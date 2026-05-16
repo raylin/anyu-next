@@ -25,9 +25,15 @@ YYYY-MM-DD
 
 - List concrete next steps.
 
+## Git Commit
+
+- Commit hash: `<hash or not created>`
+- Commit message: `<type>: <short task summary>`
+- If no commit was created, document the blocker.
+
 ## Final Response Requirement
 
-After saving this report and appending `ai-collaboration/summaries/summary_log.md`, end the final CLI response with:
+After saving this report, appending `ai-collaboration/summaries/summary_log.md`, and creating the required git commit, end the final CLI response with:
 
 ```markdown
 ## Codex Completion Summary
@@ -40,6 +46,9 @@ Report:
 
 Summary Log:
 <summary log path updated>
+
+Commit:
+<commit hash or blocker>
 
 Files Changed:
 - <file 1>
@@ -74,4 +83,3 @@ Yes / No
 Paste-Back Context:
 <5-10 lines of context that allow ChatGPT Web to continue without reading the full repo>
 ```
-

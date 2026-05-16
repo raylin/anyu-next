@@ -29,9 +29,10 @@ What the next agent needs to know before acting.
 2. Execute the requested change.
 3. Generate an execution report.
 4. Append `ai-collaboration/summaries/summary_log.md`.
-5. End the final CLI response with a paste-back completion summary.
+5. Run relevant validation.
+6. Create a git commit containing the completed handoff changes.
+7. End the final CLI response with a paste-back completion summary that includes the commit hash.
 
 ## Uncertainties
 
 - List any open questions or assumptions.
-

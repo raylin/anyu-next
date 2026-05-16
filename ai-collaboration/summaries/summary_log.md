@@ -478,3 +478,56 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Unresolved Questions
 
 - None for the commit itself.
+
+## 2026-05-16 Product Runtime Prompt v0.1 Cleanup
+
+### Task Completed
+
+- Calibrated `prompts/product_result_prompt_v0.md` after the first `曖昧溫度計` product output review.
+- Added the mandatory workflow rule that every completed handoff must end with a git commit.
+- Updated `AGENTS.md`, `WORKING_AGREEMENT.md`, `README.md`, and collaboration templates with the commit requirement.
+- Reran all three product samples with live Anthropic generation.
+- Updated `ai-collaboration/research/2026-05-16-product-result-v0-review-bundle.md`.
+- Created `ai-collaboration/reports/2026-05-16-product-runtime-prompt-v0-1-cleanup-execution-report.md`.
+
+### Prompt Changes Made
+
+- Clarified that `temperature_score` measures observable interaction warmth, not relationship safety or romantic success probability.
+- Added score calibration bands for the primary situation types.
+- Made share-card guidance identity-safe and less exposing.
+- Made `personal_pattern_candidate.should_store` default to `false` with stricter evidence requirements for `true`.
+- Shifted paid preview toward immediate action value.
+- Shifted paid result tone toward a smart friend rather than a consultant report.
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed.
+- `python3 -m py_compile scripts/generate_product_sample.py` passed.
+- `schemas/product_result_schema_v0.json` remains valid JSON.
+- All regenerated product outputs validate against `schemas/product_result_schema_v0.json`.
+- Share cards do not include raw conversation text and are more identity-safe.
+- Personal pattern candidates are non-diagnostic.
+- `should_store` is not blindly true for all samples; all three regenerated outputs use `false`.
+- Temperature scores improved from `35, 35, 42` to `35, 52, 52`.
+
+### Live Generation
+
+- Live Anthropic generation was run for:
+  - `outputs/product_samples/raw/product_sample_001.txt`
+  - `outputs/product_samples/raw/product_sample_002.txt`
+  - `outputs/product_samples/raw/product_sample_003.txt`
+
+### Review Readiness
+
+- Outputs are ready for ChatGPT review.
+- Top review issues: the `52/52` tie across samples 002 and 003, repeated `微訊號觀察家` share persona, and `medium` confidence across all personal pattern candidates.
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Unresolved Questions
+
+- Whether `product_sample_002` and `product_sample_003` should be differentiated beyond the current tied score of 52.
+- Whether share-card persona variety should be enforced more strongly.
+- Whether one-off product samples should default personal pattern confidence to `low`.

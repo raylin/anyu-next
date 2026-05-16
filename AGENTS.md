@@ -34,9 +34,21 @@ For every future task, Codex must:
 2. Execute the requested changes.
 3. Generate an execution report in `ai-collaboration/reports/`.
 4. Append `ai-collaboration/summaries/summary_log.md`.
-5. End the final CLI response with a paste-back completion summary.
-6. Escalate uncertainties instead of guessing.
-7. Never silently change schemas.
+5. Create a git commit containing the completed handoff changes.
+6. End the final CLI response with a paste-back completion summary.
+7. Escalate uncertainties instead of guessing.
+8. Never silently change schemas.
+
+After every completed handoff, Codex must create a git commit containing the completed changes.
+
+Commit requirements:
+
+- Run relevant validation before committing.
+- Include the handoff, report, summary log, and changed project files in the commit.
+- Use a clear commit message in the format `<type>: <short task summary>`.
+- Mention the commit hash in the final Codex Completion Summary.
+- If a git commit cannot be created, document the reason under blockers.
+- If pre-existing unrelated uncommitted changes are present, do not silently include them; document the situation and ask for human guidance.
 
 ## Execution Constraints
 
@@ -123,6 +135,9 @@ Report:
 
 Summary Log:
 <summary log path updated>
+
+Commit:
+<commit hash or blocker>
 
 Files Changed:
 - <file 1>

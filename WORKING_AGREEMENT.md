@@ -26,8 +26,20 @@ For every future task:
 2. Execute the change.
 3. Write an execution report.
 4. Append `ai-collaboration/summaries/summary_log.md`.
-5. End with a paste-back completion summary in the final CLI response.
-6. Escalate uncertainty.
+5. Create a git commit containing the completed handoff changes.
+6. End with a paste-back completion summary in the final CLI response.
+7. Escalate uncertainty.
+
+After every completed handoff, Codex must create a git commit containing the completed changes.
+
+Commit requirements:
+
+- Run relevant validation before committing.
+- Include the handoff, report, summary log, and changed project files in the commit.
+- Use a clear commit message in the format `<type>: <short task summary>`.
+- Mention the commit hash in the final Codex Completion Summary.
+- If a git commit cannot be created, document the reason under blockers.
+- If pre-existing unrelated uncommitted changes are present, do not silently include them; ask for human guidance before committing.
 
 ## Paste-Back Completion Summary
 
@@ -44,6 +56,9 @@ Report:
 
 Summary Log:
 <summary log path updated>
+
+Commit:
+<commit hash or blocker>
 
 Files Changed:
 - <file 1>
@@ -97,6 +112,7 @@ A task is complete when:
 - requested files or changes are present
 - reports are written
 - `ai-collaboration/summaries/summary_log.md` is appended
+- a git commit contains the completed handoff changes
 - final CLI response includes the paste-back completion summary
 - unresolved questions are visible
 - the next agent can continue from repository context alone

@@ -1,70 +1,36 @@
-# Product Result v0 Review Bundle
+# Product Result v0.1 Review Bundle
 
 Date: 2026-05-16
 
 ## Overview
 
-This bundle reviews the first Product Runtime Track artifacts for `曖昧溫度計`.
+This bundle reviews the calibrated Product Runtime Track output for `曖昧溫度計` after the Product Result Prompt v0.1 cleanup.
 
-Created artifacts:
+Updated artifacts:
 
 - Product runtime prompt: `prompts/product_result_prompt_v0.md`
-- Product runtime schema: `schemas/product_result_schema_v0.json`
-- Raw product samples: `outputs/product_samples/raw/`
 - Generated product outputs: `outputs/product_samples/generated/`
-- Dev-only generator: `scripts/generate_product_sample.py`
+- Review bundle: `ai-collaboration/research/2026-05-16-product-result-v0-review-bundle.md`
 
-This track is separate from the Research Signal Track:
+Unchanged contract:
 
-- `prompts/extraction_prompt_v1.md`
-- `schemas/signal_schema_v1.json`
+- Product runtime schema: `schemas/product_result_schema_v0.json`
+- Research signal prompt/schema: `prompts/extraction_prompt_v1.md`, `schemas/signal_schema_v1.json`
 
-## Schema Summary
+## Prompt v0.1 Summary
 
-Top-level product result schema:
+Prompt v0.1 keeps the existing product result schema and calibrates generation behavior only.
 
-```json
-{
-  "free_result": {},
-  "insight_layer": {},
-  "paid_preview": {},
-  "paid_result": {},
-  "share_card": {},
-  "personal_pattern_candidate": {},
-  "metadata": {}
-}
-```
+Changes:
 
-Key schema requirements:
-
-- `free_result.temperature_score` is an integer from 0 to 100.
-- `insight_layer` captures lightweight psychology-informed resonance without academic framing.
-- `paid_preview` anchors the fake-door CTA around `解鎖下一句怎麼回` and `NT$49`.
-- `paid_result.reply_strategies` requires exactly `主動推進`, `低壓試探`, and `暫時拉開`.
-- `share_card` must not include raw conversation text.
-- `personal_pattern_candidate` captures a non-diagnostic candidate insight for future personalization.
-- `metadata.experiment_id` is fixed to `ambiguous-temperature-fake-door-v0`.
-
-## Prompt Summary
-
-The prompt positions the model as:
-
-```text
-一個懂人際互動模式、語氣像聰明朋友的 AI 產品輸出引擎。
-```
-
-The prompt instructs the model to:
-
-- Return valid JSON only.
-- Use Traditional Chinese for user-facing values.
-- Keep tone lightweight, emotionally resonant, and Taiwan social-native.
-- Add subtle psychology-informed insight without textbook language.
-- Avoid deterministic claims, therapy framing, diagnosis, and claims about hidden intent.
-- Generate free result, insight layer, paid preview, paid result, share card, personal pattern candidate, and metadata.
-- Keep raw conversation text out of share cards.
-- Avoid sensational, cruel, academic, or authority-heavy wording.
-
-The prompt needed several calibration passes because live outputs initially drifted into overclaiming phrases such as `真實意圖`, `真實原因`, `出局`, and `專業建議`. The final prompt includes a forbidden-substring self-check.
+- Clarifies that `temperature_score` measures observable interaction warmth, not relationship safety, romantic success probability, or certainty that the other person likes the user.
+- Adds approximate score bands for `已讀不回`, `忽冷忽熱`, `回訊變慢但看限動`, stable proactive interaction, and highly mutual interaction.
+- Makes share cards identity-safe and avoids language that would make the user feel exposed, rejected, needy, humiliated, or too obviously heartbroken.
+- Adds safer share-card persona and sentence examples.
+- Makes `personal_pattern_candidate.should_store` default to `false`.
+- Allows `should_store: true` only when the pattern is clearly reusable, non-diagnostic, evidence-supported, and useful for future personalization.
+- Reframes paid result tone as a smart friend who understands interaction patterns rather than a consultant report.
+- Refocuses paid preview on immediate action value: what not to do now, three stable replies, how to test investment without lowering oneself, and whether to ask, low-pressure probe, or pull back.
 
 ## Sample Input Summaries
 
@@ -76,28 +42,87 @@ The prompt needed several calibration passes because live outputs initially drif
 
 ## Generated Output Summaries
 
-| Sample | Temperature | State | Insight Principle | Pattern Confidence |
-| --- | ---: | --- | --- | --- |
-| `product_sample_001` | 35 | `降溫觀望` | `模糊訊號放大` | `medium` |
-| `product_sample_002` | 35 | `急速降溫` | `親密後的距離調整` | `medium` |
-| `product_sample_003` | 42 | `低溫保留` | `低成本互動訊號` | `medium` |
+| Sample | Temperature | State | Share Persona | Pattern Confidence | Should Store |
+| --- | ---: | --- | --- | --- | --- |
+| `product_sample_001` | 35 | `主動性下降` | `微訊號觀察家` | `medium` | `false` |
+| `product_sample_002` | 52 | `溫差劇烈` | `溫差敏感觀察者` | `medium` | `false` |
+| `product_sample_003` | 52 | `回應頻率降溫` | `微訊號觀察家` | `medium` | `false` |
 
-## Observed Quality Notes
+## Before / After Notes
 
-- The generated outputs validate against `schemas/product_result_schema_v0.json`.
-- The outputs preserve uncertainty and avoid claiming certainty about the other person.
-- Share cards do not include full raw conversation text.
-- `personal_pattern_candidate` entries are framed as medium-confidence observations, not diagnosis.
-- The `insight_layer` creates a stronger emotional bridge than a plain free result alone.
-- Paid previews now emphasize action and next steps rather than only longer analysis.
+### Temperature Score Spread
+
+Before prompt cleanup:
+
+```text
+35, 35, 42
+```
+
+After prompt cleanup and rerun:
+
+```text
+35, 52, 52
+```
+
+The spread improved from 7 points to 17 points. The `忽冷忽熱` and `回訊變慢但看限動` examples still tie at 52, so ChatGPT should review whether this is acceptable or whether the calibration needs stronger differentiation between recent warmth and passive story-viewing.
+
+### Share-Card Tone
+
+Before cleanup, some share-card copy felt too exposing, such as:
+
+```text
+對方還在，但對你暫時降溫中
+```
+
+After cleanup, cards are more identity-safe:
+
+- `你不是想太多，只是你太會看見細節。`
+- `你感受到的不是冷淡，而是溫度的落差。`
+
+No regenerated share card includes raw conversation text.
+
+### Personal Pattern Candidate Policy
+
+Before cleanup, all three outputs used `should_store: true`.
+
+After cleanup, all three outputs use `should_store: false`. Candidate patterns remain present, but the prompt now treats storage as conservative and evidence-gated.
+
+### Paid Preview Action Value
+
+Before cleanup, paid previews could feel like more analysis.
+
+After cleanup, paid previews emphasize immediate action:
+
+- `現在最不該做的一件事`
+- `三種不失控回法`
+- `怎麼測對方投入度但不把自己放低`
+
+### Paid Result Tone
+
+The generated paid results now read closer to a smart friend than a consultant report. Example:
+
+```text
+重點不是他完全沒空，而是他有在社群上活動，卻暫時沒有接你的邀約。
+```
+
+## Validation Notes
+
+- Live Anthropic generation was run for all three samples.
+- The generator accepted all three outputs as valid against `schemas/product_result_schema_v0.json`.
+- Additional structured validation confirmed:
+  - product schema remains valid JSON
+  - generated outputs validate against the product schema
+  - share cards do not include raw conversation text
+  - share-card wording is identity-safe
+  - personal pattern candidates are non-diagnostic
+  - `should_store` is not blindly true for all samples
+  - temperature scores show better spread than the previous run
 
 ## Issues For ChatGPT Review
 
-1. Some product copy may still be too emotionally polished for an early fake-door test; review whether it should be rougher and more direct.
-2. `personal_pattern_candidate.should_store` is `true` for all three generated samples; review whether v0 should be more conservative.
-3. Share-card personas are promising but need tone review to avoid feeling too exposing or overly intimate.
-4. Temperature scores are clustered in the 35-42 range for all three negative/uncertain examples; review whether this is useful or too narrow.
-5. Prompt currently uses a forbidden-substring list to control tone; future implementation may need validator or post-generation checks.
+1. Temperature differentiation improved, but `product_sample_002` and `product_sample_003` both scored 52. Review whether this tie is acceptable for v0.1.
+2. Share-card persona reuse may be too narrow: `微訊號觀察家` appears in two of three samples.
+3. `personal_pattern_candidate.confidence` remains `medium` for all samples even though `should_store` is false; review whether the prompt should push more cases to `low`.
 
 ## Full Generated JSON
 
@@ -107,19 +132,19 @@ The prompt needed several calibration passes because live outputs initially drif
 {
   "free_result": {
     "temperature_score": 35,
-    "state_label": "降溫觀望",
-    "one_sentence_read": "對方目前處於低回應狀態，但仍保持正常社交活動，可能在刻意保持距離。",
+    "state_label": "主動性下降",
+    "one_sentence_read": "他有在線上活動，但暫時沒有接你的邀約，目前訊號偏向保留。",
     "observed_signals": [
-      "約會邀請已讀不回",
-      "持續發限動保持社交活躍",
-      "對其他人的貼文按讚互動"
+      "已讀不回邀請訊息",
+      "持續發限動",
+      "有按別人讚"
     ],
-    "uncertainty_note": "單次互動無法完全確定對方的投入意願，需要更多觀察。",
-    "paid_teaser": "想知道這種情況下，怎麼回應既不失尊嚴又能測試對方態度？"
+    "uncertainty_note": "單次互動無法完全確定對方的想法，還需要觀察後續反應。",
+    "paid_teaser": "想知道現在該追問、試探，還是暫時拉開？解鎖完整行動指南。"
   },
   "insight_layer": {
-    "title": "被動回應的矛盾訊號",
-    "explanation": "最讓人困擾的不是明確拒絕，而是這種「還在線上但對你沒回應」的模糊狀態。當你看到他發限動、按別人讚，卻對你的邀請沉默，這種對比會放大不確定感。",
+    "title": "當訊號不明確時的內心拉扯",
+    "explanation": "讓你卡住的不是他沒回訊息，而是他明明有在活動，卻選擇暫時不回應你。這種「還在但不靠近」的狀態，比直接被拒絕更讓人不知道怎麼辦。",
     "principle": "模糊訊號放大",
     "user_facing": true
   },
@@ -127,46 +152,44 @@ The prompt needed several calibration passes because live outputs initially drif
     "headline": "解鎖下一句怎麼回",
     "price": "NT$49",
     "included_sections": [
-      "深度訊號解讀",
-      "三種回應策略",
-      "風險提醒",
-      "不該做的事"
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
     ],
-    "preview_copy": "這種情況繼續追問風險很高，但完全不動又可能錯過機會。解鎖獲得保留尊嚴的行動方案。"
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
   },
   "paid_result": {
-    "deeper_signal_analysis": "對方的行為模式顯示：有能力回覆但選擇不回覆你的邀請，同時維持正常社交活動。這通常代表對約會邀請有所保留，但不一定是完全拒絕，可能在觀望或猶豫中。",
-    "possible_interpretation": "目前訊號偏向投入度下降，對方可能覺得節奏太快，或是對約會有顧慮，但仍保留一定互動可能性。",
-    "risk_warning": "直接追問約會安排風險較高，容易被解讀為施壓，可能讓對方更想迴避。",
+    "deeper_signal_analysis": "重點不是他完全沒空，而是他有在社群上活動，卻暫時沒有接你的邀約。這通常代表他現在對見面這件事有些猶豫或保留，但還沒有完全關上門。",
+    "possible_interpretation": "可能他需要時間考慮，或者現在不方便約會但不知道怎麼說，也可能是對關係節奏有不同想法。無論如何，直接追問很可能會增加他的壓力。",
+    "risk_warning": "現在追問很容易讓壓力集中到你身上，可能會讓原本的猶豫變成明確的退縮。",
     "what_not_to_do": [
-      "立刻再傳一次約會邀請",
-      "質問為什麼不回訊息",
-      "提到看見他發限動或按讚的事",
-      "表現出受傷或不滿的情緒"
+      "立刻再傳訊息追問",
+      "質問為什麼已讀不回",
+      "提到看見他的線上活動"
     ],
     "reply_strategies": {
-      "主動推進": "過幾天後用輕鬆話題重新開啟對話，不提約會，先重建互動節奏，例如：「剛看到一個有趣的東西想分享」",
-      "低壓試探": "用不需要明確回應的內容測試，像是分享日常趣事或問輕鬆問題，觀察回應熱度",
-      "暫時拉開": "暫停主動聯繫一週，給彼此空間，如果對方有興趣會主動聯絡，如果沒有也能避免過度投入"
+      "主動推進": "等2-3天後，用輕鬆語氣分享生活近況，最後自然提到「如果週末有空再說囉」，給對方台階下。",
+      "低壓試探": "改傳非約會相關的內容，比如有趣的事或問個輕鬆問題，觀察他的回應速度和態度變化。",
+      "暫時拉開": "暫停主動聊天1-2週，專注自己的事情，讓對方有空間主動聯絡你，也讓自己不會過度解讀每個訊號。"
     }
   },
   "share_card": {
     "temperature_label": "35°C",
-    "state_label": "降溫觀望",
-    "relationship_persona": "在線但保持距離型",
-    "card_sentence": "對方還在，但對你暫時降溫中"
+    "state_label": "主動性下降",
+    "relationship_persona": "微訊號觀察家",
+    "card_sentence": "你不是想太多，只是你太會看見細節。"
   },
   "personal_pattern_candidate": {
-    "pattern": "使用者對「低成本互動」很敏感，例如發限動、按讚等行為，容易把這些當成關係訊號進行對比分析",
+    "pattern": "使用者對「低成本互動」很敏感，例如發限動、按讚等行為，容易把這些當成關係訊號來解讀。",
     "confidence": "medium",
-    "evidence": "使用者注意到對方發限動和按讚行為，並將此與未回覆自己訊息做對比",
-    "should_store": true,
-    "user_facing_summary": "你比較會注意對方在社交媒體上的活動，並用這些來判斷關係狀態"
+    "evidence": "注意到對方已讀不回但仍有發限動和按讚行為，並將此視為重要參考訊息。",
+    "should_store": false,
+    "user_facing_summary": "你很容易注意到互動裡的小變化，這份敏感有時能保護你，但也可能讓模糊訊號變得更吵。"
   },
   "metadata": {
     "situation_type": "已讀不回",
     "input_length": 73,
-    "generated_at": "2026-05-16T09:38:49.948340+00:00",
+    "generated_at": "2026-05-16T12:54:39.495831+00:00",
     "experiment_id": "ambiguous-temperature-fake-door-v0",
     "variant": "B",
     "model_provider": "anthropic",
@@ -180,66 +203,65 @@ The prompt needed several calibration passes because live outputs initially drif
 ```json
 {
   "free_result": {
-    "temperature_score": 35,
-    "state_label": "急速降溫",
-    "one_sentence_read": "從深夜曖昧到隔天冷淡，這種劇烈溫差通常代表對方在重新調整距離。",
+    "temperature_score": 52,
+    "state_label": "溫差劇烈",
+    "one_sentence_read": "昨天的親近感今天突然降溫，讓你困在不知道該進還是退的位置上。",
     "observed_signals": [
-      "昨夜聊到半夜且語氣曖昧",
-      "今日回覆變成敷衍式短句",
-      "情緒溫度急劇下降"
+      "昨天深夜聊天語氣曖昧",
+      "今天突然變成敷衍式短回覆",
+      "回覆內容從有溫度變成哈哈、嗯嗯"
     ],
-    "uncertainty_note": "單日的冷熱變化可能有很多原因，需要觀察接下來幾天的互動模式才能判斷趨勢。",
-    "paid_teaser": "想知道這種突然降溫背後可能的原因，以及如何優雅回應？"
+    "uncertainty_note": "一天的溫差變化無法確定是後悔、忙碌還是其他原因，需要更多互動才能判斷。",
+    "paid_teaser": "解鎖看見：為什麼忽冷忽熱最讓人卡住，以及現在怎麼回才不會顯得太在意。"
   },
   "insight_layer": {
-    "title": "曖昧後的冷卻期",
-    "explanation": "當互動突然從很熱變很冷，往往不是你說錯什麼，而是對方在消化昨晚的親近感。有些人在太過親密後會本能地後退一點，重新找回控制感。",
-    "principle": "親密後的距離調整",
+    "title": "溫差焦慮",
+    "explanation": "讓你真正不安的不是他今天冷淡，而是昨天和今天的巨大落差。當關係溫度突然變化時，人很自然會開始檢討自己是不是做錯了什麼。",
+    "principle": "關係溫差不確定感",
     "user_facing": true
   },
   "paid_preview": {
     "headline": "解鎖下一句怎麼回",
     "price": "NT$49",
     "included_sections": [
-      "降溫原因深度分析",
-      "三種回應策略",
-      "避雷指南",
-      "後續觀察重點"
+      "為什麼溫差最讓人焦慮",
+      "現在最不該做的兩件事",
+      "三種不失控回法",
+      "怎麼測試但不顯得太在意"
     ],
-    "preview_copy": "這種冷熱循環很常見，但回應方式決定了關係走向。"
+    "preview_copy": "忽冷忽熱最容易讓人亂了節奏。解鎖後看到：為什麼溫差比單純冷淡更難處理，現在最不該做的兩件事，以及怎麼回應才不會顯得太在意。"
   },
   "paid_result": {
-    "deeper_signal_analysis": "這種「親密後退縮」的模式在曖昧階段很常見。對方可能覺得昨晚太投入了，今天刻意保持距離來平衡一下。也可能是白天的環境或心境不適合延續昨晚的氛圍。",
-    "possible_interpretation": "目前訊號顯示對方正在調節互動溫度，可能是想要控制節奏，也可能是對昨晚的親近感到一點不安。但這不一定代表後悔或失去興趣。",
-    "risk_warning": "急著追問「是不是我說錯什麼」可能會讓對方感到壓力，反而推遠距離。",
+    "deeper_signal_analysis": "昨天深夜聊天代表當下他是有投入感的，但今天的短回覆顯示投入度明顯下降。這種一夜之間的溫差，通常不是因為你說錯話，更可能是他在日光下重新評估昨晚的親密程度，或者單純今天有其他事情影響心情。",
+    "possible_interpretation": "目前訊號偏向他在調節互動節奏，可能是覺得昨天太快太近了，需要一點空間重新找平衡。但這不代表他完全退出，只是暫時降溫。",
+    "risk_warning": "現在直接問他怎麼了或追究昨今差異，會讓壓力集中到你身上，可能推得他更遠。",
     "what_not_to_do": [
-      "不要直接質問為什麼態度變冷",
-      "不要模仿對方也變得敷衍",
-      "不要追問昨晚聊天內容的後續"
+      "直接問「你怎麼突然變冷了」",
+      "用同樣敷衍的語氣回擊他"
     ],
     "reply_strategies": {
-      "主動推進": "自然地分享今天的有趣事情，保持昨晚的溫度但不刻意提及昨晚的對話，讓他知道你的狀態很穩定。",
-      "低壓試探": "用輕鬆的話題測試他的回應長度，比如「今天好累，你呢？」觀察他是否只會短回。",
-      "暫時拉開": "今天就不主動聊了，給彼此一點空間，明天再用平常心互動，看他是否會主動一些。"
+      "主動推進": "保持輕鬆語調分享日常，不提昨天的差異，讓他看到你的穩定感",
+      "低壓試探": "偶爾問個需要稍微多字回答的問題，測試他的回應意願",
+      "暫時拉開": "回覆頻率稍微放慢，給他空間也給自己喘息"
     }
   },
   "share_card": {
-    "temperature_label": "35°C",
-    "state_label": "急速降溫",
-    "relationship_persona": "曖昧溫差體質",
-    "card_sentence": "從深夜曖昧到隔天冷淡，這種劇烈溫差讓人摸不透。"
+    "temperature_label": "52°C",
+    "state_label": "溫差劇烈",
+    "relationship_persona": "溫差敏感觀察者",
+    "card_sentence": "你感受到的不是冷淡，而是溫度的落差。"
   },
   "personal_pattern_candidate": {
-    "pattern": "使用者對互動溫度變化很敏感，容易將對方的冷淡歸因於自己的表現。",
+    "pattern": "使用者對關係溫度變化很敏感，容易在互動熱度突然下降時進入自我檢討模式",
     "confidence": "medium",
-    "evidence": "立即懷疑是否自己說錯話，顯示對關係變化的敏感度較高。",
-    "should_store": true,
-    "user_facing_summary": "你對關係溫度的變化很敏銳，這讓你能快速察覺互動的微妙變化。"
+    "evidence": "從昨天曖昧聊天到今天冷淡回覆的落差讓使用者立即開始反思是否自己說錯話",
+    "should_store": false,
+    "user_facing_summary": "你很容易察覺關係溫度的變化，這份敏感讓你能提早注意到訊號，但有時也會讓你太快承擔責任。"
   },
   "metadata": {
     "situation_type": "忽冷忽熱",
     "input_length": 61,
-    "generated_at": "2026-05-16T09:38:49.948240+00:00",
+    "generated_at": "2026-05-16T12:54:39.495736+00:00",
     "experiment_id": "ambiguous-temperature-fake-door-v0",
     "variant": "B",
     "model_provider": "anthropic",
@@ -253,66 +275,65 @@ The prompt needed several calibration passes because live outputs initially drif
 ```json
 {
   "free_result": {
-    "temperature_score": 42,
-    "state_label": "低溫保留",
-    "one_sentence_read": "他保持著最低成本的關注方式，既沒有完全離開，也沒有積極靠近。",
+    "temperature_score": 52,
+    "state_label": "回應頻率降溫",
+    "one_sentence_read": "他還在關注你，但互動投入度明顯下降了。",
     "observed_signals": [
-      "回訊息速度明顯變慢",
-      "持續關注限動但不主動互動",
-      "長時間上線但不回覆"
+      "回訊息速度變慢",
+      "持續觀看限動",
+      "上線但沒立刻回覆"
     ],
-    "uncertainty_note": "單從這些行為還無法確定他的投入度變化原因，可能是忙碌、猶豫，或是互動模式轉變。",
-    "paid_teaser": "想知道這種「看限動但慢回訊」背後的訊號意義，以及該怎麼應對嗎？"
+    "uncertainty_note": "看限動代表還有關注，但回覆變慢可能是忙碌或投入度改變，需要更多互動才能確定。",
+    "paid_teaser": "想知道這種訊號混雜的狀況該怎麼應對嗎？"
   },
   "insight_layer": {
-    "title": "低成本互動的曖昧地帶",
-    "explanation": "真正讓人焦慮的，通常不是明確拒絕，而是那種還留著一點點可能性的模糊感。看限動是最低成本的關注方式，既能保持連結，又不用承擔回應的壓力。",
-    "principle": "低成本互動訊號",
+    "title": "被動關注vs主動回應的落差",
+    "explanation": "當訊號不明確時，人很自然會開始找線索。你在看的不是限動，而是自己在對方心中的位置。",
+    "principle": "低成本互動訊號觀察",
     "user_facing": true
   },
   "paid_preview": {
     "headline": "解鎖下一句怎麼回",
     "price": "NT$49",
     "included_sections": [
-      "深度訊號解讀",
-      "三種應對策略",
-      "避免踩雷提醒"
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
     ],
-    "preview_copy": "別讓這種模糊狀態繼續消耗你，學會讀懂訊號並做出合適回應。"
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
   },
   "paid_result": {
-    "deeper_signal_analysis": "他目前的行為模式顯示投入度下降，但還沒有完全退出。看限動是一種「安全距離」的關注，能了解你的近況又不用立即回應。這通常出現在關係轉換期，可能是生活忙碌、感情猶豫，或是在重新評估這段關係的位置。",
-    "possible_interpretation": "目前訊號偏向互動意願降低，但保留基本關注。他可能在調整對這段關係的期待，或是面臨其他生活優先順序。不過，持續看限動代表你還在他的關注範圍內。",
-    "risk_warning": "避免過度解讀每個行為，也不要用頻繁傳訊來測試他的反應，這可能會加速關係降溫。",
+    "deeper_signal_analysis": "他願意花時間看你的限動，表示對你還有基本關注，但回訊息變慢顯示他現在不想花太多精力在即時互動上。這種模式通常代表他還沒有要完全疏遠，但確實降低了互動的優先順序。",
+    "possible_interpretation": "目前訊號偏向投入度下降，但保持低程度關注。可能是生活重心轉移、對關係節奏想放慢，或是在觀望你們的互動模式。",
+    "risk_warning": "現在直接追問回訊速度，可能會讓他感受到壓力而更加疏遠。避免把焦慮轉化成對他的要求。",
     "what_not_to_do": [
-      "連續傳多則訊息追問為什麼慢回",
-      "在限動暗示他有看沒回",
-      "突然變得很冷淡來「以牙還牙」",
-      "頻繁發限動想引起他的反應"
+      "連續追問為什麼回得慢",
+      "在限動發暗示性內容",
+      "立刻減少自己的回覆來「報復」"
     ],
     "reply_strategies": {
-      "主動推進": "「最近好像都很忙？有空的話想約出來聊聊」- 直接但不逼迫，給他選擇的空間。",
-      "低壓試探": "「分享一個有趣的事給你」然後分享日常，觀察他的回應熱度和速度變化。",
-      "暫時拉開": "暫時降低主動聯繫的頻率，專注於自己的生活，讓他有機會主動。"
+      "主動推進": "分享有趣內容或邀請低壓力的活動，但不要期待立即回應，給他自然回覆的空間。",
+      "低壓試探": "偶爾在限動互動，觀察他的反應熱度，用輕鬆話題測試他的回應意願。",
+      "暫時拉開": "降低訊息頻率，專注自己的生活，讓他有機會主動靠近或表達想法。"
     }
   },
   "share_card": {
-    "temperature_label": "42°C",
-    "state_label": "低溫保留",
-    "relationship_persona": "被溫柔懸掛的人",
-    "card_sentence": "他用最低成本的方式關注著你，既沒走遠，也沒靠近。"
+    "temperature_label": "52°C",
+    "state_label": "回應頻率降溫",
+    "relationship_persona": "微訊號觀察家",
+    "card_sentence": "你不是想太多，只是你太會看見細節。"
   },
   "personal_pattern_candidate": {
-    "pattern": "使用者對「低成本互動」很敏感，會仔細觀察對方的線上行為與回覆頻率差異，容易在模糊訊號中尋找關係確定感。",
+    "pattern": "使用者對「低成本互動」很敏感，例如看限動、按讚、短回覆，容易把這些當成關係訊號。",
     "confidence": "medium",
-    "evidence": "注意到對方看限動但慢回訊的矛盾行為，並且會觀察對方上線時間與回覆行為的關聯",
-    "should_store": true,
-    "user_facing_summary": "你很善於觀察細節訊號，但有時候可能會讓自己陷入過度分析"
+    "evidence": "使用者注意到對方看限動的行為，並將此與回訊息速度對比分析",
+    "should_store": false,
+    "user_facing_summary": "你很容易注意到互動裡的小變化，這份敏感有時能保護你，但也可能讓模糊訊號變得更吵。"
   },
   "metadata": {
     "situation_type": "回訊變慢但看限動",
     "input_length": 60,
-    "generated_at": "2026-05-16T09:38:49.948020+00:00",
+    "generated_at": "2026-05-16T12:54:39.545767+00:00",
     "experiment_id": "ambiguous-temperature-fake-door-v0",
     "variant": "B",
     "model_provider": "anthropic",

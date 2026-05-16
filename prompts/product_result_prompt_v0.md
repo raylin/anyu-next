@@ -1,4 +1,4 @@
-# Product Result Prompt v0 — 曖昧溫度計
+# Product Result Prompt v0.1 — 曖昧溫度計
 
 Use this prompt to generate one user-facing product result for the `曖昧溫度計` fake-door experiment.
 
@@ -75,6 +75,7 @@ The user may paste a short conversation or describe what happened.
 - Keep metadata values factual and concise.
 - Keep raw conversation text out of `share_card`.
 - Do not add fields outside the schema.
+- Treat the final self-check forbidden substring list as a hard output constraint. No final string value may contain those substrings.
 
 ## Tone Rules
 
@@ -137,6 +138,16 @@ Use this section for the free fake-door result.
 Rules:
 
 - `temperature_score` must be an integer from 0 to 100.
+- `temperature_score` measures observable interaction warmth.
+- `temperature_score` does not measure relationship safety, romantic success probability, or certainty that the other person likes the user.
+- Use the full range when evidence supports it; do not cluster every uncertain case around the mid-30s.
+- Approximate calibration:
+  - `已讀不回` plus visible social activity: `30-40`
+  - `忽冷忽熱` with a recent warm interaction: `45-60`
+  - reply speed slowed but still watches stories: `45-55`
+  - stable, proactive interaction: `65-80`
+  - highly mutual, consistent interaction: `80-90`
+  - `90+` should be rare and only for very strong mutuality.
 - `state_label` should be concise, for example `降溫觀望`, `訊號混雜`, `低溫保留`, `忽冷忽熱`, `主動性下降`.
 - `one_sentence_read` should feel emotionally resonant but not deterministic.
 - `observed_signals` should include 1-3 concrete observable signals from the input.
@@ -185,6 +196,7 @@ Do not use academic labels such as:
 The preview should emphasize action and decision support.
 
 Do not simply promise `更多分析`.
+The preview should feel like it helps the user avoid making the wrong next move right now.
 
 Use:
 
@@ -193,6 +205,19 @@ Use:
 - `included_sections`: practical sections the user gets
 - `preview_copy`: a short reason to unlock now
 
+Prefer included sections that promise immediate action value, such as:
+
+- `現在最不該做的一件事`
+- `三種不失控回法`
+- `怎麼測對方投入度但不把自己放低`
+- `該追問、低壓試探，還是暫時拉開`
+
+Good preview copy:
+
+```text
+解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。
+```
+
 ### `paid_result`
 
 The paid result should help the user decide what to do next.
@@ -200,11 +225,24 @@ The paid result should help the user decide what to do next.
 Rules:
 
 - Preserve uncertainty.
+- Write like a smart friend who understands interaction patterns, not like a consultant report.
 - Do not claim to know the other person's true intent.
 - Do not use `意圖`, `真實`, or `完整意義`; use softer phrasing such as `投入度`, `互動意願`, `目前訊號`, or `對方的回應模式`.
 - `what_not_to_do` should be specific and practical.
 - Reply strategies should feel natural in Traditional Chinese.
 - Avoid manipulative, cruel, or game-playing advice.
+
+Avoid consultant-like wording:
+
+```text
+對方的行為模式顯示：有能力回覆但選擇不回覆你的邀請，同時維持正常社交活動。
+```
+
+Prefer smart-friend wording:
+
+```text
+重點不是他完全沒空，而是他有在社群上活動，卻暫時沒有接你的邀約。這代表現在直接追問，可能會讓壓力集中到你身上。
+```
 
 Generate exactly these reply strategy keys:
 
@@ -221,7 +259,41 @@ Rules:
 - Do not include raw conversation text.
 - Do not expose private details.
 - Make it safe to share publicly.
+- Share cards must be identity-safe: the user should feel comfortable posting the card publicly without feeling exposed, needy, rejected, humiliated, or too obviously heartbroken.
 - Use a compact `temperature_label`, such as `68°C`.
+
+Prefer share-card personas such as:
+
+- `已讀偵探型`
+- `微訊號觀察家`
+- `低壓試探型`
+- `高敏感觀察者`
+- `曖昧溫差觀察員`
+
+Prefer card sentences such as:
+
+```text
+你不是想太多，只是你太會看見細節。
+```
+
+```text
+有些曖昧不是沒訊號，是訊號太小聲。
+```
+
+```text
+你看見的不是答案，而是節奏的變化。
+```
+
+Avoid exposing or humiliating card language such as:
+
+- `你被冷落了`
+- `你被吊著`
+- `他不在乎你`
+- `你是備胎`
+- `被溫柔懸掛的人`
+- `對方還在，但對你暫時降溫中`
+
+Even when the input strongly supports a painful interpretation, keep that interpretation out of `share_card`.
 
 ### `personal_pattern_candidate`
 
@@ -246,10 +318,25 @@ Good examples:
 Rules:
 
 - Do not diagnose.
+- Do not label personality.
 - Do not overgeneralize from one input.
+- Avoid words such as `過度分析`, `依賴`, `控制`, `焦慮型`, and `創傷`.
+- The pattern should describe an observed interaction tendency, not a fixed identity.
 - Use `confidence: "low"` or `confidence: "medium"` unless the input strongly supports `high`.
-- `should_store` should be `true` only if the pattern seems useful for future personalization.
+- Default `should_store` should be `false`.
+- Set `should_store: true` only when the pattern is clearly reusable, non-diagnostic, supported by evidence, and useful for future personalization.
+- For one short standalone input, `should_store` is usually `false`.
+- If there are not at least two concrete evidence points supporting the same reusable pattern, use `should_store: false`.
+- Never set `should_store: true` merely because a candidate pattern can be written.
+- When uncertain, use `should_store: false`.
 - `user_facing_summary` should sound gentle and non-invasive.
+- `user_facing_summary` should frame the pattern as a gentle observation with both strength and risk.
+
+Better user-facing summary example:
+
+```text
+你很容易注意到互動裡的小變化，這份敏感有時能保護你，但也可能讓模糊訊號變得更吵。
+```
 
 ### `metadata`
 
@@ -310,7 +397,7 @@ Return only valid JSON with this exact top-level shape:
     "pattern": "",
     "confidence": "low",
     "evidence": "",
-    "should_store": true,
+    "should_store": false,
     "user_facing_summary": ""
   },
   "metadata": {
@@ -365,5 +452,13 @@ The final JSON must not contain these substrings:
 - `專業建議`
 - `精準拿捏`
 - `責任感`
+- `過度分析`
+- `依賴`
+- `控制`
+- `焦慮型`
+- `創傷`
 
 If any forbidden substring appears, rewrite that field with softer wording before returning the JSON.
+For example, replace `真實` with softer words such as `明顯`, `實際`, `確實`, or remove the phrase.
+Also verify that `share_card` is identity-safe and contains no raw conversation text.
+Also verify that `personal_pattern_candidate.should_store` is not `true` by default.

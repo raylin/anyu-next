@@ -72,8 +72,11 @@ For every task:
 2. Make the requested repository changes.
 3. Generate an execution report in `ai-collaboration/reports/`.
 4. Append `ai-collaboration/summaries/summary_log.md`.
-5. End the final CLI response with a paste-back completion summary.
-6. Escalate unresolved questions.
+5. Create a git commit containing the completed handoff changes.
+6. End the final CLI response with a paste-back completion summary that includes the commit hash.
+7. Escalate unresolved questions.
+
+After every completed handoff, the commit should include the handoff, execution report, summary log update, and changed project files. Run relevant validation before committing. If unrelated uncommitted changes are present, do not silently include them.
 
 No scraping, UI, dashboards, cloud services, databases, or auth should be added unless explicitly requested and approved.
 
