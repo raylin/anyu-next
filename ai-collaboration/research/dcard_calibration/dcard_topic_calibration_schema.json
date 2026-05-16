@@ -18,7 +18,8 @@
     "product_mapping",
     "landing_hook_candidate",
     "should_adjust_mvp",
-    "notes"
+    "notes",
+    "fetch_status"
   ],
   "properties": {
     "source": {
@@ -64,6 +65,14 @@
     },
     "notes": {
       "type": "string"
+    },
+    "fetch_status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "manual_needed"
+      ]
     }
   }
 }

@@ -1,29 +1,31 @@
 # Dcard Topic Calibration Template
 
-Use this template for future manual or semi-automated topic calibration notes.
+Use this template for manual follow-up notes when semi-automated fetches are incomplete or when a human wants to calibrate a topic from a public Dcard post.
 
-```json
-{
-  "source": "dcard_manual",
-  "url_or_ref": "",
-  "title": "",
-  "board": "relationship",
-  "posted_date": "",
-  "theme": "",
-  "user_question": "",
-  "emotional_trigger": "",
-  "action_pressure": "",
-  "social_signal": "",
-  "product_mapping": "",
-  "landing_hook_candidate": "",
-  "should_adjust_mvp": false,
-  "notes": ""
-}
-```
+## Dcard Topic Calibration Note
 
-Guidance:
+URL:
+Title:
+Board:
+Posted date:
 
-- summarize the topic and emotional pattern rather than copying the full post
-- avoid personal details
-- note whether the topic maps cleanly to the current `曖昧溫度計` fake-door flow
-- use `should_adjust_mvp` only when the topic suggests a real scope or positioning change
+Theme:
+User question:
+Emotional trigger:
+Action pressure:
+Social signal:
+Product mapping:
+Landing hook candidate:
+Should adjust MVP:
+Notes:
+
+## Guidance
+
+- Summarize the topic and emotional pattern instead of copying the full post.
+- Avoid personal details.
+- Prefer product-relevant observations:
+  - which current situation type it maps to
+  - whether it has immediate action pressure
+  - whether it feels monetizable for `下一句怎麼回`
+  - whether it suggests a stronger landing hook
+- Use `Should adjust MVP` only when the topic implies a real scope, positioning, or prompt-direction change.

@@ -734,3 +734,49 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - Whether `已讀不回` is now slightly too warm after the v0.2 lift.
 - Whether `18/30` strict reply-strategy example compliance is enough for the next phase.
 - Whether `confidence` should move off all-`medium` outputs before Dcard calibration.
+
+## 2026-05-16 Dcard Topic Calibration v0
+
+### Task Completed
+
+- Added `scripts/dcard_topic_calibration.py` for semi-automated public URL processing.
+- Added `ai-collaboration/research/dcard_calibration/dcard_urls.txt`.
+- Updated the Dcard calibration README, manual note template, and schema.
+- Added `ai-collaboration/research/dcard_calibration/2026-05-16-dcard-topic-calibration-v0-review-bundle.md`.
+- Created `ai-collaboration/reports/2026-05-16-dcard-topic-calibration-v0-execution-report.md`.
+
+### Workflow Paths
+
+- script: `scripts/dcard_topic_calibration.py`
+- URL input: `ai-collaboration/research/dcard_calibration/dcard_urls.txt`
+- review bundle: `ai-collaboration/research/dcard_calibration/2026-05-16-dcard-topic-calibration-v0-review-bundle.md`
+
+### Dcard Data Status
+
+- real Dcard URLs processed: `0`
+- real Dcard data collected: `no`
+- current bundle is workflow-ready and waiting on public URL input
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed.
+- `python3 -m py_compile experiments/ambiguous_temperature_v0/*.py` passed.
+- `python3 -m py_compile scripts/generate_product_sample.py` passed.
+- `python3 -m py_compile scripts/run_product_eval.py` passed.
+- `python3 -m py_compile scripts/dcard_topic_calibration.py` passed.
+- `python3 scripts/dcard_topic_calibration.py` exited cleanly with no URLs present.
+- `ai-collaboration/research/dcard_calibration/dcard_topic_calibration_schema.json` parses as valid JSON.
+
+### Known Technical Debt
+
+- None.
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Unresolved Questions
+
+- Whether public Dcard pages expose enough useful metadata for lightweight calibration without manual supplementation.
+- Whether `product_mapping` is sufficient or a separate monetization-strength field will eventually be useful.
+- Whether future calibration should remain summary-only or allow short approved snippets when metadata is thin.

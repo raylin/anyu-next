@@ -1,0 +1,4 @@
+# Paste one public Dcard relationship-topic URL per line.
+# Lines starting with # are ignored.
+# Use only public URLs that do not require login or bypassing restrictions.
+# https://www.dcard.tw/f/relationship/p/123456789
