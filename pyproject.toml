@@ -1,0 +1,15 @@
+[project]
+name = "opportunity-radar"
+version = "0.1.0"
+description = "Local-first AI-native founder research tooling for emotional market signal extraction."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+oradar = "oradar.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+

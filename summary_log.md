@@ -1,4 +1,14 @@
-# Summary Log
+# Deprecated Summary Log
+
+This root-level summary log is deprecated.
+
+Canonical summary log path:
+
+```text
+ai-collaboration/summaries/summary_log.md
+```
+
+Do not append new entries here. Preserve this file only for historical context.
 
 Persistent agent memory for Opportunity Radar.
 

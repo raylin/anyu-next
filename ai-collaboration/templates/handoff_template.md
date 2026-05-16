@@ -28,7 +28,8 @@ What the next agent needs to know before acting.
 1. Save this handoff.
 2. Execute the requested change.
 3. Generate an execution report.
-4. Append `summary_log.md`.
+4. Append `ai-collaboration/summaries/summary_log.md`.
+5. End the final CLI response with a paste-back completion summary.
 
 ## Uncertainties
 

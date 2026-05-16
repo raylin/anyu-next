@@ -33,9 +33,10 @@ For every future task, Codex must:
 1. Save a handoff first in `ai-collaboration/handoffs/`.
 2. Execute the requested changes.
 3. Generate an execution report in `ai-collaboration/reports/`.
-4. Append `summary_log.md`.
-5. Escalate uncertainties instead of guessing.
-6. Never silently change schemas.
+4. Append `ai-collaboration/summaries/summary_log.md`.
+5. End the final CLI response with a paste-back completion summary.
+6. Escalate uncertainties instead of guessing.
+7. Never silently change schemas.
 
 ## Execution Constraints
 
@@ -85,6 +86,7 @@ Use markdown for:
 - summaries
 - prompt documentation
 - operating agreements
+- collaboration templates under `ai-collaboration/templates/`
 
 Use structured data formats only where structure is the artifact, such as JSON schemas or extracted signal JSON.
 
@@ -106,9 +108,59 @@ Every execution report must include:
 
 Reports should be concise, factual, and written for the next human or AI collaborator.
 
+## Paste-Back Completion Summary
+
+Every Codex task must end the final CLI response with this paste-back completion summary. The purpose is to give the human a compact review packet that can be pasted into ChatGPT Web.
+
+```markdown
+## Codex Completion Summary
+
+Task:
+<task name>
+
+Report:
+<report file path>
+
+Summary Log:
+<summary log path updated>
+
+Files Changed:
+- <file 1>
+- <file 2>
+- <file 3>
+
+What Changed:
+- <key change 1>
+- <key change 2>
+- <key change 3>
+
+Validation:
+- <validation result 1>
+- <validation result 2>
+
+Decisions Made:
+- <execution-level decision 1>
+- <execution-level decision 2>
+- None
+
+Uncertainties / Blockers:
+- <uncertainty or blocker 1>
+- <uncertainty or blocker 2>
+- None
+
+Recommended Next Step:
+<recommended next step>
+
+Needs ChatGPT Review:
+Yes / No
+
+Paste-Back Context:
+<5-10 lines of context that allow ChatGPT Web to continue without reading the full repo>
+```
+
 ## Summary Logging Requirements
 
-After every task, append `summary_log.md` with:
+After every task, append `ai-collaboration/summaries/summary_log.md` with:
 
 - date
 - completed changes
@@ -116,6 +168,14 @@ After every task, append `summary_log.md` with:
 - unresolved questions
 
 The summary log is persistent agent memory. It should preserve enough context for a future agent to continue without re-discovering the repository history.
+
+Root-level `summary_log.md` is deprecated. Do not append to it for future work.
+
+## Templates Directory
+
+Canonical collaboration templates live in `ai-collaboration/templates/`.
+
+Use this directory for handoff, execution report, and decision log templates. Root-level `templates/` is deprecated and must not be treated as canonical.
 
 ## Research Logging System
 
@@ -147,6 +207,19 @@ The initial emotion taxonomy is `schemas/emotion_taxonomy_v1.md`.
 
 The initial extraction prompt is `prompts/extraction_prompt_v1.md`.
 
+Signal Extraction v1 uses a strict output boundary:
+
+- one raw input file produces one structured signal JSON object
+- multiple signal records per raw input are out of scope until a future version
+
+Signal Extraction v1 supports only manual or semi-manual source types:
+
+- `manual_paste`
+- `dcard_manual`
+- `reddit_manual`
+
+Do not implement scraping or automatic source collection for Signal Extraction v1.
+
 ## Schema Change Policy
 
 Schemas are contracts.
@@ -172,4 +245,3 @@ Escalate to the human when:
 - the requested implementation conflicts with these operating rules
 
 Escalation should be concise and include the decision needed.
-

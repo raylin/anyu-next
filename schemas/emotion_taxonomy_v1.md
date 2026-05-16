@@ -96,12 +96,10 @@ Common signals:
 
 ## Scoring Guidance
 
-Use `emotion_intensity` from 0 to 5:
+Use `emotion_intensity` from 0 to 10. Scoring is directional and qualitative, not statistically precise.
 
-- 0: no clear emotional charge
-- 1: mild emotional signal
-- 2: noticeable but low intensity
-- 3: clear emotional pain or desire
-- 4: strong emotional urgency
-- 5: acute, repeated, or identity-level emotional intensity
-
+- 0-2: almost no emotional signal
+- 3-4: weak emotional signal
+- 5-6: moderate emotional signal
+- 7-8: strong emotional signal
+- 9-10: very strong, repeated, or identity-level emotional signal

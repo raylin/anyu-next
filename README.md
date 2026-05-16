@@ -52,6 +52,7 @@ ai-collaboration/
   summaries/
   decisions/
   research/
+  templates/
 prompts/
 schemas/
 sources/
@@ -59,8 +60,9 @@ extractors/
 outputs/
   raw/
   structured/
-templates/
 ```
+
+Collaboration templates live under `ai-collaboration/templates/`. The root-level `templates/` directory is deprecated.
 
 ## Local Development Workflow
 
@@ -69,10 +71,13 @@ For every task:
 1. Save a handoff in `ai-collaboration/handoffs/`.
 2. Make the requested repository changes.
 3. Generate an execution report in `ai-collaboration/reports/`.
-4. Append `summary_log.md`.
-5. Escalate unresolved questions.
+4. Append `ai-collaboration/summaries/summary_log.md`.
+5. End the final CLI response with a paste-back completion summary.
+6. Escalate unresolved questions.
 
 No scraping, UI, dashboards, cloud services, databases, or auth should be added unless explicitly requested and approved.
+
+The paste-back completion summary is a concise review packet intended to be copied into ChatGPT Web. The repository remains the source of truth.
 
 ## Signal Extraction Foundation
 
@@ -83,6 +88,64 @@ The initial extraction foundation includes:
 - `prompts/extraction_prompt_v1.md`
 
 The system extracts emotions, pain points, behavioral patterns, monetization signals, retention likelihood, and shareability potential.
+
+Signal Extraction v1 uses:
+
+```text
+1 raw input file -> 1 structured signal JSON object
+```
+
+Multiple signal records per raw input are out of scope for v1.
+
+Allowed v1 source types:
+
+- `manual_paste`
+- `dcard_manual`
+- `reddit_manual`
+
+Scoring fields use integer values from 0 to 10 and are qualitative, directional estimates.
+
+## Signal Extraction v1 CLI
+
+Run the local extractor with:
+
+```bash
+python3 -m oradar.cli extract outputs/raw/sample_001.txt --source-type dcard_manual
+```
+
+If the package is installed in editable mode, the equivalent console command is:
+
+```bash
+oradar extract outputs/raw/sample_001.txt --source-type dcard_manual
+```
+
+The CLI reads one raw text file, loads `prompts/extraction_prompt_v1.md`, calls the OpenAI API, validates the returned JSON against `schemas/signal_schema_v1.json`, and writes one structured output file under `outputs/structured/`.
+
+The structured output `source` field is a clean identifier derived from the raw input filename stem. For example, `outputs/raw/sample_001.txt` becomes `"source": "sample_001"`.
+
+Set `OPENAI_API_KEY` in the environment or a local `.env` file. See `.env.example`.
+
+Provider selection is controlled by `ORADAR_PROVIDER`.
+
+OpenAI:
+
+```bash
+ORADAR_PROVIDER=openai python3 -m oradar.cli extract outputs/raw/sample_001.txt --source-type dcard_manual
+```
+
+Anthropic:
+
+```bash
+ORADAR_PROVIDER=anthropic python3 -m oradar.cli extract outputs/raw/sample_001.txt --source-type dcard_manual
+```
+
+Supported provider environment variables:
+
+- `ORADAR_PROVIDER=openai|anthropic`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+- `ANTHROPIC_API_KEY`
+- `ANTHROPIC_MODEL`
 
 ## Future Roadmap
 
@@ -95,4 +158,3 @@ Likely future phases:
 5. Build synthesis reports from structured outputs.
 
 Scraping, UI, dashboards, databases, and external infrastructure are intentionally out of scope until approved.
-

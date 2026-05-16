@@ -1,0 +1,68 @@
+{
+  "free_result": {
+    "temperature_score": 42,
+    "state_label": "低溫保留",
+    "one_sentence_read": "他保持著最低成本的關注方式，既沒有完全離開，也沒有積極靠近。",
+    "observed_signals": [
+      "回訊息速度明顯變慢",
+      "持續關注限動但不主動互動",
+      "長時間上線但不回覆"
+    ],
+    "uncertainty_note": "單從這些行為還無法確定他的投入度變化原因，可能是忙碌、猶豫，或是互動模式轉變。",
+    "paid_teaser": "想知道這種「看限動但慢回訊」背後的訊號意義，以及該怎麼應對嗎？"
+  },
+  "insight_layer": {
+    "title": "低成本互動的曖昧地帶",
+    "explanation": "真正讓人焦慮的，通常不是明確拒絕，而是那種還留著一點點可能性的模糊感。看限動是最低成本的關注方式，既能保持連結，又不用承擔回應的壓力。",
+    "principle": "低成本互動訊號",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "深度訊號解讀",
+      "三種應對策略",
+      "避免踩雷提醒"
+    ],
+    "preview_copy": "別讓這種模糊狀態繼續消耗你，學會讀懂訊號並做出合適回應。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "他目前的行為模式顯示投入度下降，但還沒有完全退出。看限動是一種「安全距離」的關注，能了解你的近況又不用立即回應。這通常出現在關係轉換期，可能是生活忙碌、感情猶豫，或是在重新評估這段關係的位置。",
+    "possible_interpretation": "目前訊號偏向互動意願降低，但保留基本關注。他可能在調整對這段關係的期待，或是面臨其他生活優先順序。不過，持續看限動代表你還在他的關注範圍內。",
+    "risk_warning": "避免過度解讀每個行為，也不要用頻繁傳訊來測試他的反應，這可能會加速關係降溫。",
+    "what_not_to_do": [
+      "連續傳多則訊息追問為什麼慢回",
+      "在限動暗示他有看沒回",
+      "突然變得很冷淡來「以牙還牙」",
+      "頻繁發限動想引起他的反應"
+    ],
+    "reply_strategies": {
+      "主動推進": "「最近好像都很忙？有空的話想約出來聊聊」- 直接但不逼迫，給他選擇的空間。",
+      "低壓試探": "「分享一個有趣的事給你」然後分享日常，觀察他的回應熱度和速度變化。",
+      "暫時拉開": "暫時降低主動聯繫的頻率，專注於自己的生活，讓他有機會主動。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "42°C",
+    "state_label": "低溫保留",
+    "relationship_persona": "被溫柔懸掛的人",
+    "card_sentence": "他用最低成本的方式關注著你，既沒走遠，也沒靠近。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對「低成本互動」很敏感，會仔細觀察對方的線上行為與回覆頻率差異，容易在模糊訊號中尋找關係確定感。",
+    "confidence": "medium",
+    "evidence": "注意到對方看限動但慢回訊的矛盾行為，並且會觀察對方上線時間與回覆行為的關聯",
+    "should_store": true,
+    "user_facing_summary": "你很善於觀察細節訊號，但有時候可能會讓自己陷入過度分析"
+  },
+  "metadata": {
+    "situation_type": "回訊變慢但看限動",
+    "input_length": 60,
+    "generated_at": "2026-05-16T09:38:49.948020+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

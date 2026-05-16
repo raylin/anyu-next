@@ -1,0 +1,68 @@
+{
+  "free_result": {
+    "temperature_score": 35,
+    "state_label": "急速降溫",
+    "one_sentence_read": "從深夜曖昧到隔天冷淡，這種劇烈溫差通常代表對方在重新調整距離。",
+    "observed_signals": [
+      "昨夜聊到半夜且語氣曖昧",
+      "今日回覆變成敷衍式短句",
+      "情緒溫度急劇下降"
+    ],
+    "uncertainty_note": "單日的冷熱變化可能有很多原因，需要觀察接下來幾天的互動模式才能判斷趨勢。",
+    "paid_teaser": "想知道這種突然降溫背後可能的原因，以及如何優雅回應？"
+  },
+  "insight_layer": {
+    "title": "曖昧後的冷卻期",
+    "explanation": "當互動突然從很熱變很冷，往往不是你說錯什麼，而是對方在消化昨晚的親近感。有些人在太過親密後會本能地後退一點，重新找回控制感。",
+    "principle": "親密後的距離調整",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "降溫原因深度分析",
+      "三種回應策略",
+      "避雷指南",
+      "後續觀察重點"
+    ],
+    "preview_copy": "這種冷熱循環很常見，但回應方式決定了關係走向。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "這種「親密後退縮」的模式在曖昧階段很常見。對方可能覺得昨晚太投入了，今天刻意保持距離來平衡一下。也可能是白天的環境或心境不適合延續昨晚的氛圍。",
+    "possible_interpretation": "目前訊號顯示對方正在調節互動溫度，可能是想要控制節奏，也可能是對昨晚的親近感到一點不安。但這不一定代表後悔或失去興趣。",
+    "risk_warning": "急著追問「是不是我說錯什麼」可能會讓對方感到壓力，反而推遠距離。",
+    "what_not_to_do": [
+      "不要直接質問為什麼態度變冷",
+      "不要模仿對方也變得敷衍",
+      "不要追問昨晚聊天內容的後續"
+    ],
+    "reply_strategies": {
+      "主動推進": "自然地分享今天的有趣事情，保持昨晚的溫度但不刻意提及昨晚的對話，讓他知道你的狀態很穩定。",
+      "低壓試探": "用輕鬆的話題測試他的回應長度，比如「今天好累，你呢？」觀察他是否只會短回。",
+      "暫時拉開": "今天就不主動聊了，給彼此一點空間，明天再用平常心互動，看他是否會主動一些。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "35°C",
+    "state_label": "急速降溫",
+    "relationship_persona": "曖昧溫差體質",
+    "card_sentence": "從深夜曖昧到隔天冷淡，這種劇烈溫差讓人摸不透。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對互動溫度變化很敏感，容易將對方的冷淡歸因於自己的表現。",
+    "confidence": "medium",
+    "evidence": "立即懷疑是否自己說錯話，顯示對關係變化的敏感度較高。",
+    "should_store": true,
+    "user_facing_summary": "你對關係溫度的變化很敏銳，這讓你能快速察覺互動的微妙變化。"
+  },
+  "metadata": {
+    "situation_type": "忽冷忽熱",
+    "input_length": 61,
+    "generated_at": "2026-05-16T09:38:49.948240+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

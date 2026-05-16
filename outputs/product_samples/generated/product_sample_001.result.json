@@ -1,0 +1,69 @@
+{
+  "free_result": {
+    "temperature_score": 35,
+    "state_label": "降溫觀望",
+    "one_sentence_read": "對方目前處於低回應狀態，但仍保持正常社交活動，可能在刻意保持距離。",
+    "observed_signals": [
+      "約會邀請已讀不回",
+      "持續發限動保持社交活躍",
+      "對其他人的貼文按讚互動"
+    ],
+    "uncertainty_note": "單次互動無法完全確定對方的投入意願，需要更多觀察。",
+    "paid_teaser": "想知道這種情況下，怎麼回應既不失尊嚴又能測試對方態度？"
+  },
+  "insight_layer": {
+    "title": "被動回應的矛盾訊號",
+    "explanation": "最讓人困擾的不是明確拒絕，而是這種「還在線上但對你沒回應」的模糊狀態。當你看到他發限動、按別人讚，卻對你的邀請沉默，這種對比會放大不確定感。",
+    "principle": "模糊訊號放大",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "深度訊號解讀",
+      "三種回應策略",
+      "風險提醒",
+      "不該做的事"
+    ],
+    "preview_copy": "這種情況繼續追問風險很高，但完全不動又可能錯過機會。解鎖獲得保留尊嚴的行動方案。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "對方的行為模式顯示：有能力回覆但選擇不回覆你的邀請，同時維持正常社交活動。這通常代表對約會邀請有所保留，但不一定是完全拒絕，可能在觀望或猶豫中。",
+    "possible_interpretation": "目前訊號偏向投入度下降，對方可能覺得節奏太快，或是對約會有顧慮，但仍保留一定互動可能性。",
+    "risk_warning": "直接追問約會安排風險較高，容易被解讀為施壓，可能讓對方更想迴避。",
+    "what_not_to_do": [
+      "立刻再傳一次約會邀請",
+      "質問為什麼不回訊息",
+      "提到看見他發限動或按讚的事",
+      "表現出受傷或不滿的情緒"
+    ],
+    "reply_strategies": {
+      "主動推進": "過幾天後用輕鬆話題重新開啟對話，不提約會，先重建互動節奏，例如：「剛看到一個有趣的東西想分享」",
+      "低壓試探": "用不需要明確回應的內容測試，像是分享日常趣事或問輕鬆問題，觀察回應熱度",
+      "暫時拉開": "暫停主動聯繫一週，給彼此空間，如果對方有興趣會主動聯絡，如果沒有也能避免過度投入"
+    }
+  },
+  "share_card": {
+    "temperature_label": "35°C",
+    "state_label": "降溫觀望",
+    "relationship_persona": "在線但保持距離型",
+    "card_sentence": "對方還在，但對你暫時降溫中"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對「低成本互動」很敏感，例如發限動、按讚等行為，容易把這些當成關係訊號進行對比分析",
+    "confidence": "medium",
+    "evidence": "使用者注意到對方發限動和按讚行為，並將此與未回覆自己訊息做對比",
+    "should_store": true,
+    "user_facing_summary": "你比較會注意對方在社交媒體上的活動，並用這些來判斷關係狀態"
+  },
+  "metadata": {
+    "situation_type": "已讀不回",
+    "input_length": 73,
+    "generated_at": "2026-05-16T09:38:49.948340+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

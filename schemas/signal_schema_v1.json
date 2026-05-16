@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "signal_schema_v1.json",
   "title": "Opportunity Radar Signal Schema v1",
-  "description": "Structured extraction contract for emotional market signals from raw social or qualitative research content.",
+  "description": "Structured extraction contract for emotional market signals from raw social or qualitative research content. Signal Extraction v1 uses one raw input file to one structured signal JSON object.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -28,11 +28,16 @@
   "properties": {
     "source": {
       "type": "string",
-      "description": "Human-readable source reference, URL, file path, or source note."
+      "description": "Human-readable source reference, URL, file path, or source note. Signal Extraction v1 supports manual and semi-manual sources only."
     },
     "platform": {
       "type": "string",
-      "description": "Platform or environment where the signal was observed."
+      "enum": [
+        "manual_paste",
+        "dcard_manual",
+        "reddit_manual"
+      ],
+      "description": "Allowed Signal Extraction v1 source type."
     },
     "category": {
       "type": "string",
@@ -53,8 +58,8 @@
     "emotion_intensity": {
       "type": "integer",
       "minimum": 0,
-      "maximum": 5,
-      "description": "Estimated emotional intensity from 0 to 5."
+      "maximum": 10,
+      "description": "Estimated emotional intensity from 0 to 10. Directional and qualitative, not statistically precise."
     },
     "pain_point": {
       "type": "string",
@@ -75,20 +80,20 @@
     "shareability_score": {
       "type": "integer",
       "minimum": 0,
-      "maximum": 5,
-      "description": "Estimated likelihood that the signal motivates sharing, reposting, commenting, or forwarding."
+      "maximum": 10,
+      "description": "Estimated likelihood from 0 to 10 that the signal motivates sharing, reposting, commenting, or forwarding. Directional and qualitative, not statistically precise."
     },
     "monetization_score": {
       "type": "integer",
       "minimum": 0,
-      "maximum": 5,
-      "description": "Estimated willingness to pay or commercial opportunity strength."
+      "maximum": 10,
+      "description": "Estimated willingness to pay or commercial opportunity strength from 0 to 10. Directional and qualitative, not statistically precise."
     },
     "retention_score": {
       "type": "integer",
       "minimum": 0,
-      "maximum": 5,
-      "description": "Estimated likelihood that the problem creates repeated product use."
+      "maximum": 10,
+      "description": "Estimated likelihood from 0 to 10 that the problem creates repeated product use. Directional and qualitative, not statistically precise."
     },
     "possible_product": {
       "type": "array",
@@ -117,4 +122,3 @@
     }
   }
 }
-
