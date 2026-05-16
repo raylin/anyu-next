@@ -531,3 +531,55 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - Whether `product_sample_002` and `product_sample_003` should be differentiated beyond the current tied score of 52.
 - Whether share-card persona variety should be enforced more strongly.
 - Whether one-off product samples should default personal pattern confidence to `low`.
+
+## 2026-05-16 Prototype Skeleton v0
+
+### Task Completed
+
+- Built the local fake-door prototype under `experiments/ambiguous_temperature_v0/`.
+- Added a small standard-library web server with static UI and JSON API endpoints.
+- Added reusable local JSONL logging for events, submissions, and contact submissions.
+- Added experiment-specific runtime helpers and shared product runtime generation reuse.
+- Updated `.gitignore` to ignore `outputs/experiments/**/*.jsonl`.
+- Created `ai-collaboration/reports/2026-05-16-prototype-skeleton-v0-execution-report.md`.
+
+### Prototype Path
+
+- `experiments/ambiguous_temperature_v0/`
+
+### Implementation Approach
+
+- Python standard-library HTTP server
+- static HTML, CSS, and JavaScript
+- shared runtime logic extracted to `oradar/product_runtime.py`
+- local JSONL append-only logging
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed.
+- `python3 -m py_compile experiments/ambiguous_temperature_v0/*.py` passed.
+- `python3 -m py_compile scripts/generate_product_sample.py` passed.
+- Local smoke test passed for:
+  - `/health`
+  - page HTML render
+  - live `/api/analyze` generation with Anthropic
+  - `/api/contact` fake-door contact capture
+
+### Known Technical Debt
+
+- None.
+
+### Review Readiness
+
+- Prototype is ready for ChatGPT review.
+- Top review issues: whether the standard-library server is the right interim shape, whether the log schema is sufficient for experiment analysis, and whether the conversation-snippet heuristic should change before real usage.
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Unresolved Questions
+
+- OpenAI-backed product runtime was not live-tested in this task.
+- The conversation-snippet heuristic is intentionally simple and may need real-usage feedback.
+- Future aggregation/reporting over JSONL experiment logs is still out of scope.

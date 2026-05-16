@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>曖昧溫度計 Prototype</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Variant B · Fake Door Prototype</p>
+        <h1>他是真的忙，還是其實在冷掉？</h1>
+        <p class="subheadline">貼上對話，AI 幫你判斷關係溫度和下一句怎麼回。</p>
+      </section>
+
+      <section class="layout">
+        <form id="analysis-form" class="panel input-panel">
+          <label class="field">
+            <span>情境類型</span>
+            <select id="situation-type" name="situation_type">
+              <option value="已讀不回">已讀不回</option>
+              <option value="忽冷忽熱">忽冷忽熱</option>
+              <option value="回訊變慢但看限動">回訊變慢但看限動</option>
+              <option value="不確定 / 跳過">不確定 / 跳過</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>貼上對話或描述情況</span>
+            <textarea
+              id="input-text"
+              name="input_text"
+              rows="10"
+              placeholder="例如：我昨天約他週末見面，他已讀後沒回，但晚上還在發限動。"
+            ></textarea>
+          </label>
+
+          <p class="helper-text">可以貼最近幾句對話，或用自己的話描述。請不要貼姓名、電話、地址或其他能識別身份的資訊。</p>
+
+          <button type="submit" class="primary-button">分析我的曖昧溫度</button>
+          <p id="form-error" class="status-message error" hidden></p>
+          <p id="form-status" class="status-message" hidden></p>
+        </form>
+
+        <section id="result-panel" class="panel result-panel" hidden>
+          <div class="result-header">
+            <p class="eyebrow">免費結果</p>
+            <div class="temperature-wrap">
+              <span id="temperature-score" class="temperature-score">0</span>
+              <span class="temperature-unit">/ 100</span>
+            </div>
+            <p id="state-label" class="state-label"></p>
+            <p id="one-sentence-read" class="one-sentence-read"></p>
+          </div>
+
+          <div class="result-section">
+            <h2>主要訊號</h2>
+            <ul id="observed-signals" class="signal-list"></ul>
+            <p id="uncertainty-note" class="uncertainty-note"></p>
+          </div>
+
+          <div class="result-section">
+            <h2 id="insight-title"></h2>
+            <p id="insight-explanation"></p>
+          </div>
+
+          <button id="share-card-button" type="button" class="share-card">
+            <span id="share-temperature-label" class="share-temperature"></span>
+            <span id="share-state-label" class="share-state"></span>
+            <strong id="share-persona" class="share-persona"></strong>
+            <span id="share-sentence" class="share-sentence"></span>
+          </button>
+
+          <div class="result-section paywall">
+            <p class="eyebrow">Fake Paid Preview</p>
+            <h2 id="paid-headline"></h2>
+            <p id="paid-price" class="paid-price"></p>
+            <ul id="paid-included-sections" class="included-list"></ul>
+            <p id="paid-preview-copy"></p>
+            <p id="paid-teaser" class="paid-teaser"></p>
+            <button id="paid-unlock-button" type="button" class="unlock-button">解鎖下一句怎麼回 — NT$49</button>
+          </div>
+
+          <form id="contact-form" class="contact-form" hidden>
+            <p class="contact-message">目前正在內測。留下 LINE 或 Email，我們會人工送你一次完整分析。</p>
+            <p class="contact-note">這次不會真的收費。</p>
+            <label class="field">
+              <span>聯絡方式</span>
+              <select id="contact-type" name="contact_type">
+                <option value="line">LINE</option>
+                <option value="email">Email</option>
+              </select>
+            </label>
+            <label class="field">
+              <span id="contact-value-label">LINE ID 或 Email</span>
+              <input id="contact-value" name="contact_value" type="text" autocomplete="off" placeholder="your_line_id 或 name@example.com">
+            </label>
+            <button type="submit" class="secondary-button">送出聯絡方式</button>
+            <p id="contact-error" class="status-message error" hidden></p>
+            <p id="contact-status" class="status-message" hidden></p>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <script>window.__APP_CONFIG__ = __APP_CONFIG__;</script>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
