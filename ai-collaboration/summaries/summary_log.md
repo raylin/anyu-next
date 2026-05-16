@@ -780,3 +780,49 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - Whether public Dcard pages expose enough useful metadata for lightweight calibration without manual supplementation.
 - Whether `product_mapping` is sufficient or a separate monetization-strength field will eventually be useful.
 - Whether future calibration should remain summary-only or allow short approved snippets when metadata is thin.
+
+## 2026-05-17 Dcard Browser Topic Scan v0
+
+### Task Completed
+
+- Added `scripts/dcard_browser_topic_scan.py`.
+- Added `ai-collaboration/research/dcard_calibration/dcard_browser_topic_scan_notes.jsonl`.
+- Added `ai-collaboration/research/dcard_calibration/2026-05-17-dcard-browser-topic-scan-review-bundle.md`.
+- Updated the Dcard calibration README with browser-scan setup and usage notes.
+- Created `ai-collaboration/reports/2026-05-17-dcard-browser-topic-scan-v0-execution-report.md`.
+
+### Workflow Paths
+
+- script: `scripts/dcard_browser_topic_scan.py`
+- notes output: `ai-collaboration/research/dcard_calibration/dcard_browser_topic_scan_notes.jsonl`
+- review bundle: `ai-collaboration/research/dcard_calibration/2026-05-17-dcard-browser-topic-scan-review-bundle.md`
+
+### Run Result
+
+- command run: `python3 scripts/dcard_browser_topic_scan.py --max-posts 5 --max-comments 3`
+- result: setup blocker
+- Playwright was not installed, so no browser session launched
+- URLs discovered: `0`
+- articles processed: `0`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed.
+- `python3 -m py_compile scripts/dcard_browser_topic_scan.py` passed.
+- `python3 -m py_compile scripts/dcard_topic_calibration.py` passed.
+- `python3 -m py_compile scripts/run_product_eval.py` passed.
+- browser scan script exited cleanly with manual setup instructions.
+
+### Known Technical Debt
+
+- None.
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Unresolved Questions
+
+- Whether a normal Playwright browser session can access Dcard public pages without a browser-visible block wall.
+- Whether the current selectors are robust enough once live pages are available.
+- Whether `max-posts=5` is the right first smoke-test size after setup.

@@ -41,8 +41,12 @@ This workflow is semi-automated:
   - manual note template
 - `dcard_topic_calibration_notes.jsonl`
   - generated summarized notes from the script
+- `dcard_browser_topic_scan_notes.jsonl`
+  - generated notes from the minimal Playwright browser scan
 - `2026-05-16-dcard-topic-calibration-v0-review-bundle.md`
   - current review bundle
+- `2026-05-17-dcard-browser-topic-scan-review-bundle.md`
+  - current browser-scan review bundle
 
 ## How To Run
 
@@ -50,6 +54,19 @@ Default run:
 
 ```bash
 python3 scripts/dcard_topic_calibration.py
+```
+
+Browser-assisted scan:
+
+```bash
+python3 scripts/dcard_browser_topic_scan.py --max-posts 10 --max-comments 3
+```
+
+Manual setup for the browser script:
+
+```bash
+python3 -m pip install playwright
+python3 -m playwright install chromium
 ```
 
 The script reads:
@@ -73,3 +90,4 @@ If no URLs are present, the script exits cleanly, prints a clear message, and cr
 - It only stores lightweight metadata and summarized notes.
 - Default behavior does not use an LLM for structuring.
 - If Dcard blocks normal HTTP access, the workflow records that and leaves the item for manual note entry later.
+- The browser scan depends on a manual Playwright + Chromium setup and may still hit a browser-visible access wall.
