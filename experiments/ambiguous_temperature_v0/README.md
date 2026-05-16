@@ -57,16 +57,50 @@ These files are created under `outputs/experiments/ambiguous_temperature_v0/` wh
 - `events.jsonl`
 - `submissions.jsonl`
 - `contact_submissions.jsonl`
+- `experiment_report.md`
 
 These files are intentionally ignored by git.
+
+## Analyze Local Results
+
+Generate a local markdown summary from the JSONL logs with:
+
+```bash
+python3 experiments/ambiguous_temperature_v0/analyze_results.py
+```
+
+Optional output override:
+
+```bash
+python3 experiments/ambiguous_temperature_v0/analyze_results.py --output outputs/experiments/ambiguous_temperature_v0/experiment_report.md
+```
+
+The analysis script reads:
+
+- `events.jsonl`
+- `submissions.jsonl`
+- `contact_submissions.jsonl`
+
+And writes:
+
+- `outputs/experiments/ambiguous_temperature_v0/experiment_report.md`
+
+Interpretation notes:
+
+- fake paid unlock clicks are intent signals, not revenue
+- contact submissions are stronger intent than paid clicks alone
+- early sample sizes should be interpreted directionally
+- a high paid click count with weak contact conversion can indicate curiosity without strong commitment
 
 ## Privacy Warning
 
 Local submissions may contain sensitive user text and contact information.
 
 - Do not commit generated JSONL logs publicly.
+- Do not commit generated experiment reports publicly.
 - Do not use real private conversations when demoing unless you are comfortable storing them locally.
 - The UI warns users not to paste names, phone numbers, addresses, or other identifying information.
+- The analysis report hides raw input text and does not print contact values.
 
 ## Intentionally Not Built
 

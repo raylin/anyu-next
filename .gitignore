@@ -12,3 +12,4 @@ build/
 
 # Local experiment outputs
 outputs/experiments/**/*.jsonl
+outputs/experiments/**/experiment_report.md
