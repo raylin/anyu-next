@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "signal_schema_v1.json",
+  "title": "Opportunity Radar Signal Schema v1",
+  "description": "Structured extraction contract for emotional market signals from raw social or qualitative research content.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "platform",
+    "category",
+    "raw_text",
+    "summary",
+    "emotion",
+    "emotion_intensity",
+    "pain_point",
+    "pain_frequency",
+    "social_behavior",
+    "identity_signal",
+    "shareability_score",
+    "monetization_score",
+    "retention_score",
+    "possible_product",
+    "possible_hook",
+    "observed_patterns",
+    "timestamp"
+  ],
+  "properties": {
+    "source": {
+      "type": "string",
+      "description": "Human-readable source reference, URL, file path, or source note."
+    },
+    "platform": {
+      "type": "string",
+      "description": "Platform or environment where the signal was observed."
+    },
+    "category": {
+      "type": "string",
+      "description": "Research category or market area."
+    },
+    "raw_text": {
+      "type": "string",
+      "description": "Original excerpt or manually captured source text."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Concise summary of the signal."
+    },
+    "emotion": {
+      "type": "string",
+      "description": "Primary emotional category from the taxonomy."
+    },
+    "emotion_intensity": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Estimated emotional intensity from 0 to 5."
+    },
+    "pain_point": {
+      "type": "string",
+      "description": "Concrete pain, frustration, anxiety, or unmet need."
+    },
+    "pain_frequency": {
+      "type": "string",
+      "description": "Estimated recurrence pattern, such as one-time, occasional, recurring, frequent, or constant."
+    },
+    "social_behavior": {
+      "type": "string",
+      "description": "Observed behavior, habit, coping mechanism, or social action."
+    },
+    "identity_signal": {
+      "type": "string",
+      "description": "What the signal suggests about self-image, status, belonging, aspiration, or identity."
+    },
+    "shareability_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Estimated likelihood that the signal motivates sharing, reposting, commenting, or forwarding."
+    },
+    "monetization_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Estimated willingness to pay or commercial opportunity strength."
+    },
+    "retention_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Estimated likelihood that the problem creates repeated product use."
+    },
+    "possible_product": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Possible product concepts suggested by the signal."
+    },
+    "possible_hook": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Possible acquisition, content, or positioning hooks suggested by the signal."
+    },
+    "observed_patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Recurring patterns, repeated language, behaviors, or adjacent signals."
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "ISO 8601 timestamp for when the signal was captured or extracted."
+    }
+  }
+}
+
