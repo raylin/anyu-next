@@ -85,6 +85,7 @@ def main() -> int:
     state_labels: Counter[str] = Counter()
     share_personas: Counter[str] = Counter()
     situation_counts: Counter[str] = Counter()
+    pattern_confidences: Counter[str] = Counter()
     should_store_true_ids: list[str] = []
     risky_language_findings: list[dict[str, str]] = []
     invalid_output_ids: list[str] = []
@@ -124,6 +125,7 @@ def main() -> int:
         state_labels[summary["state_label"]] += 1
         share_personas[summary["share_card_persona"]] += 1
         situation_counts[summary["situation_type"]] += 1
+        pattern_confidences[summary["pattern_confidence"]] += 1
 
         if summary["should_store"]:
             should_store_true_ids.append(sample_id)
@@ -142,12 +144,24 @@ def main() -> int:
         "failure_count": len(failures),
         "failures": failures,
         "temperature_scores": temperature_scores,
+        "temperature_score_range": summarize_temperature_range(temperature_scores),
+        "temperature_score_average": round(sum(temperature_scores) / len(temperature_scores), 1) if temperature_scores else None,
+        "temperature_bucket_counts": bucket_temperature_scores(temperature_scores),
+        "temperature_scores_above_60_count": sum(1 for score in temperature_scores if score > 60),
+        "temperature_by_situation_type": summarize_temperature_by_situation(sample_summaries),
         "state_label_counts": dict(state_labels),
         "share_persona_counts": dict(share_personas),
+        "share_persona_top_repeated": [
+            {"persona": persona, "count": count}
+            for persona, count in share_personas.most_common()
+            if count > 1
+        ],
         "situation_type_counts": dict(situation_counts),
+        "pattern_confidence_counts": dict(pattern_confidences),
         "should_store_true_ids": should_store_true_ids,
         "risky_language_findings": risky_language_findings,
         "invalid_output_ids": invalid_output_ids,
+        "reply_strategy_format_examples_count": count_reply_strategies_with_examples(sample_summaries),
         "sample_summaries": sample_summaries,
     }
     args.summary.write_text(json.dumps(bundle_summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -197,6 +211,7 @@ def summarize_result(
     paid_preview = result["paid_preview"]
     share_card = result["share_card"]
     personal_pattern = result["personal_pattern_candidate"]
+    reply_strategies = result["paid_result"]["reply_strategies"]
 
     findings = scan_risky_language(result)
     quality_flags: list[str] = []
@@ -208,6 +223,10 @@ def summarize_result(
         quality_flags.append("share_card identity safety risk")
     if contains_any(json.dumps(personal_pattern, ensure_ascii=False), DIAGNOSTIC_PATTERN_TERMS):
         quality_flags.append("personal pattern diagnostic risk")
+    if bool(personal_pattern.get("should_store")):
+        quality_flags.append("should_store should be false in v0")
+    if not all_reply_strategies_have_examples(reply_strategies):
+        quality_flags.append("reply strategies missing concrete example")
 
     return {
         "id": sample_id,
@@ -227,6 +246,10 @@ def summarize_result(
         "share_card_sentence": require_str(share_card, "card_sentence"),
         "pattern_confidence": require_str(personal_pattern, "confidence"),
         "should_store": bool(personal_pattern.get("should_store")),
+        "reply_strategies": {
+            key: require_str(reply_strategies, key)
+            for key in ("主動推進", "低壓試探", "暫時拉開")
+        },
         "risky_language_findings": findings,
         "quality_flags": quality_flags,
     }
@@ -257,6 +280,72 @@ def iter_string_fields(value: Any, path: str = "$") -> list[tuple[str, str]]:
 def share_card_text_contains_raw(raw_text: str, share_card: dict[str, Any]) -> bool:
     share_card_text = json.dumps(share_card, ensure_ascii=False)
     return bool(raw_text and raw_text in share_card_text)
+
+
+def summarize_temperature_range(scores: list[int]) -> dict[str, int | None]:
+    if not scores:
+        return {"min": None, "max": None}
+    return {"min": min(scores), "max": max(scores)}
+
+
+def bucket_temperature_scores(scores: list[int]) -> dict[str, int]:
+    buckets = {
+        "0-20": 0,
+        "21-40": 0,
+        "41-60": 0,
+        "61-75": 0,
+        "76-90": 0,
+        "91-100": 0,
+    }
+    for score in scores:
+        if score <= 20:
+            buckets["0-20"] += 1
+        elif score <= 40:
+            buckets["21-40"] += 1
+        elif score <= 60:
+            buckets["41-60"] += 1
+        elif score <= 75:
+            buckets["61-75"] += 1
+        elif score <= 90:
+            buckets["76-90"] += 1
+        else:
+            buckets["91-100"] += 1
+    return buckets
+
+
+def summarize_temperature_by_situation(sample_summaries: list[dict[str, Any]]) -> dict[str, dict[str, float | int | None]]:
+    grouped: dict[str, list[int]] = {}
+    for summary in sample_summaries:
+        grouped.setdefault(summary["situation_type"], []).append(summary["temperature_score"])
+
+    output: dict[str, dict[str, float | int | None]] = {}
+    for situation_type, scores in grouped.items():
+        output[situation_type] = {
+            "count": len(scores),
+            "min": min(scores) if scores else None,
+            "max": max(scores) if scores else None,
+            "average": round(sum(scores) / len(scores), 1) if scores else None,
+            "above_60_count": sum(1 for score in scores if score > 60),
+        }
+    return output
+
+
+def all_reply_strategies_have_examples(reply_strategies: dict[str, Any]) -> bool:
+    for value in reply_strategies.values():
+        if not isinstance(value, str):
+            return False
+        if "可以這樣回：" not in value or "「" not in value or "」" not in value:
+            return False
+    return True
+
+
+def count_reply_strategies_with_examples(sample_summaries: list[dict[str, Any]]) -> dict[str, int]:
+    total = len(sample_summaries)
+    complete = 0
+    for summary in sample_summaries:
+        if all_reply_strategies_have_examples(summary["reply_strategies"]):
+            complete += 1
+    return {"complete_count": complete, "total_count": total}
 
 
 def contains_any(text: str, terms: tuple[str, ...]) -> bool:

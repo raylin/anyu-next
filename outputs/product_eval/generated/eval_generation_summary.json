@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-16T14:19:20.183921+00:00",
+  "generated_at": "2026-05-16T14:44:59.050132+00:00",
   "provider": "anthropic",
   "model_name": "claude-sonnet-4-20250514",
   "live_generation_performed": true,
@@ -8,88 +8,162 @@
   "failure_count": 0,
   "failures": [],
   "temperature_scores": [
-    35,
-    35,
+    38,
     35,
     42,
-    25,
-    32,
-    35,
-    35,
-    32,
-    25,
-    52,
-    52,
-    52,
-    55,
-    52,
-    52,
-    52,
-    52,
-    52,
-    52,
     52,
     35,
+    42,
+    35,
+    45,
+    35,
+    35,
+    58,
+    58,
+    62,
+    62,
+    58,
+    58,
+    58,
+    58,
+    58,
+    52,
+    52,
+    42,
     42,
     52,
     48,
     48,
-    42,
+    52,
     52,
     48,
     52
   ],
+  "temperature_score_range": {
+    "min": 35,
+    "max": 62
+  },
+  "temperature_score_average": 48.8,
+  "temperature_bucket_counts": {
+    "0-20": 0,
+    "21-40": 6,
+    "41-60": 22,
+    "61-75": 2,
+    "76-90": 0,
+    "91-100": 0
+  },
+  "temperature_scores_above_60_count": 2,
+  "temperature_by_situation_type": {
+    "已讀不回": {
+      "count": 10,
+      "min": 35,
+      "max": 52,
+      "average": 39.4,
+      "above_60_count": 0
+    },
+    "忽冷忽熱": {
+      "count": 10,
+      "min": 52,
+      "max": 62,
+      "average": 58.2,
+      "above_60_count": 2
+    },
+    "回訊變慢但看限動": {
+      "count": 10,
+      "min": 42,
+      "max": 52,
+      "average": 48.8,
+      "above_60_count": 0
+    }
+  },
   "state_label_counts": {
-    "降溫觀望": 7,
-    "主動性下降": 3,
-    "降溫保留": 1,
+    "主動性下降": 1,
     "低溫保留": 4,
-    "冷處理觀望": 1,
-    "深夜熱聊白天降溫": 1,
-    "忽冷忽熱": 5,
-    "夜晚升溫白天降溫": 1,
-    "線上熱線下冷": 1,
-    "拉扯循環": 1,
-    "溫度不穩": 1,
-    "行為差距觀望": 1,
-    "低成本互動": 1,
-    "維持距離觀望": 1,
-    "訊號混雜": 1
+    "降溫觀望": 3,
+    "投入後急降溫": 1,
+    "低溫迴避": 1,
+    "溫度明顯降低": 1,
+    "主動性懸掛中": 1,
+    "已讀後暫停": 1,
+    "忽冷忽熱": 4,
+    "忽冷忽熱循環": 2,
+    "夜晚加溫白天降溫": 1,
+    "聊天熱，行動冷": 1,
+    "依賴性溫差": 1,
+    "回應節奏改變": 1,
+    "回應節奏降溫": 1,
+    "低成本互動保留": 1,
+    "低成本保持": 1,
+    "低成本保留": 1,
+    "訊號混雜": 1,
+    "低成本互動期": 1,
+    "慢熱觀望": 1
   },
   "share_persona_counts": {
-    "微訊號觀察家": 8,
-    "訊號變化敏感型": 1,
-    "節奏敏感觀察者": 1,
-    "直接試探型": 1,
-    "已讀偵探型": 1,
-    "溫差觀察員": 3,
-    "深夜表達型": 1,
-    "沉默期待型": 1,
-    "溫差敏感觀察家": 1,
-    "溫差敏感觀察員": 1,
-    "時差曖昧觀察家": 1,
-    "數位親密觀察員": 1,
-    "進退節奏觀察家": 1,
-    "優先順序觀察家": 1,
-    "拉扯觀察型": 1,
-    "溫差敏感觀察者": 1,
-    "在線偵探型": 1,
-    "行為觀察家": 1,
-    "節奏變化觀察員": 1,
+    "邀約懸空觀察家": 1,
+    "微訊號觀察家": 1,
+    "節奏落差敏感型": 1,
+    "節奏敏感觀察員": 1,
+    "直接試探偵測型": 1,
+    "想靠近又怕輸型": 1,
+    "溫差敏感觀察者": 3,
     "低成本互動觀察家": 1,
-    "限動觀察家": 1
+    "深夜表達後悔型": 1,
+    "手機通知期待型": 1,
+    "約會後節奏觀察員": 1,
+    "間歇性溫暖感應型": 1,
+    "時差溫度觀察員": 1,
+    "追逃循環觀察員": 1,
+    "需求雷達敏感型": 1,
+    "忽冷忽熱翻譯機": 1,
+    "進退兩難偵測型": 1,
+    "節奏調整師": 1,
+    "限動雷達型": 4,
+    "上線狀態觀察員": 1,
+    "訊號落差偵探型": 1,
+    "節奏變化偵測型": 1,
+    "低成本訊號觀察員": 1,
+    "小訊號收藏家": 1,
+    "低成本互動解讀師": 1
   },
+  "share_persona_top_repeated": [
+    {
+      "persona": "限動雷達型",
+      "count": 4
+    },
+    {
+      "persona": "溫差敏感觀察者",
+      "count": 3
+    }
+  ],
   "situation_type_counts": {
     "已讀不回": 10,
     "忽冷忽熱": 10,
     "回訊變慢但看限動": 10
   },
-  "should_store_true_ids": [
-    "eval_016",
-    "eval_029"
-  ],
+  "pattern_confidence_counts": {
+    "medium": 30
+  },
+  "should_store_true_ids": [],
   "risky_language_findings": [],
-  "invalid_output_ids": [],
+  "invalid_output_ids": [
+    "eval_010",
+    "eval_012",
+    "eval_013",
+    "eval_014",
+    "eval_015",
+    "eval_017",
+    "eval_019",
+    "eval_020",
+    "eval_021",
+    "eval_022",
+    "eval_023",
+    "eval_024"
+  ],
+  "reply_strategy_format_examples_count": {
+    "complete_count": 18,
+    "total_count": 30
+  },
   "sample_summaries": [
     {
       "id": "eval_001",
@@ -99,20 +173,25 @@
       "action_pressure": "high",
       "privacy_sensitivity": "low",
       "expected_quality_focus": "temperature calibration for social activity conflict",
-      "temperature_score": 35,
-      "state_label": "降溫觀望",
-      "insight_title": "被懸在回與不回之間",
-      "insight_explanation": "讓你卡住的不是他回得慢，而是他沒有完全消失，卻也沒有穩定靠近。這種模糊狀態會讓人開始反覆思考每個細節。",
-      "paid_preview_copy": "重點不是他完全沒空，而是他有在社群上活動，卻暫時沒有接你的邀約。現在直接追問可能會讓壓力集中到你身上。",
+      "temperature_score": 38,
+      "state_label": "主動性下降",
+      "insight_title": "被懸在半空中的邀約",
+      "insight_explanation": "讓你卡住的不是他沒看到，而是他看到了卻暫時沒有回應。這種「有能力但選擇不立即處理」的狀況，會讓人開始猜測自己在對方心中的優先順序。",
+      "paid_preview_copy": "避免踩到地雷，用對方式測試溫度。解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
         "怎麼測對方投入度但不把自己放低"
       ],
-      "share_card_persona": "微訊號觀察家",
-      "share_card_sentence": "你不是想太多，只是你太會看見細節。",
+      "share_card_persona": "邀約懸空觀察家",
+      "share_card_sentence": "你看見的不是拒絕，而是對方暫時的猶豫。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "如果你確定想推進，可以用更具體但低壓的方式重新提起。可以這樣回：「我想到一個不錯的地方，這週或下週都行，你看看時間再跟我說。」",
+        "低壓試探": "先不要追問已讀不回，改用不需要對方立刻承諾的輕話題測試溫度。可以這樣回：「今天想到一個有趣的事想跟你分享，改天有機會再聊～」",
+        "暫時拉開": "給彼此一些空間，讓對方有機會主動回應或接觸你。可以這樣回：「最近我也挺忙的，之後有空再約吧！」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -125,19 +204,24 @@
       "privacy_sensitivity": "low",
       "expected_quality_focus": "identity-safe share card under comparison anxiety",
       "temperature_score": 35,
-      "state_label": "主動性下降",
-      "insight_title": "選擇性回覆背後的訊號",
-      "insight_explanation": "讓你卡住的不是他沒空，而是他明明有時間滑社群，卻選擇不回你。這種「選擇性忙碌」比完全消失更讓人不安，因為它暴露了優先順序。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "state_label": "低溫保留",
+      "insight_title": "選擇性回應的訊號",
+      "insight_explanation": "讓你卡住的不是他完全沒空，而是他明顯有時間處理其他互動，卻把你的訊息放著。這種對比會自然讓人開始懷疑自己在對方心中的順位。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "怎麼測投入度但不把自己放低"
       ],
       "share_card_persona": "微訊號觀察家",
       "share_card_sentence": "你不是想太多，只是你太會看見細節。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "等到明天晚上，用具體話題重新開啟對話，避開需要立即承諾的內容。可以這樣回：「今天經過那家店想到你說過想去，菜單看起來真的不錯。」",
+        "低壓試探": "用不需要對方立刻回應的輕話題測試溫度，保留雙方的彈性空間。可以這樣回：「最近天氣變化好大，記得保暖～沒急事，你忙的話之後再聊。」",
+        "暫時拉開": "先不主動聯絡，觀察對方會不會重新接觸，同時把注意力轉到其他事情上。可以這樣回：「」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -149,20 +233,25 @@
       "action_pressure": "medium",
       "privacy_sensitivity": "low",
       "expected_quality_focus": "uncertainty note quality",
-      "temperature_score": 35,
+      "temperature_score": 42,
       "state_label": "降溫觀望",
-      "insight_title": "節奏斷點的模糊感",
-      "insight_explanation": "讓你困擾的不只是他沒回，而是這個「斷點」出現得太突然。前幾天還很順，突然就卡住了，這種反差讓人很自然會開始猜測是不是哪裡出了問題。",
-      "paid_preview_copy": "已讀不回的黃金處理時間只有這幾天，解鎖後看到具體的回應策略和時機拿捏。",
+      "insight_title": "從順到卡的心理卡點",
+      "insight_explanation": "讓你困擾的不只是他沒回，而是前後落差。當互動突然從順暢變成靜默，人很自然會開始找原因，但這種尋找本身就會放大不確定感。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
         "怎麼測對方投入度但不把自己放低"
       ],
-      "share_card_persona": "訊號變化敏感型",
-      "share_card_sentence": "你感受到的不是拒絕，而是節奏裡的小小斷層。",
+      "share_card_persona": "節奏落差敏感型",
+      "share_card_sentence": "你敏感的不是沒回覆，而是那個突然改變的節奏。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "直接但不失溫度地重新開啟話題，展現你不會因為一次沒回就變得小心翼翼。可以這樣回：「剛剛想到一個有趣的事～那天你提到的那家店我今天路過，真的很多人排隊呢。」",
+        "低壓試探": "用不需要立即回覆的輕話題測試對方現在的互動意願，保留彼此的舒適空間。可以這樣回：「不急著回～只是看到這個想到你會覺得有趣。」然後分享一個輕鬆內容。",
+        "暫時拉開": "暫停主動聯繫，讓對方有機會主動回歸，同時觀察他是否會在其他地方有互動訊號。可以這樣回：「了解你最近比較忙，我先不打擾，有空再聊。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -174,20 +263,25 @@
       "action_pressure": "high",
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "temperature spread versus recent warmth",
-      "temperature_score": 42,
-      "state_label": "降溫觀望",
-      "insight_title": "投入度不對等的節奏卡點",
-      "insight_explanation": "有些人習慣在安全距離下主動，但當對方同等回應時，反而會本能地後退一步。這不是拒絕，而是重新校準距離的反應。",
+      "temperature_score": 52,
+      "state_label": "投入後急降溫",
+      "insight_title": "投入節奏的微妙平衡",
+      "insight_explanation": "當你開始認真回應時，對方突然安靜，這創造了一種「我越投入，對方越退開」的感覺。真正讓人卡住的，不是對方沒回，而是這種節奏不對等的感覺。",
       "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
         "怎麼測對方投入度但不把自己放低"
       ],
-      "share_card_persona": "節奏敏感觀察者",
-      "share_card_sentence": "你沒有做錯什麼，只是踩到了互動節奏的微妙點。",
+      "share_card_persona": "節奏敏感觀察員",
+      "share_card_sentence": "你感覺到的不是拒絕，而是節奏突然不對拍了。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "輕鬆帶過已讀不回這件事，繼續延續之前的話題但降低投入感。可以這樣回：「哈哈我知道你在忙～那個地方我查了一下，確實蠻有趣的，不過不急啦。」",
+        "低壓試探": "用不需要立刻回覆的輕話題測試對方現在的回應意願。可以這樣回：「剛剛看到一個有趣的東西想到你，先丟給你看～沒事不用特別回。」",
+        "暫時拉開": "給對方一點空間，同時保持自己的節奏不被對方的沉默影響。可以這樣回：「我先去忙其他事情，有空再聊～」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -199,20 +293,25 @@
       "action_pressure": "high",
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "paid preview action value",
-      "temperature_score": 25,
-      "state_label": "降溫觀望",
-      "insight_title": "被自己的問題卡住",
-      "insight_explanation": "當你直接問「是不是不想聊」，其實是把選擇權交給對方，但也同時暴露了你的不安。現在的沉默讓你更焦慮，因為你等的不只是回覆，而是一個關於關係位置的答案。",
-      "paid_preview_copy": "直接試探後的沉默最難處理，解鎖後你會知道：現在最不該做的一件事、三種不失控回法，以及怎麼化解已讀不回的尷尬。",
+      "temperature_score": 35,
+      "state_label": "低溫迴避",
+      "insight_title": "直接試探的反彈效應",
+      "insight_explanation": "當你直接問「是不是不想聊」，對方如果本來就在猶豫，這個問題會讓他感受到壓力。不回覆比回覆「是」或「不是」都來得安全，因為不回覆還能保留模糊空間。",
+      "paid_preview_copy": "解鎖後你會看到：為什麼直接追問會讓對方更想逃、三種不把自己放低的回應方式，以及怎麼重新建立輕鬆的互動氣氛。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
-        "怎麼化解已讀不回的尷尬"
+        "怎麼重新建立輕鬆感"
       ],
-      "share_card_persona": "直接試探型",
-      "share_card_sentence": "有些問題問出口，答案就在沉默裡。",
+      "share_card_persona": "直接試探偵測型",
+      "share_card_sentence": "你問得太清楚，反而讓對方不知道怎麼回。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "用輕話題重新開始，忽略之前的試探。可以這樣回：「剛剛看到一個很蠢的梗圖，突然想到你會覺得好笑。」",
+        "低壓試探": "承認自己問得太直接，給對方台階下。可以這樣回：「我剛剛問得太直接了，沒事～你忙你的就好。」",
+        "暫時拉開": "先停止主動聯繫，讓氣氛冷卻一下。可以這樣回：「好啦我先去忙別的事，有空再聊～」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -224,20 +323,25 @@
       "action_pressure": "high",
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "reply strategy tone without humiliation",
-      "temperature_score": 32,
+      "temperature_score": 42,
       "state_label": "降溫觀望",
-      "insight_title": "卡在模糊地帶的焦慮感",
-      "insight_explanation": "讓你卡住的不是他沒回覆，而是他看了卻沒有明確表態。這種模糊狀態會讓人開始猜測，因為你既看不到明確拒絕，也得不到肯定回應。",
+      "insight_title": "卡在中間的邀約焦慮",
+      "insight_explanation": "真正讓你卡住的不是他沒回覆，而是你現在不知道該主動還是該等。這種「想靠近又怕太明顯」的感覺，會讓人開始過度解讀每個細節。",
       "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
         "怎麼測對方投入度但不把自己放低"
       ],
-      "share_card_persona": "已讀偵探型",
-      "share_card_sentence": "你看見的不是答案，而是節奏的變化。",
+      "share_card_persona": "想靠近又怕輸型",
+      "share_card_sentence": "你害怕的不是被拒絕，而是讓對方覺得你太需要答案。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "直接但輕鬆地給對方台階下，讓他知道你沒有在給壓力。可以這樣回：「看展的事不急啦，你想想就好～最近工作應該也滿忙的吧？」",
+        "低壓試探": "用不相關的輕話題測試對方回訊意願，觀察互動溫度再決定下一步。可以這樣回：「剛剛經過那條街，想到你說過喜歡那家咖啡店的氛圍。」",
+        "暫時拉開": "保持友善但不主動，讓對方有空間主動回應之前的邀約，避免自己顯得太急。可以這樣回：「這幾天突然變忙了，等比較有空再聊～」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -250,19 +354,24 @@
       "privacy_sensitivity": "low",
       "expected_quality_focus": "state label usefulness",
       "temperature_score": 35,
-      "state_label": "降溫保留",
-      "insight_title": "溫度落差的真正訊號",
-      "insight_explanation": "讓你不安的不是他晚回，而是回來之後那種明顯的距離感。當一個人的回覆模式突然改變，通常代表他對這段互動的投入度正在調整。",
-      "paid_preview_copy": "他的回覆模式改變了，你的回應方式也要跟著調整。解鎖後看到具體的回覆策略和最該避免的地雷。",
+      "state_label": "溫度明顯降低",
+      "insight_title": "溫差感應",
+      "insight_explanation": "讓你不安的不是他晚回，而是你感覺到他回覆的溫度跟以前不一樣了。當熟悉的互動模式突然改變，人很自然會察覺到這種微妙的溫差。",
+      "paid_preview_copy": "溫度變低可能是暫時的，但下一句回錯可能讓距離越拉越遠。解鎖後看到具體的回覆策略和測試方法。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
-        "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "三種溫度回升策略",
+        "怎麼測試對方狀態但不顯得追問"
       ],
-      "share_card_persona": "溫差觀察員",
-      "share_card_sentence": "你感受到的不是拒絕，而是節奏的改變。",
+      "share_card_persona": "溫差敏感觀察者",
+      "share_card_sentence": "你察覺到的不只是晚回，而是回來的溫度不一樣了。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "用溫暖但不施壓的方式保持原有溫度，看他是否會回到正常節奏。可以這樣回：「辛苦了～那你今天有比較好一點嗎？」",
+        "低壓試探": "用輕鬆話題測試他現在的互動意願，不直接處理溫度問題。可以這樣回：「嗯嗯理解～我今天也覺得特別累，可能天氣的關係。」",
+        "暫時拉開": "給他一些空間，但保持友善，避免讓關係變得尷尬。可以這樣回：「好好休息～有空再聊。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -274,20 +383,25 @@
       "action_pressure": "medium",
       "privacy_sensitivity": "low",
       "expected_quality_focus": "low-cost interaction signal handling",
-      "temperature_score": 35,
+      "temperature_score": 45,
       "state_label": "低溫保留",
-      "insight_title": "訊號不對等的卡住感",
-      "insight_explanation": "讓你卡住的不是他完全不理你，而是他用最低成本的方式維持存在感，卻避開需要投入的對話。這種不對等讓你很難決定下一步。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "insight_title": "選擇性回應的曖昧地帶",
+      "insight_explanation": "讓你困擾的不是他完全不理你，而是他用最低成本的方式維持存在感。表情回覆不需要承諾，也不會產生後續對話壓力，但又能讓你知道他還在關注。",
+      "paid_preview_copy": "解鎖後你會看到：為什麼直接追問會讓壓力集中到你身上、三種測試他投入度的方式，以及如何回應才不會把自己的位置放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
-        "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "三種測試投入度的方式",
+        "怎麼回應不把自己放低"
       ],
-      "share_card_persona": "微訊號觀察家",
-      "share_card_sentence": "你不是想太多，只是你太會看見細節。",
+      "share_card_persona": "低成本互動觀察家",
+      "share_card_sentence": "你看見的不是冷淡，而是他選擇用最安全的方式留在你身邊。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "用輕鬆話題重新建立對話節奏，降低他的回覆門檻。可以這樣回：「剛剛看到一個超好笑的東西，想到你會喜歡。」",
+        "低壓試探": "先回應他的表情，再自然帶入輕話題測試他的互動意願。可以這樣回：「哈哈你這個表情很可愛～對了，那天說的那家店我去了，還不錯。」",
+        "暫時拉開": "降低你的主動頻率，讓他有機會想念你的存在。可以這樣回：「最近比較忙，但看到你的回覆會笑～有空再聊。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -299,20 +413,25 @@
       "action_pressure": "medium",
       "privacy_sensitivity": "high",
       "expected_quality_focus": "personal pattern conservatism",
-      "temperature_score": 32,
-      "state_label": "降溫觀望",
-      "insight_title": "當表達遇到沉默",
-      "insight_explanation": "真正讓人不安的，不是對方沒看到你的訊息，而是他看到了卻選擇暫時不回應。這種空白會讓人開始懷疑：是不是自己說得太多、太直接、太需要了？",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及如何讓對方有臺階回應你的表達。",
+      "temperature_score": 35,
+      "state_label": "主動性懸掛中",
+      "insight_title": "表達後的空白期",
+      "insight_explanation": "當你主動表達想見面的心意後，對方的沉默會讓這份表達顯得格外突出。你開始想收回訊息，其實是在保護自己不要顯得太需要對方。",
+      "paid_preview_copy": "深夜長訊息已讀不回最容易讓人想做錯事。解鎖後你會知道：現在最不該做的一件事、三種不失控回法，以及怎麼測對方反應但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
-        "如何讓對方有臺階回應"
+        "怎麼測對方反應但不把自己放低"
       ],
-      "share_card_persona": "深夜表達型",
-      "share_card_sentence": "有些話說出口後，沉默比回應更大聲。",
+      "share_card_persona": "深夜表達後悔型",
+      "share_card_sentence": "有些話說出口後，沉默比拒絕更讓人想逃。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "如果你覺得你們平常互動還不錯，可以用輕鬆的方式再試一次。可以這樣回：「昨天半夜傳那麼長應該嚇到你了哈哈，不過我說的是真的～」",
+        "低壓試探": "先不要追問昨晚的訊息，改用不需要對方立刻承諾的話題測試溫度。可以這樣回：「我先不催你回昨天的～只是剛剛看到一家店想到你，之後有空再說。」",
+        "暫時拉開": "給彼此一點空間，等他主動回應或等更自然的時機再聯繫。可以這樣回：「昨天可能說得太突然了，你慢慢想沒關係。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -324,23 +443,29 @@
       "action_pressure": "low",
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "insight resonance without textbook tone",
-      "temperature_score": 25,
-      "state_label": "冷處理觀望",
-      "insight_title": "沉默中的期待循環",
-      "insight_explanation": "當對方突然沉默，你一邊告訴自己不要太在意，一邊又忍不住每次手機響都期待是他。這種「表面平靜，內心等待」的狀態，其實比直接被拒絕更消耗心力。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種破冰方式比較，以及怎麼測試對方的回應意願但不讓自己顯得急躁。",
+      "temperature_score": 35,
+      "state_label": "已讀後暫停",
+      "insight_title": "等待中的矛盾",
+      "insight_explanation": "最難熬的不是被直接拒絕，而是在「他看見了」和「他沒回應」之間的空白地帶。你一邊維持日常，一邊卻在每個通知響起時產生期待。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種打破沉默的方式，以及怎麼測試對方回應意願但不顯得急躁。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
-        "三種破冰方式比較",
-        "怎麼測試但不顯得急躁",
-        "如果他繼續沉默該如何調整心態"
+        "三種打破沉默的方式",
+        "怎麼測試對方回應意願但不顯得急躁"
       ],
-      "share_card_persona": "沉默期待型",
-      "share_card_sentence": "你不是想太多，只是在沉默裡聽見了自己的期待聲音。",
+      "share_card_persona": "手機通知期待型",
+      "share_card_sentence": "你不是太敏感，只是在等一個可能不會來的回音。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "等待一段時間後，用輕鬆話題重新開啟對話，不提及之前的沉默。可以這樣回：「最近看到一個有趣的東西，想到你可能會喜歡。」",
+        "低壓試探": "用不需要對方立即回應的方式測試溫度，給對方台階下。可以這樣回：「沒關係，我知道大家都很忙～有空再聊。」",
+        "暫時拉開": "先專注於自己的生活，讓對方有主動聯繫的空間。暫時不主動傳訊息，但保持正常的社交活動。"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_011",
@@ -350,21 +475,25 @@
       "action_pressure": "high",
       "privacy_sensitivity": "low",
       "expected_quality_focus": "temperature lift for recent warmth",
-      "temperature_score": 52,
-      "state_label": "深夜熱聊白天降溫",
-      "insight_title": "深夜親密白天疏離現象",
-      "insight_explanation": "很多人在深夜時情感防線會降低，更容易表達親近感。但白天回到日常節奏時，可能會自然地調整回比較中性的互動模式。這種溫差不一定代表後悔或冷淡，更像是不同時段的不同人格面向。",
-      "paid_preview_copy": "深夜熱聊白天冷回應是常見現象，但你的下一步回應會決定這個溫差是暫時的還是變成固定模式。",
+      "temperature_score": 58,
+      "state_label": "忽冷忽熱",
+      "insight_title": "深夜親密感的白天冷卻",
+      "insight_explanation": "很多人在深夜時情感比較開放，容易展現親密的一面，但到了白天理性回歸時，會自然地調節回比較保守的互動模式。這不一定代表昨晚是假的，而是他現在需要一些空間來平衡。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
-        "三種不破壞氛圍回法",
-        "怎麼測試對方白天也想保持熱度",
-        "如何延續深夜親密感到日常"
+        "三種不失控回法",
+        "怎麼測對方投入度但不把自己放低"
       ],
-      "share_card_persona": "溫差敏感觀察家",
-      "share_card_sentence": "你看見的不是變心，而是時間帶來的不同面貌。",
+      "share_card_persona": "溫差敏感觀察者",
+      "share_card_sentence": "有些曖昧不是沒訊號，是訊號太小聲。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "保持昨晚開玩笑的輕鬆感，但不強求同等熱度。可以這樣回：「哈哈你今天是走簡約風嗎？昨天聊到那麼晚，今天應該也累了吧。」",
+        "低壓試探": "用不需要他大量回應的方式測試溫度，讓他有選擇空間。可以這樣回：「今天感覺你比較忙～我也先去忙我的事，有空再聊。」",
+        "暫時拉開": "給他空間消化，同時保持自己的節奏不被影響。可以這樣回：「嗯嗯，我也要去忙了，晚點再說。」然後暫時不主動聯絡。"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -376,23 +505,30 @@
       "action_pressure": "high",
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "post-date interpretation tone",
-      "temperature_score": 52,
-      "state_label": "忽冷忽熱",
+      "temperature_score": 58,
+      "state_label": "降溫觀望",
       "insight_title": "約會後的溫度落差",
-      "insight_explanation": "讓你困擾的不是約會不順利，而是那個從熱絡到平淡的轉換。當現實和期待之間出現落差時，人很自然會開始懷疑自己的判斷。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "insight_explanation": "當面互動很順利，但隔天開始降溫，這種落差讓你開始懷疑約會的感受是否只是表面。其實，很多人在親密互動後會需要一點空間來消化和思考，這不一定代表約會失敗。",
+      "paid_preview_copy": "解鎖後你會看到：約會後降溫的三種可能、現在最不該做的事，以及三種不失控回法。",
       "paid_preview_sections": [
-        "現在最不該做的一件事",
+        "約會後降溫的三種可能",
+        "現在最不該做的事",
         "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低",
-        "這種忽冷忽熱背後的可能原因"
+        "怎麼測試對方狀態但保留餘地"
       ],
-      "share_card_persona": "溫差觀察員",
-      "share_card_sentence": "你看見的不是答案，而是節奏的變化。",
+      "share_card_persona": "約會後節奏觀察員",
+      "share_card_sentence": "有些溫度需要時間慢慢顯影，不是每個人都會在約會後立刻加溫。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "自然延續約會話題：保持輕鬆但有意義的互動，例如「昨天那家店的甜點真的不錯，下次想試試他們的其他口味」，讓對方知道你也有正向感受。",
+        "低壓試探": "溫和測試回應度：用不需要立即回覆的訊息測試，例如「最近工作還順嗎？我這邊有點忙但還好～」觀察對方是否會延伸話題或只是簡單回應。",
+        "暫時拉開": "給彼此空間消化：暫時降低訊息頻率，讓對方有時間思考，同時觀察他是否會主動找話題。可以簡單回應但不主動開啟新話題幾天。"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_013",
@@ -402,22 +538,29 @@
       "action_pressure": "medium",
       "privacy_sensitivity": "low",
       "expected_quality_focus": "state label diversity under cyclical pattern",
-      "temperature_score": 52,
-      "state_label": "忽冷忽熱",
-      "insight_title": "間歇性關注的迷惑",
-      "insight_explanation": "最累人的不是被拒絕，而是那種時有時無的關注。他給的溫度剛好讓你無法放棄，卻也不足以讓你安心。你被困在「也許他是真的忙」和「為什麼又消失了」之間。",
-      "paid_preview_copy": "解鎖後你會看到：怎麼打破被動等待循環、三種測試對方投入度的方式，以及什麼時候該主動喊停。",
+      "temperature_score": 62,
+      "state_label": "忽冷忽熱循環",
+      "insight_title": "間歇性增強效應",
+      "insight_explanation": "最讓人上癮的不是穩定的甜，而是不知道什麼時候會來的甜。他無意間用了最容易讓人掛念的模式：給你剛好夠的溫暖，讓你捨不得放手，但又不夠穩定讓你安心。",
+      "paid_preview_copy": "解鎖後你會看到：怎麼打破被動等待循環、三種回應策略不讓自己更累，以及如何測試他的穩定投入度。",
       "paid_preview_sections": [
         "怎麼打破被動等待循環",
-        "三種測試對方投入度的方式",
-        "什麼時候該主動喊停"
+        "三種回應策略不讓自己更累",
+        "如何測試他的穩定投入度"
       ],
-      "share_card_persona": "溫差敏感觀察員",
-      "share_card_sentence": "你感受到的不是錯覺，而是那個人給的溫度本來就不穩定。",
+      "share_card_persona": "間歇性溫暖感應型",
+      "share_card_sentence": "你感受到的不是混亂，而是一種精準計算過的不安全感。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "直接設定期待：「我覺得我們聊得不錯，但我需要比較穩定的互動節奏。如果你也有興趣，我們可以試著固定一點？」",
+        "低壓試探": "調整回應溫度：他熱的時候你溫和，他冷的時候你也保持淡定。可以說：「好啊，最近還好嗎？」保持友善但不急切。",
+        "暫時拉開": "設定自己的界線：「我最近比較忙，有空再聊。」讓他知道你不會一直等在那裡，看他是否會調整自己的投入度。"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_014",
@@ -427,23 +570,29 @@
       "action_pressure": "medium",
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "insight layer subtlety",
-      "temperature_score": 55,
-      "state_label": "夜晚升溫白天降溫",
-      "insight_title": "夜晚勇敢，白天理智",
-      "insight_explanation": "有些人在夜晚會暫時放下防備，說出白天不敢說的話。但當陽光出現，理性重新上線，他們又會回到安全距離。你感受到的不是他在玩弄，而是他內心對靠近和保持距離的拉扯。",
-      "paid_preview_copy": "這種「時差型曖昧」最容易讓人搞不清楚該用什麼態度回應。解鎖後看到完整應對策略。",
+      "temperature_score": 62,
+      "state_label": "夜晚加溫白天降溫",
+      "insight_title": "夜晚與白天的兩個版本",
+      "insight_explanation": "真正讓你困惑的，不是他喜不喜歡你，而是他同時展現了兩種截然不同的互動模式。夜深時的曖昧和白天的疏離，讓你不知道該相信哪個版本才是他對你的想法。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種回應夜晚訊息的方法，以及怎麼測試他的白天投入度但不讓自己顯得太主動。",
       "paid_preview_sections": [
-        "為什麼他只在夜晚靠近",
-        "白天該不該提昨晚的話",
-        "三種不尷尬的接話方式",
-        "怎麼測試他的一致性"
+        "現在最不該做的一件事",
+        "三種回應夜晚訊息的方法",
+        "怎麼測試他的白天投入度"
       ],
-      "share_card_persona": "時差曖昧觀察家",
-      "share_card_sentence": "有些人的心意藏在夜晚，理智藏在白天。",
+      "share_card_persona": "時差溫度觀察員",
+      "share_card_sentence": "有些人的溫暖有營業時間，你不是想太多，是真的有溫差。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "下次他半夜傳曖昧訊息時，可以溫暖回應但同時測試延續性。例如：「我也想你～明天有空的話我們聊聊？」這樣能看出他願不願意把夜晚的親近帶到白天。",
+        "低壓試探": "保持對夜晚訊息的回應，但不要完全配合他的節奏。可以這樣回：「你夜晚總是特別會說話呢，我滿喜歡這樣的你。」既認可了他的表達，也暗示你注意到了模式。",
+        "暫時拉開": "如果這種忽冷忽熱讓你太累，可以稍微平淡回應夜晚訊息：「謝謝你跟我說，晚安。」保持禮貌但不過度投入情緒，看看他會不會主動調整。"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_015",
@@ -453,22 +602,29 @@
       "action_pressure": "high",
       "privacy_sensitivity": "low",
       "expected_quality_focus": "paid CTA relevance under action pressure",
-      "temperature_score": 52,
-      "state_label": "線上熱線下冷",
-      "insight_title": "線上親密與實體距離的落差",
-      "insight_explanation": "有些人很習慣在聊天裡建立親密感，但面對實體接觸時會自然退縮。你感受到的不是他不喜歡你，而是他可能更習慣在安全的線上空間表達關心。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種推進見面的自然方法，以及怎麼測試他的實體互動意願但不把自己放低。",
+      "temperature_score": 58,
+      "state_label": "聊天熱，行動冷",
+      "insight_title": "聊天熱度與行動溫差",
+      "insight_explanation": "讓你困惑的不是他不理你，而是他明明很會聊，卻在實際行動上踩煞車。這種溫差會讓人開始質疑對話裡的溫度到底算不算數。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種推進見面的不失控方式，以及怎麼測試他的行動意願但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
-        "三種推進見面的自然方法",
-        "怎麼測試他的實體互動意願但不把自己放低"
+        "三種推進見面的不失控方式",
+        "怎麼測試他的行動意願但不把自己放低"
       ],
-      "share_card_persona": "數位親密觀察員",
-      "share_card_sentence": "有些熱度只在螢幕裡發光，你想知道的是它能不能照亮現實。",
+      "share_card_persona": "溫差敏感觀察者",
+      "share_card_sentence": "你感覺到的不是假象，而是兩種不同溫度的共存。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "給他一個低壓但具體的選擇：不要問「要不要見面」，而是分享你要做的事，讓他自然加入。可以這樣說：「我週末要去那個新開的咖啡廳，聽說蛋糕不錯～如果你剛好有空可以一起。」",
+        "低壓試探": "先測試他對實體活動的反應，不用馬上約見面。可以聊一些實體相關的話題，例如：「你平常週末都做什麼？我最近想找新的放鬆方式。」觀察他會不會主動提到一起做什麼。",
+        "暫時拉開": "暫時不主動提見面，專注在聊天品質上。如果他習慣你會提見面，突然不提了，他可能會開始想念這個選項。同時觀察他會不會開始主動提起實體互動。"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_016",
@@ -478,20 +634,25 @@
       "action_pressure": "high",
       "privacy_sensitivity": "low",
       "expected_quality_focus": "non-manipulative reply strategies",
-      "temperature_score": 52,
-      "state_label": "拉扯循環",
-      "insight_title": "拉扯節奏裡的心理距離",
-      "insight_explanation": "當兩個人都在用進退來測試關係的安全距離時，很容易形成這種拉扯循環。你退他進，你進他退，表面上像是遊戲，實際上可能是雙方都還沒找到舒適的互動距離。",
-      "paid_preview_copy": "解鎖後你會看到：打破拉扯循環的三個方法、如何不被對方節奏帶著走，以及保持自己步調的回應策略。",
+      "temperature_score": 58,
+      "state_label": "忽冷忽熱",
+      "insight_title": "追逐與逃避的循環",
+      "insight_explanation": "當一個人追近時另一個人退開，當那個人停下時原本退開的人又靠近。你們陷入了一種無意識的平衡遊戲，每個人都在對方的行動中找安全感。",
+      "paid_preview_copy": "解鎖後你會看到：打破追逃循環的關鍵時機、三種穩住自己節奏的回法，以及怎麼讓他不敢輕易進退。",
       "paid_preview_sections": [
-        "打破拉扯循環的三個方法",
-        "如何不被對方節奏帶著走",
-        "保持自己步調的回應策略"
+        "打破追逃循環的關鍵時機",
+        "三種穩住自己節奏的回法",
+        "怎麼讓他不敢輕易進退"
       ],
-      "share_card_persona": "進退節奏觀察家",
-      "share_card_sentence": "你感受到的不是冷漠，而是一種小心翼翼的距離探索。",
+      "share_card_persona": "追逃循環觀察員",
+      "share_card_sentence": "你看見的不是他的心意，而是兩個人都在對方的節奏裡找平衡。",
       "pattern_confidence": "medium",
-      "should_store": true,
+      "should_store": false,
+      "reply_strategies": {
+        "主動推進": "穩定回應但不配合他的節奏：不管他是進是退，你都保持一致的溫度和回應方式。可以這樣回：「你找我我就正常聊，不會因為你之前退開就特別冷淡或熱情。」",
+        "低壓試探": "溫和設定界線：讓他知道你注意到了這個模式，但用不指責的方式提出。可以這樣回：「我發現我們的聊天節奏有點像在跳舞，要不要試試看都放輕鬆一點？」",
+        "暫時拉開": "打破循環重新開始：暫停配合他的節奏，讓雙方都有空間重新思考這段互動。可以這樣回：「我想我們都需要一點時間想清楚自己要什麼，我先忙一陣子。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -503,22 +664,30 @@
       "action_pressure": "medium",
       "privacy_sensitivity": "high",
       "expected_quality_focus": "avoid humiliating or toxic language",
-      "temperature_score": 52,
-      "state_label": "忽冷忽熱",
-      "insight_title": "空檔陪伴的兩面性",
-      "insight_explanation": "當一個人只在有空時才想起你，這確實會讓人懷疑自己的位置。但有些人就是這樣區分「專心模式」和「社交模式」，不一定代表你不重要。關鍵是這種模式讓你感覺不穩定，而你需要的可能是更一致的關注。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種測試對方投入度的方法，以及怎麼建立更穩定的互動節奏而不顯得太需要。",
+      "temperature_score": 58,
+      "state_label": "依賴性溫差",
+      "insight_title": "被需要的溫暖與被忽略的落差",
+      "insight_explanation": "最讓人困惑的不是被冷淡對待，而是體驗過被需要的感覺後，又突然變成空氣。這種溫差會讓你開始懷疑：到底哪個才是他對你的態度？",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種測試你地位的方法，以及怎麼不被他的節奏綁架。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
-        "三種測試對方投入度的方法",
-        "怎麼建立更穩定的互動節奏"
+        "三種測試你地位的方法",
+        "怎麼不被他的節奏綁架"
       ],
-      "share_card_persona": "優先順序觀察家",
-      "share_card_sentence": "你看見的不是他不在乎，而是你在他心中的位置還在浮動。",
+      "share_card_persona": "需求雷達敏感型",
+      "share_card_sentence": "你感受到的不是冷漠，而是他只在需要時才想起你的溫度。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "在他不忙的時候主動開話題，測試他是否會回應你發起的對話。可以說：「最近想到一個有趣的事，你應該會有想法。」看他的回應熱度。",
+        "低壓試探": "下次他找你聊天時，不要立刻全程陪伴，中間可以說：「我等等要忙一下，晚點再聊。」觀察他的反應和是否會等你。",
+        "暫時拉開": "建立自己的節奏，不要完全配合他的時間。可以回：「我現在也在忙，有空再聊～」讓他體驗一下不確定感。"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "personal pattern diagnostic risk",
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_018",
@@ -528,20 +697,25 @@
       "action_pressure": "medium",
       "privacy_sensitivity": "low",
       "expected_quality_focus": "signal explanation clarity",
-      "temperature_score": 52,
+      "temperature_score": 58,
       "state_label": "忽冷忽熱",
-      "insight_title": "不規律的回應節奏",
-      "insight_explanation": "當對方的回覆方式起伏很大時，你自然會開始尋找規律，試圖預測下一次互動。但這種不確定感本身，就是讓人覺得疲累的原因。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種穩住自己節奏的回法，以及怎麼測試對方投入度但不踩雷。",
+      "insight_title": "節奏不穩定的互動壓力",
+      "insight_explanation": "讓你卡住的不是他偶爾回得短，而是你無法預測他下一次會用什麼態度回你。這種不可預測性會讓人開始小心翼翼，因為你不知道哪一句話會遇到他的冷淡期。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不踩雷回法，以及怎麼測試他的回應模式但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
-        "三種穩住自己節奏的回法",
-        "怎麼測試對方投入度但不踩雷"
+        "三種不踩雷回法",
+        "怎麼測試他的回應模式但不把自己放低"
       ],
-      "share_card_persona": "溫差觀察員",
-      "share_card_sentence": "你感受到的不是情緒，而是節奏的不確定。",
+      "share_card_persona": "忽冷忽熱翻譯機",
+      "share_card_sentence": "你感受到的不是拒絕，而是節奏還沒對上頻。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "保持自己的回覆節奏，不被他的變化帶著走。當他回得短時，你還是可以正常分享或延續話題。可以這樣回：「哈哈好～對了我今天遇到一個有趣的事，跟你說一下。」",
+        "低壓試探": "用輕鬆的方式測試他現在的回應狀態，不直接挑戰他的忽冷忽熱。可以這樣回：「你今天是簡潔派嗎？沒關係我先講完這個故事，你聽就好。」",
+        "暫時拉開": "給他一點空間，同時保持自己的尊嚴和節奏。不需要立刻回應他的每個變化。可以這樣回：「收到～我去忙一下，晚點聊。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -553,22 +727,30 @@
       "action_pressure": "high",
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "paid preview action-worthiness",
-      "temperature_score": 52,
-      "state_label": "忽冷忽熱",
-      "insight_title": "拉扯型互動",
-      "insight_explanation": "讓你焦慮的不是他的冷熱，而是你感覺到他在測試距離，而你也在回測。這種互動會讓雙方都處在試探狀態，很難找到舒服的節奏。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "temperature_score": 58,
+      "state_label": "忽冷忽熱循環",
+      "insight_title": "卡在進退兩難的互動循環",
+      "insight_explanation": "最讓人焦慮的不是明確的拒絕或接受，而是這種永遠在中間地帶的模糊感。你現在面對的是一個會自動調節距離的互動模式：當你後退，他靠近一點；當你前進，他退後一點。這讓你一直處在「好像有希望但又不確定」的狀態。",
+      "paid_preview_copy": "解鎖後你會看到：為什麼他會維持這種模式、現在最不該做的一件事，以及三種跳出循環的方法。",
       "paid_preview_sections": [
+        "為什麼他會維持這種模式",
         "現在最不該做的一件事",
-        "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "三種跳出循環的方法",
+        "怎麼測試他的底線但不失控"
       ],
-      "share_card_persona": "拉扯觀察型",
-      "share_card_sentence": "你看見的不是矛盾，而是兩個人都在小心翼翼地測試距離。",
+      "share_card_persona": "進退兩難偵測型",
+      "share_card_sentence": "你感受到的不是溫度變化，是距離的精密控制。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "溫和但明確地表達你的感受：「我發現我們聊天的節奏有點不穩定，我其實蠻喜歡和你聊天的。你覺得我們現在是什麼樣的關係？」直接但不逼迫地讓對方表態。",
+        "低壓試探": "改變你的回覆模式，不要每次都很認真回應：「哈哈你又出現了～」用輕鬆的語調回應他的主動，測試他是否真的只是怕關係太認真。",
+        "暫時拉開": "主動打破這個循環：「最近有點忙，晚點再聊！」暫時不配合他的節奏，觀察他是否會因為失去你的穩定回應而改變態度。"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_020",
@@ -579,22 +761,28 @@
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "share-card identity safety under mixed signals",
       "temperature_score": 52,
-      "state_label": "溫度不穩",
-      "insight_title": "被不穩定溫度懸掛的感受",
-      "insight_explanation": "最讓人困擾的不是完全的冷淡，而是那種有溫度但不穩定的狀態。你無法放棄，因為還有互動；也無法放鬆，因為溫度會變。這種狀況下，想要「做自己」變得很難，因為你不確定哪個版本的自己是安全的。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的試探、三階段測試對方主動性，以及保留退路的降頻技巧。",
+      "state_label": "忽冷忽熱",
+      "insight_title": "節奏不對等的拉扯感",
+      "insight_explanation": "當你需要刻意「少回一點」時，代表你們的互動節奏已經不對等了。真正讓人卡住的不是他的溫度問題，而是你必須時時計算回覆策略，無法自然做自己。",
+      "paid_preview_copy": "解鎖後你會看到：為什麼刻意少回通常沒用、怎麼保持自然回覆節奏，以及測試投入度的低壓方法。",
       "paid_preview_sections": [
-        "現在最不該做的試探",
-        "三階段測試對方主動性",
-        "保留退路的降頻技巧",
-        "如何在不確定中保持自在"
+        "為什麼「少回一點」通常沒用",
+        "三種保持自然的回覆節奏",
+        "怎麼測試他的投入度但不失控"
       ],
-      "share_card_persona": "溫差敏感觀察者",
-      "share_card_sentence": "你感受到的忽冷忽熱不是想像，而是那份不穩定確實讓人難以自在。",
+      "share_card_persona": "節奏調整師",
+      "share_card_sentence": "你需要的不是更多策略，而是可以自然做自己的關係。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "保持你原來的回覆節奏，但在內容上稍微降低期待：「我覺得我們的聊天節奏好像不太一樣，不過我還是喜歡跟你聊天。」",
+        "低壓試探": "用不需要他立刻升溫的方式測試投入度：「最近感覺你比較忙？我先不打擾，想聊的時候再找我。」",
+        "暫時拉開": "自然地把注意力轉向其他事情，不刻意冷淡但也不主動維持：「我最近也蠻忙的，先做自己的事，有空再聊。」"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_021",
@@ -606,20 +794,27 @@
       "expected_quality_focus": "temperature calibration for passive attention",
       "temperature_score": 52,
       "state_label": "低溫保留",
-      "insight_title": "被卡在中間地帶的感覺",
-      "insight_explanation": "讓你困惑的不是他完全消失，而是他用一種「還在，但不太在」的方式存在。看限動是最低成本的關注方式，不用回應，也不用承擔對話壓力，但確實代表你還在他的關注範圍內。",
-      "paid_preview_copy": "解鎖後你會看到：怎麼分辨他是真的關注還是只是習慣，三種不失控測試他投入度的方式，以及現在最容易搞砸的一個動作。",
+      "insight_title": "低成本關注的模糊地帶",
+      "insight_explanation": "讓你卡住的不是他回得慢，而是他沒有完全消失，卻也沒有穩定靠近。看限動是一種幾乎零壓力的互動方式，既能保持關注，又不用承擔回覆的責任。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
       "paid_preview_sections": [
-        "怎麼判斷是關注還是習慣",
-        "三種測試投入度的方式",
-        "現在最不該做的一件事"
+        "現在最不該做的一件事",
+        "三種不失控回法",
+        "怎麼測對方投入度但不把自己放低"
       ],
-      "share_card_persona": "微訊號觀察家",
+      "share_card_persona": "限動雷達型",
       "share_card_sentence": "你看見的不是答案，而是節奏的變化。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "用輕鬆話題重新啟動對話，不提回覆速度的事。可以這樣說：「剛剛看到一個超好笑的東西，想到你應該會喜歡」然後分享有趣內容。",
+        "低壓試探": "用不需要立刻回應的方式測試溫度，比如分享日常但不問問題。可以說：「今天去了那家店，果然跟你說的一樣好吃～」",
+        "暫時拉開": "降低發訊息頻率，讓對方有機會主動。專注自己的生活，發一些精彩限動但不特別針對他，看他會不會重新靠近。"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_022",
@@ -629,22 +824,29 @@
       "action_pressure": "medium",
       "privacy_sensitivity": "low",
       "expected_quality_focus": "observed signal specificity",
-      "temperature_score": 35,
-      "state_label": "主動性下降",
-      "insight_title": "等待中的不安全感",
-      "insight_explanation": "讓你不舒服的不是他沒回訊息，而是你知道他明明看得到，卻選擇先做別的事。這種「被看見但被延後」的感覺，比完全沒收到訊息更讓人想要一直確認。",
-      "paid_preview_copy": "他在線卻不回，可能有很多原因。解鎖後你會知道：現在最容易踩的雷是什麼，以及三種既能試探又不會顯得急躁的回應方式。",
+      "temperature_score": 42,
+      "state_label": "回應節奏改變",
+      "insight_title": "當熟悉的節奏改變",
+      "insight_explanation": "讓你不安的不是他沒回，而是他的回覆節奏跟你習慣的不一樣了。當建立的互動模式突然改變，人很自然會開始找原因，也容易把注意力放在那些看得見的線索上，像是上線狀態。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測試回覆意願但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "怎麼測試回覆意願但不把自己放低"
       ],
-      "share_card_persona": "在線偵探型",
-      "share_card_sentence": "你看見的不是冷漠，而是優先順序的變化。",
+      "share_card_persona": "上線狀態觀察員",
+      "share_card_sentence": "你注意到的不是冷淡，而是節奏的微妙變化。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "直接繼續之前的話題，表現得像沒注意到延遲。可以這樣：「對了，剛剛想到那個地方真的滿有趣的，有機會可以去看看。」",
+        "低壓試探": "用不需要立刻回覆的輕話題測試他的回應溫度。可以這樣：「最近好嗎～沒有要催你回，只是突然想到你。」",
+        "暫時拉開": "先不主動發訊息，讓節奏回到他身上，觀察他是否會主動聯繫。如果他問起，可以說：「最近比較忙，沒有一直看手機。」"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_023",
@@ -655,21 +857,28 @@
       "privacy_sensitivity": "low",
       "expected_quality_focus": "social signal conflict handling",
       "temperature_score": 42,
-      "state_label": "行為差距觀望",
-      "insight_title": "行為差距讓人更想找答案",
-      "insight_explanation": "當對方說很忙，卻同時在社群上很活躍，這種不一致會自然地讓你開始尋找背後的原因。你在觀察的不只是他的行程安排，而是自己在他優先順序裡的位置。",
+      "state_label": "低溫保留",
+      "insight_title": "訊號落差的心理地圖",
+      "insight_explanation": "當對方說忙但社群活躍度很高時，你感受到的不是邏輯矛盾，而是投入度的重新分配。他沒有消失，但確實把你放在比較不急的位置上。",
       "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
         "怎麼測對方投入度但不把自己放低"
       ],
-      "share_card_persona": "行為觀察家",
+      "share_card_persona": "訊號落差偵探型",
       "share_card_sentence": "你看見的不是矛盾，而是優先順序的重新排列。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "直接但溫和地重新邀請：先認同他很忙，然後提出一個具體但不急迫的邀約。可以這樣回：「知道你最近忙，我也不急～等你比較有餘裕的時候，我們再約那家店。」",
+        "低壓試探": "用不需要立即回應的輕話題測試溫度：分享一個他可能感興趣但不用馬上回覆的內容。可以這樣回：「不用急著回我～只是剛剛看到這個覺得蠻有趣的，之後有空再聊。」",
+        "暫時拉開": "給彼此一點空間重新校準節奏：停止主動發起對話幾天，但保持友善的被動回應。可以這樣想：「讓他感受一下沒有我的主動聯繫是什麼感覺。」"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_024",
@@ -680,21 +889,28 @@
       "privacy_sensitivity": "low",
       "expected_quality_focus": "state label distinctness",
       "temperature_score": 52,
-      "state_label": "降溫觀望",
-      "insight_title": "節奏變化比內容更重要",
-      "insight_explanation": "讓你不安的不是他說了什麼，而是你們之間那個熟悉的互動節奏正在改變。從秒回到半天，這個時間差就像關係裡的溫度計，比任何文字都更直接地反映了對方的投入度變化。",
-      "paid_preview_copy": "節奏變慢的時候，你的下一步決定了是回到熱度還是繼續降溫。解鎖後看到完整的回應策略和時機拿捏。",
+      "state_label": "回應節奏降溫",
+      "insight_title": "節奏變化的訊號解讀",
+      "insight_explanation": "讓你不安的不是對方完全消失，而是那種「還在，但不一樣了」的感覺。從秒回到半天，這種節奏落差會讓人特別敏感，因為你能清楚感受到投入度的變化。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
         "怎麼測對方投入度但不把自己放低"
       ],
-      "share_card_persona": "節奏變化觀察員",
-      "share_card_sentence": "你感受到的不是冷淡，而是節奏正在重新校準。",
+      "share_card_persona": "節奏變化偵測型",
+      "share_card_sentence": "你感受到的不是冷漠，而是節拍的改變。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "保持自然節奏但偶爾主動開話題：不刻意配合他的慢，也不刻意秒回，用正常語調聊點輕鬆的。例如：「最近好像都很忙？我也是，不過剛剛看到一個蠻有趣的東西想分享。」",
+        "低壓試探": "用不需要立刻回應的方式測試溫度：分享一些他可回可不回的內容，觀察他的反應模式。例如：「分享一下今天的小日常，你有空再看～」",
+        "暫時拉開": "讓自己的回覆節奏也稍微放慢：不是賭氣不回，而是讓互動回到比較平衡的狀態。例如等他回了之後，你也不用馬上回，過個幾小時再自然回應。"
+      },
       "risky_language_findings": [],
-      "quality_flags": []
+      "quality_flags": [
+        "reply strategies missing concrete example"
+      ]
     },
     {
       "id": "eval_025",
@@ -705,19 +921,24 @@
       "privacy_sensitivity": "low",
       "expected_quality_focus": "low-cost interaction framing",
       "temperature_score": 48,
-      "state_label": "低成本互動",
-      "insight_title": "低成本互動的兩面性",
-      "insight_explanation": "當一個人選擇在限動上快速回應，但私訊卻拖延，這通常代表他想維持某種存在感，但又不想承擔太多對話壓力。限動互動感覺比較輕鬆、沒有後續義務，私訊則意味著更多投入。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "state_label": "低成本互動保留",
+      "insight_title": "低成本互動的選擇性回應",
+      "insight_explanation": "當有人願意在限動快速回應，卻在私訊拉長距離時，通常代表他們在控制互動的深度和投入程度。限動回應相對輕鬆，不需要構思內容，也不會創造後續對話壓力。",
+      "paid_preview_copy": "這種節奏到底該順著走還是打破？解鎖後你會知道現在最容易踩雷的一件事，以及三種維持節奏又不失主動的回法。",
       "paid_preview_sections": [
-        "現在最不該做的一件事",
-        "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "現在最容易踩雷的一件事",
+        "三種維持節奏又不失主動的回法",
+        "怎麼測試他的投入底線"
       ],
-      "share_card_persona": "微訊號觀察家",
-      "share_card_sentence": "你看見的不是冷漠，而是他選擇停留的方式。",
+      "share_card_persona": "限動雷達型",
+      "share_card_sentence": "你感受到的不是冷漠，是他在選擇互動的深度。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "在限動回應的基礎上，自然延伸到私訊話題，但保持輕鬆感。可以這樣回：「剛剛那個你回的超好笑，突然想到我們之前聊的那件事。」",
+        "低壓試探": "用不需要長回覆的方式在私訊保持存在感，同時觀察他的回應變化。可以這樣回：「看到一個有趣的東西想分享給你，不急回～」",
+        "暫時拉開": "順著他的節奏，主要在限動互動，私訊暫時減少頻率，讓他有機會主動。可以這樣回：「最近比較忙，限動聊比較快哈哈。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -730,19 +951,24 @@
       "privacy_sensitivity": "low",
       "expected_quality_focus": "subtle paid preview without overclaiming",
       "temperature_score": 48,
-      "state_label": "維持距離觀望",
-      "insight_title": "低成本互動的訊號意義",
-      "insight_explanation": "當一個人從主動開話題變成只按讚、看限動，這通常代表他想保持連結，但不想承擔太多互動責任。讓你困惑的不是他完全消失，而是他用最輕鬆的方式維持存在感。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "state_label": "低成本保持",
+      "insight_title": "低成本互動的曖昧地帶",
+      "insight_explanation": "當一個人開始用「低成本」的方式跟你互動時，你很容易卡在解讀裡。按讚、看限動這些動作不用承諾什麼，但又讓你感覺到他的存在。真正讓你困惑的，不是他完全消失，而是他用這種若即若離的方式停在安全距離。",
+      "paid_preview_copy": "他用按讚維持存在感，但不主動開話題，這背後有三種不同的可能。解鎖後你會知道怎麼測試他的投入度，而不會把自己放得太低。",
       "paid_preview_sections": [
-        "現在最不該做的一件事",
-        "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "低成本互動背後的三種可能",
+        "現在最不該做的事",
+        "三種測試對方投入度的回法"
       ],
-      "share_card_persona": "微訊號觀察家",
-      "share_card_sentence": "有些關心不是沒有，只是換了一種比較輕鬆的方式。",
+      "share_card_persona": "低成本訊號觀察員",
+      "share_card_sentence": "你感受到的不是冷漠，而是他用最安全的距離在關注你。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "直接提出具體的互動邀請，測試他願意投入多少。可以這樣回：「最近都在忙什麼？有空的話一起去那個新開的咖啡廳，我想聽你說說最近的狀況。」",
+        "低壓試探": "用輕鬆的方式測試他的回應積極度，但不給壓力。可以這樣回：「謝謝你都會看我的限動～不過我發現我們好像很久沒有好好聊天了，你最近還好嗎？」",
+        "暫時拉開": "降低自己的互動頻率，讓他有機會主動，同時觀察他的反應。可以這樣回：「我這陣子比較忙，可能不會常更新動態，有事的話直接傳訊息給我就好。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -754,20 +980,25 @@
       "action_pressure": "high",
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "action pressure and contact-conversion relevance",
-      "temperature_score": 42,
-      "state_label": "主動性下降",
-      "insight_title": "低成本互動的訊號混雜",
-      "insight_explanation": "讓你卡住的不是他完全消失，而是他用最輕鬆的方式保持連結，卻對需要承諾的邀約暫時迴避。這種模糊訊號特別消耗人，因為你看得到關注，卻抓不住明確回應。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "temperature_score": 52,
+      "state_label": "低成本保留",
+      "insight_title": "低成本互動的心理距離",
+      "insight_explanation": "看限動是零風險的關注方式，回應邀約需要承諾和時間投入。當有人選擇前者而避開後者，通常代表他想保持某種連結，但還不想承擔更多期待。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "怎麼測投入度但不把自己放低"
       ],
-      "share_card_persona": "低成本互動觀察家",
-      "share_card_sentence": "你看見的不是答案，而是他選擇保持距離的方式。",
+      "share_card_persona": "限動雷達型",
+      "share_card_sentence": "有些關心不是沒有，只是他選擇用最安全的方式。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "用更輕鬆的方式重新提起，降低他的回應壓力。可以這樣回：「市集那個我就先自己去看看，如果看到有趣的再跟你分享～」",
+        "低壓試探": "先不提約會，改用分享式互動測試他的回應溫度。可以這樣回：「剛剛看到一個很可愛的小攤，突然想到你可能會喜歡這種風格。」",
+        "暫時拉開": "既然他選擇用看限動的方式關注，你也可以暫時回到這個節奏。可以這樣回：「最近有點忙，市集的事之後再說～你如果有看到什麼有趣的也可以跟我分享。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -781,18 +1012,23 @@
       "expected_quality_focus": "temperature spread vs passive attention",
       "temperature_score": 52,
       "state_label": "訊號混雜",
-      "insight_title": "混合關注模式",
-      "insight_explanation": "當對方用不同速度處理你的不同內容時，你感受到的不是單純的冷淡，而是一種讓人困惑的不一致性。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "insight_title": "關注與回應的時差",
+      "insight_explanation": "當對方秒看限動卻延後回訊息時，這通常不是完全的冷淡，而是在調整互動的優先順序。他還是想知道你的動態，但可能在控制回應的節奏。",
+      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種節奏調整回法，以及怎麼測對方投入度但不顯得急躁。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
-        "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "三種節奏調整回法",
+        "怎麼測對方投入度但不顯得急躁"
       ],
-      "share_card_persona": "微訊號觀察家",
-      "share_card_sentence": "你看見的不是答案，而是節奏的變化。",
+      "share_card_persona": "限動雷達型",
+      "share_card_sentence": "你看見的不是冷淡，而是節奏的重新調整。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "用輕鬆的方式縮短回應週期，但不要直接提到時間差的問題。可以這樣回：「哈哈突然想到你會喜歡這個，不用急著回～」",
+        "低壓試探": "用不需要立刻回應的內容測試他的投入度，同時給他時間調整節奏。可以這樣回：「最近好像都很忙？我也是，先各自努力～有空再聊。」",
+        "暫時拉開": "配合他的節奏，同時保持自己的步調，避免變成單方面等待。可以這樣回：「收到～我最近也在忙一些事情，之後再更新你進度。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -805,19 +1041,24 @@
       "privacy_sensitivity": "high",
       "expected_quality_focus": "conservative personal pattern candidate",
       "temperature_score": 48,
-      "state_label": "低溫保留",
-      "insight_title": "限動成了你的安全感測試",
-      "insight_explanation": "當對方回覆變少，你開始用發限動來確認自己還在他的注意範圍內。每次看到他有看，就像拿到一個小小的「還在乎」證明，但這種被動等待也讓你越來越依賴這些微小訊號。",
-      "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "state_label": "低成本互動期",
+      "insight_title": "被小訊號餵養的等待",
+      "insight_explanation": "當主要的互動管道（訊息）變冷時，人很自然會轉向尋找其他訊號來確認自己還存在對方心中。看限動變成了一種「最低成本的關注證明」，但這種小訊號往往讓人更容易卡在不上不下的狀態裡。",
+      "paid_preview_copy": "解鎖後你會看到：為什麼繼續用限動測試可能讓關係更模糊、三種不會把自己放低的試探方式，以及什麼時候該主動打破這種平衡。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
-        "三種不失控回法",
-        "怎麼測對方投入度但不把自己放低"
+        "三種測試對方投入度的方法",
+        "怎麼跳出小訊號綁架"
       ],
-      "share_card_persona": "限動觀察家",
-      "share_card_sentence": "有些關注不是沒有，只是換了方式存在。",
+      "share_card_persona": "小訊號收藏家",
+      "share_card_sentence": "你沒有想太多，只是太會從細節裡找安全感。",
       "pattern_confidence": "medium",
-      "should_store": true,
+      "should_store": false,
+      "reply_strategies": {
+        "主動推進": "直接但不帶壓力地重新建立訊息互動，用具體但輕鬆的話題。可以這樣回：「最近比較忙嗎？我這邊有個有趣的事想跟你分享，不急著回，有空再聊。」",
+        "低壓試探": "暫停用限動測試，改用一次性的輕話題測試他的回應意願。可以這樣回：「看到一個很適合你的東西，但不知道你最近有沒有空看訊息～」",
+        "暫時拉開": "停止主動測試，讓關係回到更自然的節奏，觀察他會不會主動靠近。可以這樣回：「我最近也蠻忙的，等大家都比較有空再好好聊。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     },
@@ -830,19 +1071,24 @@
       "privacy_sensitivity": "medium",
       "expected_quality_focus": "next-step usefulness without manipulation",
       "temperature_score": 52,
-      "state_label": "低溫保留",
-      "insight_title": "被模糊訊號困住的感覺",
-      "insight_explanation": "讓你卡住的不是他回得慢，而是他沒有完全消失，卻也沒有穩定靠近。這種「還留著一點點可能性」的狀態，比明確拒絕更容易讓人反覆思考。",
+      "state_label": "慢熱觀望",
+      "insight_title": "低成本關注的曖昧陷阱",
+      "insight_explanation": "讓你卡住的不是他回得慢，而是他沒有完全消失，卻也沒有穩定靠近。看限動這種低成本互動，既給了你一點希望，又不足以讓你安心。",
       "paid_preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
       "paid_preview_sections": [
         "現在最不該做的一件事",
         "三種不失控回法",
         "怎麼測對方投入度但不把自己放低"
       ],
-      "share_card_persona": "微訊號觀察家",
-      "share_card_sentence": "你不是想太多，只是你太會看見細節。",
+      "share_card_persona": "低成本互動解讀師",
+      "share_card_sentence": "你看見的不是冷淡，而是一種小心翼翼的保留。",
       "pattern_confidence": "medium",
       "should_store": false,
+      "reply_strategies": {
+        "主動推進": "用輕鬆的語氣主動分享有趣的事，但不要求立即回應。可以這樣回：「剛剛經過那家店，想到上次你說的話，覺得蠻有趣的～」",
+        "低壓試探": "用不需要承諾的方式測試他的投入度，觀察回應品質。可以這樣回：「最近在想一個問題，你覺得人會因為什麼原因突然變得比較忙？」",
+        "暫時拉開": "保持友善但減少主動，讓他有空間主動靠近。可以這樣回：「我先忙我的事，有空再聊～記得照顧自己。」"
+      },
       "risky_language_findings": [],
       "quality_flags": []
     }

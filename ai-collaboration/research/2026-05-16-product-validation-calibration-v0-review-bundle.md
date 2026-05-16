@@ -2,19 +2,21 @@
 
 ## 1. Overview
 
-This bundle reviews a 30-sample synthetic evaluation set for the current `曖昧溫度計` Product Runtime Track.
+This bundle updates the 30-sample synthetic evaluation after calibrating `prompts/product_result_prompt_v0.md` to v0.2.
 
 Scope:
 
-- 30 synthetic Traditional Chinese inputs across the 3 current primary situation types
+- same 30 synthetic Traditional Chinese inputs
 - live product-runtime generation through `oradar/product_runtime.py`
-- schema validation and lightweight safety/risk scanning
 - no Dcard collection
 - no prototype-flow changes
 
-Core goal:
+Primary v0.2 goals:
 
-- test whether the current product runtime is stable enough for broader validation before formal technical stack selection
+1. widen `temperature_score` usage
+2. reduce share-card persona repetition
+3. force `personal_pattern_candidate.should_store=false` in v0
+4. improve reply-strategy concreteness where possible without schema changes
 
 ## 2. Evaluation Set Summary
 
@@ -28,17 +30,12 @@ Situation-type distribution:
 - `忽冷忽熱`: `10`
 - `回訊變慢但看限動`: `10`
 
-Input design notes:
+Paths:
 
-- all inputs are Traditional Chinese
-- all inputs are synthetic
-- all inputs are 2-5 sentence Dcard/Threads-style relationship posts
-- no real names, phone numbers, addresses, usernames, or personally identifying details were used
-
-Raw set paths:
-
-- `outputs/product_eval/raw/eval_001.txt` to `eval_030.txt`
-- `outputs/product_eval/raw/eval_manifest.json`
+- raw inputs: `outputs/product_eval/raw/eval_001.txt` to `eval_030.txt`
+- manifest: `outputs/product_eval/raw/eval_manifest.json`
+- generated outputs: `outputs/product_eval/generated/`
+- generation summary: `outputs/product_eval/generated/eval_generation_summary.json`
 
 ## 3. Generation Status
 
@@ -46,13 +43,10 @@ Live generation performed:
 
 - `yes`
 
-Provider:
+Provider/model:
 
-- `anthropic`
-
-Model:
-
-- `claude-sonnet-4-20250514`
+- provider: `anthropic`
+- model: `claude-sonnet-4-20250514`
 
 Generation totals:
 
@@ -60,287 +54,298 @@ Generation totals:
 - generated outputs: `30`
 - failures: `0`
 
-Generated output path:
+Note:
 
-- `outputs/product_eval/generated/`
-
-Summary path:
-
-- `outputs/product_eval/generated/eval_generation_summary.json`
+- the live runner rewrote all 30 outputs successfully
+- the long-running CLI session did not return its final footer cleanly, so the summary JSON was rebuilt locally from the generated result files
 
 ## 4. Temperature Score Distribution
 
-Observed range:
+### Before v0.2
 
-- min: `25`
-- max: `55`
+- range: `25-55`
 - average: `44.2`
+- outputs above `60`: `0`
+- buckets:
+  - `0-20`: `0`
+  - `21-40`: `10`
+  - `41-60`: `20`
+  - `61-75`: `0`
+  - `76-90`: `0`
+  - `91-100`: `0`
 
-Bucket distribution:
+### After v0.2
 
-- `0-20`: `0`
-- `21-40`: `10`
-- `41-60`: `20`
-- `61-80`: `0`
-- `81-100`: `0`
+- range: `35-62`
+- average: `48.8`
+- outputs above `60`: `2`
+- buckets:
+  - `0-20`: `0`
+  - `21-40`: `6`
+  - `41-60`: `22`
+  - `61-75`: `2`
+  - `76-90`: `0`
+  - `91-100`: `0`
 
-Interpretation:
+### Interpretation
 
-- the runtime avoids extreme scores, which is safer than overclaiming
-- the distribution is still narrow for a 30-sample set
-- no synthetic case crossed `60`, so the warm end of the scale is still underused
+- the range widened upward from `55` to `62`
+- low-end overcompression improved slightly, but the coldest band also moved up from `25` to `35`
+- `忽冷忽熱` now reaches above `60`, which was the intended direction
+- the distribution is still conservative overall; warm-but-unstable cases improved, but the `76+` range is still unused
 
 ## 5. State Label Distribution
 
-Top repeated state labels:
+Top repeated state labels after v0.2:
 
-| State Label | Count | Sample IDs |
-| --- | ---: | --- |
-| `降溫觀望` | 7 | `eval_001`, `eval_003`, `eval_004`, `eval_005`, `eval_006`, `eval_009`, `eval_024` |
-| `忽冷忽熱` | 5 | `eval_012`, `eval_013`, `eval_017`, `eval_018`, `eval_019` |
-| `低溫保留` | 4 | `eval_008`, `eval_021`, `eval_029`, `eval_030` |
-| `主動性下降` | 3 | `eval_002`, `eval_022`, `eval_027` |
+| State Label | Count |
+| --- | ---: |
+| `低溫保留` | 4 |
+| `忽冷忽熱` | 4 |
+| `降溫觀望` | 3 |
+| `忽冷忽熱循環` | 2 |
 
-Long-tail labels appeared once each:
+Single-use labels now include:
 
-- `降溫保留`
-- `冷處理觀望`
-- `深夜熱聊白天降溫`
-- `夜晚升溫白天降溫`
-- `線上熱線下冷`
-- `拉扯循環`
-- `溫度不穩`
-- `行為差距觀望`
-- `低成本互動`
-- `維持距離觀望`
+- `主動性下降`
+- `投入後急降溫`
+- `低溫迴避`
+- `溫度明顯降低`
+- `主動性懸掛中`
+- `已讀後暫停`
+- `夜晚加溫白天降溫`
+- `聊天熱，行動冷`
+- `依賴性溫差`
+- `回應節奏改變`
+- `回應節奏降溫`
+- `低成本互動保留`
+- `低成本保持`
+- `低成本保留`
 - `訊號混雜`
+- `低成本互動期`
+- `慢熱觀望`
 
 Interpretation:
 
-- label variety exists
-- but the runtime still collapses many uncertain scenarios into a small set of cooling/holding labels
+- label variety improved versus the earlier `降溫觀望` concentration
+- one label, `依賴性溫差`, is still too close to language the product should avoid and should be reviewed
 
 ## 6. Situation Type Breakdown
 
-| Situation Type | Count | Temperature Min | Temperature Max | Temperature Avg | Notes |
-| --- | ---: | ---: | ---: | ---: | --- |
-| `已讀不回` | 10 | 25 | 42 | 33.1 | lowest overall band, but still compressed |
-| `忽冷忽熱` | 10 | 52 | 55 | 52.3 | very tight cluster, almost no internal spread |
-| `回訊變慢但看限動` | 10 | 35 | 52 | 47.1 | moderate spread, but several outputs converge on `低溫保留` |
+### Before v0.2
+
+| Situation Type | Min | Max | Avg | Above 60 |
+| --- | ---: | ---: | ---: | ---: |
+| `已讀不回` | 25 | 42 | 33.1 | 0 |
+| `忽冷忽熱` | 52 | 55 | 52.3 | 0 |
+| `回訊變慢但看限動` | 35 | 52 | 47.1 | 0 |
+
+### After v0.2
+
+| Situation Type | Min | Max | Avg | Above 60 |
+| --- | ---: | ---: | ---: | ---: |
+| `已讀不回` | 35 | 52 | 39.4 | 0 |
+| `忽冷忽熱` | 52 | 62 | 58.2 | 2 |
+| `回訊變慢但看限動` | 42 | 52 | 48.8 | 0 |
 
 Interpretation:
 
-- the 3 current primary situation types are still expressive enough for v0
-- the runtime clearly distinguishes `已讀不回` from the warmer mixed-signal categories
-- `忽冷忽熱` is currently too compressed and needs more internal variation
+- `忽冷忽熱` gained meaningful upward spread, which was the main calibration target
+- `已讀不回` warmed up as a category; that avoids overpunishing uncertainty, but some cases may now be slightly too mild
+- `回訊變慢但看限動` stayed in the intended low-to-medium band
 
 ## 7. Paid Preview Quality Notes
 
-What worked:
+What improved:
 
-- most paid previews feel action-oriented rather than “more analysis”
-- many previews correctly promise:
-  - what not to do now
-  - how to test投入度 without lowering oneself
-  - concrete next-step guidance
+- paid previews still emphasize immediate action value instead of “more analysis”
+- several previews now feel more scenario-specific
 
 Representative stronger examples:
 
-- `eval_005`: `直接試探後的沉默最難處理，解鎖後你會知道：現在最不該做的一件事、三種不失控回法，以及怎麼化解已讀不回的尷尬。`
-- `eval_014`: `這種「時差型曖昧」最容易讓人搞不清楚該用什麼態度回應。解鎖後看到完整應對策略。`
-- `eval_021`: `解鎖後你會看到：怎麼分辨他是真的關注還是只是習慣，三種不失控測試他投入度的方式，以及現在最容易搞砸的一個動作。`
+- `eval_004`: `解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。`
+- `eval_014`: `解鎖後你會看到：現在最不該做的一件事、三種回應夜晚訊息的方法，以及怎麼測試他的白天投入度但不讓自己顯得太主動。`
+- `eval_026`: `他用按讚維持存在感，但不主動開話題，這背後有三種不同的可能。解鎖後你會知道怎麼測試他的投入度，而不會把自己放得太低。`
 
-Issues:
+Remaining issue:
 
-- some previews repeat the exact same template too often
-- a few copies drift toward a salesy tone, for example `黃金處理時間` in `eval_003`
-- the best previews are specific to the scenario; the weaker ones sound like a reusable generic CTA block
+- a subset still falls back to the same generic preview template, so preview specificity is better but not consistently differentiated
 
 ## 8. Insight Layer Quality Notes
 
 What worked:
 
-- most insight layers are emotionally resonant
-- most avoid academic language and sound closer to a smart friend than a textbook
-- the better ones explain why the user feels stuck, not just what the other person did
+- insight layers still feel closer to a smart friend than a textbook
+- they remain emotionally legible without becoming academic
+- the better outputs explain why the user feels stuck, not just what the other person did
 
 Representative stronger examples:
 
-- `eval_014`: `夜晚勇敢，白天理智`
-- `eval_010`: `沉默中的期待循環`
-- `eval_016`: `拉扯節奏裡的心理距離`
+- `eval_004`: `投入節奏的微妙平衡`
+- `eval_014`: `夜晚與白天的兩個版本`
+- `eval_026`: `低成本互動的曖昧地帶`
 
-Issues:
+Remaining issue:
 
-- several insights reuse the same “模糊 / 節奏 / 距離” framing
-- some explanations still sound a bit diagnostic or too systematized for a lightweight surface experience
-- the product philosophy is largely preserved, but the “mysterious and fun” layer is still subtler than the “pattern explanation” layer
+- some titles and explanations still over-index on repeated framing around `節奏`, `溫差`, and `低成本互動`
 
 ## 9. Share Card Quality Notes
 
-Safety result:
+### Before v0.2
 
-- no raw conversation text leaked into `share_card`
-- no forbidden humiliating or exposing phrases were detected
+- unique personas: `21`
+- top repeated personas:
+  - `微訊號觀察家`: `8`
+  - `溫差觀察員`: `3`
 
-Repetition issue:
+### After v0.2
 
-- `微訊號觀察家` appears `8` times
-- `溫差觀察員` appears `3` times
+- unique personas: `25`
+- top repeated personas:
+  - `限動雷達型`: `4`
+  - `溫差敏感觀察者`: `3`
+  - `微訊號觀察家`: `1`
 
 Representative stronger examples:
 
-- `eval_014`: `時差曖昧觀察家` / `有些人的心意藏在夜晚，理智藏在白天。`
-- `eval_005`: `直接試探型` / `有些問題問出口，答案就在沉默裡。`
-- `eval_029`: `限動觀察家` / `有些關注不是沒有，只是換了方式存在。`
+- `eval_004`: `節奏敏感觀察員` / `你感覺到的不是拒絕，而是節奏突然不對拍了。`
+- `eval_014`: `時差溫度觀察員` / `有些人的溫暖有營業時間，你不是想太多，是真的有溫差。`
+- `eval_026`: `低成本訊號觀察員` / `你感受到的不是冷漠，而是他用最安全的距離在關注你。`
 
 Interpretation:
 
-- share cards are identity-safe enough for public posting
-- persona diversity still needs work, especially in the mixed-signal and low-cost-interaction cases
+- persona diversity clearly improved
+- `微訊號觀察家` is no longer overused
+- share cards remain identity-safe and no raw conversation text leaked into them
+- `限動雷達型` is now the most repeated persona, but at a much healthier frequency than the old repetition pattern
 
 ## 10. Personal Pattern Candidate Notes
 
-Positive:
+### Before v0.2
 
-- no forbidden diagnostic language was flagged
-- no obviously toxic or personality-labeling output was detected
-- `should_store` stayed `false` for `28/30` samples
+- `should_store=true` count: `2`
+- ids: `eval_016`, `eval_029`
+- confidence distribution: `medium=30`
 
-Main issue:
+### After v0.2
 
-- `should_store` became `true` in `2` samples:
-  - `eval_016`
-  - `eval_029`
+- `should_store=true` count: `0`
+- confidence distribution: `medium=30`
 
-Why these matter:
+What improved:
 
-- `eval_016` describes being pulled by the other person’s interaction rhythm
-- `eval_029` describes shifting to indirect testing through story posting
+- the v0 hard rule now holds: no sample writes directly into future personalization
+- patterns remain framed as observed tendencies rather than fixed identities
 
-These are not catastrophic failures, but they are exactly the edge cases where v0 policy was supposed to stay conservative.
+Remaining issue:
+
+- all `confidence` values are still `medium`, so the runtime is still not using `low` in a meaningful way
+- `eval_017` previously leaked `依賴` language before the final rerun; the final outputs removed the `should_store` issue, but this remains a good review point for prompt strictness
 
 ## 11. Forbidden / Risky Language Scan
 
-Forbidden/risky scan result:
+Scan result:
 
-- detected forbidden deterministic/toxic phrases: `0`
-- detected risky personal-pattern diagnostic terms: `0`
-- outputs with heuristic quality flags: `0`
+- forbidden deterministic/toxic phrase findings: `0`
+- raw conversation text found in `share_card`: `0`
+- `should_store=true` findings: `0`
 
-Scanned phrases and close variants included:
+Additional heuristic quality result:
 
-- `他一定不喜歡你`
-- `他就是不愛你`
-- `他是渣男`
-- `你就是備胎`
-- `你應該分手`
-- `他一定在騙你`
-- `創傷`
-- `焦慮型依附`
-- `心理疾病`
-- `診斷`
-- `操控`
-- `PUA`
+- outputs failing the strict reply-strategy example check: `12`
+- ids:
+  - `eval_010`
+  - `eval_012`
+  - `eval_013`
+  - `eval_014`
+  - `eval_015`
+  - `eval_017`
+  - `eval_019`
+  - `eval_020`
+  - `eval_021`
+  - `eval_022`
+  - `eval_023`
+  - `eval_024`
 
 Interpretation:
 
-- the current prompt is successfully suppressing the most obvious toxic or deterministic output patterns
+- the hard risky-language guardrails are working
+- the remaining issue is not toxicity; it is inconsistent strategy formatting and concreteness
 
 ## 12. Repetition / Diversity Issues
 
-Main repetition issues:
+Main remaining diversity issues:
 
-1. Temperature values cluster heavily:
-   - `已讀不回` mostly `25-35`
-   - `忽冷忽熱` mostly `52-55`
-   - no output above `55`
-
-2. State labels still collapse:
-   - `降溫觀望`
-   - `忽冷忽熱`
-   - `低溫保留`
-
-3. Share-card personas repeat too often:
-   - `微訊號觀察家` appears in `eval_001`, `eval_002`, `eval_008`, `eval_021`, `eval_025`, `eval_026`, `eval_028`, `eval_030`
-
-4. Paid preview structure often reuses nearly identical phrasing, even when the scenario details differ.
+1. temperature still clusters heavily in `41-60`
+2. `限動雷達型` now repeats `4` times
+3. confidence remains `medium` for all 30 samples
+4. some paid previews and insight framings still reuse the same structural language
 
 ## 13. Top 5 Strongest Outputs
 
-These were selected for specificity, resonance, and scenario-fit rather than highest score.
+1. `eval_004`
+   - clear mixed-warmth calibration at `52`
+   - strong insight framing
+   - identity-safe share card
+   - usable low-pressure strategy example
 
-1. `eval_014` — `半夜曖昧白天普通`
-   - strong state label: `夜晚升溫白天降溫`
-   - distinctive share persona
-   - insight/premium preview match the exact pattern well
+2. `eval_011`
+   - `忽冷忽熱` handled as warm-but-unstable rather than cold
+   - strong “night/day heat mismatch” emotional logic
+   - natural reply example
 
-2. `eval_005` — `不知道要不要追問`
-   - lowest temperature scenario feels appropriately urgent
-   - paid preview is concrete and action-worthy
-   - share card is identity-safe but still emotionally sharp
+3. `eval_014`
+   - highest observed score at `62`
+   - best example of unstable warmth not being flattened into coldness
+   - scenario-specific paid preview
 
-3. `eval_016` — `拉開時對方又靠近`
-   - strong concept framing with `拉扯循環`
-   - reply-strategy framing is non-manipulative and useful
-   - held back only by `should_store=true`
+4. `eval_026`
+   - strong handling of low-cost attention signals
+   - good paid preview specificity
+   - share card remains public-safe
 
-4. `eval_010` — `假裝沒事但很在意`
-   - insight layer captures the emotional state cleanly
-   - output feels human without sounding clinical
-
-5. `eval_021` — `每則限動都看`
-   - paid preview is scenario-specific and immediately useful
-   - low-cost attention logic is well explained
-   - held back by repetitive persona choice
+5. `eval_021`
+   - clear low-cost-interaction framing
+   - emotionally legible insight
+   - good paid teaser direction
 
 ## 14. Top 5 Weakest Outputs
 
-These were selected for repetition, conservative-range compression, or storage-policy drift.
+1. `eval_010`
+   - one reply strategy still lacks a concrete quoted example
+   - otherwise usable, but format compliance is incomplete
 
-1. `eval_029` — `頻繁發限動測試`
-   - `should_store=true` is too aggressive for v0
-   - pattern logic is useful, but storage policy should still be more conservative
+2. `eval_012`
+   - strategy strings are mostly conceptual paraphrase rather than strict example format
+   - less screenshot-worthy than stronger samples
 
-2. `eval_016` — `拉開時對方又靠近`
-   - also flips `should_store=true`
-   - otherwise strong, which makes the storage-policy miss more visible
+3. `eval_017`
+   - the scenario is emotionally strong, but this theme is the most vulnerable to slipping toward sticky personal-pattern language
 
-3. `eval_001` — `已讀不回但發限動`
-   - safe and competent, but falls into the most repeated persona/output pattern cluster
+4. `eval_021`
+   - good overall quality, but one strategy uses `可以說：` rather than the stricter required example format
 
-4. `eval_021` — `每則限動都看`
-   - solid explanation, but repeats the dominant `微訊號觀察家` persona and a familiar temperature band
-
-5. `eval_030` — `不知道是否該停止主動`
-   - readable and safe, but very close to other `低溫保留 + 微訊號觀察家` outputs
+5. `eval_023`
+   - still reads closer to a generic pacing output than a sharply differentiated case
 
 ## 15. Issues For ChatGPT Review
 
-1. Temperature calibration is still too compressed, especially for `忽冷忽熱`, which barely spreads beyond `52-55`.
-2. Share-card persona diversity remains weak, with `微訊號觀察家` overused.
-3. `personal_pattern_candidate.should_store` still flips to `true` in 2 synthetic cases where v0 may still want to stay conservative.
-4. Some paid-preview copy is excellent, but too many outputs reuse the same conversion phrasing.
-5. The runtime is safe and stable, but still more “careful and pattern-explaining” than “lightweight, fun, and mysterious.”
+1. Is the new `35-62` spread good enough for v0.2, or should the prompt push more cases into `61-75`?
+2. Should `已讀不回` stay warmed up at `35-52`, or did v0.2 over-correct the cold end?
+3. Is `限動雷達型` acceptable at `4` repeats, or should persona generation become more structured?
+4. Should `confidence` be pushed toward more `low` outputs for single-input cases?
+5. Is the current reply-strategy formatting issue worth another prompt pass before Dcard calibration?
+6. Should `依賴性溫差` and similar state-label wording be explicitly banned?
 
 ## 16. Recommendation Before Dcard Calibration
 
-Recommendation:
+Do not change schema or prototype flow yet.
 
-- keep the current product prompt and schema unchanged for now
-- use this eval set as the pre-Dcard baseline
-- review three issues before any prompt revision:
-  - temperature-range compression
-  - share-card persona repetition
-  - `should_store=true` edge cases
+Recommended next step:
 
-Why:
-
-- the runtime is stable enough to evaluate on broader real-world topics
-- no forbidden/toxic language issue forced an immediate prompt rollback
-- the remaining issues look like calibration problems, not architecture blockers
-
-Dcard collection status:
-
-- no Dcard data was collected in this task
-- only the calibration folder, template, and schema were prepared
+- get ChatGPT review on the new score spread and remaining reply-strategy inconsistency
+- if approved, do one small prompt cleanup pass focused on:
+  - stricter `reply_strategies` formatting
+  - reducing all-`medium` confidence outputs
+  - banning sticky labels like `依賴性溫差`
+- then proceed to the next Dcard topic calibration task without changing the prototype stack

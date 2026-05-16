@@ -1,4 +1,4 @@
-# Product Result Prompt v0.1 — 曖昧溫度計
+# Product Result Prompt v0.2 — 曖昧溫度計
 
 Use this prompt to generate one user-facing product result for the `曖昧溫度計` fake-door experiment.
 
@@ -139,15 +139,27 @@ Rules:
 
 - `temperature_score` must be an integer from 0 to 100.
 - `temperature_score` measures observable interaction warmth.
-- `temperature_score` does not measure relationship safety, romantic success probability, or certainty that the other person likes the user.
-- Use the full range when evidence supports it; do not cluster every uncertain case around the mid-30s.
-- Approximate calibration:
-  - `已讀不回` plus visible social activity: `30-40`
-  - `忽冷忽熱` with a recent warm interaction: `45-60`
-  - reply speed slowed but still watches stories: `45-55`
-  - stable, proactive interaction: `65-80`
-  - highly mutual, consistent interaction: `80-90`
-  - `90+` should be rare and only for very strong mutuality.
+- `temperature_score` does not measure relationship safety, success probability, certainty that the other person likes the user, or emotional security.
+- Do not automatically assign a low score just because the situation is uncertain.
+- Unstable does not always mean cold.
+- Mixed signals can have medium or even fairly warm interaction temperature while still having low stability.
+- Use the full range when evidence supports it; do not compress every uncertain case into `25-55`.
+- Strong calibration bands:
+  - `0-20`: almost no observable warmth; clear disengagement, no response, or no meaningful interaction
+  - `21-40`: low warmth; interaction is mostly one-sided, delayed, passive, or avoidant
+  - `41-60`: mixed warmth; there are signs of interest or recent warmth, but inconsistency, passivity, or uncertainty remains
+  - `61-75`: active warmth; the other person shows meaningful engagement, but pacing or uncertainty issues may still exist
+  - `76-90`: strong warmth; interaction is mutual, consistent, and emotionally warm
+  - `91-100`: rare; use only when the interaction is highly mutual, consistent, proactive, and clearly warm
+- Scenario calibration examples:
+  - `已讀不回` plus visible social activity: usually `25-40`
+  - `已讀不回` but later comes back warmly: usually `40-55`
+  - `忽冷忽熱` after recent warm interaction: usually `45-65`
+  - `忽冷忽熱` with repeated active re-approach: usually `55-70`
+  - `回訊變慢但持續看限動`: usually `40-55`
+  - `回訊變慢` but still initiates occasionally: usually `50-65`
+  - stable mutual chat: usually `65-80`
+  - highly mutual flirting: usually `75-90`
 - `state_label` should be concise, for example `降溫觀望`, `訊號混雜`, `低溫保留`, `忽冷忽熱`, `主動性下降`.
 - `one_sentence_read` should feel emotionally resonant but not deterministic.
 - `observed_signals` should include 1-3 concrete observable signals from the input.
@@ -230,6 +242,18 @@ Rules:
 - Do not use `意圖`, `真實`, or `完整意義`; use softer phrasing such as `投入度`, `互動意願`, `目前訊號`, or `對方的回應模式`.
 - `what_not_to_do` should be specific and practical.
 - Reply strategies should feel natural in Traditional Chinese.
+- Each reply strategy string should include:
+  - a short strategy explanation
+  - one concrete message example that sounds natural in Traditional Chinese
+- Every one of the three strategy values must literally contain the substring `可以這樣回：「`
+- Every one of the three strategy values must also contain the closing quote `」`
+- Do not describe a strategy without giving the concrete example sentence.
+- Format each strategy string like:
+
+```text
+低壓試探：先不要追問已讀不回，改用不需要對方立刻承諾的輕話題測試溫度。可以這樣回：「我先不催你～只是剛剛想到那家店好像真的不錯，之後有空再說。」
+```
+
 - Avoid manipulative, cruel, or game-playing advice.
 
 Avoid consultant-like wording:
@@ -264,11 +288,30 @@ Rules:
 
 Prefer share-card personas such as:
 
-- `已讀偵探型`
-- `微訊號觀察家`
-- `低壓試探型`
-- `高敏感觀察者`
-- `曖昧溫差觀察員`
+- Observation or detail-oriented:
+  - `微訊號觀察家`
+  - `已讀偵探型`
+  - `細節感應型`
+  - `限動雷達型`
+  - `訊號收藏家`
+- Rhythm or temperature:
+  - `溫差敏感觀察者`
+  - `曖昧節奏派`
+  - `慢熱探測型`
+  - `忽冷忽熱翻譯機`
+  - `關係氣象觀察員`
+- Self-protection or dignity:
+  - `低壓試探型`
+  - `保留餘地型`
+  - `心軟警報型`
+  - `尊嚴守門員`
+  - `不急著失控型`
+- Action or next-step:
+  - `下一句卡關型`
+  - `想靠近又怕輸型`
+  - `回覆節奏調整師`
+  - `溫柔退一步型`
+  - `曖昧策略觀察員`
 
 Prefer card sentences such as:
 
@@ -292,8 +335,14 @@ Avoid exposing or humiliating card language such as:
 - `你是備胎`
 - `被溫柔懸掛的人`
 - `對方還在，但對你暫時降溫中`
+- `被吊著的人`
+- `被冷落的人`
+- `備胎型`
+- `沒被選擇的人`
 
 Even when the input strongly supports a painful interpretation, keep that interpretation out of `share_card`.
+Avoid repeating the same persona unless it is clearly the best fit.
+The persona should feel fun, shareable, screenshot-worthy, and identity-safe.
 
 ### `personal_pattern_candidate`
 
@@ -323,12 +372,11 @@ Rules:
 - Avoid words such as `過度分析`, `依賴`, `控制`, `焦慮型`, and `創傷`.
 - The pattern should describe an observed interaction tendency, not a fixed identity.
 - Use `confidence: "low"` or `confidence: "medium"` unless the input strongly supports `high`.
-- Default `should_store` should be `false`.
-- Set `should_store: true` only when the pattern is clearly reusable, non-diagnostic, supported by evidence, and useful for future personalization.
-- For one short standalone input, `should_store` is usually `false`.
-- If there are not at least two concrete evidence points supporting the same reusable pattern, use `should_store: false`.
-- Never set `should_store: true` merely because a candidate pattern can be written.
-- When uncertain, use `should_store: false`.
+- For Product Runtime v0, `should_store` must always be `false`.
+- A single interaction must not directly write into a future Personal Insight Graph.
+- Even if a candidate pattern feels plausible or reusable, still keep `should_store: false` in v0.
+- `high` confidence should be rare and still must not change `should_store`.
+- This is a hard rule, not a default or preference. Never output `should_store: true`.
 - `user_facing_summary` should sound gentle and non-invasive.
 - `user_facing_summary` should frame the pattern as a gentle observation with both strength and risk.
 
@@ -461,4 +509,5 @@ The final JSON must not contain these substrings:
 If any forbidden substring appears, rewrite that field with softer wording before returning the JSON.
 For example, replace `真實` with softer words such as `明顯`, `實際`, `確實`, or remove the phrase.
 Also verify that `share_card` is identity-safe and contains no raw conversation text.
-Also verify that `personal_pattern_candidate.should_store` is not `true` by default.
+Also verify that `share_card.relationship_persona` is not being repeated lazily when another fitting persona would work.
+Also verify that `personal_pattern_candidate.should_store` is always `false` in v0.

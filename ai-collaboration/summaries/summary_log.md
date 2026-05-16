@@ -680,3 +680,57 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Commit Hash
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-16 Product Runtime Prompt v0.2 Calibration
+
+### Task Completed
+
+- Calibrated `prompts/product_result_prompt_v0.md` to v0.2 in place.
+- Reran the 30-sample synthetic product evaluation with live Anthropic generation.
+- Updated `scripts/run_product_eval.py` to emit richer evaluation summary metrics.
+- Updated `ai-collaboration/research/2026-05-16-product-validation-calibration-v0-review-bundle.md`.
+- Created `ai-collaboration/reports/2026-05-16-product-runtime-prompt-v0-2-calibration-execution-report.md`.
+
+### Prompt Changes
+
+- strengthened `temperature_score` calibration bands and scenario examples
+- expanded share-card persona families and anti-repetition guidance
+- forced `personal_pattern_candidate.should_store` to always be `false` in v0
+- strengthened reply-strategy instructions to prefer quoted concrete message examples
+
+### Evaluation Rerun Status
+
+- live generation ran for all `30` synthetic inputs
+- temperature range changed from `25-55` to `35-62`
+- outputs above `60` changed from `0` to `2`
+- unique share-card personas increased from `21` to `25`
+- `微訊號觀察家` dropped from `8` uses to `1`
+- `should_store=true` count dropped from `2` to `0`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed.
+- `python3 -m py_compile experiments/ambiguous_temperature_v0/*.py` passed.
+- `python3 -m py_compile scripts/generate_product_sample.py` passed.
+- `python3 -m py_compile scripts/run_product_eval.py` passed.
+- `outputs/product_eval/raw/eval_manifest.json` parses as valid JSON.
+- `outputs/product_eval/generated/eval_generation_summary.json` parses as valid JSON.
+- all 30 generated outputs passed local structural validation against `schemas/product_result_schema_v0.json`.
+
+### Known Technical Debt
+
+- None.
+
+### Review Bundle Path
+
+- `ai-collaboration/research/2026-05-16-product-validation-calibration-v0-review-bundle.md`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Unresolved Questions
+
+- Whether `已讀不回` is now slightly too warm after the v0.2 lift.
+- Whether `18/30` strict reply-strategy example compliance is enough for the next phase.
+- Whether `confidence` should move off all-`medium` outputs before Dcard calibration.
