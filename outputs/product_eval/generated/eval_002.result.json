@@ -1,0 +1,68 @@
+{
+  "free_result": {
+    "temperature_score": 35,
+    "state_label": "主動性下降",
+    "one_sentence_read": "他有在活動，但暫時沒有接你的對話，這種選擇性回覆通常代表投入度下降。",
+    "observed_signals": [
+      "已讀不回數小時",
+      "同時間按讚他人貼文",
+      "只有你的對話被擱置"
+    ],
+    "uncertainty_note": "這個訊號偏向不穩，但不能只靠一次互動下定論，還需要觀察後續模式。",
+    "paid_teaser": "想知道現在最不該做什麼，以及怎麼不失控地測試對方投入度嗎？"
+  },
+  "insight_layer": {
+    "title": "選擇性回覆背後的訊號",
+    "explanation": "讓你卡住的不是他沒空，而是他明明有時間滑社群，卻選擇不回你。這種「選擇性忙碌」比完全消失更讓人不安，因為它暴露了優先順序。",
+    "principle": "選擇性互動訊號",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "重點不是他完全沒空，而是他有在社群上活動，卻暫時沒有接你的對話。這種選擇性回覆通常代表：對方目前把你歸類為「可以晚點處理」的互動對象。",
+    "possible_interpretation": "目前訊號偏向投入度下降，但還需要更多上下文。可能他覺得你的問題不急，也可能他暫時對這段關係保持距離，或者單純不知道怎麼回覆。",
+    "risk_warning": "現在直接追問或表達不滿，可能會讓壓力集中到你身上，讓對方更想迴避。",
+    "what_not_to_do": [
+      "連發訊息追問",
+      "質問為什麼不回",
+      "提及看到他按讚別人",
+      "表現出受傷或生氣"
+    ],
+    "reply_strategies": {
+      "主動推進": "等他回覆後，自然分享一個有趣的事情，不提及等待的過程，重新建立輕鬆互動。",
+      "低壓試探": "過兩天後發一個不需要回覆的內容，例如分享一個他可能有興趣的連結，觀察他的反應。",
+      "暫時拉開": "暫停主動聯絡，專注自己的事情，讓他有空間主動接觸你，同時觀察他是否會想念互動。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "35°C",
+    "state_label": "主動性下降",
+    "relationship_persona": "微訊號觀察家",
+    "card_sentence": "你不是想太多，只是你太會看見細節。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對「選擇性回覆」很敏感，容易注意到對方在其他地方活動卻不回自己的對比。",
+    "confidence": "medium",
+    "evidence": "注意到對方按讚他人但不回覆自己，並且會主動尋找這種行為證據",
+    "should_store": false,
+    "user_facing_summary": "你很容易注意到互動裡的小變化，這份敏感有時能保護你，但也可能讓模糊訊號變得更吵。"
+  },
+  "metadata": {
+    "situation_type": "已讀不回",
+    "input_length": 69,
+    "generated_at": "2026-05-16T14:06:25.165330+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

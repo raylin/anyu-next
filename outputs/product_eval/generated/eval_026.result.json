@@ -1,0 +1,68 @@
+{
+  "free_result": {
+    "temperature_score": 48,
+    "state_label": "維持距離觀望",
+    "one_sentence_read": "他在維持基本存在感，但明顯降低了主動投入的程度。",
+    "observed_signals": [
+      "按限動讚但不主動開話題",
+      "回覆速度明顯變慢",
+      "仍會看貼文保持關注"
+    ],
+    "uncertainty_note": "這種模式可能代表他在重新評估關係節奏，但也可能只是生活重心暫時轉移。",
+    "paid_teaser": "想知道這種「有距離的關注」背後可能的考量，以及你現在該如何回應嗎？"
+  },
+  "insight_layer": {
+    "title": "低成本互動的訊號意義",
+    "explanation": "當一個人從主動開話題變成只按讚、看限動，這通常代表他想保持連結，但不想承擔太多互動責任。讓你困惑的不是他完全消失，而是他用最輕鬆的方式維持存在感。",
+    "principle": "低成本互動訊號",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "他同時在做兩件事：保持對你的關注（看貼文、按讚），但減少需要回應的互動（不主動開話題、回覆變慢）。這通常表示他想維持連結，但目前不想讓關係升溫或變得更密切。",
+    "possible_interpretation": "目前訊號偏向「友善保持距離」，他可能在重新思考你們的互動節奏，或是生活中有其他優先事項。重點是他沒有完全退出，但也沒有積極靠近。",
+    "risk_warning": "現在直接問他「是不是對我沒興趣」或「為什麼都不主動」，可能會讓他覺得有壓力而真的退開。",
+    "what_not_to_do": [
+      "連續傳訊息要求回應",
+      "直接質問為什麼態度改變",
+      "故意冷落他測試反應",
+      "過度解讀每個按讚的時間點"
+    ],
+    "reply_strategies": {
+      "主動推進": "偶爾分享有趣的生活片段，但不期待立即回應。讓他知道你的生活很豐富，同時給他輕鬆參與的機會。",
+      "低壓試探": "提到一個你們都有興趣的話題，看他會簡短回應還是會延續對話。這能測出他目前的參與意願。",
+      "暫時拉開": "減少主動開話題的頻率，專注自己的生活。讓他習慣的「低成本關注」變得不那麼容易取得。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "48°C",
+    "state_label": "維持距離觀望",
+    "relationship_persona": "微訊號觀察家",
+    "card_sentence": "有些關心不是沒有，只是換了一種比較輕鬆的方式。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對「低成本互動」很敏感，容易把按讚、看限動這些行為當成關係訊號來解讀。",
+    "confidence": "medium",
+    "evidence": "使用者注意到對方會看貼文、按限動讚，並且會思考這些行為的關係意義",
+    "should_store": false,
+    "user_facing_summary": "你很擅長觀察互動細節，這讓你能察覺關係的微妙變化，但有時也會讓簡單的互動變得複雜。"
+  },
+  "metadata": {
+    "situation_type": "回訊變慢但看限動",
+    "input_length": 63,
+    "generated_at": "2026-05-16T14:17:25.979201+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

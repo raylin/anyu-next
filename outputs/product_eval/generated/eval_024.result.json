@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 52,
+    "state_label": "降溫觀望",
+    "one_sentence_read": "從秒回變半天，不是內容敷衍，而是互動節奏明顯在降溫。",
+    "observed_signals": [
+      "回覆時間從秒回變成半天以上",
+      "內容質量沒有完全敷衍但缺少以前的順暢感",
+      "整體互動節奏明顯下降"
+    ],
+    "uncertainty_note": "單從回覆變慢還無法確定關係走向，需要觀察更多互動模式。",
+    "paid_teaser": "現在最關鍵的是下一步怎麼走，別讓降溫變成冷戰。"
+  },
+  "insight_layer": {
+    "title": "節奏變化比內容更重要",
+    "explanation": "讓你不安的不是他說了什麼，而是你們之間那個熟悉的互動節奏正在改變。從秒回到半天，這個時間差就像關係裡的溫度計，比任何文字都更直接地反映了對方的投入度變化。",
+    "principle": "互動節奏變化感知",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "節奏變慢的時候，你的下一步決定了是回到熱度還是繼續降溫。解鎖後看到完整的回應策略和時機拿捏。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "對方還在回訊息，內容也不是完全應付，這表示還保有基本的互動意願，但投入程度確實在調整。從秒回變半天，通常代表你在對方的優先級有所變化，但不代表完全失去興趣。",
+    "possible_interpretation": "這可能是對方生活重心的自然調整，也可能是在測試或重新評估這段關係的節奏。關鍵是他沒有消失，只是互動的即時性降低了。",
+    "risk_warning": "如果現在開始頻繁追問或刻意加快自己的回覆速度，可能會讓節奏差距變得更明顯，反而增加對方的壓力。",
+    "what_not_to_do": [
+      "不要刻意縮短自己的回覆時間來對比",
+      "不要直接詢問「你是不是對我沒興趣了」",
+      "不要突然增加訊息頻率想要拉回注意力"
+    ],
+    "reply_strategies": {
+      "主動推進": "保持自然的對話節奏，但可以在適當時候提出具體的見面邀請，測試對方是否願意投入線下互動。",
+      "低壓試探": "偶爾分享一些有趣的日常，觀察對方的回應熱度，如果有正面反應再逐漸增加互動。",
+      "暫時拉開": "適應對方目前的節奏，不主動開啟新話題，讓對方有空間主動聯繫你。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "52°C",
+    "state_label": "降溫觀望",
+    "relationship_persona": "節奏變化觀察員",
+    "card_sentence": "你感受到的不是冷淡，而是節奏正在重新校準。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對互動節奏變化很敏感，會從回覆時間的改變來判讀關係狀態。",
+    "confidence": "medium",
+    "evidence": "能具體描述從秒回到半天的時間變化，並將此與關係溫度連結。",
+    "should_store": false,
+    "user_facing_summary": "你很容易從互動節奏裡讀出關係的溫度變化，這份敏感讓你能提早察覺，但也可能讓你過早擔心。"
+  },
+  "metadata": {
+    "situation_type": "回訊變慢但看限動",
+    "input_length": 64,
+    "generated_at": "2026-05-16T14:16:34.527351+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 32,
+    "state_label": "降溫觀望",
+    "one_sentence_read": "你的主動表達遇到了他的暫停鍵，這種空白讓你開始質疑自己的投入。",
+    "observed_signals": [
+      "已讀但未回覆長訊息",
+      "對方看到表達想念但選擇沉默",
+      "你開始後悔主動表達"
+    ],
+    "uncertainty_note": "一次已讀不回不能完全判定對方的回應模式，可能需要時間消化或不知道怎麼回應。",
+    "paid_teaser": "想知道現在該怎麼辦嗎？解鎖後看見三種不失控的應對方式。"
+  },
+  "insight_layer": {
+    "title": "當表達遇到沉默",
+    "explanation": "真正讓人不安的，不是對方沒看到你的訊息，而是他看到了卻選擇暫時不回應。這種空白會讓人開始懷疑：是不是自己說得太多、太直接、太需要了？",
+    "principle": "表達後的沉默焦慮",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "如何讓對方有臺階回應"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及如何讓對方有臺階回應你的表達。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "對方看到你的想念表達後選擇沉默，可能代表幾種情況：需要時間思考怎麼回應、不知道怎麼處理你的情感表達、或者目前不想承接這個話題的重量。重點是他確實看到了，但暫時沒有回應的準備。",
+    "possible_interpretation": "你的長訊息可能讓對方感受到一些壓力，特別是在深夜時間表達想念，這種時機和內容組合容易讓人不知道該怎麼接話。對方的沉默更像是在思考，而不是拒絕。",
+    "risk_warning": "現在最危險的是讓焦慮驅動下一步行動。如果你因為後悔而發更多訊息解釋或道歉，反而會讓整個互動變得更重。",
+    "what_not_to_do": [
+      "發訊息道歉或解釋剛才說太多",
+      "追問為什麼不回覆",
+      "發更多訊息試圖稀釋前面的表達"
+    ],
+    "reply_strategies": {
+      "主動推進": "等個兩三天，如果還是沒回應，可以發個輕鬆的日常話題，像是「今天看到一個很好笑的東西」，給對方一個自然回應的機會。",
+      "低壓試探": "過一天後可以傳個簡單的：「哈哈昨天半夜想太多了，不過是真的想見你」，用輕鬆語氣承認自己的表達，降低對方的壓力。",
+      "暫時拉開": "什麼都不做，讓這個表達自然存在。如果對方想回應會找時機，如果不想回應，追問也不會改變什麼。專注在自己的生活上。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "32°C",
+    "state_label": "降溫觀望",
+    "relationship_persona": "深夜表達型",
+    "card_sentence": "有些話說出口後，沉默比回應更大聲。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者在主動表達情感後容易進入自我質疑模式，特別是遇到對方沉默時會開始後悔自己的投入。",
+    "confidence": "medium",
+    "evidence": "深夜傳長訊息表達想念，已讀不回後立刻後悔並想收回訊息",
+    "should_store": false,
+    "user_facing_summary": "你願意主動表達情感，這很珍貴，但也容易在對方沉默時開始質疑自己是否太多了。"
+  },
+  "metadata": {
+    "situation_type": "已讀不回",
+    "input_length": 74,
+    "generated_at": "2026-05-16T14:09:20.075011+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

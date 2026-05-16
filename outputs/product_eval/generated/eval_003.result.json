@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 35,
+    "state_label": "降溫觀望",
+    "one_sentence_read": "從順暢聊天到突然已讀不回，這個節奏轉變讓你卡在不確定裡。",
+    "observed_signals": [
+      "昨晚十點已讀未回至今",
+      "前幾天聊天還很順暢",
+      "突然的回覆節奏改變"
+    ],
+    "uncertainty_note": "單一次的已讀不回還不足以判斷關係走向，但節奏變化確實值得留意。",
+    "paid_teaser": "解鎖完整分析，看看現在該怎麼回應最不會踩雷。"
+  },
+  "insight_layer": {
+    "title": "節奏斷點的模糊感",
+    "explanation": "讓你困擾的不只是他沒回，而是這個「斷點」出現得太突然。前幾天還很順，突然就卡住了，這種反差讓人很自然會開始猜測是不是哪裡出了問題。",
+    "principle": "回覆節奏不對等",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "已讀不回的黃金處理時間只有這幾天，解鎖後看到具體的回應策略和時機拿捏。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "重點是這個「斷點」出現在聊天很順的時候。如果對話本來就冷淡，已讀不回比較像自然結束。但前面聊得順，突然卡住，通常代表對方在這段關係裡遇到了什麼需要思考的節點。",
+    "possible_interpretation": "目前訊號偏向對方需要一些空間思考，但還不到完全失去興趣的程度。這種情況下，給對方一點時間通常比馬上追問更有效果。",
+    "risk_warning": "現在最大的風險是把「已讀不回」當成個人問題，開始自我檢討或急著補救。這樣反而容易把原本還算平衡的互動推向緊張。",
+    "what_not_to_do": [
+      "傳訊息問他是不是忘記回覆",
+      "開始檢討自己上一則訊息是不是有問題",
+      "假裝什麼都沒發生但語氣變得小心翼翼"
+    ],
+    "reply_strategies": {
+      "主動推進": "等到明天晚上，如果還是沒回應，可以用輕鬆的語氣分享一個小日常，不提之前的訊息，給他一個自然的重新開始點。",
+      "低壓試探": "過兩天後，可以轉發一個你們之前聊過話題相關的有趣內容，看他的回應熱度來判斷目前的互動意願。",
+      "暫時拉開": "這幾天專注在自己的生活上，讓這次的已讀不回自然過去。如果他有心維持這段關係，會主動找機會重新開始對話。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "35°C",
+    "state_label": "節奏觀察中",
+    "relationship_persona": "訊號變化敏感型",
+    "card_sentence": "你感受到的不是拒絕，而是節奏裡的小小斷層。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對互動節奏的變化很敏感，容易在對話突然中斷時進入不確定感和自我懷疑。",
+    "confidence": "medium",
+    "evidence": "明確描述了聊天從順暢到已讀不回的對比，以及因為這個變化而產生的困惑和不知道該如何應對的狀態。",
+    "should_store": false,
+    "user_facing_summary": "你對互動節奏的變化很敏感，這讓你能提早察覺關係的微妙變化，但也可能讓你在模糊時刻想得比較多。"
+  },
+  "metadata": {
+    "situation_type": "已讀不回",
+    "input_length": 75,
+    "generated_at": "2026-05-16T14:06:46.963173+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

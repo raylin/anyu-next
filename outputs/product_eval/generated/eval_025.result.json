@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 48,
+    "state_label": "低成本互動",
+    "one_sentence_read": "他保持著剛好的距離：不會完全消失，但也不會真正靠近。",
+    "observed_signals": [
+      "私訊回覆速度變慢",
+      "限動互動很積極",
+      "選擇輕量互動方式"
+    ],
+    "uncertainty_note": "這種互動模式可能代表他想保持某種連結，但目前訊號還不足以確定具體投入度。",
+    "paid_teaser": "想知道這種節奏背後的考量，以及你該如何回應嗎？"
+  },
+  "insight_layer": {
+    "title": "低成本互動的兩面性",
+    "explanation": "當一個人選擇在限動上快速回應，但私訊卻拖延，這通常代表他想維持某種存在感，但又不想承擔太多對話壓力。限動互動感覺比較輕鬆、沒有後續義務，私訊則意味著更多投入。",
+    "principle": "低成本互動偏好",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "他在限動上的積極回應說明他並沒有想要完全疏遠你，但私訊的拖延顯示他目前可能不想進入需要更多情感投入的對話模式。這種差別對待通常代表對方想保持一種「安全的互動距離」。",
+    "possible_interpretation": "目前訊號顯示他對你還有興趣保持連結，但可能正在觀望或者不確定要投入多少。也有可能是他習慣把限動當作輕鬆社交，私訊當作比較正式的溝通管道。",
+    "risk_warning": "如果你完全順著這種節奏，可能會讓互動一直停留在表面；但如果太急著推進私訊互動，又可能讓他感到壓力而更加退縮。",
+    "what_not_to_do": [
+      "不要在限動下頻繁留言想引起他私訊你",
+      "不要在私訊裡質問他為什麼回得慢",
+      "不要突然停止所有互動想測試他的反應"
+    ],
+    "reply_strategies": {
+      "主動推進": "可以在限動互動中偶爾加入一些個人化的回應，讓他感覺你們有特別的互動默契，然後自然地將話題延伸到私訊。",
+      "低壓試探": "在私訊中分享一些不需要立即回覆的內容，比如有趣的發現或心情感想，觀察他會不會主動延續話題。",
+      "暫時拉開": "保持限動互動但降低頻率，同時暫停主動私訊，讓他有機會感受到你的存在感變化，看他會不會主動調整互動模式。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "48°C",
+    "state_label": "低成本互動",
+    "relationship_persona": "微訊號觀察家",
+    "card_sentence": "你看見的不是冷漠，而是他選擇停留的方式。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對互動方式的差別對待很敏感，容易從不同平台的回應模式中尋找關係訊號。",
+    "confidence": "medium",
+    "evidence": "能察覺私訊和限動互動的節奏差異，並且會思考這種差異背後的含義",
+    "should_store": false,
+    "user_facing_summary": "你很容易注意到互動方式的細微變化，這份觀察力讓你能讀懂很多訊號，但有時也會讓你陷入過度解讀。"
+  },
+  "metadata": {
+    "situation_type": "回訊變慢但看限動",
+    "input_length": 82,
+    "generated_at": "2026-05-16T14:17:00.360307+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

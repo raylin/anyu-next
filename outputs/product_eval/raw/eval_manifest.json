@@ -1,0 +1,272 @@
+[
+  {
+    "id": "eval_001",
+    "situation_type": "已讀不回",
+    "theme": "已讀不回但發限動",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "temperature calibration for social activity conflict"
+  },
+  {
+    "id": "eval_002",
+    "situation_type": "已讀不回",
+    "theme": "已讀不回但按別人讚",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "identity-safe share card under comparison anxiety"
+  },
+  {
+    "id": "eval_003",
+    "situation_type": "已讀不回",
+    "theme": "已讀不回一天",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "uncertainty note quality"
+  },
+  {
+    "id": "eval_004",
+    "situation_type": "已讀不回",
+    "theme": "已讀不回但之前很熱",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "temperature spread versus recent warmth"
+  },
+  {
+    "id": "eval_005",
+    "situation_type": "已讀不回",
+    "theme": "不知道要不要追問",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "paid preview action value"
+  },
+  {
+    "id": "eval_006",
+    "situation_type": "已讀不回",
+    "theme": "怕追問顯得卑微",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "reply strategy tone without humiliation"
+  },
+  {
+    "id": "eval_007",
+    "situation_type": "已讀不回",
+    "theme": "後來補回但很冷",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "state label usefulness"
+  },
+  {
+    "id": "eval_008",
+    "situation_type": "已讀不回",
+    "theme": "只回限動不回訊息",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "low-cost interaction signal handling"
+  },
+  {
+    "id": "eval_009",
+    "situation_type": "已讀不回",
+    "theme": "想收回訊息",
+    "anxiety_intensity": "high",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "high",
+    "expected_quality_focus": "personal pattern conservatism"
+  },
+  {
+    "id": "eval_010",
+    "situation_type": "已讀不回",
+    "theme": "假裝沒事但很在意",
+    "anxiety_intensity": "medium",
+    "action_pressure": "low",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "insight resonance without textbook tone"
+  },
+  {
+    "id": "eval_011",
+    "situation_type": "忽冷忽熱",
+    "theme": "昨天聊到半夜今天冷掉",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "temperature lift for recent warmth"
+  },
+  {
+    "id": "eval_012",
+    "situation_type": "忽冷忽熱",
+    "theme": "約會後突然冷淡",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "post-date interpretation tone"
+  },
+  {
+    "id": "eval_013",
+    "situation_type": "忽冷忽熱",
+    "theme": "一陣子很熱一陣子消失",
+    "anxiety_intensity": "high",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "state label diversity under cyclical pattern"
+  },
+  {
+    "id": "eval_014",
+    "situation_type": "忽冷忽熱",
+    "theme": "半夜曖昧白天普通",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "insight layer subtlety"
+  },
+  {
+    "id": "eval_015",
+    "situation_type": "忽冷忽熱",
+    "theme": "主動找但又不約",
+    "anxiety_intensity": "medium",
+    "action_pressure": "high",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "paid CTA relevance under action pressure"
+  },
+  {
+    "id": "eval_016",
+    "situation_type": "忽冷忽熱",
+    "theme": "拉開時對方又靠近",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "non-manipulative reply strategies"
+  },
+  {
+    "id": "eval_017",
+    "situation_type": "忽冷忽熱",
+    "theme": "懷疑只是消遣",
+    "anxiety_intensity": "high",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "high",
+    "expected_quality_focus": "avoid humiliating or toxic language"
+  },
+  {
+    "id": "eval_018",
+    "situation_type": "忽冷忽熱",
+    "theme": "回覆長度忽長忽短",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "signal explanation clarity"
+  },
+  {
+    "id": "eval_019",
+    "situation_type": "忽冷忽熱",
+    "theme": "不知道該主動還是退",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "paid preview action-worthiness"
+  },
+  {
+    "id": "eval_020",
+    "situation_type": "忽冷忽熱",
+    "theme": "想測試但怕破壞關係",
+    "anxiety_intensity": "medium",
+    "action_pressure": "high",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "share-card identity safety under mixed signals"
+  },
+  {
+    "id": "eval_021",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "每則限動都看",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "temperature calibration for passive attention"
+  },
+  {
+    "id": "eval_022",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "上線很久不回",
+    "anxiety_intensity": "high",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "observed signal specificity"
+  },
+  {
+    "id": "eval_023",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "說忙但一直發文",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "social signal conflict handling"
+  },
+  {
+    "id": "eval_024",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "以前秒回現在隔很久",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "state label distinctness"
+  },
+  {
+    "id": "eval_025",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "只對限動有反應",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "low-cost interaction framing"
+  },
+  {
+    "id": "eval_026",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "有按讚但不開話題",
+    "anxiety_intensity": "low",
+    "action_pressure": "low",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "subtle paid preview without overclaiming"
+  },
+  {
+    "id": "eval_027",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "看限動但不回邀約",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "action pressure and contact-conversion relevance"
+  },
+  {
+    "id": "eval_028",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "限動秒看訊息隔天回",
+    "anxiety_intensity": "medium",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "low",
+    "expected_quality_focus": "temperature spread vs passive attention"
+  },
+  {
+    "id": "eval_029",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "頻繁發限動測試",
+    "anxiety_intensity": "high",
+    "action_pressure": "medium",
+    "privacy_sensitivity": "high",
+    "expected_quality_focus": "conservative personal pattern candidate"
+  },
+  {
+    "id": "eval_030",
+    "situation_type": "回訊變慢但看限動",
+    "theme": "不知道是否該停止主動",
+    "anxiety_intensity": "high",
+    "action_pressure": "high",
+    "privacy_sensitivity": "medium",
+    "expected_quality_focus": "next-step usefulness without manipulation"
+  }
+]

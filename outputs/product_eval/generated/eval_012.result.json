@@ -1,0 +1,68 @@
+{
+  "free_result": {
+    "temperature_score": 52,
+    "state_label": "忽冷忽熱",
+    "one_sentence_read": "約會後的回饋很正面，但後續互動明顯降溫，這種落差感特別讓人不安。",
+    "observed_signals": [
+      "約會當下很開心，回家後還主動傳訊說很放鬆",
+      "隔天開始回訊變慢，內容變得普通",
+      "前後互動熱度有明顯落差"
+    ],
+    "uncertainty_note": "單次約會後的互動變化，可能有很多原因，需要更多時間觀察才能確定趨勢。",
+    "paid_teaser": "想知道這種前熱後冷的訊號代表什麼，以及下一步該怎麼回應嗎？"
+  },
+  "insight_layer": {
+    "title": "約會後的溫度落差",
+    "explanation": "讓你困擾的不是約會不順利，而是那個從熱絡到平淡的轉換。當現實和期待之間出現落差時，人很自然會開始懷疑自己的判斷。",
+    "principle": "期待落差放大",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低",
+      "這種忽冷忽熱背後的可能原因"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "這種約會後的溫度變化很常見。對方在約會當下給正面回饋，但隔天互動降溫，可能代表他需要時間消化這次見面，或是生活節奏回到日常狀態。重點不是約會失敗，而是你們目前還在摸索彼此的互動節奏。",
+    "possible_interpretation": "目前訊號偏向：對方對約會本身應該是滿意的，但可能不確定要用什麼樣的頻率和深度繼續互動。這不一定是負面訊號，更像是他在觀察你們的關係要往哪個方向發展。",
+    "risk_warning": "現在直接問「是不是約會不順」會把壓力集中到你身上，也可能讓對方覺得你對一次互動變化反應過度。",
+    "what_not_to_do": [
+      "不要直接問約會是不是不順利",
+      "不要突然增加訊息頻率來測試反應",
+      "不要把他回訊變慢解讀成對你失去興趣"
+    ],
+    "reply_strategies": {
+      "主動推進": "分享一些輕鬆的生活動態，或提到約會時聊到的話題，保持自然的連結感。例如：「剛剛經過那家店，想起你說的那個故事」",
+      "低壓試探": "用很輕鬆的方式提到下次見面的可能性，但不要施壓。例如：「如果你有空的話，那部電影好像還不錯」",
+      "暫時拉開": "維持禮貌互動但不主動延續話題，給彼此一些空間，讓他有機會主動靠近。回應他的訊息但不急著開啟新話題。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "52°C",
+    "state_label": "忽冷忽熱",
+    "relationship_persona": "溫差觀察員",
+    "card_sentence": "你看見的不是答案，而是節奏的變化。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者容易在互動溫度出現落差時，開始質疑自己對情況的判斷",
+    "confidence": "medium",
+    "evidence": "從約會後互動變化直接推論到約會可能不順利，顯示對溫度變化較敏感",
+    "should_store": false,
+    "user_facing_summary": "你很容易察覺到互動裡的溫度變化，這份敏感有時能幫你注意到重要訊號，但也可能讓正常的節奏調整變得讓人不安。"
+  },
+  "metadata": {
+    "situation_type": "忽冷忽熱",
+    "input_length": 71,
+    "generated_at": "2026-05-16T14:10:49.765769+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

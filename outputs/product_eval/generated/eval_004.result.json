@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 42,
+    "state_label": "降溫觀望",
+    "one_sentence_read": "你的投入讓互動節奏產生了變化，他暫時退到觀察位置。",
+    "observed_signals": [
+      "前兩天主動丟話題和提未來計畫",
+      "你認真回應後立即已讀不回",
+      "互動節奏在你表現投入後明顯改變"
+    ],
+    "uncertainty_note": "單次已讀不回無法確定長期走向，需要觀察後續互動模式。",
+    "paid_teaser": "現在怎麼回應最關鍵，一步錯可能讓距離越拉越遠。"
+  },
+  "insight_layer": {
+    "title": "投入度不對等的節奏卡點",
+    "explanation": "有些人習慣在安全距離下主動，但當對方同等回應時，反而會本能地後退一步。這不是拒絕，而是重新校準距離的反應。",
+    "principle": "回應強度不對等反應",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "重點不是他突然不想聊，而是你們的互動強度在短時間內發生了明顯變化。他從主動提未來計畫，到你認真回應後立即消失，這通常表示他需要時間消化這個新的互動層級。",
+    "possible_interpretation": "目前訊號偏向「需要重新校準距離」而非完全失去興趣。他可能正在評估你們的互動是否符合他目前的期待節奏。",
+    "risk_warning": "現在最危險的是急著追問或解釋，這會讓壓力完全集中到你身上，反而確認他「退一步是對的」這個感覺。",
+    "what_not_to_do": [
+      "不要立即追問「怎麼不回」或「是不是我說錯什麼」",
+      "不要重複傳訊息解釋你的回應",
+      "不要因為焦慮而降低自己的回應標準"
+    ],
+    "reply_strategies": {
+      "主動推進": "等待2-3天後，用輕鬆話題重新開始，不提及這次的已讀不回。例如：「剛看到你之前說的那個地方，查了一下評價還不錯」",
+      "低壓試探": "保持正常社群活動，如果他有反應再自然回應。不刻意迴避但也不主動聯繫。",
+      "暫時拉開": "專注自己的事情，讓互動回到他比較舒適的節奏。如果他重新主動，再以相應但不過度的強度回應。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "42°C",
+    "state_label": "降溫觀望",
+    "relationship_persona": "節奏敏感觀察者",
+    "card_sentence": "你沒有做錯什麼，只是踩到了互動節奏的微妙點。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者能敏銳察覺互動節奏的變化，並且會擔心自己的投入程度影響關係發展",
+    "confidence": "medium",
+    "evidence": "明確觀察到投入後對方行為改變的時間點，並且立即反思自己行為的影響",
+    "should_store": false,
+    "user_facing_summary": "你很會察覺互動節奏的細微變化，這份敏感讓你能及早發現關係動態，但有時也會讓你對自己的每個回應都很在意。"
+  },
+  "metadata": {
+    "situation_type": "已讀不回",
+    "input_length": 72,
+    "generated_at": "2026-05-16T14:07:15.929183+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

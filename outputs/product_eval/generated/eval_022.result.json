@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 35,
+    "state_label": "主動性下降",
+    "one_sentence_read": "他還在，但回應的優先順序明顯往後移了。",
+    "observed_signals": [
+      "長時間在線但未回覆訊息",
+      "回覆模式與過往不同",
+      "你開始頻繁確認對方在線狀態"
+    ],
+    "uncertainty_note": "單次互動變化不能完全反映關係狀態，可能有其他因素影響回覆習慣。",
+    "paid_teaser": "想知道這種變化代表什麼，以及現在該怎麼回應最不會踩雷？"
+  },
+  "insight_layer": {
+    "title": "等待中的不安全感",
+    "explanation": "讓你不舒服的不是他沒回訊息，而是你知道他明明看得到，卻選擇先做別的事。這種「被看見但被延後」的感覺，比完全沒收到訊息更讓人想要一直確認。",
+    "principle": "回覆節奏不對等",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "他在線卻不回，可能有很多原因。解鎖後你會知道：現在最容易踩的雷是什麼，以及三種既能試探又不會顯得急躁的回應方式。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "對方在線但延遲回覆，通常代表他現在把回覆你的事情排在較後面的順序。這不一定代表關係變差，但確實顯示目前的互動重要性下降了。重點是他的回覆習慣改變了，而且你已經開始因為這個變化感到不安。",
+    "possible_interpretation": "他可能正在重新評估你們的互動節奏，或者單純是現在有其他事情佔據注意力。但無論原因是什麼，現在追問或表達不滿都可能讓壓力集中到你身上。",
+    "risk_warning": "最大的風險是你開始頻繁確認他的在線狀態，這會讓等待變得更痛苦，也可能讓你的下一則訊息帶著情緒或催促的語氣。",
+    "what_not_to_do": [
+      "不要直接問他為什麼看到不回",
+      "不要發第二則訊息催促回覆",
+      "不要一直確認他的在線狀態"
+    ],
+    "reply_strategies": {
+      "主動推進": "等他回覆後，用輕鬆的語氣說「看你在線想說你應該在忙，沒關係慢慢回」，既表達了你有注意到，也給了他台階下。",
+      "低壓試探": "先暫停主動發訊息，看看他會不會在接下來幾天主動聯繫你，或者在其他社群平台與你互動。",
+      "暫時拉開": "把注意力轉移到其他事情上，不要主動確認他的在線狀態。如果他真的在意這段關係，會主動回覆或解釋。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "35°C",
+    "state_label": "主動性下降",
+    "relationship_persona": "在線偵探型",
+    "card_sentence": "你看見的不是冷漠，而是優先順序的變化。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者容易透過對方的在線狀態和回覆時間差來判讀關係變化，並且會因為這種不一致而產生持續的關注和不安。",
+    "confidence": "medium",
+    "evidence": "使用者明確提到會盯著對方的上線狀態，並且對回覆模式的改變很敏感，顯示對互動節奏變化的高度關注。",
+    "should_store": false,
+    "user_facing_summary": "你很容易從互動細節中讀出關係變化，這份敏銳有時能提早察覺問題，但也可能讓等待變得更煎熬。"
+  },
+  "metadata": {
+    "situation_type": "回訊變慢但看限動",
+    "input_length": 69,
+    "generated_at": "2026-05-16T14:15:40.935208+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

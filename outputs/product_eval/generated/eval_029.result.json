@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 48,
+    "state_label": "低溫保留",
+    "one_sentence_read": "他用最低成本的方式保持聯繫，而你正在用限動測試自己在他心中的位置。",
+    "observed_signals": [
+      "回訊息頻率明顯下降",
+      "持續觀看限動",
+      "維持被動關注"
+    ],
+    "uncertainty_note": "看限動代表還有關注，但不主動回訊可能是投入度下降，也可能只是暫時忙碌。",
+    "paid_teaser": "想知道怎麼回應這種模糊訊號，又不讓自己顯得太在意？"
+  },
+  "insight_layer": {
+    "title": "限動成了你的安全感測試",
+    "explanation": "當對方回覆變少，你開始用發限動來確認自己還在他的注意範圍內。每次看到他有看，就像拿到一個小小的「還在乎」證明，但這種被動等待也讓你越來越依賴這些微小訊號。",
+    "principle": "低成本互動訊號",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "他看限動但不回訊息，代表他還有餘力關注你的生活，但可能不想承擔回覆的互動壓力。這種行為通常出現在對方想保持距離但不想完全斷聯的階段。",
+    "possible_interpretation": "目前訊號偏向他想降低互動頻率，但還沒有想要完全退出。看限動是一種低壓關注方式，讓他可以知道你的狀況，卻不用主動參與對話。",
+    "risk_warning": "繼續用限動測試可能會讓你越來越敏感他的回應，也容易讓互動變得更被動。如果他一直只看不回，這種模式可能會持續下去。",
+    "what_not_to_do": [
+      "連續發限動暗示他",
+      "直接問為什麼不回訊息",
+      "在限動裡發洩情緒"
+    ],
+    "reply_strategies": {
+      "主動推進": "直接但輕鬆地邀請他參與對話：「最近在忙什麼？好久沒聊了」，給他一個自然回應的機會。",
+      "低壓試探": "發一些不需要回覆但有趣的內容，觀察他的反應模式，例如分享生活趣事但不問問題。",
+      "暫時拉開": "減少主動聯繫和限動頻率，讓他有機會主動找你，同時專注在其他事情上。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "48°C",
+    "state_label": "低溫保留",
+    "relationship_persona": "限動觀察家",
+    "card_sentence": "有些關注不是沒有，只是換了方式存在。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者容易在直接溝通受阻時轉向間接方式尋求確認，對低成本互動訊號（如看限動）特別敏感。",
+    "confidence": "medium",
+    "evidence": "主動用限動測試對方反應，並從對方看限動的行為中尋求安全感確認。",
+    "should_store": true,
+    "user_facing_summary": "你很會注意到細微的關注訊號，這份敏感有時能保護你，但也可能讓你被小訊號牽著走。"
+  },
+  "metadata": {
+    "situation_type": "回訊變慢但看限動",
+    "input_length": 85,
+    "generated_at": "2026-05-16T14:18:33.238786+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

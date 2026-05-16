@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 25,
+    "state_label": "降溫觀望",
+    "one_sentence_read": "你的直接試探碰到了一面看不見的牆，他選擇用沉默來回應你的不安。",
+    "observed_signals": [
+      "直接詢問聊天意願後被已讀不回",
+      "已讀三小時仍無回應",
+      "你感受到追問的衝動但同時知道風險"
+    ],
+    "uncertainty_note": "三小時的沉默不能完全確定他的想法，但訊號偏向需要空間。",
+    "paid_teaser": "現在最關鍵的是下一步怎麼走，追問還是拉開？"
+  },
+  "insight_layer": {
+    "title": "被自己的問題卡住",
+    "explanation": "當你直接問「是不是不想聊」，其實是把選擇權交給對方，但也同時暴露了你的不安。現在的沉默讓你更焦慮，因為你等的不只是回覆，而是一個關於關係位置的答案。",
+    "principle": "直接試探後的沉默放大",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼化解已讀不回的尷尬"
+    ],
+    "preview_copy": "直接試探後的沉默最難處理，解鎖後你會知道：現在最不該做的一件事、三種不失控回法，以及怎麼化解已讀不回的尷尬。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "你的問題讓他陷入了一個微妙的位置：承認確實不想聊會顯得冷酷，否認又可能被理解為要繼續更密切的互動。所以他選擇不回應，用行動來回答你的問題。這種沉默本身就是一種回應方式。",
+    "possible_interpretation": "目前訊號顯示他可能需要一些空間，但不一定代表完全拒絕。沉默可能是因為不知道怎麼回應你的直接詢問，而不是對你完全失去興趣。",
+    "risk_warning": "現在再追問會讓壓力完全集中到你身上，可能會讓他覺得需要更明確地拉開距離。",
+    "what_not_to_do": [
+      "不要再問一次同樣的問題",
+      "不要解釋或補充剛才的問題",
+      "不要表達等待的焦慮感"
+    ],
+    "reply_strategies": {
+      "主動推進": "明天自然地分享一件輕鬆的事，像是「剛看到一個很好笑的事」，測試他會不會自然回應。如果有回應，就暫時不提剛才的問題。",
+      "低壓試探": "等一天後，用「昨天問得太直接了哈哈，我就是最近有點想太多」來化解尷尬，同時給他台階下。",
+      "暫時拉開": "讓這個問題自然沉澱，過幾天再用完全不相關的輕鬆話題重新開始，觀察他的回應節奏是否恢復。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "25°C",
+    "state_label": "降溫觀望",
+    "relationship_persona": "直接試探型",
+    "card_sentence": "有些問題問出口，答案就在沉默裡。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者傾向用直接詢問來緩解關係不確定感，但這種方式可能會增加互動壓力。",
+    "confidence": "medium",
+    "evidence": "用戶直接詢問對方是否不想聊天，顯示習慣透過明確詢問來處理模糊訊號，同時表達了對追問的內在衝突。",
+    "should_store": false,
+    "user_facing_summary": "你習慣用直接的方式處理不確定感，這份坦率有時能釐清狀況，但也可能在時機不對時增加壓力。"
+  },
+  "metadata": {
+    "situation_type": "已讀不回",
+    "input_length": 76,
+    "generated_at": "2026-05-16T14:07:42.787034+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

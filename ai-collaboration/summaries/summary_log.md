@@ -526,6 +526,48 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
 
+## 2026-05-16 Product Validation Calibration v0
+
+### Task Completed
+
+- Created 30 synthetic product evaluation inputs under `outputs/product_eval/raw/`.
+- Added `scripts/run_product_eval.py`.
+- Ran live generation for all 30 synthetic inputs and wrote outputs under `outputs/product_eval/generated/`.
+- Created `ai-collaboration/research/2026-05-16-product-validation-calibration-v0-review-bundle.md`.
+- Created Dcard calibration preparation files under `ai-collaboration/research/dcard_calibration/`.
+- Created `ai-collaboration/reports/2026-05-16-product-validation-calibration-v0-execution-report.md`.
+
+### Counts
+
+- Synthetic inputs created: `30`
+- Generated outputs: `30`
+
+### Review Bundle Path
+
+- `ai-collaboration/research/2026-05-16-product-validation-calibration-v0-review-bundle.md`
+
+### Dcard Calibration Template Path
+
+- `ai-collaboration/research/dcard_calibration/dcard_topic_calibration_template.md`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed.
+- `python3 -m py_compile experiments/ambiguous_temperature_v0/*.py` passed.
+- `python3 -m py_compile scripts/generate_product_sample.py` passed.
+- `python3 -m py_compile scripts/run_product_eval.py` passed.
+- `outputs/product_eval/raw/eval_manifest.json` is valid JSON.
+- `ai-collaboration/research/dcard_calibration/dcard_topic_calibration_schema.json` is valid JSON.
+- Live generation succeeded for all 30 synthetic inputs.
+
+### Known Technical Debt
+
+- None.
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
 ## 2026-05-16 Minimal Experiment Analysis Report
 
 ### Task Completed

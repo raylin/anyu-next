@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 52,
+    "state_label": "忽冷忽熱",
+    "one_sentence_read": "他在用間歇性的熱度維持連結，但沒有穩定投入。",
+    "observed_signals": [
+      "連續找你聊好幾天後突然消失",
+      "在你快放下時主動丟話題",
+      "循環性的熱絡和冷淡"
+    ],
+    "uncertainty_note": "這種模式可能反映他對關係的矛盾感受，但單從互動頻率無法確定他的實際想法。",
+    "paid_teaser": "想知道如何打破這個讓人疲累的循環？"
+  },
+  "insight_layer": {
+    "title": "間歇性關注的迷惑",
+    "explanation": "最累人的不是被拒絕，而是那種時有時無的關注。他給的溫度剛好讓你無法放棄，卻也不足以讓你安心。你被困在「也許他是真的忙」和「為什麼又消失了」之間。",
+    "principle": "間歇性增強效應",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "怎麼打破被動等待循環",
+      "三種測試對方投入度的方式",
+      "什麼時候該主動喊停"
+    ],
+    "preview_copy": "解鎖後你會看到：怎麼打破被動等待循環、三種測試對方投入度的方式，以及什麼時候該主動喊停。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "他的互動模式顯示一種矛盾：既想保持連結，又不願意承擔穩定互動的成本。連續幾天熱絡代表他有投入能力，突然消失則可能是在控制距離感。最關鍵的是，他總在你快要放下時回來，這說明他能感知到你的節奏變化。",
+    "possible_interpretation": "目前訊號偏向「低成本維持」，他可能享受你的關注但還沒準備好更深的投入。不過也可能是他自己對關係感到困惑，用進進退退來測試彼此的界限。",
+    "risk_warning": "這種模式容易讓你的情緒跟著他的節奏起伏，長期下來會消耗你對關係的判斷力。",
+    "what_not_to_do": [
+      "不要在他消失時連續傳訊息詢問",
+      "不要每次他回來時都立刻熱烈回應",
+      "不要試圖分析他每次消失的原因"
+    ],
+    "reply_strategies": {
+      "主動推進": "下次他熱絡時，可以直接提出：「我們找個時間好好聊聊彼此的想法吧」，把關係推向更明確的方向。",
+      "低壓試探": "當他又開始冷淡時，可以說：「最近比較忙嗎？我這邊沒什麼急事，你方便再聊」，測試他的回應。",
+      "暫時拉開": "選擇不立刻回應他丟來的話題，讓他體驗一下主動維持對話的感覺，觀察他會如何調整。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "52°C",
+    "state_label": "忽冷忽熱",
+    "relationship_persona": "溫差敏感觀察員",
+    "card_sentence": "你感受到的不是錯覺，而是那個人給的溫度本來就不穩定。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對間歇性關注模式特別敏感，容易在對方的冷熱循環中產生情緒波動。",
+    "confidence": "medium",
+    "evidence": "明確描述了被對方的熱絡-消失-回歸模式影響，表達了疲累感但又無法斷乾淨的矛盾狀態。",
+    "should_store": false,
+    "user_facing_summary": "你對關係溫度的變化很敏感，這讓你能察覺細微的互動變化，但也容易在不穩定的模式中感到疲累。"
+  },
+  "metadata": {
+    "situation_type": "忽冷忽熱",
+    "input_length": 66,
+    "generated_at": "2026-05-16T14:11:18.547473+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

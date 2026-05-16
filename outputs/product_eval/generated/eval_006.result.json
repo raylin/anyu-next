@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 32,
+    "state_label": "降溫觀望",
+    "one_sentence_read": "你感受到的不是被拒絕，而是對方暫時把決定權留白了。",
+    "observed_signals": [
+      "看了邀約訊息但沒有回覆",
+      "你需要猜測對方的想法",
+      "你開始反覆檢查聊天視窗"
+    ],
+    "uncertainty_note": "單次沒回覆可能有很多原因，需要更多互動脈絡才能判斷整體投入度。",
+    "paid_teaser": "想知道現在該主動追問、低壓試探，還是暫時拉開？解鎖看三種不失控的回法。"
+  },
+  "insight_layer": {
+    "title": "卡在模糊地帶的焦慮感",
+    "explanation": "讓你卡住的不是他沒回覆，而是他看了卻沒有明確表態。這種模糊狀態會讓人開始猜測，因為你既看不到明確拒絕，也得不到肯定回應。",
+    "principle": "模糊訊號放大",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "重點不是他沒空回覆，而是他選擇看了之後暫時不表態。這可能代表他需要時間思考，也可能代表這個邀約對他來說不是優先選項。但單次互動很難確定整體投入度。",
+    "possible_interpretation": "目前訊號偏向保留，但不代表完全沒興趣。可能是時間安排、心情狀態，或者他習慣不立即回覆需要思考的邀約。",
+    "risk_warning": "現在直接追問可能會讓壓力集中到你身上，讓對方覺得需要立刻給答案。",
+    "what_not_to_do": [
+      "立刻再問一次看展的事",
+      "解釋為什麼想約他",
+      "暗示他應該要回覆你"
+    ],
+    "reply_strategies": {
+      "主動推進": "等2-3天後，用別的話題自然開啟對話，再看他的回應狀況決定是否重提邀約。",
+      "低壓試探": "分享一個輕鬆的日常動態，看他會不會主動回應，測試目前互動意願。",
+      "暫時拉開": "先把注意力轉到自己的事情上，如果他有興趣會主動提起，如果沒有你也保留了尊嚴。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "32°C",
+    "state_label": "降溫觀望",
+    "relationship_persona": "已讀偵探型",
+    "card_sentence": "你看見的不是答案，而是節奏的變化。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者在收到模糊回應時容易進入反覆確認模式，同時很在意在關係中的主動位置。",
+    "confidence": "medium",
+    "evidence": "描述了盯著聊天視窗的行為，以及擔心看起來像在拜託對方的心理狀態。",
+    "should_store": false,
+    "user_facing_summary": "你很在意在關係中保持平等位置，這份敏感能保護你不失控，但也可能讓等待變得更煎熬。"
+  },
+  "metadata": {
+    "situation_type": "已讀不回",
+    "input_length": 70,
+    "generated_at": "2026-05-16T14:08:10.229910+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

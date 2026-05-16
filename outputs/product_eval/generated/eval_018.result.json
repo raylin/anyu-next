@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 52,
+    "state_label": "忽冷忽熱",
+    "one_sentence_read": "你感受到的不是他的心情起伏，而是你們之間互動節奏的不穩定。",
+    "observed_signals": [
+      "有時回覆一大段並主動延續細節",
+      "有時突然只回一兩個字",
+      "變化沒有固定規律"
+    ],
+    "uncertainty_note": "這種溫差變化可能有多種原因，單憑回覆方式還無法確定他對你的投入程度。",
+    "paid_teaser": "想知道怎麼應對這種忽冷忽熱，而不是每次都重新猜測？"
+  },
+  "insight_layer": {
+    "title": "不規律的回應節奏",
+    "explanation": "當對方的回覆方式起伏很大時，你自然會開始尋找規律，試圖預測下一次互動。但這種不確定感本身，就是讓人覺得疲累的原因。",
+    "principle": "回覆節奏不對等",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種穩住自己節奏的回法",
+      "怎麼測試對方投入度但不踩雷"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種穩住自己節奏的回法，以及怎麼測試對方投入度但不踩雷。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "這種忽冷忽熱的模式通常代表對方在你們的互動中還沒找到穩定的定位。一大段回覆顯示他有投入的能力，短回覆可能是當下狀態或優先順序的反映，而不是對你的態度改變。",
+    "possible_interpretation": "目前訊號偏向：他對你有興趣但投入程度不穩定，可能還在試探合適的互動方式，或是他本身就習慣這種彈性回覆模式。",
+    "risk_warning": "最大的風險是你開始根據他的回覆長度調整自己的情緒和期待，這會讓你在關係中變得被動。",
+    "what_not_to_do": [
+      "不要根據他的回覆長度立刻調整自己的熱度",
+      "不要直接問他為什麼有時候回很多有時候回很少",
+      "不要因為他短回覆就故意也短回覆"
+    ],
+    "reply_strategies": {
+      "主動推進": "保持你自己的回覆風格穩定，該詳細時詳細，該簡潔時簡潔，讓他適應你的節奏而不是相反。",
+      "低壓試探": "偶爾在他長回覆時順勢深入聊下去，看他是否會持續這種投入度，但不要每次都這樣做。",
+      "暫時拉開": "維持禮貌回應但不主動開話題一兩天，觀察他是否會主動找你或改變回覆模式。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "52°C",
+    "state_label": "忽冷忽熱",
+    "relationship_persona": "溫差觀察員",
+    "card_sentence": "你感受到的不是情緒，而是節奏的不確定。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者容易根據對方回覆方式的變化調整自己的期待和行動策略",
+    "confidence": "medium",
+    "evidence": "用戶明確表達對回覆長度變化的敏感度，以及擔心踩錯步的心理狀態",
+    "should_store": false,
+    "user_facing_summary": "你很容易從對方的回覆方式中讀出訊息，這份敏感讓你能察覺變化，但也可能讓每次對話都變成猜測遊戲。"
+  },
+  "metadata": {
+    "situation_type": "忽冷忽熱",
+    "input_length": 78,
+    "generated_at": "2026-05-16T14:13:50.859298+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

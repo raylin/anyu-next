@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 35,
+    "state_label": "低溫保留",
+    "one_sentence_read": "他維持著一條細細的互動線，但避開需要認真回應的對話。",
+    "observed_signals": [
+      "正經問題已讀不回",
+      "限動會回表情符號",
+      "選擇性回應模式"
+    ],
+    "uncertainty_note": "單從這些訊號無法確定對方的完整想法，需要更多互動脈絡才能判斷。",
+    "paid_teaser": "想知道這種「選擇性回應」背後可能的考量，以及你現在最適合的下一步嗎？"
+  },
+  "insight_layer": {
+    "title": "訊號不對等的卡住感",
+    "explanation": "讓你卡住的不是他完全不理你，而是他用最低成本的方式維持存在感，卻避開需要投入的對話。這種不對等讓你很難決定下一步。",
+    "principle": "低成本互動訊號",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "他在用表情回限動，代表他有在關注你，但選擇跳過需要思考和投入的私訊。這不是完全拒絕，但確實顯示他現在的互動意願偏向輕鬆、無壓力的接觸。",
+    "possible_interpretation": "目前訊號顯示他想保持某種連結，但不想承擔深度對話的負擔。可能是時間考量、情緒狀態，或是對關係進展的保守態度。",
+    "risk_warning": "直接追問為什麼不回私訊，很可能會讓他感受到壓力，反而讓互動變得更尷尬。",
+    "what_not_to_do": [
+      "不要連續私訊追問",
+      "不要在限動下留言暗示他沒回私訊",
+      "不要突然停止發限動測試他的反應"
+    ],
+    "reply_strategies": {
+      "主動推進": "下次發限動時，可以分享一些他可能有想法的內容，看他會不會主動開啟話題。",
+      "低壓試探": "用輕鬆的方式重新包裝之前的問題，或是換個時間點用更casual的語氣再試一次。",
+      "暫時拉開": "先暫停私訊，專注在限動互動，觀察一段時間看他會不會主動私訊你。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "35°C",
+    "state_label": "低溫保留",
+    "relationship_persona": "微訊號觀察家",
+    "card_sentence": "你不是想太多，只是你太會看見細節。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對「低成本互動」很敏感，例如限動回應、表情符號，容易把這些當成關係訊號進行解讀。",
+    "confidence": "medium",
+    "evidence": "使用者明確提到注意到對方在限動回表情但私訊不回的差別，並且在思考這種行為的含義。",
+    "should_store": false,
+    "user_facing_summary": "你很容易注意到互動裡的小變化，這份敏感有時能保護你，但也可能讓模糊訊號變得更吵。"
+  },
+  "metadata": {
+    "situation_type": "已讀不回",
+    "input_length": 78,
+    "generated_at": "2026-05-16T14:08:57.341286+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 42,
+    "state_label": "行為差距觀望",
+    "one_sentence_read": "他在其他地方很活躍，但對你的回應節奏明顯下調了。",
+    "observed_signals": [
+      "回訊息速度明顯放慢",
+      "同時期社群發文頻率反而增加",
+      "主動解釋忙碌但行為不完全吻合"
+    ],
+    "uncertainty_note": "單一行為差距不能完全判斷關係變化，還需要觀察更多互動模式。",
+    "paid_teaser": "這種行為差距背後可能有多種原因，解鎖看完整分析和你的最佳回應策略。"
+  },
+  "insight_layer": {
+    "title": "行為差距讓人更想找答案",
+    "explanation": "當對方說很忙，卻同時在社群上很活躍，這種不一致會自然地讓你開始尋找背後的原因。你在觀察的不只是他的行程安排，而是自己在他優先順序裡的位置。",
+    "principle": "行為一致性觀察",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "重點不是他完全沒空滑手機，而是他選擇把時間分給社群分享，但暫時沒有優先回覆你。這可能代表他現在對這段關係的投入度下降，也可能是他需要一些空間但不知道怎麼直說。",
+    "possible_interpretation": "目前訊號偏向他在這段關係裡暫時降低了主動性，但還沒有完全退出。他給出的忙碌解釋可能是真的，也可能是為了避免直接討論關係變化。",
+    "risk_warning": "現在直接質疑他的行為一致性，很容易讓他覺得被監控或被施壓，反而會加速他真正的疏離。",
+    "what_not_to_do": [
+      "不要直接問為什麼有空發文沒空回訊息",
+      "不要開始計算他發文和回你訊息的時間差",
+      "不要用「我看你明明有在滑手機」這種話"
+    ],
+    "reply_strategies": {
+      "主動推進": "用輕鬆的方式分享你的日常，不期待立即回覆，但維持互動的自然感。例如：「今天遇到一件有趣的事」然後正常分享，不追問他的狀況。",
+      "低壓試探": "偶爾在他發文時給個自然的回應，觀察他會不會主動延續對話。這樣可以測試他對互動的開放程度，但不會造成壓力。",
+      "暫時拉開": "暫停主動發起對話，專注在自己的生活上。如果他開始主動聯繫，代表他還是在意的；如果沒有，你也為自己保留了尊嚴。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "42°C",
+    "state_label": "行為差距觀望",
+    "relationship_persona": "行為觀察家",
+    "card_sentence": "你看見的不是矛盾，而是優先順序的重新排列。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對於對方行為一致性很敏感，容易從行為差距中尋找關係變化的線索。",
+    "confidence": "medium",
+    "evidence": "能夠注意到對方回訊速度與社群活躍度的差異，並且會主動分析這種差距的意義。",
+    "should_store": false,
+    "user_facing_summary": "你很容易注意到別人行為的不一致，這份觀察力有時能幫你及早發現變化，但也可能讓你過度解讀正常的優先順序調整。"
+  },
+  "metadata": {
+    "situation_type": "回訊變慢但看限動",
+    "input_length": 70,
+    "generated_at": "2026-05-16T14:16:07.918444+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}

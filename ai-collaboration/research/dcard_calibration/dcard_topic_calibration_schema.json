@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dcard_topic_calibration_schema.json",
+  "title": "Dcard Topic Calibration Note",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "url_or_ref",
+    "title",
+    "board",
+    "posted_date",
+    "theme",
+    "user_question",
+    "emotional_trigger",
+    "action_pressure",
+    "social_signal",
+    "product_mapping",
+    "landing_hook_candidate",
+    "should_adjust_mvp",
+    "notes"
+  ],
+  "properties": {
+    "source": {
+      "type": "string",
+      "const": "dcard_manual"
+    },
+    "url_or_ref": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "board": {
+      "type": "string",
+      "const": "relationship"
+    },
+    "posted_date": {
+      "type": "string"
+    },
+    "theme": {
+      "type": "string"
+    },
+    "user_question": {
+      "type": "string"
+    },
+    "emotional_trigger": {
+      "type": "string"
+    },
+    "action_pressure": {
+      "type": "string"
+    },
+    "social_signal": {
+      "type": "string"
+    },
+    "product_mapping": {
+      "type": "string"
+    },
+    "landing_hook_candidate": {
+      "type": "string"
+    },
+    "should_adjust_mvp": {
+      "type": "boolean"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

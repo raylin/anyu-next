@@ -1,0 +1,67 @@
+{
+  "free_result": {
+    "temperature_score": 35,
+    "state_label": "降溫觀望",
+    "one_sentence_read": "他有能力回應但選擇暫停，這個落差讓你陷入要不要主動的兩難。",
+    "observed_signals": [
+      "邀約後已讀不回",
+      "同時間正常發限動和社交活動",
+      "回應優先順序明顯下降"
+    ],
+    "uncertainty_note": "單一次互動無法確定對方的完整態度，可能是時機不對或其他因素。",
+    "paid_teaser": "現在補句話可能會讓壓力集中到你身上，但完全不動又怕錯過機會。"
+  },
+  "insight_layer": {
+    "title": "被懸在回與不回之間",
+    "explanation": "讓你卡住的不是他回得慢，而是他沒有完全消失，卻也沒有穩定靠近。這種模糊狀態會讓人開始反覆思考每個細節。",
+    "principle": "模糊訊號放大",
+    "user_facing": true
+  },
+  "paid_preview": {
+    "headline": "解鎖下一句怎麼回",
+    "price": "NT$49",
+    "included_sections": [
+      "現在最不該做的一件事",
+      "三種不失控回法",
+      "怎麼測對方投入度但不把自己放低"
+    ],
+    "preview_copy": "重點不是他完全沒空，而是他有在社群上活動，卻暫時沒有接你的邀約。現在直接追問可能會讓壓力集中到你身上。"
+  },
+  "paid_result": {
+    "deeper_signal_analysis": "對方目前的訊號是：有社交能量，但暫時沒有把你的邀約放在優先處理清單上。這不等於拒絕，但確實代表投入度下降。",
+    "possible_interpretation": "可能他現在不確定怎麼回應，或是對見面這件事還在考慮中。也可能是其他生活重心佔據了他的注意力。",
+    "risk_warning": "直接追問或表達焦慮會讓這個互動變成壓力點，可能讓他更傾向迴避。",
+    "what_not_to_do": [
+      "直接問「為什麼不回我」",
+      "用另一個邀約當作試探",
+      "在限動底下留言製造存在感"
+    ],
+    "reply_strategies": {
+      "主動推進": "過幾天後用輕鬆話題重新開啟對話，不提之前的邀約，等互動回溫再說。",
+      "低壓試探": "分享一個有趣的日常，看他會不會主動回應，測試他目前的互動意願。",
+      "暫時拉開": "暫停主動聯繫，專注自己的生活，讓他有空間主動聯繫你。"
+    }
+  },
+  "share_card": {
+    "temperature_label": "35°C",
+    "state_label": "降溫觀望",
+    "relationship_persona": "微訊號觀察家",
+    "card_sentence": "你不是想太多，只是你太會看見細節。"
+  },
+  "personal_pattern_candidate": {
+    "pattern": "使用者對互動優先順序很敏感，容易在對方同時有其他社交活動但不回應自己時感到卡住。",
+    "confidence": "medium",
+    "evidence": "注意到對方發限動和朋友聚會，同時糾結於要不要補句話的反應。",
+    "should_store": false,
+    "user_facing_summary": "你很容易注意到互動裡的優先順序變化，這份敏感有時能保護你，但也可能讓等待變得更難受。"
+  },
+  "metadata": {
+    "situation_type": "已讀不回",
+    "input_length": 68,
+    "generated_at": "2026-05-16T14:06:03.486090+00:00",
+    "experiment_id": "ambiguous-temperature-fake-door-v0",
+    "variant": "B",
+    "model_provider": "anthropic",
+    "model_name": "claude-sonnet-4-20250514"
+  }
+}
