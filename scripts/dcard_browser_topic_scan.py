@@ -22,7 +22,18 @@ DEFAULT_OUTPUT = (
     / "dcard_browser_topic_scan_notes.jsonl"
 )
 
-BLOCK_TERMS = ("驗證", "captcha", "登入", "註冊", "sign in", "log in")
+BLOCK_TERMS = (
+    "驗證",
+    "captcha",
+    "登入",
+    "註冊",
+    "sign in",
+    "log in",
+    "attention required",
+    "you have been blocked",
+    "unable to access",
+    "cloudflare",
+)
 THEME_RULES = (
     ("回訊變慢但看限動", ("看限動", "限動", "回訊變慢", "回很慢")),
     ("已讀不回", ("已讀不回", "讀不回", "不回訊息")),
@@ -103,7 +114,7 @@ def main() -> int:
         if page_looks_blocked(page):
             browser.close()
             args.output.write_text("", encoding="utf-8")
-            print("Board page appears blocked by login wall, captcha, or access wall.")
+            print("Board page appears blocked by login wall, captcha, Cloudflare, or another access wall.")
             print(f"Created empty output file at {args.output}.")
             return 1
 

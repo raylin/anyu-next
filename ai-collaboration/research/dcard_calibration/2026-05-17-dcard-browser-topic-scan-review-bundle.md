@@ -2,45 +2,42 @@
 
 ## 1. Overview
 
-This bundle documents the minimal Playwright-based Dcard browser topic scan workflow for public relationship-board topic calibration.
+This bundle records the first real smoke test of the minimal Playwright-based Dcard browser topic scan.
 
 Goal:
 
-- test whether a normal browser session can expose enough lightweight public topic signals to calibrate the current `曖昧溫度計` direction
+- test whether a normal automated browser session can access the public Dcard relationship board and expose enough lightweight topic signals for calibration
 
 ## 2. Method
 
-Planned method:
+Smoke-test flow:
 
-1. open `https://www.dcard.tw/f/relationship`
-2. collect a small number of visible article URLs
-3. visit each article URL
-4. store only:
-   - URL
-   - title
-   - short visible snippet
-   - lightweight visible comment patterns up to a small limit
+1. launch local Playwright Chromium
+2. open `https://www.dcard.tw/f/relationship`
+3. stop immediately if a browser-visible access wall appears
+4. otherwise discover up to a small number of article URLs and extract lightweight signals
 
 Guardrails:
 
 - no login
+- no cookies from a user profile
 - no proxying
 - no anti-bot bypass
-- no large-scale crawling
+- no large-scale scraping
 - no raw post archiving
 
 ## 3. Run Configuration
 
-Intended default command:
+Command used:
 
 ```bash
-python3 scripts/dcard_browser_topic_scan.py --max-posts 5 --max-comments 3
+PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers .venv/bin/python scripts/dcard_browser_topic_scan.py --max-posts 5 --max-comments 3
 ```
 
-Default script settings:
+Configuration:
 
 - board URL: `https://www.dcard.tw/f/relationship`
-- max posts: `10`
+- max posts: `5`
 - max comments: `3`
 - headless: `true`
 
@@ -48,73 +45,78 @@ Default script settings:
 
 - `0`
 
-Reason:
-
-- Playwright is not installed in the current environment, so the browser scan could not start.
-
 ## 5. Articles Processed
 
 - `0`
 
 ## 6. Fetch / Browser Results
 
-Observed failure mode:
+Observed result:
 
-- setup blocker before browser launch
-- Playwright Python package not installed
+- Playwright launched successfully
+- Chromium opened the board URL successfully
+- the board page rendered a Cloudflare block page before any board content became available
 
-Manual setup required:
+Observed page signals:
 
-```bash
-python3 -m pip install playwright
-python3 -m playwright install chromium
-```
+- title: `Attention Required! | Cloudflare`
+- visible message included:
+  - `Sorry, you have been blocked`
+  - `You are unable to access dcard.tw`
 
-No browser-visible access wall, captcha, or login wall was observed yet because the script did not reach runtime browsing.
+Script outcome:
+
+- exited with:
+  - `Board page appears blocked by login wall, captcha, Cloudflare, or another access wall.`
+- created an empty notes file
 
 ## 7. Theme Distribution
 
-Pending once Playwright is installed and a small scan can run.
+- none
+
+Reason:
+
+- no article content was accessible in the browser session
 
 ## 8. Action Pressure Patterns
 
-Pending once Playwright is installed and a small scan can run.
+- none
 
 ## 9. Social Signal Patterns
 
-Pending once Playwright is installed and a small scan can run.
+- none
 
 ## 10. Comment Signal Summary
 
-Pending once Playwright is installed and a small scan can run.
+- none
+
+Comments were not reached because no article pages were processed.
 
 ## 11. Product Mapping Summary
 
-Pending once Playwright is installed and a small scan can run.
+- none
 
 ## 12. Landing Hook Candidates
 
-Pending once Playwright is installed and a small scan can run.
+- none
 
 ## 13. Potential MVP Adjustments
 
-No recommendation yet.
+No product-direction recommendation from this run.
 
-The workflow is ready to test whether:
+Current conclusion:
 
-- the current three primary situation types remain the right v0 focus
-- `社群微訊號` should become a broader category
-- a fourth situation type should be added
+- browser-assisted public reading is blocked in this environment before any Dcard topic data becomes accessible
 
 ## 14. Data Quality / Limitations
 
-- browser scan not executed yet
-- no real article data collected
-- note extraction heuristics are intentionally simple
-- browser-visible blocking behavior is still unknown in this environment
+- zero topic data collected
+- Cloudflare blocked the automated browser at the board page
+- the smoke test proves the failure mode, but not the topic distribution
+- the script now explicitly detects this block condition
 
 ## 15. Issues For ChatGPT Review
 
-1. Is the current script shape the right minimal pre-install baseline, or should browser setup be separated from scan logic even more clearly?
-2. Once Playwright is installed, should the first scan stay at `5` posts or go lower for an even safer smoke test?
-3. Should `comment_signal_summary` stay rule-based in v0, or is a slightly richer manual review step better than adding more heuristics?
+1. Given the Cloudflare block, should Dcard calibration move to manual browser observation plus manual note entry instead of more automation?
+2. Is it still worth keeping the Playwright script as a diagnostic tool even if it cannot access content in this environment?
+3. Should future topic calibration pivot toward manually supplied snippets/titles instead of browser collection?

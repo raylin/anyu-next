@@ -826,3 +826,48 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - Whether a normal Playwright browser session can access Dcard public pages without a browser-visible block wall.
 - Whether the current selectors are robust enough once live pages are available.
 - Whether `max-posts=5` is the right first smoke-test size after setup.
+
+## 2026-05-17 Dcard Browser Topic Scan Smoke Test
+
+### Task Completed
+
+- Created `ai-collaboration/handoffs/2026-05-17-dcard-browser-topic-scan-smoke-test-handoff.md`.
+- Installed Playwright into a local `.venv/`.
+- Downloaded Chromium into `.playwright-browsers/`.
+- Ran a real browser smoke test for `scripts/dcard_browser_topic_scan.py`.
+- Updated the browser review bundle with the actual Cloudflare failure mode.
+- Created `ai-collaboration/reports/2026-05-17-dcard-browser-topic-scan-smoke-test-execution-report.md`.
+
+### Workflow Paths
+
+- script: `scripts/dcard_browser_topic_scan.py`
+- output notes: `ai-collaboration/research/dcard_calibration/dcard_browser_topic_scan_notes.jsonl`
+- review bundle: `ai-collaboration/research/dcard_calibration/2026-05-17-dcard-browser-topic-scan-review-bundle.md`
+
+### Run Result
+
+- command run: `PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers .venv/bin/python scripts/dcard_browser_topic_scan.py --max-posts 5 --max-comments 3`
+- result: browser launched, but board page was blocked by Cloudflare before any article discovery
+- URLs discovered: `0`
+- articles processed: `0`
+
+### Validation Results
+
+- `python3 -m py_compile scripts/dcard_browser_topic_scan.py` passed.
+- local Playwright install succeeded inside `.venv/`.
+- local Chromium install succeeded inside `.playwright-browsers/`.
+- browser diagnostic confirmed page title `Attention Required! | Cloudflare`.
+
+### Known Technical Debt
+
+- None.
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Unresolved Questions
+
+- Whether the Cloudflare block is environment-specific or a stable response to browser automation.
+- Whether Dcard calibration should now pivot to manual browser reading plus manual notes.
+- Whether the Playwright script should remain as a diagnostic-only tool.
