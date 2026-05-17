@@ -43,6 +43,8 @@ This workflow is semi-automated:
   - generated summarized notes from the script
 - `dcard_browser_topic_scan_notes.jsonl`
   - generated notes from the minimal Playwright browser scan
+- `external_json/`
+  - privacy-minimized notes, summary JSON, and review bundle generated from externally collected Dcard-like JSON
 - `2026-05-16-dcard-topic-calibration-v0-review-bundle.md`
   - current review bundle
 - `2026-05-17-dcard-browser-topic-scan-review-bundle.md`
@@ -60,6 +62,12 @@ Browser-assisted scan:
 
 ```bash
 python3 scripts/dcard_browser_topic_scan.py --max-posts 10 --max-comments 3
+```
+
+External JSON calibration:
+
+```bash
+python3 scripts/external_dcard_json_calibration.py --input ai-collaboration/output-0517.jsonl
 ```
 
 Manual setup for the browser script:
@@ -81,6 +89,14 @@ And writes:
 ai-collaboration/research/dcard_calibration/dcard_topic_calibration_notes.jsonl
 ```
 
+The external JSON calibration writes:
+
+```text
+ai-collaboration/research/dcard_calibration/external_json/external_dcard_calibration_notes.jsonl
+ai-collaboration/research/dcard_calibration/external_json/external_dcard_calibration_summary.json
+ai-collaboration/research/dcard_calibration/external_json/2026-05-17-external-dcard-json-calibration-v0-review-bundle.md
+```
+
 If no URLs are present, the script exits cleanly, prints a clear message, and creates an empty JSONL output file.
 
 ## Current Limitations
@@ -91,3 +107,5 @@ If no URLs are present, the script exits cleanly, prints a clear message, and cr
 - Default behavior does not use an LLM for structuring.
 - If Dcard blocks normal HTTP access, the workflow records that and leaves the item for manual note entry later.
 - The browser scan depends on a manual Playwright + Chromium setup and may still hit a browser-visible access wall.
+- External JSON calibration is currently the preferred path when Dcard automation is blocked.
+- External raw JSON inputs may contain real content and should stay uncommitted; only the minimized calibration outputs should be reviewed or committed.

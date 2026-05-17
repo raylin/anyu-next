@@ -2,3 +2,40 @@
 # Lines starting with # are ignored.
 # Use only public URLs that do not require login or bypassing restrictions.
 # https://www.dcard.tw/f/relationship/p/123456789
+https://www.dcard.tw/f/mood/p/261491545
+https://www.dcard.tw/f/relationship/p/261490842
+https://www.dcard.tw/f/mood/p/261494683
+https://www.dcard.tw/f/girl/p/261491823
+https://www.dcard.tw/f/relationship/p/261490803
+https://www.dcard.tw/f/girl/p/261493190
+https://www.dcard.tw/f/talk/p/261488067
+https://www.dcard.tw/f/relationship/p/261491795
+https://www.dcard.tw/f/mood/p/261493332
+https://www.dcard.tw/f/funny/p/261489922
+https://www.dcard.tw/f/talk/p/261492331
+https://www.dcard.tw/f/entertainer/p/261494601
+https://www.dcard.tw/f/mood/p/261492233
+https://www.dcard.tw/f/relationship/p/261489376
+https://www.dcard.tw/f/entertainer/p/261494598
+https://www.dcard.tw/f/talk/p/261489513
+https://www.dcard.tw/f/relationship/p/261491439
+https://www.dcard.tw/f/house_purchase/p/261493257
+https://www.dcard.tw/f/house_purchase/p/261491087
+https://www.dcard.tw/f/partner_selection_criteria/p/261490364
+https://www.dcard.tw/f/relationship/p/261491483
+https://www.dcard.tw/f/mood/p/261492797
+https://www.dcard.tw/f/relationship/p/261494124
+https://www.dcard.tw/f/relationship/p/261488837
+https://www.dcard.tw/f/trending/p/261491659
+https://www.dcard.tw/f/talk/p/261489499
+https://www.dcard.tw/f/talk/p/261488740
+https://www.dcard.tw/f/mood/p/261492422
+https://www.dcard.tw/f/relationship/p/261488893
+https://www.dcard.tw/f/relationship/p/261489042
+https://www.dcard.tw/f/relationship/p/261489715
+https://www.dcard.tw/f/relationship/p/261488459
+https://www.dcard.tw/f/relationship/p/261490444
+https://www.dcard.tw/f/relationship/p/261488564
+https://www.dcard.tw/f/relationship/p/261492649
+https://www.dcard.tw/f/relationship/p/261490038
+https://www.dcard.tw/f/relationship/p/261490039

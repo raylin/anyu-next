@@ -871,3 +871,60 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - Whether the Cloudflare block is environment-specific or a stable response to browser automation.
 - Whether Dcard calibration should now pivot to manual browser reading plus manual notes.
 - Whether the Playwright script should remain as a diagnostic-only tool.
+
+## 2026-05-17 External Dcard JSON Calibration v0
+
+### Task Completed
+
+- Added `scripts/external_dcard_json_calibration.py`.
+- Created `ai-collaboration/research/dcard_calibration/external_json/` outputs.
+- Ran calibration on `ai-collaboration/output-0517.jsonl`.
+- Generated notes, summary JSON, and review bundle.
+- Updated the Dcard calibration README.
+- Created `ai-collaboration/reports/2026-05-17-external-dcard-json-calibration-v0-execution-report.md`.
+
+### Input Source
+
+- `ai-collaboration/output-0517.jsonl`
+
+### Output Paths
+
+- notes: `ai-collaboration/research/dcard_calibration/external_json/external_dcard_calibration_notes.jsonl`
+- summary: `ai-collaboration/research/dcard_calibration/external_json/external_dcard_calibration_summary.json`
+- review bundle: `ai-collaboration/research/dcard_calibration/external_json/2026-05-17-external-dcard-json-calibration-v0-review-bundle.md`
+
+### Processing Results
+
+- posts processed: `20`
+- skipped posts: `0`
+- top product families:
+  - `伴侶價值觀雷達`
+  - `關係紅旗雷達`
+  - `親密落差解讀`
+- current MVP family count (`曖昧溫度計` + `下一句怎麼回`): `5`
+- broader adjacent family count: `11`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed.
+- `python3 -m py_compile scripts/external_dcard_json_calibration.py` passed.
+- `python3 -m py_compile scripts/dcard_topic_calibration.py` passed.
+- `python3 -m py_compile scripts/dcard_browser_topic_scan.py` passed.
+- `python3 -m py_compile scripts/run_product_eval.py` passed.
+- notes JSONL parses and contains `20` rows.
+- summary JSON parses successfully.
+- privacy minimization check passed.
+
+### Known Technical Debt
+
+- None.
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Unresolved Questions
+
+- Whether `關係紅旗雷達` should be the next product family after `曖昧溫度計`.
+- Whether `親密落差解讀` is too sensitive for an early paid consumer surface.
+- Whether `Relationship Radar general` should be broken into narrower future families sooner.

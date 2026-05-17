@@ -15,3 +15,6 @@ build/
 # Local experiment outputs
 outputs/experiments/**/*.jsonl
 outputs/experiments/**/experiment_report.md
+
+# External raw calibration inputs
+ai-collaboration/output-*.jsonl

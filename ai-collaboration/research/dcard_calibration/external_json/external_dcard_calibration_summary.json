@@ -1,0 +1,69 @@
+{
+  "input_posts": 20,
+  "processed_posts": 20,
+  "skipped_posts": 0,
+  "input_path": "ai-collaboration/output-0517.jsonl",
+  "input_format": "jsonl",
+  "theme_counts": {
+    "伴侶價值觀落差": 5,
+    "親密需求落差": 3,
+    "關係邊界": 4,
+    "交友軟體策略": 1,
+    "曖昧不確定": 5,
+    "擇偶條件焦慮": 1,
+    "uncertain": 1
+  },
+  "relationship_stage_counts": {
+    "交往": 9,
+    "婚姻": 7,
+    "曖昧": 2,
+    "uncertain": 1,
+    "婚前": 1
+  },
+  "core_question_type_counts": {
+    "大家怎麼看": 3,
+    "經驗分享": 5,
+    "uncertain": 3,
+    "我該怎麼做": 4,
+    "這正常嗎": 1,
+    "要不要繼續": 2,
+    "他是什麼意思": 2
+  },
+  "product_family_counts": {
+    "伴侶價值觀雷達": 5,
+    "親密落差解讀": 3,
+    "關係紅旗雷達": 4,
+    "交友軟體策略": 1,
+    "下一句怎麼回": 3,
+    "Relationship Radar general": 2,
+    "曖昧溫度計": 2
+  },
+  "action_pressure_counts": {
+    "medium": 6,
+    "low": 5,
+    "high": 9
+  },
+  "shareability_strength_counts": {
+    "high": 4,
+    "medium": 12,
+    "low": 4
+  },
+  "monetization_strength_counts": {
+    "medium": 9,
+    "high": 9,
+    "low": 2
+  },
+  "high_mvp_relevance_count": 5,
+  "sensitive_topic_count": 12,
+  "top_candidate_product_families": [
+    "伴侶價值觀雷達",
+    "關係紅旗雷達",
+    "親密落差解讀",
+    "下一句怎麼回",
+    "Relationship Radar general"
+  ],
+  "recommended_mvp_adjustments": [
+    "Keep 曖昧溫度計 + 下一句怎麼回 as the first narrow MVP.",
+    "Broader Relationship Radar families look promising after the first MVP."
+  ]
+}
