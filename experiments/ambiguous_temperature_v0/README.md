@@ -1,3 +1,19 @@
+# Status
+
+This is the legacy local validation prototype for 曖昧溫度計.
+
+It is retained as a reference for:
+- product flow
+- ANYU visual direction
+- fake-door behavior
+- local experiment logging
+
+It is not the C-stage production frontend foundation.
+
+The production app foundation now lives under:
+
+`apps/web/`
+
 # 曖昧溫度計 Prototype Skeleton v0
 
 ## Purpose

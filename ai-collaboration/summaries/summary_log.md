@@ -526,6 +526,50 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
 
+## 2026-05-18 Repo Foundation Setup v0
+
+### Task Completed
+
+- created the `anyu-next` production app foundation under `apps/web/`
+- promoted the ANYU design system into `docs/design-system/`
+- synced the app token copy to `apps/web/src/styles/tokens.css`
+- strengthened root `.gitignore` for the mixed Python + Next.js workspace
+- marked `experiments/ambiguous_temperature_v0/` as a legacy/reference prototype
+- created `ai-collaboration/research/2026-05-18-repo-foundation-structure-report.md`
+- created `ai-collaboration/reports/2026-05-18-repo-foundation-setup-v0-execution-report.md`
+
+### Repo Details
+
+- repo name: `anyu-next`
+- app path: `apps/web/`
+- design system canonical path: `docs/design-system/`
+- package manager: `pnpm`
+
+### Gitignore Update Summary
+
+- added ignore coverage for Node / Next / Vercel artifacts
+- preserved `.env.example` while ignoring local env files
+- added runtime log, browser cache, and broader Python cache coverage
+- preserved targeted ignores for local experiment outputs
+
+### Repo Structure Report Path
+
+- `ai-collaboration/research/2026-05-18-repo-foundation-structure-report.md`
+
+### Validation Result
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm install` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- `corepack pnpm --version` returned `11.1.2`
+- `node --version` returned `v24.15.0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
 ## 2026-05-16 Product Validation Calibration v0
 
 ### Task Completed

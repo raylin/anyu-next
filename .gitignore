@@ -1,5 +1,29 @@
 # Local secrets
 .env
+.env.*
+!.env.example
+!**/.env.example
+*.local
+
+# Node / Next / Vercel
+node_modules/
+.pnpm-store/
+.next/
+out/
+dist/
+build/
+.vercel/
+.turbo/
+coverage/
+playwright-report/
+test-results/
+
+# Logs / runtime
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Python cache and build artifacts
 __pycache__/
@@ -7,14 +31,18 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .venv/
-.playwright-browsers/
-dist/
-build/
+.venv*/
 *.egg-info/
+
+# Browser caches
+.playwright-browsers/
 
 # Local experiment outputs
 outputs/experiments/**/*.jsonl
 outputs/experiments/**/experiment_report.md
-
-# External raw calibration inputs
 ai-collaboration/output-*.jsonl
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
