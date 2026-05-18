@@ -526,6 +526,34 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
 
+## 2026-05-18 Module 01 UI Port v0
+
+### Task Completed
+
+- implemented Module 01 UI shell routes:
+  - `/m/ambiguous-temperature`
+  - `/m/ambiguous-temperature/result/demo`
+- added shared ANYU UI components for privacy helper, input card, temperature card, share preview, paid preview, and contact placeholder
+- added module-specific landing and result shell components
+- created `ai-collaboration/research/2026-05-18-module-01-ui-port-v0-review-bundle.md`
+- created `ai-collaboration/reports/2026-05-18-module-01-ui-port-v0-execution-report.md`
+
+### Review Bundle Path
+
+- `ai-collaboration/research/2026-05-18-module-01-ui-port-v0-review-bundle.md`
+
+### Validation Result
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- local route checks for landing and demo result returned `200 OK`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
 ## 2026-05-18 Module 01 Migration Plan v0
 
 ### Task Completed

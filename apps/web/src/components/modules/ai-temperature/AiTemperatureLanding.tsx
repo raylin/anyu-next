@@ -1,6 +1,14 @@
-import { Button } from "@/components/anyu/Button";
-import { Card } from "@/components/anyu/Card";
-import { SituationChips } from "@/components/anyu/SituationChips";
+"use client";
+
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { InputCard } from "@/components/anyu/InputCard";
+import { Wordmark } from "@/components/anyu/Wordmark";
+import {
+  getAnalyzeButtonLabel,
+  getModuleLabel,
+  isAnalyzeInputReady,
+} from "@/lib/modules/ai-temperature-ui";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 
 type AiTemperatureLandingProps = {
@@ -10,34 +18,67 @@ type AiTemperatureLandingProps = {
 export function AiTemperatureLanding({
   moduleConfig,
 }: AiTemperatureLandingProps) {
-  return (
-    <section className="anyu-module-stack">
-      <Card>
-        <span className="anyu-kicker">
-          {moduleConfig.brand} · {moduleConfig.moduleId}
-        </span>
-        <h1 className="anyu-title">{moduleConfig.family}</h1>
-        <p className="anyu-subtitle">{moduleConfig.title}</p>
-        <p className="anyu-copy">{moduleConfig.subtitle}</p>
-      </Card>
+  const router = useRouter();
+  const [selectedChip, setSelectedChip] = useState(moduleConfig.chips[0] ?? "");
+  const [inputValue, setInputValue] = useState("");
+  const titleParts = moduleConfig.title.split("，");
 
-      <Card>
-        <label className="anyu-field-label" htmlFor="situation-input">
-          描述對話或情境
-        </label>
-        <textarea
-          id="situation-input"
-          className="anyu-textarea"
-          placeholder="貼上最近的對話，或簡單描述目前的曖昧狀態。"
-          rows={8}
-          disabled
-        />
-        <SituationChips chips={moduleConfig.chips} />
-        <div className="anyu-cta-row">
-          <Button disabled>分析關係溫度（coming soon）</Button>
-          <span className="anyu-meta">{moduleConfig.price} · one-time unlock</span>
+  function handleInputChange(event: ChangeEvent<HTMLTextAreaElement>) {
+    setInputValue(event.target.value);
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!isAnalyzeInputReady(inputValue)) {
+      return;
+    }
+
+    router.push(`/m/${moduleConfig.slug}/result/demo`);
+  }
+
+  const ctaLabel = getAnalyzeButtonLabel(inputValue);
+  const ctaDisabled = !isAnalyzeInputReady(inputValue);
+
+  return (
+    <section className="anyu-module-page">
+      <header className="anyu-topbar">
+        <div className="anyu-topbar-brand">
+          <Wordmark />
+          <p className="anyu-topbar-subline">讀懂關係裡那些沒說出口的訊號</p>
         </div>
-      </Card>
+        <p className="anyu-topbar-tag">{moduleConfig.family}</p>
+      </header>
+
+      <section className="anyu-hero-block" aria-labelledby="anyu-hero-title">
+        <p className="anyu-kicker">{getModuleLabel(moduleConfig)}</p>
+        <div className="anyu-hero-copy">
+          <div className="anyu-hero-glow" aria-hidden="true" />
+          <h1 id="anyu-hero-title" className="anyu-hero-title">
+            {titleParts.length > 1 ? (
+              <>
+                {titleParts[0]}，
+                <br />
+                {titleParts.slice(1).join("，")}
+              </>
+            ) : (
+              moduleConfig.title
+            )}
+          </h1>
+          <p className="anyu-copy">{moduleConfig.subtitle}</p>
+        </div>
+      </section>
+
+      <InputCard
+        chips={moduleConfig.chips}
+        selectedChip={selectedChip}
+        inputValue={inputValue}
+        onChipSelect={setSelectedChip}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        ctaLabel={ctaLabel}
+        ctaDisabled={ctaDisabled}
+      />
     </section>
   );
 }

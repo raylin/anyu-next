@@ -2,9 +2,23 @@
 
 This is the production Next.js app foundation for `暗語 ANYU`.
 
-Current routes are skeletons.
+Current routes are skeletons or UI-only shells.
 
 Do not expect full product runtime yet.
+
+Module 01 UI shell now exists for:
+
+- `/m/ambiguous-temperature`
+- `/m/ambiguous-temperature/result/demo`
+
+The current Module 01 experience is UI-only:
+
+- local chip/input state
+- CTA enable/disable behavior
+- mock result rendering
+- no provider call
+- no DB persistence
+- no payment
 
 ## Commands
 
