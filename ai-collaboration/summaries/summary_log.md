@@ -526,6 +526,34 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
 
+## 2026-05-18 Module 01 Migration Plan v0
+
+### Task Completed
+
+- created `ai-collaboration/handoffs/2026-05-18-module-01-migration-plan-v0-handoff.md`
+- created `ai-collaboration/research/2026-05-18-module-01-migration-plan-v0.md`
+- created `ai-collaboration/reports/2026-05-18-module-01-migration-plan-v0-execution-report.md`
+
+### Migration Plan Summary
+
+- captured the migration path from `experiments/ambiguous_temperature_v0/` into `apps/web/`
+- identified what should be reused, rewritten, deferred, or explicitly not migrated
+- preserved the generic module-registry route direction already present in `apps/web/`
+
+### Repo Details
+
+- migration plan path: `ai-collaboration/research/2026-05-18-module-01-migration-plan-v0.md`
+- source prototype path: `experiments/ambiguous_temperature_v0/`
+- target app path: `apps/web/`
+
+### Recommended Next Step
+
+- `Module 01 UI Port v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
 ## 2026-05-18 Root README / Repo Alignment v0
 
 ### Task Completed
