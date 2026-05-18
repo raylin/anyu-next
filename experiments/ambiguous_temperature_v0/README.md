@@ -8,7 +8,7 @@ It is retained as a reference for:
 - fake-door behavior
 - local experiment logging
 
-It is not the C-stage production frontend foundation.
+It is not the production frontend foundation.
 
 The production app foundation now lives under:
 

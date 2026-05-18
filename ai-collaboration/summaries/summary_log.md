@@ -526,6 +526,37 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
 
+## 2026-05-18 Root README / Repo Alignment v0
+
+### Task Completed
+
+- rewrote `README.md` around `anyu-next` as the C-stage production foundation for `暗語 ANYU`
+- aligned `apps/web/README.md` with its current role as the production Next.js app foundation
+- checked and updated `docs/design-system/README.md`
+- checked and tightened the legacy status wording in `experiments/ambiguous_temperature_v0/README.md`
+- created `ai-collaboration/reports/2026-05-18-root-readme-repo-alignment-v0-execution-report.md`
+
+### README Alignment Summary
+
+- root README now explains the repo as both a production app foundation and a retained research/prototype workspace
+- `apps/web/` is explicitly documented as the production app path
+- `docs/design-system/` is explicitly documented as canonical
+- `experiments/ambiguous_temperature_v0/` is explicitly documented as legacy/reference only
+
+### Repo Details
+
+- production app path: `apps/web/`
+- design system canonical path: `docs/design-system/`
+- legacy prototype status: legacy local validation prototype, not the production frontend foundation
+
+### Recommended Next Step
+
+- `Module 01 Migration Plan v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
 ## 2026-05-18 Repo Foundation Setup v0
 
 ### Task Completed

@@ -1,163 +1,176 @@
-# Opportunity Radar
+# anyu-next
 
-Opportunity Radar is a local-first, AI-native founder research system for detecting emotional market signals and turning them into structured, AI-readable research artifacts.
+## What This Repo Is
 
-The project is exploratory and research-oriented. It is not a production SaaS app.
+`anyu-next` is the C-stage production foundation for `暗語 ANYU`, an AI-native relationship insight product system.
 
-## Purpose
+`暗語 ANYU` is the future mother brand and portal container.
 
-Opportunity Radar is intended to become an AI-native qualitative market research engine focused on:
+`曖昧溫度計` is the first standalone theme module.
 
-- emotional signals
-- recurring anxieties
-- monetizable behaviors
-- viral social patterns
-- retention and shareability clues
+This repository currently contains both:
 
-The goal is to support iterative MVP discovery by transforming messy emotional and social content into structured signals.
+1. the production web app foundation
+2. research, calibration, and prototype assets retained for validation and iteration
 
-## Architecture Philosophy
+## Product Direction
 
-This repository favors simple, inspectable, local files.
+- Standalone theme pages first
+- Future portal later
+- Weekly / biweekly theme launch cycle
+- Production app foundation under `apps/web/`
 
-Current defaults:
+## Current First MVP
 
-- markdown-first collaboration memory
-- local-first storage and execution
-- JSON Schema for extraction contracts
-- plain folders for raw and structured outputs
-- no cloud infrastructure
-- no auth
-- no vector database
-- no dashboards or scraping until explicitly requested
+First MVP:
 
-Avoid overengineering. Add automation only when repeated manual work becomes costly.
+`曖昧溫度計 + 下一句怎麼回`
 
-## Collaboration Workflow
+Free:
 
-The operating model is:
+- relationship temperature
+- insight layer
+- share card
 
-- ChatGPT: strategy, specification, review
-- Codex: execution, repository changes, reporting
-- Human: clarification, judgment, architecture approval
+Paid hypothesis:
 
-Codex acts as an implementation agent. Architecture decisions require human approval.
+- `解鎖下一句怎麼回 — NT$49`
+- fake-door / contact capture first
 
-## Repository Layout
+## Repo Map
 
-```text
-ai-collaboration/
-  handoffs/
-  reports/
-  summaries/
-  decisions/
-  research/
-  templates/
-prompts/
-schemas/
-sources/
-extractors/
-outputs/
-  raw/
-  structured/
-```
+| Path | Purpose |
+| --- | --- |
+| `apps/web/` | production Next.js app foundation |
+| `docs/design-system/` | canonical ANYU design system |
+| `experiments/ambiguous_temperature_v0/` | legacy local prototype |
+| `oradar/` | Python research/runtime package |
+| `scripts/` | research, evaluation, calibration scripts |
+| `prompts/` | prompt assets |
+| `schemas/` | schema assets |
+| `outputs/` | synthetic/generated local research outputs |
+| `ai-collaboration/` | handoffs, reports, research notes, summary log |
 
-Collaboration templates live under `ai-collaboration/templates/`. The root-level `templates/` directory is deprecated.
+## Production App
 
-## Local Development Workflow
+`apps/web/` is the production app foundation.
 
-For every task:
+Current stack:
 
-1. Save a handoff in `ai-collaboration/handoffs/`.
-2. Make the requested repository changes.
-3. Generate an execution report in `ai-collaboration/reports/`.
-4. Append `ai-collaboration/summaries/summary_log.md`.
-5. Create a git commit containing the completed handoff changes.
-6. End the final CLI response with a paste-back completion summary that includes the commit hash.
-7. Escalate unresolved questions.
+- Next.js `16.2.6`
+- React
+- TypeScript strict
+- App Router
+- `pnpm`
+- Vitest
+- Drizzle / Neon skeleton
+- Vercel target
 
-After every completed handoff, the commit should include the handoff, execution report, summary log update, and changed project files. Run relevant validation before committing. If unrelated uncommitted changes are present, do not silently include them.
+Current scope limits:
 
-No scraping, UI, dashboards, cloud services, databases, or auth should be added unless explicitly requested and approved.
+- No required auth in v0
+- No real payment in v0
+- Current routes are skeletons, not full product runtime
 
-The paste-back completion summary is a concise review packet intended to be copied into ChatGPT Web. The repository remains the source of truth.
+## Design System
 
-## Signal Extraction Foundation
+Design system references:
 
-The initial extraction foundation includes:
+- `docs/design-system/anyu-design-system-v1.md`
+- `docs/design-system/tokens.css`
+- `apps/web/src/styles/tokens.css`
 
-- `schemas/signal_schema_v1.json`
-- `schemas/emotion_taxonomy_v1.md`
-- `prompts/extraction_prompt_v1.md`
+`docs/design-system/` is canonical.
 
-The system extracts emotions, pain points, behavioral patterns, monetization signals, retention likelihood, and shareability potential.
+`apps/web/src/styles/tokens.css` is the app import copy.
 
-Signal Extraction v1 uses:
+## Research / Calibration Tooling
 
-```text
-1 raw input file -> 1 structured signal JSON object
-```
+The Python tooling is intentionally retained for:
 
-Multiple signal records per raw input are out of scope for v1.
+- research extraction
+- synthetic evaluation
+- external Dcard JSON calibration
+- offline reports
+- prompt evaluation
 
-Allowed v1 source types:
+`oradar/` and `scripts/` are research/evaluation tooling, not the production web app path.
 
-- `manual_paste`
-- `dcard_manual`
-- `reddit_manual`
+## Legacy Prototype
 
-Scoring fields use integer values from 0 to 10 and are qualitative, directional estimates.
+`experiments/ambiguous_temperature_v0/` is retained as a validation reference.
 
-## Signal Extraction v1 CLI
+It is not the production frontend foundation.
 
-Run the local extractor with:
+The production app now lives under `apps/web/`.
 
-```bash
-python3 -m oradar.cli extract outputs/raw/sample_001.txt --source-type dcard_manual
-```
+## AI Collaboration Workflow
 
-If the package is installed in editable mode, the equivalent console command is:
+- Every task starts with a handoff.
+- Every task creates an execution report.
+- Every task appends `ai-collaboration/summaries/summary_log.md`.
+- Every completed handoff should be git committed.
+- Final Codex responses should include the paste-back completion summary.
+
+## Local Development
+
+Root-level checks:
 
 ```bash
-oradar extract outputs/raw/sample_001.txt --source-type dcard_manual
+corepack pnpm --version
+python3 -m compileall oradar
 ```
 
-The CLI reads one raw text file, loads `prompts/extraction_prompt_v1.md`, calls the OpenAI API, validates the returned JSON against `schemas/signal_schema_v1.json`, and writes one structured output file under `outputs/structured/`.
-
-The structured output `source` field is a clean identifier derived from the raw input filename stem. For example, `outputs/raw/sample_001.txt` becomes `"source": "sample_001"`.
-
-Set `OPENAI_API_KEY` in the environment or a local `.env` file. See `.env.example`.
-
-Provider selection is controlled by `ORADAR_PROVIDER`.
-
-OpenAI:
+Web app commands:
 
 ```bash
-ORADAR_PROVIDER=openai python3 -m oradar.cli extract outputs/raw/sample_001.txt --source-type dcard_manual
+cd apps/web
+corepack pnpm install
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm build
+corepack pnpm dev
 ```
 
-Anthropic:
+## Environment Variables
+
+Web app example variables live in:
+
+- `apps/web/.env.example`
+
+Do not commit secrets or local `.env` files.
+
+## Validation Commands
 
 ```bash
-ORADAR_PROVIDER=anthropic python3 -m oradar.cli extract outputs/raw/sample_001.txt --source-type dcard_manual
+test -f README.md
+test -f apps/web/README.md
+test -f docs/design-system/README.md
+test -f experiments/ambiguous_temperature_v0/README.md
+python3 -m compileall oradar
+cd apps/web && corepack pnpm lint
+cd apps/web && corepack pnpm test
+cd apps/web && corepack pnpm build
 ```
 
-Supported provider environment variables:
+## What Not To Do
 
-- `ORADAR_PROVIDER=openai|anthropic`
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL`
-- `ANTHROPIC_API_KEY`
-- `ANTHROPIC_MODEL`
+- Do not productionize the Python prototype.
+- Do not require auth for v0.
+- Do not commit `.env` files.
+- Do not store raw relationship text in analytics.
+- Do not build Dcard crawler infrastructure into the product path.
+- Do not bypass platform access controls.
+- Do not move or delete legacy artifacts without explicit handoff.
 
-## Future Roadmap
+## Current Status
 
-Likely future phases:
+Repo foundation is complete.
 
-1. Collect manually selected research examples into `outputs/raw/`.
-2. Run prompt-based extraction into `outputs/structured/`.
-3. Review extracted signals for schema gaps.
-4. Add lightweight local extractors only after the manual workflow stabilizes.
-5. Build synthesis reports from structured outputs.
+Next step is documentation alignment, then Module 01 migration planning.
 
-Scraping, UI, dashboards, databases, and external infrastructure are intentionally out of scope until approved.
+## Next Milestone
+
+Recommended next milestone:
+
+`Module 01 Migration Plan v0`
