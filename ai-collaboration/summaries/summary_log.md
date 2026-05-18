@@ -1054,3 +1054,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Commit Hash
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-18 C-stage Frontend Stack Selection Prep
+
+### Task Completed
+
+- created `ai-collaboration/handoffs/2026-05-18-c-stage-frontend-stack-selection-prep-handoff.md`
+- created `ai-collaboration/research/2026-05-18-c-stage-frontend-stack-selection-prep.md`
+- created `ai-collaboration/reports/2026-05-18-c-stage-frontend-stack-selection-prep-execution-report.md`
+
+### Main Decision Captured
+
+- formal stack selection should optimize for a multi-module AI-native insight system, not merely productionizing the current prototype
+
+### Candidate Stacks Covered
+
+- `Next.js full-stack`
+- `Next.js frontend + Python backend`
+- `Astro static-first + serverless`
+- `Keep Python prototype and deploy lightly`
+
+### Recommended Next Step
+
+- `Formal Tech Stack Selection v0`
+
+### Validation Results
+
+- prep document exists
+- execution report exists
+- `python3 -m compileall oradar` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
