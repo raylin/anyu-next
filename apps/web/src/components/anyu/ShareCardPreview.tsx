@@ -1,8 +1,11 @@
+"use client";
+
 type ShareCardPreviewProps = {
   persona: string;
   quote: string;
   score: number;
   stateLabel: string;
+  onShareClick?: () => void;
 };
 
 export function ShareCardPreview({
@@ -10,6 +13,7 @@ export function ShareCardPreview({
   quote,
   score,
   stateLabel,
+  onShareClick,
 }: ShareCardPreviewProps) {
   return (
     <div className="anyu-share-preview" aria-label="分享卡預覽">
@@ -39,6 +43,10 @@ export function ShareCardPreview({
           </div>
         </div>
       </div>
+
+      <button type="button" className="anyu-share-action" onClick={onShareClick}>
+        這張卡可直接截圖分享
+      </button>
     </div>
   );
 }

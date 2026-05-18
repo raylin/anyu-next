@@ -12,6 +12,7 @@ type ContactCapturePayload = {
 
 type ContactCaptureProps = {
   visible?: boolean;
+  noticeMessage?: string;
   onSubmit?: (
     payload: ContactCapturePayload,
   ) => Promise<{ ok: boolean; message: string }>;
@@ -19,6 +20,7 @@ type ContactCaptureProps = {
 
 export function ContactCapture({
   visible = true,
+  noticeMessage,
   onSubmit,
 }: ContactCaptureProps) {
   const [contactType, setContactType] = useState<"line" | "email">("line");
@@ -70,6 +72,7 @@ export function ContactCapture({
       <p className="anyu-kicker">目前內測中</p>
       <h2 className="anyu-section-title">這次不會真的收費。</h2>
       <p className="anyu-copy">留下 LINE 或 Email，我們會送你一次完整分析。</p>
+      {noticeMessage ? <p className="anyu-subtle-note">{noticeMessage}</p> : null}
 
       <form className="anyu-contact-grid" onSubmit={handleSubmit}>
         <label className="anyu-contact-field">

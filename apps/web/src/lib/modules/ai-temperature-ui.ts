@@ -55,6 +55,19 @@ export function getAnalyzeButtonLabel(input: string): string {
   return isAnalyzeInputReady(input) ? "分析我的曖昧溫度" : "先貼一段對話";
 }
 
+export function getAnalyzeErrorMessage(error: string): string {
+  switch (error) {
+    case "input_too_short":
+      return "文字太短，請多貼一點互動脈絡。";
+    case "input_too_long":
+      return "文字太長，請先保留最近幾段關鍵對話。";
+    case "config_error":
+      return "目前分析服務尚未設定完成，請稍後再試。";
+    default:
+      return "分析暫時失敗，請晚點再試一次。";
+  }
+}
+
 export function getModuleLabel(moduleConfig: ProductModuleConfig): string {
   return `module · 01 · ${moduleConfig.family}`;
 }

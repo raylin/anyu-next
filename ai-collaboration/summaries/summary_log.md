@@ -1305,3 +1305,37 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Commit Hash
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-18 Module 01 Launch Readiness v0
+
+### Task Completed
+
+- added passive client-side launch-readiness events for `page_view`, `input_started`, `analysis_started`, `analysis_failed`, and `share_card_clicked`
+- added unlock-intent fallback so contact capture still opens even when intent persistence fails
+- tightened user-facing analyze/contact error copy
+- created `ai-collaboration/research/2026-05-18-module-01-launch-readiness-checklist.md`
+- created `ai-collaboration/research/2026-05-18-module-01-launch-readiness-v0-review-bundle.md`
+- created `ai-collaboration/reports/2026-05-18-module-01-launch-readiness-v0-execution-report.md`
+
+### Launch Readiness Learnings
+
+- passive analytics can be added safely as best-effort client calls without making the UI depend on event persistence success
+- unlock-intent storage should not block contact capture in the first launch flow
+- privacy and retention expectations need to be explicit in launch docs because deletion automation is still deferred
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- local build/test still work without `DATABASE_URL` or provider keys
+- no-env route tests verify friendly `config_error` responses for analyze and events APIs
+
+### Recommended Next Step
+
+- `Module 01 Preview Deployment + Manual QA v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.

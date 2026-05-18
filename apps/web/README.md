@@ -34,15 +34,33 @@ If `DATABASE_URL` or a provider key is missing, the app should stay up and retur
 
 Copy `apps/web/.env.example` and provide the values you need locally:
 
-- `DATABASE_URL`
-- `ANTHROPIC_API_KEY`
-- `ANTHROPIC_MODEL`
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL`
-- `ORADAR_PROVIDER`
-- `NEXT_PUBLIC_APP_URL`
+- `DATABASE_URL=`
+- `ANTHROPIC_API_KEY=`
+- `ANTHROPIC_MODEL=`
+- `OPENAI_API_KEY=`
+- `OPENAI_MODEL=`
+- `ORADAR_PROVIDER=anthropic`
+- `NEXT_PUBLIC_APP_URL=`
 
 Provider priority in v0 is Anthropic first. OpenAI is available as a lightweight fallback path.
+
+Launch-readiness behavior:
+
+- local dev without env should still lint, test, and build
+- live analyze requires `DATABASE_URL` plus at least one provider key
+- `/m/ambiguous-temperature/result/demo` works without env
+- unconfigured runtime APIs should return friendly non-technical errors
+
+## Launch Readiness
+
+Before the first low-key launch review, confirm:
+
+- Vercel project has all required env vars
+- Neon project is created in `ap-southeast-1`
+- Drizzle migration has been generated and applied in the target environment
+- a live analyze inserts rows into `analysis_results`, `events`, and `contact_submissions`
+- privacy review confirms raw text is excluded from events
+- manual QA is completed for landing, runtime result, demo result, unlock fallback, and contact submit flows
 
 ## Commands
 

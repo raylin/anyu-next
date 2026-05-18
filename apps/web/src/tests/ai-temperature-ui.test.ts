@@ -3,6 +3,7 @@ import { aiTemperatureModule } from "@/content/modules/ai-temperature";
 import {
   MAX_ANALYZE_LENGTH,
   MIN_ANALYZE_LENGTH,
+  getAnalyzeErrorMessage,
   getAnalyzeButtonLabel,
   getModuleLabel,
   isAnalyzeInputReady,
@@ -74,5 +75,20 @@ describe("ai-temperature UI helpers", () => {
     expect(scoreToBucket(70)).toBe("warm");
     expect(scoreToBucket(90)).toBe("hot");
     expect(scoreToBucket(Number.NaN)).toBe("unknown");
+  });
+
+  it("maps runtime errors into friendly UI copy", () => {
+    expect(getAnalyzeErrorMessage("config_error")).toBe(
+      "目前分析服務尚未設定完成，請稍後再試。",
+    );
+    expect(getAnalyzeErrorMessage("input_too_short")).toBe(
+      "文字太短，請多貼一點互動脈絡。",
+    );
+    expect(getAnalyzeErrorMessage("input_too_long")).toBe(
+      "文字太長，請先保留最近幾段關鍵對話。",
+    );
+    expect(getAnalyzeErrorMessage("anything_else")).toBe(
+      "分析暫時失敗，請晚點再試一次。",
+    );
   });
 });

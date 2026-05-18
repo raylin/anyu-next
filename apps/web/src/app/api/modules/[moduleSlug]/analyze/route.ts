@@ -139,6 +139,6 @@ export async function POST(
       return errorResponse(503, "config_error", getProviderUserMessage());
     }
 
-    return errorResponse(502, "analyze_failed", "目前分析服務忙碌中，請稍後再試。");
+    return errorResponse(502, "analyze_failed", "分析暫時失敗，請晚點再試一次。");
   }
 }

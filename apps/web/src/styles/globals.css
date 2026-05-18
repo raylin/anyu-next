@@ -643,6 +643,22 @@ textarea {
   color: var(--anyu-danger);
 }
 
+.anyu-share-action {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--anyu-dim);
+  font: inherit;
+  text-align: center;
+  padding: 0.4rem 0 0;
+  cursor: pointer;
+}
+
+.anyu-share-action:focus-visible {
+  outline: 2px solid var(--anyu-accent);
+  outline-offset: 4px;
+}
+
 @media (min-width: 720px) {
   .anyu-shell {
     width: min(100%, 38rem);

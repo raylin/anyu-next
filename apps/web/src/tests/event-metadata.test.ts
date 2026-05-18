@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasForbiddenEventMetadata } from "@/lib/events/types";
+import { EVENT_NAMES, hasForbiddenEventMetadata } from "@/lib/events/types";
 
 describe("event metadata guard", () => {
   it("rejects raw text-like metadata keys", () => {
@@ -13,5 +13,13 @@ describe("event metadata guard", () => {
     expect(
       hasForbiddenEventMetadata({ scoreBucket: "cool", privacyFlags: ["email"] }),
     ).toBe(false);
+  });
+
+  it("includes the launch-readiness passive events", () => {
+    expect(EVENT_NAMES).toContain("page_view");
+    expect(EVENT_NAMES).toContain("input_started");
+    expect(EVENT_NAMES).toContain("analysis_started");
+    expect(EVENT_NAMES).toContain("analysis_failed");
+    expect(EVENT_NAMES).toContain("share_card_clicked");
   });
 });

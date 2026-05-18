@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { InputCard } from "@/components/anyu/InputCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
+import { trackClientEvent } from "@/lib/events/client";
 import {
   getClientAnonymousSessionId,
+  getAnalyzeErrorMessage,
   getAnalyzeButtonLabel,
   getModuleLabel,
   isAnalyzeInputReady,
@@ -26,10 +28,36 @@ export function AiTemperatureLanding({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
+  const hasTrackedInputStarted = useRef(false);
   const titleParts = moduleConfig.title.split("，");
 
+  useEffect(() => {
+    const anonymousSessionId = getClientAnonymousSessionId();
+
+    void trackClientEvent({
+      eventName: "page_view",
+      moduleConfig,
+      anonymousSessionId,
+      metadata: {
+        pageType: "landing",
+      },
+    });
+  }, [moduleConfig]);
+
   function handleInputChange(event: ChangeEvent<HTMLTextAreaElement>) {
-    setInputValue(event.target.value);
+    const nextValue = event.target.value;
+    setInputValue(nextValue);
+
+    if (!hasTrackedInputStarted.current && nextValue.trim().length > 0) {
+      hasTrackedInputStarted.current = true;
+
+      void trackClientEvent({
+        eventName: "input_started",
+        moduleConfig,
+        anonymousSessionId: getClientAnonymousSessionId(),
+        situationType: selectedChip,
+      });
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -43,6 +71,18 @@ export function AiTemperatureLanding({
     setErrorMessage("");
     setStatusMessage("分析中...");
 
+    const anonymousSessionId = getClientAnonymousSessionId();
+
+    void trackClientEvent({
+      eventName: "analysis_started",
+      moduleConfig,
+      anonymousSessionId,
+      situationType: selectedChip,
+      metadata: {
+        inputCharCount: inputValue.trim().length,
+      },
+    });
+
     try {
       const response = await fetch(`/api/modules/${moduleConfig.slug}/analyze`, {
         method: "POST",
@@ -52,24 +92,43 @@ export function AiTemperatureLanding({
         body: JSON.stringify({
           text: inputValue,
           situation: selectedChip,
-          anonymousSessionId: getClientAnonymousSessionId(),
+          anonymousSessionId,
         }),
       });
 
       const data = (await response.json()) as AnalyzeResponse;
 
       if (!response.ok || !data.ok) {
-        setErrorMessage(
-          data.ok ? "目前分析服務尚未設定完成，請稍後再試。" : data.message,
-        );
+        const normalizedError = data.ok ? "config_error" : data.error;
+        const friendlyMessage = getAnalyzeErrorMessage(normalizedError);
+
+        setErrorMessage(friendlyMessage);
         setStatusMessage("");
+        void trackClientEvent({
+          eventName: "analysis_failed",
+          moduleConfig,
+          anonymousSessionId,
+          situationType: selectedChip,
+          metadata: {
+            reason: normalizedError,
+          },
+        });
         return;
       }
 
       router.push(data.redirectTo);
     } catch {
-      setErrorMessage("目前分析服務尚未設定完成，請稍後再試。");
+      setErrorMessage(getAnalyzeErrorMessage("analyze_failed"));
       setStatusMessage("");
+      void trackClientEvent({
+        eventName: "analysis_failed",
+        moduleConfig,
+        anonymousSessionId,
+        situationType: selectedChip,
+        metadata: {
+          reason: "network_or_runtime_error",
+        },
+      });
     } finally {
       setIsSubmitting(false);
     }

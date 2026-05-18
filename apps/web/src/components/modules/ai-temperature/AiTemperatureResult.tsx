@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/anyu/Card";
 import { ContactCapture } from "@/components/anyu/ContactCapture";
@@ -8,7 +8,11 @@ import { PaidPreviewCard } from "@/components/anyu/PaidPreviewCard";
 import { ShareCardPreview } from "@/components/anyu/ShareCardPreview";
 import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
-import { getClientAnonymousSessionId } from "@/lib/modules/ai-temperature-ui";
+import { trackClientEvent } from "@/lib/events/client";
+import {
+  getClientAnonymousSessionId,
+  scoreToBucket,
+} from "@/lib/modules/ai-temperature-ui";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import type { AiTemperatureResultViewModel } from "@/lib/modules/ai-temperature-ui";
 
@@ -27,6 +31,20 @@ export function AiTemperatureResult({
 }: AiTemperatureResultProps) {
   const [showContact, setShowContact] = useState(false);
   const [unlockIntentId, setUnlockIntentId] = useState<string | null>(null);
+  const [unlockIntentFailed, setUnlockIntentFailed] = useState(false);
+
+  useEffect(() => {
+    void trackClientEvent({
+      eventName: "page_view",
+      moduleConfig,
+      anonymousSessionId: getClientAnonymousSessionId(),
+      scoreBucket: scoreToBucket(result.score),
+      metadata: {
+        pageType: mode === "demo" ? "result_demo" : "result_runtime",
+        resultId,
+      },
+    });
+  }, [mode, moduleConfig, result.score, resultId]);
 
   async function revealContact() {
     if (mode === "demo") {
@@ -55,19 +73,24 @@ export function AiTemperatureResult({
       };
 
       if (!response.ok || !data.ok || !data.unlockIntentId) {
+        setUnlockIntentId(null);
+        setUnlockIntentFailed(true);
+        setShowContact(true);
         return {
-          ok: false,
-          message: data.message ?? "目前無法開啟完整分析，請稍後再試。",
+          ok: true,
         };
       }
 
       setUnlockIntentId(data.unlockIntentId);
+      setUnlockIntentFailed(false);
       setShowContact(true);
       return { ok: true };
     } catch {
+      setUnlockIntentId(null);
+      setUnlockIntentFailed(true);
+      setShowContact(true);
       return {
-        ok: false,
-        message: "目前無法開啟完整分析，請稍後再試。",
+        ok: true,
       };
     }
   }
@@ -106,14 +129,29 @@ export function AiTemperatureResult({
 
       return {
         ok: response.ok && data.ok,
-        message: data.message,
+        message:
+          response.ok && data.ok
+            ? data.message
+            : "目前內測表單暫時無法送出，請稍後再試。",
       };
     } catch {
       return {
         ok: false,
-        message: "目前聯絡收集服務忙碌中，請稍後再試。",
+        message: "目前內測表單暫時無法送出，請稍後再試。",
       };
     }
+  }
+
+  function handleShareClick() {
+    void trackClientEvent({
+      eventName: "share_card_clicked",
+      moduleConfig,
+      anonymousSessionId: getClientAnonymousSessionId(),
+      scoreBucket: scoreToBucket(result.score),
+      metadata: {
+        resultId,
+      },
+    });
   }
 
   return (
@@ -168,6 +206,7 @@ export function AiTemperatureResult({
         quote={result.shareQuote}
         score={result.score}
         stateLabel={result.stateLabel}
+        onShareClick={handleShareClick}
       />
 
       <PaidPreviewCard
@@ -178,7 +217,15 @@ export function AiTemperatureResult({
         onRevealContact={revealContact}
       />
 
-      <ContactCapture visible={showContact} onSubmit={submitContact} />
+      <ContactCapture
+        visible={showContact}
+        noticeMessage={
+          unlockIntentFailed
+            ? "內測記錄暫時無法建立，但你仍可留下聯絡方式。"
+            : undefined
+        }
+        onSubmit={submitContact}
+      />
     </section>
   );
 }
