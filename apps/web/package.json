@@ -8,10 +8,13 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
+    "ajv": "^8.20.0",
     "drizzle-orm": "^0.45.2",
     "next": "16.2.6",
     "react": "19.2.4",

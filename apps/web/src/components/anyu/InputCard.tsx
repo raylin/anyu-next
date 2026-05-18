@@ -13,6 +13,8 @@ type InputCardProps = {
   onSubmit: FormEventHandler<HTMLFormElement>;
   ctaLabel: string;
   ctaDisabled: boolean;
+  errorMessage?: string;
+  statusMessage?: string;
 };
 
 export function InputCard({
@@ -24,6 +26,8 @@ export function InputCard({
   onSubmit,
   ctaLabel,
   ctaDisabled,
+  errorMessage,
+  statusMessage,
 }: InputCardProps) {
   return (
     <Card className="anyu-input-card">
@@ -63,6 +67,10 @@ export function InputCard({
 
         <p className="anyu-small-note">免費 · 約 8 秒 · 結果可截圖分享</p>
         <p className="anyu-subtle-note">不寄電子報 · 不分享第三方</p>
+        {statusMessage ? <p className="anyu-status-message">{statusMessage}</p> : null}
+        {errorMessage ? (
+          <p className="anyu-status-message anyu-status-message-error">{errorMessage}</p>
+        ) : null}
       </form>
     </Card>
   );

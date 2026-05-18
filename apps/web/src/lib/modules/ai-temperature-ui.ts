@@ -1,23 +1,51 @@
+import type { ProductResult } from "@/lib/ai/product-result-schema";
+import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 
 export const MIN_ANALYZE_LENGTH = 12;
+export const MAX_ANALYZE_LENGTH = 4000;
+export const ANONYMOUS_SESSION_STORAGE_KEY = "anyu-ambiguous-temperature-session-id";
 
-export type DemoObservedSignal = {
+export type ScoreBucket = "cold" | "cool" | "warm" | "hot" | "unknown";
+
+export type ObservedSignalViewModel = {
   label: string;
   value: number;
   note: string;
 };
 
-export type DemoResult = {
+export type AiTemperatureResultViewModel = {
   score: number;
   stateLabel: string;
   oneSentenceRead: string;
-  observedSignals: DemoObservedSignal[];
+  observedSignals: ObservedSignalViewModel[];
+  insightTitle: string;
   insight: string;
   reassurance: string;
   persona: string;
   shareQuote: string;
+  paidHeadline: string;
+  paidPrice: string;
+  paidIncludedSections: string[];
+  paidPreviewCopy: string;
 };
+
+export type AnalyzeInputValidationResult =
+  | {
+      ok: true;
+      text: string;
+      situation: string;
+      anonymousSessionId: string | null;
+      inputCharCount: number;
+    }
+  | {
+      ok: false;
+      error: string;
+      message: string;
+    };
+
+const OBSERVED_SIGNAL_LABELS = ["主動度", "即時性", "情緒投入"] as const;
+const OBSERVED_SIGNAL_OFFSETS = [-10, 3, -4] as const;
 
 export function isAnalyzeInputReady(input: string): boolean {
   return input.trim().length >= MIN_ANALYZE_LENGTH;
@@ -31,21 +59,125 @@ export function getModuleLabel(moduleConfig: ProductModuleConfig): string {
   return `module · 01 · ${moduleConfig.family}`;
 }
 
-export function getAiTemperatureDemoResult(): DemoResult {
+export function scoreToBucket(score: number): ScoreBucket {
+  if (!Number.isFinite(score)) {
+    return "unknown";
+  }
+
+  if (score <= 25) {
+    return "cold";
+  }
+
+  if (score <= 50) {
+    return "cool";
+  }
+
+  if (score <= 75) {
+    return "warm";
+  }
+
+  return "hot";
+}
+
+export function normalizeSituationType(
+  value: string | undefined,
+  allowedChips: readonly string[],
+): string {
+  const candidate = value?.trim();
+
+  if (candidate && allowedChips.includes(candidate)) {
+    return candidate;
+  }
+
+  return allowedChips[allowedChips.length - 1] ?? "不確定 / 跳過";
+}
+
+export function validateAnalyzeInput(input: {
+  text?: string;
+  situation?: string;
+  anonymousSessionId?: string;
+  allowedChips: readonly string[];
+}): AnalyzeInputValidationResult {
+  const text = input.text?.trim() ?? "";
+
+  if (text.length < MIN_ANALYZE_LENGTH) {
+    return {
+      ok: false,
+      error: "input_too_short",
+      message: "請再多貼一些內容，讓我們比較看得出關係溫度。",
+    };
+  }
+
+  if (text.length > MAX_ANALYZE_LENGTH) {
+    return {
+      ok: false,
+      error: "input_too_long",
+      message: "這段內容有點太長了，先縮短到 4000 字內再試試看。",
+    };
+  }
+
   return {
-    score: 42,
-    stateLabel: "溫差期",
-    oneSentenceRead: "你不是想太多，只是你太會看見細節。",
-    observedSignals: [
-      { label: "主動度", value: 32, note: "多半由你先開話題" },
-      { label: "即時性", value: 45, note: "回覆節奏有明顯落差" },
-      { label: "情緒投入", value: 38, note: "短句多，延伸提問偏少" },
-    ],
-    insight:
-      "讓你卡住的不是他沒回訊息，而是他明明有在活動，卻暫時沒有接你的邀約。",
-    reassurance:
-      "現在最不該做的，不是追問答案，而是把壓力全部丟到自己身上。",
-    persona: "微訊號觀察家",
-    shareQuote: "有些曖昧不是沒訊號，是訊號太小聲。",
+    ok: true,
+    text,
+    situation: normalizeSituationType(input.situation, input.allowedChips),
+    anonymousSessionId: input.anonymousSessionId?.trim() || null,
+    inputCharCount: text.length,
   };
+}
+
+export function getClientAnonymousSessionId(): string {
+  if (typeof window === "undefined") {
+    throw new Error("Anonymous session ID can only be accessed in the browser.");
+  }
+
+  const existingValue = window.localStorage.getItem(ANONYMOUS_SESSION_STORAGE_KEY);
+
+  if (existingValue) {
+    return existingValue;
+  }
+
+  const createdValue =
+    typeof window.crypto?.randomUUID === "function"
+      ? window.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  window.localStorage.setItem(ANONYMOUS_SESSION_STORAGE_KEY, createdValue);
+  return createdValue;
+}
+
+function clampSignalValue(score: number, offset: number): number {
+  return Math.max(10, Math.min(95, score + offset));
+}
+
+export function mapProductResultToViewModel(
+  result: ProductResult,
+): AiTemperatureResultViewModel {
+  const score = result.free_result.temperature_score;
+
+  return {
+    score,
+    stateLabel: result.free_result.state_label,
+    oneSentenceRead: result.free_result.one_sentence_read,
+    observedSignals: result.free_result.observed_signals.map((signal, index) => ({
+      label: OBSERVED_SIGNAL_LABELS[index] ?? `訊號 ${index + 1}`,
+      value: clampSignalValue(score, OBSERVED_SIGNAL_OFFSETS[index] ?? 0),
+      note: signal,
+    })),
+    insightTitle: result.insight_layer.title,
+    insight: result.insight_layer.explanation,
+    reassurance:
+      result.paid_result.risk_warning ||
+      result.paid_result.what_not_to_do[0] ||
+      result.free_result.uncertainty_note,
+    persona: result.share_card.relationship_persona,
+    shareQuote: result.share_card.card_sentence,
+    paidHeadline: result.paid_preview.headline,
+    paidPrice: result.paid_preview.price,
+    paidIncludedSections: result.paid_preview.included_sections,
+    paidPreviewCopy: result.paid_preview.preview_copy,
+  };
+}
+
+export function getAiTemperatureDemoResult(): AiTemperatureResultViewModel {
+  return mapProductResultToViewModel(aiTemperatureDemoProductResult);
 }

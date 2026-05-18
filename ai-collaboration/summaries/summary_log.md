@@ -1266,3 +1266,42 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Commit Hash
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-18 Module 01 Runtime + DB Integration v0
+
+### Task Completed
+
+- implemented runtime + persistence flow for `apps/web` Module 01
+- added analyze, events, unlock intent, and contact APIs
+- added Drizzle runtime tables for `sessions`, `events`, `analysis_requests`, `analysis_results`, `unlock_intents`, and `contact_submissions`
+- created `ai-collaboration/research/2026-05-18-module-01-runtime-db-integration-v0-review-bundle.md`
+- created `ai-collaboration/reports/2026-05-18-module-01-runtime-db-integration-v0-execution-report.md`
+
+### Runtime Decisions
+
+- normalized result JSON is the UI source of truth for stored results
+- Anthropic is the primary provider path, with lightweight OpenAI fallback support
+- `/m/ambiguous-temperature/result/demo` stays available as an internal review route alongside DB-backed real result pages
+
+### Privacy / Storage Learnings
+
+- event payloads now reject obvious raw-text metadata keys
+- input redaction is basic and limited to email / phone / handle-like patterns in v0
+- raw text remains excluded from event storage, while redacted request text is separated from result and contact records
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- local GET smoke checks for `/m/ambiguous-temperature` and `/m/ambiguous-temperature/result/demo` returned `200 OK`
+- live analyze could not be exercised end-to-end because local `DATABASE_URL` and provider keys are not configured
+
+### Recommended Next Step
+
+- `Module 01 Launch Readiness v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.

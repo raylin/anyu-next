@@ -1,12 +1,68 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
+
+type ContactCapturePayload = {
+  email?: string;
+  lineId?: string;
+  consent: boolean;
+};
 
 type ContactCaptureProps = {
   visible?: boolean;
+  onSubmit?: (
+    payload: ContactCapturePayload,
+  ) => Promise<{ ok: boolean; message: string }>;
 };
 
-export function ContactCapture({ visible = true }: ContactCaptureProps) {
+export function ContactCapture({
+  visible = true,
+  onSubmit,
+}: ContactCaptureProps) {
+  const [contactType, setContactType] = useState<"line" | "email">("line");
+  const [contactValue, setContactValue] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   if (!visible) {
     return null;
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!onSubmit) {
+      setStatusMessage("這是 demo 路線，目前不會真的送出。");
+      setErrorMessage("");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatusMessage("");
+    setErrorMessage("");
+
+    try {
+      const response = await onSubmit({
+        email: contactType === "email" ? contactValue : undefined,
+        lineId: contactType === "line" ? contactValue : undefined,
+        consent,
+      });
+
+      if (!response.ok) {
+        setErrorMessage(response.message);
+        return;
+      }
+
+      setStatusMessage(response.message);
+      setContactValue("");
+      setConsent(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -15,18 +71,56 @@ export function ContactCapture({ visible = true }: ContactCaptureProps) {
       <h2 className="anyu-section-title">這次不會真的收費。</h2>
       <p className="anyu-copy">留下 LINE 或 Email，我們會送你一次完整分析。</p>
 
-      <div className="anyu-contact-grid" aria-label="聯絡方式占位區">
-        <div className="anyu-contact-field">
+      <form className="anyu-contact-grid" onSubmit={handleSubmit}>
+        <label className="anyu-contact-field">
           <span className="anyu-field-label">聯絡方式</span>
-          <div className="anyu-contact-placeholder">LINE / Email</div>
-        </div>
-        <div className="anyu-contact-field">
-          <span className="anyu-field-label">聯絡資訊</span>
-          <div className="anyu-contact-placeholder">UI placeholder only</div>
-        </div>
-      </div>
+          <select
+            className="anyu-select"
+            value={contactType}
+            onChange={(event) =>
+              setContactType(event.target.value === "email" ? "email" : "line")
+            }
+          >
+            <option value="line">LINE</option>
+            <option value="email">Email</option>
+          </select>
+        </label>
 
-      <p className="anyu-subtle-note">不寄電子報 · 不分享第三方 · 送出流程尚未接 API</p>
+        <label className="anyu-contact-field">
+          <span className="anyu-field-label">
+            {contactType === "email" ? "Email" : "LINE ID"}
+          </span>
+          <input
+            className="anyu-input"
+            type={contactType === "email" ? "email" : "text"}
+            value={contactValue}
+            onChange={(event) => setContactValue(event.target.value)}
+            placeholder={
+              contactType === "email" ? "name@example.com" : "@your_line_id"
+            }
+          />
+        </label>
+
+        <label className="anyu-consent-row">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(event) => setConsent(event.target.checked)}
+          />
+          <span>我同意留下聯絡方式，供內測完整分析回傳使用。</span>
+        </label>
+
+        <Button type="submit" className="anyu-button-block" disabled={isSubmitting}>
+          {isSubmitting ? "送出中..." : "送出 · 等我們的完整分析"}
+        </Button>
+      </form>
+
+      {statusMessage ? <p className="anyu-status-message">{statusMessage}</p> : null}
+      {errorMessage ? (
+        <p className="anyu-status-message anyu-status-message-error">{errorMessage}</p>
+      ) : null}
+
+      <p className="anyu-subtle-note">不寄電子報 · 不分享第三方 · 僅儲存必要聯絡資料</p>
     </Card>
   );
 }

@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
 import {
+  MAX_ANALYZE_LENGTH,
   MIN_ANALYZE_LENGTH,
   getAnalyzeButtonLabel,
   getModuleLabel,
   isAnalyzeInputReady,
+  scoreToBucket,
+  validateAnalyzeInput,
 } from "@/lib/modules/ai-temperature-ui";
 
 describe("ai-temperature UI helpers", () => {
@@ -33,5 +36,43 @@ describe("ai-temperature UI helpers", () => {
       "回訊變慢但看限動",
       "不確定 / 跳過",
     ]);
+  });
+
+  it("normalizes analyze input against the allowed chips", () => {
+    const result = validateAnalyzeInput({
+      text: "我昨天約他週末見面，但他今天已讀後沒回，晚上卻還在發限動。",
+      situation: "已讀不回",
+      anonymousSessionId: "session-123",
+      allowedChips: aiTemperatureModule.chips,
+    });
+
+    expect(result.ok).toBe(true);
+
+    if (result.ok) {
+      expect(result.situation).toBe("已讀不回");
+      expect(result.anonymousSessionId).toBe("session-123");
+    }
+  });
+
+  it("rejects too-short and too-long analyze input", () => {
+    const tooShort = validateAnalyzeInput({
+      text: "太短了",
+      allowedChips: aiTemperatureModule.chips,
+    });
+    const tooLong = validateAnalyzeInput({
+      text: "a".repeat(MAX_ANALYZE_LENGTH + 1),
+      allowedChips: aiTemperatureModule.chips,
+    });
+
+    expect(tooShort.ok).toBe(false);
+    expect(tooLong.ok).toBe(false);
+  });
+
+  it("maps score ranges into buckets", () => {
+    expect(scoreToBucket(10)).toBe("cold");
+    expect(scoreToBucket(40)).toBe("cool");
+    expect(scoreToBucket(70)).toBe("warm");
+    expect(scoreToBucket(90)).toBe("hot");
+    expect(scoreToBucket(Number.NaN)).toBe("unknown");
   });
 });

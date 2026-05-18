@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { InputCard } from "@/components/anyu/InputCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import {
+  getClientAnonymousSessionId,
   getAnalyzeButtonLabel,
   getModuleLabel,
   isAnalyzeInputReady,
 } from "@/lib/modules/ai-temperature-ui";
+import type { AnalyzeResponse } from "@/lib/ai/types";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 
 type AiTemperatureLandingProps = {
@@ -21,24 +23,60 @@ export function AiTemperatureLanding({
   const router = useRouter();
   const [selectedChip, setSelectedChip] = useState(moduleConfig.chips[0] ?? "");
   const [inputValue, setInputValue] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
   const titleParts = moduleConfig.title.split("，");
 
   function handleInputChange(event: ChangeEvent<HTMLTextAreaElement>) {
     setInputValue(event.target.value);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!isAnalyzeInputReady(inputValue)) {
+    if (!isAnalyzeInputReady(inputValue) || isSubmitting) {
       return;
     }
 
-    router.push(`/m/${moduleConfig.slug}/result/demo`);
+    setIsSubmitting(true);
+    setErrorMessage("");
+    setStatusMessage("分析中...");
+
+    try {
+      const response = await fetch(`/api/modules/${moduleConfig.slug}/analyze`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: inputValue,
+          situation: selectedChip,
+          anonymousSessionId: getClientAnonymousSessionId(),
+        }),
+      });
+
+      const data = (await response.json()) as AnalyzeResponse;
+
+      if (!response.ok || !data.ok) {
+        setErrorMessage(
+          data.ok ? "目前分析服務尚未設定完成，請稍後再試。" : data.message,
+        );
+        setStatusMessage("");
+        return;
+      }
+
+      router.push(data.redirectTo);
+    } catch {
+      setErrorMessage("目前分析服務尚未設定完成，請稍後再試。");
+      setStatusMessage("");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  const ctaLabel = getAnalyzeButtonLabel(inputValue);
-  const ctaDisabled = !isAnalyzeInputReady(inputValue);
+  const ctaLabel = isSubmitting ? "分析中..." : getAnalyzeButtonLabel(inputValue);
+  const ctaDisabled = isSubmitting || !isAnalyzeInputReady(inputValue);
 
   return (
     <section className="anyu-module-page">
@@ -78,6 +116,8 @@ export function AiTemperatureLanding({
         onSubmit={handleSubmit}
         ctaLabel={ctaLabel}
         ctaDisabled={ctaDisabled}
+        errorMessage={errorMessage}
+        statusMessage={statusMessage}
       />
     </section>
   );

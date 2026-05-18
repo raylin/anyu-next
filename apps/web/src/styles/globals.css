@@ -30,7 +30,8 @@ a {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -229,6 +230,18 @@ textarea {
 .anyu-textarea::placeholder {
   color: var(--anyu-faint);
   font-style: italic;
+}
+
+.anyu-input,
+.anyu-select {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: var(--anyu-radius-xl);
+  background: var(--anyu-surface);
+  color: var(--anyu-ink);
+  box-shadow: var(--anyu-shadow-sm);
 }
 
 .anyu-privacy-helper {
@@ -595,6 +608,19 @@ textarea {
   gap: 0.5rem;
 }
 
+.anyu-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
+}
+
+.anyu-consent-row input {
+  margin-top: 0.18rem;
+}
+
 .anyu-contact-placeholder {
   min-height: 3rem;
   display: flex;
@@ -604,6 +630,17 @@ textarea {
   border-radius: var(--anyu-radius-xl);
   background: var(--anyu-surface);
   color: var(--anyu-faint);
+}
+
+.anyu-status-message {
+  margin: 0;
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
+}
+
+.anyu-status-message-error {
+  color: var(--anyu-danger);
 }
 
 @media (min-width: 720px) {

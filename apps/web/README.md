@@ -2,23 +2,47 @@
 
 This is the production Next.js app foundation for `暗語 ANYU`.
 
-Current routes are skeletons or UI-only shells.
-
-Do not expect full product runtime yet.
-
-Module 01 UI shell now exists for:
+Module 01 now has a runtime + persistence integration path for:
 
 - `/m/ambiguous-temperature`
 - `/m/ambiguous-temperature/result/demo`
+- `/api/modules/ambiguous-temperature/analyze`
+- `/api/events`
+- `/api/unlock-intent`
+- `/api/contact`
 
-The current Module 01 experience is UI-only:
+The current Module 01 experience supports:
 
-- local chip/input state
-- CTA enable/disable behavior
-- mock result rendering
-- no provider call
-- no DB persistence
-- no payment
+- landing input + chip selection
+- analyze submit flow
+- schema-validated result normalization
+- DB-backed result loading when `DATABASE_URL` is configured
+- fake-door unlock intent + contact capture APIs
+
+The current Module 01 experience still defers:
+
+- real payment
+- auth
+- share PNG / OG generation
+- email or LINE delivery
+- advanced PII detection
+- retention cleanup jobs
+
+If `DATABASE_URL` or a provider key is missing, the app should stay up and return friendly configuration errors instead of crashing.
+
+## Environment
+
+Copy `apps/web/.env.example` and provide the values you need locally:
+
+- `DATABASE_URL`
+- `ANTHROPIC_API_KEY`
+- `ANTHROPIC_MODEL`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+- `ORADAR_PROVIDER`
+- `NEXT_PUBLIC_APP_URL`
+
+Provider priority in v0 is Anthropic first. OpenAI is available as a lightweight fallback path.
 
 ## Commands
 
@@ -28,6 +52,8 @@ corepack pnpm dev
 corepack pnpm lint
 corepack pnpm test
 corepack pnpm build
+corepack pnpm db:generate
+corepack pnpm db:migrate
 ```
 
 ## Notes
@@ -37,3 +63,4 @@ corepack pnpm build
 - The current app foundation uses token-driven custom styles rather than a UI kit baseline.
 - No required auth in v0.
 - No real payment in v0.
+- `/m/ambiguous-temperature/result/demo` remains available for internal UI review even after runtime integration.
