@@ -4,6 +4,8 @@
 
 This prototype is a local-first fake-door skeleton for the `曖昧溫度計` experiment.
 
+It now uses the `暗語 ANYU · Design System v1.0` visual direction for the current `曖昧溫度計 by 暗語 ANYU` module shell.
+
 It validates this thin flow:
 
 1. user selects a situation type
@@ -61,6 +63,43 @@ These files are created under `outputs/experiments/ambiguous_temperature_v0/` wh
 
 These files are intentionally ignored by git.
 
+## Design System Sources
+
+The current visual layer is based on:
+
+- `ai-collaboration/research/design/2026-05-18-anyu-design-system-v1.md`
+- `experiments/ambiguous_temperature_v0/static/tokens.css`
+
+The prototype imports the token file through:
+
+- `experiments/ambiguous_temperature_v0/static/styles.css`
+
+## Visual Direction Summary
+
+The prototype currently applies these design-system decisions:
+
+- `暗語 ANYU` as the mother-brand lockup, with `曖昧溫度計` as `module · 01`
+- cream background, serif headline, and soft accent glow instead of a SaaS dashboard layout
+- token-based cards, chips, typography, shadows, and spacing
+- premium result cards, a screenshot-oriented share-card preview, and a one-time paid unlock surface
+- contact capture styling aligned to the same module language
+
+## What Was Implemented
+
+- token import and module-level visual theming
+- updated landing page structure and brand hierarchy
+- premium input card styling and chip-based situation selector UI
+- refreshed temperature signature, insight, share preview, paid preview, and contact capture cards
+- mobile-first spacing and focus-visible styling
+
+## Intentionally Not Implemented Yet
+
+- real share-card image generation
+- real payment
+- portal or multi-module navigation
+- backend PII redaction or guaranteed 24-hour deletion enforcement
+- production privacy policy, retention logic, or account controls
+
 ## Analyze Local Results
 
 Generate a local markdown summary from the JSONL logs with:
@@ -101,6 +140,7 @@ Local submissions may contain sensitive user text and contact information.
 - Do not use real private conversations when demoing unless you are comfortable storing them locally.
 - The UI warns users not to paste names, phone numbers, addresses, or other identifying information.
 - The analysis report hides raw input text and does not print contact values.
+- The current UI copy frames 24-hour deletion as prototype intent; production privacy and PII handling still need implementation.
 
 ## Intentionally Not Built
 

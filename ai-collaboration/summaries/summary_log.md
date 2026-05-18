@@ -957,3 +957,56 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Commit Hash
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-18 ANYU Design System Implementation v1.0
+
+### Task Completed
+
+- Stored the ANYU design system source under `ai-collaboration/research/design/2026-05-18-anyu-design-system-v1.md`.
+- Stored and used design tokens from `experiments/ambiguous_temperature_v0/static/tokens.css`.
+- Applied the design system visual layer to `experiments/ambiguous_temperature_v0/`.
+- Created `ai-collaboration/research/design/2026-05-18-anyu-design-system-implementation-review-bundle.md`.
+- Created `ai-collaboration/reports/2026-05-18-anyu-design-system-implementation-execution-report.md`.
+
+### Prototype Paths
+
+- design system source: `ai-collaboration/research/design/2026-05-18-anyu-design-system-v1.md`
+- tokens path: `experiments/ambiguous_temperature_v0/static/tokens.css`
+- prototype path: `experiments/ambiguous_temperature_v0/`
+- review bundle: `ai-collaboration/research/design/2026-05-18-anyu-design-system-implementation-review-bundle.md`
+
+### What Changed
+
+- added `暗語 ANYU` brand hierarchy and `module · 01 · 曖昧溫度計` landing structure
+- moved prototype styling to token-based CSS
+- refreshed landing, result, share preview, paid CTA, and contact capture visuals without changing API contracts or event names
+- added chip-based situation selection UI over the existing hidden form control
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m py_compile experiments/ambiguous_temperature_v0/*.py` passed
+- `python3 -m py_compile scripts/generate_product_sample.py` passed
+- `python3 -m py_compile scripts/run_product_eval.py` passed
+- local server started at `http://127.0.0.1:8010`
+- `GET /health` passed
+- `POST /api/events` passed
+- `POST /api/contact` passed with synthetic payload
+- headless browser landing-page render check passed
+- live analyze call timed out in this environment
+
+### Learnings
+
+- the design system fits the existing single-page prototype without needing runtime changes
+- the hidden-state rule had to be restored explicitly in the new stylesheet to keep the fake-door flow intact
+- the current schema supports the refreshed result layout, but not the richer three-dimension signal model described in the design document
+
+### Unresolved Questions
+
+- whether `暗語 ANYU` should be louder or quieter on the first standalone module page
+- whether contact capture should remain inline or move to a bottom sheet later
+- whether provider timeout is local-environment-specific or a runtime issue to investigate separately
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.

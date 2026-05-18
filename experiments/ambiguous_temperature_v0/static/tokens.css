@@ -1,0 +1,424 @@
+/* ============================================================
+ * 暗語 ANYU · Design Tokens
+ * v1.0 — Module 01 曖昧溫度計 baseline
+ *
+ * Single source of truth for color, type, spacing, radius,
+ * shadow. Import this once at the root of your app.
+ *
+ *   // app/globals.css or main.ts
+ *   @import "./tokens.css";
+ *
+ * Theming model:
+ *   <html lang="zh-Hant"
+ *         data-module="ai-temperature"
+ *         data-theme="light|dark">
+ *
+ * - data-module switches the accent pair (§4 / §17.3)
+ * - data-theme switches base palette (§4.2 / §4.3)
+ * - Absence of data-theme falls back to `prefers-color-scheme`
+ *
+ * Naming convention:
+ *   --anyu-{role}             solid color
+ *   --anyu-{role}-{NN}        alpha variant (NN = opacity ×100)
+ *   --anyu-type-{name}        compound type token (size + LH)
+ *   --anyu-font-{family}      font-family
+ *   --anyu-track-{name}       letter-spacing
+ *   --anyu-space-{n}          4pt-based spacing scale
+ *   --anyu-radius-{name}      border-radius
+ *   --anyu-shadow-{name}      box-shadow
+ * ============================================================ */
+
+
+/* ─── Font families (§5.1) ───────────────────────────────────
+ * Load these once in your HTML <head> or via next/font.
+ * Recommended Google Fonts query:
+ *   family=Noto+Serif+TC:wght@300;400;500;600;700
+ *   family=Noto+Sans+TC:wght@300;400;500;600;700
+ *   family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400
+ *   family=JetBrains+Mono:wght@300;400;500
+ * ─────────────────────────────────────────────────────────── */
+
+:root {
+  --anyu-font-serif: "Noto Serif TC", "Songti TC", serif;
+  --anyu-font-sans:  "Noto Sans TC", "PingFang TC", "Inter", system-ui, -apple-system, sans-serif;
+  --anyu-font-latin: "Cormorant Garamond", "Noto Serif TC", serif;
+  --anyu-font-mono:  "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+
+/* ─── Letter-spacing (§5.4) ─────────────────────────────── */
+
+:root {
+  --anyu-track-tight:    -0.3px; /* serif display */
+  --anyu-track-normal:   0;
+  --anyu-track-wide:     0.5px;  /* sans button */
+  --anyu-track-mono:     1.2px;  /* mono label */
+  --anyu-track-wordmark: 3px;    /* 「暗語」字標 */
+}
+
+
+/* ─── Type scale (§5.3) ──────────────────────────────────
+ * Use as compound tokens via `font` shorthand, or split into
+ * --anyu-type-{name}-size / -line-height where finer control
+ * is needed.
+ * ─────────────────────────────────────────────────────── */
+
+:root {
+  /* size / line-height */
+  --anyu-type-display-size:    32px;  --anyu-type-display-lh:    1.35;
+  --anyu-type-h1-size:         26px;  --anyu-type-h1-lh:         1.4;
+  --anyu-type-h2-size:         22px;  --anyu-type-h2-lh:         1.45;
+  --anyu-type-h3-size:         18px;  --anyu-type-h3-lh:         1.5;
+  --anyu-type-quote-size:      17px;  --anyu-type-quote-lh:      1.6;
+  --anyu-type-body-lg-size:    15px;  --anyu-type-body-lg-lh:    1.7;
+  --anyu-type-body-size:       14px;  --anyu-type-body-lh:       1.7;
+  --anyu-type-caption-size:    13px;  --anyu-type-caption-lh:    1.65;
+  --anyu-type-label-size:      11px;  --anyu-type-label-lh:      1;
+  --anyu-type-num-xl-size:     64px;  --anyu-type-num-xl-lh:     1;
+  --anyu-type-num-lg-size:     38px;  --anyu-type-num-lg-lh:     1;
+  --anyu-type-num-md-size:     26px;  --anyu-type-num-md-lh:     1;
+}
+
+/* Desktop scaling (§5.5) — display & num-xl 1.15× from 768pt up. */
+@media (min-width: 768px) {
+  :root {
+    --anyu-type-display-size: 37px; /* 32 × 1.15 */
+    --anyu-type-num-xl-size:  74px; /* 64 × 1.15 */
+  }
+}
+
+/* Optional shorthand utility classes (drop in if not using Tailwind) */
+.anyu-type-display { font: 500 var(--anyu-type-display-size)/var(--anyu-type-display-lh) var(--anyu-font-serif); letter-spacing: var(--anyu-track-tight); }
+.anyu-type-h1      { font: 500 var(--anyu-type-h1-size)/var(--anyu-type-h1-lh)           var(--anyu-font-serif); letter-spacing: var(--anyu-track-tight); }
+.anyu-type-h2      { font: 500 var(--anyu-type-h2-size)/var(--anyu-type-h2-lh)           var(--anyu-font-serif); }
+.anyu-type-h3      { font: 500 var(--anyu-type-h3-size)/var(--anyu-type-h3-lh)           var(--anyu-font-serif); }
+.anyu-type-quote   { font: italic 400 var(--anyu-type-quote-size)/var(--anyu-type-quote-lh) var(--anyu-font-serif); }
+.anyu-type-body-lg { font: 400 var(--anyu-type-body-lg-size)/var(--anyu-type-body-lg-lh) var(--anyu-font-sans); }
+.anyu-type-body    { font: 400 var(--anyu-type-body-size)/var(--anyu-type-body-lh)       var(--anyu-font-sans); }
+.anyu-type-caption { font: 400 var(--anyu-type-caption-size)/var(--anyu-type-caption-lh) var(--anyu-font-sans); }
+.anyu-type-label   { font: 500 var(--anyu-type-label-size)/var(--anyu-type-label-lh)     var(--anyu-font-mono); letter-spacing: var(--anyu-track-mono); text-transform: uppercase; }
+.anyu-type-num-xl  { font: italic 300 var(--anyu-type-num-xl-size)/var(--anyu-type-num-xl-lh) var(--anyu-font-latin); }
+.anyu-type-num-lg  { font: italic 300 var(--anyu-type-num-lg-size)/var(--anyu-type-num-lg-lh) var(--anyu-font-latin); }
+.anyu-type-num-md  { font: italic 400 var(--anyu-type-num-md-size)/var(--anyu-type-num-md-lh) var(--anyu-font-latin); }
+
+
+/* ─── Spacing scale (§6.1) ───────────────────────────────
+ * 4pt base. Use --anyu-space-6 for mobile gutters,
+ * --anyu-space-8 for section vertical rhythm.
+ * ─────────────────────────────────────────────────────── */
+
+:root {
+  --anyu-space-1:   4px;
+  --anyu-space-2:   8px;
+  --anyu-space-3:  12px;
+  --anyu-space-4:  16px;
+  --anyu-space-5:  20px;
+  --anyu-space-6:  24px;
+  --anyu-space-8:  32px;
+  --anyu-space-10: 40px;
+  --anyu-space-14: 56px;
+  --anyu-space-18: 72px;
+}
+
+
+/* ─── Radius scale (§6.2) ──────────────────────────────── */
+
+:root {
+  --anyu-radius-sm:    8px;  /* chip · tag */
+  --anyu-radius-md:   10px;  /* input · 小卡 */
+  --anyu-radius-lg:   14px;  /* CTA · 一般卡 */
+  --anyu-radius-xl:   18px;  /* 主要卡片 */
+  --anyu-radius-2xl:  20px;  /* 簽名卡 (temperature card) */
+  --anyu-radius-3xl:  24px;  /* share card */
+  --anyu-radius-pill: 999px; /* chip · 輔助按鈕 */
+}
+
+
+/* ============================================================
+ *  Color tokens — base palette (§4.2 / §4.3)
+ *  Default light. Dark overrides at the bottom of this block.
+ *  Module-specific accents come AFTER the base, so they cascade
+ *  on top regardless of theme.
+ * ============================================================ */
+
+:root,
+:root[data-theme="light"] {
+  /* base */
+  --anyu-bg:       #f4efe7;  /* 整頁背景 · 奶油霧 */
+  --anyu-surface:  #fbf7ef;  /* navbar / 表單區 / CTA 反白 */
+  --anyu-card:     #ffffff;  /* 卡片底 */
+  --anyu-mist:     #ece2cf;  /* hint / track / mist 區塊 */
+
+  /* ink */
+  --anyu-ink:      #2a2419;
+  --anyu-dim:      rgba(42, 36, 25, .62);
+  --anyu-faint:    rgba(42, 36, 25, .42);
+  --anyu-line:     rgba(42, 36, 25, .09);
+
+  /* state (light) */
+  --anyu-success:  #6f8a6a;
+  --anyu-warning:  #c9904a;
+  --anyu-danger:   #b85a4a;
+
+  /* shadow (light) */
+  --anyu-shadow-xs: 0 1px 2px rgba(42,36,25,.06);
+  --anyu-shadow-sm: 0 1px 0 rgba(42,36,25,.04), 0 4px 14px rgba(42,36,25,.04);
+  --anyu-shadow-md: 0 1px 0 rgba(42,36,25,.04), 0 8px 24px rgba(42,36,25,.04);
+  --anyu-shadow-lg: 0 1px 0 rgba(42,36,25,.04), 0 12px 32px rgba(42,36,25,.06);
+  --anyu-shadow-xl: 0 24px 60px rgba(42,36,25,.12), 0 1px 0 rgba(42,36,25,.04);
+}
+
+:root[data-theme="dark"] {
+  --anyu-bg:       #191614;
+  --anyu-surface:  #221f1c;
+  --anyu-card:     #2a2622;
+  --anyu-mist:     rgba(244, 236, 224, .05);
+
+  --anyu-ink:      #f4ece0;
+  --anyu-dim:      rgba(244, 236, 224, .62);
+  --anyu-faint:    rgba(244, 236, 224, .42);
+  --anyu-line:     rgba(244, 236, 224, .08);
+
+  --anyu-success:  #8aae84;
+  --anyu-warning:  #e5b573;
+  --anyu-danger:   #e08572;
+
+  /* dark shadows = 內描線 + 暗光暈 (§6.3) */
+  --anyu-shadow-xs: inset 0 0 0 1px var(--anyu-line);
+  --anyu-shadow-sm: inset 0 0 0 1px var(--anyu-line);
+  --anyu-shadow-md: inset 0 0 0 1px var(--anyu-line);
+  --anyu-shadow-lg: inset 0 0 0 1px var(--anyu-line), 0 12px 32px rgba(0,0,0,.4);
+  --anyu-shadow-xl: 0 24px 60px rgba(0,0,0,.5);
+}
+
+/* Honour OS preference when no explicit data-theme attribute. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --anyu-bg:       #191614;
+    --anyu-surface:  #221f1c;
+    --anyu-card:     #2a2622;
+    --anyu-mist:     rgba(244, 236, 224, .05);
+
+    --anyu-ink:      #f4ece0;
+    --anyu-dim:      rgba(244, 236, 224, .62);
+    --anyu-faint:    rgba(244, 236, 224, .42);
+    --anyu-line:     rgba(244, 236, 224, .08);
+
+    --anyu-success:  #8aae84;
+    --anyu-warning:  #e5b573;
+    --anyu-danger:   #e08572;
+
+    --anyu-shadow-xs: inset 0 0 0 1px var(--anyu-line);
+    --anyu-shadow-sm: inset 0 0 0 1px var(--anyu-line);
+    --anyu-shadow-md: inset 0 0 0 1px var(--anyu-line);
+    --anyu-shadow-lg: inset 0 0 0 1px var(--anyu-line), 0 12px 32px rgba(0,0,0,.4);
+    --anyu-shadow-xl: 0 24px 60px rgba(0,0,0,.5);
+  }
+}
+
+
+/* ============================================================
+ *  Module accent palettes (§17.3)
+ *  Each module switches --anyu-accent / --anyu-accent2 +
+ *  matching alpha + rose variants. accent2 is the atmospheric
+ *  口音色 — limit to ≤ 1 occurrence per screen (§4.4).
+ *
+ *  data-module values:
+ *    ai-temperature      曖昧溫度計
+ *    red-flag-radar      關係紅旗雷達
+ *    values-radar        伴侶價值觀雷達
+ *    pre-marriage-trust  婚前信任檢查
+ *    social-signal       社群微訊號分析
+ *
+ *  Default (no data-module attribute) = ai-temperature.
+ * ============================================================ */
+
+/* Module 01 · 曖昧溫度計 — warm gold + misty purple (DEFAULT) */
+:root,
+:root[data-module="ai-temperature"] {
+  --anyu-accent:     #b69664;
+  --anyu-accent-12:  rgba(182, 150, 100, .12);
+  --anyu-accent-20:  rgba(182, 150, 100, .20);
+  --anyu-accent-45:  rgba(182, 150, 100, .45);
+
+  --anyu-accent2:    #9b7eb0;
+  --anyu-accent2-15: rgba(155, 126, 176, .15);
+
+  --anyu-rose:       #cd8a78;
+}
+
+:root[data-theme="dark"][data-module="ai-temperature"],
+:root[data-module="ai-temperature"][data-theme="dark"] {
+  --anyu-accent:     #d9c79a;
+  --anyu-accent-12:  rgba(217, 199, 154, .12);
+  --anyu-accent-20:  rgba(217, 199, 154, .20);
+  --anyu-accent-45:  rgba(217, 199, 154, .45);
+
+  --anyu-accent2:    #b39bc7;
+  --anyu-accent2-15: rgba(179, 155, 199, .18);
+
+  --anyu-rose:       #e0a48a;
+}
+
+/* Module 02 · 關係紅旗雷達 — muted rose + ember */
+:root[data-module="red-flag-radar"] {
+  --anyu-accent:     #c97c66;
+  --anyu-accent-12:  rgba(201, 124, 102, .12);
+  --anyu-accent-20:  rgba(201, 124, 102, .20);
+  --anyu-accent-45:  rgba(201, 124, 102, .45);
+
+  --anyu-accent2:    #e0865a;
+  --anyu-accent2-15: rgba(224, 134, 90, .15);
+
+  --anyu-rose:       #d99880;
+}
+
+:root[data-theme="dark"][data-module="red-flag-radar"] {
+  --anyu-accent:     #e09b85;
+  --anyu-accent-12:  rgba(224, 155, 133, .12);
+  --anyu-accent-20:  rgba(224, 155, 133, .20);
+  --anyu-accent-45:  rgba(224, 155, 133, .45);
+
+  --anyu-accent2:    #eda07a;
+  --anyu-accent2-15: rgba(237, 160, 122, .18);
+
+  --anyu-rose:       #e8a890;
+}
+
+/* Module 03 · 伴侶價值觀雷達 — sage gray + warm clay */
+:root[data-module="values-radar"] {
+  --anyu-accent:     #7d8c7d;
+  --anyu-accent-12:  rgba(125, 140, 125, .12);
+  --anyu-accent-20:  rgba(125, 140, 125, .20);
+  --anyu-accent-45:  rgba(125, 140, 125, .45);
+
+  --anyu-accent2:    #b88469;
+  --anyu-accent2-15: rgba(184, 132, 105, .15);
+
+  --anyu-rose:       #c89684;
+}
+
+:root[data-theme="dark"][data-module="values-radar"] {
+  --anyu-accent:     #a3b3a3;
+  --anyu-accent-12:  rgba(163, 179, 163, .12);
+  --anyu-accent-20:  rgba(163, 179, 163, .20);
+  --anyu-accent-45:  rgba(163, 179, 163, .45);
+
+  --anyu-accent2:    #d2a085;
+  --anyu-accent2-15: rgba(210, 160, 133, .18);
+
+  --anyu-rose:       #d6a892;
+}
+
+/* Module 04 · 婚前信任檢查 — deep blue gray + soft gold */
+:root[data-module="pre-marriage-trust"] {
+  --anyu-accent:     #4a5a6d;
+  --anyu-accent-12:  rgba(74, 90, 109, .12);
+  --anyu-accent-20:  rgba(74, 90, 109, .20);
+  --anyu-accent-45:  rgba(74, 90, 109, .45);
+
+  --anyu-accent2:    #c9a878;
+  --anyu-accent2-15: rgba(201, 168, 120, .15);
+
+  --anyu-rose:       #b39280;
+}
+
+:root[data-theme="dark"][data-module="pre-marriage-trust"] {
+  --anyu-accent:     #8aa0b8;
+  --anyu-accent-12:  rgba(138, 160, 184, .12);
+  --anyu-accent-20:  rgba(138, 160, 184, .20);
+  --anyu-accent-45:  rgba(138, 160, 184, .45);
+
+  --anyu-accent2:    #dfc394;
+  --anyu-accent2-15: rgba(223, 195, 148, .18);
+
+  --anyu-rose:       #c9a896;
+}
+
+/* Module 05 · 社群微訊號分析 — blue purple + signal silver */
+:root[data-module="social-signal"] {
+  --anyu-accent:     #6c5d8c;
+  --anyu-accent-12:  rgba(108, 93, 140, .12);
+  --anyu-accent-20:  rgba(108, 93, 140, .20);
+  --anyu-accent-45:  rgba(108, 93, 140, .45);
+
+  --anyu-accent2:    #b8b8c0;
+  --anyu-accent2-15: rgba(184, 184, 192, .18);
+
+  --anyu-rose:       #b89eb0;
+}
+
+:root[data-theme="dark"][data-module="social-signal"] {
+  --anyu-accent:     #a796c7;
+  --anyu-accent-12:  rgba(167, 150, 199, .12);
+  --anyu-accent-20:  rgba(167, 150, 199, .20);
+  --anyu-accent-45:  rgba(167, 150, 199, .45);
+
+  --anyu-accent2:    #d0d0d8;
+  --anyu-accent2-15: rgba(208, 208, 216, .18);
+
+  --anyu-rose:       #ceb6c8;
+}
+
+
+/* ─── Focus ring + glow (§6.3 / §6.4) ────────────────────
+ * Depend on the active accent, so they live AFTER module
+ * blocks. All var() references resolve at use-site.
+ * ─────────────────────────────────────────────────────── */
+
+:root {
+  --anyu-shadow-focus: 0 0 0 4px var(--anyu-accent-12);
+
+  --anyu-glow-warm:
+    radial-gradient(circle, var(--anyu-accent-20) 0%, transparent 65%);
+  --anyu-glow-mist:
+    radial-gradient(circle, var(--anyu-accent2-15) 0%, transparent 60%);
+}
+
+:root[data-theme="dark"] {
+  --anyu-shadow-focus: 0 0 0 4px var(--anyu-accent-20);
+}
+
+
+/* ─── Reduced motion (§16.4) ─────────────────────────────
+ * Add helper var that components can check, e.g.:
+ *   .temp-bar { transition: width var(--anyu-motion-bar, 600ms) ease-out; }
+ * ─────────────────────────────────────────────────────── */
+
+:root {
+  --anyu-motion-fast: 180ms;
+  --anyu-motion-base: 320ms;
+  --anyu-motion-bar:  600ms;
+  --anyu-motion-page: 700ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --anyu-motion-fast: 0ms;
+    --anyu-motion-base: 0ms;
+    --anyu-motion-bar:  0ms;
+    --anyu-motion-page: 0ms;
+  }
+}
+
+
+/* ─── Base reset hooks (optional, opt-in) ────────────────
+ * Apply at the body level if you want one-line defaults.
+ * Safe to delete if you prefer to wire defaults yourself.
+ * ─────────────────────────────────────────────────────── */
+
+.anyu-app {
+  background: var(--anyu-bg);
+  color: var(--anyu-ink);
+  font: 400 var(--anyu-type-body-size)/var(--anyu-type-body-lh) var(--anyu-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.anyu-app :focus-visible {
+  outline: none;
+  box-shadow: var(--anyu-shadow-focus);
+  border-radius: var(--anyu-radius-md);
+  transition: box-shadow var(--anyu-motion-fast) ease-out;
+}

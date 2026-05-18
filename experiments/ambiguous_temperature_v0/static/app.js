@@ -1,7 +1,10 @@
 const appConfig = window.__APP_CONFIG__ || {};
 
 const analysisForm = document.getElementById("analysis-form");
+const analyzeButton = document.getElementById("analyze-button");
+const resetAnalysisButton = document.getElementById("reset-analysis-button");
 const situationTypeSelect = document.getElementById("situation-type");
+const situationChips = Array.from(document.querySelectorAll(".situation-chip"));
 const inputText = document.getElementById("input-text");
 const formError = document.getElementById("form-error");
 const formStatus = document.getElementById("form-status");
@@ -13,7 +16,11 @@ const contactValueInput = document.getElementById("contact-value");
 const contactError = document.getElementById("contact-error");
 const contactStatus = document.getElementById("contact-status");
 const paidUnlockButton = document.getElementById("paid-unlock-button");
+const paidUnlockProxyButton = document.querySelector('[data-action="paid-unlock-proxy"]');
 const shareCardButton = document.getElementById("share-card-button");
+const shareCardPreview = document.getElementById("share-card-preview");
+const temperatureFill = document.getElementById("temperature-fill");
+const temperatureScore = document.getElementById("temperature-score");
 
 const sessionStorageKey = "ambiguous-temperature-v0-session-id";
 let inputStartedLogged = false;
@@ -66,6 +73,35 @@ function setMessage(element, message, isError = false) {
   }
 }
 
+function syncSituationChips() {
+  for (const chip of situationChips) {
+    const isActive = chip.dataset.value === situationTypeSelect.value;
+    chip.classList.toggle("is-active", isActive);
+    chip.setAttribute("aria-pressed", isActive ? "true" : "false");
+  }
+}
+
+function updateAnalyzeButtonState() {
+  const hasInput = inputText.value.trim().length > 0;
+  analyzeButton.style.opacity = hasInput ? "1" : "0.72";
+}
+
+function setSituationType(value, shouldLog = true) {
+  situationTypeSelect.value = value;
+  syncSituationChips();
+  if (shouldLog) {
+    logEvent("situation_selected", {
+      situation_type: situationTypeSelect.value,
+    });
+  }
+}
+
+function updateTemperatureVisual(score) {
+  const safeScore = Math.max(0, Math.min(100, Number(score) || 0));
+  temperatureFill.style.width = `${safeScore}%`;
+  temperatureScore.setAttribute("aria-label", `當前溫度 ${safeScore} 滿分 100`);
+}
+
 function renderResult(result) {
   const freeResult = result.free_result;
   const insightLayer = result.insight_layer;
@@ -73,6 +109,7 @@ function renderResult(result) {
   const paidPreview = result.paid_preview;
 
   document.getElementById("temperature-score").textContent = String(freeResult.temperature_score);
+  updateTemperatureVisual(freeResult.temperature_score);
   document.getElementById("state-label").textContent = freeResult.state_label;
   document.getElementById("one-sentence-read").textContent = freeResult.one_sentence_read;
   document.getElementById("uncertainty-note").textContent = freeResult.uncertainty_note;
@@ -113,21 +150,61 @@ function updateContactLabel() {
   contactValueLabel.textContent = contactTypeSelect.value === "email" ? "Email" : "LINE ID";
 }
 
+function resetForNewAnalysis() {
+  contactForm.hidden = true;
+  setMessage(contactError, "");
+  setMessage(contactStatus, "");
+  setMessage(formError, "");
+  setMessage(formStatus, "");
+  inputText.focus();
+}
+
+async function handleShareCardClick() {
+  if (!currentResult) {
+    return;
+  }
+  await logEvent("share_card_clicked", {
+    state_label: currentResult.free_result.state_label,
+    temperature_score: currentResult.free_result.temperature_score,
+  });
+  setMessage(formStatus, "已記錄分享卡點擊。");
+}
+
+async function handlePaidUnlockClick() {
+  if (!currentResult) {
+    setMessage(formError, "請先完成分析。", true);
+    return;
+  }
+  await logEvent("paid_unlock_clicked", {
+    situation_type: currentSummary?.situation_type || situationTypeSelect.value,
+    state_label: currentSummary?.state_label || currentResult.free_result.state_label,
+    temperature_score: currentSummary?.temperature_score || currentResult.free_result.temperature_score,
+    price: currentSummary?.price || currentResult.paid_preview.price,
+  });
+  contactForm.hidden = false;
+  contactForm.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 window.addEventListener("load", () => {
   logEvent("page_view", {
     entry_point: "prototype",
     variant: appConfig.variant || "B",
   });
+  syncSituationChips();
+  updateAnalyzeButtonState();
   updateContactLabel();
 });
 
-situationTypeSelect.addEventListener("change", () => {
-  logEvent("situation_selected", {
-    situation_type: situationTypeSelect.value,
+for (const chip of situationChips) {
+  chip.addEventListener("click", () => {
+    setSituationType(chip.dataset.value || "不確定 / 跳過");
   });
-});
+}
+
+situationTypeSelect.addEventListener("change", syncSituationChips);
 
 inputText.addEventListener("input", () => {
+  updateAnalyzeButtonState();
   if (!inputStartedLogged && inputText.value.trim()) {
     inputStartedLogged = true;
     logEvent("input_started", {
@@ -161,30 +238,14 @@ analysisForm.addEventListener("submit", async (event) => {
   }
 });
 
-shareCardButton.addEventListener("click", () => {
-  if (!currentResult) {
-    return;
-  }
-  logEvent("share_card_clicked", {
-    state_label: currentResult.free_result.state_label,
-    temperature_score: currentResult.free_result.temperature_score,
-  });
-  setMessage(formStatus, "已記錄分享卡點擊。");
-});
+shareCardButton.addEventListener("click", handleShareCardClick);
+shareCardPreview.addEventListener("click", handleShareCardClick);
+paidUnlockButton.addEventListener("click", handlePaidUnlockClick);
+paidUnlockProxyButton.addEventListener("click", handlePaidUnlockClick);
 
-paidUnlockButton.addEventListener("click", async () => {
-  if (!currentResult) {
-    setMessage(formError, "請先完成分析。", true);
-    return;
-  }
-  await logEvent("paid_unlock_clicked", {
-    situation_type: currentSummary?.situation_type || situationTypeSelect.value,
-    state_label: currentSummary?.state_label || currentResult.free_result.state_label,
-    temperature_score: currentSummary?.temperature_score || currentResult.free_result.temperature_score,
-    price: currentSummary?.price || currentResult.paid_preview.price,
-  });
-  contactForm.hidden = false;
-  contactForm.scrollIntoView({ behavior: "smooth", block: "start" });
+resetAnalysisButton.addEventListener("click", () => {
+  resetForNewAnalysis();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 contactTypeSelect.addEventListener("change", updateContactLabel);

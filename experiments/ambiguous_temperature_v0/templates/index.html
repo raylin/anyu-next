@@ -1,107 +1,221 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-module="ai-temperature">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>曖昧溫度計 Prototype</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>曖昧溫度計 by 暗語 ANYU</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    >
     <link rel="stylesheet" href="/static/styles.css">
   </head>
-  <body>
-    <main class="shell">
-      <section class="hero">
-        <p class="eyebrow">Variant B · Fake Door Prototype</p>
-        <h1>他是真的忙，還是其實在冷掉？</h1>
-        <p class="subheadline">貼上對話，AI 幫你判斷關係溫度和下一句怎麼回。</p>
-      </section>
+  <body class="anyu-app">
+    <main class="app-shell">
+      <div class="page-frame">
+        <header class="topbar">
+          <div class="wordmark">
+            <span class="moon-icon" aria-hidden="true"></span>
+            <span class="wordmark-text">暗語 ANYU</span>
+          </div>
+          <p class="topbar-hook">讀懂關係裡那些沒說出口的訊號</p>
+        </header>
 
-      <section class="layout">
-        <form id="analysis-form" class="panel input-panel">
-          <label class="field">
-            <span>情境類型</span>
-            <select id="situation-type" name="situation_type">
+        <section class="hero-block" aria-labelledby="hero-title">
+          <p class="module-label">module · 01 · 曖昧溫度計</p>
+          <div class="hero-copy">
+            <div class="hero-glow" aria-hidden="true"></div>
+            <h1 id="hero-title">
+              他是真的忙，<br>
+              還是其實在<span class="accent-word">冷</span>掉？
+            </h1>
+            <p class="hero-subheadline">貼上對話或描述情境，AI 幫你讀出關係溫度，與下一句怎麼回。</p>
+          </div>
+        </section>
+
+        <form id="analysis-form" class="feature-card input-card">
+          <div class="card-header">
+            <p class="mono-label">// 貼一段對話 · 或用自己的話描述</p>
+          </div>
+
+          <label class="field textarea-field" for="input-text">
+            <span class="field-label">情境描述</span>
+            <textarea
+              id="input-text"
+              name="input_text"
+              rows="6"
+              placeholder="例如：我昨天約他週末見面，他已讀後沒回，但晚上還在發限動。"
+            ></textarea>
+          </label>
+
+          <div class="privacy-helper privacy-helper-card">
+            <span class="helper-rule"></span>
+            <p>請不要貼姓名 / 電話 / 地址</p>
+            <p>原型展示以分析後 24 小時內刪除為目標</p>
+          </div>
+
+          <div class="field situation-field">
+            <div class="field-head">
+              <span class="field-label">情境 · 可選</span>
+            </div>
+            <select id="situation-type" name="situation_type" class="visually-hidden" aria-label="情境類型">
               <option value="已讀不回">已讀不回</option>
               <option value="忽冷忽熱">忽冷忽熱</option>
               <option value="回訊變慢但看限動">回訊變慢但看限動</option>
               <option value="不確定 / 跳過">不確定 / 跳過</option>
             </select>
-          </label>
+            <div class="chip-group" role="group" aria-label="情境選擇">
+              <button type="button" class="situation-chip is-active" data-value="已讀不回" aria-pressed="true">已讀不回</button>
+              <button type="button" class="situation-chip" data-value="忽冷忽熱" aria-pressed="false">忽冷忽熱</button>
+              <button type="button" class="situation-chip" data-value="回訊變慢但看限動" aria-pressed="false">回訊變慢但看限動</button>
+              <button type="button" class="situation-chip" data-value="不確定 / 跳過" aria-pressed="false">不確定 / 跳過</button>
+            </div>
+          </div>
 
-          <label class="field">
-            <span>貼上對話或描述情況</span>
-            <textarea
-              id="input-text"
-              name="input_text"
-              rows="10"
-              placeholder="例如：我昨天約他週末見面，他已讀後沒回，但晚上還在發限動。"
-            ></textarea>
-          </label>
-
-          <p class="helper-text">可以貼最近幾句對話，或用自己的話描述。請不要貼姓名、電話、地址或其他能識別身份的資訊。</p>
-
-          <button type="submit" class="primary-button">分析我的曖昧溫度</button>
+          <button id="analyze-button" type="submit" class="primary-button">分析我的曖昧溫度</button>
+          <p class="cta-caption">免費 · 約 8 秒 · 結果可截圖分享</p>
+          <p class="privacy-helper privacy-helper-foot">不寄電子報 · 不分享第三方</p>
           <p id="form-error" class="status-message error" hidden></p>
           <p id="form-status" class="status-message" hidden></p>
         </form>
 
-        <section id="result-panel" class="panel result-panel" hidden>
-          <div class="result-header">
-            <p class="eyebrow">免費結果</p>
-            <div class="temperature-wrap">
-              <span id="temperature-score" class="temperature-score">0</span>
-              <span class="temperature-unit">/ 100</span>
+        <section id="result-panel" class="result-stack" hidden>
+          <div class="result-topbar">
+            <button type="button" class="ghost-button" id="reset-analysis-button">重新分析</button>
+            <div class="wordmark wordmark-compact">
+              <span class="moon-icon" aria-hidden="true"></span>
+              <span class="wordmark-text">暗語 ANYU</span>
+            </div>
+          </div>
+
+          <article class="feature-card signature-card">
+            <div class="signature-head">
+              <div>
+                <p class="mono-label">temperature signature</p>
+                <h2>當前溫度</h2>
+              </div>
+              <span class="moon-icon moon-icon-large" aria-hidden="true"></span>
+            </div>
+            <div class="signature-number-wrap">
+              <p id="temperature-score" class="signature-number" aria-label="當前溫度 0 滿分 100">0</p>
+              <span class="signature-unit">/100</span>
             </div>
             <p id="state-label" class="state-label"></p>
-            <p id="one-sentence-read" class="one-sentence-read"></p>
-          </div>
+            <div class="temperature-meter" aria-hidden="true">
+              <span id="temperature-fill" class="temperature-fill"></span>
+            </div>
+            <div class="temperature-scale">
+              <span>cold</span>
+              <span>warm</span>
+              <span>hot</span>
+            </div>
+          </article>
 
-          <div class="result-section">
-            <h2>主要訊號</h2>
+          <article class="feature-card one-line-card">
+            <p id="one-sentence-read" class="one-sentence-read"></p>
+          </article>
+
+          <section class="signals-block">
+            <div class="signals-head">
+              <p class="mono-label">他這邊的訊號</p>
+              <span class="signals-meta">observed signals</span>
+            </div>
             <ul id="observed-signals" class="signal-list"></ul>
             <p id="uncertainty-note" class="uncertainty-note"></p>
-          </div>
+          </section>
 
-          <div class="result-section">
+          <article class="feature-card insight-card">
+            <p class="mono-label">insight layer</p>
             <h2 id="insight-title"></h2>
-            <p id="insight-explanation"></p>
-          </div>
+            <p id="insight-explanation" class="insight-explanation"></p>
+          </article>
 
-          <button id="share-card-button" type="button" class="share-card">
-            <span id="share-temperature-label" class="share-temperature"></span>
-            <span id="share-state-label" class="share-state"></span>
-            <strong id="share-persona" class="share-persona"></strong>
-            <span id="share-sentence" class="share-sentence"></span>
+          <section class="share-actions">
+            <button id="share-card-button" type="button" class="secondary-button">分享卡預覽 ↗</button>
+            <button id="paid-unlock-button" type="button" class="secondary-button secondary-button-accent">解鎖下一句怎麼回 · NT$49</button>
+          </section>
+
+          <button id="share-card-preview" type="button" class="share-card-preview">
+            <div class="share-card-top">
+              <div class="wordmark wordmark-compact">
+                <span class="moon-icon moon-icon-tiny" aria-hidden="true"></span>
+                <span class="wordmark-text">暗語 ANYU</span>
+              </div>
+              <span class="share-moon" aria-hidden="true"></span>
+            </div>
+            <div class="share-card-body">
+              <span class="mono-label">my persona</span>
+              <strong id="share-persona" class="share-persona"></strong>
+              <span class="share-divider"></span>
+              <p id="share-sentence" class="share-sentence"></p>
+            </div>
+            <div class="share-card-footer">
+              <div>
+                <span class="mono-label">temperature</span>
+                <div class="share-temperature-wrap">
+                  <span id="share-temperature-label" class="share-temperature-label"></span>
+                  <span id="share-state-label" class="share-state-label"></span>
+                </div>
+              </div>
+              <div class="share-footer-link">
+                <span class="mono-label">測一次 ↗</span>
+                <span>anyu.app</span>
+              </div>
+            </div>
           </button>
 
-          <div class="result-section paywall">
-            <p class="eyebrow">Fake Paid Preview</p>
-            <h2 id="paid-headline"></h2>
-            <p id="paid-price" class="paid-price"></p>
-            <ul id="paid-included-sections" class="included-list"></ul>
-            <p id="paid-preview-copy"></p>
+          <article class="feature-card paid-card">
+            <p class="mono-label">one-time · no sub</p>
+            <div class="paid-header">
+              <div>
+                <h2 id="paid-headline">解鎖下一句怎麼回</h2>
+                <p class="paid-subhead">給你 3 種不失控的回法：主動推進、低壓試探、暫時拉開。</p>
+              </div>
+              <span id="paid-price" class="paid-price">NT$49</span>
+            </div>
+            <div class="paid-preview-rail">
+              <article class="paid-preview-card paid-preview-card-open">
+                <p class="preview-label">preview · 完整</p>
+                <ul id="paid-included-sections" class="included-list"></ul>
+              </article>
+              <article class="paid-preview-card paid-preview-card-locked" aria-hidden="true">
+                <p class="preview-label">低壓試探</p>
+                <div class="locked-lines"></div>
+              </article>
+              <article class="paid-preview-card paid-preview-card-locked" aria-hidden="true">
+                <p class="preview-label">暫時拉開</p>
+                <div class="locked-lines locked-lines-deep"></div>
+              </article>
+            </div>
+            <p id="paid-preview-copy" class="paid-preview-copy"></p>
             <p id="paid-teaser" class="paid-teaser"></p>
-            <button id="paid-unlock-button" type="button" class="unlock-button">解鎖下一句怎麼回 — NT$49</button>
-          </div>
+            <button type="button" class="primary-button paid-button" data-action="paid-unlock-proxy">解鎖下一句怎麼回 — NT$49</button>
+          </article>
 
-          <form id="contact-form" class="contact-form" hidden>
-            <p class="contact-message">目前正在內測。留下 LINE 或 Email，我們會人工送你一次完整分析。</p>
-            <p class="contact-note">這次不會真的收費。</p>
-            <label class="field">
-              <span>聯絡方式</span>
+          <form id="contact-form" class="feature-card contact-card" hidden>
+            <p class="mono-label">目前內測中</p>
+            <h2>這次不會真的收費。</h2>
+            <p class="contact-message">留下 LINE 或 Email，我們會送你一次完整分析。</p>
+            <p class="contact-note">不寄電子報 · 不分享第三方 · 隨時可刪除</p>
+            <label class="field input-field">
+              <span class="field-label">聯絡方式</span>
               <select id="contact-type" name="contact_type">
                 <option value="line">LINE</option>
                 <option value="email">Email</option>
               </select>
             </label>
-            <label class="field">
-              <span id="contact-value-label">LINE ID 或 Email</span>
+            <label class="field input-field">
+              <span id="contact-value-label" class="field-label">LINE ID</span>
               <input id="contact-value" name="contact_value" type="text" autocomplete="off" placeholder="your_line_id 或 name@example.com">
             </label>
-            <button type="submit" class="secondary-button">送出聯絡方式</button>
+            <button type="submit" class="primary-button">送出 · 等我們的完整分析</button>
             <p id="contact-error" class="status-message error" hidden></p>
             <p id="contact-status" class="status-message" hidden></p>
           </form>
         </section>
-      </section>
+      </div>
     </main>
 
     <script>window.__APP_CONFIG__ = __APP_CONFIG__;</script>
