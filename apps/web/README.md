@@ -62,6 +62,35 @@ Before the first low-key launch review, confirm:
 - privacy review confirms raw text is excluded from events
 - manual QA is completed for landing, runtime result, demo result, unlock fallback, and contact submit flows
 
+## Preview Deployment
+
+Recommended preview project settings:
+
+- Root Directory: `apps/web`
+- Framework Preset: `Next.js`
+- Build Command: `corepack pnpm build`
+- Install Command: `corepack pnpm install --frozen-lockfile`
+
+Preview env required for live analyze:
+
+- `DATABASE_URL`
+- `ANTHROPIC_API_KEY`
+- `ANTHROPIC_MODEL`
+- `ORADAR_PROVIDER=anthropic`
+- `NEXT_PUBLIC_APP_URL`
+
+Suggested manual preview commands if Vercel CLI access is available:
+
+```bash
+vercel link
+vercel env add DATABASE_URL preview
+vercel env add ANTHROPIC_API_KEY preview
+vercel env add ANTHROPIC_MODEL preview
+vercel env add ORADAR_PROVIDER preview
+vercel env add NEXT_PUBLIC_APP_URL preview
+vercel --cwd apps/web
+```
+
 ## Commands
 
 ```bash

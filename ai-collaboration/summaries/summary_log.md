@@ -1339,3 +1339,42 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Commit Hash
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-18 Module 01 Preview Deployment + Manual QA v0
+
+### Task Completed
+
+- verified local preview-QA prerequisites and found live env unavailable in this workspace
+- verified standard validation still passes
+- created `ai-collaboration/research/2026-05-18-module-01-preview-deployment-qa-report.md`
+- created `ai-collaboration/reports/2026-05-18-module-01-preview-deployment-manual-qa-v0-execution-report.md`
+- updated `apps/web/README.md` with explicit preview deployment settings and commands
+
+### Live QA / Deployment Status
+
+- live QA did not run because required runtime env vars are missing locally
+- Drizzle migration did not run because `DATABASE_URL` is missing locally
+- Vercel preview deployment did not run because `vercel` CLI is not available in this workspace
+
+### Blockers
+
+- `blocked_pending_user_setup`
+- missing local `DATABASE_URL`
+- missing local Anthropic env
+- missing local `NEXT_PUBLIC_APP_URL`
+- missing `vercel` CLI or linked preview deployment access
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Recommended Next Step
+
+- `Module 01 Preview Env Setup + Live QA Retry v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
