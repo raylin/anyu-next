@@ -83,7 +83,8 @@ function syncSituationChips() {
 
 function updateAnalyzeButtonState() {
   const hasInput = inputText.value.trim().length > 0;
-  analyzeButton.style.opacity = hasInput ? "1" : "0.72";
+  analyzeButton.disabled = !hasInput;
+  analyzeButton.textContent = hasInput ? "分析我的曖昧溫度" : "先貼一段對話";
 }
 
 function setSituationType(value, shouldLog = true) {

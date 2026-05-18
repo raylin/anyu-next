@@ -1010,3 +1010,47 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Commit Hash
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-18 ANYU Prototype Mobile Visual Polish v0.1
+
+### Task Completed
+
+- created `ai-collaboration/handoffs/2026-05-18-anyu-mobile-visual-polish-v0-1-handoff.md`
+- created `ai-collaboration/research/design/2026-05-18-anyu-mobile-visual-polish-review-bundle.md`
+- created `ai-collaboration/reports/2026-05-18-anyu-mobile-visual-polish-execution-report.md`
+- tightened the mobile landing layout in `experiments/ambiguous_temperature_v0/`
+
+### Main Changes
+
+- reduced the first-screen vertical footprint
+- moved the long ANYU tagline under the wordmark and used `曖昧溫度計` as the short right-side label
+- made the primary CTA explicitly disabled when the input is empty and enabled when the input is filled
+- improved unselected chip contrast and hover/focus affordance
+- slightly strengthened hero accent readability for `冷掉`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m py_compile experiments/ambiguous_temperature_v0/*.py` passed
+- `python3 -m py_compile scripts/generate_product_sample.py` passed
+- `python3 -m py_compile scripts/run_product_eval.py` passed
+- local prototype server started successfully
+- headless browser mobile render check passed
+- empty CTA state showed `先貼一段對話`
+- filled CTA state showed `分析我的曖昧溫度`
+
+### Learnings
+
+- the layout improved more from spacing and state clarity than from any structural redesign
+- the topbar needed hierarchy cleanup more than extra brand copy
+- chip contrast had to be restored with both border and surface, not text color alone
+
+### Unresolved Questions
+
+- whether the brand subline under `暗語 ANYU` should remain visible on the first screen
+- whether the disabled CTA should stay muted ink or move to a lighter surface treatment
+- whether the hero should tighten one more step for short mobile viewports
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.

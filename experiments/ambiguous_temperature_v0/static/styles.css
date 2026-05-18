@@ -45,16 +45,16 @@ button {
 
 .app-shell {
   padding:
-    calc(var(--anyu-space-6) + env(safe-area-inset-top))
+    calc(var(--anyu-space-5) + env(safe-area-inset-top))
     var(--anyu-space-6)
-    calc(var(--anyu-space-10) + env(safe-area-inset-bottom));
+    calc(var(--anyu-space-8) + env(safe-area-inset-bottom));
 }
 
 .page-frame {
   width: min(100%, 480px);
   margin: 0 auto;
   display: grid;
-  gap: var(--anyu-space-6);
+  gap: 18px;
 }
 
 .topbar,
@@ -69,7 +69,7 @@ button {
   min-height: 44px;
 }
 
-.topbar-hook,
+.topbar-tag,
 .signals-meta,
 .cta-caption,
 .privacy-helper,
@@ -81,11 +81,26 @@ button {
   color: var(--anyu-dim);
 }
 
-.topbar-hook {
-  max-width: 152px;
-  text-align: right;
+.brand-stack {
+  display: grid;
+  gap: 2px;
+}
+
+.brand-subline {
+  margin: 0;
   font-size: var(--anyu-type-caption-size);
-  line-height: var(--anyu-type-caption-lh);
+  line-height: 1.45;
+  color: var(--anyu-faint);
+}
+
+.topbar-tag {
+  margin: 0;
+  font-family: var(--anyu-font-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: var(--anyu-track-mono);
+  text-transform: uppercase;
+  color: var(--anyu-faint);
 }
 
 .wordmark {
@@ -132,7 +147,7 @@ button {
 .hero-block {
   position: relative;
   display: grid;
-  gap: var(--anyu-space-4);
+  gap: 12px;
 }
 
 .module-label,
@@ -150,15 +165,15 @@ button {
 .hero-copy {
   position: relative;
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .hero-glow {
   position: absolute;
-  top: -8px;
-  right: 12px;
-  width: 84px;
-  height: 84px;
+  top: -4px;
+  right: 8px;
+  width: 72px;
+  height: 72px;
   border-radius: 999px;
   background: radial-gradient(circle, var(--anyu-accent2-15) 0%, transparent 68%);
   pointer-events: none;
@@ -177,6 +192,7 @@ button {
 
 .accent-word {
   color: var(--anyu-accent);
+  text-shadow: 0 0 12px rgba(182, 150, 100, 0.08);
 }
 
 .hero-subheadline {
@@ -198,12 +214,12 @@ button {
 
 .feature-card {
   border-radius: var(--anyu-radius-xl);
-  padding: var(--anyu-space-5);
+  padding: 18px;
 }
 
 .input-card {
   display: grid;
-  gap: var(--anyu-space-4);
+  gap: 14px;
 }
 
 .card-header,
@@ -242,9 +258,9 @@ select {
 }
 
 textarea {
-  min-height: 124px;
+  min-height: 156px;
   resize: vertical;
-  padding: 18px;
+  padding: 16px;
   font-size: 14px;
   line-height: 1.7;
 }
@@ -296,32 +312,39 @@ button:focus-visible {
   display: block;
   width: 100%;
   border-top: 1px dashed var(--anyu-line);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .situation-field {
   display: grid;
-  gap: var(--anyu-space-3);
+  gap: 10px;
 }
 
 .chip-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .situation-chip {
   min-height: 44px;
   padding: 8px 14px;
   border-radius: var(--anyu-radius-pill);
-  border: 1px solid var(--anyu-line);
-  background: transparent;
-  color: rgba(42, 36, 25, 0.72);
+  border: 1px solid color-mix(in srgb, var(--anyu-line) 35%, var(--anyu-ink) 65%);
+  background: color-mix(in srgb, var(--anyu-surface) 92%, white 8%);
+  color: color-mix(in srgb, var(--anyu-ink) 82%, white 18%);
   font-size: 13px;
   font-weight: 500;
   line-height: 1;
   cursor: pointer;
-  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 120ms ease;
+  box-shadow: var(--anyu-shadow-xs);
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 120ms ease, box-shadow 180ms ease;
+}
+
+.situation-chip:hover,
+.situation-chip:focus-visible {
+  border-color: color-mix(in srgb, var(--anyu-accent) 35%, var(--anyu-ink) 65%);
+  box-shadow: var(--anyu-shadow-focus);
 }
 
 .situation-chip:active,
@@ -336,6 +359,7 @@ button:focus-visible {
   border-color: var(--anyu-accent);
   background: var(--anyu-accent-12);
   color: var(--anyu-accent);
+  box-shadow: none;
 }
 
 .primary-button,
@@ -354,10 +378,18 @@ button:focus-visible {
   font-size: 14px;
   font-weight: 600;
   box-shadow: var(--anyu-shadow-md);
+  transition: background-color 180ms ease, color 180ms ease, opacity 180ms ease, transform 120ms ease;
 }
 
 .primary-button:hover {
   background: color-mix(in srgb, var(--anyu-ink) 88%, var(--anyu-accent) 12%);
+}
+
+.primary-button:disabled {
+  background: color-mix(in srgb, var(--anyu-ink) 58%, var(--anyu-surface) 42%);
+  color: color-mix(in srgb, var(--anyu-surface) 72%, var(--anyu-ink) 28%);
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 .secondary-button {
@@ -561,7 +593,7 @@ button:focus-visible {
 .share-actions {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--anyu-space-3);
+  gap: 10px;
 }
 
 .share-card-preview {
@@ -772,8 +804,71 @@ button:focus-visible {
 }
 
 @media (max-width: 420px) {
-  .topbar-hook {
-    display: none;
+  .app-shell {
+    padding:
+      calc(18px + env(safe-area-inset-top))
+      18px
+      calc(28px + env(safe-area-inset-bottom));
+  }
+
+  .page-frame {
+    gap: 16px;
+  }
+
+  .feature-card {
+    padding: 16px;
+  }
+
+  .brand-subline {
+    font-size: 11px;
+  }
+
+  .hero-block h1 {
+    font-size: 30px;
+  }
+
+  .hero-subheadline {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .textarea-field {
+    gap: 6px;
+  }
+
+  textarea {
+    min-height: 152px;
+    padding: 14px;
+  }
+
+  .privacy-helper-card {
+    gap: 2px;
+  }
+
+  .cta-caption,
+  .privacy-helper-foot {
+    font-size: 12px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .topbar-tag {
+    padding-top: 4px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .accent-word {
+    color: color-mix(in srgb, var(--anyu-accent) 88%, white 12%);
+    text-shadow: 0 0 14px rgba(217, 199, 154, 0.18);
+  }
+
+  :root:not([data-theme="light"]) .situation-chip {
+    border-color: color-mix(in srgb, var(--anyu-line) 45%, var(--anyu-ink) 55%);
+    background: color-mix(in srgb, var(--anyu-card) 88%, var(--anyu-surface) 12%);
+    color: color-mix(in srgb, var(--anyu-ink) 84%, black 16%);
   }
 }
 

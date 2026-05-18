@@ -89,6 +89,7 @@ The prototype currently applies these design-system decisions:
 - token import and module-level visual theming
 - updated landing page structure and brand hierarchy
 - premium input card styling and chip-based situation selector UI
+- explicit mobile CTA enabled / disabled states
 - refreshed temperature signature, insight, share preview, paid preview, and contact capture cards
 - mobile-first spacing and focus-visible styling
 
