@@ -928,3 +928,32 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - Whether `關係紅旗雷達` should be the next product family after `曖昧溫度計`.
 - Whether `親密落差解讀` is too sensitive for an early paid consumer surface.
 - Whether `Relationship Radar general` should be broken into narrower future families sooner.
+
+## 2026-05-17 Product Map Calibration Note v0
+
+### Task Completed
+
+- Created `ai-collaboration/research/2026-05-17-product-map-calibration-note-v0.md`.
+- Created `ai-collaboration/reports/2026-05-17-product-map-calibration-note-v0-execution-report.md`.
+- Captured the first MVP decision, future product family map, `暗語 ANYU` brand candidate, standalone theme-page model, portal model, and weekly/biweekly launch model.
+
+### Key Decisions Captured
+
+- first MVP remains `曖昧溫度計 + 下一句怎麼回`
+- `暗語 ANYU` is documented as a future mother-brand / portal candidate
+- standalone theme page plus future portal model is captured
+- weekly / biweekly launch operating model is captured
+
+### Recommended Next Step
+
+- `Visual Direction Exploration v0`
+
+### Validation Results
+
+- note file exists
+- execution report exists
+- `python3 -m compileall oradar` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
