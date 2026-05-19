@@ -1431,13 +1431,15 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Preview Deployment Status
 
 - preview deployment succeeded and reached `READY`
-- preview URL is protected by Vercel SSO from this sandbox, so route-level remote QA could not fully complete here
+- authenticated preview access worked through Vercel CLI bypass
+- landing, demo route, and health endpoint responded successfully
+- remote analyze, events, and contact write paths failed in preview
 
 ### Blockers
 
-- remote preview route checks returned `401` due Vercel SSO protection
+- preview DB-backed write paths are failing remotely
 - `NEXT_PUBLIC_APP_URL` was not confirmed in preview env output
-- remote DB/event verification is still pending authenticated browser QA
+- remote DB/event verification is still pending until the preview write-path issue is resolved
 
 ### Validation Results
 
@@ -1449,7 +1451,45 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 ### Recommended Next Step
 
-- `Module 01 Authenticated Preview Browser QA v0`
+- `Module 01 Preview Runtime Failure Triage v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-19 Module 01 Authenticated Preview Browser QA v0
+
+### Task Completed
+
+- verified protected preview access using authenticated Vercel CLI bypass
+- verified preview landing route, demo route, and health endpoint remotely
+- exercised preview analyze, events, and contact APIs with synthetic payloads
+- created `ai-collaboration/research/2026-05-19-module-01-authenticated-preview-browser-qa-report.md`
+- created `ai-collaboration/reports/2026-05-19-module-01-authenticated-preview-browser-qa-v0-execution-report.md`
+
+### Authenticated Preview QA Status
+
+- preview access passed
+- landing/demo/health checks passed
+- preview DB-backed write paths failed for analyze, events, and contact
+
+### DB / Privacy Verification Status
+
+- remote DB verification is blocked by preview write failures
+- no secrets were printed
+- only synthetic payloads were used
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- Vercel preview deployment remained `READY`
+
+### Recommended Next Step
+
+- `Module 01 Preview Runtime Failure Triage v0`
 
 ### Commit Hash
 

@@ -2,7 +2,7 @@
 
 ## 1. Summary
 
-The first Vercel preview deployment for Module 01 succeeded.
+The first Vercel preview deployment for Module 01 succeeded and the protected preview routes were reached through Vercel’s authenticated bypass tooling.
 
 Preview deployment:
 
@@ -10,7 +10,16 @@ Preview deployment:
 - inspector URL: `https://vercel.com/studioanyu-1488s-projects/anyu-next/3hghWaYAhPyMkNfhiyAgtdqT6zaU`
 - deployment status: `READY`
 
-Remote route QA from this workspace was only partially completed because the preview URL is protected by Vercel SSO and returned `401` for direct HTTP access from this environment.
+Remote QA result:
+
+- landing route: reachable
+- demo result route: reachable
+- health API: reachable
+- analyze API: reachable but failed with app-level `analyze_failed`
+- events API: reachable but failed with `event_store_failed`
+- contact API: reachable but failed with `contact_store_failed`
+
+This is now classified as a preview DB/runtime write-path issue, not a preview-access issue.
 
 ## 2. Environment Setup
 
@@ -33,13 +42,21 @@ Observed gap:
 
 - `NEXT_PUBLIC_APP_URL` was not listed in the preview env output
 
-Attempting to add it through the CLI hit Vercel’s preview-branch targeting constraint. This should be completed in the dashboard or via the correct non-production branch target.
+Additional note:
+
+- local code search found `NEXT_PUBLIC_APP_URL` referenced only in documentation, not in the current runtime path
+- it should still be added for completeness, but it does not explain the current preview write-path failures
 
 ## 3. Neon / Database Setup
 
-The preview project already has a `DATABASE_URL` configured for Preview in Vercel.
+The preview project already has a `DATABASE_URL` configured for Preview in Vercel according to `vercel env ls preview`.
 
-This handoff did not run a separate remote DB query against the preview environment because the preview route flow itself was blocked by Vercel SSO access controls in this sandbox.
+However:
+
+- pulling preview env locally produced an empty `DATABASE_URL` value in the temp export
+- remote preview write-paths failed consistently
+
+That means the preview DB target is not yet independently verified as healthy from this workflow.
 
 ## 4. Drizzle Migration Result
 
@@ -87,25 +104,30 @@ Deployment result:
 
 Remote preview QA status:
 
-- partially blocked
+- partially completed
 
-What was verified:
+Verified through authenticated Vercel bypass:
 
-- deployment reached `READY`
-- build completed successfully on Vercel
-- expected app routes were included in the build output
+- preview landing page HTML rendered
+- preview demo result page HTML rendered
+- health endpoint returned `{ "ok": true, "service": "anyu-next-web" }`
 
-What was blocked:
+Remote runtime failure checks:
 
-- direct HTTP checks to `/m/ambiguous-temperature`
-- direct HTTP checks to `/m/ambiguous-temperature/result/demo`
-- remote analyze/unlock/contact flow execution
+- analyze request with synthetic input returned:
+  - `{"ok":false,"error":"analyze_failed","message":"分析暫時失敗，請晚點再試一次。"}`
+- safe synthetic events request returned:
+  - `{"ok":false,"error":"event_store_failed","message":"目前事件收集服務忙碌中，請稍後再試。"}`
+- synthetic contact request returned:
+  - `{"ok":false,"error":"contact_store_failed","message":"目前聯絡收集服務忙碌中，請稍後再試。"}`
 
-Blocking reason:
+Interpretation:
 
-- Vercel preview protection / SSO returned `401` from this environment
+- preview route access is working
+- preview app build is working
+- preview DB-backed write paths are failing
 
-Manual authenticated browser QA still needed:
+Manual authenticated browser QA still needed after the DB/runtime issue is fixed:
 
 1. sign into the Vercel team in a browser
 2. open the preview URL
@@ -121,13 +143,13 @@ Manual authenticated browser QA still needed:
 
 Remote preview DB verification:
 
-- not completed from this workspace
+- not completed successfully
 
 Reason:
 
-- preview app routes could not be exercised past SSO protection
+- preview app routes were reachable, but all preview DB-backed write paths failed
 
-Manual verification after authenticated preview QA:
+Manual verification after the preview write-path issue is fixed:
 
 - `analysis_requests` row inserted
 - `analysis_results` row inserted
@@ -139,10 +161,11 @@ Manual verification after authenticated preview QA:
 
 ## 9. Privacy Verification
 
-Verified from deployment/build behavior:
+Verified:
 
 - no secrets were printed
 - no env values were committed
+- only synthetic input and synthetic contact values were used for remote requests
 
 Still pending on remote preview:
 
@@ -153,13 +176,14 @@ Still pending on remote preview:
 
 Remote event verification:
 
-- not completed from preview runtime
+- request path reached
+- DB-backed event persistence failed
 
-Reason:
+Evidence:
 
-- preview route execution blocked by Vercel SSO from this environment
+- `/api/events` returned `event_store_failed`
 
-Manual follow-up:
+Manual follow-up after fixing preview DB/runtime writes:
 
 - complete one authenticated preview analyze flow
 - confirm preview DB `events` rows exist
@@ -167,17 +191,17 @@ Manual follow-up:
 
 ## 11. Known Blockers
 
-- remote route-level QA from this sandbox is blocked by Vercel SSO preview protection
+- preview DB/runtime write paths are failing remotely
 - `NEXT_PUBLIC_APP_URL` still needs to be added cleanly to Preview env
-- remote DB verification is pending until authenticated preview flow is executed
+- authenticated browser-side full QA should wait until preview write-path failures are fixed or explained
 
 ## 12. Fixes Needed Before Production
 
-- complete authenticated browser QA on the preview URL
+- diagnose why preview DB-backed writes fail for analyze, events, and contact
 - add `NEXT_PUBLIC_APP_URL` to the preview environment cleanly
-- verify preview DB rows and event privacy after a real preview flow
-- decide whether preview protection settings should be adjusted for future automated QA
+- verify preview DB rows and event privacy after a successful real preview flow
+- complete authenticated browser QA after the write-path issue is resolved
 
 ## 13. Recommended Next Step
 
-`Module 01 Authenticated Preview Browser QA v0`
+`Module 01 Preview Runtime Failure Triage v0`

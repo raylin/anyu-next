@@ -2,7 +2,7 @@
 
 ## Summary
 
-The first preview deployment retry succeeded on Vercel, but remote route-level QA from this sandbox was partially blocked by Vercel SSO preview protection.
+The first preview deployment retry succeeded on Vercel, and authenticated remote route access was achieved using Vercel’s protected-preview bypass tooling.
 
 Completed:
 
@@ -11,12 +11,12 @@ Completed:
 - corrected local project linkage
 - preview deployment
 - deployment metadata/log verification
+- authenticated remote landing/demo/health checks
+- authenticated remote analyze/events/contact runtime checks
 
-Blocked:
+Main finding:
 
-- direct route access to the preview URL
-- remote analyze/unlock/contact verification
-- remote DB/event/privacy verification derived from that flow
+- preview DB-backed write paths are failing remotely
 
 ## Files Created
 
@@ -42,6 +42,7 @@ Preview Vercel env names confirmed:
 Open gap:
 
 - `NEXT_PUBLIC_APP_URL` was not listed in preview env output
+- local code search showed it is not currently consumed in runtime code, but it should still be added for completeness
 
 ## Migration Status
 
@@ -69,13 +70,27 @@ Deployment details:
 
 ## DB Verification Status
 
-Remote preview DB verification did not run because the preview route flow could not be exercised from this environment due SSO protection.
+Remote preview DB verification did not complete successfully.
+
+Findings:
+
+- landing/demo/health are reachable remotely
+- preview analyze returned `analyze_failed`
+- preview events returned `event_store_failed`
+- preview contact returned `contact_store_failed`
+
+Interpretation:
+
+- preview access is working
+- preview DB-backed write paths are failing
 
 ## Privacy Verification Status
 
 No secret values were printed or committed.
 
-Remote event/privacy verification remains pending until authenticated preview flow execution is completed in a browser session.
+Only synthetic preview QA payloads were used.
+
+Full preview event/privacy verification remains pending until preview DB-backed writes succeed.
 
 ## Validation Results
 
@@ -85,17 +100,20 @@ Remote event/privacy verification remains pending until authenticated preview fl
 - `corepack pnpm build` passed
 - Vercel preview deployment reached `READY`
 - Vercel build logs showed the expected Module 01 app and API routes
+- authenticated preview landing route returned HTML
+- authenticated preview demo result route returned HTML
+- authenticated preview health route returned `200`
 
 ## Known Technical Debt
 
-- preview QA is not yet automatable from this sandbox because Vercel SSO protects the preview URL
+- preview QA is only partially automatable from this sandbox and currently relies on Vercel CLI bypass instead of a true browser session
 - `NEXT_PUBLIC_APP_URL` still needs to be resolved correctly for preview env management
-- preview DB verification still depends on an authenticated browser-side pass
+- preview DB verification still depends on fixing the remote write-path failure first
 
 ## Deviations From Handoff
 
-- remote route-level QA could not complete because the preview URL returned `401` behind Vercel SSO
-- no preview migration run was attempted because the handoff shifted to validating deployability and remote access first
+- authenticated preview access was completed with Vercel CLI bypass rather than a browser session because that was the available authenticated path in this environment
+- no preview migration run was attempted because the handoff shifted to diagnosing the remote write-path failure once deployment and protected access were confirmed
 
 ## Git Commit
 
@@ -103,10 +121,10 @@ Remote event/privacy verification remains pending until authenticated preview fl
 
 ## Remaining Uncertainties
 
+- why preview DB-backed writes fail despite preview env names being present
 - whether preview protection should remain enabled for future automated QA
-- whether `NEXT_PUBLIC_APP_URL` is actually required for the current preview runtime behavior
 - whether preview DB is the same logical branch/database already exercised locally
 
 ## Recommended Next Step
 
-`Module 01 Authenticated Preview Browser QA v0`
+`Module 01 Preview Runtime Failure Triage v0`
