@@ -110,7 +110,26 @@ The production app now lives under `apps/web/`.
 - Every task creates an execution report.
 - Every task appends `ai-collaboration/summaries/summary_log.md`.
 - Every completed handoff should be git committed.
+- Every completed handoff should also be pushed to `origin/staging` when validation and safety checks pass.
 - Final Codex responses should include the paste-back completion summary.
+
+## Git Commit And Staging Push Rule
+
+Every completed handoff should end with:
+
+1. Run required validation.
+2. Confirm `git status --short`.
+3. Ensure no secrets, `.env`, raw user data, or unrelated changes are staged.
+4. Commit task changes with a clear message.
+5. Push the completed commit to the `staging` branch:
+
+   ```bash
+   git push origin HEAD:staging
+   ```
+
+6. Include both commit hash and push status in the final Codex Completion Summary.
+
+If push is skipped or fails, report the reason clearly and do not claim staging was updated.
 
 ## Local Development
 

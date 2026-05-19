@@ -31,7 +31,26 @@ What the next agent needs to know before acting.
 4. Append `ai-collaboration/summaries/summary_log.md`.
 5. Run relevant validation.
 6. Create a git commit containing the completed handoff changes.
-7. End the final CLI response with a paste-back completion summary that includes the commit hash.
+7. Push the completed commit to `origin/staging` unless a documented safety blocker prevents it.
+8. End the final CLI response with a paste-back completion summary that includes the commit hash and staging push status.
+
+## Git Commit And Staging Push Rule
+
+Every completed handoff should end with:
+
+1. Run required validation.
+2. Confirm `git status --short`.
+3. Ensure no secrets, `.env`, raw user data, or unrelated changes are staged.
+4. Commit task changes with a clear message.
+5. Push the completed commit to the `staging` branch:
+
+   ```bash
+   git push origin HEAD:staging
+   ```
+
+6. Include both commit hash and push status in the final Codex Completion Summary.
+
+If push is skipped or fails, report the reason clearly and do not claim staging was updated.
 
 ## Uncertainties
 

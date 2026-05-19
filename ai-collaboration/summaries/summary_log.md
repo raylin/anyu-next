@@ -1494,3 +1494,34 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Commit Hash
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-19 Add Staging Push Workflow Rule
+
+### Task Completed
+
+- added the staging push rule to `AGENTS.md`
+- added the staging push rule to `WORKING_AGREEMENT.md`
+- updated `README.md` workflow guidance
+- updated `ai-collaboration/templates/handoff_template.md`
+- updated `ai-collaboration/templates/execution_report_template.md`
+- created `ai-collaboration/reports/2026-05-19-staging-push-workflow-rule-execution-report.md`
+
+### Workflow Change
+
+- completed handoffs now require commit plus push to `origin/staging` when validation and safety checks pass
+- final completion summaries must include both commit hash and staging push status
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.

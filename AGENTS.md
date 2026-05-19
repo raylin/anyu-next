@@ -35,11 +35,30 @@ For every future task, Codex must:
 3. Generate an execution report in `ai-collaboration/reports/`.
 4. Append `ai-collaboration/summaries/summary_log.md`.
 5. Create a git commit containing the completed handoff changes.
-6. End the final CLI response with a paste-back completion summary.
-7. Escalate uncertainties instead of guessing.
-8. Never silently change schemas.
+6. Push the completed commit to `origin/staging` when validation and safety checks pass.
+7. End the final CLI response with a paste-back completion summary.
+8. Escalate uncertainties instead of guessing.
+9. Never silently change schemas.
 
 After every completed handoff, Codex must create a git commit containing the completed changes.
+
+## Git Commit And Staging Push Rule
+
+Every completed handoff should end with:
+
+1. Run required validation.
+2. Confirm `git status --short`.
+3. Ensure no secrets, `.env`, raw user data, or unrelated changes are staged.
+4. Commit task changes with a clear message.
+5. Push the completed commit to the `staging` branch:
+
+   ```bash
+   git push origin HEAD:staging
+   ```
+
+6. Include both commit hash and push status in the final Codex Completion Summary.
+
+If push is skipped or fails, report the reason clearly and do not claim staging was updated.
 
 Commit requirements:
 
@@ -47,6 +66,8 @@ Commit requirements:
 - Include the handoff, report, summary log, and changed project files in the commit.
 - Use a clear commit message in the format `<type>: <short task summary>`.
 - Mention the commit hash in the final Codex Completion Summary.
+- Push the completed commit to `origin/staging` unless blocked by validation failure, unrelated uncommitted changes, secrets risk, unclear branch state, missing remote access, missing `staging` branch without user approval to create it, or explicit user instruction not to push.
+- Never use `git push --force` unless the user explicitly requests it.
 - If a git commit cannot be created, document the reason under blockers.
 - If pre-existing unrelated uncommitted changes are present, do not silently include them; document the situation and ask for human guidance.
 
@@ -138,6 +159,9 @@ Summary Log:
 
 Commit:
 <commit hash or blocker>
+
+Staging Push:
+<pushed to origin/staging or skipped / failed — reason>
 
 Files Changed:
 - <file 1>
@@ -258,5 +282,6 @@ Escalate to the human when:
 - a task would introduce cloud infrastructure or persistent services
 - a task would add scraping, UI, dashboards, auth, or databases
 - the requested implementation conflicts with these operating rules
+- a `staging` push is required but the branch does not exist and the user has not approved creating it
 
 Escalation should be concise and include the decision needed.

@@ -27,10 +27,29 @@ For every future task:
 3. Write an execution report.
 4. Append `ai-collaboration/summaries/summary_log.md`.
 5. Create a git commit containing the completed handoff changes.
-6. End with a paste-back completion summary in the final CLI response.
-7. Escalate uncertainty.
+6. Push the completed commit to `origin/staging` when validation and safety checks pass.
+7. End with a paste-back completion summary in the final CLI response.
+8. Escalate uncertainty.
 
 After every completed handoff, Codex must create a git commit containing the completed changes.
+
+## Git Commit And Staging Push Rule
+
+Every completed handoff should end with:
+
+1. Run required validation.
+2. Confirm `git status --short`.
+3. Ensure no secrets, `.env`, raw user data, or unrelated changes are staged.
+4. Commit task changes with a clear message.
+5. Push the completed commit to the `staging` branch:
+
+   ```bash
+   git push origin HEAD:staging
+   ```
+
+6. Include both commit hash and push status in the final Codex Completion Summary.
+
+If push is skipped or fails, report the reason clearly and do not claim staging was updated.
 
 Commit requirements:
 
@@ -38,6 +57,8 @@ Commit requirements:
 - Include the handoff, report, summary log, and changed project files in the commit.
 - Use a clear commit message in the format `<type>: <short task summary>`.
 - Mention the commit hash in the final Codex Completion Summary.
+- Push the completed commit to `origin/staging` unless blocked by validation failure, unrelated uncommitted changes, secrets risk, unclear branch state, missing remote access, missing `staging` branch without approval to create it, or explicit user instruction not to push.
+- Never use `git push --force` unless the user explicitly requests it.
 - If a git commit cannot be created, document the reason under blockers.
 - If pre-existing unrelated uncommitted changes are present, do not silently include them; ask for human guidance before committing.
 
@@ -59,6 +80,9 @@ Summary Log:
 
 Commit:
 <commit hash or blocker>
+
+Staging Push:
+<pushed to origin/staging or skipped / failed — reason>
 
 Files Changed:
 - <file 1>
@@ -113,6 +137,7 @@ A task is complete when:
 - reports are written
 - `ai-collaboration/summaries/summary_log.md` is appended
 - a git commit contains the completed handoff changes
+- the completed commit is pushed to `origin/staging` unless a documented safety blocker prevents it
 - final CLI response includes the paste-back completion summary
 - unresolved questions are visible
 - the next agent can continue from repository context alone

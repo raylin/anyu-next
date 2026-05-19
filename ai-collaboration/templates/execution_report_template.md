@@ -31,6 +31,12 @@ YYYY-MM-DD
 - Commit message: `<type>: <short task summary>`
 - If no commit was created, document the blocker.
 
+## Staging Push
+
+- Push status: `<pushed to origin/staging | skipped | failed>`
+- Push command: `git push origin HEAD:staging`
+- If push was skipped or failed, document the reason clearly.
+
 ## Final Response Requirement
 
 After saving this report, appending `ai-collaboration/summaries/summary_log.md`, and creating the required git commit, end the final CLI response with:
@@ -49,6 +55,9 @@ Summary Log:
 
 Commit:
 <commit hash or blocker>
+
+Staging Push:
+<pushed to origin/staging or skipped / failed — reason>
 
 Files Changed:
 - <file 1>
