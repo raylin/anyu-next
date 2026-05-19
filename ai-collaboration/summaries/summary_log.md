@@ -1526,6 +1526,51 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-19 Module 01 Staging Browser Manual QA Sweep v0
+
+### Task Completed
+
+- reviewed the staging landing, runtime result, and demo result routes through authenticated staging access
+- ran a fresh synthetic staging analyze flow for QA context
+- inspected current Module 01 source and responsive CSS for mobile/browser polish
+- created `ai-collaboration/research/2026-05-19-module-01-staging-browser-manual-qa-sweep-report.md`
+- created `ai-collaboration/reports/2026-05-19-module-01-staging-browser-manual-qa-sweep-v0-execution-report.md`
+
+### Staging URL Tested
+
+- `https://staging.anyu.tw`
+
+### QA Method
+
+- authenticated `vercel curl` route checks
+- remote HTML inspection
+- source/CSS inspection
+- no true interactive browser/devtools session available in this environment
+
+### Fixes Applied
+
+- softened landing latency expectation copy
+- softened analyze loading status copy
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Recommended Next Step
+
+- `Module 01 Staging Real-Device QA Pass v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-19 Module 01 Staging Remote QA v0
 
 ### Task Completed

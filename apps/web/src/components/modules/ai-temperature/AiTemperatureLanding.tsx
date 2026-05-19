@@ -69,7 +69,7 @@ export function AiTemperatureLanding({
 
     setIsSubmitting(true);
     setErrorMessage("");
-    setStatusMessage("分析中...");
+    setStatusMessage("分析中，請稍候...");
 
     const anonymousSessionId = getClientAnonymousSessionId();
 
