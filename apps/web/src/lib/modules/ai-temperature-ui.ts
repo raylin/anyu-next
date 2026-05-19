@@ -6,10 +6,10 @@ export const MIN_ANALYZE_LENGTH = 12;
 export const MAX_ANALYZE_LENGTH = 4000;
 export const ANONYMOUS_SESSION_STORAGE_KEY = "anyu-ambiguous-temperature-session-id";
 export const ANALYZE_LOADING_MESSAGES = [
-  "正在讀取互動裡的微訊號…",
-  "整理關係溫度中…",
-  "生成一份不急著下結論的分析…",
-  "快好了，正在把結果整理成可以理解的方向…",
+  "讀著你貼上的對話⋯",
+  "比對節奏與回應時差⋯",
+  "整理一下訊號⋯",
+  "再讀一下⋯",
 ] as const;
 
 export type ScoreBucket = "cold" | "cool" | "warm" | "hot" | "unknown";
@@ -77,6 +77,14 @@ export function getAnalyzeErrorMessage(error: string): string {
 export function getAnalyzeLoadingMessage(step: number): string {
   const normalizedStep = Math.max(0, step);
   return ANALYZE_LOADING_MESSAGES[normalizedStep % ANALYZE_LOADING_MESSAGES.length];
+}
+
+export function getAnalyzeLoadingSubtitle(step: number): string {
+  if (step >= 3) {
+    return "如果稍微慢一點，也只是我們多看一眼那些容易忽略的細節。";
+  }
+
+  return "我們在比對節奏、回應時差與情緒投入的細節。";
 }
 
 export function getModuleLabel(moduleConfig: ProductModuleConfig): string {

@@ -106,7 +106,10 @@ corepack pnpm db:migrate
 ## Notes
 
 - Design tokens are imported from `apps/web/src/styles/tokens.css`.
-- Canonical source is `docs/design-system/tokens.css`.
+- Canonical source is `docs/design-system/tokens-v1.1.css`.
+- Current design-system source-of-truth docs are:
+  - `docs/design-system/anyu-design-system-v1.1.md`
+  - `docs/design-system/ux-flow-v1.1.md`
 - The current app foundation uses token-driven custom styles rather than a UI kit baseline.
 - No required auth in v0.
 - No real payment in v0.

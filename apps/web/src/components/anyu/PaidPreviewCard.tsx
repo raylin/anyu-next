@@ -19,7 +19,7 @@ export function PaidPreviewCard({
   previewCopy,
   onRevealContact,
 }: PaidPreviewCardProps) {
-  const [revealed, setRevealed] = useState(false);
+const [revealed, setRevealed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -41,6 +41,11 @@ export function PaidPreviewCard({
     }
   }
 
+  const lockedPreviewBodies = [
+    "「看你在跟朋友打球，那就先好好玩——哪天你比較有空，再把時間給我。」",
+    "「這幾天如果你真的忙，我先把節奏收回來；等你想聊的時候再來找我。」",
+  ] as const;
+
   return (
     <Card className="anyu-paid-card">
       <p className="anyu-kicker">one-time · no sub</p>
@@ -59,46 +64,51 @@ export function PaidPreviewCard({
 
       <div className="anyu-paid-grid">
         <article className="anyu-reply-card anyu-reply-card-open">
-          <span className="anyu-kicker">A · 可讀預覽</span>
-          <p className="anyu-reply-title">
-            {includedSections[0] ?? "現在最不該做的一件事"}
-          </p>
+          <div className="anyu-reply-head">
+            <span className="anyu-reply-letter anyu-reply-letter-open">A</span>
+            <span className="anyu-reply-tag">保留主動權</span>
+          </div>
           <p className="anyu-reply-copy">{previewCopy}</p>
+          <span className="anyu-reply-divider" aria-hidden="true" />
+          <p className="anyu-reply-why">
+            <span>為什麼這樣回 ·</span>
+            <em>{includedSections[0] ?? "把球給回去，但不催。"}</em>
+          </p>
         </article>
 
         <article className="anyu-reply-card anyu-reply-card-locked" aria-hidden="true">
-          <span className="anyu-kicker">B · locked</span>
-          <p className="anyu-reply-title">
-            {includedSections[1] ?? "三種不失控回法"}
-          </p>
-          <div className="anyu-lock-lines">
-            <span />
-            <span />
-            <span />
+          <div className="anyu-reply-head">
+            <span className="anyu-reply-letter">B</span>
+            <span className="anyu-reply-tag anyu-reply-tag-locked">
+              {includedSections[1] ?? "低壓試探"}
+            </span>
           </div>
+          <p className="anyu-reply-title">低壓試探</p>
+          <p className="anyu-reply-copy anyu-reply-copy-locked">{lockedPreviewBodies[0]}</p>
+          <span className="anyu-reply-lock">尚未解鎖</span>
         </article>
 
         <article className="anyu-reply-card anyu-reply-card-locked" aria-hidden="true">
-          <span className="anyu-kicker">C · locked</span>
-          <p className="anyu-reply-title">
-            {includedSections[2] ?? "怎麼測對方投入度"}
-          </p>
-          <div className="anyu-lock-lines anyu-lock-lines-deep">
-            <span />
-            <span />
-            <span />
+          <div className="anyu-reply-head">
+            <span className="anyu-reply-letter">C</span>
+            <span className="anyu-reply-tag anyu-reply-tag-locked">
+              {includedSections[2] ?? "尊嚴守門"}
+            </span>
           </div>
+          <p className="anyu-reply-title">尊嚴守門</p>
+          <p className="anyu-reply-copy anyu-reply-copy-locked">{lockedPreviewBodies[1]}</p>
+          <span className="anyu-reply-lock">尚未解鎖</span>
         </article>
       </div>
 
       <p className="anyu-small-note">
         {revealed
           ? "目前內測中，這次不會真的收費。"
-          : "解鎖後會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測投入度。"}
+          : "目前內測 · 點下後留 LINE 或 Email，這次不會真的收費。"}
       </p>
 
       <Button type="button" className="anyu-button-block" onClick={handleReveal} disabled={isLoading}>
-        {isLoading ? "開啟中..." : `${headline} — ${price}`}
+        {isLoading ? "開啟中..." : `解鎖一次 — ${price}`}
       </Button>
 
       {errorMessage ? (

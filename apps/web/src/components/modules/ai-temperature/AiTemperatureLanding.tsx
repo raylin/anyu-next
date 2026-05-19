@@ -7,6 +7,7 @@ import { Wordmark } from "@/components/anyu/Wordmark";
 import { trackClientEvent } from "@/lib/events/client";
 import {
   getAnalyzeLoadingMessage,
+  getAnalyzeLoadingSubtitle,
   getClientAnonymousSessionId,
   getAnalyzeErrorMessage,
   getAnalyzeButtonLabel,
@@ -150,6 +151,7 @@ export function AiTemperatureLanding({
   const ctaLabel = isSubmitting ? "分析中..." : getAnalyzeButtonLabel(inputValue);
   const ctaDisabled = isSubmitting || !isAnalyzeInputReady(inputValue);
   const statusMessage = isSubmitting ? getAnalyzeLoadingMessage(loadingStep) : "";
+  const statusDetail = isSubmitting ? getAnalyzeLoadingSubtitle(loadingStep) : "";
 
   return (
     <section className="anyu-module-page">
@@ -189,6 +191,7 @@ export function AiTemperatureLanding({
         isLoading={isSubmitting}
         errorMessage={errorMessage}
         statusMessage={statusMessage}
+        statusDetail={statusDetail}
       />
     </section>
   );

@@ -76,13 +76,16 @@ Current scope limits:
 
 Design system references:
 
-- `docs/design-system/anyu-design-system-v1.md`
-- `docs/design-system/tokens.css`
+- `docs/design-system/anyu-design-system-v1.1.md`
+- `docs/design-system/ux-flow-v1.1.md`
+- `docs/design-system/tokens-v1.1.css`
 - `apps/web/src/styles/tokens.css`
 
-`docs/design-system/` is canonical.
+`docs/design-system/` is canonical, and v1.1 is now the engineering source of truth.
 
-`apps/web/src/styles/tokens.css` is the app import copy.
+`apps/web/src/styles/tokens.css` is the synced app import copy.
+
+High-fidelity reference files are preserved under `docs/design-system/reference/v1.1/` and are reference-only, not production imports.
 
 ## Research / Calibration Tooling
 
@@ -184,12 +187,12 @@ cd apps/web && corepack pnpm build
 
 ## Current Status
 
-Repo foundation is complete.
+Repo foundation and Module 01 staging iteration are in progress.
 
-Next step is documentation alignment, then Module 01 migration planning.
+The current UI baseline is being re-aligned to the ANYU Design System v1.1 source of truth.
 
 ## Next Milestone
 
 Recommended next milestone:
 
-`Module 01 Migration Plan v0`
+`Module 01 Staging Real-Device Contrast Check v0`

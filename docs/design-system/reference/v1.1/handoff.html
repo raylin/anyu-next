@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-Hant" data-module="ai-temperature" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>暗語 ANYU · 曖昧溫度計 · v1.1 高保真規格</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="anyu-tokens-v1.1.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #e8e3da; font-family: var(--anyu-font-sans); -webkit-font-smoothing: antialiased; }
+  body { color: var(--anyu-ink); }
+
+  /* mobile phone container — bezel-less 390×844 */
+  .anyu-phone {
+    width: 390px;
+    height: 844px;
+    background: var(--anyu-bg);
+    color: var(--anyu-ink);
+    position: relative;
+    overflow: hidden;
+    font-family: var(--anyu-font-sans);
+    border-radius: 38px;
+    box-shadow: 0 30px 80px -20px rgba(20,15,5,.25), 0 0 0 1px rgba(20,15,5,.04);
+  }
+  .anyu-phone-status {
+    height: 44px;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--anyu-font-sans);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--anyu-ink);
+    letter-spacing: 0.2px;
+    position: relative;
+  }
+  .anyu-phone-status::before {
+    /* dynamic island */
+    content: '';
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 110px; height: 28px;
+    background: #1a1612;
+    border-radius: 18px;
+  }
+  .anyu-phone-page { height: 800px; overflow-y: auto; overflow-x: hidden; position: relative; }
+  .anyu-phone-page.dark { background: var(--anyu-ink-dark); color: var(--anyu-ink-onDark); }
+
+  /* visual spec card (for token reference) */
+  .spec-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(20,15,5,.08);
+    box-shadow: 0 2px 12px rgba(20,15,5,.04);
+    color: #29261b;
+    font-family: var(--anyu-font-sans);
+  }
+  .spec-card h3 {
+    font-family: var(--anyu-font-serif);
+    font-size: 17px;
+    font-weight: 500;
+    margin: 0 0 8px;
+    color: #29261b;
+  }
+  .spec-card .micro {
+    font-family: var(--anyu-font-mono);
+    font-size: 10.5px;
+    color: rgba(42,36,25,.62);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .spec-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 12.5px; }
+  .spec-row code { font-family: var(--anyu-font-mono); font-size: 11px; color: rgba(42,36,25,.65); }
+  .swatch { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(20,15,5,.06); }
+
+  /* annotation styling */
+  .anno {
+    position: absolute;
+    background: #1f1a12;
+    color: #f5ecdd;
+    font-family: var(--anyu-font-mono);
+    font-size: 10.5px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .anno::before {
+    content: '';
+    position: absolute;
+    width: 14px; height: 1px;
+    background: #1f1a12;
+  }
+
+  /* before/after comparison */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .compare-cell { padding: 14px; border-radius: 12px; border: 1px solid rgba(20,15,5,.08); font-family: var(--anyu-font-sans); font-size: 13px; }
+  .compare-cell.bad { background: #fdf3f1; }
+  .compare-cell.good { background: #f1f6ef; }
+  .compare-cell .label { font-family: var(--anyu-font-mono); font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .compare-cell.bad .label { color: #b85a4a; }
+  .compare-cell.good .label { color: #5a7c52; }
+</style>
+</head>
+<body>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="reference.jsx"></script>
+<script type="text/babel" src="audit.jsx"></script>
+
+<div id="root"></div>
+
+<script type="text/babel">
+  const { DesignCanvas } = window;
+
+  function App() {
+    return (
+      <DesignCanvas initialZoom={0.45}>
+        <window.SectionIntro />
+        <window.SectionTokens />
+        <window.SectionComponents />
+        <window.SectionScreens />
+        <window.SectionAudit />
+      </DesignCanvas>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>

@@ -218,6 +218,27 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Cleaned Signal Extraction v1 source-field handling so structured outputs no longer use local absolute file paths.
 - Updated the extractor to derive `source_id` from the raw input filename stem and enforce `signal["source"] = source_id` before validation/save.
+
+## 2026-05-20 ANYU Design System v1.1 Adoption
+
+### Task Completed
+
+- Adopted ANYU Design System v1.1 as the current canonical implementation source of truth.
+- Preserved the uploaded high-fidelity v1.1 reference bundle under `docs/design-system/reference/v1.1/`.
+- Synced the canonical token file to `docs/design-system/tokens-v1.1.css` and the app token copy to `apps/web/src/styles/tokens.css`.
+- Reapplied the current Module 01 staging UI to the stricter v1.1 pairing and readability rules.
+
+### Key Learnings
+
+- Most of the staging drift was not missing tokens; it was incorrect surface/ink pairing and over-softened text hierarchy.
+- The biggest readability win came from removing pale-card signal treatments and restoring dark/light pairing discipline.
+- A narrow CSS-first pass was enough to correct the most obvious drift without touching runtime or data flow.
+
+### Unresolved Questions
+
+- Whether the full-screen v1.1 loading experience should replace the current inline loading treatment.
+- Whether the share surface should move closer to the fuller v1.1 multi-action flow before launch review.
+- Real-device contrast and rhythm still need one more pass after staging updates land.
 - Added a minimal prompt clarification to use `source_id`.
 - Regenerated `outputs/structured/sample_001.signal.json` through live Anthropic extraction.
 - Created `ai-collaboration/reports/2026-05-16-source-field-cleanup-execution-report.md`.

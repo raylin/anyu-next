@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
 import {
   ANALYZE_LOADING_MESSAGES,
@@ -96,11 +98,28 @@ describe("ai-temperature UI helpers", () => {
   });
 
   it("cycles through calm loading messages", () => {
-    expect(getAnalyzeLoadingMessage(0)).toBe(ANALYZE_LOADING_MESSAGES[0]);
-    expect(getAnalyzeLoadingMessage(1)).toBe(ANALYZE_LOADING_MESSAGES[1]);
+    expect(getAnalyzeLoadingMessage(0)).toBe("讀著你貼上的對話⋯");
+    expect(getAnalyzeLoadingMessage(1)).toBe("比對節奏與回應時差⋯");
     expect(getAnalyzeLoadingMessage(ANALYZE_LOADING_MESSAGES.length)).toBe(
       ANALYZE_LOADING_MESSAGES[0],
     );
+  });
+
+  it("keeps the app token copy synced with required v1.1 tokens", () => {
+    const appTokens = readFileSync(
+      resolve(process.cwd(), "src/styles/tokens.css"),
+      "utf8",
+    );
+    const canonicalTokens = readFileSync(
+      resolve(process.cwd(), "../../docs/design-system/tokens-v1.1.css"),
+      "utf8",
+    );
+
+    expect(appTokens).toContain("--anyu-ink-dark");
+    expect(appTokens).toContain("--anyu-ink-onDark");
+    expect(appTokens).toContain("--anyu-dim-onDark");
+    expect(appTokens).toContain("--anyu-line-onDark");
+    expect(appTokens).toBe(canonicalTokens);
   });
 
   it("builds identity-safe share text from result data", () => {

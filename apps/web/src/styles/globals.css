@@ -110,7 +110,7 @@ textarea {
 .anyu-topbar-tag,
 .anyu-kicker,
 .anyu-meta {
-  color: var(--anyu-faint);
+  color: var(--anyu-dim);
   font-family: var(--anyu-font-mono);
   font-size: var(--anyu-type-label-size);
   line-height: 1.4;
@@ -285,35 +285,26 @@ textarea {
 }
 
 .anyu-chip {
-  min-height: 2.65rem;
-  padding: 0.7rem 0.95rem;
-  border: 1px solid color-mix(in srgb, var(--anyu-line) 52%, var(--anyu-ink) 48%);
+  min-height: 2.4rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--anyu-line);
   border-radius: var(--anyu-radius-pill);
-  background: color-mix(in srgb, var(--anyu-surface) 88%, var(--anyu-mist) 12%);
-  color: color-mix(in srgb, var(--anyu-ink) 92%, var(--anyu-dim) 8%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: var(--anyu-surface);
+  color: var(--anyu-ink);
   transition:
     border-color 120ms ease,
     background-color 120ms ease,
-    box-shadow 120ms ease,
-    transform 120ms ease;
+    color 120ms ease;
 }
 
 .anyu-chip:hover {
-  border-color: var(--anyu-accent-45);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 6px 14px rgba(42, 36, 25, 0.08);
+  background: var(--anyu-mist);
 }
 
 .anyu-chip-active {
-  background: color-mix(in srgb, var(--anyu-accent-12) 72%, var(--anyu-surface) 28%);
-  border-color: color-mix(in srgb, var(--anyu-accent) 62%, var(--anyu-line) 38%);
-  color: var(--anyu-ink);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 8px 18px rgba(172, 119, 92, 0.14);
-  transform: translateY(-1px);
+  background: var(--anyu-accent);
+  border-color: var(--anyu-accent);
+  color: var(--anyu-surface);
 }
 
 .anyu-button {
@@ -323,29 +314,40 @@ textarea {
   min-height: 3.15rem;
   padding: 0.9rem 1.35rem;
   border: 0;
-  border-radius: var(--anyu-radius-pill);
-  background: linear-gradient(135deg, var(--anyu-accent), var(--anyu-rose));
-  color: #fff;
+  border-radius: var(--anyu-radius-lg);
+  background: var(--anyu-ink-dark);
+  color: var(--anyu-ink-onDark);
   font-weight: 500;
   font-family: var(--anyu-font-serif);
   font-size: var(--anyu-type-body-lg-size);
   line-height: 1;
+  letter-spacing: var(--anyu-track-wide);
   box-shadow:
-    0 12px 22px rgba(172, 119, 92, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 1px 0 rgba(42, 36, 25, 0.04),
+    0 14px 36px rgba(42, 36, 25, 0.14);
+  transition:
+    transform 120ms ease-out,
+    background-color 180ms ease-out,
+    filter 180ms ease-out;
 }
 
 .anyu-button-block {
   width: 100%;
 }
 
+.anyu-button:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+.anyu-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
 .anyu-button:disabled {
   cursor: not-allowed;
-  opacity: 0.72;
-  filter: saturate(0.78);
-  box-shadow:
-    0 8px 14px rgba(42, 36, 25, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  opacity: 0.4;
+  filter: none;
+  box-shadow: 0 1px 0 rgba(42, 36, 25, 0.04);
 }
 
 .anyu-back-link {
@@ -365,11 +367,16 @@ textarea {
 
 .anyu-signature-card,
 .anyu-quote-card,
-.anyu-signals-card,
 .anyu-insight-card,
 .anyu-paid-card,
 .anyu-contact-card {
   gap: var(--anyu-space-4);
+}
+
+.anyu-signals-card {
+  display: grid;
+  gap: var(--anyu-space-4);
+  padding-inline: 0.25rem;
 }
 
 .anyu-orb {
@@ -407,7 +414,7 @@ textarea {
 
 .anyu-state-label {
   margin: 0;
-  color: var(--anyu-accent);
+  color: var(--anyu-ink);
   font-family: var(--anyu-font-serif);
   font-size: var(--anyu-type-h3-size);
   line-height: var(--anyu-type-h3-lh);
@@ -422,7 +429,8 @@ textarea {
 }
 
 .anyu-meter-thin {
-  height: 0.45rem;
+  height: 0.25rem;
+  background: var(--anyu-line);
 }
 
 .anyu-meter-fill {
@@ -435,7 +443,7 @@ textarea {
 .anyu-meter-labels {
   display: flex;
   justify-content: space-between;
-  color: var(--anyu-faint);
+  color: var(--anyu-dim);
   font-family: var(--anyu-font-mono);
   font-size: 10px;
   letter-spacing: var(--anyu-track-mono);
@@ -453,14 +461,8 @@ textarea {
 .anyu-signal-item {
   display: grid;
   gap: 0.5rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--anyu-line) 48%, var(--anyu-accent) 18%);
-  border-radius: var(--anyu-radius-xl);
-  background:
-    linear-gradient(180deg, rgba(255, 253, 250, 0.96), rgba(249, 243, 238, 0.92));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 10px 18px rgba(42, 36, 25, 0.06);
+  padding-bottom: 1.05rem;
+  border-bottom: 1px solid var(--anyu-line);
 }
 
 .anyu-signal-top strong,
@@ -474,14 +476,21 @@ textarea {
 }
 
 .anyu-signal-top span {
-  color: var(--anyu-accent);
-  font-family: var(--anyu-font-latin);
-  font-size: var(--anyu-type-num-md-size);
-  font-style: italic;
+  color: var(--anyu-ink);
+  font-family: var(--anyu-font-mono);
+  font-size: var(--anyu-type-caption-size);
+  line-height: 1;
+  letter-spacing: var(--anyu-track-mono);
 }
 
 .anyu-signal-item .anyu-subtle-note {
   color: var(--anyu-dim);
+  font-style: italic;
+}
+
+.anyu-signal-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .anyu-reassurance {
@@ -580,59 +589,107 @@ textarea {
   padding: 1rem;
   border: 1px solid var(--anyu-line);
   border-radius: var(--anyu-radius-xl);
+  position: relative;
 }
 
 .anyu-reply-card-open {
-  background: rgba(255, 255, 255, 0.76);
+  background: var(--anyu-ink-dark);
+  border-color: transparent;
+  color: var(--anyu-ink-onDark);
 }
 
 .anyu-reply-card-locked {
-  background:
-    linear-gradient(135deg, rgba(42, 36, 25, 0.06), rgba(42, 36, 25, 0.02)),
-    var(--anyu-surface);
+  background: var(--anyu-card);
+}
+
+.anyu-reply-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.anyu-reply-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--anyu-accent-45);
+  border-radius: 0.75rem;
+  color: var(--anyu-accent);
+  font-family: var(--anyu-font-latin);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.anyu-reply-letter-open {
+  border-color: transparent;
+  background: var(--anyu-accent);
+  color: var(--anyu-ink-dark);
+}
+
+.anyu-reply-tag {
+  color: var(--anyu-accent);
+  font-family: var(--anyu-font-mono);
+  font-size: 12px;
+  letter-spacing: var(--anyu-track-mono);
+  text-transform: uppercase;
+}
+
+.anyu-reply-tag-locked {
+  color: var(--anyu-dim);
 }
 
 .anyu-reply-copy {
   margin: 0;
-  color: var(--anyu-dim);
+  color: var(--anyu-ink-onDark);
   font-size: var(--anyu-type-body-size);
   line-height: var(--anyu-type-body-lh);
 }
 
-.anyu-lock-lines {
-  display: grid;
-  gap: 0.45rem;
+.anyu-reply-copy-locked {
+  color: var(--anyu-ink);
+  filter: blur(4.5px);
+  user-select: none;
 }
 
-.anyu-lock-lines span {
+.anyu-reply-divider {
   display: block;
-  height: 0.7rem;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(42, 36, 25, 0.12), rgba(42, 36, 25, 0.03));
+  width: 100%;
+  border-top: 1px dashed var(--anyu-line-onDark);
 }
 
-.anyu-lock-lines span:nth-child(1) {
-  width: 86%;
+.anyu-reply-why {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  color: var(--anyu-dim-onDark);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
 }
 
-.anyu-lock-lines span:nth-child(2) {
-  width: 73%;
+.anyu-reply-why span {
+  color: var(--anyu-accent);
+  font-family: var(--anyu-font-mono);
+  font-size: 11px;
+  letter-spacing: var(--anyu-track-mono);
+  text-transform: uppercase;
 }
 
-.anyu-lock-lines span:nth-child(3) {
-  width: 64%;
+.anyu-reply-why em {
+  font-style: italic;
 }
 
-.anyu-lock-lines-deep span:nth-child(1) {
-  width: 72%;
-}
-
-.anyu-lock-lines-deep span:nth-child(2) {
-  width: 88%;
-}
-
-.anyu-lock-lines-deep span:nth-child(3) {
-  width: 58%;
+.anyu-reply-lock {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  color: var(--anyu-accent);
+  font-family: var(--anyu-font-mono);
+  font-size: 11px;
+  letter-spacing: var(--anyu-track-mono);
+  text-transform: uppercase;
 }
 
 .anyu-contact-grid {
@@ -676,46 +733,111 @@ textarea {
 }
 
 .anyu-status-panel {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.7rem;
-  padding: 0.85rem 0.95rem;
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
   border: 1px solid var(--anyu-line);
   border-radius: var(--anyu-radius-xl);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--anyu-card);
+  box-shadow: var(--anyu-shadow-sm);
 }
 
 .anyu-status-panel-loading {
-  border-color: color-mix(in srgb, var(--anyu-accent) 34%, var(--anyu-line) 66%);
+  border-color: var(--anyu-line);
+}
+
+.anyu-loading-head {
+  display: grid;
+  justify-items: center;
+  gap: 0.8rem;
+  text-align: center;
+}
+
+.anyu-loading-moon {
+  width: 3.8rem;
+  height: 3.8rem;
+  border-radius: 999px;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--anyu-accent-12) 58%, white 42%), rgba(255, 255, 255, 0.88));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65),
-    0 8px 16px rgba(172, 119, 92, 0.08);
+    radial-gradient(circle at 35% 50%, var(--anyu-surface) 0 28%, transparent 29%),
+    var(--anyu-accent);
+  box-shadow: 0 0 24px var(--anyu-accent-20);
 }
 
 .anyu-status-copy {
   display: grid;
-  gap: 0.12rem;
+  gap: 0.35rem;
 }
 
-.anyu-status-kicker {
+.anyu-loading-title {
+  margin: 0;
+  color: var(--anyu-ink);
+  font-family: var(--anyu-font-serif);
+  font-size: var(--anyu-type-h2-size);
+  line-height: var(--anyu-type-h2-lh);
+}
+
+.anyu-loading-detail {
+  margin: 0;
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: 1.7;
+}
+
+.anyu-loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.875rem;
+}
+
+.anyu-loading-dots span {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--anyu-accent);
+  animation: anyuPulse 1.4s ease-in-out infinite;
+}
+
+.anyu-loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.anyu-loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.anyu-loading-hint {
+  margin: 0;
+  color: var(--anyu-faint);
+  font-family: var(--anyu-font-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: var(--anyu-track-mono);
+  text-align: center;
+}
+
+.anyu-loading-tip {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: 12px;
+  background: var(--anyu-card);
+}
+
+.anyu-loading-tip-kicker {
   color: var(--anyu-accent);
   font-family: var(--anyu-font-mono);
-  font-size: 10px;
+  font-size: 11px;
+  line-height: 1;
   letter-spacing: var(--anyu-track-mono);
   text-transform: uppercase;
 }
 
-.anyu-status-dot {
-  width: 0.7rem;
-  height: 0.7rem;
-  margin-top: 0.3rem;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--anyu-accent), var(--anyu-accent2));
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--anyu-accent2-15) 78%, transparent 22%);
-  animation: anyuPulse 1.8s ease-in-out infinite;
+.anyu-loading-tip-copy {
+  margin: 0;
+  color: var(--anyu-ink);
+  font-size: var(--anyu-type-caption-size);
+  line-height: 1.6;
 }
 
 .anyu-status-message-error {
@@ -761,7 +883,11 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .anyu-status-dot {
+  .anyu-loading-moon {
+    box-shadow: none;
+  }
+
+  .anyu-loading-dots span {
     animation: none;
   }
 }

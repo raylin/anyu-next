@@ -16,6 +16,7 @@ type InputCardProps = {
   isLoading?: boolean;
   errorMessage?: string;
   statusMessage?: string;
+  statusDetail?: string;
 };
 
 export function InputCard({
@@ -30,6 +31,7 @@ export function InputCard({
   isLoading = false,
   errorMessage,
   statusMessage,
+  statusDetail,
 }: InputCardProps) {
   return (
     <Card className="anyu-input-card">
@@ -67,14 +69,26 @@ export function InputCard({
           {ctaLabel}
         </Button>
 
-        <p className="anyu-small-note">免費 · 通常數十秒內 · 結果可截圖分享</p>
+        <p className="anyu-small-note">免費 · 結果可截圖分享</p>
         <p className="anyu-subtle-note">不寄電子報 · 不分享第三方</p>
         {statusMessage ? (
           <div className={["anyu-status-panel", isLoading ? "anyu-status-panel-loading" : ""].filter(Boolean).join(" ")}>
-            {isLoading ? <span className="anyu-status-dot" aria-hidden="true" /> : null}
-            <div className="anyu-status-copy">
-              {isLoading ? <span className="anyu-status-kicker">分析中</span> : null}
-              <p className="anyu-status-message">{statusMessage}</p>
+            <div className="anyu-loading-head">
+              <span className="anyu-loading-moon" aria-hidden="true" />
+              <div className="anyu-status-copy">
+                <p className="anyu-loading-title">{statusMessage}</p>
+                {statusDetail ? <p className="anyu-loading-detail">{statusDetail}</p> : null}
+              </div>
+            </div>
+            <div className="anyu-loading-dots" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <p className="anyu-loading-hint">請稍候片刻</p>
+            <div className="anyu-loading-tip">
+              <span className="anyu-loading-tip-kicker">{"// reminder"}</span>
+              <p className="anyu-loading-tip-copy">這不是判決，是給你一個多看一眼的角度。</p>
             </div>
           </div>
         ) : null}

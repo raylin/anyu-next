@@ -215,13 +215,15 @@ export function AiTemperatureResult({
         <p className="anyu-lead-quote">{result.oneSentenceRead}</p>
       </Card>
 
-      <Card className="anyu-signals-card">
+      <section className="anyu-signals-card" aria-labelledby="anyu-observed-signals-title">
         <div className="anyu-section-head">
           <div>
             <p className="anyu-kicker">他這邊的訊號</p>
-            <h2 className="anyu-section-title">觀察到的三個小訊號</h2>
+            <h2 id="anyu-observed-signals-title" className="anyu-section-title">
+              觀察到的三個小訊號
+            </h2>
           </div>
-          <span className="anyu-meta">observed signals</span>
+          <span className="anyu-meta">3 個維度</span>
         </div>
 
         <div className="anyu-signal-list">
@@ -238,7 +240,7 @@ export function AiTemperatureResult({
             </article>
           ))}
         </div>
-      </Card>
+      </section>
 
       <Card className="anyu-insight-card">
         <p className="anyu-kicker">insight layer</p>

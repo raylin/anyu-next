@@ -10,8 +10,8 @@ export function TemperatureCard({ score, stateLabel }: TemperatureCardProps) {
     <Card className="anyu-signature-card">
       <div className="anyu-signature-head">
         <div>
-          <p className="anyu-kicker">temperature signature</p>
-          <h2 className="anyu-section-title">當前溫度</h2>
+          <p className="anyu-kicker">當前溫度</p>
+          <h2 className="anyu-section-title">現在比較像哪一種溫差</h2>
         </div>
         <span className="anyu-orb" aria-hidden="true" />
       </div>
