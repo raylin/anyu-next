@@ -1525,3 +1525,56 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Staging Push Status
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
+## 2026-05-19 Module 01 Staging Remote QA v0
+
+### Task Completed
+
+- verified authenticated staging access for `https://staging.anyu.tw`
+- confirmed staging alias mapped to the current `staging` preview deployment
+- verified staging env-name presence in Vercel Preview
+- identified and fixed the staging-only prompt/schema path bug
+- applied the runtime schema to the Neon `preview` branch
+- verified real staging analyze, result, unlock, contact, and event flows with synthetic payloads
+- created `ai-collaboration/research/2026-05-19-module-01-staging-remote-qa-report.md`
+- created `ai-collaboration/reports/2026-05-19-module-01-staging-remote-qa-v0-execution-report.md`
+
+### Staging URL
+
+- `https://staging.anyu.tw`
+
+### Remote QA Status
+
+- staging landing route passed
+- staging demo route passed
+- staging analyze flow passed after the app-local asset fix and Preview DB bootstrap
+- DB-backed result route passed
+- unlock intent passed
+- email and LINE contact submissions passed
+- direct event ingestion passed
+
+### DB / Privacy Verification Status
+
+- Neon `preview` branch contains the expected runtime tables
+- normalized result, retention fields, unlock intent, and contact rows were verified
+- raw input was not present in event metadata
+- synthetic contact values were not present in event metadata
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Recommended Next Step
+
+- `Module 01 Staging Browser Manual QA Sweep v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
