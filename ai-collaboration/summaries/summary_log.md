@@ -239,6 +239,25 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - Whether the full-screen v1.1 loading experience should replace the current inline loading treatment.
 - Whether the share surface should move closer to the fuller v1.1 multi-action flow before launch review.
 - Real-device contrast and rhythm still need one more pass after staging updates land.
+
+## 2026-05-20 Module 01 Staging Deployment Refresh + Contrast Check
+
+### Task Completed
+
+- Verified that `https://staging.anyu.tw` now serves the newer post-`cedd219` staging deployment.
+- Confirmed landing, demo result, live analyze, runtime result, unlock intent, and contact submit all work on refreshed staging using synthetic input.
+- Documented the contrast/readability findings for the v1.1 adoption pass.
+
+### Key Learnings
+
+- The main blocker was deployment freshness, not another staging-only design regression.
+- The live staging HTML now reflects the v1.1 adoption pass, including the new landing helper copy and the paid/signal hierarchy.
+- The runtime path survived the design-system adoption without introducing new staging failures.
+
+### Unresolved Questions
+
+- A true human phone pass is still the best way to finalize perceived loading feel and contrast in real lighting conditions.
+- If additional polish is needed from that phone pass, it should stay narrow and evidence-based.
 - Added a minimal prompt clarification to use `source_id`.
 - Regenerated `outputs/structured/sample_001.signal.json` through live Anthropic extraction.
 - Created `ai-collaboration/reports/2026-05-16-source-field-cleanup-execution-report.md`.
