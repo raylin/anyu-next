@@ -46,3 +46,4 @@ ai-collaboration/output-*.jsonl
 .DS_Store
 .idea/
 .vscode/
+.vercel

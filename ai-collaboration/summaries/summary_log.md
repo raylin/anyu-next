@@ -1417,3 +1417,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Commit Hash
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+## 2026-05-19 Module 01 Preview Deployment + Remote QA Retry v0
+
+### Task Completed
+
+- authenticated Vercel CLI on this machine
+- discovered and linked the existing `anyu-next` Vercel project correctly at repo root
+- deployed a new preview successfully
+- created `ai-collaboration/research/2026-05-19-module-01-preview-deployment-qa-report.md`
+- created `ai-collaboration/reports/2026-05-19-module-01-preview-deployment-remote-qa-retry-v0-execution-report.md`
+
+### Preview Deployment Status
+
+- preview deployment succeeded and reached `READY`
+- preview URL is protected by Vercel SSO from this sandbox, so route-level remote QA could not fully complete here
+
+### Blockers
+
+- remote preview route checks returned `401` due Vercel SSO protection
+- `NEXT_PUBLIC_APP_URL` was not confirmed in preview env output
+- remote DB/event verification is still pending authenticated browser QA
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- Vercel preview deployment reached `READY`
+
+### Recommended Next Step
+
+- `Module 01 Authenticated Preview Browser QA v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
