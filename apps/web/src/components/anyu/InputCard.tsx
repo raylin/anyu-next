@@ -13,6 +13,7 @@ type InputCardProps = {
   onSubmit: FormEventHandler<HTMLFormElement>;
   ctaLabel: string;
   ctaDisabled: boolean;
+  isLoading?: boolean;
   errorMessage?: string;
   statusMessage?: string;
 };
@@ -26,6 +27,7 @@ export function InputCard({
   onSubmit,
   ctaLabel,
   ctaDisabled,
+  isLoading = false,
   errorMessage,
   statusMessage,
 }: InputCardProps) {
@@ -67,7 +69,15 @@ export function InputCard({
 
         <p className="anyu-small-note">免費 · 通常數十秒內 · 結果可截圖分享</p>
         <p className="anyu-subtle-note">不寄電子報 · 不分享第三方</p>
-        {statusMessage ? <p className="anyu-status-message">{statusMessage}</p> : null}
+        {statusMessage ? (
+          <div className={["anyu-status-panel", isLoading ? "anyu-status-panel-loading" : ""].filter(Boolean).join(" ")}>
+            {isLoading ? <span className="anyu-status-dot" aria-hidden="true" /> : null}
+            <div className="anyu-status-copy">
+              {isLoading ? <span className="anyu-status-kicker">分析中</span> : null}
+              <p className="anyu-status-message">{statusMessage}</p>
+            </div>
+          </div>
+        ) : null}
         {errorMessage ? (
           <p className="anyu-status-message anyu-status-message-error">{errorMessage}</p>
         ) : null}

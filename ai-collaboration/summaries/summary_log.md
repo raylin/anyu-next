@@ -1526,6 +1526,43 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 Module 01 Staging UX Polish v0.2
+
+### Task Completed
+
+- improved chip/button contrast on staging
+- improved observed-signal card readability on mobile
+- made rotating loading messages more visually noticeable
+- removed redundant `by 暗語 ANYU` landing subtitle copy
+- created `ai-collaboration/research/2026-05-20-module-01-staging-ux-polish-v0-2-review-bundle.md`
+- created `ai-collaboration/reports/2026-05-20-module-01-staging-ux-polish-v0-2-execution-report.md`
+
+### UX Polish Summary
+
+- chips should read more clearly as interactive
+- signal cards should be easier to read on mobile screenshots
+- loading-state change should be more noticeable
+- landing hero is slightly cleaner and tighter
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Recommended Next Step
+
+- `Module 01 Staging Real-Device Contrast Check v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-19 Module 01 Staging UX Polish v0.1
 
 ### Task Completed

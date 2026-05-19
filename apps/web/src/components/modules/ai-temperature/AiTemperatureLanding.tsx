@@ -143,8 +143,8 @@ export function AiTemperatureLanding({
         },
       });
     } finally {
-    setIsSubmitting(false);
-  }
+      setIsSubmitting(false);
+    }
   }
 
   const ctaLabel = isSubmitting ? "分析中..." : getAnalyzeButtonLabel(inputValue);
@@ -174,7 +174,6 @@ export function AiTemperatureLanding({
             )}
           </h1>
           <p className="anyu-copy">{moduleConfig.subtitle}</p>
-          <p className="anyu-topbar-subline anyu-brand-byline">by 暗語 ANYU</p>
         </div>
       </section>
 
@@ -187,6 +186,7 @@ export function AiTemperatureLanding({
         onSubmit={handleSubmit}
         ctaLabel={ctaLabel}
         ctaDisabled={ctaDisabled}
+        isLoading={isSubmitting}
         errorMessage={errorMessage}
         statusMessage={statusMessage}
       />
