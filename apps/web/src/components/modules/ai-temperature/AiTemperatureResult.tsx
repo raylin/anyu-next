@@ -10,6 +10,7 @@ import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { trackClientEvent } from "@/lib/events/client";
 import {
+  buildShareText,
   getClientAnonymousSessionId,
   scoreToBucket,
 } from "@/lib/modules/ai-temperature-ui";
@@ -154,6 +155,51 @@ export function AiTemperatureResult({
     });
   }
 
+  async function handleCopyShareText() {
+    const shareText = buildShareText(
+      result,
+      moduleConfig,
+      typeof window !== "undefined" ? window.location.origin : "https://staging.anyu.tw",
+    );
+
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+        await navigator.share({
+          text: shareText,
+        });
+      } else if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareText);
+      } else {
+        throw new Error("share_unavailable");
+      }
+
+      return {
+        ok: true,
+        message: "已複製，可以貼到 LINE / Threads",
+      };
+    } catch {
+      try {
+        if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(shareText);
+          return {
+            ok: true,
+            message: "已複製，可以貼到 LINE / Threads",
+          };
+        }
+      } catch {
+        return {
+          ok: false,
+          message: "複製失敗，請手動選取文字",
+        };
+      }
+
+      return {
+        ok: false,
+        message: "複製失敗，請手動選取文字",
+      };
+    }
+  }
+
   return (
     <section className="anyu-result-stack">
       <div className="anyu-result-topbar">
@@ -207,6 +253,7 @@ export function AiTemperatureResult({
         score={result.score}
         stateLabel={result.stateLabel}
         onShareClick={handleShareClick}
+        onCopyShareText={handleCopyShareText}
       />
 
       <PaidPreviewCard

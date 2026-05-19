@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
+
 type ShareCardPreviewProps = {
   persona: string;
   quote: string;
   score: number;
   stateLabel: string;
   onShareClick?: () => void;
+  onCopyShareText?: () => Promise<{ ok: boolean; message: string }>;
 };
 
 export function ShareCardPreview({
@@ -14,7 +17,19 @@ export function ShareCardPreview({
   score,
   stateLabel,
   onShareClick,
+  onCopyShareText,
 }: ShareCardPreviewProps) {
+  const [shareStatus, setShareStatus] = useState("");
+
+  async function handleCopyShare() {
+    if (!onCopyShareText) {
+      return;
+    }
+
+    const response = await onCopyShareText();
+    setShareStatus(response.message);
+  }
+
   return (
     <div className="anyu-share-preview" aria-label="分享卡預覽">
       <div className="anyu-share-shell">
@@ -44,9 +59,15 @@ export function ShareCardPreview({
         </div>
       </div>
 
-      <button type="button" className="anyu-share-action" onClick={onShareClick}>
-        這張卡可直接截圖分享
-      </button>
+      <div className="anyu-share-actions">
+        <button type="button" className="anyu-share-action" onClick={onShareClick}>
+          這張卡可直接截圖分享
+        </button>
+        <button type="button" className="anyu-share-action anyu-share-action-copy" onClick={handleCopyShare}>
+          複製分享文字
+        </button>
+      </div>
+      {shareStatus ? <p className="anyu-status-message">{shareStatus}</p> : null}
     </div>
   );
 }

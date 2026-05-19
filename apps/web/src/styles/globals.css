@@ -52,7 +52,7 @@ textarea {
   width: min(100%, 34rem);
   margin: 0 auto;
   padding:
-    calc(var(--anyu-space-8) + env(safe-area-inset-top))
+    calc(var(--anyu-space-6) + env(safe-area-inset-top))
     var(--anyu-space-6)
     calc(var(--anyu-space-14) + env(safe-area-inset-bottom));
 }
@@ -81,6 +81,10 @@ textarea {
 
 .anyu-topbar {
   align-items: flex-start;
+}
+
+.anyu-topbar-landing {
+  gap: var(--anyu-space-2);
 }
 
 .anyu-topbar-brand {
@@ -131,6 +135,10 @@ textarea {
   color: var(--anyu-ink);
 }
 
+.anyu-wordmark-quiet {
+  opacity: 0.76;
+}
+
 .anyu-wordmark-zh {
   font-family: var(--anyu-font-serif);
   font-size: var(--anyu-type-caption-size);
@@ -149,6 +157,10 @@ textarea {
   position: relative;
   display: grid;
   gap: var(--anyu-space-3);
+}
+
+.anyu-hero-block-landing {
+  gap: var(--anyu-space-2);
 }
 
 .anyu-hero-copy {
@@ -188,6 +200,10 @@ textarea {
   color: var(--anyu-dim);
   font-size: var(--anyu-type-body-lg-size);
   line-height: var(--anyu-type-body-lg-lh);
+}
+
+.anyu-brand-byline {
+  padding-top: 0.15rem;
 }
 
 .anyu-card-head,
@@ -654,6 +670,15 @@ textarea {
   cursor: pointer;
 }
 
+.anyu-share-actions {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.anyu-share-action-copy {
+  color: var(--anyu-accent);
+}
+
 .anyu-share-action:focus-visible {
   outline: 2px solid var(--anyu-accent);
   outline-offset: 4px;
@@ -684,6 +709,11 @@ textarea {
   .anyu-share-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .anyu-topbar-landing {
+    flex-direction: row;
+    align-items: center;
   }
 
   .anyu-share-link {

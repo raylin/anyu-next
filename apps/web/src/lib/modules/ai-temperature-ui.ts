@@ -5,6 +5,12 @@ import type { ProductModuleConfig } from "@/lib/modules/types";
 export const MIN_ANALYZE_LENGTH = 12;
 export const MAX_ANALYZE_LENGTH = 4000;
 export const ANONYMOUS_SESSION_STORAGE_KEY = "anyu-ambiguous-temperature-session-id";
+export const ANALYZE_LOADING_MESSAGES = [
+  "正在讀取互動裡的微訊號…",
+  "整理關係溫度中…",
+  "生成一份不急著下結論的分析…",
+  "快好了，正在把結果整理成可以理解的方向…",
+] as const;
 
 export type ScoreBucket = "cold" | "cool" | "warm" | "hot" | "unknown";
 
@@ -66,6 +72,11 @@ export function getAnalyzeErrorMessage(error: string): string {
     default:
       return "分析暫時失敗，請晚點再試一次。";
   }
+}
+
+export function getAnalyzeLoadingMessage(step: number): string {
+  const normalizedStep = Math.max(0, step);
+  return ANALYZE_LOADING_MESSAGES[normalizedStep % ANALYZE_LOADING_MESSAGES.length];
 }
 
 export function getModuleLabel(moduleConfig: ProductModuleConfig): string {
@@ -193,4 +204,17 @@ export function mapProductResultToViewModel(
 
 export function getAiTemperatureDemoResult(): AiTemperatureResultViewModel {
   return mapProductResultToViewModel(aiTemperatureDemoProductResult);
+}
+
+export function buildShareText(
+  result: AiTemperatureResultViewModel,
+  moduleConfig: ProductModuleConfig,
+  appUrl: string,
+): string {
+  return [
+    `我剛測了${moduleConfig.family}：${result.score}/100｜${result.stateLabel}`,
+    result.shareQuote || result.oneSentenceRead,
+    "— 暗語 ANYU",
+    `${appUrl.replace(/\/$/, "")}/m/${moduleConfig.slug}`,
+  ].join("\n");
 }

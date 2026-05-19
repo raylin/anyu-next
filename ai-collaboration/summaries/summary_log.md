@@ -1526,6 +1526,43 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-19 Module 01 Staging UX Polish v0.1
+
+### Task Completed
+
+- polished the Module 01 landing header/brand treatment to move the CTA higher
+- added rotating loading reassurance for long analyze waits
+- added a lightweight share-text action with native-share/clipboard fallback
+- improved the post-submit contact success state
+- created `ai-collaboration/research/2026-05-19-module-01-staging-ux-polish-v0-1-review-bundle.md`
+- created `ai-collaboration/reports/2026-05-19-module-01-staging-ux-polish-v0-1-execution-report.md`
+
+### UX Polish Summary
+
+- above-the-fold conversion rhythm improved
+- mother brand is quieter on landing
+- waiting experience is calmer
+- sharing is more convenient on mobile without PNG generation
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Recommended Next Step
+
+- `Module 01 Model Latency Evaluation v0`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-19 Module 01 Staging Browser Manual QA Sweep v0
 
 ### Task Completed

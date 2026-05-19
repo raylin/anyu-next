@@ -6,6 +6,7 @@ import { InputCard } from "@/components/anyu/InputCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { trackClientEvent } from "@/lib/events/client";
 import {
+  getAnalyzeLoadingMessage,
   getClientAnonymousSessionId,
   getAnalyzeErrorMessage,
   getAnalyzeButtonLabel,
@@ -27,7 +28,7 @@ export function AiTemperatureLanding({
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [statusMessage, setStatusMessage] = useState("");
+  const [loadingStep, setLoadingStep] = useState(0);
   const hasTrackedInputStarted = useRef(false);
   const titleParts = moduleConfig.title.split("，");
 
@@ -43,6 +44,20 @@ export function AiTemperatureLanding({
       },
     });
   }, [moduleConfig]);
+
+  useEffect(() => {
+    if (!isSubmitting) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setLoadingStep((currentStep) => currentStep + 1);
+    }, 4200);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isSubmitting]);
 
   function handleInputChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const nextValue = event.target.value;
@@ -69,7 +84,7 @@ export function AiTemperatureLanding({
 
     setIsSubmitting(true);
     setErrorMessage("");
-    setStatusMessage("分析中，請稍候...");
+    setLoadingStep(0);
 
     const anonymousSessionId = getClientAnonymousSessionId();
 
@@ -103,7 +118,6 @@ export function AiTemperatureLanding({
         const friendlyMessage = getAnalyzeErrorMessage(normalizedError);
 
         setErrorMessage(friendlyMessage);
-        setStatusMessage("");
         void trackClientEvent({
           eventName: "analysis_failed",
           moduleConfig,
@@ -119,7 +133,6 @@ export function AiTemperatureLanding({
       router.push(data.redirectTo);
     } catch {
       setErrorMessage(getAnalyzeErrorMessage("analyze_failed"));
-      setStatusMessage("");
       void trackClientEvent({
         eventName: "analysis_failed",
         moduleConfig,
@@ -130,24 +143,22 @@ export function AiTemperatureLanding({
         },
       });
     } finally {
-      setIsSubmitting(false);
-    }
+    setIsSubmitting(false);
+  }
   }
 
   const ctaLabel = isSubmitting ? "分析中..." : getAnalyzeButtonLabel(inputValue);
   const ctaDisabled = isSubmitting || !isAnalyzeInputReady(inputValue);
+  const statusMessage = isSubmitting ? getAnalyzeLoadingMessage(loadingStep) : "";
 
   return (
     <section className="anyu-module-page">
-      <header className="anyu-topbar">
-        <div className="anyu-topbar-brand">
-          <Wordmark />
-          <p className="anyu-topbar-subline">讀懂關係裡那些沒說出口的訊號</p>
-        </div>
+      <header className="anyu-topbar anyu-topbar-landing">
         <p className="anyu-topbar-tag">{moduleConfig.family}</p>
+        <Wordmark className="anyu-wordmark-quiet" />
       </header>
 
-      <section className="anyu-hero-block" aria-labelledby="anyu-hero-title">
+      <section className="anyu-hero-block anyu-hero-block-landing" aria-labelledby="anyu-hero-title">
         <p className="anyu-kicker">{getModuleLabel(moduleConfig)}</p>
         <div className="anyu-hero-copy">
           <div className="anyu-hero-glow" aria-hidden="true" />
@@ -163,6 +174,7 @@ export function AiTemperatureLanding({
             )}
           </h1>
           <p className="anyu-copy">{moduleConfig.subtitle}</p>
+          <p className="anyu-topbar-subline anyu-brand-byline">by 暗語 ANYU</p>
         </div>
       </section>
 
