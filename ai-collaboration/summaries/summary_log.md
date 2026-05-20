@@ -1585,6 +1585,32 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 - Module 01 Input Guidance + Indicator v0.5
+
+### Completed
+
+- softened Module 01 input guidance states and CTA labels without changing the server-side validation thresholds
+- added a subtle four-dot context-health indicator to the landing guidance card
+- removed remaining-count pressure from normal input states and kept explicit count only for true over-limit input
+
+### Learnings
+
+- the landing guidance reads calmer when framed as “context quality” rather than “characters remaining”
+- the existing shared helper layer was enough to drive both copy and indicator state without touching runtime logic
+
+### Unresolved Questions
+
+- whether the indicator reads clearly enough on a real bright mobile screen
+- whether a later human-browser pass should tune the dot prominence further
+
+### Report Path
+
+- `ai-collaboration/research/2026-05-20-module-01-input-guidance-indicator-v0-5.md`
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
 ## 2026-05-20 - Module 01 Input Validation + Abuse Guard v0
 
 ### Completed Changes

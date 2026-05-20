@@ -25,11 +25,11 @@ import {
 describe("ai-temperature UI helpers", () => {
   it("keeps the CTA disabled for short input", () => {
     expect(isAnalyzeInputReady("太短了")).toBe(false);
-    expect(getAnalyzeButtonLabel("太短了")).toBe("先貼一段對話");
+    expect(getAnalyzeButtonLabel("太短了")).toBe("再寫一點…");
     expect(getAnalyzeInputGuidance("太短了")).toMatchObject({
       state: "too_short" satisfies AnalyzeInputGuidanceState,
-      label: "再寫一點",
-      detail: "多貼一點前後文，ANYU 會更容易讀出節奏。",
+      label: "還差一點點",
+      detail: "多給一點互動脈絡，ANYU 才讀得出節奏。",
     });
   });
 
@@ -41,34 +41,51 @@ describe("ai-temperature UI helpers", () => {
     expect(getAnalyzeButtonLabel(longEnough)).toBe("分析我的曖昧溫度");
     expect(getAnalyzeInputGuidance(longEnough)).toMatchObject({
       state: "can_analyze" satisfies AnalyzeInputGuidanceState,
-      label: "可分析",
-      detail: "可以分析，但多一點上下文會更準。",
+      label: "可以分析了",
+      detail: "如果再多一點前後文，結果會更細。",
     });
   });
 
   it("maps context quality bands into guidance states", () => {
     expect(getAnalyzeInputGuidance("a".repeat(130))).toMatchObject({
       state: "ideal" satisfies AnalyzeInputGuidanceState,
-      label: "剛剛好",
-      detail: "內容足夠，適合分析。",
+      label: "內容剛剛好",
+      detail: "這段互動已經足夠讀出節奏。",
     });
     expect(getAnalyzeInputGuidance("a".repeat(SOFT_MAX_ANALYZE_LENGTH + 1))).toMatchObject({
       state: "long" satisfies AnalyzeInputGuidanceState,
-      label: "有點長",
-      detail: "內容有點長，建議保留最近幾段關鍵對話。",
+      label: "內容有點長",
+      detail: "建議保留最近幾段關鍵對話就好。",
     });
     expect(getAnalyzeInputGuidance("a".repeat(MAX_ANALYZE_LENGTH + 1))).toMatchObject({
       state: "too_long" satisfies AnalyzeInputGuidanceState,
-      label: "太長了",
-      detail: "太長了，請縮短到最近幾段。",
+      label: "內容太長了",
+      detail: "請刪到 4000 字以內，再送出分析。",
+      showMaxCounter: true,
     });
+    expect(getAnalyzeButtonLabel("a".repeat(MAX_ANALYZE_LENGTH + 1))).toBe("內容太長了");
   });
 
   it("keeps the legacy hint helper aligned with the richer guidance", () => {
-    expect(getAnalyzeInputHint("a".repeat(130))).toBe("內容足夠，適合分析。");
+    expect(getAnalyzeInputHint("a".repeat(130))).toBe("這段互動已經足夠讀出節奏。");
     expect(getAnalyzeInputHint("a".repeat(SOFT_MAX_ANALYZE_LENGTH + 1))).toBe(
-      "內容有點長，建議保留最近幾段關鍵對話。",
+      "建議保留最近幾段關鍵對話就好。",
     );
+  });
+
+  it("keeps the guidance copy soft and avoids remaining-count pressure", () => {
+    const states = [
+      getAnalyzeInputGuidance("太短了"),
+      getAnalyzeInputGuidance("a".repeat(MIN_ANALYZE_LENGTH)),
+      getAnalyzeInputGuidance("a".repeat(130)),
+      getAnalyzeInputGuidance("a".repeat(SOFT_MAX_ANALYZE_LENGTH + 1)),
+      getAnalyzeInputGuidance("a".repeat(MAX_ANALYZE_LENGTH + 1)),
+    ];
+
+    for (const state of states) {
+      expect(state.detail).not.toMatch(/再補\s*\d+\s*個字/);
+      expect(state.detail).not.toMatch(/還剩\s*\d+\s*個字/);
+    }
   });
 
   it("renders the expected module label and chip inventory", () => {

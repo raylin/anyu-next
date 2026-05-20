@@ -22,6 +22,13 @@ export type AnalyzeInputGuidanceState =
   | "long"
   | "too_long";
 
+export type AnalyzeInputGuidance = {
+  state: AnalyzeInputGuidanceState;
+  label: string;
+  detail: string;
+  showMaxCounter?: boolean;
+};
+
 export type ObservedSignalViewModel = {
   label: string;
   value: number;
@@ -66,55 +73,55 @@ export function isAnalyzeInputReady(input: string): boolean {
 }
 
 export function getAnalyzeButtonLabel(input: string): string {
-  return isAnalyzeInputReady(input) ? "分析我的曖昧溫度" : "先貼一段對話";
+  const guidance = getAnalyzeInputGuidance(input);
+
+  if (guidance.state === "too_long") {
+    return "內容太長了";
+  }
+
+  return isAnalyzeInputReady(input) ? "分析我的曖昧溫度" : "再寫一點…";
 }
 
-export function getAnalyzeInputGuidance(input: string): {
-  state: AnalyzeInputGuidanceState;
-  label: string;
-  detail: string;
-} {
+export function getAnalyzeInputGuidance(input: string): AnalyzeInputGuidance {
   const trimmedLength = input.trim().length;
 
   if (trimmedLength > MAX_ANALYZE_LENGTH) {
     return {
       state: "too_long",
-      label: "太長了",
-      detail: "太長了，請縮短到最近幾段。",
+      label: "內容太長了",
+      detail: "請刪到 4000 字以內，再送出分析。",
+      showMaxCounter: true,
     };
   }
 
   if (trimmedLength > SOFT_MAX_ANALYZE_LENGTH) {
     return {
       state: "long",
-      label: "有點長",
-      detail: "內容有點長，建議保留最近幾段關鍵對話。",
+      label: "內容有點長",
+      detail: "建議保留最近幾段關鍵對話就好。",
     };
   }
 
   if (trimmedLength >= 120) {
     return {
       state: "ideal",
-      label: "剛剛好",
-      detail: "內容足夠，適合分析。",
+      label: "內容剛剛好",
+      detail: "這段互動已經足夠讀出節奏。",
     };
   }
 
   if (trimmedLength >= MIN_ANALYZE_LENGTH) {
     return {
       state: "can_analyze",
-      label: "可分析",
-      detail: "可以分析，但多一點上下文會更準。",
+      label: "可以分析了",
+      detail: "如果再多一點前後文，結果會更細。",
     };
   }
 
   return {
     state: "too_short",
-    label: "再寫一點",
-    detail:
-      trimmedLength > 0
-        ? "多貼一點前後文，ANYU 會更容易讀出節奏。"
-        : "多貼一點前後文，ANYU 會更容易讀出節奏。",
+    label: "還差一點點",
+    detail: "多給一點互動脈絡，ANYU 才讀得出節奏。",
   };
 }
 

@@ -3,13 +3,7 @@ import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { PrivacyHelper } from "@/components/anyu/PrivacyHelper";
 import { SituationChips } from "@/components/anyu/SituationChips";
-import type { AnalyzeInputGuidanceState } from "@/lib/modules/ai-temperature-ui";
-
-type AnalyzeInputGuidance = {
-  state: AnalyzeInputGuidanceState;
-  label: string;
-  detail: string;
-};
+import type { AnalyzeInputGuidance } from "@/lib/modules/ai-temperature-ui";
 
 type InputCardProps = {
   chips: readonly string[];
@@ -73,12 +67,25 @@ export function InputCard({
           >
             <div className="anyu-guidance-head">
               <span className="anyu-guidance-label">{inputGuidance.label}</span>
-              <span className="anyu-guidance-meta">{inputValue.trim().length} 字</span>
+              {inputGuidance.showMaxCounter ? (
+                <span className="anyu-guidance-meta">{inputValue.trim().length} / 4000</span>
+              ) : null}
             </div>
             <p className="anyu-guidance-copy">{inputGuidance.detail}</p>
-            <p className="anyu-guidance-helper">
-              多貼一點前後文，ANYU 會更容易讀出節奏。
-            </p>
+            <div className="anyu-guidance-indicator" aria-hidden="true">
+              <span
+                className={`anyu-guidance-dot ${["too_short", "can_analyze", "ideal", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
+              />
+              <span
+                className={`anyu-guidance-dot ${["can_analyze", "ideal", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
+              />
+              <span
+                className={`anyu-guidance-dot ${["ideal", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
+              />
+              <span
+                className={`anyu-guidance-dot ${["long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
+              />
+            </div>
           </div>
         ) : null}
 

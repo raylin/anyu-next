@@ -267,6 +267,30 @@ textarea {
   color: var(--anyu-ink);
 }
 
+.anyu-guidance-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.anyu-guidance-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: var(--anyu-line);
+  opacity: 0.72;
+  transition:
+    background-color 140ms ease,
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.anyu-guidance-dot-active {
+  background: var(--anyu-accent);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
 .anyu-guidance-helper {
   color: var(--anyu-dim);
 }
