@@ -23,8 +23,8 @@ Latest normalization progress:
 - a fresh `anyu-next` production deployment is healthy
 - `https://anyu.tw` now serves `anyu-next`
 - `https://www.anyu.tw` also serves `anyu-next`
-- `www -> apex` redirect is still pending
-- `DATABASE_URL` target is still not positively confirmed
+- `www -> apex` redirect is now live
+- `DATABASE_URL` target is still not positively confirmed and may be blank/unusable in the current production env context
 
 ## 2. Approved Production Commit
 
@@ -279,8 +279,8 @@ Production should not proceed until all of the following are confirmed:
 2. Final production candidate commit is selected from `origin/staging`.
 3. Human browser/phone smoke on staging is accepted.
 4. Manual retention cleanup SOP is accepted by the human operator.
-5. `www.anyu.tw` redirect policy is decided and implemented.
-6. Production domain / DNS readiness is verified after the final project/domain mapping is in place.
+5. Production domain / DNS readiness is verified after the final project/domain mapping is in place.
+6. Production provider/database smoke is accepted after DB readiness is real.
 
 Current normalization recommendation:
 
@@ -291,6 +291,11 @@ Current normalization recommendation:
 Current normalization status:
 
 - `anyu.tw` now serves `anyu-next`
-- `www.anyu.tw` now serves `anyu-next`
+- `www.anyu.tw` now redirects to `https://anyu.tw/`
 - public production env names are complete on `anyu-next`
-- launch remains `No-Go` until DB target confirmation, `www` redirect completion, and final launch approvals
+- launch remains `No-Go` until DB target confirmation and final launch approvals
+
+Provider secret readiness:
+
+- `ANTHROPIC_API_KEY` is present by env-name and appears present in a safe production env-run probe
+- actual provider-call success is still pending a later production smoke pass

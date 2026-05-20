@@ -102,6 +102,7 @@ Neon production checklist:
 - set `DATABASE_URL` only in Vercel production env
 - do not reuse a dev, local, or preview branch as production
 - verify the production branch contains the expected runtime tables before launch
+- confirm the active production `DATABASE_URL` actually targets the Neon `anyu-next` `production` branch without exposing secrets
 
 ## 8. Drizzle Migration Checklist
 
@@ -164,7 +165,7 @@ Production domain checklist:
 Open question:
 
 - production project/domain normalization should be complete before production launch
-- `www.anyu.tw` redirect strategy should be confirmed before production launch if it is not already decided in Vercel
+- `www.anyu.tw` must redirect to apex before launch approval, whether via Vercel config or a narrow app-level redirect
 
 ## 11. NEXT_PUBLIC Env Rebuild Rule
 
@@ -233,6 +234,7 @@ Before production:
 - current model default is still the approved launch candidate
 - no unapproved model strategy flag is active
 - abuse guard behavior has been verified recently on staging
+- provider key presence alone is not enough; production smoke should still verify an actual provider call after DB readiness is real
 
 ## 16. Retention Cleanup SOP
 

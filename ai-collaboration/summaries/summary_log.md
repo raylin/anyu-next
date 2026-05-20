@@ -2760,3 +2760,38 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether `DATABASE_URL` truly points to Neon `anyu-next` `production`
 - how `www.anyu.tw -> https://anyu.tw` should be finalized in production config
 - whether stale Vercel domain-inspection ownership output needs manual cleanup
+
+## 2026-05-20 Production Redirect + DB Target Confirmation v0
+
+### Task Completed
+
+- Added a narrow host-based redirect so `www.anyu.tw` now redirects to `https://anyu.tw`.
+- Deployed a fresh healthy `anyu-next` production build and verified apex/redirect behavior live.
+- Ran a safe production env-run probe for `DATABASE_URL` and `ANTHROPIC_API_KEY` readiness.
+
+### Redirect Status
+
+- `anyu.tw` returns `200`
+- `www.anyu.tw` returns `308` to `https://anyu.tw/`
+
+### DB / Provider Status
+
+- `ANTHROPIC_API_KEY` appears present in the safe probe
+- `DATABASE_URL` could not be confirmed and appears blank/unusable in the same safe probe
+
+### Current Go / No-Go Status
+
+- `No-Go`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Unresolved Questions
+
+- whether production `DATABASE_URL` is truly blank or just inaccessible through the current safe probe path
+- whether production DB migration is still required once the secret is repaired or confirmed
+- whether the team later wants the redirect moved from app-level config to Vercel/domain-level config
