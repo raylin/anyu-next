@@ -3140,3 +3140,37 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact real-browser/mobile rendering feel of Instrument Serif on wordmark and large numerals
 - whether the next step should be dedicated staging QA before any later font phase
+
+## 2026-05-21 - Font Migration Phase 1 Staging QA v0
+
+### Completed Changes
+
+- completed a focused staging QA pass for the Instrument Serif Phase 1 Latin display migration
+- verified `staging.anyu.tw` is serving `7bb4e91` or newer
+- confirmed live staging landing, demo result, and runtime result HTML load `Instrument Serif`
+- confirmed no active `Cormorant` references remain in current app/source-of-truth paths
+- verified one synthetic staging analyze, runtime result load, and unlock intent still work
+
+### Learnings
+
+- the Phase 1 font swap is live on the intended landing/result surfaces without any obvious protected-staging regression
+- the current QA method can confirm font loading and structural health from protected HTML and bundle inspection, but exact rendering feel still benefits from a true browser/device pass
+- later typography work should remain separate from this Phase 1 verification because Newsreader and LXGW WenKai are still intentionally deferred
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- staging route checks for landing, demo result, and one runtime result returned healthy responses
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact real-browser/mobile rendering feel of Instrument Serif on wordmark and large numerals
+- whether the next step should be human browser/device funnel QA before any later typography phase
