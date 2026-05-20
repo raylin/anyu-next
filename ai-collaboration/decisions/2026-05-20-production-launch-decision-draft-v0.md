@@ -8,24 +8,17 @@ This is a draft production launch decision record for Module 01.
 
 It is not final approval.
 
-Current recommendation is `No-Go` until production env readiness, production DB readiness, migration confirmation, and a final human phone/browser smoke pass are all confirmed.
+Current recommendation is `No-Go` until the completed technical smoke is followed by final human launch approval, final candidate-commit selection, and retention-operations acceptance.
 
 Latest verification update:
 
-- the prepared app project is `anyu-next`
-- the live production domain `https://anyu.tw` is currently served by a different Vercel project, `anyu`
-- production launch must not proceed until project/domain/env ownership is normalized
-- recommended normalization target is `anyu-next` owning `anyu.tw` and `www.anyu.tw`
-
-Latest normalization progress:
-
-- `anyu-next` public production env names are now complete for the approved launch candidate
-- a fresh `anyu-next` production deployment is healthy
-- `https://anyu.tw` now serves `anyu-next`
-- `https://www.anyu.tw` also serves `anyu-next`
-- `www -> apex` redirect is now live
-- `DATABASE_URL` target is still not positively confirmed and runtime still reports it absent after an explicit repair attempt
-- Neon `anyu-next` `production` branch currently appears schema-empty for the required runtime tables
+- `anyu.tw` serves the `anyu-next` production deployment
+- `www.anyu.tw` redirects to `https://anyu.tw/`
+- public production env names are complete on `anyu-next`
+- the approved Neon `anyu-next` `production` branch has now been migrated
+- the required runtime tables are now present on the production branch
+- a tightly scoped synthetic production smoke has passed for analyze, result load, unlock, Email fallback, legal routes, and redirect
+- live runtime DB access is now proven by successful production smoke even though the safe `vercel env run` probe path remains inconsistent
 
 ## 2. Approved Production Commit
 
@@ -93,24 +86,10 @@ Notes:
 
 Required production env vars and current status:
 
-- linked app project `anyu-next` production env:
+- production app project `anyu-next`:
   - present by name:
     - `DATABASE_URL`
     - `ANTHROPIC_API_KEY`
-    - `ANTHROPIC_MODEL=claude-sonnet-4-20250514`
-    - `ORADAR_PROVIDER=anthropic`
-    - `NEXT_PUBLIC_LINE_ADD_URL=https://lin.ee/S6dnbJO`
-  - missing by name:
-    - `MODEL_STRATEGY=sonnet_default`
-    - `NEXT_PUBLIC_APP_URL=https://anyu.tw`
-    - `ANALYSIS_SESSION_DAILY_LIMIT=3`
-    - `ANALYSIS_IP_HOURLY_LIMIT=10`
-    - `ANALYSIS_GLOBAL_DAILY_LIMIT=200`
-- actual production-facing Vercel project `anyu`:
-  - present by name:
-    - `DATABASE_URL`
-    - `ANTHROPIC_API_KEY`
-  - missing by name for current launch candidate:
     - `ANTHROPIC_MODEL=claude-sonnet-4-20250514`
     - `ORADAR_PROVIDER=anthropic`
     - `MODEL_STRATEGY=sonnet_default`
@@ -123,8 +102,9 @@ Required production env vars and current status:
 Operational note:
 
 - `NEXT_PUBLIC_*` changes require rebuild and domain/alias freshness verification before launch.
-- current production env ownership is not normalized; env readiness cannot be treated as complete until `anyu.tw` points at the intended app project and its final env set is confirmed
 - public production env name coverage on `anyu-next` is now complete for the launch candidate
+- `ANTHROPIC_API_KEY` appears present in the safe probe path
+- safe `vercel env run` probing still does not expose a usable `DATABASE_URL` to Drizzle even though live production DB behavior is now proven by smoke
 
 ## 7. Database / Migration Status
 
@@ -132,11 +112,11 @@ Current status:
 
 - Neon project `anyu-next` has a ready `production` branch in `aws-ap-southeast-1`
 - legacy Neon project `AnYu` also exists, but its `production` branch is archived
-- production DB migration must be run only after explicit approval
+- approved production migration has now been run on the `anyu-next` `production` branch
 - do not reuse preview/dev branch for production
-- production table listing used in the latest verification was empty for the expected runtime tables
-- active production `DATABASE_URL` linkage was not safely confirmed, and runtime still reports it absent after repair
-- production DB readiness is blocked
+- required runtime tables now exist on the production branch
+- live production analyze/result/unlock/contact flow proves deployed runtime DB access is functioning
+- safe probe inconsistency around `DATABASE_URL` remains an operational debugging note, not a current smoke blocker
 
 ## 8. Legal / Trust Status
 
@@ -277,33 +257,28 @@ Current recommendation: `No-Go`
 
 Production should not proceed until all of the following are confirmed:
 
-1. Active `DATABASE_URL` is confirmed to target the `anyu-next` Neon `production` branch.
-2. Final production candidate commit is selected from `origin/staging`.
-3. Human browser/phone smoke on staging is accepted.
-4. Manual retention cleanup SOP is accepted by the human operator.
-5. Production domain / DNS readiness is verified after the final project/domain mapping is in place.
-6. Production provider/database smoke is accepted after DB readiness is real.
-
-Current normalization recommendation:
-
-- choose `Option A`
-- make `anyu-next` the production Vercel project
-- move `anyu.tw` and `www.anyu.tw` to `anyu-next` only after explicit human approval
+1. Final production candidate commit is selected from `origin/staging`.
+2. Human browser/phone smoke acceptance is completed.
+3. Manual retention cleanup SOP is explicitly accepted by the human operator, or replaced with a stronger operational alternative.
+4. Final launch decision is explicitly approved by a human operator.
 
 Current normalization status:
 
 - `anyu.tw` now serves `anyu-next`
 - `www.anyu.tw` now redirects to `https://anyu.tw/`
 - public production env names are complete on `anyu-next`
-- launch remains `No-Go` until DB target confirmation and final launch approvals
+- required production runtime tables now exist
+- synthetic production smoke has passed
+- launch remains `No-Go` only because final human launch approval gates are still pending
 
 Provider secret readiness:
 
 - `ANTHROPIC_API_KEY` is present by env-name and appears present in a safe production env-run probe
-- actual provider-call success is still pending a later production smoke pass
+- actual provider-call success is now proven by the completed production smoke pass
 
 Production smoke gate status:
 
-- smoke not eligible yet
-- Gate A failed because runtime `DATABASE_URL` is still absent/unconfirmed
-- Gate B failed because required production tables are not present in the latest verification path
+- smoke was eligible and was run
+- migration gate passed
+- required-table gate passed
+- synthetic production smoke passed

@@ -125,6 +125,7 @@ corepack pnpm db:migrate
 Rule:
 
 - only run this command when production `DATABASE_URL` is intentionally configured for that session
+- if the safe Vercel `env run` path still behaves as if `DATABASE_URL` is unavailable but a human has explicitly confirmed the target and a production migration is approved, a direct Neon production-branch migration may be used instead, with the fallback documented in the launch report
 
 ## 9. Vercel Production Deployment Checklist
 
@@ -198,6 +199,14 @@ Gate before smoke:
 9. confirm `/m/ambiguous-temperature/result/demo` still works if retained intentionally
 
 Use synthetic content only for QA.
+
+Minimal happy-path production smoke evidence should include:
+
+- analyze response success
+- real result route `200`
+- unlock intent success
+- synthetic Email fallback success if tested
+- privacy-safe event verification with no raw input or contact leakage
 
 ## 13. Legal / Trust Checklist
 

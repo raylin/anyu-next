@@ -2833,3 +2833,49 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether a fresh post-secret-update production deploy is still needed for runtime to see `DATABASE_URL`
 - whether the empty production branch means migration was never run
 - whether the next approved step should combine migration with env/runtime debug
+
+## 2026-05-21 Production Migration + Smoke Gate v0
+
+### Task Completed
+
+- Ran the approved production migration through a direct Neon production-branch transaction after the safe `vercel env run` / Drizzle path still saw empty `url`.
+- Verified the required runtime tables now exist on the Neon `anyu-next` `production` branch.
+- Ran a tightly scoped synthetic production smoke for analyze, real result load, unlock, synthetic Email fallback, legal routes, and apex / `www` redirect.
+
+### Migration Result
+
+- production migration passed
+- required runtime tables are now present
+
+### Smoke Result
+
+- production smoke was run
+- production smoke passed
+
+### Event / Privacy Result
+
+- `analysis_completed` and `contact_submitted` were verified
+- timing metadata was present
+- no raw synthetic input or synthetic email leakage was found in verified event metadata
+
+### Current Go / No-Go Status
+
+- `No-Go pending final human approval / final launch decision`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- which exact production candidate commit should be approved from `origin/staging`
+- whether final human browser / phone smoke is accepted
+- whether manual retention cleanup burden is explicitly accepted for launch
