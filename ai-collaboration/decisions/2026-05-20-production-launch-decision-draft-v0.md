@@ -10,6 +10,12 @@ It is not final approval.
 
 Current recommendation is `No-Go` until production env readiness, production DB readiness, migration confirmation, and a final human phone/browser smoke pass are all confirmed.
 
+Latest verification update:
+
+- the prepared app project is `anyu-next`
+- the live production domain `https://anyu.tw` is currently served by a different Vercel project, `anyu`
+- production launch must not proceed until project/domain/env ownership is normalized
+
 ## 2. Approved Production Commit
 
 Pending: choose exact production commit from `origin/staging` before launch.
@@ -76,29 +82,48 @@ Notes:
 
 Required production env vars and current status:
 
-- `DATABASE_URL=<Neon production pooled connection string>` — pending
-- `ANTHROPIC_API_KEY` — pending
-- `ANTHROPIC_MODEL=claude-sonnet-4-20250514` — pending
-- `ORADAR_PROVIDER=anthropic` — pending
-- `MODEL_STRATEGY=sonnet_default` — pending
-- `NEXT_PUBLIC_APP_URL=https://anyu.tw` — pending
-- `NEXT_PUBLIC_LINE_ADD_URL=https://lin.ee/S6dnbJO` — pending
-- `ANALYSIS_SESSION_DAILY_LIMIT=3` — pending
-- `ANALYSIS_IP_HOURLY_LIMIT=10` — pending
-- `ANALYSIS_GLOBAL_DAILY_LIMIT=200` — pending
+- linked app project `anyu-next` production env:
+  - present by name:
+    - `DATABASE_URL`
+    - `ANTHROPIC_API_KEY`
+    - `ANTHROPIC_MODEL=claude-sonnet-4-20250514`
+    - `ORADAR_PROVIDER=anthropic`
+    - `NEXT_PUBLIC_LINE_ADD_URL=https://lin.ee/S6dnbJO`
+  - missing by name:
+    - `MODEL_STRATEGY=sonnet_default`
+    - `NEXT_PUBLIC_APP_URL=https://anyu.tw`
+    - `ANALYSIS_SESSION_DAILY_LIMIT=3`
+    - `ANALYSIS_IP_HOURLY_LIMIT=10`
+    - `ANALYSIS_GLOBAL_DAILY_LIMIT=200`
+- actual production-facing Vercel project `anyu`:
+  - present by name:
+    - `DATABASE_URL`
+    - `ANTHROPIC_API_KEY`
+  - missing by name for current launch candidate:
+    - `ANTHROPIC_MODEL=claude-sonnet-4-20250514`
+    - `ORADAR_PROVIDER=anthropic`
+    - `MODEL_STRATEGY=sonnet_default`
+    - `NEXT_PUBLIC_APP_URL=https://anyu.tw`
+    - `NEXT_PUBLIC_LINE_ADD_URL=https://lin.ee/S6dnbJO`
+    - `ANALYSIS_SESSION_DAILY_LIMIT=3`
+    - `ANALYSIS_IP_HOURLY_LIMIT=10`
+    - `ANALYSIS_GLOBAL_DAILY_LIMIT=200`
 
 Operational note:
 
 - `NEXT_PUBLIC_*` changes require rebuild and domain/alias freshness verification before launch.
+- current production env ownership is not normalized; env readiness cannot be treated as complete until `anyu.tw` points at the intended app project and its final env set is confirmed
 
 ## 7. Database / Migration Status
 
 Current status:
 
-- Neon production branch not yet verified or migrated
+- Neon project `anyu-next` has a ready `production` branch in `aws-ap-southeast-1`
+- legacy Neon project `AnYu` also exists, but its `production` branch is archived
 - production DB migration must be run only after explicit approval
 - do not reuse preview/dev branch for production
 - production table verification is still pending
+- active production `DATABASE_URL` linkage was not safely confirmed, so production DB readiness is still blocked
 
 ## 8. Legal / Trust Status
 
@@ -239,10 +264,11 @@ Current recommendation: `No-Go`
 
 Production should not proceed until all of the following are confirmed:
 
-1. Production env vars are configured in Vercel production.
-2. Neon production branch is created and migration plan is confirmed.
-3. Final production candidate commit is selected from `origin/staging`.
-4. Human browser/phone smoke on staging is accepted.
-5. Manual retention cleanup SOP is accepted by the human operator.
-6. `www.anyu.tw` redirect policy is decided.
-7. Production domain / DNS readiness is verified.
+1. Production project/domain ownership is normalized so `anyu.tw` points at the intended app project.
+2. Final production env vars are configured on the actual production-facing Vercel project.
+3. Active `DATABASE_URL` is confirmed to target the `anyu-next` Neon `production` branch.
+4. Final production candidate commit is selected from `origin/staging`.
+5. Human browser/phone smoke on staging is accepted.
+6. Manual retention cleanup SOP is accepted by the human operator.
+7. `www.anyu.tw` redirect policy is decided and implemented.
+8. Production domain / DNS readiness is verified after the final project/domain mapping is in place.
