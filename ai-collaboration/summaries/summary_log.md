@@ -3209,3 +3209,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact human perception of the new CTA rhythm and share emphasis on a real phone viewport
 - whether the next step should be a dedicated staging QA pass before any broader conversion/paywall polish
+
+## 2026-05-21 - Conversion CTA Rhythm Staging QA v0
+
+### Completed Changes
+
+- completed a focused staging QA pass for the conversion/CTA rhythm polish work
+- verified staging is serving `df99f26` or newer
+- confirmed the new inline CTA, updated share copy, revised paid-preview hierarchy, and compressed LINE panel copy are live
+- ran one synthetic runtime funnel covering analyze, result load, unlock intent, and Email fallback
+
+### Learnings
+
+- the new inline CTA appears late enough in the result flow to feel like a next-step prompt rather than a hard interruption
+- the share action still reads secondary while the paid/LINE path stays clearer
+- safe implementation verification of unlock-event `source` is strong from source/bundle/live route behavior, even though direct DB-row confirmation was not done in this pass
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- synthetic staging analyze, runtime result load, unlock intent, and Email fallback all passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact human perception of the inline CTA rhythm and scroll landing on a real phone viewport
+- whether direct persisted-event verification should be done later in a DB-accessible QA pass
