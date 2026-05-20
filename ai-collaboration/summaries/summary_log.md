@@ -3072,3 +3072,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether the selective mark rollout should expand further before any font migration work
 - whether the next polish pass should target staging QA or conversion/paywall rhythm first
+
+## 2026-05-21 Brand Mark Selective UI Staging QA v0
+
+### Task Completed
+
+- Verified staging deployment freshness for the selective AnyuMark rollout.
+- Checked live landing, demo result, runtime result, unlock intent, and public icon assets on staging.
+- Confirmed the selective brand-mark rollout is staging-healthy and did not require a tiny fix.
+
+### QA Result Summary
+
+- landing header: passed
+- result header: passed
+- loading state: passed with source/bundle verification limitation
+- temperature/share/signal/icon checks: passed
+- funnel regression: passed
+
+### Fixes Applied
+
+- none
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact human viewport feel of the loading ornament and selective lockup still benefits from a true browser/device pass
+- whether the next step should be human funnel QA before any broader polish work
