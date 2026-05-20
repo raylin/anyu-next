@@ -258,6 +258,25 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - A true human phone pass is still the best way to finalize perceived loading feel and contrast in real lighting conditions.
 - If additional polish is needed from that phone pass, it should stay narrow and evidence-based.
+
+## 2026-05-20 Module 01 Model Latency Evaluation
+
+### Task Completed
+
+- Measured the current Anthropic baseline model with a local evaluator harness using the real app prompt/schema assets.
+- Probed two Haiku-class candidate model names for availability.
+- Documented the latency, schema-stability, and recommendation outcome for Module 01 launch planning.
+
+### Key Learnings
+
+- Current baseline `claude-sonnet-4-20250514` is stable but slow, with a direct median around 28 seconds on the synthetic set.
+- The tested Haiku candidate names were not available on the current Anthropic account.
+- The model itself appears to be the main source of wait time; parsing/validation overhead is minor by comparison.
+
+### Unresolved Questions
+
+- Whether a different faster Anthropic model name is available on this specific account.
+- Whether the next speed improvement should come from model switching or UX/runtime mitigation if no faster safe model is accessible.
 - Added a minimal prompt clarification to use `source_id`.
 - Regenerated `outputs/structured/sample_001.signal.json` through live Anthropic extraction.
 - Created `ai-collaboration/reports/2026-05-16-source-field-cleanup-execution-report.md`.
