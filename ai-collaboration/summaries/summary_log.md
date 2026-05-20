@@ -618,6 +618,59 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 Production Launch Decision Draft v0
+
+### Task Completed
+
+- created `ai-collaboration/decisions/2026-05-20-production-launch-decision-draft-v0.md`
+- copied the handoff into `ai-collaboration/handoffs/2026-05-20-production-launch-decision-draft-v0-handoff.md`
+- created `ai-collaboration/reports/2026-05-20-production-launch-decision-draft-v0-execution-report.md`
+- documented the current production recommendation as `No-Go`
+- recorded the main blockers before any `anyu.tw` production launch
+
+### Decision Draft Path
+
+- `ai-collaboration/decisions/2026-05-20-production-launch-decision-draft-v0.md`
+
+### Current Go / No-Go Recommendation
+
+- `No-Go`
+
+### Main Blockers
+
+- production env vars not yet verified
+- Neon production branch and migration readiness not yet verified
+- final approved production commit not yet selected
+- final human phone/browser smoke pass not yet accepted
+- manual retention cleanup SOP not yet explicitly accepted
+- `www.anyu.tw` redirect policy still undecided
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Learnings
+
+- The production runbook and launch-decision template were sufficient to produce a real draft without changing app/runtime state.
+- The biggest remaining launch blockers are operational rather than code-level.
+
+### Unresolved Questions
+
+- Which exact commit from `origin/staging` should be the approved production candidate?
+- Will production promotion use `main`, or another explicitly approved commit path?
+- What should `www.anyu.tw` do at launch?
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 Production Deployment Runbook v0
 
 ### Task Completed
