@@ -14,6 +14,12 @@ describe("event metadata guard", () => {
       hasForbiddenEventMetadata({
         scoreBucket: "cool",
         privacyFlags: ["email"],
+        modelStrategy: "haiku_retry_sonnet_fallback",
+        primaryModel: "claude-haiku-4-5-20251001",
+        finalModel: "claude-sonnet-4-20250514",
+        retryCount: 1,
+        fallbackUsed: true,
+        schemaValidationPassed: true,
         timingMs: {
           totalLatencyMs: 28000,
           providerLatencyMs: 24000,

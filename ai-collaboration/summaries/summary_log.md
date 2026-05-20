@@ -1585,6 +1585,42 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 — Module 01 Haiku Staging Trial v0
+
+### Task Completed
+
+- added an env-driven guarded Anthropic strategy for Module 01: Haiku primary, retry once on invalid output, Sonnet fallback
+- deployed the guarded strategy to preview branch `staging` temporarily and confirmed one live staging sample through the real route plus Neon verification
+- reverted `MODEL_STRATEGY` on preview branch `staging` back to `sonnet_default` after the partial trial
+
+### Key Learnings
+
+- the guarded strategy code path works in the real staging analyze route
+- one confirmed live sample persisted with `modelStrategy=haiku_retry_sonnet_fallback`, `finalModel=claude-haiku-4-5-20251001`, `retryCount=0`, and `fallbackUsed=false`
+- repeated automated protected-preview POSTs were intercepted by Vercel’s browser security checkpoint, so the intended 5-sample trial did not complete
+
+### Unresolved Questions
+
+- whether the retry/fallback path will be exercised in a real authenticated staging run is still unknown
+- whether a protected-preview bypass secret or true browser session is needed for future multi-sample remote QA is still open
+
+### Report Path
+
+- `ai-collaboration/reports/2026-05-20-module-01-haiku-staging-trial-v0-execution-report.md`
+
+### Validation Result
+
+- compileall, lint, test, and build passed
+- one live staging analyze sample plus Neon preview-branch verification passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 — Module 01 Haiku Repair Trial v0
 
 ### Task Completed

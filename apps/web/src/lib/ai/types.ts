@@ -27,6 +27,19 @@ export type ProviderCallResult = {
   rawResponse?: unknown;
 };
 
+export type ModelStrategyName =
+  | "sonnet_default"
+  | "haiku_retry_sonnet_fallback";
+
+export type RuntimeModelMetadata = {
+  modelStrategy: ModelStrategyName;
+  primaryModel: string;
+  finalModel: string;
+  retryCount: number;
+  fallbackUsed: boolean;
+  schemaValidationPassed: boolean;
+};
+
 export type PromptMetadata = {
   situation_type: string;
   input_length: number;

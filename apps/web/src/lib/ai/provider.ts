@@ -1,6 +1,6 @@
 import type { ProviderCallResult } from "@/lib/ai/types";
 
-class ProviderConfigError extends Error {}
+export class ProviderConfigError extends Error {}
 class ProviderRuntimeError extends Error {}
 
 type ProviderName = "anthropic" | "openai";
@@ -11,18 +11,26 @@ type ResolvedProvider = {
   model: string;
 };
 
+type ProviderCallOptions = {
+  model?: string;
+};
+
 function getPreferredProvider(): ProviderName {
   return process.env.ORADAR_PROVIDER === "openai" ? "openai" : "anthropic";
 }
 
-function resolveProvider(): ResolvedProvider {
+function resolveProvider(options: ProviderCallOptions = {}): ResolvedProvider {
   const preferredProvider = getPreferredProvider();
+  const requestedModel = options.model?.trim();
 
   if (preferredProvider === "anthropic" && process.env.ANTHROPIC_API_KEY) {
     return {
       name: "anthropic",
       apiKey: process.env.ANTHROPIC_API_KEY,
-      model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514",
+      model:
+        requestedModel ??
+        process.env.ANTHROPIC_MODEL ??
+        "claude-sonnet-4-20250514",
     };
   }
 
@@ -30,7 +38,7 @@ function resolveProvider(): ResolvedProvider {
     return {
       name: "openai",
       apiKey: process.env.OPENAI_API_KEY,
-      model: process.env.OPENAI_MODEL ?? "gpt-5.5",
+      model: requestedModel ?? process.env.OPENAI_MODEL ?? "gpt-5.5",
     };
   }
 
@@ -38,7 +46,10 @@ function resolveProvider(): ResolvedProvider {
     return {
       name: "anthropic",
       apiKey: process.env.ANTHROPIC_API_KEY,
-      model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514",
+      model:
+        requestedModel ??
+        process.env.ANTHROPIC_MODEL ??
+        "claude-sonnet-4-20250514",
     };
   }
 
@@ -46,7 +57,7 @@ function resolveProvider(): ResolvedProvider {
     return {
       name: "openai",
       apiKey: process.env.OPENAI_API_KEY,
-      model: process.env.OPENAI_MODEL ?? "gpt-5.5",
+      model: requestedModel ?? process.env.OPENAI_MODEL ?? "gpt-5.5",
     };
   }
 
@@ -205,8 +216,11 @@ async function callAnthropic(prompt: string, provider: ResolvedProvider): Promis
   };
 }
 
-export async function callAiProvider(prompt: string): Promise<ProviderCallResult> {
-  const provider = resolveProvider();
+export async function callAiProvider(
+  prompt: string,
+  options: ProviderCallOptions = {},
+): Promise<ProviderCallResult> {
+  const provider = resolveProvider(options);
 
   if (provider.name === "anthropic") {
     return callAnthropic(prompt, provider);

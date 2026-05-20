@@ -138,6 +138,12 @@ export async function POST(
       metadata: {
         resultId: analysisResult.id,
         privacyFlags: generated.privacyFlags,
+        modelStrategy: generated.runtimeModel.modelStrategy,
+        primaryModel: generated.runtimeModel.primaryModel,
+        finalModel: generated.runtimeModel.finalModel,
+        retryCount: generated.runtimeModel.retryCount,
+        fallbackUsed: generated.runtimeModel.fallbackUsed,
+        schemaValidationPassed: generated.runtimeModel.schemaValidationPassed,
         timingMs: getEventTimingMetrics(timing.summarize()),
       },
     });

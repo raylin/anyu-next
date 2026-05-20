@@ -39,9 +39,12 @@ Copy `apps/web/.env.example` and provide the values you need locally:
 - `DATABASE_URL=`
 - `ANTHROPIC_API_KEY=`
 - `ANTHROPIC_MODEL=`
+- `ANTHROPIC_FAST_MODEL=`
+- `ANTHROPIC_FALLBACK_MODEL=`
 - `OPENAI_API_KEY=`
 - `OPENAI_MODEL=`
 - `ORADAR_PROVIDER=anthropic`
+- `MODEL_STRATEGY=sonnet_default`
 - `NEXT_PUBLIC_APP_URL=`
 
 Provider priority in v0 is Anthropic first. OpenAI is available as a lightweight fallback path.
@@ -80,7 +83,10 @@ Preview env required for live analyze:
 - `DATABASE_URL`
 - `ANTHROPIC_API_KEY`
 - `ANTHROPIC_MODEL`
+- `ANTHROPIC_FAST_MODEL` for guarded Haiku staging trials
+- `ANTHROPIC_FALLBACK_MODEL` for guarded Haiku staging trials
 - `ORADAR_PROVIDER=anthropic`
+- `MODEL_STRATEGY`
 - `NEXT_PUBLIC_APP_URL`
 
 Suggested manual preview commands if Vercel CLI access is available:
