@@ -618,6 +618,42 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 LINE CTA Env Hotfix + Staging Verification v0
+
+### Task Completed
+
+- confirmed app code already used `NEXT_PUBLIC_LINE_ADD_URL` correctly
+- confirmed Vercel env already contained `NEXT_PUBLIC_LINE_ADD_URL`
+- identified stale staging deployment as the real cause of the fallback-to-Email behavior
+- created a fresh preview deployment and repointed `staging.anyu.tw`
+- verified the live client bundle now contains the LINE URL, LINE-first strings, and same-tab navigation path
+- created `ai-collaboration/research/2026-05-20-line-cta-env-hotfix-staging-verification-v0.md`
+- created `ai-collaboration/reports/2026-05-20-line-cta-env-hotfix-staging-verification-v0-execution-report.md`
+
+### Learnings
+
+- `NEXT_PUBLIC_*` bugs can present like app logic regressions even when the real issue is simply that a public env change was never rebuilt into the active bundle
+- protected staging verification is still workable from shell-only tooling when HTML and client bundle inspection are used carefully
+
+### Unresolved Questions
+
+- a true protected-browser click pass is still useful to confirm the final human interaction feel into LINE
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 LINE Funnel Contact UI Implementation v0
 
 ### Task Completed
