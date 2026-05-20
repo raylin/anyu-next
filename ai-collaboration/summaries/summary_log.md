@@ -3275,3 +3275,37 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact real-browser/mobile rendering feel of Newsreader on insight/reassurance and the paid-preview sample reply
 - whether the next step should be a narrow staging QA pass before any later typography phase
+
+## 2026-05-21 - Font Migration Phase 2 Staging QA v0
+
+### Completed Changes
+
+- completed a focused staging QA pass for the Newsreader editorial-reading rollout
+- verified staging is serving `d8bef11` or newer
+- confirmed `Newsreader` loads on landing, demo result, and one runtime result surface alongside `Instrument Serif`
+- confirmed `.t-reading` remains scoped to insight, reassurance, and the paid-preview sample reply
+- ran one synthetic runtime funnel covering analyze, result load, unlock intent, and Email fallback
+
+### Learnings
+
+- the Phase 2 rollout stays visually narrow because the reading font appears only on the long-form result surfaces that already behave like editorial copy
+- locked paid-preview cards, CTA/buttons, and surrounding UI remain structurally separate from the reading treatment
+- protected staging HTML plus source verification is enough to establish scope correctness, but not final human judgment on exact mobile rendering feel
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- live staging landing, demo result, runtime result, unlock intent, and Email fallback checks passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact human perception of Newsreader on a real phone viewport
+- whether a later true browser/device pass finds any subjective FOUT or weight issue
