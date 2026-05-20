@@ -1623,6 +1623,25 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether a later authenticated browser + direct DB access pass should explicitly verify blocked-case row absence on the preview DB
 - whether preview should carry explicit `ANALYSIS_*` overrides or continue relying on code defaults
 
+## 2026-05-20 - Module 01 Staging Contact + Unlock Post-Guard Regression Check v0
+
+### Completed Changes
+
+- verified the live staging happy path for valid analyze, runtime result load, unlock intent, synthetic email submit, and synthetic LINE submit
+- verified the missing-consent case still returns friendly validation copy
+- documented the current boundary between route/API verification and exact staging DB row confirmation
+
+### Learnings
+
+- the abuse-guard pass did not regress the fake-door funnel behavior
+- success-state collapse after contact submit remains coherent in source and matches the returned success API copy
+- the local Neon env available in this shell is not the same branch/database as the live staging deployment
+
+### Unresolved Questions
+
+- whether a true human browser/device pass should explicitly confirm the post-submit success-collapse feel
+- whether a branch-aligned staging DB access path should be added for future remote QA verification
+
 ## 2026-05-20 — Module 01 Haiku Staging Trial v0
 
 ### Task Completed
