@@ -618,6 +618,41 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 LINE Funnel Strategy v0
+
+### Task Completed
+
+- created `ai-collaboration/research/2026-05-20-line-funnel-strategy-v0.md`
+- defined LINE as the primary Taiwan v0 retention and complete-analysis delivery channel
+- kept Email as a secondary fallback rather than removing it
+- defined v0 funnel placement, OA minimum setup, welcome message drafts, rich menu draft, delivery model, metrics, and implementation milestones
+- created `ai-collaboration/reports/2026-05-20-line-funnel-strategy-v0-execution-report.md`
+
+### Learnings
+
+- the existing legal drafts already support a LINE-primary, Email-fallback direction as long as the product does not overclaim automation
+- the simplest launch-safe path is still manual or semi-manual LINE delivery first, with automation deferred until volume justifies it
+
+### Unresolved Questions
+
+- final LINE OA add-friend URL is still unknown
+- acceptable manual delivery volume for v0 is still undecided
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 Workflow Tech Debt Reporting Rule v0
 
 ### Task Completed
