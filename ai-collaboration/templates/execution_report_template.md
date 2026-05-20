@@ -25,6 +25,32 @@ YYYY-MM-DD
 
 - List concrete next steps.
 
+## Known Technical Debt
+
+- Short summary of the most relevant current technical debt, or `None`.
+
+## Tech Debt Review
+
+### New Technical Debt Introduced
+
+- List any new technical debt caused by the task, or `None`.
+
+### Existing Technical Debt Observed
+
+- List relevant pre-existing technical debt noticed during the task, or `None beyond previously documented items`.
+
+### Opportunistic Cleanup Completed
+
+- List any small, low-risk cleanup completed inside task scope, or `None`.
+
+### Deferred Cleanup Candidates
+
+- List larger cleanup items that should be deferred, or `None`.
+
+### Recommended Follow-up
+
+- List follow-up cleanup that would materially improve maintainability, extensibility, quality, or launch safety, or `None`.
+
 ## Git Commit
 
 - Commit hash: `<hash or not created>`
@@ -72,6 +98,13 @@ What Changed:
 Validation:
 - <validation result 1>
 - <validation result 2>
+
+Tech Debt / Cleanup Notes:
+- New technical debt introduced: <note or none>
+- Existing technical debt observed: <note or none beyond previously documented items>
+- Opportunistic cleanup completed: <note or none>
+- Deferred cleanup candidates: <note or none>
+- Recommended follow-up: <note or none>
 
 Decisions Made:
 - <execution-level decision 1>

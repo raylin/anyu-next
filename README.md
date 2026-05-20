@@ -134,6 +134,24 @@ Every completed handoff should end with:
 
 If push is skipped or fails, report the reason clearly and do not claim staging was updated.
 
+## Tech Debt And Cleanup Policy
+
+Codex should not leave obvious technical debt just to reduce implementation effort.
+
+For each handoff:
+
+1. Fix small, obvious, low-risk technical debt when it is inside the task scope.
+2. Do not broaden product behavior or architecture without explicit approval.
+3. Document new technical debt introduced by the task.
+4. Document existing technical debt observed during the task.
+5. Document opportunistic cleanup completed.
+6. Document deferred cleanup candidates.
+7. Recommend follow-up cleanup only when it materially improves maintainability, extensibility, quality, or launch safety.
+
+Small cleanup is encouraged.
+Over-design is not.
+Silent large refactors are not allowed.
+
 ## Local Development
 
 Root-level checks:

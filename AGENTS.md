@@ -60,6 +60,49 @@ Every completed handoff should end with:
 
 If push is skipped or fails, report the reason clearly and do not claim staging was updated.
 
+## Tech Debt And Cleanup Policy
+
+Codex should not leave obvious technical debt just to reduce implementation effort.
+
+For each handoff:
+
+1. Fix small, obvious, low-risk technical debt when it is inside the task scope.
+2. Do not broaden product behavior or architecture without explicit approval.
+3. Document new technical debt introduced by the task.
+4. Document existing technical debt observed during the task.
+5. Document opportunistic cleanup completed.
+6. Document deferred cleanup candidates.
+7. Recommend follow-up cleanup only when it materially improves maintainability, extensibility, quality, or launch safety.
+
+Small cleanup is encouraged.
+Over-design is not.
+Silent large refactors are not allowed.
+
+Allowed opportunistic cleanup examples:
+
+- remove dead comments
+- fix obvious typo
+- remove unused import
+- consolidate duplicate helper within the same touched file
+- improve naming in touched code if low-risk
+- add a missing test for a helper being touched
+- update a stale README sentence in the touched area
+- fix a small accessibility attribute issue
+- align copy/docs with current behavior
+
+Not allowed without explicit scope or approval:
+
+- DB schema redesign
+- provider/model routing change
+- auth/payment architecture
+- moving major folders
+- rewriting the component system
+- changing product prompt/schema semantics
+- changing privacy/data retention behavior
+- switching analytics/event strategy
+- large design-system rewrite
+- changing the production/staging deployment model
+
 Commit requirements:
 
 - Run relevant validation before committing.
@@ -137,6 +180,7 @@ Every execution report must include:
 - architecture decisions
 - blockers
 - uncertainties
+- tech debt review
 - suggested next steps
 
 Reports should be concise, factual, and written for the next human or AI collaborator.
@@ -176,6 +220,13 @@ What Changed:
 Validation:
 - <validation result 1>
 - <validation result 2>
+
+Tech Debt / Cleanup Notes:
+- New technical debt introduced: <note or none>
+- Existing technical debt observed: <note or none beyond previously documented items>
+- Opportunistic cleanup completed: <note or none>
+- Deferred cleanup candidates: <note or none>
+- Recommended follow-up: <note or none>
 
 Decisions Made:
 - <execution-level decision 1>

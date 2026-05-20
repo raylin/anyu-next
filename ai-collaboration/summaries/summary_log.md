@@ -618,6 +618,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 Workflow Tech Debt Reporting Rule v0
+
+### Task Completed
+
+- added an explicit workflow rule requiring tech debt reporting in every execution report and final Codex completion summary
+- updated canonical workflow docs in `AGENTS.md`, `WORKING_AGREEMENT.md`, and `README.md`
+- updated `ai-collaboration/templates/handoff_template.md` with task-level tech debt policy guidance
+- updated `ai-collaboration/templates/execution_report_template.md` with a structured `Tech Debt Review` section and final-summary tech debt notes block
+- created `ai-collaboration/reports/2026-05-20-workflow-tech-debt-reporting-rule-v0-execution-report.md`
+
+### Learnings
+
+- workflow changes are more durable when the instructions, templates, and final completion summary format are updated in the same pass
+- structured tech debt notes are a low-cost way to preserve cleanup context for later handoffs without broadening current task scope
+
+### Unresolved Questions
+
+- whether future workflow-rule changes should eventually be centralized into a more single-source policy file to reduce duplicate maintenance
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 - Legal Route + Footer Browser QA v0
 
 ### Completed

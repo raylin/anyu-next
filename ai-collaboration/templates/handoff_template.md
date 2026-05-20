@@ -23,6 +23,12 @@ What the next agent needs to know before acting.
 - No schema changes without approval
 - No cloud infrastructure, auth, vector DB, scraping, UI, or dashboards unless explicitly approved
 
+## Tech Debt Policy For This Task
+
+Small, obvious, low-risk cleanup inside this task scope is allowed.
+Do not perform large refactors or architecture/data/runtime changes unless explicitly requested.
+Record all tech debt notes in the execution report and final completion summary.
+
 ## Planned Work
 
 1. Save this handoff.
