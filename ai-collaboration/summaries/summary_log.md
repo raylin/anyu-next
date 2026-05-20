@@ -1585,6 +1585,42 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 — Module 01 Haiku Repair Trial v0
+
+### Task Completed
+
+- evaluated four Haiku reliability strategies for Module 01: `direct`, `retry-on-invalid`, `repair-on-invalid`, and `sonnet-fallback`
+- extended the local evaluator to support strategy execution, repair prompts, fallback routing, and per-stage token/latency accounting
+
+### Key Learnings
+
+- direct Haiku is still not reliable enough: `4/5`
+- retry-on-invalid was the strongest narrow guard in this run: `5/5`, median `18,526 ms`, estimated `$14.495 / 1,000`
+- repair-on-invalid is not viable: `3/5` and weaker cost/latency tradeoff
+- sonnet-fallback stayed directionally promising, but fallback did not actually trigger in this run
+
+### Unresolved Questions
+
+- whether retry-on-invalid remains stable across a larger or noisier sample is still unknown
+- whether Sonnet fallback is worth the extra runtime complexity is still unproven without an exercised fallback path
+
+### Report Path
+
+- `ai-collaboration/reports/2026-05-20-module-01-haiku-repair-trial-v0-execution-report.md`
+
+### Validation Result
+
+- evaluator strategy runs completed
+- compileall, lint, test, and build pending at summary-write time
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 Module 01 Faster Model Discovery + Cost Evaluation v0
 
 ### Task Completed

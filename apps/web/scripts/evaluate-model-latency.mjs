@@ -72,6 +72,13 @@ const PRICING_BY_FAMILY = [
   },
 ];
 
+const STRATEGIES = [
+  "direct",
+  "retry-on-invalid",
+  "repair-on-invalid",
+  "sonnet-fallback",
+];
+
 function parseArgs(argv) {
   const args = {
     model: "",
@@ -79,6 +86,8 @@ function parseArgs(argv) {
     provider: "anthropic",
     discover: false,
     discoverOnly: false,
+    strategy: "direct",
+    fallbackModel: "claude-sonnet-4-20250514",
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -102,6 +111,12 @@ function parseArgs(argv) {
     } else if (part === "--discover-only") {
       args.discover = true;
       args.discoverOnly = true;
+    } else if (part === "--strategy") {
+      args.strategy = argv[index + 1] ?? "direct";
+      index += 1;
+    } else if (part === "--fallback-model") {
+      args.fallbackModel = argv[index + 1] ?? "claude-sonnet-4-20250514";
+      index += 1;
     }
   }
 
@@ -272,6 +287,39 @@ function getUsage(payload) {
   };
 }
 
+function mergeUsage(...usages) {
+  const totals = {
+    input_tokens: 0,
+    output_tokens: 0,
+    cache_read_input_tokens: 0,
+    cache_creation_input_tokens: 0,
+  };
+  let hasAny = false;
+
+  for (const usage of usages) {
+    if (!usage) {
+      continue;
+    }
+
+    for (const key of Object.keys(totals)) {
+      const value = usage[key];
+      if (typeof value === "number") {
+        totals[key] += value;
+        hasAny = true;
+      }
+    }
+  }
+
+  return hasAny
+    ? totals
+    : {
+        input_tokens: null,
+        output_tokens: null,
+        cache_read_input_tokens: null,
+        cache_creation_input_tokens: null,
+      };
+}
+
 async function callAnthropic(prompt, model, apiKey) {
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -339,7 +387,6 @@ async function callAnthropic(prompt, model, apiKey) {
   return {
     text: textParts.join("\n"),
     usage: getUsage(payload),
-    raw: payload,
   };
 }
 
@@ -449,20 +496,182 @@ function averageOf(values) {
   return Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 100) / 100;
 }
 
-function summarizeModelResults(modelResults, pricing) {
-  const successful = modelResults.filter((item) => item.success);
-  const latencies = successful.map((item) => item.latency_ms);
-  const inputTokens = successful
-    .map((item) => item.input_tokens)
+function buildProductPrompt(promptTemplate, sample, requestStartTimestamp, provider, model) {
+  return promptTemplate
+    .replace("{{RAW_CONTENT}}", sample.text)
+    .replace(
+      "{{SOURCE_METADATA}}",
+      JSON.stringify(
+        {
+          situation_type: sample.situation,
+          input_length: sample.text.length,
+          generated_at: requestStartTimestamp,
+          experiment_id: "module-01-model-latency-eval-v0",
+          variant: "latency-eval",
+          model_provider: provider,
+          model_name: model,
+        },
+        null,
+        2,
+      ),
+    );
+}
+
+function buildRepairPrompt(failedOutput, schema) {
+  return [
+    "Return only one valid JSON object.",
+    "Repair the previous malformed output so it matches the required schema exactly.",
+    "Do not add explanation or markdown fences.",
+    "",
+    "Required schema:",
+    JSON.stringify(schema, null, 2),
+    "",
+    "Malformed previous output:",
+    failedOutput,
+  ].join("\n");
+}
+
+function parseAndValidate(text, validate) {
+  const parsed = JSON.parse(stripMarkdownFences(text));
+  const schemaValidationSuccess = validate(parsed);
+  const schemaErrors = schemaValidationSuccess
+    ? []
+    : (validate.errors ?? []).map(
+        (error) => `${error.instancePath || "$"} ${error.message ?? "is invalid"}`,
+      );
+
+  return {
+    parsed,
+    jsonParseSuccess: true,
+    schemaValidationSuccess,
+    schemaErrors,
+  };
+}
+
+async function performModelAttempt({
+  prompt,
+  model,
+  apiKey,
+  validate,
+  phase,
+}) {
+  const startedAt = performance.now();
+  const providerResult = await callAnthropic(prompt, model, apiKey);
+  const latencyMs = Math.round(performance.now() - startedAt);
+  const usage = providerResult.usage;
+
+  try {
+    const parsedResult = parseAndValidate(providerResult.text, validate);
+    return {
+      phase,
+      model,
+      latency_ms: latencyMs,
+      usage,
+      text: providerResult.text,
+      success: parsedResult.schemaValidationSuccess,
+      provider_error_category: parsedResult.schemaValidationSuccess
+        ? null
+        : "schema_validation_failed",
+      ...parsedResult,
+    };
+  } catch (error) {
+    return {
+      phase,
+      model,
+      latency_ms: latencyMs,
+      usage,
+      text: providerResult.text,
+      success: false,
+      provider_error_category: "json_parse_failed",
+      jsonParseSuccess: false,
+      schemaValidationSuccess: false,
+      schemaErrors: [],
+      parsed: null,
+      notes: error instanceof Error ? error.message : "JSON parse failed",
+    };
+  }
+}
+
+async function executeStrategy({
+  strategy,
+  model,
+  fallbackModel,
+  apiKey,
+  prompt,
+  schema,
+  validate,
+}) {
+  const attempts = [];
+
+  const primary = await performModelAttempt({
+    prompt,
+    model,
+    apiKey,
+    validate,
+    phase: "primary",
+  });
+  attempts.push(primary);
+
+  if (primary.success) {
+    return attempts;
+  }
+
+  if (strategy === "retry-on-invalid" || strategy === "sonnet-fallback") {
+    const retry = await performModelAttempt({
+      prompt,
+      model,
+      apiKey,
+      validate,
+      phase: "retry",
+    });
+    attempts.push(retry);
+
+    if (retry.success) {
+      return attempts;
+    }
+  }
+
+  if (strategy === "repair-on-invalid" || strategy === "sonnet-fallback") {
+    const latestFailed = attempts[attempts.length - 1];
+    if (latestFailed.text) {
+      const repair = await performModelAttempt({
+        prompt: buildRepairPrompt(latestFailed.text, schema),
+        model,
+        apiKey,
+        validate,
+        phase: "repair",
+      });
+      attempts.push(repair);
+
+      if (repair.success) {
+        return attempts;
+      }
+    }
+  }
+
+  if (strategy === "sonnet-fallback") {
+    const fallback = await performModelAttempt({
+      prompt,
+      model: fallbackModel,
+      apiKey,
+      validate,
+      phase: "fallback",
+    });
+    attempts.push(fallback);
+  }
+
+  return attempts;
+}
+
+function summarizeStrategyResults(results, pricing) {
+  const successful = results.filter((item) => item.success);
+  const latencies = successful.map((item) => item.total_latency_ms);
+  const primaryLatencies = successful.map((item) => item.primary_model_latency_ms);
+  const repairLatencies = successful
+    .map((item) => item.repair_latency_ms)
     .filter((value) => typeof value === "number");
-  const outputTokens = successful
-    .map((item) => item.output_tokens)
-    .filter((value) => typeof value === "number");
-  const cacheReadTokens = successful
-    .map((item) => item.cache_read_input_tokens)
-    .filter((value) => typeof value === "number");
-  const cacheCreationTokens = successful
-    .map((item) => item.cache_creation_input_tokens)
+  const fallbackLatencies = successful
+    .map((item) => item.fallback_latency_ms)
     .filter((value) => typeof value === "number");
   const requestCosts = successful
     .map((item) => item.estimated_cost_usd)
@@ -481,19 +690,20 @@ function summarizeModelResults(modelResults, pricing) {
       : null;
 
   return {
-    model: modelResults[0]?.model ?? null,
+    strategy: results[0]?.strategy ?? null,
+    model: results[0]?.model ?? null,
+    fallback_model: results[0]?.fallback_model ?? null,
     pricing_class: pricing?.label ?? null,
-    sample_count: modelResults.length,
+    sample_count: results.length,
     success_count: successful.length,
-    median_latency_ms: medianOf(latencies),
-    average_latency_ms: averageOf(latencies),
-    average_input_tokens: averageOf(inputTokens),
-    average_output_tokens: averageOf(outputTokens),
-    average_cache_read_input_tokens: averageOf(cacheReadTokens),
-    average_cache_creation_input_tokens: averageOf(cacheCreationTokens),
-    average_cost_per_request_usd: avgCostPerRequestUsd,
+    median_total_latency_ms: medianOf(latencies),
+    average_total_latency_ms: averageOf(latencies),
+    median_primary_latency_ms: medianOf(primaryLatencies),
+    average_repair_latency_ms: averageOf(repairLatencies),
+    average_fallback_latency_ms: averageOf(fallbackLatencies),
     estimated_cost_per_1000_usd:
       avgCostPerRequestUsd != null ? roundCurrency(avgCostPerRequestUsd * 1000) : null,
+    average_cost_per_request_usd: avgCostPerRequestUsd,
     schema_validation_pass_count: successful.filter(
       (item) => item.ajv_schema_validation_success,
     ).length,
@@ -502,10 +712,13 @@ function summarizeModelResults(modelResults, pricing) {
 }
 
 async function evaluateModel({
+  strategy,
   model,
+  fallbackModel,
   provider,
   apiKey,
   promptTemplate,
+  schema,
   validate,
 }) {
   const pricing = getPricingForModel(model);
@@ -513,156 +726,92 @@ async function evaluateModel({
 
   for (const sample of SYNTHETIC_CASES) {
     const requestStartTimestamp = new Date().toISOString();
-    const startedAt = performance.now();
+    const prompt = buildProductPrompt(
+      promptTemplate,
+      sample,
+      requestStartTimestamp,
+      provider,
+      model,
+    );
 
-    try {
-      const prompt = promptTemplate
-        .replace("{{RAW_CONTENT}}", sample.text)
-        .replace(
-          "{{SOURCE_METADATA}}",
-          JSON.stringify(
-            {
-              situation_type: sample.situation,
-              input_length: sample.text.length,
-              generated_at: requestStartTimestamp,
-              experiment_id: "module-01-model-latency-eval-v0",
-              variant: "latency-eval",
-              model_provider: provider,
-              model_name: model,
-            },
-            null,
-            2,
-          ),
-        );
+    const attempts = await executeStrategy({
+      strategy,
+      model,
+      fallbackModel,
+      apiKey,
+      prompt,
+      schema,
+      validate,
+    });
 
-      const providerResult = await callAnthropic(prompt, model, apiKey);
-      const endedAt = performance.now();
-      const requestEndTimestamp = new Date().toISOString();
-      const latencyMs = Math.round(endedAt - startedAt);
+    const finalAttempt = attempts[attempts.length - 1];
+    const finalSuccess = finalAttempt.success;
+    const finalParsed = finalAttempt.parsed ?? null;
+    const finalUsage = mergeUsage(...attempts.map((attempt) => attempt.usage));
+    const qualityReview = finalSuccess
+      ? buildQualityReview(
+          finalParsed,
+          finalAttempt.schemaValidationSuccess,
+          detectForbiddenLanguage(finalParsed),
+        )
+      : { quality_rating: "fail", note: finalAttempt.notes ?? finalAttempt.provider_error_category };
 
-      let parsed = null;
-      let jsonParseSuccess = false;
-      let schemaValidationSuccess = false;
-      let schemaErrors = [];
-
-      try {
-        parsed = JSON.parse(stripMarkdownFences(providerResult.text));
-        jsonParseSuccess = true;
-      } catch (error) {
-        const usage = providerResult.usage;
-        results.push({
-          model,
-          sample_id: sample.id,
-          request_start_timestamp: requestStartTimestamp,
-          request_end_timestamp: requestEndTimestamp,
-          latency_ms: latencyMs,
-          success: false,
-          provider_error_category: "json_parse_failed",
-          json_parse_success: false,
-          ajv_schema_validation_success: false,
-          input_tokens: usage.input_tokens,
-          output_tokens: usage.output_tokens,
-          cache_read_input_tokens: usage.cache_read_input_tokens,
-          cache_creation_input_tokens: usage.cache_creation_input_tokens,
-          estimated_cost_usd: estimateCostUsd(usage, pricing),
-          result_score: null,
-          score_bucket: null,
-          state_label: null,
-          persona: null,
-          paid_preview_count: null,
-          forbidden_language: null,
-          quality_rating: "fail",
-          notes: error instanceof Error ? error.message : "JSON parse failed",
-        });
-        continue;
-      }
-
-      schemaValidationSuccess = validate(parsed);
-      if (!schemaValidationSuccess) {
-        schemaErrors = (validate.errors ?? []).map(
-          (error) => `${error.instancePath || "$"} ${error.message ?? "is invalid"}`,
-        );
-      }
-
-      const forbiddenLanguage = detectForbiddenLanguage(parsed);
-      const qualityReview = buildQualityReview(
-        parsed,
-        schemaValidationSuccess,
-        forbiddenLanguage,
-      );
-      const usage = providerResult.usage;
-
-      results.push({
-        model,
-        sample_id: sample.id,
-        request_start_timestamp: requestStartTimestamp,
-        request_end_timestamp: requestEndTimestamp,
-        latency_ms: latencyMs,
-        success: jsonParseSuccess && schemaValidationSuccess,
-        provider_error_category: schemaValidationSuccess ? null : "schema_validation_failed",
-        json_parse_success: jsonParseSuccess,
-        ajv_schema_validation_success: schemaValidationSuccess,
-        input_tokens: usage.input_tokens,
-        output_tokens: usage.output_tokens,
-        cache_read_input_tokens: usage.cache_read_input_tokens,
-        cache_creation_input_tokens: usage.cache_creation_input_tokens,
-        estimated_cost_usd: estimateCostUsd(usage, pricing),
-        result_score: parsed?.free_result?.temperature_score ?? null,
-        score_bucket: getScoreBucket(parsed?.free_result?.temperature_score),
-        state_label: parsed?.free_result?.state_label ?? null,
-        persona: parsed?.share_card?.relationship_persona ?? null,
-        paid_preview_count:
-          parsed?.paid_result?.reply_strategies &&
-          typeof parsed.paid_result.reply_strategies === "object"
-            ? Object.keys(parsed.paid_result.reply_strategies).length
-            : 0,
-        forbidden_language: forbiddenLanguage,
-        quality_rating: qualityReview.quality_rating,
-        notes:
-          qualityReview.note +
-          (schemaErrors.length > 0 ? ` | ${schemaErrors.join(" | ")}` : ""),
-        one_sentence_read: parsed?.free_result?.one_sentence_read ?? null,
-        share_sentence: parsed?.share_card?.card_sentence ?? null,
-      });
-    } catch (error) {
-      const endedAt = performance.now();
-      const requestEndTimestamp = new Date().toISOString();
-      const latencyMs = Math.round(endedAt - startedAt);
-      const message = error instanceof Error ? error.message : "Unknown provider failure";
-      const providerErrorCategory = message.split(":")[0];
-
-      results.push({
-        model,
-        sample_id: sample.id,
-        request_start_timestamp: requestStartTimestamp,
-        request_end_timestamp: requestEndTimestamp,
-        latency_ms: latencyMs,
-        success: false,
-        provider_error_category: providerErrorCategory,
-        json_parse_success: false,
-        ajv_schema_validation_success: false,
-        input_tokens: null,
-        output_tokens: null,
-        cache_read_input_tokens: null,
-        cache_creation_input_tokens: null,
-        estimated_cost_usd: null,
-        result_score: null,
-        score_bucket: null,
-        state_label: null,
-        persona: null,
-        paid_preview_count: null,
-        forbidden_language: null,
-        quality_rating: "fail",
-        notes: message,
-      });
-    }
+    results.push({
+      strategy,
+      model,
+      fallback_model: strategy === "sonnet-fallback" ? fallbackModel : null,
+      model_sequence_used: attempts.map((attempt) => `${attempt.phase}:${attempt.model}`),
+      sample_id: sample.id,
+      total_latency_ms: attempts.reduce((sum, attempt) => sum + attempt.latency_ms, 0),
+      primary_model_latency_ms:
+        attempts.find((attempt) => attempt.phase === "primary")?.latency_ms ?? null,
+      repair_latency_ms:
+        attempts.find((attempt) => attempt.phase === "repair")?.latency_ms ?? null,
+      fallback_latency_ms:
+        attempts.find((attempt) => attempt.phase === "fallback")?.latency_ms ?? null,
+      success: finalSuccess,
+      json_parse_success: finalAttempt.jsonParseSuccess,
+      ajv_schema_validation_success: finalAttempt.schemaValidationSuccess,
+      input_tokens: finalUsage.input_tokens,
+      output_tokens: finalUsage.output_tokens,
+      cache_read_input_tokens: finalUsage.cache_read_input_tokens,
+      cache_creation_input_tokens: finalUsage.cache_creation_input_tokens,
+      repair_input_tokens:
+        attempts.find((attempt) => attempt.phase === "repair")?.usage?.input_tokens ?? null,
+      repair_output_tokens:
+        attempts.find((attempt) => attempt.phase === "repair")?.usage?.output_tokens ?? null,
+      fallback_input_tokens:
+        attempts.find((attempt) => attempt.phase === "fallback")?.usage?.input_tokens ?? null,
+      fallback_output_tokens:
+        attempts.find((attempt) => attempt.phase === "fallback")?.usage?.output_tokens ?? null,
+      estimated_cost_usd: estimateCostUsd(finalUsage, pricing),
+      estimated_cost_per_1000:
+        estimateCostUsd(finalUsage, pricing) != null
+          ? roundCurrency(estimateCostUsd(finalUsage, pricing) * 1000)
+          : null,
+      result_score: finalParsed?.free_result?.temperature_score ?? null,
+      score_bucket: getScoreBucket(finalParsed?.free_result?.temperature_score),
+      state_label: finalParsed?.free_result?.state_label ?? null,
+      persona: finalParsed?.share_card?.relationship_persona ?? null,
+      paid_preview_count:
+        finalParsed?.paid_result?.reply_strategies &&
+        typeof finalParsed.paid_result.reply_strategies === "object"
+          ? Object.keys(finalParsed.paid_result.reply_strategies).length
+          : 0,
+      quality_rating: qualityReview.quality_rating,
+      notes: qualityReview.note,
+      one_sentence_read: finalParsed?.free_result?.one_sentence_read ?? null,
+      share_sentence: finalParsed?.share_card?.card_sentence ?? null,
+    });
   }
 
   return {
+    strategy,
     model,
+    fallbackModel,
     pricing,
     results,
-    summary: summarizeModelResults(results, pricing),
+    summary: summarizeStrategyResults(results, pricing),
   };
 }
 
@@ -681,6 +830,10 @@ async function main() {
 
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error("ANTHROPIC_API_KEY is not configured.");
+  }
+
+  if (!args.discoverOnly && !STRATEGIES.includes(args.strategy)) {
+    throw new Error(`Unsupported strategy: ${args.strategy}`);
   }
 
   const promptTemplate = await readFile(
@@ -717,10 +870,13 @@ async function main() {
   for (const model of modelsToEvaluate) {
     evaluations.push(
       await evaluateModel({
+        strategy: args.strategy,
         model,
+        fallbackModel: args.fallbackModel,
         provider,
         apiKey: process.env.ANTHROPIC_API_KEY,
         promptTemplate,
+        schema,
         validate,
       }),
     );
@@ -731,6 +887,8 @@ async function main() {
       {
         provider,
         configured_model: configuredModel || null,
+        strategy: args.strategy,
+        fallback_model: args.fallbackModel,
         discovery_attempted: args.discover,
         discovery_error: discoveryError,
         available_models_found: availableModels,
