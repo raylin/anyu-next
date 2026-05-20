@@ -212,6 +212,10 @@ Before production:
 - welcome-message and OA profile basics are set in LINE backend
 - product copy still says notification / opening when immediate delivery is not yet true
 
+Reference record:
+
+- `ai-collaboration/research/2026-05-20-anyu-line-oa-setup-record-v0.md`
+
 ## 15. Abuse Guard / Cost Cap Checklist
 
 Before production:

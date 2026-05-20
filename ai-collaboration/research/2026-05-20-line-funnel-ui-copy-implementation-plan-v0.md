@@ -2,6 +2,10 @@
 
 Date: 2026-05-20
 
+Setup record reference:
+
+- `ai-collaboration/research/2026-05-20-anyu-line-oa-setup-record-v0.md`
+
 ## 1. Executive Summary
 
 Module 01 should move from generic contact capture to LINE-first conversion after paid-intent click. The user should first see product value, then be invited to add LINE to receive the complete analysis. Email remains a secondary fallback.

@@ -618,6 +618,52 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 ANYU LINE OA Setup Record v0
+
+### Task Completed
+
+- created `ai-collaboration/research/2026-05-20-anyu-line-oa-setup-record-v0.md`
+- recorded the LINE OA identity, add-friend URL, QR URL, profile image asset, and welcome-message baseline
+- added small cross-references from existing LINE strategy/plan docs and the production runbook
+- created the execution report for the setup-record task
+
+### LINE OA Setup Record Path
+
+- `ai-collaboration/research/2026-05-20-anyu-line-oa-setup-record-v0.md`
+
+### Add-Friend URL
+
+- `https://lin.ee/S6dnbJO`
+
+### Profile Image Asset
+
+- `docs/design-system/brand/exports/line-profile-1024.png`
+
+### Learnings
+
+- The manual LINE OA state is now stable enough to treat as a launch reference artifact instead of relying on scattered handoff notes.
+- Small cross-references are enough here; full doc rewrites were unnecessary.
+
+### Unresolved Questions
+
+- What exact category was chosen in the LINE backend?
+- Does the final live welcome message differ in any small way from the documented baseline?
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 ANYU Brand Mark Asset Export v0
 
 ### Task Completed

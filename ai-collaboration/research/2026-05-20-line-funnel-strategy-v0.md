@@ -2,6 +2,10 @@
 
 Date: 2026-05-20
 
+Setup record reference:
+
+- `ai-collaboration/research/2026-05-20-anyu-line-oa-setup-record-v0.md`
+
 ## 1. Executive Summary
 
 LINE should become the primary v0 retention and complete-analysis delivery channel for Taiwan. Email remains a secondary fallback. v0 should avoid heavy community management and use LINE mainly as a conversion and retention funnel, not as a daily content channel.
