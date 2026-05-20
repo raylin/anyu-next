@@ -76,12 +76,12 @@ Completed a focused staging QA pass for the selective AnyuMark rollout. Staging 
 
 ## Git Commit
 
-- Commit hash: `<pending>`
+- Commit hash: `514dadb`
 - Commit message: `chore: qa selective brand mark rollout`
 
 ## Staging Push
 
-- Push status: `<pending>`
+- Push status: `pushed to origin/staging`
 - Push command: `git push origin HEAD:staging`
 
 ## Remaining Uncertainties
