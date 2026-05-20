@@ -618,6 +618,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 - Legal Baseline Content Draft v0
+
+### Completed
+
+- drafted first-pass legal/trust markdown for privacy policy, terms, disclaimer, UI notices, LINE funnel disclosure, and persona/insight consent
+- created the legal review bundle under `ai-collaboration/research/2026-05-20-legal-baseline-content-review-v0.md`
+- kept the drafts conservative about retention, deletion, LINE automation, and future personalization
+
+### Learnings
+
+- the current product state supports warm, practical legal copy as long as it avoids promising automation or deletion flows that are not fully implemented
+- the biggest unresolved content gap is no final public deletion/contact channel yet
+
+### Unresolved Questions
+
+- should the 24-hour retention target stay as a goal or become a firmer promise later
+- should LINE be described as primary now or as near-future default
+- what exact email or form should be listed for privacy/deletion requests before launch
+
+### Validation
+
+- `python3 -m compileall oradar` passed
+- `cd apps/web && corepack pnpm lint` passed
+- `cd apps/web && corepack pnpm test` passed
+- `cd apps/web && corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-18 Module 01 UI Port v0
 
 ### Task Completed
