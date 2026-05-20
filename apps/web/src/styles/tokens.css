@@ -69,6 +69,20 @@
   --anyu-motion-base: 320ms;
   --anyu-motion-bar:  700ms;
   --anyu-motion-page: 700ms;
+
+  /* brand mark · ANYU Brand Mark v1.1 */
+  --anyu-mark-min:           12px;
+  --anyu-mark-favicon:       16px;
+  --anyu-mark-favicon-hires: 32px;
+  --anyu-mark-app-icon:     180px;
+  --anyu-mark-inline:      0.85em;
+  --anyu-mark-divider:       20px;
+  --anyu-mark-unread:        20px;
+  --anyu-mark-loading:       48px;
+  --anyu-mark-loading-size:  92px;
+  --anyu-mark-stamp:         48px;
+  --anyu-mark-cycle:         1.6s;
+  --anyu-mark-stagger:       0.2s;
 }
 
 @media (min-width: 768px) {

@@ -1,0 +1,312 @@
+/* ============================================================
+ *  暗語 ANYU · brand mark · v1.1
+ *  ─────────────────────────────────────────────────────────────
+ *  Pairs with `anyu-mark.jsx` + the `anyu-mark-*` tokens in
+ *  `anyu-tokens-v1.1.css`. Inherits theme variables from there.
+ *
+ *  Contents:
+ *    §1  Mark base & animated states
+ *    §2  Lockups (mark + wordmark)
+ *    §3  Inline ⋯ (for body copy)
+ *    §4  System utilities — the mark's 7 product-level roles:
+ *        4.1 divider     · 段落分隔
+ *        4.2 loading     · AI 思考中 (uses animated)
+ *        4.3 unread      · 有新訊號
+ *        4.4 stamp       · 認證印章
+ *        4.5 pattern-bg  · wallpaper / ad / pack
+ *        4.6 chip / button affordance
+ *        4.7 favicon spec (build-time guidance — comments only)
+ *
+ *  All classes are `anyu-*` prefixed; never collides with utility CSS.
+ * ============================================================ */
+
+/* ────────────────────────────────────────────────────────────
+ *  §1 · MARK · base + typing animation
+ *  ──────────────────────────────────────────────────────────── */
+
+.anyu-mark {
+  display: inline-block;
+  vertical-align: middle;
+  color: currentColor;   /* the only way to recolor the mark */
+  flex-shrink: 0;
+}
+
+/* Animated state — typing indicator.
+   Three dots pulse in sequence over a 1.6s cycle.
+   Use for AI loading, message-typing, page-transition. */
+.anyu-mark--typing .anyu-mark__dot {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: anyu-mark-pulse 1.6s ease-in-out infinite;
+  opacity: 0.35;
+}
+.anyu-mark--typing .anyu-mark__dot--1 { animation-delay: 0s; }
+.anyu-mark--typing .anyu-mark__dot--2 { animation-delay: 0.2s; }
+.anyu-mark--typing .anyu-mark__dot--3 { animation-delay: 0.4s; }
+
+@keyframes anyu-mark-pulse {
+  0%, 60%, 100% { transform: translateY(0);   opacity: 0.35; }
+  20%, 35%      { transform: translateY(-12px); opacity: 1; }
+}
+
+/* Respect reduced-motion: fall back to the static-resolved arrangement. */
+@media (prefers-reduced-motion: reduce) {
+  .anyu-mark--typing .anyu-mark__dot {
+    animation: none;
+  }
+  .anyu-mark--typing .anyu-mark__dot--1 { opacity: 0.55; transform: translateY(6px); }
+  .anyu-mark--typing .anyu-mark__dot--2 { opacity: 0.82; transform: translateY(0); }
+  .anyu-mark--typing .anyu-mark__dot--3 { opacity: 1;    transform: translateY(-6px); }
+}
+
+/* ────────────────────────────────────────────────────────────
+ *  §2 · LOCKUPS
+ *  ──────────────────────────────────────────────────────────── */
+
+.anyu-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--anyu-space-4, 16px);
+  color: var(--anyu-ink);
+  font-family: var(--anyu-font-latin);
+  line-height: 1;
+}
+
+/* EN — primary horizontal: ⋯  ANYU */
+.anyu-lockup--en .anyu-lockup__en {
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  padding-left: 0.18em;       /* optical compensation for italic */
+}
+
+/* ZH — bilingual: ⋯ │ 暗語 / ANYU */
+.anyu-lockup--zh {
+  gap: var(--anyu-space-5, 20px);
+}
+.anyu-lockup__divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--anyu-line);
+}
+.anyu-lockup__zhblock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.anyu-lockup__zh {
+  font-family: var(--anyu-font-serif);
+  font-weight: 500;
+  color: var(--anyu-ink);
+  letter-spacing: 0.13em;
+  padding-left: 0.13em;
+  line-height: 1;
+}
+.anyu-lockup--zh .anyu-lockup__en {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--anyu-dim);
+  letter-spacing: 0.22em;
+  padding-left: 0.22em;
+}
+
+/* Stacked — square spaces (profile pic, ad unit, signage) */
+.anyu-lockup--stack {
+  flex-direction: column;
+  gap: var(--anyu-space-4, 16px);
+  align-items: center;
+  text-align: center;
+}
+.anyu-lockup--stack .anyu-lockup__zh {
+  font-family: var(--anyu-font-serif);
+  font-weight: 500;
+}
+.anyu-lockup--stack .anyu-lockup__en {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--anyu-accent);
+  letter-spacing: 0.3em;
+  padding-left: 0.3em;
+}
+
+/* ────────────────────────────────────────────────────────────
+ *  §3 · INLINE — ⋯ as a glyph inside body copy
+ *  ────────────────────────────────────────────────────────────
+ *  Sized to surrounding font's cap-height (~0.85em), centered on x-height.
+ *  Use sparingly — at most once per paragraph. */
+
+.anyu-mark--inline {
+  display: inline-flex;
+  width: 1em;
+  height: 0.4em;
+  margin: 0 0.25em;
+  color: var(--anyu-accent);
+  vertical-align: -0.05em;
+}
+.anyu-mark--inline svg {
+  width: 100%;
+  height: auto;
+}
+
+/* ────────────────────────────────────────────────────────────
+ *  §4 · SYSTEM UTILITIES
+ *  ───────────────────────────────────────────────────────────
+ *  These take the mark beyond the logo — into product chrome,
+ *  print, ads. Each role has its own component class.
+ *  ───────────────────────────────────────────────────────────
+ *
+ *  Usage requires the .anyu-mark SVG inside (React: <AnyuMark>).
+ *  See LOGO_v1.1.md §4 for HTML snippets. */
+
+/* §4.1 — divider ─────────────────────────────────────────── */
+/* Centered ⋯ between flanking rules. Replaces <hr> for poetic copy. */
+.anyu-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--anyu-space-4, 16px);
+  margin: var(--anyu-space-8, 32px) 0;
+  color: var(--anyu-accent);
+}
+.anyu-divider::before,
+.anyu-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--anyu-line);
+}
+.anyu-divider > .anyu-mark { flex-shrink: 0; }
+
+/* §4.2 — loading bubble ──────────────────────────────────── */
+/* A round chip housing the typing animation. Default goes on dark — there's
+   a -light variant for cream surfaces. Tone color via --anyu-accent. */
+.anyu-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--anyu-mark-loading-size, 92px);
+  height: var(--anyu-mark-loading-size, 92px);
+  border-radius: 50%;
+  background: var(--anyu-ink-dark);
+  color: var(--anyu-accent);
+}
+.anyu-loading--light {
+  background: var(--anyu-card);
+  border: 1px solid var(--anyu-line);
+  color: var(--anyu-accent);
+}
+.anyu-loading--inline {       /* tiny, sits beside text */
+  width: 1.6em;
+  height: 1.6em;
+  background: transparent;
+  color: var(--anyu-accent);
+}
+
+/* §4.3 — unread indicator ─────────────────────────────────── */
+/* Replaces the generic "unread dot" with the ⋯ — semantically:
+   "there's an unread anyu in here". Used in lists / nav rails. */
+.anyu-unread {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--anyu-mist);
+  color: var(--anyu-accent);
+}
+.anyu-unread--muted {                /* "already read" state */
+  background: var(--anyu-surface);
+  color: var(--anyu-faint);
+}
+
+/* §4.4 — stamp · paid feature / signature ───────────────────── */
+/* Wax-seal / verified-mark composition. Slight rotation = inked-by-hand feel.
+   Pair with strip text below the seal — see LOGO_v1.1.md for markup. */
+.anyu-stamp {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--anyu-space-3, 12px);
+  padding: var(--anyu-space-6, 24px);
+  border-radius: var(--anyu-radius-lg, 14px);
+  border: 1.5px solid var(--anyu-accent-45);
+  background: var(--anyu-accent-12);
+  color: var(--anyu-accent);
+  transform: rotate(-3deg);
+  font-family: var(--anyu-font-mono);
+}
+.anyu-stamp__seal {
+  width: 90px;
+  height: 90px;
+  border: 2px solid var(--anyu-accent);
+  border-radius: 50%;
+  background: rgba(182, 150, 100, 0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.anyu-stamp__strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.anyu-stamp__meta {
+  font-size: 9.5px;
+  color: var(--anyu-faint);
+  letter-spacing: 0.05em;
+}
+
+/* §4.5 — pattern background ─────────────────────────────────── */
+/* Tiles the mark as a wallpaper. Use behind ad banners, splash, packaging.
+   The SVG is inlined as a data URI so you can use a single class — no
+   asset registration needed. */
+.anyu-pattern-bg {
+  --anyu-pattern-color: #b69664;   /* override per surface */
+  --anyu-pattern-opacity: 0.32;
+  background-color: var(--anyu-ink-dark);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60' width='80' height='60'><g transform='translate(8 24) scale(0.5)' opacity='1'><circle cx='22' cy='56' r='7.5' fill='%23b69664' opacity='0.45'/><circle cx='50' cy='50' r='7.5' fill='%23b69664' opacity='0.68'/><circle cx='78' cy='44' r='7.5' fill='%23b69664'/></g></svg>");
+  background-size: 80px 60px;
+  background-repeat: repeat;
+}
+.anyu-pattern-bg--cream {
+  background-color: var(--anyu-bg);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60' width='80' height='60'><g transform='translate(8 24) scale(0.5)' opacity='1'><circle cx='22' cy='56' r='7.5' fill='%232a2419' opacity='0.10'/><circle cx='50' cy='50' r='7.5' fill='%232a2419' opacity='0.15'/><circle cx='78' cy='44' r='7.5' fill='%232a2419' opacity='0.22'/></g></svg>");
+}
+
+/* §4.6 — affordance · ⋯ as "more" / "tap" button ─────────────── */
+/* Wraps the mark in a circular tap target. 44×44px = iOS HIG min tap. */
+.anyu-mark-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--anyu-line);
+  background: var(--anyu-card);
+  color: var(--anyu-ink);
+  cursor: pointer;
+  transition: background var(--anyu-motion-fast, 180ms),
+              border-color var(--anyu-motion-fast, 180ms);
+}
+.anyu-mark-btn:hover {
+  background: var(--anyu-mist);
+  border-color: transparent;
+}
+.anyu-mark-btn:active { transform: translateY(1px); }
+.anyu-mark-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--anyu-shadow-focus);
+}
+
+/* §4.7 — favicon spec (informational only · no class) ────────────
+   Use the static SVG at 32×32, 48×48, 64×64, 192×192, 512×512.
+   - Below 12px: switch to wordmark "A".
+   - For Apple touch icon (180×180): wrap mark on --anyu-ink-dark with
+     a 22.65% corner radius and 18% inset.
+   ────────────────────────────────────────────────────────────── */

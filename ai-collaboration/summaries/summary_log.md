@@ -618,6 +618,45 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 ANYU Brand Mark v1.1 Adoption v0
+
+### Task Completed
+
+- verified the inbox brand-mark bundle under `ai-collaboration/inbox/2026-05-20-brand-mark-v1.1/`
+- preserved the raw bundle under `docs/design-system/reference/brand-v1.1/`
+- created canonical brand-mark docs/assets under `docs/design-system/brand/`
+- merged brand-mark tokens into `docs/design-system/tokens-v1.1.css` and `apps/web/src/styles/tokens.css`
+- added `apps/web/src/components/anyu/AnyuMark.tsx`
+- added `apps/web/src/styles/anyu-mark.css`
+- added `apps/web/public/favicon.svg`
+- updated design/app docs and tests
+
+### Learnings
+
+- The inbox bundle was complete and clean enough to adopt directly into canonical and reference layers.
+- Favicon adoption is a safe first production use of the new mark without forcing a broad UI refresh.
+
+### Unresolved Questions
+
+- Should the app keep the current text-first `Wordmark` across shared shells for now?
+- Is a formal `AnyuLockup` component worth adding later?
+- Is favicon-only production adoption sufficient before any broader brand rollout?
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 Production Launch Decision Draft v0
 
 ### Task Completed

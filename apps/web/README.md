@@ -134,6 +134,10 @@ corepack pnpm db:migrate
 
 - Design tokens are imported from `apps/web/src/styles/tokens.css`.
 - Canonical source is `docs/design-system/tokens-v1.1.css`.
+- ANYU Brand Mark v1.1 source docs live under `docs/design-system/brand/`.
+- The production-safe app mark component is `apps/web/src/components/anyu/AnyuMark.tsx`.
+- The app-local brand-mark animation subset is `apps/web/src/styles/anyu-mark.css`.
+- The browser favicon is `apps/web/public/favicon.svg`.
 - Current design-system source-of-truth docs are:
   - `docs/design-system/anyu-design-system-v1.1.md`
   - `docs/design-system/ux-flow-v1.1.md`

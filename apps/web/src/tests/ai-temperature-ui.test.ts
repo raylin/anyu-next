@@ -229,6 +229,12 @@ describe("ai-temperature UI helpers", () => {
     expect(appTokens).toContain("--anyu-ink-onDark");
     expect(appTokens).toContain("--anyu-dim-onDark");
     expect(appTokens).toContain("--anyu-line-onDark");
+    expect(appTokens).toContain("--anyu-mark-min");
+    expect(appTokens).toContain("--anyu-mark-favicon");
+    expect(appTokens).toContain("--anyu-mark-loading");
+    expect(appTokens).toContain("--anyu-mark-loading-size");
+    expect(appTokens).toContain("--anyu-mark-cycle");
+    expect(appTokens).toContain("--anyu-mark-stagger");
     expect(appTokens).toBe(canonicalTokens);
   });
 

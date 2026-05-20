@@ -79,6 +79,7 @@ Design system references:
 - `docs/design-system/anyu-design-system-v1.1.md`
 - `docs/design-system/ux-flow-v1.1.md`
 - `docs/design-system/tokens-v1.1.css`
+- `docs/design-system/brand/anyu-brand-mark-v1.1.md`
 - `apps/web/src/styles/tokens.css`
 
 `docs/design-system/` is canonical, and v1.1 is now the engineering source of truth.
@@ -86,6 +87,7 @@ Design system references:
 `apps/web/src/styles/tokens.css` is the synced app import copy.
 
 High-fidelity reference files are preserved under `docs/design-system/reference/v1.1/` and are reference-only, not production imports.
+Brand-mark raw files are preserved separately under `docs/design-system/reference/brand-v1.1/`.
 
 ## Research / Calibration Tooling
 

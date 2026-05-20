@@ -70,17 +70,22 @@
   --anyu-motion-bar:  700ms;
   --anyu-motion-page: 700ms;
 
-  /* brand mark · ANYU Brand Mark v1.1 */
-  --anyu-mark-min:           12px;
+  /* ──── brand mark · ⋯ ──── (v1.1, see anyu-mark.css)
+     The mark is sized via the consumer (width/height on the SVG / size prop
+     on <AnyuMark>). These tokens fix the WELL-KNOWN sizes so every surface
+     stays consistent. */
+  --anyu-mark-min:           12px;   /* below this → fall back to wordmark "ANYU" */
   --anyu-mark-favicon:       16px;
   --anyu-mark-favicon-hires: 32px;
-  --anyu-mark-app-icon:     180px;
-  --anyu-mark-inline:      0.85em;
-  --anyu-mark-divider:       20px;
-  --anyu-mark-unread:        20px;
-  --anyu-mark-loading:       48px;
-  --anyu-mark-loading-size:  92px;
-  --anyu-mark-stamp:         48px;
+  --anyu-mark-app-icon:     180px;   /* iOS touch icon */
+  --anyu-mark-inline:      0.85em;   /* in body copy, ~cap-height */
+  --anyu-mark-divider:       20px;   /* centered between rules */
+  --anyu-mark-unread:        20px;   /* inside a 36px chip */
+  --anyu-mark-loading:       48px;   /* inside a 92px bubble */
+  --anyu-mark-loading-size:  92px;   /* the bubble itself */
+  --anyu-mark-stamp:         48px;   /* inside an 90px seal */
+
+  /* typing animation — set here so other components can match the cadence */
   --anyu-mark-cycle:         1.6s;
   --anyu-mark-stagger:       0.2s;
 }

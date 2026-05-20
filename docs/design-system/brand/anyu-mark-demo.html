@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="zh-Hant" data-module="ai-temperature" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>暗語 ANYU · brand mark · 整合驗證</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="anyu-tokens-v1.1.css">
+<link rel="stylesheet" href="anyu-mark.css">
+<link rel="icon" type="image/svg+xml" href="anyu-mark.svg">
+<style>
+  html, body { margin: 0; padding: 0; background: var(--anyu-bg); color: var(--anyu-ink); font-family: var(--anyu-font-sans); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 1180px; margin: 0 auto; padding: 64px 32px 96px; }
+  .head { margin-bottom: 56px; }
+  .micro { font-family: var(--anyu-font-mono); font-size: 11px; color: var(--anyu-accent); letter-spacing: 1.5px; text-transform: uppercase; }
+  h1 { font-family: var(--anyu-font-serif); font-weight: 500; font-size: 40px; line-height: 1.3; margin: 12px 0 8px; letter-spacing: -0.5px; }
+  h1 em { font-family: var(--anyu-font-latin); font-style: italic; font-weight: 400; color: var(--anyu-accent); }
+  .head p { font-size: 15px; line-height: 1.75; color: var(--anyu-dim); max-width: 720px; margin: 8px 0 0; }
+
+  .section { margin-bottom: 64px; }
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid var(--anyu-line); }
+  .section-head .num { font-family: var(--anyu-font-mono); font-size: 11px; color: var(--anyu-accent); letter-spacing: 1.5px; text-transform: uppercase; min-width: 48px; }
+  .section-head h2 { margin: 0; font-family: var(--anyu-font-serif); font-weight: 500; font-size: 22px; }
+  .section-head .meta { margin-left: auto; font-family: var(--anyu-font-mono); font-size: 11px; color: var(--anyu-dim); }
+
+  .grid { display: grid; gap: 18px; }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+
+  .demo-card {
+    background: var(--anyu-card); border: 1px solid var(--anyu-line);
+    border-radius: var(--anyu-radius-xl);
+    padding: 24px;
+    display: flex; flex-direction: column; gap: 14px;
+    min-height: 180px;
+  }
+  .demo-card .stage {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    background: var(--anyu-surface); border-radius: 10px; padding: 24px; min-height: 120px;
+  }
+  .demo-card .stage.dark { background: var(--anyu-ink-dark); }
+  .demo-card .stage.accent { background: var(--anyu-accent); }
+  .demo-card .stage.cream { background: linear-gradient(160deg, #fbf5e9 0%, #f4e7d3 100%); }
+  .demo-card .stage.pattern { background: transparent; padding: 0; min-height: 160px; }
+  .demo-card .label { font-family: var(--anyu-font-mono); font-size: 10.5px; color: var(--anyu-dim); letter-spacing: 1.2px; text-transform: uppercase; }
+  .demo-card .desc { font-size: 12.5px; line-height: 1.65; color: var(--anyu-dim); }
+  .demo-card .code {
+    font-family: var(--anyu-font-mono); font-size: 11px; color: var(--anyu-ink);
+    background: var(--anyu-mist); border-radius: 8px; padding: 8px 10px;
+    overflow-x: auto; white-space: nowrap;
+  }
+
+  .scale-row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+  .scale-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .scale-cell .lbl { font-family: var(--anyu-font-mono); font-size: 10px; color: var(--anyu-faint); letter-spacing: 1.2px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HEAD -->
+  <div class="head">
+    <div class="micro">// brand mark · integration check · v1.1</div>
+    <h1>暗語 <em>ANYU</em> · mark 整合驗證</h1>
+    <p>
+      這頁把 <code>anyu-mark.svg</code> / <code>anyu-mark.css</code> / <code>anyu-mark.jsx</code> 三個檔案的所有用法跑過一次。
+      當你把 mark 接到任何新環境，視覺與這頁一致即代表整合 OK。詳見 <code>LOGO_v1.1.md</code>。
+    </p>
+  </div>
+
+  <!-- §1 · scales -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">§1</span>
+      <h2>Static · 縮放</h2>
+      <span class="meta">12px → 200px · currentColor</span>
+    </div>
+    <div class="demo-card">
+      <div class="stage">
+        <div class="scale-row">
+          <scale-cell size="200"></scale-cell>
+          <scale-cell size="96"></scale-cell>
+          <scale-cell size="64"></scale-cell>
+          <scale-cell size="48"></scale-cell>
+          <scale-cell size="32"></scale-cell>
+          <scale-cell size="24"></scale-cell>
+          <scale-cell size="16"></scale-cell>
+          <scale-cell size="12"></scale-cell>
+        </div>
+      </div>
+      <div class="desc">最小可讀 12px · 16px 三點仍可分離 · 32px 起 wordmark 可以一起出現。</div>
+    </div>
+  </div>
+
+  <!-- §2 · colors -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">§2</span>
+      <h2>Color pairs · 六種表面</h2>
+      <span class="meta">v1.1 strict pairing</span>
+    </div>
+    <div class="grid g3">
+      <color-card bg="surface" mark="ink"        label="surface · ink"       desc="預設組合 · 95% 場景"></color-card>
+      <color-card bg="surface" mark="accent"     label="surface · accent"    desc="印章 / signature 變體"></color-card>
+      <color-card bg="dark"    mark="accent"     label="ink-dark · accent"   desc="暗夜 · 付費頁"></color-card>
+      <color-card bg="dark"    mark="onDark"     label="ink-dark · cream"    desc="暗底但更安靜時"></color-card>
+      <color-card bg="accent"  mark="darkOnAcc"  label="accent · ink-dark"   desc="廣告 banner · 出位"></color-card>
+      <color-card bg="white"   mark="black"      label="100% K · print"      desc="名片 / 黑白印刷"></color-card>
+    </div>
+  </div>
+
+  <!-- §3 · animated -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">§3</span>
+      <h2>Animated · typing indicator</h2>
+      <span class="meta">1.6s cycle · stagger 0.2s</span>
+    </div>
+    <div class="grid g3">
+      <div class="demo-card">
+        <div class="stage dark"><div style="color: var(--anyu-accent)"><svg viewBox="0 0 100 100" width="80" class="anyu-mark anyu-mark--typing"><circle class="anyu-mark__dot anyu-mark__dot--1" cx="22" cy="50" r="7.5" fill="currentColor"/><circle class="anyu-mark__dot anyu-mark__dot--2" cx="50" cy="50" r="7.5" fill="currentColor"/><circle class="anyu-mark__dot anyu-mark__dot--3" cx="78" cy="50" r="7.5" fill="currentColor"/></svg></div></div>
+        <div class="label">animated · accent on dark</div>
+        <div class="desc">AI 推理 · 訊息打字 · 頁面切換。</div>
+      </div>
+      <div class="demo-card">
+        <div class="stage"><div style="color: var(--anyu-accent)"><svg viewBox="0 0 100 100" width="80" class="anyu-mark anyu-mark--typing"><circle class="anyu-mark__dot anyu-mark__dot--1" cx="22" cy="50" r="7.5" fill="currentColor"/><circle class="anyu-mark__dot anyu-mark__dot--2" cx="50" cy="50" r="7.5" fill="currentColor"/><circle class="anyu-mark__dot anyu-mark__dot--3" cx="78" cy="50" r="7.5" fill="currentColor"/></svg></div></div>
+        <div class="label">animated · accent on cream</div>
+      </div>
+      <div class="demo-card">
+        <div class="stage">
+          <span style="font-family: var(--anyu-font-serif); font-style: italic; font-size: 16px; color: var(--anyu-ink)">ANYU 正在感覺這句話</span>
+          <span class="anyu-mark anyu-mark--inline" style="color: var(--anyu-accent); width: 1.6em; height: 0.5em">
+            <svg viewBox="0 0 100 100" class="anyu-mark--typing"><circle class="anyu-mark__dot anyu-mark__dot--1" cx="22" cy="50" r="7.5" fill="currentColor"/><circle class="anyu-mark__dot anyu-mark__dot--2" cx="50" cy="50" r="7.5" fill="currentColor"/><circle class="anyu-mark__dot anyu-mark__dot--3" cx="78" cy="50" r="7.5" fill="currentColor"/></svg>
+          </span>
+        </div>
+        <div class="label">animated · inline</div>
+        <div class="desc">配文案使用 — 行內版本。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- §4 · lockups -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">§4</span>
+      <h2>Lockups · mark + wordmark</h2>
+      <span class="meta">en · zh · stack</span>
+    </div>
+    <div class="grid g3">
+      <div class="demo-card">
+        <div class="stage">
+          <span class="anyu-lockup anyu-lockup--en" style="color: var(--anyu-ink)">
+            <svg viewBox="0 0 100 100" width="56" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg>
+            <span class="anyu-lockup__en" style="font-size: 44px">ANYU</span>
+          </span>
+        </div>
+        <div class="label">lang="en" · primary</div>
+      </div>
+      <div class="demo-card">
+        <div class="stage">
+          <span class="anyu-lockup anyu-lockup--zh" style="color: var(--anyu-ink)">
+            <svg viewBox="0 0 100 100" width="56" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg>
+            <span class="anyu-lockup__divider"></span>
+            <span class="anyu-lockup__zhblock">
+              <span class="anyu-lockup__zh" style="font-size: 38px">暗語</span>
+              <span class="anyu-lockup__en" style="font-size: 14px">ANYU</span>
+            </span>
+          </span>
+        </div>
+        <div class="label">lang="zh" · bilingual</div>
+      </div>
+      <div class="demo-card">
+        <div class="stage">
+          <span class="anyu-lockup anyu-lockup--stack" style="color: var(--anyu-ink)">
+            <svg viewBox="0 0 100 100" width="60" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg>
+            <span class="anyu-lockup__zh" style="font-size: 32px">暗語</span>
+            <span class="anyu-lockup__en" style="font-size: 14px">ANYU</span>
+          </span>
+        </div>
+        <div class="label">lang="stack" · square spaces</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- §5 · system utilities -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">§5</span>
+      <h2>System utilities · 7 個產品角色</h2>
+      <span class="meta">divider · loading · unread · stamp · pattern · button · inline</span>
+    </div>
+
+    <div class="grid g2">
+      <!-- 5.1 divider -->
+      <div class="demo-card">
+        <div class="stage" style="flex-direction: column; padding: 32px 24px; gap: 0">
+          <p style="margin: 0; font-family: var(--anyu-font-serif); font-size: 15px; line-height: 1.7; color: var(--anyu-ink); text-align: center;">他說沒事，傳了一個句點。</p>
+          <div class="anyu-divider">
+            <svg viewBox="0 0 100 100" width="20" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg>
+          </div>
+          <p style="margin: 0; font-family: var(--anyu-font-serif); font-size: 15px; line-height: 1.7; color: var(--anyu-ink); text-align: center;">你看著螢幕。</p>
+        </div>
+        <div class="label">§4.1 · .anyu-divider</div>
+        <div class="code">&lt;div class="anyu-divider"&gt;&lt;svg class="anyu-mark"…/&gt;&lt;/div&gt;</div>
+      </div>
+
+      <!-- 5.2 loading -->
+      <div class="demo-card">
+        <div class="stage dark" style="flex-direction: column; gap: 18px">
+          <div class="anyu-loading">
+            <svg viewBox="0 0 100 100" width="48" class="anyu-mark anyu-mark--typing"><circle class="anyu-mark__dot anyu-mark__dot--1" cx="22" cy="50" r="7.5" fill="currentColor"/><circle class="anyu-mark__dot anyu-mark__dot--2" cx="50" cy="50" r="7.5" fill="currentColor"/><circle class="anyu-mark__dot anyu-mark__dot--3" cx="78" cy="50" r="7.5" fill="currentColor"/></svg>
+          </div>
+          <span style="font-family: var(--anyu-font-serif); font-style: italic; font-size: 13px; color: var(--anyu-dim-onDark)">ANYU 正在感覺這句話 …</span>
+        </div>
+        <div class="label">§4.2 · .anyu-loading</div>
+        <div class="code">&lt;div class="anyu-loading"&gt;&lt;svg class="anyu-mark--typing"…/&gt;&lt;/div&gt;</div>
+      </div>
+
+      <!-- 5.3 unread -->
+      <div class="demo-card">
+        <div class="stage" style="flex-direction: column; gap: 10px; align-items: stretch; padding: 18px">
+          <unread-row active label="阿凱昨晚的訊息" meta="3 個新訊號"></unread-row>
+          <unread-row label="媽 · 上週四" meta="已讀"></unread-row>
+        </div>
+        <div class="label">§4.3 · .anyu-unread / .anyu-unread--muted</div>
+        <div class="code">&lt;span class="anyu-unread"&gt;&lt;svg…/&gt;&lt;/span&gt;</div>
+      </div>
+
+      <!-- 5.4 stamp -->
+      <div class="demo-card">
+        <div class="stage">
+          <div class="anyu-stamp">
+            <div class="anyu-stamp__seal">
+              <svg viewBox="0 0 100 100" width="48" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg>
+            </div>
+            <div class="anyu-stamp__strip"><span>VERIFIED</span><span style="opacity:.5">·</span><span>ANYU READ</span></div>
+            <div class="anyu-stamp__meta">2026/05/19 · 信心度 92%</div>
+          </div>
+        </div>
+        <div class="label">§4.4 · .anyu-stamp</div>
+        <div class="code">&lt;div class="anyu-stamp"&gt;… seal / strip / meta …&lt;/div&gt;</div>
+      </div>
+
+      <!-- 5.5 pattern -->
+      <div class="demo-card">
+        <div class="stage pattern">
+          <div class="anyu-pattern-bg" style="width: 100%; height: 160px; border-radius: 10px; display: flex; align-items: center; justify-content: center">
+            <span style="background: rgba(31,26,18,.82); padding: 10px 16px; border-radius: 8px; color: var(--anyu-ink-onDark); font-family: var(--anyu-font-serif); font-style: italic; font-size: 13px">用於包裝 / banner / splash</span>
+          </div>
+        </div>
+        <div class="label">§4.5 · .anyu-pattern-bg</div>
+        <div class="code">&lt;div class="anyu-pattern-bg"&gt;…&lt;/div&gt;</div>
+      </div>
+
+      <!-- 5.6 button -->
+      <div class="demo-card">
+        <div class="stage" style="gap: 14px">
+          <button class="anyu-mark-btn" aria-label="more">
+            <svg viewBox="0 0 100 100" width="20" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg>
+          </button>
+          <button class="anyu-mark-btn" aria-label="more">
+            <svg viewBox="0 0 100 100" width="20" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg>
+          </button>
+          <button class="anyu-mark-btn" aria-label="more">
+            <svg viewBox="0 0 100 100" width="20" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg>
+          </button>
+        </div>
+        <div class="label">§4.6 · .anyu-mark-btn · 44×44 hit area</div>
+        <div class="code">&lt;button class="anyu-mark-btn"&gt;&lt;svg…/&gt;&lt;/button&gt;</div>
+      </div>
+    </div>
+
+    <!-- 5.7 inline -->
+    <div style="height: 18px"></div>
+    <div class="demo-card">
+      <div class="stage" style="padding: 32px; justify-content: flex-start">
+        <p style="margin: 0; font-family: var(--anyu-font-serif); font-size: 18px; line-height: 1.8; color: var(--anyu-ink); max-width: 580px">
+          你今天的曖昧溫度
+          <span class="anyu-mark anyu-mark--inline" style="color: var(--anyu-accent); width: 1.6em; height: 0.5em"><svg viewBox="0 0 100 100"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg></span>
+          是 32°C — 比上週低了 11 度。要看
+          <span class="anyu-mark anyu-mark--inline" style="color: var(--anyu-accent); width: 1.6em; height: 0.5em"><svg viewBox="0 0 100 100"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg></span>
+          怎麼變化的嗎？
+        </p>
+      </div>
+      <div class="label">§4.7 · .anyu-mark--inline · 行內使用</div>
+      <div class="code">&lt;span class="anyu-mark anyu-mark--inline"&gt;&lt;svg…/&gt;&lt;/span&gt;</div>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <div style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--anyu-line); font-family: var(--anyu-font-mono); font-size: 11px; color: var(--anyu-faint); letter-spacing: 0.5px; display: flex; justify-content: space-between">
+    <span>v1.1.0 · 2026-05-20</span>
+    <span>files: anyu-mark.svg · anyu-mark.css · anyu-mark.jsx · LOGO_v1.1.md</span>
+  </div>
+
+</div>
+
+<!-- HTML web components for repeated pieces (keeps page short) -->
+<script>
+const MARK_SVG = `<svg viewBox="0 0 100 100" class="anyu-mark">
+  <circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/>
+  <circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/>
+  <circle cx="78" cy="44" r="7.5" fill="currentColor"/>
+</svg>`;
+
+class ScaleCell extends HTMLElement {
+  connectedCallback() {
+    const size = this.getAttribute('size');
+    this.innerHTML = `
+      <div class="scale-cell">
+        <div style="color: var(--anyu-ink); width: ${size}px; height: ${size}px; display: flex; align-items: center; justify-content: center">
+          <svg viewBox="0 0 100 100" width="${size}" height="${size}" class="anyu-mark">
+            <circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/>
+            <circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/>
+            <circle cx="78" cy="44" r="7.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="lbl">${size}px</span>
+      </div>`;
+  }
+}
+customElements.define('scale-cell', ScaleCell);
+
+const COLOR_MAP = {
+  surface: { bg: 'var(--anyu-surface)', cls: '' },
+  dark:    { bg: 'var(--anyu-ink-dark)', cls: 'dark' },
+  accent:  { bg: 'var(--anyu-accent)', cls: 'accent' },
+  white:   { bg: '#ffffff', cls: '' },
+};
+const MARK_COLOR = {
+  ink:        'var(--anyu-ink)',
+  accent:     'var(--anyu-accent)',
+  onDark:     'var(--anyu-ink-onDark)',
+  darkOnAcc:  'var(--anyu-ink-dark)',
+  black:      '#000',
+};
+
+class ColorCard extends HTMLElement {
+  connectedCallback() {
+    const bg = this.getAttribute('bg');
+    const mark = this.getAttribute('mark');
+    const label = this.getAttribute('label');
+    const desc = this.getAttribute('desc') || '';
+    const m = COLOR_MAP[bg];
+    const c = MARK_COLOR[mark];
+    this.innerHTML = `
+      <div class="demo-card">
+        <div class="stage ${m.cls}" style="background: ${m.bg}">
+          <div style="color: ${c}"><svg viewBox="0 0 100 100" width="80" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg></div>
+        </div>
+        <div class="label">${label}</div>
+        <div class="desc">${desc}</div>
+      </div>`;
+  }
+}
+customElements.define('color-card', ColorCard);
+
+class UnreadRow extends HTMLElement {
+  connectedCallback() {
+    const active = this.hasAttribute('active');
+    const label = this.getAttribute('label');
+    const meta = this.getAttribute('meta');
+    this.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--anyu-card); border: 1px solid var(--anyu-line); border-radius: 10px;">
+        <span class="anyu-unread ${active ? '' : 'anyu-unread--muted'}">
+          <svg viewBox="0 0 100 100" width="20" class="anyu-mark"><circle cx="22" cy="56" r="7.5" fill="currentColor" opacity="0.55"/><circle cx="50" cy="50" r="7.5" fill="currentColor" opacity="0.82"/><circle cx="78" cy="44" r="7.5" fill="currentColor"/></svg>
+        </span>
+        <div style="flex: 1">
+          <div style="font-family: var(--anyu-font-serif); font-size: 13.5px; font-weight: 500; color: var(--anyu-ink)">${label}</div>
+          <div style="font-family: var(--anyu-font-mono); font-size: 10.5px; color: var(--anyu-dim); margin-top: 2px; letter-spacing: 0.3px">${meta}</div>
+        </div>
+        ${active ? '<span style="width: 8px; height: 8px; border-radius: 4px; background: var(--anyu-accent)"></span>' : ''}
+      </div>`;
+  }
+}
+customElements.define('unread-row', UnreadRow);
+</script>
+
+</body>
+</html>
