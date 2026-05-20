@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Wordmark } from "@/components/anyu/Wordmark";
-import { legalLinks } from "@/content/legal";
+import { LEGAL_CONTACT_EMAIL, legalLinks } from "@/content/legal";
 
 export const metadata: Metadata = {
   title: "法律與說明 | 暗語 ANYU",
@@ -25,6 +25,11 @@ export default function LegalIndexPage() {
             <p className="anyu-copy">
               這裡整理 ANYU v0 目前對外公開的隱私、使用規則與免責說明。
             </p>
+            <div className="anyu-legal-meta">
+              <span>版本 v0</span>
+              <span>更新日期 2026-05-20</span>
+              <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
+            </div>
           </div>
         </header>
 

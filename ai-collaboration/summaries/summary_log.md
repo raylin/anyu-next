@@ -618,6 +618,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 - Legal Route + Footer Browser QA v0
+
+### Completed
+
+- verified staging freshness for the legal-page deployment
+- checked live staging legal routes and Module 01 footer legal links
+- confirmed `hello@anyu.tw` is present where expected
+- applied one tiny consistency fix to `/legal` so it also shows version/date/contact meta
+
+### Learnings
+
+- the legal pages themselves were already solid after implementation; the only real inconsistency was the lighter `/legal` index metadata
+- protected staging HTML inspection is still enough to catch footer/link/content regressions when a full browser runtime is unavailable
+
+### Unresolved Questions
+
+- a true human device/browser pass is still better for final readability/tap-feel judgment
+- runtime result route footer was inferred from shared component structure rather than separately re-hit on staging in this pass
+
+### Validation
+
+- `python3 -m compileall oradar` passed
+- `cd apps/web && corepack pnpm lint` passed
+- `cd apps/web && corepack pnpm test` passed
+- `cd apps/web && corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 - Legal Page Implementation v0
 
 ### Completed
