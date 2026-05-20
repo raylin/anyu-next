@@ -11,7 +11,14 @@ describe("event metadata guard", () => {
 
   it("allows safe event metadata", () => {
     expect(
-      hasForbiddenEventMetadata({ scoreBucket: "cool", privacyFlags: ["email"] }),
+      hasForbiddenEventMetadata({
+        scoreBucket: "cool",
+        privacyFlags: ["email"],
+        timingMs: {
+          totalLatencyMs: 28000,
+          providerLatencyMs: 24000,
+        },
+      }),
     ).toBe(false);
   });
 

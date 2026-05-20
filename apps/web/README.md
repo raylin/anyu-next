@@ -15,9 +15,11 @@ The current Module 01 experience supports:
 
 - landing input + chip selection
 - analyze submit flow
+- elapsed-time wait-state copy with a client timeout guard
 - schema-validated result normalization
 - DB-backed result loading when `DATABASE_URL` is configured
 - fake-door unlock intent + contact capture APIs
+- safe runtime timing metadata attached to `analysis_completed` events
 
 The current Module 01 experience still defers:
 
@@ -50,6 +52,7 @@ Launch-readiness behavior:
 - live analyze requires `DATABASE_URL` plus at least one provider key
 - `/m/ambiguous-temperature/result/demo` works without env
 - unconfigured runtime APIs should return friendly non-technical errors
+- wait-state instrumentation must not include raw input or contact values in events
 
 ## Launch Readiness
 
@@ -60,6 +63,7 @@ Before the first low-key launch review, confirm:
 - Drizzle migration has been generated and applied in the target environment
 - a live analyze inserts rows into `analysis_results`, `events`, and `contact_submissions`
 - privacy review confirms raw text is excluded from events
+- runtime timing review confirms only aggregate latency metadata is stored in events
 - manual QA is completed for landing, runtime result, demo result, unlock fallback, and contact submit flows
 
 ## Preview Deployment

@@ -3,13 +3,15 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
 import {
-  ANALYZE_LOADING_MESSAGES,
+  ANALYZE_REQUEST_TIMEOUT_MS,
   MAX_ANALYZE_LENGTH,
   MIN_ANALYZE_LENGTH,
   buildShareText,
   getAnalyzeErrorMessage,
   getAnalyzeButtonLabel,
   getAnalyzeLoadingMessage,
+  getAnalyzeLoadingSubtitle,
+  getAnalyzeWaitStage,
   getModuleLabel,
   isAnalyzeInputReady,
   scoreToBucket,
@@ -86,6 +88,9 @@ describe("ai-temperature UI helpers", () => {
     expect(getAnalyzeErrorMessage("config_error")).toBe(
       "目前分析服務尚未設定完成，請稍後再試。",
     );
+    expect(getAnalyzeErrorMessage("request_timeout")).toBe(
+      "這次分析等得比較久，請稍後再試一次。",
+    );
     expect(getAnalyzeErrorMessage("input_too_short")).toBe(
       "文字太短，請多貼一點互動脈絡。",
     );
@@ -97,12 +102,23 @@ describe("ai-temperature UI helpers", () => {
     );
   });
 
-  it("cycles through calm loading messages", () => {
+  it("maps elapsed time into wait-state stages and copy", () => {
+    expect(ANALYZE_REQUEST_TIMEOUT_MS).toBeGreaterThan(60_000);
+    expect(getAnalyzeWaitStage(0)).toBe("normal");
+    expect(getAnalyzeWaitStage(8_500)).toBe("deeper_read");
+    expect(getAnalyzeWaitStage(22_000)).toBe("slow_generation");
+    expect(getAnalyzeWaitStage(45_000)).toBe("slow_retry_hint");
     expect(getAnalyzeLoadingMessage(0)).toBe("讀著你貼上的對話⋯");
-    expect(getAnalyzeLoadingMessage(1)).toBe("比對節奏與回應時差⋯");
-    expect(getAnalyzeLoadingMessage(ANALYZE_LOADING_MESSAGES.length)).toBe(
-      ANALYZE_LOADING_MESSAGES[0],
+    expect(getAnalyzeLoadingMessage(10_000)).toBe(
+      "訊號比較細，我們還在整理節奏與回應落差⋯",
     );
+    expect(getAnalyzeLoadingMessage(25_000)).toBe(
+      "這次讀得比較久，請再等一下；結果還在生成中。",
+    );
+    expect(getAnalyzeLoadingMessage(45_000)).toBe(
+      "這次真的有點慢。你可以繼續等，或稍後重新試一次。",
+    );
+    expect(getAnalyzeLoadingSubtitle(45_000)).toContain("不會被寫進事件紀錄");
   });
 
   it("keeps the app token copy synced with required v1.1 tokens", () => {

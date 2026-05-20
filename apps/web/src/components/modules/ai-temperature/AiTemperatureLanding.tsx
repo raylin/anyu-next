@@ -6,6 +6,7 @@ import { InputCard } from "@/components/anyu/InputCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { trackClientEvent } from "@/lib/events/client";
 import {
+  ANALYZE_REQUEST_TIMEOUT_MS,
   getAnalyzeLoadingMessage,
   getAnalyzeLoadingSubtitle,
   getClientAnonymousSessionId,
@@ -29,7 +30,7 @@ export function AiTemperatureLanding({
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [loadingStep, setLoadingStep] = useState(0);
+  const [loadingElapsedMs, setLoadingElapsedMs] = useState(0);
   const hasTrackedInputStarted = useRef(false);
   const titleParts = moduleConfig.title.split("，");
 
@@ -51,9 +52,10 @@ export function AiTemperatureLanding({
       return;
     }
 
+    const startedAt = Date.now();
     const intervalId = window.setInterval(() => {
-      setLoadingStep((currentStep) => currentStep + 1);
-    }, 4200);
+      setLoadingElapsedMs(Date.now() - startedAt);
+    }, 1000);
 
     return () => {
       window.clearInterval(intervalId);
@@ -85,7 +87,7 @@ export function AiTemperatureLanding({
 
     setIsSubmitting(true);
     setErrorMessage("");
-    setLoadingStep(0);
+    setLoadingElapsedMs(0);
 
     const anonymousSessionId = getClientAnonymousSessionId();
 
@@ -100,47 +102,61 @@ export function AiTemperatureLanding({
     });
 
     try {
-      const response = await fetch(`/api/modules/${moduleConfig.slug}/analyze`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: inputValue,
-          situation: selectedChip,
-          anonymousSessionId,
-        }),
-      });
-
-      const data = (await response.json()) as AnalyzeResponse;
-
-      if (!response.ok || !data.ok) {
-        const normalizedError = data.ok ? "config_error" : data.error;
-        const friendlyMessage = getAnalyzeErrorMessage(normalizedError);
-
-        setErrorMessage(friendlyMessage);
-        void trackClientEvent({
-          eventName: "analysis_failed",
-          moduleConfig,
-          anonymousSessionId,
-          situationType: selectedChip,
-          metadata: {
-            reason: normalizedError,
+      const abortController = new AbortController();
+      const timeoutId = window.setTimeout(() => {
+        abortController.abort();
+      }, ANALYZE_REQUEST_TIMEOUT_MS);
+      try {
+        const response = await fetch(`/api/modules/${moduleConfig.slug}/analyze`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            text: inputValue,
+            situation: selectedChip,
+            anonymousSessionId,
+          }),
+          signal: abortController.signal,
         });
-        return;
-      }
 
-      router.push(data.redirectTo);
-    } catch {
-      setErrorMessage(getAnalyzeErrorMessage("analyze_failed"));
+        const data = (await response.json()) as AnalyzeResponse;
+
+        if (!response.ok || !data.ok) {
+          const normalizedError = data.ok ? "config_error" : data.error;
+          const friendlyMessage = getAnalyzeErrorMessage(normalizedError);
+
+          setErrorMessage(friendlyMessage);
+          void trackClientEvent({
+            eventName: "analysis_failed",
+            moduleConfig,
+            anonymousSessionId,
+            situationType: selectedChip,
+            metadata: {
+              reason: normalizedError,
+            },
+          });
+          return;
+        }
+
+        router.push(data.redirectTo);
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    } catch (error) {
+      const normalizedReason =
+        error instanceof DOMException && error.name === "AbortError"
+          ? "request_timeout"
+          : "network_or_runtime_error";
+
+      setErrorMessage(getAnalyzeErrorMessage(normalizedReason));
       void trackClientEvent({
         eventName: "analysis_failed",
         moduleConfig,
         anonymousSessionId,
         situationType: selectedChip,
         metadata: {
-          reason: "network_or_runtime_error",
+          reason: normalizedReason,
         },
       });
     } finally {
@@ -150,8 +166,8 @@ export function AiTemperatureLanding({
 
   const ctaLabel = isSubmitting ? "分析中..." : getAnalyzeButtonLabel(inputValue);
   const ctaDisabled = isSubmitting || !isAnalyzeInputReady(inputValue);
-  const statusMessage = isSubmitting ? getAnalyzeLoadingMessage(loadingStep) : "";
-  const statusDetail = isSubmitting ? getAnalyzeLoadingSubtitle(loadingStep) : "";
+  const statusMessage = isSubmitting ? getAnalyzeLoadingMessage(loadingElapsedMs) : "";
+  const statusDetail = isSubmitting ? getAnalyzeLoadingSubtitle(loadingElapsedMs) : "";
 
   return (
     <section className="anyu-module-page">

@@ -6,6 +6,7 @@ import { isDbConfigured } from "@/lib/db/client";
 import { validateAnalyzeInput } from "@/lib/modules/ai-temperature-ui";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { redactUserInput } from "@/lib/privacy/pii";
+import { createTimingTracker, getEventTimingMetrics } from "@/lib/runtime/timing";
 import type { AnalyzeRequestPayload, ApiErrorResponse } from "@/lib/ai/types";
 
 type ModuleAnalyzeRouteProps = {
@@ -26,6 +27,8 @@ export async function POST(
   request: NextRequest,
   { params }: ModuleAnalyzeRouteProps,
 ) {
+  const timing = createTimingTracker();
+  timing.mark("request_received");
   const { moduleSlug } = await params;
   const moduleConfig = getModuleBySlug(moduleSlug);
 
@@ -56,9 +59,12 @@ export async function POST(
     return errorResponse(400, validatedInput.error, validatedInput.message);
   }
 
+  timing.mark("input_validated");
+
   try {
     const retentionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const redaction = redactUserInput(validatedInput.text);
+    timing.mark("input_redacted");
     const analysisRequest = await createAnalysisRequestRecord({
       moduleId: moduleConfig.moduleId,
       themeSlug: moduleConfig.slug,
@@ -72,6 +78,7 @@ export async function POST(
       privacyFlags: redaction.flags,
       retentionExpiresAt,
     });
+    timing.mark("analysis_request_stored");
 
     await insertEvent({
       eventName: "input_submitted",
@@ -90,8 +97,11 @@ export async function POST(
 
     const generated = await generateModuleResult({
       moduleConfig,
-      text: validatedInput.text,
+      redactedText: redaction.redactedText,
+      privacyFlags: redaction.flags,
       situation: validatedInput.situation,
+    }, {
+      mark: timing.mark,
     });
 
     const analysisResult = await createAnalysisResultRecord({
@@ -111,6 +121,8 @@ export async function POST(
       providerRawJson: generated.providerRawJson,
       retentionExpiresAt,
     });
+    timing.mark("analysis_result_stored");
+    timing.mark("response_ready");
 
     await insertEvent({
       eventName: "analysis_completed",
@@ -126,6 +138,7 @@ export async function POST(
       metadata: {
         resultId: analysisResult.id,
         privacyFlags: generated.privacyFlags,
+        timingMs: getEventTimingMetrics(timing.summarize()),
       },
     });
 

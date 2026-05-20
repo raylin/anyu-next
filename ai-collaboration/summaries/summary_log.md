@@ -1585,6 +1585,56 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 Module 01 Wait-State + Runtime Instrumentation v0
+
+### Task Completed
+
+- added server-side timing instrumentation for the Module 01 analyze route
+- added `apps/web/src/lib/runtime/timing.ts` for stable phase marking and safe timing summaries
+- attached safe latency metadata to `analysis_completed` event records
+- upgraded the landing wait-state UX to elapsed-time-aware reassurance copy
+- added a generous client timeout guard for analyze submit
+- created `ai-collaboration/research/2026-05-20-module-01-wait-state-runtime-instrumentation-v0.md`
+- created `ai-collaboration/reports/2026-05-20-module-01-wait-state-runtime-instrumentation-v0-execution-report.md`
+
+### Timing Instrumentation Summary
+
+- phases now tracked are `request_received`, `input_validated`, `input_redacted`, `analysis_request_stored`, `provider_started`, `provider_completed`, `schema_validated`, `analysis_result_stored`, and `response_ready`
+- event-safe metrics now include total latency plus approximate provider, validation, and DB write durations
+- timing is stored on the existing `analysis_completed` event metadata rather than a new event name
+
+### Wait-State UX Summary
+
+- loading copy now changes by elapsed-time stage instead of looping generic messages
+- slow-state reassurance begins after roughly `8s`
+- explicit long-wait acknowledgement begins after roughly `20s`
+- a friendly retry-oriented timeout message now exists for client-side timeout failure
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Learnings
+
+- the smaller safe implementation path was to enrich `analysis_completed` metadata rather than expanding the event taxonomy
+- duplicate input redaction in the runtime path was unnecessary and could be removed without changing behavior
+
+### Unresolved Questions
+
+- live event-row verification of the new timing metadata still needs a running dev/staging pass
+- real user perception of the new `40s+` wait copy still benefits from a human staging check
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 Module 01 Staging UX Polish v0.2
 
 ### Task Completed

@@ -5,14 +5,14 @@ import type { ProductModuleConfig } from "@/lib/modules/types";
 export const MIN_ANALYZE_LENGTH = 12;
 export const MAX_ANALYZE_LENGTH = 4000;
 export const ANONYMOUS_SESSION_STORAGE_KEY = "anyu-ambiguous-temperature-session-id";
-export const ANALYZE_LOADING_MESSAGES = [
-  "讀著你貼上的對話⋯",
-  "比對節奏與回應時差⋯",
-  "整理一下訊號⋯",
-  "再讀一下⋯",
-] as const;
+export const ANALYZE_REQUEST_TIMEOUT_MS = 65_000;
 
 export type ScoreBucket = "cold" | "cool" | "warm" | "hot" | "unknown";
+export type AnalyzeWaitStage =
+  | "normal"
+  | "deeper_read"
+  | "slow_generation"
+  | "slow_retry_hint";
 
 export type ObservedSignalViewModel = {
   label: string;
@@ -69,22 +69,55 @@ export function getAnalyzeErrorMessage(error: string): string {
       return "文字太長，請先保留最近幾段關鍵對話。";
     case "config_error":
       return "目前分析服務尚未設定完成，請稍後再試。";
+    case "request_timeout":
+      return "這次分析等得比較久，請稍後再試一次。";
     default:
       return "分析暫時失敗，請晚點再試一次。";
   }
 }
 
-export function getAnalyzeLoadingMessage(step: number): string {
-  const normalizedStep = Math.max(0, step);
-  return ANALYZE_LOADING_MESSAGES[normalizedStep % ANALYZE_LOADING_MESSAGES.length];
-}
-
-export function getAnalyzeLoadingSubtitle(step: number): string {
-  if (step >= 3) {
-    return "如果稍微慢一點，也只是我們多看一眼那些容易忽略的細節。";
+export function getAnalyzeWaitStage(elapsedMs: number): AnalyzeWaitStage {
+  if (elapsedMs >= 40_000) {
+    return "slow_retry_hint";
   }
 
-  return "我們在比對節奏、回應時差與情緒投入的細節。";
+  if (elapsedMs >= 20_000) {
+    return "slow_generation";
+  }
+
+  if (elapsedMs >= 8_000) {
+    return "deeper_read";
+  }
+
+  return "normal";
+}
+
+export function getAnalyzeLoadingMessage(elapsedMs: number): string {
+  switch (getAnalyzeWaitStage(elapsedMs)) {
+    case "deeper_read":
+      return "訊號比較細，我們還在整理節奏與回應落差⋯";
+    case "slow_generation":
+      return "這次讀得比較久，請再等一下；結果還在生成中。";
+    case "slow_retry_hint":
+      return "這次真的有點慢。你可以繼續等，或稍後重新試一次。";
+    case "normal":
+    default:
+      return "讀著你貼上的對話⋯";
+  }
+}
+
+export function getAnalyzeLoadingSubtitle(elapsedMs: number): string {
+  switch (getAnalyzeWaitStage(elapsedMs)) {
+    case "deeper_read":
+      return "我們還在比對回應節奏、主動度和那些不太明說的小訊號。";
+    case "slow_generation":
+      return "不是當掉，只是這次需要多看一眼那些容易忽略的細節。";
+    case "slow_retry_hint":
+      return "如果不想繼續等，也可以稍後重試；你剛剛貼的內容不會被寫進事件紀錄。";
+    case "normal":
+    default:
+      return "我們在比對節奏、回應時差與情緒投入的細節。";
+  }
 }
 
 export function getModuleLabel(moduleConfig: ProductModuleConfig): string {

@@ -4,7 +4,7 @@ import type { ProductResult } from "@/lib/ai/product-result-schema";
 import { validateProductResultText } from "@/lib/ai/validate-product-result";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import { scoreToBucket } from "@/lib/modules/ai-temperature-ui";
-import { redactUserInput } from "@/lib/privacy/pii";
+import type { TimingPhaseName } from "@/lib/runtime/timing";
 
 export type GeneratedProductRuntime = {
   result: ProductResult;
@@ -16,17 +16,23 @@ export type GeneratedProductRuntime = {
   scoreBucket: string;
 };
 
+type RuntimeTimingHooks = {
+  mark?: (phase: TimingPhaseName) => void;
+};
+
 export async function generateModuleResult(input: {
   moduleConfig: ProductModuleConfig;
-  text: string;
+  redactedText: string;
+  privacyFlags: string[];
   situation: string;
-}): Promise<GeneratedProductRuntime> {
-  const { redactedText, flags } = redactUserInput(input.text);
+}, timing: RuntimeTimingHooks = {}): Promise<GeneratedProductRuntime> {
   const providerInfo = getActiveProviderInfo();
+
+  timing.mark?.("provider_started");
   const providerResult = await callAiProvider(
-    await buildProductPrompt(redactedText, {
+    await buildProductPrompt(input.redactedText, {
       situation_type: input.situation,
-      input_length: redactedText.length,
+      input_length: input.redactedText.length,
       generated_at: new Date().toISOString(),
       experiment_id: input.moduleConfig.experimentId,
       variant: "B",
@@ -34,16 +40,18 @@ export async function generateModuleResult(input: {
       model_name: providerInfo.model,
     }),
   );
+  timing.mark?.("provider_completed");
 
   const result = validateProductResultText(providerResult.text);
+  timing.mark?.("schema_validated");
 
   return {
     result,
     provider: providerResult.provider,
     providerModel: providerResult.model,
     providerRawJson: providerResult.rawResponse,
-    redactedText,
-    privacyFlags: flags,
+    redactedText: input.redactedText,
+    privacyFlags: input.privacyFlags,
     scoreBucket: scoreToBucket(result.free_result.temperature_score),
   };
 }
