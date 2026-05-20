@@ -1642,6 +1642,25 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether a true human browser/device pass should explicitly confirm the post-submit success-collapse feel
 - whether a branch-aligned staging DB access path should be added for future remote QA verification
 
+## 2026-05-20 - Module 01 Micro UX Fixes v0.4
+
+### Completed Changes
+
+- added richer context-quality guidance bands for the landing textarea without changing the current 30-character hard minimum
+- added blur + scroll/focus behavior so the loading panel becomes the active target after analyze submit
+- improved the share affordance with a stronger primary button label and clearer social-copy support text
+
+### Learnings
+
+- the guidance UI reads more clearly when it is separated from pricing/share notes
+- loading state accessibility and mobile attention flow can be improved without touching runtime behavior
+- the current share flow already had enough logic underneath; it mainly needed clearer presentation
+
+### Unresolved Questions
+
+- how the new loading focus feels on a real phone with the soft keyboard open
+- whether the share action needs one more pass to distinguish native share from copy behavior more explicitly
+
 ## 2026-05-20 — Module 01 Haiku Staging Trial v0
 
 ### Task Completed

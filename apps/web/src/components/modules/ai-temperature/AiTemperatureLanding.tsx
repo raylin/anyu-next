@@ -11,7 +11,7 @@ import {
   getAnalyzeLoadingSubtitle,
   getClientAnonymousSessionId,
   getAnalyzeErrorMessage,
-  getAnalyzeInputHint,
+  getAnalyzeInputGuidance,
   getAnalyzeButtonLabel,
   getModuleLabel,
   isAnalyzeInputReady,
@@ -33,6 +33,8 @@ export function AiTemperatureLanding({
   const [errorMessage, setErrorMessage] = useState("");
   const [loadingElapsedMs, setLoadingElapsedMs] = useState(0);
   const hasTrackedInputStarted = useRef(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const loadingRef = useRef<HTMLDivElement | null>(null);
   const titleParts = moduleConfig.title.split("，");
 
   useEffect(() => {
@@ -63,6 +65,24 @@ export function AiTemperatureLanding({
     };
   }, [isSubmitting]);
 
+  useEffect(() => {
+    if (!isSubmitting) {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      loadingRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      loadingRef.current?.focus({ preventScroll: true });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [isSubmitting]);
+
   function handleInputChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const nextValue = event.target.value;
     setInputValue(nextValue);
@@ -86,6 +106,7 @@ export function AiTemperatureLanding({
       return;
     }
 
+    textareaRef.current?.blur();
     setIsSubmitting(true);
     setErrorMessage("");
     setLoadingElapsedMs(0);
@@ -167,7 +188,7 @@ export function AiTemperatureLanding({
 
   const ctaLabel = isSubmitting ? "分析中..." : getAnalyzeButtonLabel(inputValue);
   const ctaDisabled = isSubmitting || !isAnalyzeInputReady(inputValue);
-  const inputHint = getAnalyzeInputHint(inputValue);
+  const inputGuidance = getAnalyzeInputGuidance(inputValue);
   const statusMessage = isSubmitting ? getAnalyzeLoadingMessage(loadingElapsedMs) : "";
   const statusDetail = isSubmitting ? getAnalyzeLoadingSubtitle(loadingElapsedMs) : "";
 
@@ -204,11 +225,13 @@ export function AiTemperatureLanding({
         onChipSelect={setSelectedChip}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
+        textareaRef={textareaRef}
+        loadingRef={loadingRef}
         ctaLabel={ctaLabel}
         ctaDisabled={ctaDisabled}
         isLoading={isSubmitting}
         errorMessage={errorMessage}
-        inputHint={inputHint}
+        inputGuidance={inputGuidance}
         statusMessage={statusMessage}
         statusDetail={statusDetail}
       />

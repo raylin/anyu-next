@@ -223,6 +223,69 @@ textarea {
   line-height: var(--anyu-type-caption-lh);
 }
 
+.anyu-guidance-card {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: var(--anyu-radius-xl);
+  background: var(--anyu-surface);
+}
+
+.anyu-guidance-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--anyu-space-3);
+}
+
+.anyu-guidance-label,
+.anyu-guidance-meta {
+  font-family: var(--anyu-font-mono);
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: var(--anyu-track-mono);
+  text-transform: uppercase;
+}
+
+.anyu-guidance-label {
+  color: var(--anyu-accent);
+}
+
+.anyu-guidance-meta {
+  color: var(--anyu-faint);
+}
+
+.anyu-guidance-copy,
+.anyu-guidance-helper {
+  margin: 0;
+  font-size: var(--anyu-type-caption-size);
+  line-height: 1.65;
+}
+
+.anyu-guidance-copy {
+  color: var(--anyu-ink);
+}
+
+.anyu-guidance-helper {
+  color: var(--anyu-dim);
+}
+
+.anyu-guidance-too_short,
+.anyu-guidance-can_analyze {
+  background: var(--anyu-card);
+}
+
+.anyu-guidance-ideal {
+  border-color: var(--anyu-accent-45);
+  background: linear-gradient(180deg, var(--anyu-card), var(--anyu-surface));
+}
+
+.anyu-guidance-long,
+.anyu-guidance-too_long {
+  border-color: var(--anyu-accent2-35);
+}
+
 .anyu-textarea {
   width: 100%;
   border: 1px solid var(--anyu-line);
@@ -746,6 +809,10 @@ textarea {
   border-color: var(--anyu-line);
 }
 
+.anyu-status-panel:focus-visible {
+  box-shadow: var(--anyu-shadow-sm);
+}
+
 .anyu-loading-head {
   display: grid;
   justify-items: center;
@@ -846,22 +913,44 @@ textarea {
 
 .anyu-share-action {
   width: 100%;
-  border: 0;
-  background: transparent;
-  color: var(--anyu-dim);
+  min-height: 3rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: var(--anyu-radius-xl);
+  background: var(--anyu-surface);
+  color: var(--anyu-ink);
   font: inherit;
   text-align: center;
-  padding: 0.4rem 0 0;
+  padding: 0.75rem 1rem;
   cursor: pointer;
+  transition:
+    transform 120ms ease-out,
+    border-color 180ms ease-out,
+    background-color 180ms ease-out;
 }
 
 .anyu-share-actions {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.45rem;
 }
 
-.anyu-share-action-copy {
-  color: var(--anyu-accent);
+.anyu-share-action-primary {
+  background: var(--anyu-card);
+}
+
+.anyu-share-action:hover {
+  border-color: var(--anyu-accent-45);
+}
+
+.anyu-share-action:active {
+  transform: translateY(1px);
+}
+
+.anyu-share-action-detail {
+  margin: 0;
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: 1.6;
+  text-align: center;
 }
 
 .anyu-share-action:focus-visible {

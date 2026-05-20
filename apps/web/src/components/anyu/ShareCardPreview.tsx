@@ -30,6 +30,11 @@ export function ShareCardPreview({
     setShareStatus(response.message);
   }
 
+  async function handlePrimaryShare() {
+    onShareClick?.();
+    await handleCopyShare();
+  }
+
   return (
     <div className="anyu-share-preview" aria-label="分享卡預覽">
       <div className="anyu-share-shell">
@@ -60,12 +65,10 @@ export function ShareCardPreview({
       </div>
 
       <div className="anyu-share-actions">
-        <button type="button" className="anyu-share-action" onClick={onShareClick}>
-          這張卡可直接截圖分享
+        <button type="button" className="anyu-share-action anyu-share-action-primary" onClick={handlePrimaryShare}>
+          分享這個結果
         </button>
-        <button type="button" className="anyu-share-action anyu-share-action-copy" onClick={handleCopyShare}>
-          複製分享文字
-        </button>
+        <p className="anyu-share-action-detail">複製成 LINE / Threads 可貼上的文字</p>
       </div>
       {shareStatus ? <p className="anyu-status-message">{shareStatus}</p> : null}
     </div>

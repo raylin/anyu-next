@@ -1,8 +1,15 @@
-import type { ChangeEventHandler, FormEventHandler } from "react";
+import type { ChangeEventHandler, FormEventHandler, RefObject } from "react";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { PrivacyHelper } from "@/components/anyu/PrivacyHelper";
 import { SituationChips } from "@/components/anyu/SituationChips";
+import type { AnalyzeInputGuidanceState } from "@/lib/modules/ai-temperature-ui";
+
+type AnalyzeInputGuidance = {
+  state: AnalyzeInputGuidanceState;
+  label: string;
+  detail: string;
+};
 
 type InputCardProps = {
   chips: readonly string[];
@@ -11,11 +18,13 @@ type InputCardProps = {
   onChipSelect: (chip: string) => void;
   onInputChange: ChangeEventHandler<HTMLTextAreaElement>;
   onSubmit: FormEventHandler<HTMLFormElement>;
+  textareaRef?: RefObject<HTMLTextAreaElement | null>;
+  loadingRef?: RefObject<HTMLDivElement | null>;
   ctaLabel: string;
   ctaDisabled: boolean;
   isLoading?: boolean;
   errorMessage?: string;
-  inputHint?: string;
+  inputGuidance?: AnalyzeInputGuidance;
   statusMessage?: string;
   statusDetail?: string;
 };
@@ -27,11 +36,13 @@ export function InputCard({
   onChipSelect,
   onInputChange,
   onSubmit,
+  textareaRef,
+  loadingRef,
   ctaLabel,
   ctaDisabled,
   isLoading = false,
   errorMessage,
-  inputHint,
+  inputGuidance,
   statusMessage,
   statusDetail,
 }: InputCardProps) {
@@ -49,10 +60,27 @@ export function InputCard({
             className="anyu-textarea anyu-textarea-lg"
             placeholder="例如：我昨天約他週末見面，他已讀後沒回，但晚上還在發限動。"
             rows={7}
+            ref={textareaRef}
             value={inputValue}
             onChange={onInputChange}
           />
         </label>
+
+        {inputGuidance ? (
+          <div
+            className={`anyu-guidance-card anyu-guidance-${inputGuidance.state}`}
+            aria-live="polite"
+          >
+            <div className="anyu-guidance-head">
+              <span className="anyu-guidance-label">{inputGuidance.label}</span>
+              <span className="anyu-guidance-meta">{inputValue.trim().length} 字</span>
+            </div>
+            <p className="anyu-guidance-copy">{inputGuidance.detail}</p>
+            <p className="anyu-guidance-helper">
+              多貼一點前後文，ANYU 會更容易讀出節奏。
+            </p>
+          </div>
+        ) : null}
 
         <PrivacyHelper />
 
@@ -71,10 +99,16 @@ export function InputCard({
           {ctaLabel}
         </Button>
 
-        <p className="anyu-small-note">{inputHint || "免費 · 結果可截圖分享"}</p>
+        <p className="anyu-small-note">免費 · 結果可截圖分享</p>
         <p className="anyu-subtle-note">不寄電子報 · 不分享第三方</p>
         {statusMessage ? (
-          <div className={["anyu-status-panel", isLoading ? "anyu-status-panel-loading" : ""].filter(Boolean).join(" ")}>
+          <div
+            ref={loadingRef}
+            tabIndex={-1}
+            role="status"
+            aria-live="polite"
+            className={["anyu-status-panel", isLoading ? "anyu-status-panel-loading" : ""].filter(Boolean).join(" ")}
+          >
             <div className="anyu-loading-head">
               <span className="anyu-loading-moon" aria-hidden="true" />
               <div className="anyu-status-copy">

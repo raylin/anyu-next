@@ -15,6 +15,13 @@ export type AnalyzeWaitStage =
   | "slow_generation"
   | "slow_retry_hint";
 
+export type AnalyzeInputGuidanceState =
+  | "too_short"
+  | "can_analyze"
+  | "ideal"
+  | "long"
+  | "too_long";
+
 export type ObservedSignalViewModel = {
   label: string;
   value: number;
@@ -62,22 +69,57 @@ export function getAnalyzeButtonLabel(input: string): string {
   return isAnalyzeInputReady(input) ? "分析我的曖昧溫度" : "先貼一段對話";
 }
 
-export function getAnalyzeInputHint(input: string): string {
+export function getAnalyzeInputGuidance(input: string): {
+  state: AnalyzeInputGuidanceState;
+  label: string;
+  detail: string;
+} {
   const trimmedLength = input.trim().length;
 
   if (trimmedLength > MAX_ANALYZE_LENGTH) {
-    return "這段太長了，請保留最近幾段關鍵對話再試一次。";
+    return {
+      state: "too_long",
+      label: "太長了",
+      detail: "太長了，請縮短到最近幾段。",
+    };
   }
 
   if (trimmedLength > SOFT_MAX_ANALYZE_LENGTH) {
-    return "內容有點長，建議保留最近幾段關鍵對話。";
+    return {
+      state: "long",
+      label: "有點長",
+      detail: "內容有點長，建議保留最近幾段關鍵對話。",
+    };
   }
 
-  if (trimmedLength > 0 && trimmedLength < MIN_ANALYZE_LENGTH) {
-    return "再寫一點互動脈絡，ANYU 才讀得出節奏。";
+  if (trimmedLength >= 120) {
+    return {
+      state: "ideal",
+      label: "剛剛好",
+      detail: "內容足夠，適合分析。",
+    };
   }
 
-  return "免費 · 結果可截圖分享";
+  if (trimmedLength >= MIN_ANALYZE_LENGTH) {
+    return {
+      state: "can_analyze",
+      label: "可分析",
+      detail: "可以分析，但多一點上下文會更準。",
+    };
+  }
+
+  return {
+    state: "too_short",
+    label: "再寫一點",
+    detail:
+      trimmedLength > 0
+        ? "多貼一點前後文，ANYU 會更容易讀出節奏。"
+        : "多貼一點前後文，ANYU 會更容易讀出節奏。",
+  };
+}
+
+export function getAnalyzeInputHint(input: string): string {
+  return getAnalyzeInputGuidance(input).detail;
 }
 
 export function getAnalyzeErrorMessage(error: string): string {

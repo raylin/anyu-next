@@ -4,12 +4,14 @@ import { resolve } from "node:path";
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
 import {
   ANALYZE_REQUEST_TIMEOUT_MS,
+  type AnalyzeInputGuidanceState,
   MAX_ANALYZE_LENGTH,
   MIN_ANALYZE_LENGTH,
   SOFT_MAX_ANALYZE_LENGTH,
   buildShareText,
   getAnalyzeErrorMessage,
   getAnalyzeButtonLabel,
+  getAnalyzeInputGuidance,
   getAnalyzeInputHint,
   getAnalyzeLoadingMessage,
   getAnalyzeLoadingSubtitle,
@@ -24,7 +26,11 @@ describe("ai-temperature UI helpers", () => {
   it("keeps the CTA disabled for short input", () => {
     expect(isAnalyzeInputReady("太短了")).toBe(false);
     expect(getAnalyzeButtonLabel("太短了")).toBe("先貼一段對話");
-    expect(getAnalyzeInputHint("太短了")).toBe("再寫一點互動脈絡，ANYU 才讀得出節奏。");
+    expect(getAnalyzeInputGuidance("太短了")).toMatchObject({
+      state: "too_short" satisfies AnalyzeInputGuidanceState,
+      label: "再寫一點",
+      detail: "多貼一點前後文，ANYU 會更容易讀出節奏。",
+    });
   });
 
   it("enables the CTA once input reaches the minimum length", () => {
@@ -33,15 +39,35 @@ describe("ai-temperature UI helpers", () => {
     expect(longEnough.trim().length).toBeGreaterThanOrEqual(MIN_ANALYZE_LENGTH);
     expect(isAnalyzeInputReady(longEnough)).toBe(true);
     expect(getAnalyzeButtonLabel(longEnough)).toBe("分析我的曖昧溫度");
-    expect(getAnalyzeInputHint(longEnough)).toBe("免費 · 結果可截圖分享");
+    expect(getAnalyzeInputGuidance(longEnough)).toMatchObject({
+      state: "can_analyze" satisfies AnalyzeInputGuidanceState,
+      label: "可分析",
+      detail: "可以分析，但多一點上下文會更準。",
+    });
   });
 
-  it("shows a soft helper once the input becomes long", () => {
+  it("maps context quality bands into guidance states", () => {
+    expect(getAnalyzeInputGuidance("a".repeat(130))).toMatchObject({
+      state: "ideal" satisfies AnalyzeInputGuidanceState,
+      label: "剛剛好",
+      detail: "內容足夠，適合分析。",
+    });
+    expect(getAnalyzeInputGuidance("a".repeat(SOFT_MAX_ANALYZE_LENGTH + 1))).toMatchObject({
+      state: "long" satisfies AnalyzeInputGuidanceState,
+      label: "有點長",
+      detail: "內容有點長，建議保留最近幾段關鍵對話。",
+    });
+    expect(getAnalyzeInputGuidance("a".repeat(MAX_ANALYZE_LENGTH + 1))).toMatchObject({
+      state: "too_long" satisfies AnalyzeInputGuidanceState,
+      label: "太長了",
+      detail: "太長了，請縮短到最近幾段。",
+    });
+  });
+
+  it("keeps the legacy hint helper aligned with the richer guidance", () => {
+    expect(getAnalyzeInputHint("a".repeat(130))).toBe("內容足夠，適合分析。");
     expect(getAnalyzeInputHint("a".repeat(SOFT_MAX_ANALYZE_LENGTH + 1))).toBe(
       "內容有點長，建議保留最近幾段關鍵對話。",
-    );
-    expect(getAnalyzeInputHint("a".repeat(MAX_ANALYZE_LENGTH + 1))).toBe(
-      "這段太長了，請保留最近幾段關鍵對話再試一次。",
     );
   });
 
