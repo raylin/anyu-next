@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
+import { uiNotices } from "@/content/legal";
 
 type ContactCapturePayload = {
   email?: string;
@@ -81,6 +82,7 @@ export function ContactCapture({
           ? "我們會用你留下的方式送出一次完整分析。這次不會真的收費。"
           : "留下 LINE 或 Email，我們會送你一次完整分析。"}
       </p>
+      <p className="anyu-subtle-note">{uiNotices.contactCapture}</p>
       {noticeMessage ? <p className="anyu-subtle-note">{noticeMessage}</p> : null}
 
       {isSubmitted ? null : (

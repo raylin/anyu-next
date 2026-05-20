@@ -30,6 +30,17 @@ The current Module 01 experience still defers:
 - advanced PII detection
 - retention cleanup jobs
 
+Public legal/trust routes now exist for:
+
+- `/privacy`
+- `/terms`
+- `/disclaimer`
+- `/legal`
+
+Source legal drafts live under `docs/legal/`.
+The v0 public contact email used in legal pages is `hello@anyu.tw`.
+The app currently duplicates reviewed legal copy into app-local content modules for deploy-safe rendering, so future legal copy changes must sync both `docs/legal/` and `apps/web/src/content/legal.ts`.
+
 If `DATABASE_URL` or a provider key is missing, the app should stay up and return friendly configuration errors instead of crashing.
 
 ## Environment

@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/anyu/Card";
 import { ContactCapture } from "@/components/anyu/ContactCapture";
+import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { PaidPreviewCard } from "@/components/anyu/PaidPreviewCard";
 import { ShareCardPreview } from "@/components/anyu/ShareCardPreview";
 import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
+import { uiNotices } from "@/content/legal";
 import { trackClientEvent } from "@/lib/events/client";
 import {
   buildShareText,
@@ -249,6 +251,8 @@ export function AiTemperatureResult({
         <p className="anyu-reassurance">{result.reassurance}</p>
       </Card>
 
+      <p className="anyu-subtle-note">{uiNotices.resultDisclaimer}</p>
+
       <ShareCardPreview
         persona={result.persona}
         quote={result.shareQuote}
@@ -275,6 +279,8 @@ export function AiTemperatureResult({
         }
         onSubmit={submitContact}
       />
+
+      <LegalFooter />
     </section>
   );
 }

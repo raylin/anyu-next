@@ -618,6 +618,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 - Legal Page Implementation v0
+
+### Completed
+
+- implemented public legal routes at `/privacy`, `/terms`, `/disclaimer`, and `/legal`
+- applied `hello@anyu.tw` as the v0 public contact/deletion email in legal drafts and rendered pages
+- added quiet legal footer links to the Module 01 landing and result flows
+- aligned landing/result/contact short notices with the reviewed legal draft copy
+
+### Learnings
+
+- deploy-safe legal rendering is simplest when the app keeps its own app-local legal content module, even if docs remain the human review source
+- the biggest ongoing maintenance risk is docs/app legal copy drift, not route implementation complexity
+
+### Unresolved Questions
+
+- whether `/legal` should remain as a public index page long-term
+- whether footer legal links should eventually expand beyond Module 01 pages
+
+### Validation
+
+- `python3 -m compileall oradar` passed
+- `cd apps/web && corepack pnpm lint` passed
+- `cd apps/web && corepack pnpm test` passed
+- `cd apps/web && corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 - Legal Baseline Content Draft v0
 
 ### Completed

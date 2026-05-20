@@ -3,6 +3,7 @@ import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { PrivacyHelper } from "@/components/anyu/PrivacyHelper";
 import { SituationChips } from "@/components/anyu/SituationChips";
+import { uiNotices } from "@/content/legal";
 import type { AnalyzeInputGuidance } from "@/lib/modules/ai-temperature-ui";
 
 type InputCardProps = {
@@ -106,6 +107,7 @@ export function InputCard({
           {ctaLabel}
         </Button>
 
+        <p className="anyu-subtle-note">{uiNotices.ctaConsent}</p>
         <p className="anyu-small-note">免費 · 結果可截圖分享</p>
         <p className="anyu-subtle-note">不寄電子報 · 不分享第三方</p>
         {statusMessage ? (

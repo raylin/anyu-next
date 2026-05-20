@@ -1,3 +1,5 @@
+import { uiNotices } from "@/content/legal";
+
 type PrivacyHelperProps = {
   compact?: boolean;
 };
@@ -13,8 +15,7 @@ export function PrivacyHelper({ compact = false }: PrivacyHelperProps) {
         .join(" ")}
     >
       <span className="anyu-helper-rule" aria-hidden="true" />
-      <p>請不要貼姓名 / 電話 / 地址</p>
-      <p>結果頁不展示原始對話，分享卡也不包含私密內容。</p>
+      <p>{uiNotices.inputHelper}</p>
     </div>
   );
 }

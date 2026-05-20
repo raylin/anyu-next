@@ -60,7 +60,10 @@ textarea {
 .anyu-module-page,
 .anyu-result-stack,
 .anyu-hero,
-.anyu-module-stack {
+.anyu-module-stack,
+.anyu-legal-page,
+.anyu-legal-article,
+.anyu-legal-section {
   display: grid;
   gap: var(--anyu-space-5);
 }
@@ -200,6 +203,101 @@ textarea {
   color: var(--anyu-dim);
   font-size: var(--anyu-type-body-lg-size);
   line-height: var(--anyu-type-body-lg-lh);
+}
+
+.anyu-legal-shell {
+  padding-bottom: calc(var(--anyu-space-12) + env(safe-area-inset-bottom));
+}
+
+.anyu-legal-header,
+.anyu-legal-header-copy,
+.anyu-legal-meta,
+.anyu-legal-nav {
+  display: grid;
+  gap: var(--anyu-space-3);
+}
+
+.anyu-legal-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--anyu-space-3);
+}
+
+.anyu-legal-meta {
+  gap: 0.35rem;
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: 1.6;
+}
+
+.anyu-legal-meta a {
+  color: var(--anyu-accent);
+}
+
+.anyu-legal-nav {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.anyu-legal-nav-link {
+  min-height: 2.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: var(--anyu-radius-pill);
+  background: var(--anyu-surface);
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.anyu-legal-nav-link-active {
+  border-color: var(--anyu-accent-45);
+  background: var(--anyu-card);
+  color: var(--anyu-ink);
+}
+
+.anyu-legal-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--anyu-dim);
+  display: grid;
+  gap: 0.7rem;
+}
+
+.anyu-legal-footer {
+  padding-top: var(--anyu-space-2);
+}
+
+.anyu-legal-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2rem;
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: 1.6;
+}
+
+.anyu-legal-footer-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.anyu-legal-footer-separator {
+  color: var(--anyu-faint);
+  margin-inline: 0.2rem;
+}
+
+.anyu-legal-footer-link {
+  color: var(--anyu-dim);
+}
+
+.anyu-legal-footer-link:hover {
+  color: var(--anyu-ink);
 }
 
 .anyu-card-head,
@@ -1039,5 +1137,14 @@ textarea {
 
   .anyu-share-link {
     justify-items: start;
+  }
+
+  .anyu-legal-header-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .anyu-legal-nav {
+    grid-template-columns: 1fr;
   }
 }

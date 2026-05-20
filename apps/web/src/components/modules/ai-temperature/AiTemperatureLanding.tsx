@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { InputCard } from "@/components/anyu/InputCard";
+import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { trackClientEvent } from "@/lib/events/client";
 import {
@@ -235,6 +236,8 @@ export function AiTemperatureLanding({
         statusMessage={statusMessage}
         statusDetail={statusDetail}
       />
+
+      <LegalFooter />
     </section>
   );
 }
