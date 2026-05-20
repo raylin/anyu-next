@@ -1585,6 +1585,58 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 Module 01 Staging Timing Verification v0
+
+### Task Completed
+
+- verified live staging deployment freshness for the wait-state instrumentation pass
+- ran two synthetic staging analyze flows through protected preview access
+- verified runtime result loading from returned `resultId`
+- verified `analysis_completed` event metadata now includes safe timing aggregates
+- confirmed the deployed landing bundle contains the new elapsed-time wait-state strings and `65_000ms` timeout constant
+- created `ai-collaboration/research/2026-05-20-module-01-staging-timing-verification-v0.md`
+- created `ai-collaboration/reports/2026-05-20-module-01-staging-timing-verification-v0-execution-report.md`
+
+### Staging Timing Verification Status
+
+- deployment freshness: passed
+- staging analyze flow: passed
+- runtime result route: passed
+- event timing metadata presence: passed
+- privacy verification: passed
+
+### Latency Classification
+
+- `provider-dominant`
+- sample A total/provider latency: `27,972ms / 24,688ms`
+- sample B total/provider latency: `26,347ms / 23,931ms`
+- provider share remained roughly `88–91%` across both samples
+
+### Learnings
+
+- the new event metadata shape is sufficient to diagnose the main latency source without widening the event taxonomy
+- current staging latency is not mainly a DB-write or cold-start problem
+
+### Unresolved Questions
+
+- whether a faster Anthropic model is available on this account under a different valid name
+- whether the human perception of the new slow-wait copy is good enough without a model change
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 Module 01 Wait-State + Runtime Instrumentation v0
 
 ### Task Completed
