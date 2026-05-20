@@ -215,6 +215,8 @@ Before production:
 Reference record:
 
 - `ai-collaboration/research/2026-05-20-anyu-line-oa-setup-record-v0.md`
+- profile image asset: `docs/design-system/brand/exports/line-profile-1024.png`
+- current public `NEXT_PUBLIC_LINE_ADD_URL`: `https://lin.ee/S6dnbJO`
 
 ## 15. Abuse Guard / Cost Cap Checklist
 

@@ -618,6 +618,54 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 Production Env + Launch Checklist Sync v0
+
+### Task Completed
+
+- updated `ai-collaboration/decisions/2026-05-20-production-launch-decision-draft-v0.md`
+- synced completed legal, LINE, brand-asset, abuse-guard, and staging-QA status into the launch decision draft
+- updated `docs/operations/production-deployment-runbook.md` with the LINE setup record, brand asset path, and current public LINE URL reference
+- created `ai-collaboration/reports/2026-05-20-production-env-launch-checklist-sync-v0-execution-report.md`
+
+### Launch Decision Draft Updated
+
+- `ai-collaboration/decisions/2026-05-20-production-launch-decision-draft-v0.md`
+
+### Current Go / No-Go Status
+
+- `No-Go`
+
+### Remaining Blockers
+
+- production Vercel env readiness not yet verified
+- Neon production branch not yet created or confirmed
+- production DB migration plan not yet verified
+- final production candidate commit not yet selected
+- final human phone/browser smoke not yet accepted
+- manual retention cleanup SOP not yet explicitly accepted or replaced
+- `www.anyu.tw` redirect policy not yet confirmed
+- production domain / DNS readiness not yet verified
+
+### Learnings
+
+- The product-side launch work is largely synced; the remaining blockers are operational launch prerequisites.
+- The decision draft is now a more accurate launch gate and less of a partial placeholder.
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 ANYU LINE OA Setup Record v0
 
 ### Task Completed

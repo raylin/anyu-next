@@ -26,12 +26,17 @@ Completed staging checks:
 
 - Module 01 staging runtime verified
 - ANYU Design System v1.1 adopted and verified live on staging
+- `staging.anyu.tw` verified through multiple runtime and UI checks
 - analyze, result, unlock, and contact funnel verified
 - input validation and abuse guard verified
 - legal routes verified
+- legal footer links verified
+- UI short notices applied and verified
 - LINE-first contact UI verified
 - LINE CTA mobile handoff manually verified
-- legal footer and trust notices verified
+- desktop QR fallback accepted for v0
+- LINE OA setup completed and recorded
+- profile image asset generated and recorded
 
 Remaining recommendation:
 
@@ -101,6 +106,8 @@ Current status:
 
 - `/privacy`, `/terms`, `/disclaimer`, and `/legal` are implemented and verified on staging
 - `hello@anyu.tw` is the public contact, deletion, and support email
+- legal footer links verified
+- UI short notices applied
 - retention wording remains a `24 小時目標`, not a fixed public guarantee
 
 ## 9. LINE Funnel Status
@@ -108,18 +115,39 @@ Current status:
 Current status:
 
 - LINE-first contact UI implemented
+- `NEXT_PUBLIC_LINE_ADD_URL=https://lin.ee/S6dnbJO` verified in the staging bundle
 - LINE add URL: `https://lin.ee/S6dnbJO`
-- mobile handoff manually verified
+- mobile same-tab add-friend handoff manually verified
 - desktop QR-style behavior acceptable for v0
-- LINE API, LIFF, and webhook automation are not implemented
+- LINE OA setup completed and recorded
+- profile image asset generated and recorded at `docs/design-system/brand/exports/line-profile-1024.png`
+- Email fallback remains secondary
 
-Pending OA setup:
+Deferred:
 
-- Profile image: pending
-- Background image: pending / optional
-- Category: pending
+- LINE API
+- LIFF
+- webhook
+- rich menu
+- automatic result delivery
+- short-code matching
+- CRM segmentation
+- broadcast campaigns
 
-## 10. Abuse Guard / Cost Cap Status
+Reference:
+
+- `ai-collaboration/research/2026-05-20-anyu-line-oa-setup-record-v0.md`
+
+## 10. Brand / Asset Status
+
+Current status:
+
+- ANYU Brand Mark v1.1 adopted
+- brand mark exports generated
+- LINE profile image asset available at `docs/design-system/brand/exports/line-profile-1024.png`
+- app icons and `manifest.webmanifest` added
+
+## 11. Abuse Guard / Cost Cap Status
 
 Implemented status:
 
@@ -127,6 +155,9 @@ Implemented status:
 - hard max `4000`
 - prompt injection guard
 - unrelated content guard
+- input length guards implemented and staging verified
+- relationship-content guard implemented and staging verified
+- prompt-injection and misuse guard implemented and staging verified
 - session cap
 - global daily cap
 - process-local IP hourly cap
@@ -136,7 +167,7 @@ Known limitation:
 
 - IP cap is best-practical in serverless and is not a shared distributed limiter yet
 
-## 11. Retention Cleanup Status
+## 12. Retention Cleanup Status
 
 Current status:
 
@@ -144,7 +175,7 @@ Current status:
 - manual cleanup SOP is required for low-key launch
 - broader public launch should require scheduled cleanup or a stronger operational alternative
 
-## 12. Known Risks Accepted
+## 13. Known Risks Accepted
 
 If launch is eventually approved, the following risks would need explicit human acceptance:
 
@@ -156,7 +187,7 @@ If launch is eventually approved, the following risks would need explicit human 
 - IP limiter is not shared across all serverless instances
 - docs/legal and app-local legal content require manual sync
 
-## 13. Rollback Plan
+## 14. Rollback Plan
 
 Rollback plan for production:
 
@@ -170,7 +201,7 @@ Reference:
 
 - `docs/operations/production-deployment-runbook.md`
 
-## 14. Monitoring Plan
+## 15. Monitoring Plan
 
 Monitor at launch:
 
@@ -189,7 +220,7 @@ Monitor at launch:
 - API spend
 - ad spend
 
-## 15. Human Approval
+## 16. Human Approval
 
 Human approval: pending
 
@@ -202,7 +233,7 @@ Approval notes:
 - this draft is not approval
 - production deployment must not proceed until this section is explicitly completed by a human operator
 
-## 16. Go / No-Go
+## 17. Go / No-Go
 
 Current recommendation: `No-Go`
 
@@ -214,3 +245,4 @@ Production should not proceed until all of the following are confirmed:
 4. Human browser/phone smoke on staging is accepted.
 5. Manual retention cleanup SOP is accepted by the human operator.
 6. `www.anyu.tw` redirect policy is decided.
+7. Production domain / DNS readiness is verified.
