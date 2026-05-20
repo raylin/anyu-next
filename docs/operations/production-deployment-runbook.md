@@ -146,6 +146,7 @@ Recommended v0 approach:
 - merge the approved staging commit into `main` only after the Production Launch Decision is completed
 - complete production project/domain normalization before final launch approval
 - current recommended target is `anyu-next` owning `anyu.tw` and `www.anyu.tw`
+- after normalization, verify `www.anyu.tw` redirects to `https://anyu.tw` rather than serving a parallel canonical host
 
 Do not auto-push `main`.
 

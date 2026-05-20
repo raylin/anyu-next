@@ -17,6 +17,15 @@ Latest verification update:
 - production launch must not proceed until project/domain/env ownership is normalized
 - recommended normalization target is `anyu-next` owning `anyu.tw` and `www.anyu.tw`
 
+Latest normalization progress:
+
+- `anyu-next` public production env names are now complete for the approved launch candidate
+- a fresh `anyu-next` production deployment is healthy
+- `https://anyu.tw` now serves `anyu-next`
+- `https://www.anyu.tw` also serves `anyu-next`
+- `www -> apex` redirect is still pending
+- `DATABASE_URL` target is still not positively confirmed
+
 ## 2. Approved Production Commit
 
 Pending: choose exact production commit from `origin/staging` before launch.
@@ -114,6 +123,7 @@ Operational note:
 
 - `NEXT_PUBLIC_*` changes require rebuild and domain/alias freshness verification before launch.
 - current production env ownership is not normalized; env readiness cannot be treated as complete until `anyu.tw` points at the intended app project and its final env set is confirmed
+- public production env name coverage on `anyu-next` is now complete for the launch candidate
 
 ## 7. Database / Migration Status
 
@@ -265,17 +275,22 @@ Current recommendation: `No-Go`
 
 Production should not proceed until all of the following are confirmed:
 
-1. Production project/domain ownership is normalized so `anyu.tw` points at the intended app project.
-2. Final production env vars are configured on the actual production-facing Vercel project.
-3. Active `DATABASE_URL` is confirmed to target the `anyu-next` Neon `production` branch.
-4. Final production candidate commit is selected from `origin/staging`.
-5. Human browser/phone smoke on staging is accepted.
-6. Manual retention cleanup SOP is accepted by the human operator.
-7. `www.anyu.tw` redirect policy is decided and implemented.
-8. Production domain / DNS readiness is verified after the final project/domain mapping is in place.
+1. Active `DATABASE_URL` is confirmed to target the `anyu-next` Neon `production` branch.
+2. Final production candidate commit is selected from `origin/staging`.
+3. Human browser/phone smoke on staging is accepted.
+4. Manual retention cleanup SOP is accepted by the human operator.
+5. `www.anyu.tw` redirect policy is decided and implemented.
+6. Production domain / DNS readiness is verified after the final project/domain mapping is in place.
 
 Current normalization recommendation:
 
 - choose `Option A`
 - make `anyu-next` the production Vercel project
 - move `anyu.tw` and `www.anyu.tw` to `anyu-next` only after explicit human approval
+
+Current normalization status:
+
+- `anyu.tw` now serves `anyu-next`
+- `www.anyu.tw` now serves `anyu-next`
+- public production env names are complete on `anyu-next`
+- launch remains `No-Go` until DB target confirmation, `www` redirect completion, and final launch approvals

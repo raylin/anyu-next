@@ -2724,3 +2724,39 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - Whether any hidden dependency still requires the old `anyu` project.
 - Whether the active production `DATABASE_URL` already points at Neon `anyu-next` `production`.
 - Whether production should launch from `main` or an explicitly approved production commit path.
+
+## 2026-05-20 Production Domain Move Approval + Env Finalization v0
+
+### Task Completed
+
+- Finalized approved public production env values on `anyu-next`.
+- Created a healthy `anyu-next` production deployment.
+- Verified that `anyu.tw` and `www.anyu.tw` now serve the new `anyu-next` production deployment.
+
+### Domain Normalization Status
+
+- `anyu.tw` now serves `anyu-next`
+- `www.anyu.tw` now serves `anyu-next`
+- `www -> apex` redirect is still pending
+
+### Env Finalization Status
+
+- required non-secret production env names for the launch candidate are now present on `anyu-next`
+- `DATABASE_URL` and `ANTHROPIC_API_KEY` still require secret-safe/manual confirmation
+
+### Current Go / No-Go Status
+
+- `No-Go`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Unresolved Questions
+
+- whether `DATABASE_URL` truly points to Neon `anyu-next` `production`
+- how `www.anyu.tw -> https://anyu.tw` should be finalized in production config
+- whether stale Vercel domain-inspection ownership output needs manual cleanup
