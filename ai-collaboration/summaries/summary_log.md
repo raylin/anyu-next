@@ -618,6 +618,41 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 Production Deployment Runbook v0
+
+### Task Completed
+
+- created `docs/operations/production-deployment-runbook.md`
+- created `docs/operations/README.md`
+- created `ai-collaboration/templates/production_launch_decision_template.md`
+- clarified in repo workflow docs that staging push is routine but production deployment is manual and human-approved only
+- created `ai-collaboration/reports/2026-05-20-production-deployment-runbook-v0-execution-report.md`
+
+### Learnings
+
+- staging-first workflow needs a separate production runbook so “validated and pushed to staging” is never confused with “ready to auto-promote to production”
+- public env rebuild rules deserve explicit production visibility because stale `NEXT_PUBLIC_*` bundles are an operational risk, not just a staging annoyance
+
+### Unresolved Questions
+
+- long-term production branch strategy is still open
+- `www.anyu.tw` redirect policy should still be confirmed before production launch
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 LINE CTA Env Hotfix + Staging Verification v0
 
 ### Task Completed

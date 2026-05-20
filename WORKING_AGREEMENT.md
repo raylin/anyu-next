@@ -51,6 +51,21 @@ Every completed handoff should end with:
 
 If push is skipped or fails, report the reason clearly and do not claim staging was updated.
 
+## Production Deployment Rule
+
+Staging push is routine after completed handoffs when validation and safety checks pass.
+
+Production deployment is never routine and never automatic.
+
+- Production deploy requires explicit human approval.
+- Production deploy requires a separate launch decision record.
+- Production env changes, production alias changes, and production DB migration must be treated as manual operations.
+
+Canonical production guidance lives in:
+
+- `docs/operations/production-deployment-runbook.md`
+- `ai-collaboration/templates/production_launch_decision_template.md`
+
 ## Tech Debt And Cleanup Policy
 
 Codex should not leave obvious technical debt just to reduce implementation effort.

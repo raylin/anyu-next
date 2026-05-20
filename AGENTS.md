@@ -185,6 +185,22 @@ Every execution report must include:
 
 Reports should be concise, factual, and written for the next human or AI collaborator.
 
+## Production Deployment Rule
+
+Completed handoffs may flow into `origin/staging` when validation and safety checks pass.
+
+Production deployment is a separate, manual workflow.
+
+- Never treat a completed handoff as automatic approval for production.
+- Production deploy requires explicit human approval.
+- Production deploy requires a separate launch decision record.
+- Production env changes, production DB migration, and production alias changes must be treated as manual operational steps.
+
+Canonical production guidance lives in:
+
+- `docs/operations/production-deployment-runbook.md`
+- `ai-collaboration/templates/production_launch_decision_template.md`
+
 ## Paste-Back Completion Summary
 
 Every Codex task must end the final CLI response with this paste-back completion summary. The purpose is to give the human a compact review packet that can be pasted into ChatGPT Web.
