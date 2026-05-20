@@ -44,20 +44,64 @@ const FORBIDDEN_LANGUAGE_PATTERNS = [
   /PUA/u,
 ];
 
+const DEFAULT_CANDIDATE_MODELS = [
+  "claude-sonnet-4-20250514",
+  "claude-sonnet-4-6",
+  "claude-haiku-4-5",
+  "claude-haiku-4-5-20251001",
+];
+
+const PRICING_BY_FAMILY = [
+  {
+    match: /^claude-haiku-4-5/u,
+    label: "Claude Haiku 4.5",
+    inputPricePerMtok: 1,
+    outputPricePerMtok: 5,
+    cacheWrite5mMultiplier: 1.25,
+    cacheWrite1hMultiplier: 2,
+    cacheReadMultiplier: 0.1,
+  },
+  {
+    match: /^claude-sonnet-4/u,
+    label: "Claude Sonnet 4.x",
+    inputPricePerMtok: 3,
+    outputPricePerMtok: 15,
+    cacheWrite5mMultiplier: 1.25,
+    cacheWrite1hMultiplier: 2,
+    cacheReadMultiplier: 0.1,
+  },
+];
+
 function parseArgs(argv) {
   const args = {
     model: "",
+    models: [],
     provider: "anthropic",
+    discover: false,
+    discoverOnly: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const part = argv[index];
+
     if (part === "--model") {
       args.model = argv[index + 1] ?? "";
+      index += 1;
+    } else if (part === "--models") {
+      const rawValue = argv[index + 1] ?? "";
+      args.models = rawValue
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
       index += 1;
     } else if (part === "--provider") {
       args.provider = argv[index + 1] ?? "anthropic";
       index += 1;
+    } else if (part === "--discover") {
+      args.discover = true;
+    } else if (part === "--discover-only") {
+      args.discover = true;
+      args.discoverOnly = true;
     }
   }
 
@@ -162,6 +206,72 @@ function buildQualityReview(result, schemaOk, forbiddenLanguage) {
   };
 }
 
+function getPricingForModel(model) {
+  return PRICING_BY_FAMILY.find((entry) => entry.match.test(model)) ?? null;
+}
+
+function roundCurrency(value) {
+  return Math.round(value * 1_000_000) / 1_000_000;
+}
+
+function estimateCostUsd(usage, pricing) {
+  if (!pricing) {
+    return null;
+  }
+
+  const inputTokens = usage.input_tokens ?? 0;
+  const outputTokens = usage.output_tokens ?? 0;
+  const cacheReadTokens = usage.cache_read_input_tokens ?? 0;
+  const cacheCreationTokens = usage.cache_creation_input_tokens ?? 0;
+  const inputCost =
+    (inputTokens / 1_000_000) * pricing.inputPricePerMtok +
+    (outputTokens / 1_000_000) * pricing.outputPricePerMtok +
+    (cacheReadTokens / 1_000_000) *
+      pricing.inputPricePerMtok *
+      pricing.cacheReadMultiplier +
+    (cacheCreationTokens / 1_000_000) *
+      pricing.inputPricePerMtok *
+      pricing.cacheWrite5mMultiplier;
+
+  return roundCurrency(inputCost);
+}
+
+function getUsage(payload) {
+  if (!payload || typeof payload !== "object" || !("usage" in payload)) {
+    return {
+      input_tokens: null,
+      output_tokens: null,
+      cache_read_input_tokens: null,
+      cache_creation_input_tokens: null,
+    };
+  }
+
+  const usage = payload.usage;
+  if (!usage || typeof usage !== "object") {
+    return {
+      input_tokens: null,
+      output_tokens: null,
+      cache_read_input_tokens: null,
+      cache_creation_input_tokens: null,
+    };
+  }
+
+  return {
+    input_tokens:
+      typeof usage.input_tokens === "number" ? usage.input_tokens : null,
+    output_tokens:
+      typeof usage.output_tokens === "number" ? usage.output_tokens : null,
+    cache_read_input_tokens:
+      typeof usage.cache_read_input_tokens === "number"
+        ? usage.cache_read_input_tokens
+        : null,
+    cache_creation_input_tokens:
+      typeof usage.cache_creation_input_tokens === "number"
+        ? usage.cache_creation_input_tokens
+        : null,
+  };
+}
+
 async function callAnthropic(prompt, model, apiKey) {
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -228,40 +338,177 @@ async function callAnthropic(prompt, model, apiKey) {
 
   return {
     text: textParts.join("\n"),
+    usage: getUsage(payload),
+    raw: payload,
   };
 }
 
-async function main() {
-  const appRoot = process.cwd();
-  const envPath = resolve(appRoot, ".env.local");
-  loadEnvFile(envPath);
+async function discoverAnthropicModels(apiKey) {
+  const response = await fetch("https://api.anthropic.com/v1/models", {
+    method: "GET",
+    headers: {
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    signal: AbortSignal.timeout(30_000),
+  });
 
-  const args = parseArgs(process.argv.slice(2));
-  const provider = args.provider || process.env.ORADAR_PROVIDER || "anthropic";
-  const model = args.model || process.env.ANTHROPIC_MODEL || "";
-
-  if (provider !== "anthropic") {
-    throw new Error("This evaluator currently supports only the Anthropic runtime path.");
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error("ANTHROPIC_API_KEY is not configured.");
+  if (!response.ok) {
+    const errorType =
+      payload &&
+      typeof payload === "object" &&
+      payload.error &&
+      typeof payload.error === "object" &&
+      "type" in payload.error
+        ? payload.error.type
+        : "models_api_error";
+    const errorMessage =
+      payload &&
+      typeof payload === "object" &&
+      payload.error &&
+      typeof payload.error === "object" &&
+      "message" in payload.error &&
+      typeof payload.error.message === "string"
+        ? payload.error.message
+        : "Models API request failed.";
+
+    throw new Error(`${errorType}: ${errorMessage}`);
   }
 
-  if (!model) {
-    throw new Error("No model provided and ANTHROPIC_MODEL is missing.");
+  const models =
+    payload && typeof payload === "object" && Array.isArray(payload.data)
+      ? payload.data.map((model) => ({
+          id: model?.id ?? null,
+          display_name: model?.display_name ?? null,
+          created_at: model?.created_at ?? null,
+          type: model?.type ?? null,
+        }))
+      : [];
+
+  return models.filter((model) => typeof model.id === "string");
+}
+
+function pickModelsToEvaluate(discoveredModelIds, configuredModel, requestedModels) {
+  if (requestedModels.length > 0) {
+    return [...new Set(requestedModels)];
   }
 
-  const promptTemplate = await readFile(
-    resolve(appRoot, "src/lib/ai/assets/product_result_prompt_v0.md"),
-    "utf8",
+  const discoveredSet = new Set(discoveredModelIds);
+  const picked = [];
+
+  if (configuredModel) {
+    picked.push(configuredModel);
+  }
+
+  for (const candidate of DEFAULT_CANDIDATE_MODELS) {
+    if (discoveredSet.size === 0 || discoveredSet.has(candidate)) {
+      picked.push(candidate);
+    }
+  }
+
+  const haikuDiscovered = discoveredModelIds.find((modelId) =>
+    modelId.startsWith("claude-haiku-4-5"),
   );
-  const schema = JSON.parse(
-    await readFile(resolve(appRoot, "src/lib/ai/assets/product_result_schema_v0.json"), "utf8"),
-  );
-  const ajv = new Ajv2020({ allErrors: true, strict: false });
-  const validate = ajv.compile(schema);
+  if (haikuDiscovered) {
+    picked.push(haikuDiscovered);
+  }
 
+  const sonnetDiscovered = discoveredModelIds.find((modelId) =>
+    modelId.startsWith("claude-sonnet-4-6"),
+  );
+  if (sonnetDiscovered) {
+    picked.push(sonnetDiscovered);
+  }
+
+  return [...new Set(picked.filter(Boolean))];
+}
+
+function medianOf(values) {
+  if (values.length === 0) {
+    return null;
+  }
+
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted.length % 2 === 1
+    ? sorted[(sorted.length - 1) / 2]
+    : Math.round((sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2);
+}
+
+function averageOf(values) {
+  if (values.length === 0) {
+    return null;
+  }
+
+  return Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 100) / 100;
+}
+
+function summarizeModelResults(modelResults, pricing) {
+  const successful = modelResults.filter((item) => item.success);
+  const latencies = successful.map((item) => item.latency_ms);
+  const inputTokens = successful
+    .map((item) => item.input_tokens)
+    .filter((value) => typeof value === "number");
+  const outputTokens = successful
+    .map((item) => item.output_tokens)
+    .filter((value) => typeof value === "number");
+  const cacheReadTokens = successful
+    .map((item) => item.cache_read_input_tokens)
+    .filter((value) => typeof value === "number");
+  const cacheCreationTokens = successful
+    .map((item) => item.cache_creation_input_tokens)
+    .filter((value) => typeof value === "number");
+  const requestCosts = successful
+    .map((item) => item.estimated_cost_usd)
+    .filter((value) => typeof value === "number");
+  const qualityCounts = successful.reduce(
+    (counts, item) => {
+      counts[item.quality_rating] = (counts[item.quality_rating] ?? 0) + 1;
+      return counts;
+    },
+    { pass: 0, borderline: 0, fail: 0 },
+  );
+
+  const avgCostPerRequestUsd =
+    requestCosts.length > 0
+      ? roundCurrency(requestCosts.reduce((sum, value) => sum + value, 0) / requestCosts.length)
+      : null;
+
+  return {
+    model: modelResults[0]?.model ?? null,
+    pricing_class: pricing?.label ?? null,
+    sample_count: modelResults.length,
+    success_count: successful.length,
+    median_latency_ms: medianOf(latencies),
+    average_latency_ms: averageOf(latencies),
+    average_input_tokens: averageOf(inputTokens),
+    average_output_tokens: averageOf(outputTokens),
+    average_cache_read_input_tokens: averageOf(cacheReadTokens),
+    average_cache_creation_input_tokens: averageOf(cacheCreationTokens),
+    average_cost_per_request_usd: avgCostPerRequestUsd,
+    estimated_cost_per_1000_usd:
+      avgCostPerRequestUsd != null ? roundCurrency(avgCostPerRequestUsd * 1000) : null,
+    schema_validation_pass_count: successful.filter(
+      (item) => item.ajv_schema_validation_success,
+    ).length,
+    quality_counts: qualityCounts,
+  };
+}
+
+async function evaluateModel({
+  model,
+  provider,
+  apiKey,
+  promptTemplate,
+  validate,
+}) {
+  const pricing = getPricingForModel(model);
   const results = [];
 
   for (const sample of SYNTHETIC_CASES) {
@@ -288,12 +535,7 @@ async function main() {
           ),
         );
 
-      const providerResult = await callAnthropic(
-        prompt,
-        model,
-        process.env.ANTHROPIC_API_KEY,
-      );
-
+      const providerResult = await callAnthropic(prompt, model, apiKey);
       const endedAt = performance.now();
       const requestEndTimestamp = new Date().toISOString();
       const latencyMs = Math.round(endedAt - startedAt);
@@ -307,6 +549,7 @@ async function main() {
         parsed = JSON.parse(stripMarkdownFences(providerResult.text));
         jsonParseSuccess = true;
       } catch (error) {
+        const usage = providerResult.usage;
         results.push({
           model,
           sample_id: sample.id,
@@ -317,6 +560,11 @@ async function main() {
           provider_error_category: "json_parse_failed",
           json_parse_success: false,
           ajv_schema_validation_success: false,
+          input_tokens: usage.input_tokens,
+          output_tokens: usage.output_tokens,
+          cache_read_input_tokens: usage.cache_read_input_tokens,
+          cache_creation_input_tokens: usage.cache_creation_input_tokens,
+          estimated_cost_usd: estimateCostUsd(usage, pricing),
           result_score: null,
           score_bucket: null,
           state_label: null,
@@ -342,6 +590,7 @@ async function main() {
         schemaValidationSuccess,
         forbiddenLanguage,
       );
+      const usage = providerResult.usage;
 
       results.push({
         model,
@@ -353,6 +602,11 @@ async function main() {
         provider_error_category: schemaValidationSuccess ? null : "schema_validation_failed",
         json_parse_success: jsonParseSuccess,
         ajv_schema_validation_success: schemaValidationSuccess,
+        input_tokens: usage.input_tokens,
+        output_tokens: usage.output_tokens,
+        cache_read_input_tokens: usage.cache_read_input_tokens,
+        cache_creation_input_tokens: usage.cache_creation_input_tokens,
+        estimated_cost_usd: estimateCostUsd(usage, pricing),
         result_score: parsed?.free_result?.temperature_score ?? null,
         score_bucket: getScoreBucket(parsed?.free_result?.temperature_score),
         state_label: parsed?.free_result?.state_label ?? null,
@@ -387,6 +641,11 @@ async function main() {
         provider_error_category: providerErrorCategory,
         json_parse_success: false,
         ajv_schema_validation_success: false,
+        input_tokens: null,
+        output_tokens: null,
+        cache_read_input_tokens: null,
+        cache_creation_input_tokens: null,
+        estimated_cost_usd: null,
         result_score: null,
         score_bucket: null,
         state_label: null,
@@ -399,24 +658,85 @@ async function main() {
     }
   }
 
-  const successLatencies = results.filter((item) => item.success).map((item) => item.latency_ms);
-  const sorted = [...successLatencies].sort((a, b) => a - b);
-  const median =
-    sorted.length === 0
-      ? null
-      : sorted.length % 2 === 1
-        ? sorted[(sorted.length - 1) / 2]
-        : Math.round((sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2);
+  return {
+    model,
+    pricing,
+    results,
+    summary: summarizeModelResults(results, pricing),
+  };
+}
+
+async function main() {
+  const appRoot = process.cwd();
+  const envPath = resolve(appRoot, ".env.local");
+  loadEnvFile(envPath);
+
+  const args = parseArgs(process.argv.slice(2));
+  const provider = args.provider || process.env.ORADAR_PROVIDER || "anthropic";
+  const configuredModel = process.env.ANTHROPIC_MODEL || "";
+
+  if (provider !== "anthropic") {
+    throw new Error("This evaluator currently supports only the Anthropic runtime path.");
+  }
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("ANTHROPIC_API_KEY is not configured.");
+  }
+
+  const promptTemplate = await readFile(
+    resolve(appRoot, "src/lib/ai/assets/product_result_prompt_v0.md"),
+    "utf8",
+  );
+  const schema = JSON.parse(
+    await readFile(resolve(appRoot, "src/lib/ai/assets/product_result_schema_v0.json"), "utf8"),
+  );
+  const ajv = new Ajv2020({ allErrors: true, strict: false });
+  const validate = ajv.compile(schema);
+
+  let availableModels = [];
+  let discoveryError = null;
+
+  if (args.discover) {
+    try {
+      availableModels = await discoverAnthropicModels(process.env.ANTHROPIC_API_KEY);
+    } catch (error) {
+      discoveryError = error instanceof Error ? error.message : "Model discovery failed.";
+    }
+  }
+
+  const discoveredModelIds = availableModels.map((model) => model.id);
+  const modelsToEvaluate = args.discoverOnly
+    ? []
+    : pickModelsToEvaluate(
+        discoveredModelIds,
+        args.model || configuredModel,
+        args.models.length > 0 ? args.models : args.model ? [args.model] : [],
+      );
+
+  const evaluations = [];
+  for (const model of modelsToEvaluate) {
+    evaluations.push(
+      await evaluateModel({
+        model,
+        provider,
+        apiKey: process.env.ANTHROPIC_API_KEY,
+        promptTemplate,
+        validate,
+      }),
+    );
+  }
 
   console.log(
     JSON.stringify(
       {
         provider,
-        model,
-        sample_count: results.length,
-        success_count: results.filter((item) => item.success).length,
-        median_latency_ms: median,
-        results,
+        configured_model: configuredModel || null,
+        discovery_attempted: args.discover,
+        discovery_error: discoveryError,
+        available_models_found: availableModels,
+        models_evaluated: evaluations.map((entry) => entry.model),
+        evaluation_summaries: evaluations.map((entry) => entry.summary),
+        results: evaluations.flatMap((entry) => entry.results),
       },
       null,
       2,

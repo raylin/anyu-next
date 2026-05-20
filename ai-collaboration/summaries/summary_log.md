@@ -1585,6 +1585,61 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 Module 01 Faster Model Discovery + Cost Evaluation v0
+
+### Task Completed
+
+- queried the Anthropic Models API for account-visible model IDs
+- extended `apps/web/scripts/evaluate-model-latency.mjs` to support model discovery, token usage capture, and cost estimation
+- evaluated the current Sonnet baseline, available Sonnet 4.6, and available Haiku 4.5 on the same 5 synthetic cases
+- created `ai-collaboration/research/2026-05-20-module-01-faster-model-discovery-cost-evaluation-v0.md`
+- created `ai-collaboration/reports/2026-05-20-module-01-faster-model-discovery-cost-evaluation-v0-execution-report.md`
+
+### Available Faster Model Result
+
+- account-visible relevant models included `claude-sonnet-4-6` and `claude-haiku-4-5-20251001`
+- Haiku 4.5 is actually available on this account
+- Sonnet 4.6 is also available on this account
+
+### Cost Per 1,000 Summary
+
+- `claude-sonnet-4-20250514`: about `$37.37 / 1,000`
+- `claude-sonnet-4-6`: about `$43.226 / 1,000`
+- `claude-haiku-4-5-20251001`: about `$14.867 / 1,000`
+
+### Recommendation
+
+- keep the current model for now
+- do not switch to Sonnet 4.6
+- only consider a guarded Haiku staging trial if we accept or mitigate JSON reliability risk first
+
+### Learnings
+
+- provider-side discovery is the reliable way to confirm available model IDs on this account
+- Haiku 4.5 has the expected cost/latency advantage, but current JSON stability is not yet strong enough for an immediate switch
+
+### Unresolved Questions
+
+- whether Haiku reliability becomes acceptable with retry/repair safeguards
+- whether the cost savings justify a controlled staging experiment despite the current `1/5` parse failure
+
+### Validation Results
+
+- Anthropic model discovery succeeded outside the sandbox
+- live evaluator runs succeeded for baseline, Sonnet 4.6, and Haiku 4.5
+- `python3 -m compileall oradar` pending at summary-write time
+- `corepack pnpm lint` pending at summary-write time
+- `corepack pnpm test` pending at summary-write time
+- `corepack pnpm build` pending at summary-write time
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 Module 01 Staging Timing Verification v0
 
 ### Task Completed
