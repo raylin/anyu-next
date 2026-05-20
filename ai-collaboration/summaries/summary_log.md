@@ -618,6 +618,41 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 LINE Funnel UI Copy + Implementation Plan v0
+
+### Task Completed
+
+- created `ai-collaboration/research/2026-05-20-line-funnel-ui-copy-implementation-plan-v0.md`
+- translated the approved LINE funnel strategy into exact paid-preview, contact-panel, CTA, and fallback copy recommendations
+- defined required env/config for `NEXT_PUBLIC_LINE_ADD_URL`
+- defined recommended event tracking and manual/semi-manual fulfillment flow
+- created `ai-collaboration/reports/2026-05-20-line-funnel-ui-copy-implementation-plan-v0-execution-report.md`
+
+### Learnings
+
+- the current app structure already has a clean place to introduce a future LINE-primary CTA without changing the whole result flow
+- keeping Email visible but clearly secondary is the lowest-risk way to align strategy and user trust
+
+### Unresolved Questions
+
+- final LINE OA add-friend URL is still unknown
+- mobile same-tab versus new-tab behavior for the LINE CTA should still be validated before implementation
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 LINE Funnel Strategy v0
 
 ### Task Completed
