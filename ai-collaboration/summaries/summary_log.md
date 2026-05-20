@@ -2795,3 +2795,41 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether production `DATABASE_URL` is truly blank or just inaccessible through the current safe probe path
 - whether production DB migration is still required once the secret is repaired or confirmed
 - whether the team later wants the redirect moved from app-level config to Vercel/domain-level config
+
+## 2026-05-21 Production DATABASE_URL Repair + Smoke Gate v0
+
+### Task Completed
+
+- Repaired production `DATABASE_URL` by explicitly overriding it from the Neon `anyu-next` production branch connection string.
+- Re-ran the safe production runtime probe for `DATABASE_URL` and `ANTHROPIC_API_KEY`.
+- Checked production branch schema state and stopped before smoke when both DB gates failed.
+
+### DATABASE_URL Confirmation Status
+
+- intended secret target was repaired
+- runtime still reported `DATABASE_URL` absent
+
+### Schema State
+
+- required runtime tables were not present in the production branch listing used for this pass
+
+### Smoke Result
+
+- not run
+
+### Current Go / No-Go Status
+
+- `No-Go`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Unresolved Questions
+
+- whether a fresh post-secret-update production deploy is still needed for runtime to see `DATABASE_URL`
+- whether the empty production branch means migration was never run
+- whether the next approved step should combine migration with env/runtime debug

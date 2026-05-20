@@ -24,7 +24,8 @@ Latest normalization progress:
 - `https://anyu.tw` now serves `anyu-next`
 - `https://www.anyu.tw` also serves `anyu-next`
 - `www -> apex` redirect is now live
-- `DATABASE_URL` target is still not positively confirmed and may be blank/unusable in the current production env context
+- `DATABASE_URL` target is still not positively confirmed and runtime still reports it absent after an explicit repair attempt
+- Neon `anyu-next` `production` branch currently appears schema-empty for the required runtime tables
 
 ## 2. Approved Production Commit
 
@@ -133,8 +134,9 @@ Current status:
 - legacy Neon project `AnYu` also exists, but its `production` branch is archived
 - production DB migration must be run only after explicit approval
 - do not reuse preview/dev branch for production
-- production table verification is still pending
-- active production `DATABASE_URL` linkage was not safely confirmed, so production DB readiness is still blocked
+- production table listing used in the latest verification was empty for the expected runtime tables
+- active production `DATABASE_URL` linkage was not safely confirmed, and runtime still reports it absent after repair
+- production DB readiness is blocked
 
 ## 8. Legal / Trust Status
 
@@ -299,3 +301,9 @@ Provider secret readiness:
 
 - `ANTHROPIC_API_KEY` is present by env-name and appears present in a safe production env-run probe
 - actual provider-call success is still pending a later production smoke pass
+
+Production smoke gate status:
+
+- smoke not eligible yet
+- Gate A failed because runtime `DATABASE_URL` is still absent/unconfirmed
+- Gate B failed because required production tables are not present in the latest verification path

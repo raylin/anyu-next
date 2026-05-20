@@ -103,6 +103,7 @@ Neon production checklist:
 - do not reuse a dev, local, or preview branch as production
 - verify the production branch contains the expected runtime tables before launch
 - confirm the active production `DATABASE_URL` actually targets the Neon `anyu-next` `production` branch without exposing secrets
+- if runtime still does not see `DATABASE_URL` after secret update, stop before smoke and resolve env/runtime mismatch first
 
 ## 8. Drizzle Migration Checklist
 
@@ -180,6 +181,11 @@ This rule applies to staging and production.
 ## 12. Module 01 Smoke Test
 
 Minimum production smoke test:
+
+Gate before smoke:
+
+- runtime must see non-empty `DATABASE_URL`
+- production branch schema must already contain required runtime tables
 
 1. open `/m/ambiguous-temperature`
 2. confirm landing loads and CTA behavior is correct
