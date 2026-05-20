@@ -3004,3 +3004,41 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether future retention policy should extend explicit timestamps to additional related tables
 - when scheduled cleanup should become mandatory before scale-up
+
+## 2026-05-21 Module 01 UI Polish Backlog Consolidation v0
+
+### Task Completed
+
+- Consolidated the Module 01 UI polish backlog into a single prioritized planning artifact.
+- Preserved stable reference copies of `STAGING_AUDIT_v1.1.md` and `FONT_MIGRATION_v1.1.md` under `docs/design-system/reference/ui-polish-v1.1/`.
+- Recommended the first implementation handoff based on current production-safe scope.
+
+### Backlog Path
+
+- `ai-collaboration/research/2026-05-21-module-01-ui-polish-backlog-consolidation-v0.md`
+
+### Source Files Reviewed
+
+- `docs/design-system/reference/ui-polish-v1.1/STAGING_AUDIT_v1.1.md`
+- `docs/design-system/reference/ui-polish-v1.1/FONT_MIGRATION_v1.1.md`
+
+### First Recommended Implementation
+
+- `Brand Mark Selective UI Rollout v0`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether font migration Phase 1 should come immediately after the brand-rollout pass
+- whether share/persona should use mini lockup first or a stronger stamp treatment
