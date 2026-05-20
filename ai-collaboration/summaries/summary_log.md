@@ -2962,3 +2962,45 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - when broader public traffic should be reconsidered
 - whether retention automation should be implemented before any scale-up
+
+## 2026-05-21 Production Retention Cleanup Review v0
+
+### Task Completed
+
+- Reviewed production retention coverage for `analysis_requests` and `analysis_results`.
+- Verified overdue retained row counts and determined no manual cleanup was required yet.
+- Re-ran a safe aggregate event/privacy scan and found no leakage.
+
+### Overdue Row Status
+
+- `analysis_requests`: `0`
+- `analysis_results`: `0`
+
+### Cleanup Action
+
+- none required
+
+### Event / Privacy Status
+
+- passed
+
+### Current Launch Status
+
+- low-key production `GO` remains acceptable
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether future retention policy should extend explicit timestamps to additional related tables
+- when scheduled cleanup should become mandatory before scale-up
