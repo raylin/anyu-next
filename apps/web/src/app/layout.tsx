@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-page-custom-font */
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 
@@ -18,6 +19,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-Hant" data-module="ai-temperature">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

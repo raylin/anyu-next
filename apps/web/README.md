@@ -141,6 +141,8 @@ corepack pnpm brand:export
 - The browser favicon is `apps/web/public/favicon.svg`.
 - Generated brand-mark exports live under `docs/design-system/brand/exports/`.
 - App icon assets are generated from `docs/design-system/brand/anyu-mark.svg`.
+- Font Migration Phase 1 is complete: Latin display now uses `Instrument Serif`.
+- Newsreader and LXGW WenKai remain deferred.
 - Do not hand-edit the generated icon PNGs.
 - Current design-system source-of-truth docs are:
   - `docs/design-system/anyu-design-system-v1.1.md`

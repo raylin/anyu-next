@@ -3109,3 +3109,34 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact human viewport feel of the loading ornament and selective lockup still benefits from a true browser/device pass
 - whether the next step should be human funnel QA before any broader polish work
+
+## 2026-05-21 Font Migration Phase 1: Latin Display v0
+
+### Task Completed
+
+- Loaded Instrument Serif in the production app layout.
+- Updated canonical and app Latin display tokens from Cormorant Garamond to Instrument Serif.
+- Removed active Cormorant references from current source-of-truth token/docs paths and added guard tests.
+
+### Font Migration Phase
+
+- Phase 1 only: Latin display
+- deferred: Newsreader and LXGW WenKai
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- staging route checks for landing/demo result returned `200`
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact real-browser/mobile rendering feel of Instrument Serif on wordmark and large numerals
+- whether the next step should be dedicated staging QA before any later font phase

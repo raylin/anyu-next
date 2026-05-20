@@ -235,7 +235,19 @@ describe("ai-temperature UI helpers", () => {
     expect(appTokens).toContain("--anyu-mark-loading-size");
     expect(appTokens).toContain("--anyu-mark-cycle");
     expect(appTokens).toContain("--anyu-mark-stagger");
+    expect(appTokens).toContain('--anyu-font-latin: "Instrument Serif", "Noto Serif TC", serif;');
+    expect(appTokens).not.toContain("Cormorant Garamond");
     expect(appTokens).toBe(canonicalTokens);
+  });
+
+  it("loads Instrument Serif in the app layout without widening into later font phases", () => {
+    const layoutSource = readFileSync(resolve(process.cwd(), "src/app/layout.tsx"), "utf8");
+
+    expect(layoutSource).toContain("fonts.googleapis.com");
+    expect(layoutSource).toContain("Instrument+Serif:ital@0;1");
+    expect(layoutSource).not.toContain("Newsreader");
+    expect(layoutSource).not.toContain("LXGW WenKai");
+    expect(layoutSource).not.toContain("Cormorant");
   });
 
   it("builds identity-safe share text from result data", () => {

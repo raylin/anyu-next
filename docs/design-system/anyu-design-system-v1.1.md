@@ -169,7 +169,7 @@ v1.0 給了方向，但 staging 出現了 6 個 drift：
 |---|---|---|
 | `--anyu-font-serif` Noto Serif TC | hero / 結果金句 / persona / CTA 主按鈕 / 溫度單位 | 表單、列表、navbar、tooltip |
 | `--anyu-font-sans` Noto Sans TC | 內文、按鈕內文、表單、navbar、chip | hero、金句 |
-| `--anyu-font-latin` Cormorant Garamond italic | `暗語 ANYU` 字標、`42`、`NT$49` | 任何中文 |
+| `--anyu-font-latin` Instrument Serif italic | `暗語 ANYU` 字標、`42`、`NT$49` | 任何中文 |
 | `--anyu-font-mono` JetBrains Mono | section 角標、`// 註解`、`ONE-TIME · NO SUB` | 內文、按鈕 |
 
 ### 4.2 Type scale（mobile 360–390pt 寬）
@@ -894,4 +894,3 @@ footer (margin-top 10, text-center):
 
 > v1.0 → v1.1 是 **patch + minor**（token 加深 = patch；新增 ink-dark 配對 = minor）。
 > 不是 major：所有 v1.0 元件名、token 名都未改動。
-

@@ -28,6 +28,11 @@ Historical v1.0 files remain in place:
 
 When v1.1 tokens change, update `docs/design-system/tokens-v1.1.css` first, then sync `apps/web/src/styles/tokens.css`.
 
+Font Migration Phase 1 completed:
+
+- Latin display now uses `Instrument Serif`
+- Newsreader and LXGW WenKai remain deferred
+
 Brand-mark raw Claude Design files are preserved under `docs/design-system/reference/brand-v1.1/`.
 The production app must not import from the reference bundle directly.
 
