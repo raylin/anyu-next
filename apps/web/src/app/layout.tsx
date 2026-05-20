@@ -4,8 +4,10 @@ import "@/styles/globals.css";
 export const metadata: Metadata = {
   title: "暗語 ANYU",
   description: "C-stage production foundation for 暗語 ANYU.",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
   },
 };
 

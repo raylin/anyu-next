@@ -31,4 +31,12 @@ When v1.1 tokens change, update `docs/design-system/tokens-v1.1.css` first, then
 Brand-mark raw Claude Design files are preserved under `docs/design-system/reference/brand-v1.1/`.
 The production app must not import from the reference bundle directly.
 
+Generated brand-mark exports live under:
+
+- `docs/design-system/brand/exports/`
+
+Recommended LINE OA profile image:
+
+- `docs/design-system/brand/exports/line-profile-1024.png`
+
 Future `packages/design-system` may be considered later, but not yet.

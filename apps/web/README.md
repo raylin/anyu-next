@@ -128,6 +128,7 @@ corepack pnpm test
 corepack pnpm build
 corepack pnpm db:generate
 corepack pnpm db:migrate
+corepack pnpm brand:export
 ```
 
 ## Notes
@@ -138,6 +139,9 @@ corepack pnpm db:migrate
 - The production-safe app mark component is `apps/web/src/components/anyu/AnyuMark.tsx`.
 - The app-local brand-mark animation subset is `apps/web/src/styles/anyu-mark.css`.
 - The browser favicon is `apps/web/public/favicon.svg`.
+- Generated brand-mark exports live under `docs/design-system/brand/exports/`.
+- App icon assets are generated from `docs/design-system/brand/anyu-mark.svg`.
+- Do not hand-edit the generated icon PNGs.
 - Current design-system source-of-truth docs are:
   - `docs/design-system/anyu-design-system-v1.1.md`
   - `docs/design-system/ux-flow-v1.1.md`
