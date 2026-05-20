@@ -134,9 +134,21 @@ textarea {
 
 .anyu-wordmark {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--anyu-space-2);
   color: var(--anyu-ink);
+}
+
+.anyu-wordmark-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--anyu-accent);
+  transform: translateY(0.03rem);
+}
+
+.anyu-wordmark-mark-icon {
+  display: block;
 }
 
 .anyu-wordmark-quiet {
@@ -155,6 +167,25 @@ textarea {
   font-size: var(--anyu-type-num-md-size);
   line-height: 1;
   font-style: italic;
+}
+
+.anyu-wordmark-share {
+  gap: 0.45rem;
+  color: var(--anyu-dim);
+}
+
+.anyu-wordmark-share .anyu-wordmark-mark {
+  color: var(--anyu-accent);
+}
+
+.anyu-wordmark-share .anyu-wordmark-zh {
+  font-size: 11px;
+  color: var(--anyu-dim);
+}
+
+.anyu-wordmark-share .anyu-wordmark-en {
+  font-size: 0.9rem;
+  color: var(--anyu-ink);
 }
 
 .anyu-hero-block {
@@ -565,17 +596,6 @@ textarea {
   padding-inline: 0.25rem;
 }
 
-.anyu-orb {
-  width: 2.9rem;
-  height: 2.9rem;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 35% 50%, var(--anyu-surface) 0 28%, transparent 29%),
-    var(--anyu-accent2);
-  box-shadow: 0 0 18px rgba(155, 126, 176, 0.18);
-  flex: 0 0 auto;
-}
-
 .anyu-score-wrap {
   display: flex;
   align-items: flex-end;
@@ -608,7 +628,7 @@ textarea {
 
 .anyu-meter {
   width: 100%;
-  height: 0.7rem;
+  height: 0.25rem;
   border-radius: 999px;
   background: var(--anyu-mist);
   overflow: hidden;
@@ -623,7 +643,7 @@ textarea {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--anyu-accent2), var(--anyu-accent), var(--anyu-rose));
+  background: linear-gradient(90deg, var(--anyu-accent2) 0%, var(--anyu-rose) 50%, var(--anyu-accent) 100%);
 }
 
 .anyu-meter-labels {
@@ -674,6 +694,10 @@ textarea {
   font-style: italic;
 }
 
+.anyu-signal-item .anyu-meter-fill {
+  background: var(--anyu-accent);
+}
+
 .anyu-signal-item:last-child {
   padding-bottom: 0;
   border-bottom: 0;
@@ -720,14 +744,6 @@ textarea {
   font-size: 1.1rem;
   line-height: 1.65;
   color: var(--anyu-dim);
-}
-
-.anyu-share-dot {
-  width: 0.95rem;
-  height: 0.95rem;
-  border-radius: 999px;
-  background: var(--anyu-accent2);
-  box-shadow: 0 0 12px rgba(155, 126, 176, 0.22);
 }
 
 .anyu-share-temp {
@@ -948,14 +964,12 @@ textarea {
   text-align: center;
 }
 
-.anyu-loading-moon {
-  width: 3.8rem;
-  height: 3.8rem;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 35% 50%, var(--anyu-surface) 0 28%, transparent 29%),
-    var(--anyu-accent);
-  box-shadow: 0 0 24px var(--anyu-accent-20);
+.anyu-loading-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  color: var(--anyu-accent);
 }
 
 .anyu-status-copy {
@@ -976,28 +990,6 @@ textarea {
   color: var(--anyu-dim);
   font-size: var(--anyu-type-caption-size);
   line-height: 1.7;
-}
-
-.anyu-loading-dots {
-  display: flex;
-  justify-content: center;
-  gap: 0.875rem;
-}
-
-.anyu-loading-dots span {
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 999px;
-  background: var(--anyu-accent);
-  animation: anyuPulse 1.4s ease-in-out infinite;
-}
-
-.anyu-loading-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.anyu-loading-dots span:nth-child(3) {
-  animation-delay: 0.4s;
 }
 
 .anyu-loading-hint {
@@ -1123,11 +1115,7 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .anyu-loading-moon {
-    box-shadow: none;
-  }
-
-  .anyu-loading-dots span {
+  .anyu-mark--typing .anyu-mark-dot {
     animation: none;
   }
 }

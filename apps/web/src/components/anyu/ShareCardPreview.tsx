@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Wordmark } from "@/components/anyu/Wordmark";
 
 type ShareCardPreviewProps = {
   persona: string;
@@ -39,8 +40,7 @@ export function ShareCardPreview({
     <div className="anyu-share-preview" aria-label="分享卡預覽">
       <div className="anyu-share-shell">
         <div className="anyu-share-top">
-          <span className="anyu-kicker">暗語 ANYU</span>
-          <span className="anyu-share-dot" aria-hidden="true" />
+          <Wordmark className="anyu-wordmark-share" showMark />
         </div>
 
         <div className="anyu-share-body">

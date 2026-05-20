@@ -13,7 +13,6 @@ export function TemperatureCard({ score, stateLabel }: TemperatureCardProps) {
           <p className="anyu-kicker">當前溫度</p>
           <h2 className="anyu-section-title">現在比較像哪一種溫差</h2>
         </div>
-        <span className="anyu-orb" aria-hidden="true" />
       </div>
 
       <div className="anyu-score-wrap">

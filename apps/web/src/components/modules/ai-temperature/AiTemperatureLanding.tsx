@@ -197,7 +197,7 @@ export function AiTemperatureLanding({
     <section className="anyu-module-page">
       <header className="anyu-topbar anyu-topbar-landing">
         <p className="anyu-topbar-tag">{moduleConfig.family}</p>
-        <Wordmark className="anyu-wordmark-quiet" />
+        <Wordmark className="anyu-wordmark-quiet" showMark />
       </header>
 
       <section className="anyu-hero-block anyu-hero-block-landing" aria-labelledby="anyu-hero-title">

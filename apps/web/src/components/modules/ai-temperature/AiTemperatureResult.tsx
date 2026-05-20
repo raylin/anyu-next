@@ -238,7 +238,7 @@ export function AiTemperatureResult({
         <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">
           ← 重新整理輸入
         </Link>
-        <Wordmark />
+        <Wordmark showMark />
       </div>
 
       <TemperatureCard score={result.score} stateLabel={result.stateLabel} />

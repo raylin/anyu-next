@@ -3042,3 +3042,33 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether font migration Phase 1 should come immediately after the brand-rollout pass
 - whether share/persona should use mini lockup first or a stronger stamp treatment
+
+## 2026-05-21 Brand Mark Selective UI Rollout v0
+
+### Task Completed
+
+- Added a selective `AnyuMark` lockup mode to `Wordmark` and applied it to the landing header, result header, and share/persona surface.
+- Replaced the loading moon/dots ornament with animated `AnyuMark`.
+- Removed the orphan purple orb/share dot and aligned temperature/signal bars to the v1.1 audit direction.
+- Added rollout-focused render/CSS guard tests.
+
+### Review Bundle
+
+- `ai-collaboration/research/2026-05-21-brand-mark-selective-ui-rollout-v0-review-bundle.md`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether the selective mark rollout should expand further before any font migration work
+- whether the next polish pass should target staging QA or conversion/paywall rhythm first

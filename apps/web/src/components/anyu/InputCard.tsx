@@ -1,4 +1,5 @@
 import type { ChangeEventHandler, FormEventHandler, RefObject } from "react";
+import { AnyuMark } from "@/components/anyu/AnyuMark";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { PrivacyHelper } from "@/components/anyu/PrivacyHelper";
@@ -119,16 +120,13 @@ export function InputCard({
             className={["anyu-status-panel", isLoading ? "anyu-status-panel-loading" : ""].filter(Boolean).join(" ")}
           >
             <div className="anyu-loading-head">
-              <span className="anyu-loading-moon" aria-hidden="true" />
+              <span className="anyu-loading-mark" aria-hidden="true">
+                <AnyuMark size={26} animated decorative />
+              </span>
               <div className="anyu-status-copy">
                 <p className="anyu-loading-title">{statusMessage}</p>
                 {statusDetail ? <p className="anyu-loading-detail">{statusDetail}</p> : null}
               </div>
-            </div>
-            <div className="anyu-loading-dots" aria-hidden="true">
-              <span />
-              <span />
-              <span />
             </div>
             <p className="anyu-loading-hint">請稍候片刻</p>
             <div className="anyu-loading-tip">
