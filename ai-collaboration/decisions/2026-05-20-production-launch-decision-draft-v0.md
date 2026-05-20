@@ -15,6 +15,7 @@ Latest verification update:
 - the prepared app project is `anyu-next`
 - the live production domain `https://anyu.tw` is currently served by a different Vercel project, `anyu`
 - production launch must not proceed until project/domain/env ownership is normalized
+- recommended normalization target is `anyu-next` owning `anyu.tw` and `www.anyu.tw`
 
 ## 2. Approved Production Commit
 
@@ -272,3 +273,9 @@ Production should not proceed until all of the following are confirmed:
 6. Manual retention cleanup SOP is accepted by the human operator.
 7. `www.anyu.tw` redirect policy is decided and implemented.
 8. Production domain / DNS readiness is verified after the final project/domain mapping is in place.
+
+Current normalization recommendation:
+
+- choose `Option A`
+- make `anyu-next` the production Vercel project
+- move `anyu.tw` and `www.anyu.tw` to `anyu-next` only after explicit human approval

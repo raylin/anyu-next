@@ -144,6 +144,8 @@ Deployment options:
 Recommended v0 approach:
 
 - merge the approved staging commit into `main` only after the Production Launch Decision is completed
+- complete production project/domain normalization before final launch approval
+- current recommended target is `anyu-next` owning `anyu.tw` and `www.anyu.tw`
 
 Do not auto-push `main`.
 
@@ -152,6 +154,7 @@ Do not auto-push `main`.
 Production domain checklist:
 
 - production domain: `anyu.tw`
+- canonical domain policy: `anyu.tw` primary, `www.anyu.tw` redirects to apex
 - verify DNS points to Vercel
 - verify SSL certificate is active
 - verify `https://anyu.tw` loads successfully
@@ -159,6 +162,7 @@ Production domain checklist:
 
 Open question:
 
+- production project/domain normalization should be complete before production launch
 - `www.anyu.tw` redirect strategy should be confirmed before production launch if it is not already decided in Vercel
 
 ## 11. NEXT_PUBLIC Env Rebuild Rule

@@ -2693,3 +2693,34 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - Whether production should be normalized onto `anyu-next` or whether `anyu` should be fully repurposed for the current app.
 - Whether the active production `DATABASE_URL` already points at the `anyu-next` production branch.
 - What final `www.anyu.tw` redirect/DNS policy should be used at launch.
+
+## 2026-05-20 Production Project + Domain Normalization v0
+
+### Task Completed
+
+- Verified the current Vercel project/domain split across `anyu-next` and `anyu`.
+- Compared normalization options and documented a safe manual plan.
+- Updated the production launch decision draft and runbook with the explicit normalization prerequisite.
+
+### Recommendation
+
+- Choose `Option A`.
+- Make `anyu-next` the production Vercel project.
+- Move `anyu.tw` and `www.anyu.tw` to `anyu-next` only after explicit human approval.
+
+### Current Go / No-Go Status
+
+- `No-Go`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Unresolved Questions
+
+- Whether any hidden dependency still requires the old `anyu` project.
+- Whether the active production `DATABASE_URL` already points at Neon `anyu-next` `production`.
+- Whether production should launch from `main` or an explicitly approved production commit path.
