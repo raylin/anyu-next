@@ -4,11 +4,19 @@ import { resolve } from "node:path";
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
 import {
   ANALYZE_REQUEST_TIMEOUT_MS,
+  EMAIL_FALLBACK_BODY,
+  EMAIL_FALLBACK_LABEL,
+  LINE_ADD_URL_CONFIG_KEY,
+  LINE_PRIMARY_BODY,
+  LINE_PRIMARY_CTA,
+  LINE_PRIMARY_PANEL_TITLE,
   type AnalyzeInputGuidanceState,
   MAX_ANALYZE_LENGTH,
+  MISSING_LINE_URL_MESSAGE,
   MIN_ANALYZE_LENGTH,
   SOFT_MAX_ANALYZE_LENGTH,
   buildShareText,
+  getLineAddUrl,
   getAnalyzeErrorMessage,
   getAnalyzeButtonLabel,
   getAnalyzeInputGuidance,
@@ -249,5 +257,23 @@ describe("ai-temperature UI helpers", () => {
     expect(shareText).toContain("有些曖昧不是沒訊號，是訊號太小聲。");
     expect(shareText).toContain("— 暗語 ANYU");
     expect(shareText).toContain("https://staging.anyu.tw/m/ambiguous-temperature");
+  });
+
+  it("reads the public line add url safely from env-like input", () => {
+    expect(LINE_ADD_URL_CONFIG_KEY).toBe("NEXT_PUBLIC_LINE_ADD_URL");
+    expect(getLineAddUrl("https://lin.ee/S6dnbJO")).toBe("https://lin.ee/S6dnbJO");
+    expect(getLineAddUrl("   ")).toBeNull();
+    expect(getLineAddUrl(undefined)).toBeNull();
+  });
+
+  it("keeps the line-first contact copy explicit and the email fallback secondary", () => {
+    expect(LINE_PRIMARY_PANEL_TITLE).toBe("加入 LINE，收到完整分析開放通知");
+    expect(LINE_PRIMARY_BODY).toContain("完整分析與新測驗開放");
+    expect(LINE_PRIMARY_CTA).toBe("加入 LINE，收到開放通知");
+    expect(EMAIL_FALLBACK_LABEL).toBe("改用 Email 接收通知");
+    expect(EMAIL_FALLBACK_BODY).toContain("不寄日常電子報");
+    expect(MISSING_LINE_URL_MESSAGE).toBe(
+      "LINE 連結暫時還沒準備好，請先改用 Email 接收通知。",
+    );
   });
 });

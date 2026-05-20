@@ -19,7 +19,7 @@ export function PaidPreviewCard({
   previewCopy,
   onRevealContact,
 }: PaidPreviewCardProps) {
-const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -104,11 +104,11 @@ const [revealed, setRevealed] = useState(false);
       <p className="anyu-small-note">
         {revealed
           ? "目前內測中，這次不會真的收費。"
-          : "目前內測 · 點下後留 LINE 或 Email，這次不會真的收費。"}
+          : "目前內測 · 點下後可加入 LINE 收到開放通知，或改用 Email。"}
       </p>
 
       <Button type="button" className="anyu-button-block" onClick={handleReveal} disabled={isLoading}>
-        {isLoading ? "開啟中..." : `解鎖一次 — ${price}`}
+        {isLoading ? "開啟中..." : `${headline} — ${price}`}
       </Button>
 
       {errorMessage ? (

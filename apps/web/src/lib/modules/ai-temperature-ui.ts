@@ -7,6 +7,15 @@ export const SOFT_MAX_ANALYZE_LENGTH = 2000;
 export const MAX_ANALYZE_LENGTH = 4000;
 export const ANONYMOUS_SESSION_STORAGE_KEY = "anyu-ambiguous-temperature-session-id";
 export const ANALYZE_REQUEST_TIMEOUT_MS = 65_000;
+export const LINE_ADD_URL_CONFIG_KEY = "NEXT_PUBLIC_LINE_ADD_URL";
+export const LINE_PRIMARY_PANEL_TITLE = "加入 LINE，收到完整分析開放通知";
+export const LINE_PRIMARY_BODY =
+  "目前內測中，這次不會真的收費。加入後，我們會優先通知你完整分析與新測驗開放。";
+export const LINE_PRIMARY_CTA = "加入 LINE，收到開放通知";
+export const EMAIL_FALLBACK_LABEL = "改用 Email 接收通知";
+export const EMAIL_FALLBACK_BODY =
+  "留下 Email，我們會在完整分析開放或新測驗上線時通知你。不寄日常電子報，也不分享給第三方。";
+export const MISSING_LINE_URL_MESSAGE = "LINE 連結暫時還沒準備好，請先改用 Email 接收通知。";
 
 export type ScoreBucket = "cold" | "cool" | "warm" | "hot" | "unknown";
 export type AnalyzeWaitStage =
@@ -204,6 +213,12 @@ export function getAnalyzeLoadingSubtitle(elapsedMs: number): string {
 
 export function getModuleLabel(moduleConfig: ProductModuleConfig): string {
   return `module · 01 · ${moduleConfig.family}`;
+}
+
+export function getLineAddUrl(envValue = process.env.NEXT_PUBLIC_LINE_ADD_URL): string | null {
+  const candidate = envValue?.trim();
+
+  return candidate ? candidate : null;
 }
 
 export function scoreToBucket(score: number): ScoreBucket {

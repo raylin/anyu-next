@@ -618,6 +618,44 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 LINE Funnel Contact UI Implementation v0
+
+### Task Completed
+
+- implemented a LINE-first contact-notification UI for Module 01 after paid unlock
+- added `NEXT_PUBLIC_LINE_ADD_URL` support and documented the public add-friend URL in `.env.example`
+- added `line_add_clicked` and `email_fallback_opened` event support
+- kept Email as a visually secondary fallback using the existing `/api/contact` path
+- created `ai-collaboration/research/2026-05-20-line-funnel-contact-ui-implementation-v0-review-bundle.md`
+- created `ai-collaboration/reports/2026-05-20-line-funnel-contact-ui-implementation-v0-execution-report.md`
+
+### Learnings
+
+- the current fake-door/result structure can support a LINE-first funnel without touching the analyze/runtime path
+- env-driven public URL configuration is enough for v0, but live staging still needs explicit env verification
+
+### Unresolved Questions
+
+- whether `NEXT_PUBLIC_LINE_ADD_URL` is already configured in preview/staging
+- same-tab LINE handoff still benefits from a protected staging/browser pass on real devices
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- render tests verified the LINE-first panel copy and missing-URL fallback
+- attempted local dev HTTP smoke could not complete because the local dev server was not reachable from this shell session
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-20 LINE Funnel UI Copy + Implementation Plan v0
 
 ### Task Completed

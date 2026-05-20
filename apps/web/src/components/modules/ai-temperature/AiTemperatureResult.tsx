@@ -10,10 +10,11 @@ import { ShareCardPreview } from "@/components/anyu/ShareCardPreview";
 import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { uiNotices } from "@/content/legal";
-import { trackClientEvent } from "@/lib/events/client";
+import { trackClientEvent, trackClientEventBeacon } from "@/lib/events/client";
 import {
   buildShareText,
   getClientAnonymousSessionId,
+  getLineAddUrl,
   scoreToBucket,
 } from "@/lib/modules/ai-temperature-ui";
 import type { ProductModuleConfig } from "@/lib/modules/types";
@@ -35,6 +36,7 @@ export function AiTemperatureResult({
   const [showContact, setShowContact] = useState(false);
   const [unlockIntentId, setUnlockIntentId] = useState<string | null>(null);
   const [unlockIntentFailed, setUnlockIntentFailed] = useState(false);
+  const lineAddUrl = getLineAddUrl();
 
   useEffect(() => {
     void trackClientEvent({
@@ -134,7 +136,7 @@ export function AiTemperatureResult({
         ok: response.ok && data.ok,
         message:
           response.ok && data.ok
-            ? data.message
+            ? "已收到，我們會在完整分析開放時通知你。"
             : "目前內測表單暫時無法送出，請稍後再試。",
       };
     } catch {
@@ -153,6 +155,34 @@ export function AiTemperatureResult({
       scoreBucket: scoreToBucket(result.score),
       metadata: {
         resultId,
+      },
+    });
+  }
+
+  function handleEmailFallbackOpen() {
+    void trackClientEvent({
+      eventName: "email_fallback_opened",
+      moduleConfig,
+      anonymousSessionId: getClientAnonymousSessionId(),
+      scoreBucket: scoreToBucket(result.score),
+      metadata: {
+        resultId,
+        unlockIntentId,
+        source: "contact_capture",
+      },
+    });
+  }
+
+  function handleLineAddClick() {
+    trackClientEventBeacon({
+      eventName: "line_add_clicked",
+      moduleConfig,
+      anonymousSessionId: getClientAnonymousSessionId(),
+      scoreBucket: scoreToBucket(result.score),
+      metadata: {
+        resultId,
+        unlockIntentId,
+        source: "contact_capture",
       },
     });
   }
@@ -272,11 +302,14 @@ export function AiTemperatureResult({
 
       <ContactCapture
         visible={showContact}
+        lineAddUrl={lineAddUrl}
         noticeMessage={
           unlockIntentFailed
             ? "內測記錄暫時無法建立，但你仍可留下聯絡方式。"
             : undefined
         }
+        onLineAddClick={handleLineAddClick}
+        onEmailFallbackOpen={handleEmailFallbackOpen}
         onSubmit={submitContact}
       />
 

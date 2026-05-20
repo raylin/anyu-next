@@ -3,7 +3,15 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
-import { uiNotices } from "@/content/legal";
+import { LEGAL_CONTACT_EMAIL, uiNotices } from "@/content/legal";
+import {
+  EMAIL_FALLBACK_BODY,
+  EMAIL_FALLBACK_LABEL,
+  LINE_PRIMARY_BODY,
+  LINE_PRIMARY_CTA,
+  LINE_PRIMARY_PANEL_TITLE,
+  MISSING_LINE_URL_MESSAGE,
+} from "@/lib/modules/ai-temperature-ui";
 
 type ContactCapturePayload = {
   email?: string;
@@ -14,6 +22,9 @@ type ContactCapturePayload = {
 type ContactCaptureProps = {
   visible?: boolean;
   noticeMessage?: string;
+  lineAddUrl?: string | null;
+  onLineAddClick?: () => Promise<void> | void;
+  onEmailFallbackOpen?: () => Promise<void> | void;
   onSubmit?: (
     payload: ContactCapturePayload,
   ) => Promise<{ ok: boolean; message: string }>;
@@ -22,13 +33,16 @@ type ContactCaptureProps = {
 export function ContactCapture({
   visible = true,
   noticeMessage,
+  lineAddUrl,
+  onLineAddClick,
+  onEmailFallbackOpen,
   onSubmit,
 }: ContactCaptureProps) {
-  const [contactType, setContactType] = useState<"line" | "email">("line");
   const [contactValue, setContactValue] = useState("");
   const [consent, setConsent] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isEmailFallbackOpen, setIsEmailFallbackOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -36,11 +50,35 @@ export function ContactCapture({
     return null;
   }
 
+  async function openEmailFallback() {
+    if (!isEmailFallbackOpen) {
+      await onEmailFallbackOpen?.();
+    }
+
+    setIsEmailFallbackOpen(true);
+    setErrorMessage("");
+    setStatusMessage("");
+  }
+
+  async function handleLinePrimaryClick() {
+    if (!lineAddUrl) {
+      setErrorMessage(MISSING_LINE_URL_MESSAGE);
+      await openEmailFallback();
+      return;
+    }
+
+    await onLineAddClick?.();
+
+    if (typeof window !== "undefined") {
+      window.location.href = lineAddUrl;
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!onSubmit) {
-      setStatusMessage("這是 demo 路線，目前不會真的送出。");
+      setStatusMessage("這是 demo 路線，目前不會真的送出，但正式流程已預留位置。");
       setErrorMessage("");
       setIsSubmitted(true);
       return;
@@ -52,8 +90,7 @@ export function ContactCapture({
 
     try {
       const response = await onSubmit({
-        email: contactType === "email" ? contactValue : undefined,
-        lineId: contactType === "line" ? contactValue : undefined,
+        email: contactValue,
         consent,
       });
 
@@ -75,44 +112,56 @@ export function ContactCapture({
     <Card className="anyu-contact-card">
       <p className="anyu-kicker">目前內測中</p>
       <h2 className="anyu-section-title">
-        {isSubmitted ? "收到，完整分析會補送給你。" : "這次不會真的收費。"}
+        {isSubmitted ? "收到，我們會在開放時通知你。" : LINE_PRIMARY_PANEL_TITLE}
       </h2>
       <p className="anyu-copy">
         {isSubmitted
-          ? "我們會用你留下的方式送出一次完整分析。這次不會真的收費。"
-          : "留下 LINE 或 Email，我們會送你一次完整分析。"}
+          ? "我們會優先用你留下的方式通知完整分析開放或新測驗上線。這次不會真的收費。"
+          : LINE_PRIMARY_BODY}
       </p>
-      <p className="anyu-subtle-note">{uiNotices.contactCapture}</p>
+      <p className="anyu-subtle-note">
+        你可以隨時封鎖官方帳號，或來信 {LEGAL_CONTACT_EMAIL} 要求刪除資料。
+      </p>
       {noticeMessage ? <p className="anyu-subtle-note">{noticeMessage}</p> : null}
 
-      {isSubmitted ? null : (
+      {isSubmitted ? null : !isEmailFallbackOpen ? (
+        <div className="anyu-contact-stack">
+          <Button
+            type="button"
+            className="anyu-button-block"
+            onClick={handleLinePrimaryClick}
+          >
+            {LINE_PRIMARY_CTA}
+          </Button>
+
+          <button
+            type="button"
+            className="anyu-inline-link-button"
+            onClick={() => {
+              void openEmailFallback();
+            }}
+          >
+            {EMAIL_FALLBACK_LABEL}
+          </button>
+
+          <p className="anyu-subtle-note">
+            {lineAddUrl
+              ? uiNotices.lineAddFriend
+              : MISSING_LINE_URL_MESSAGE}
+          </p>
+        </div>
+      ) : (
         <form className="anyu-contact-grid" onSubmit={handleSubmit}>
-          <label className="anyu-contact-field">
-            <span className="anyu-field-label">聯絡方式</span>
-            <select
-              className="anyu-select"
-              value={contactType}
-              onChange={(event) =>
-                setContactType(event.target.value === "email" ? "email" : "line")
-              }
-            >
-              <option value="line">LINE</option>
-              <option value="email">Email</option>
-            </select>
-          </label>
+          <p className="anyu-subtle-note">{EMAIL_FALLBACK_BODY}</p>
 
           <label className="anyu-contact-field">
-            <span className="anyu-field-label">
-              {contactType === "email" ? "Email" : "LINE ID"}
-            </span>
+            <span className="anyu-field-label">Email</span>
             <input
               className="anyu-input"
-              type={contactType === "email" ? "email" : "text"}
+              type="email"
               value={contactValue}
               onChange={(event) => setContactValue(event.target.value)}
-              placeholder={
-                contactType === "email" ? "name@example.com" : "@your_line_id"
-              }
+              placeholder="name@example.com"
             />
           </label>
 
@@ -122,11 +171,11 @@ export function ContactCapture({
               checked={consent}
               onChange={(event) => setConsent(event.target.checked)}
             />
-            <span>我同意留下聯絡方式，供內測完整分析回傳使用。</span>
+            <span>我同意留下 Email，供完整分析開放通知與必要的新測驗通知使用。</span>
           </label>
 
           <Button type="submit" className="anyu-button-block" disabled={isSubmitting}>
-            {isSubmitting ? "送出中..." : "送出 · 等我們的完整分析"}
+            {isSubmitting ? "送出中..." : "送出 Email 通知"}
           </Button>
         </form>
       )}

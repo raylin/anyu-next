@@ -104,7 +104,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      message: "已收到你的聯絡方式，我們會把完整分析送給你。",
+      message: "已收到你的聯絡方式，我們會在完整分析開放時通知你。",
     });
   } catch {
     return NextResponse.json(

@@ -33,6 +33,8 @@ describe("event metadata guard", () => {
     expect(EVENT_NAMES).toContain("input_started");
     expect(EVENT_NAMES).toContain("analysis_started");
     expect(EVENT_NAMES).toContain("analysis_failed");
+    expect(EVENT_NAMES).toContain("line_add_clicked");
+    expect(EVENT_NAMES).toContain("email_fallback_opened");
     expect(EVENT_NAMES).toContain("share_card_clicked");
   });
 });

@@ -45,3 +45,19 @@ export async function trackClientEvent(
     // Launch-readiness analytics should never crash the UI.
   }
 }
+
+export function trackClientEventBeacon(input: SafeClientEventInput): void {
+  try {
+    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+      const body = JSON.stringify(buildClientEventPayload(input));
+      const blob = new Blob([body], { type: "application/json" });
+
+      navigator.sendBeacon("/api/events", blob);
+      return;
+    }
+  } catch {
+    // Fall back to the standard fire-and-forget fetch path below.
+  }
+
+  void trackClientEvent(input);
+}

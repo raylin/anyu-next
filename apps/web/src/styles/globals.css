@@ -881,6 +881,11 @@ textarea {
   grid-template-columns: 1fr;
 }
 
+.anyu-contact-stack {
+  display: grid;
+  gap: 0.85rem;
+}
+
 .anyu-contact-field {
   display: grid;
   gap: 0.5rem;
@@ -1031,6 +1036,29 @@ textarea {
 
 .anyu-status-message-error {
   color: var(--anyu-danger);
+}
+
+.anyu-inline-link-button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--anyu-dim);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+  justify-self: start;
+}
+
+.anyu-inline-link-button:hover {
+  color: var(--anyu-ink);
+}
+
+.anyu-inline-link-button:focus-visible {
+  outline: 2px solid var(--anyu-accent);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 .anyu-share-action {

@@ -18,11 +18,11 @@
 
 ## 5. Contact Capture Note
 
-留下 LINE 或 Email 後，我們只會用於傳送完整分析、內測通知與新測驗提醒。
+留下 LINE 或 Email 後，我們只會用於完整分析開放通知、內測通知與新測驗提醒。
 
 ## 6. LINE Add Friend Note
 
-如果未來提供 LINE 官方帳號，LINE 會是主要的內測通知與完整分析交付管道；你也可以不加入，改用 Email 作為備用。
+如果提供 LINE 官方帳號，LINE 會是主要的內測通知與完整分析開放通知管道；你也可以不加入，改用 Email 作為備用。
 
 ## 7. Footer Links
 

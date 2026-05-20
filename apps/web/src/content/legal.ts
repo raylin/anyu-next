@@ -41,9 +41,9 @@ export const uiNotices = {
     "這不是判決，也不是心理諮商；它只是幫你多看一眼互動裡的訊號。",
   paidUnlockNote: "目前內測中，這次不會真的收費。",
   contactCapture:
-    "留下 LINE 或 Email 後，我們只會用於傳送完整分析、內測通知與新測驗提醒。",
+    "留下 LINE 或 Email 後，我們只會用於完整分析開放通知、內測通知與新測驗提醒。",
   lineAddFriend:
-    "如果未來提供 LINE 官方帳號，LINE 會是主要的內測通知與完整分析交付管道；你也可以不加入，改用 Email 作為備用。",
+    "如果提供 LINE 官方帳號，LINE 會是主要的內測通知與完整分析開放通知管道；你也可以不加入，改用 Email 作為備用。",
 } as const;
 
 export const privacyPageContent: LegalPageContent = {
@@ -302,4 +302,3 @@ export const legalPages = [
   termsPageContent,
   disclaimerPageContent,
 ] as const;
-

@@ -6,6 +6,8 @@ export const EVENT_NAMES = [
   "input_submitted",
   "analysis_completed",
   "paid_unlock_clicked",
+  "line_add_clicked",
+  "email_fallback_opened",
   "contact_submitted",
   "share_card_clicked",
   "error_seen",
