@@ -57,4 +57,22 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("一次性 · no subscription");
     expect(html).toContain("目前內測中，這次不會真的收費。點下後可加入 LINE 收到開放通知，或改用 Email。");
   });
+
+  it("applies the editorial reading class only to long-form result surfaces", () => {
+    const html = renderToStaticMarkup(
+      <AiTemperatureResult
+        moduleConfig={aiTemperatureModule}
+        result={resultFixture}
+        mode="demo"
+        resultId="demo-result"
+      />,
+    );
+
+    expect(html).toContain('class="anyu-copy t-reading"');
+    expect(html).toContain('class="anyu-reassurance t-reading"');
+    expect(html).toContain('class="anyu-reply-copy t-reading"');
+    expect(html).not.toContain('class="anyu-share-action anyu-share-action-primary t-reading"');
+    expect(html).not.toContain('class="anyu-button anyu-button-block anyu-button-secondary t-reading"');
+    expect(html).not.toContain('class="anyu-subtle-note t-reading"');
+  });
 });

@@ -3242,3 +3242,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact human perception of the inline CTA rhythm and scroll landing on a real phone viewport
 - whether direct persisted-event verification should be done later in a DB-accessible QA pass
+
+## 2026-05-21 - Font Migration Phase 2: Editorial Reading v0
+
+### Completed Changes
+
+- loaded `Newsreader` in the app layout alongside the existing `Instrument Serif` loader
+- added `--anyu-font-reading` plus `.t-reading` and `.t-reading-lg` to canonical and app token files
+- applied editorial reading typography only to selected long-form result surfaces: insight, reassurance, and paid-preview sample reply
+- updated active design-system/app docs and added guard tests to keep the reading font scoped
+
+### Learnings
+
+- the result flow has a small set of genuinely long-form editorial surfaces that can take a reading serif without widening into a global typography change
+- Phase 2 stays low-risk when it is tokenized and enforced through render tests that explicitly exclude CTA/share/subtle-note surfaces
+- adding Newsreader to the existing layout loader is enough for this phase; there was no need to introduce local font packaging or Phase 3 work
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- route smoke for landing/demo result was not run in this shell session
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact real-browser/mobile rendering feel of Newsreader on insight/reassurance and the paid-preview sample reply
+- whether the next step should be a narrow staging QA pass before any later typography phase

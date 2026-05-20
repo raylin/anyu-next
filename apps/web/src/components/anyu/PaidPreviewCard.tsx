@@ -71,7 +71,7 @@ export function PaidPreviewCard({
             <span className="anyu-reply-letter anyu-reply-letter-open">A</span>
             <span className="anyu-reply-tag">保留主動權</span>
           </div>
-          <p className="anyu-reply-copy">{previewCopy}</p>
+          <p className="anyu-reply-copy t-reading">{previewCopy}</p>
           <span className="anyu-reply-divider" aria-hidden="true" />
           <p className="anyu-reply-why">
             <span>為什麼這樣回 ·</span>

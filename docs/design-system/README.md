@@ -31,7 +31,8 @@ When v1.1 tokens change, update `docs/design-system/tokens-v1.1.css` first, then
 Font Migration Phase 1 completed:
 
 - Latin display now uses `Instrument Serif`
-- Newsreader and LXGW WenKai remain deferred
+- Editorial reading now uses selective `Newsreader` utilities via `--anyu-font-reading`, `.t-reading`, and `.t-reading-lg`
+- LXGW WenKai remains deferred
 
 Brand-mark raw Claude Design files are preserved under `docs/design-system/reference/brand-v1.1/`.
 The production app must not import from the reference bundle directly.

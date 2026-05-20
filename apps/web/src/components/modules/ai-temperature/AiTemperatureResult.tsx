@@ -301,8 +301,8 @@ export function AiTemperatureResult({
       <Card className="anyu-insight-card">
         <p className="anyu-kicker">insight layer</p>
         <h2 className="anyu-section-title">{result.insightTitle}</h2>
-        <p className="anyu-copy">{result.insight}</p>
-        <p className="anyu-reassurance">{result.reassurance}</p>
+        <p className="anyu-copy t-reading">{result.insight}</p>
+        <p className="anyu-reassurance t-reading">{result.reassurance}</p>
       </Card>
 
       <Card className="anyu-transition-card">
