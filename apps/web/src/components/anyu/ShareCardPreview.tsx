@@ -46,7 +46,7 @@ export function ShareCardPreview({
         <div className="anyu-share-body">
           <span className="anyu-kicker">my persona</span>
           <strong className="anyu-share-persona">{persona}</strong>
-          <p className="anyu-share-quote">「{quote}」</p>
+          <p className="anyu-share-quote t-kai-quote">「{quote}」</p>
         </div>
 
         <div className="anyu-share-footer">

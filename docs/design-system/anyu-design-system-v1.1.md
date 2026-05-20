@@ -171,6 +171,7 @@ v1.0 給了方向，但 staging 出現了 6 個 drift：
 | `--anyu-font-sans` Noto Sans TC | 內文、按鈕內文、表單、navbar、chip | hero、金句 |
 | `--anyu-font-latin` Instrument Serif italic | `暗語 ANYU` 字標、`42`、`NT$49` | 任何中文 |
 | `--anyu-font-reading` Newsreader | insight 長段、結果說明長文、選定的 editorial body | 按鈕、輸入、法律頁、一般 UI body |
+| `--anyu-font-kai` LXGW WenKai | hook quote、share quote、短句私語感 surface | 長文、按鈕、輸入、法律頁、一般 UI body |
 | `--anyu-font-mono` JetBrains Mono | section 角標、`// 註解`、`ONE-TIME · NO SUB` | 內文、按鈕 |
 
 ### 4.2 Type scale（mobile 360–390pt 寬）

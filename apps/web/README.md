@@ -143,7 +143,7 @@ corepack pnpm brand:export
 - App icon assets are generated from `docs/design-system/brand/anyu-mark.svg`.
 - Font Migration Phase 1 is complete: Latin display now uses `Instrument Serif`.
 - Font Migration Phase 2 is complete: selective long-form result reading surfaces now use `Newsreader` via `--anyu-font-reading` and `.t-reading`.
-- LXGW WenKai remains deferred.
+- Font Migration Phase 3 is complete: short quote / whisper surfaces now use `LXGW WenKai` via `--anyu-font-kai`, `.t-kai`, `.t-kai-quote`, and `.t-quote`.
 - Do not hand-edit the generated icon PNGs.
 - Current design-system source-of-truth docs are:
   - `docs/design-system/anyu-design-system-v1.1.md`

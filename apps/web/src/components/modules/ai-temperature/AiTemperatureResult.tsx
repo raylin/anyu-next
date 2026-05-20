@@ -268,7 +268,7 @@ export function AiTemperatureResult({
       <TemperatureCard score={result.score} stateLabel={result.stateLabel} />
 
       <Card className="anyu-quote-card">
-        <p className="anyu-lead-quote">{result.oneSentenceRead}</p>
+        <p className="anyu-lead-quote t-quote">{result.oneSentenceRead}</p>
       </Card>
 
       <section className="anyu-signals-card" aria-labelledby="anyu-observed-signals-title">

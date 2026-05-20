@@ -32,7 +32,7 @@ Font Migration Phase 1 completed:
 
 - Latin display now uses `Instrument Serif`
 - Editorial reading now uses selective `Newsreader` utilities via `--anyu-font-reading`, `.t-reading`, and `.t-reading-lg`
-- LXGW WenKai remains deferred
+- Kai quote now uses selective `LXGW WenKai` utilities via `--anyu-font-kai`, `.t-kai`, `.t-kai-quote`, and `.t-quote`
 
 Brand-mark raw Claude Design files are preserved under `docs/design-system/reference/brand-v1.1/`.
 The production app must not import from the reference bundle directly.

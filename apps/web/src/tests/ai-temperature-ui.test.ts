@@ -237,19 +237,23 @@ describe("ai-temperature UI helpers", () => {
     expect(appTokens).toContain("--anyu-mark-stagger");
     expect(appTokens).toContain('--anyu-font-latin: "Instrument Serif", "Noto Serif TC", serif;');
     expect(appTokens).toContain('--anyu-font-reading: "Newsreader", "Noto Serif TC", serif;');
+    expect(appTokens).toContain('--anyu-font-kai: "LXGW WenKai", "Kaiti TC", "STKaiti", "Noto Serif TC", serif;');
+    expect(appTokens).toContain('.t-kai { font: 400 17px/1.85 var(--anyu-font-kai);');
+    expect(appTokens).toContain('.t-kai-quote { font: 400 17px/1.85 var(--anyu-font-kai);');
+    expect(appTokens).toContain('.t-quote   { font: 400 var(--anyu-type-quote-size)/var(--anyu-type-quote-lh) var(--anyu-font-kai);');
     expect(appTokens).toContain('.t-reading { font: 400 16px/1.75 var(--anyu-font-reading);');
     expect(appTokens).toContain('.t-reading-lg { font: 400 18px/1.7 var(--anyu-font-reading);');
     expect(appTokens).not.toContain("Cormorant Garamond");
     expect(appTokens).toBe(canonicalTokens);
   });
 
-  it("loads Instrument Serif and Newsreader in the app layout without widening into later font phases", () => {
+  it("loads Instrument Serif, Newsreader, and LXGW WenKai in the app layout for the approved font phases", () => {
     const layoutSource = readFileSync(resolve(process.cwd(), "src/app/layout.tsx"), "utf8");
 
     expect(layoutSource).toContain("fonts.googleapis.com");
     expect(layoutSource).toContain("Instrument+Serif:ital@0;1");
     expect(layoutSource).toContain("family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400");
-    expect(layoutSource).not.toContain("LXGW WenKai");
+    expect(layoutSource).toContain("https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css");
     expect(layoutSource).not.toContain("Cormorant");
   });
 

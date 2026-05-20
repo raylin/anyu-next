@@ -665,10 +665,6 @@ textarea {
 
 .anyu-lead-quote {
   margin: 0;
-  font-family: var(--anyu-font-serif);
-  font-size: var(--anyu-type-quote-size);
-  line-height: var(--anyu-type-quote-lh);
-  font-style: italic;
 }
 
 .anyu-signal-item {
@@ -747,9 +743,6 @@ textarea {
 
 .anyu-share-quote {
   margin: 0;
-  font-family: var(--anyu-font-serif);
-  font-size: 1.1rem;
-  line-height: 1.65;
   color: var(--anyu-dim);
 }
 

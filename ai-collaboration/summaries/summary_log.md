@@ -3309,3 +3309,37 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact human perception of Newsreader on a real phone viewport
 - whether a later true browser/device pass finds any subjective FOUT or weight issue
+
+## 2026-05-21 - Font Migration Phase 3: Kai Quote v0
+
+### Completed Changes
+
+- loaded `LXGW WenKai` in the app layout alongside the existing `Instrument Serif` and `Newsreader` loaders
+- added `--anyu-font-kai` plus `.t-kai` and `.t-kai-quote` to canonical and app token files
+- updated `.t-quote` to use the kai token without forced italic
+- applied kai typography only to the result hook quote and the share/persona quote
+- updated active design-system/app docs and added render-test guardrails for the narrow quote scope
+
+### Learnings
+
+- the quote surfaces can take a more handwritten/private tone without disturbing the broader result reading rhythm when kept to very short copy only
+- Phase 3 remains low-risk when it reuses token utilities and removes conflicting local serif/italic declarations
+- the right separation now is clear: `Instrument Serif` for Latin display, `Newsreader` for long-form reading, and `LXGW WenKai` for short whisper-like quote surfaces
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- route smoke for landing/demo result was not run in this shell session
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact real-browser/mobile rendering feel of `LXGW WenKai` on the lead quote and share quote
+- whether the next step should be a narrow staging QA pass before shifting back to technical UX work

@@ -21,6 +21,7 @@
   --anyu-font-sans:  "Noto Sans TC", "PingFang TC", "Inter", system-ui, -apple-system, sans-serif;
   --anyu-font-latin: "Instrument Serif", "Noto Serif TC", serif;
   --anyu-font-reading: "Newsreader", "Noto Serif TC", serif;
+  --anyu-font-kai: "LXGW WenKai", "Kaiti TC", "STKaiti", "Noto Serif TC", serif;
   --anyu-font-mono:  "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
 
   /* letter-spacing */
@@ -183,9 +184,11 @@
 .t-h1      { font: 500 var(--anyu-type-h1-size)/var(--anyu-type-h1-lh)           var(--anyu-font-serif); letter-spacing: -0.2px; color: var(--anyu-ink); }
 .t-h2      { font: 500 var(--anyu-type-h2-size)/var(--anyu-type-h2-lh)           var(--anyu-font-serif); color: var(--anyu-ink); }
 .t-h3      { font: 500 var(--anyu-type-h3-size)/var(--anyu-type-h3-lh)           var(--anyu-font-serif); color: var(--anyu-ink); }
-.t-quote   { font: italic 400 var(--anyu-type-quote-size)/var(--anyu-type-quote-lh) var(--anyu-font-serif); color: var(--anyu-ink); }
+.t-quote   { font: 400 var(--anyu-type-quote-size)/var(--anyu-type-quote-lh) var(--anyu-font-kai); letter-spacing: 0.5px; color: var(--anyu-ink); }
 .t-reading { font: 400 16px/1.75 var(--anyu-font-reading); font-variation-settings: "opsz" 16; color: var(--anyu-ink); }
 .t-reading-lg { font: 400 18px/1.7 var(--anyu-font-reading); font-variation-settings: "opsz" 18; color: var(--anyu-ink); }
+.t-kai { font: 400 17px/1.85 var(--anyu-font-kai); letter-spacing: 0.5px; color: var(--anyu-ink); }
+.t-kai-quote { font: 400 17px/1.85 var(--anyu-font-kai); letter-spacing: 0.6px; color: var(--anyu-ink); }
 .t-body-lg { font: 400 var(--anyu-type-body-lg-size)/var(--anyu-type-body-lg-lh) var(--anyu-font-sans);   color: var(--anyu-ink); }
 .t-body    { font: 400 var(--anyu-type-body-size)/var(--anyu-type-body-lh)       var(--anyu-font-sans);   color: var(--anyu-ink); }
 .t-caption { font: 400 var(--anyu-type-caption-size)/var(--anyu-type-caption-lh) var(--anyu-font-sans);   color: var(--anyu-dim); }

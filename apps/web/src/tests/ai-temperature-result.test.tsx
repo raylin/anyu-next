@@ -75,4 +75,21 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).not.toContain('class="anyu-button anyu-button-block anyu-button-secondary t-reading"');
     expect(html).not.toContain('class="anyu-subtle-note t-reading"');
   });
+
+  it("applies kai typography only to the short quote surfaces", () => {
+    const html = renderToStaticMarkup(
+      <AiTemperatureResult
+        moduleConfig={aiTemperatureModule}
+        result={resultFixture}
+        mode="demo"
+        resultId="demo-result"
+      />,
+    );
+
+    expect(html).toContain('class="anyu-lead-quote t-quote"');
+    expect(html).toContain('class="anyu-share-quote t-kai-quote"');
+    expect(html).not.toContain('class="anyu-copy t-kai"');
+    expect(html).not.toContain('class="anyu-reassurance t-kai"');
+    expect(html).not.toContain('class="anyu-button anyu-button-block t-kai-quote"');
+  });
 });
