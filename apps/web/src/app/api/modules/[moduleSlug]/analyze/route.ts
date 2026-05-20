@@ -6,6 +6,14 @@ import { isDbConfigured } from "@/lib/db/client";
 import { validateAnalyzeInput } from "@/lib/modules/ai-temperature-ui";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { redactUserInput } from "@/lib/privacy/pii";
+import {
+  checkIpHourlyLimit,
+  checkPersistedAnalyzeLimits,
+  getAnalysisGuardConfig,
+  getClientIpAddress,
+  looksLikePromptInjection,
+  looksLikeUnsupportedRelationshipContent,
+} from "@/lib/runtime/abuse-guard";
 import { createTimingTracker, getEventTimingMetrics } from "@/lib/runtime/timing";
 import type { AnalyzeRequestPayload, ApiErrorResponse } from "@/lib/ai/types";
 
@@ -21,6 +29,29 @@ function errorResponse(
   message: string,
 ): NextResponse<ApiErrorResponse> {
   return NextResponse.json({ ok: false, error, message }, { status });
+}
+
+function isAnalyzeRequestPayload(body: unknown): body is AnalyzeRequestPayload {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return false;
+  }
+
+  const candidate = body as Record<string, unknown>;
+
+  if (typeof candidate.text !== "string") {
+    return false;
+  }
+
+  if (
+    ("situation" in candidate && candidate.situation !== undefined && typeof candidate.situation !== "string") ||
+    ("anonymousSessionId" in candidate &&
+      candidate.anonymousSessionId !== undefined &&
+      typeof candidate.anonymousSessionId !== "string")
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export async function POST(
@@ -40,12 +71,16 @@ export async function POST(
     return errorResponse(503, "config_error", "目前分析服務尚未設定完成，請稍後再試。");
   }
 
-  let body: AnalyzeRequestPayload;
+  let body: unknown;
 
   try {
-    body = (await request.json()) as AnalyzeRequestPayload;
+    body = await request.json();
   } catch {
     return errorResponse(400, "invalid_json", "送出的資料格式不正確。");
+  }
+
+  if (!isAnalyzeRequestPayload(body)) {
+    return errorResponse(400, "validation_error", "送出的內容格式不正確，請重新整理後再試。");
   }
 
   const validatedInput = validateAnalyzeInput({
@@ -61,7 +96,42 @@ export async function POST(
 
   timing.mark("input_validated");
 
+  if (looksLikePromptInjection(validatedInput.text)) {
+    return errorResponse(
+      422,
+      "prompt_injection_detected",
+      "這段裡有一些和關係分析無關的指令。請移除後再試一次。",
+    );
+  }
+
+  if (looksLikeUnsupportedRelationshipContent(validatedInput.text)) {
+    return errorResponse(
+      422,
+      "unsupported_content",
+      "這段看起來不像曖昧或關係互動情境。請貼最近的對話，或用自己的話描述你卡住的互動。",
+    );
+  }
+
+  const ipLimitResult = checkIpHourlyLimit(
+    getClientIpAddress(request.headers),
+    getAnalysisGuardConfig().ipHourlyLimit,
+  );
+
+  if (!ipLimitResult.ok) {
+    return errorResponse(429, ipLimitResult.error, ipLimitResult.message);
+  }
+
   try {
+    const persistedLimitResult = await checkPersistedAnalyzeLimits({
+      moduleId: moduleConfig.moduleId,
+      themeSlug: moduleConfig.slug,
+      anonymousSessionId: validatedInput.anonymousSessionId,
+    });
+
+    if (!persistedLimitResult.ok) {
+      return errorResponse(429, persistedLimitResult.error, persistedLimitResult.message);
+    }
+
     const retentionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const redaction = redactUserInput(validatedInput.text);
     timing.mark("input_redacted");
@@ -158,6 +228,6 @@ export async function POST(
       return errorResponse(503, "config_error", getProviderUserMessage());
     }
 
-    return errorResponse(502, "analyze_failed", "分析暫時失敗，請晚點再試一次。");
+    return errorResponse(502, "provider_error", "分析暫時失敗，請晚點再試一次。");
   }
 }

@@ -6,9 +6,11 @@ import {
   ANALYZE_REQUEST_TIMEOUT_MS,
   MAX_ANALYZE_LENGTH,
   MIN_ANALYZE_LENGTH,
+  SOFT_MAX_ANALYZE_LENGTH,
   buildShareText,
   getAnalyzeErrorMessage,
   getAnalyzeButtonLabel,
+  getAnalyzeInputHint,
   getAnalyzeLoadingMessage,
   getAnalyzeLoadingSubtitle,
   getAnalyzeWaitStage,
@@ -22,14 +24,25 @@ describe("ai-temperature UI helpers", () => {
   it("keeps the CTA disabled for short input", () => {
     expect(isAnalyzeInputReady("太短了")).toBe(false);
     expect(getAnalyzeButtonLabel("太短了")).toBe("先貼一段對話");
+    expect(getAnalyzeInputHint("太短了")).toBe("再寫一點互動脈絡，ANYU 才讀得出節奏。");
   });
 
   it("enables the CTA once input reaches the minimum length", () => {
-    const longEnough = "我昨天約他週末見面，但他已讀後沒有回我。";
+    const longEnough = "我昨天約他週末見面，但他已讀後沒有回我，今天晚上還在發限動。";
 
     expect(longEnough.trim().length).toBeGreaterThanOrEqual(MIN_ANALYZE_LENGTH);
     expect(isAnalyzeInputReady(longEnough)).toBe(true);
     expect(getAnalyzeButtonLabel(longEnough)).toBe("分析我的曖昧溫度");
+    expect(getAnalyzeInputHint(longEnough)).toBe("免費 · 結果可截圖分享");
+  });
+
+  it("shows a soft helper once the input becomes long", () => {
+    expect(getAnalyzeInputHint("a".repeat(SOFT_MAX_ANALYZE_LENGTH + 1))).toBe(
+      "內容有點長，建議保留最近幾段關鍵對話。",
+    );
+    expect(getAnalyzeInputHint("a".repeat(MAX_ANALYZE_LENGTH + 1))).toBe(
+      "這段太長了，請保留最近幾段關鍵對話再試一次。",
+    );
   });
 
   it("renders the expected module label and chip inventory", () => {
@@ -48,7 +61,7 @@ describe("ai-temperature UI helpers", () => {
 
   it("normalizes analyze input against the allowed chips", () => {
     const result = validateAnalyzeInput({
-      text: "我昨天約他週末見面，但他今天已讀後沒回，晚上卻還在發限動。",
+      text: "我昨天約他週末見面，但他今天已讀後沒回，晚上卻還在發限動，我真的有點猜不透。",
       situation: "已讀不回",
       anonymousSessionId: "session-123",
       allowedChips: aiTemperatureModule.chips,
@@ -85,17 +98,38 @@ describe("ai-temperature UI helpers", () => {
   });
 
   it("maps runtime errors into friendly UI copy", () => {
+    expect(getAnalyzeErrorMessage("unsupported_content")).toBe(
+      "這段看起來不像曖昧或關係互動情境。請貼最近的對話，或用自己的話描述你卡住的互動。",
+    );
+    expect(getAnalyzeErrorMessage("prompt_injection_detected")).toBe(
+      "這段裡有一些和關係分析無關的指令。請移除後再試一次。",
+    );
+    expect(getAnalyzeErrorMessage("rate_limited_session")).toBe(
+      "今天已經分析過幾次了，請明天再來看看。",
+    );
+    expect(getAnalyzeErrorMessage("rate_limited_ip")).toBe(
+      "這個裝置或網路剛剛送出太多次，請稍後再試。",
+    );
+    expect(getAnalyzeErrorMessage("daily_cap_reached")).toBe(
+      "今天的體驗名額已滿，請明天再試。",
+    );
+    expect(getAnalyzeErrorMessage("validation_error")).toBe(
+      "送出的內容格式不正確，請重新整理後再試。",
+    );
     expect(getAnalyzeErrorMessage("config_error")).toBe(
       "目前分析服務尚未設定完成，請稍後再試。",
+    );
+    expect(getAnalyzeErrorMessage("provider_error")).toBe(
+      "這次分析等得比較久，請稍後再試一次。",
     );
     expect(getAnalyzeErrorMessage("request_timeout")).toBe(
       "這次分析等得比較久，請稍後再試一次。",
     );
     expect(getAnalyzeErrorMessage("input_too_short")).toBe(
-      "文字太短，請多貼一點互動脈絡。",
+      "再寫一點互動脈絡，ANYU 才讀得出節奏。",
     );
     expect(getAnalyzeErrorMessage("input_too_long")).toBe(
-      "文字太長，請先保留最近幾段關鍵對話。",
+      "這段太長了，請保留最近幾段關鍵對話再試一次。",
     );
     expect(getAnalyzeErrorMessage("anything_else")).toBe(
       "分析暫時失敗，請晚點再試一次。",

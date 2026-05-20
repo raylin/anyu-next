@@ -11,6 +11,7 @@ import {
   getAnalyzeLoadingSubtitle,
   getClientAnonymousSessionId,
   getAnalyzeErrorMessage,
+  getAnalyzeInputHint,
   getAnalyzeButtonLabel,
   getModuleLabel,
   isAnalyzeInputReady,
@@ -166,6 +167,7 @@ export function AiTemperatureLanding({
 
   const ctaLabel = isSubmitting ? "分析中..." : getAnalyzeButtonLabel(inputValue);
   const ctaDisabled = isSubmitting || !isAnalyzeInputReady(inputValue);
+  const inputHint = getAnalyzeInputHint(inputValue);
   const statusMessage = isSubmitting ? getAnalyzeLoadingMessage(loadingElapsedMs) : "";
   const statusDetail = isSubmitting ? getAnalyzeLoadingSubtitle(loadingElapsedMs) : "";
 
@@ -206,6 +208,7 @@ export function AiTemperatureLanding({
         ctaDisabled={ctaDisabled}
         isLoading={isSubmitting}
         errorMessage={errorMessage}
+        inputHint={inputHint}
         statusMessage={statusMessage}
         statusDetail={statusDetail}
       />

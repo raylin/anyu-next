@@ -15,6 +15,7 @@ type InputCardProps = {
   ctaDisabled: boolean;
   isLoading?: boolean;
   errorMessage?: string;
+  inputHint?: string;
   statusMessage?: string;
   statusDetail?: string;
 };
@@ -30,6 +31,7 @@ export function InputCard({
   ctaDisabled,
   isLoading = false,
   errorMessage,
+  inputHint,
   statusMessage,
   statusDetail,
 }: InputCardProps) {
@@ -69,7 +71,7 @@ export function InputCard({
           {ctaLabel}
         </Button>
 
-        <p className="anyu-small-note">免費 · 結果可截圖分享</p>
+        <p className="anyu-small-note">{inputHint || "免費 · 結果可截圖分享"}</p>
         <p className="anyu-subtle-note">不寄電子報 · 不分享第三方</p>
         {statusMessage ? (
           <div className={["anyu-status-panel", isLoading ? "anyu-status-panel-loading" : ""].filter(Boolean).join(" ")}>

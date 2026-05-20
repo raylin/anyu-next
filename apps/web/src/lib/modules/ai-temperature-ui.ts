@@ -2,7 +2,8 @@ import type { ProductResult } from "@/lib/ai/product-result-schema";
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 
-export const MIN_ANALYZE_LENGTH = 12;
+export const MIN_ANALYZE_LENGTH = 30;
+export const SOFT_MAX_ANALYZE_LENGTH = 2000;
 export const MAX_ANALYZE_LENGTH = 4000;
 export const ANONYMOUS_SESSION_STORAGE_KEY = "anyu-ambiguous-temperature-session-id";
 export const ANALYZE_REQUEST_TIMEOUT_MS = 65_000;
@@ -61,14 +62,45 @@ export function getAnalyzeButtonLabel(input: string): string {
   return isAnalyzeInputReady(input) ? "分析我的曖昧溫度" : "先貼一段對話";
 }
 
+export function getAnalyzeInputHint(input: string): string {
+  const trimmedLength = input.trim().length;
+
+  if (trimmedLength > MAX_ANALYZE_LENGTH) {
+    return "這段太長了，請保留最近幾段關鍵對話再試一次。";
+  }
+
+  if (trimmedLength > SOFT_MAX_ANALYZE_LENGTH) {
+    return "內容有點長，建議保留最近幾段關鍵對話。";
+  }
+
+  if (trimmedLength > 0 && trimmedLength < MIN_ANALYZE_LENGTH) {
+    return "再寫一點互動脈絡，ANYU 才讀得出節奏。";
+  }
+
+  return "免費 · 結果可截圖分享";
+}
+
 export function getAnalyzeErrorMessage(error: string): string {
   switch (error) {
     case "input_too_short":
-      return "文字太短，請多貼一點互動脈絡。";
+      return "再寫一點互動脈絡，ANYU 才讀得出節奏。";
     case "input_too_long":
-      return "文字太長，請先保留最近幾段關鍵對話。";
+      return "這段太長了，請保留最近幾段關鍵對話再試一次。";
+    case "unsupported_content":
+      return "這段看起來不像曖昧或關係互動情境。請貼最近的對話，或用自己的話描述你卡住的互動。";
+    case "prompt_injection_detected":
+      return "這段裡有一些和關係分析無關的指令。請移除後再試一次。";
+    case "rate_limited_session":
+      return "今天已經分析過幾次了，請明天再來看看。";
+    case "rate_limited_ip":
+      return "這個裝置或網路剛剛送出太多次，請稍後再試。";
+    case "daily_cap_reached":
+      return "今天的體驗名額已滿，請明天再試。";
+    case "validation_error":
+      return "送出的內容格式不正確，請重新整理後再試。";
     case "config_error":
       return "目前分析服務尚未設定完成，請稍後再試。";
+    case "provider_error":
     case "request_timeout":
       return "這次分析等得比較久，請稍後再試一次。";
     default:
@@ -166,18 +198,18 @@ export function validateAnalyzeInput(input: {
   const text = input.text?.trim() ?? "";
 
   if (text.length < MIN_ANALYZE_LENGTH) {
-    return {
+      return {
       ok: false,
       error: "input_too_short",
-      message: "請再多貼一些內容，讓我們比較看得出關係溫度。",
+      message: "再寫一點互動脈絡，ANYU 才讀得出節奏。",
     };
   }
 
   if (text.length > MAX_ANALYZE_LENGTH) {
-    return {
+      return {
       ok: false,
       error: "input_too_long",
-      message: "這段內容有點太長了，先縮短到 4000 字內再試試看。",
+      message: "這段太長了，請保留最近幾段關鍵對話再試一次。",
     };
   }
 

@@ -1585,6 +1585,25 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
 
+## 2026-05-20 - Module 01 Input Validation + Abuse Guard v0
+
+### Completed Changes
+
+- added stronger Module 01 analyze validation with a 30-character minimum, 4,000-character hard max, and soft long-input hinting
+- blocked obvious prompt-injection and clearly unrelated generic requests before provider cost is incurred
+- added pragmatic cost guards: session daily cap, IP hourly cap, and global daily cap
+
+### Learnings
+
+- `analysis_requests` is already sufficient for persisted session/global cost controls without a schema change
+- an in-memory IP limiter is acceptable as a small v0 compromise, but it is not durable across all serverless instances
+- friendly product-style rejection copy can be added without widening runtime or provider internals
+
+### Unresolved Questions
+
+- whether staging abuse verification should include repeated protected-preview bursts from a browser session
+- when the process-local IP guard should be replaced by a durable shared limiter
+
 ## 2026-05-20 — Module 01 Haiku Staging Trial v0
 
 ### Task Completed
