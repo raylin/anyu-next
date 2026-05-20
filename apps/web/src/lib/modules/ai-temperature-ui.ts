@@ -14,7 +14,7 @@ export const LINE_PRIMARY_BODY =
 export const LINE_PRIMARY_CTA = "加入 LINE，收到開放通知";
 export const EMAIL_FALLBACK_LABEL = "改用 Email 接收通知";
 export const EMAIL_FALLBACK_BODY =
-  "留下 Email，我們會在完整分析開放或新測驗上線時通知你。不寄日常電子報，也不分享給第三方。";
+  "留下 Email，我們會在完整分析或新測驗開放時通知你。不寄日常電子報，也不分享給第三方。";
 export const MISSING_LINE_URL_MESSAGE = "LINE 連結暫時還沒準備好，請先改用 Email 接收通知。";
 
 export type ScoreBucket = "cold" | "cool" | "warm" | "hot" | "unknown";

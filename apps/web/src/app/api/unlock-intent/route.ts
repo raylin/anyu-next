@@ -8,6 +8,7 @@ type UnlockIntentPayload = {
   moduleId?: string;
   themeSlug?: string;
   anonymousSessionId?: string;
+  source?: string;
 };
 
 export async function POST(request: Request) {
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
       metadata: {
         resultId: body.resultId,
         unlockIntentId: unlockIntent.id,
+        source: body.source === "inline_result_cta" ? "inline_result_cta" : "paid_preview",
       },
     });
 

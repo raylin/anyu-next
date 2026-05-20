@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EVENT_NAMES, hasForbiddenEventMetadata } from "@/lib/events/types";
 
@@ -36,5 +38,19 @@ describe("event metadata guard", () => {
     expect(EVENT_NAMES).toContain("line_add_clicked");
     expect(EVENT_NAMES).toContain("email_fallback_opened");
     expect(EVENT_NAMES).toContain("share_card_clicked");
+  });
+
+  it("keeps the inline result CTA source on the existing paid unlock event", () => {
+    const resultSource = readFileSync(
+      resolve(process.cwd(), "src/components/modules/ai-temperature/AiTemperatureResult.tsx"),
+      "utf8",
+    );
+    const unlockRoute = readFileSync(
+      resolve(process.cwd(), "src/app/api/unlock-intent/route.ts"),
+      "utf8",
+    );
+
+    expect(resultSource).toContain('revealContact("inline_result_cta")');
+    expect(unlockRoute).toContain('body.source === "inline_result_cta" ? "inline_result_cta" : "paid_preview"');
   });
 });

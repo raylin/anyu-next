@@ -68,7 +68,7 @@ export function ShareCardPreview({
         <button type="button" className="anyu-share-action anyu-share-action-primary" onClick={handlePrimaryShare}>
           分享這個結果
         </button>
-        <p className="anyu-share-action-detail">複製成 LINE / Threads 可貼上的文字</p>
+        <p className="anyu-share-action-detail">複製成 LINE / Threads 可以貼上的文字</p>
       </div>
       {shareStatus ? <p className="anyu-status-message">{shareStatus}</p> : null}
     </div>

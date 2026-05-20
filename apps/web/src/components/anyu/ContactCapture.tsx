@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
-import { LEGAL_CONTACT_EMAIL, uiNotices } from "@/content/legal";
+import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 import {
   EMAIL_FALLBACK_BODY,
   EMAIL_FALLBACK_LABEL,
@@ -144,11 +144,7 @@ export function ContactCapture({
             {EMAIL_FALLBACK_LABEL}
           </button>
 
-          <p className="anyu-subtle-note">
-            {lineAddUrl
-              ? uiNotices.lineAddFriend
-              : MISSING_LINE_URL_MESSAGE}
-          </p>
+          {lineAddUrl ? null : <p className="anyu-subtle-note">{MISSING_LINE_URL_MESSAGE}</p>}
         </div>
       ) : (
         <form className="anyu-contact-grid" onSubmit={handleSubmit}>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { ContactCapture } from "@/components/anyu/ContactCapture";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
@@ -36,6 +37,8 @@ export function AiTemperatureResult({
   const [showContact, setShowContact] = useState(false);
   const [unlockIntentId, setUnlockIntentId] = useState<string | null>(null);
   const [unlockIntentFailed, setUnlockIntentFailed] = useState(false);
+  const paidPreviewRef = useRef<HTMLDivElement | null>(null);
+  const contactPanelRef = useRef<HTMLDivElement | null>(null);
   const lineAddUrl = getLineAddUrl();
 
   useEffect(() => {
@@ -51,7 +54,16 @@ export function AiTemperatureResult({
     });
   }, [mode, moduleConfig, result.score, resultId]);
 
-  async function revealContact() {
+  function scrollToNextStep() {
+    const target = contactPanelRef.current ?? paidPreviewRef.current;
+
+    target?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  async function revealContact(source = "paid_preview") {
     if (mode === "demo") {
       setShowContact(true);
       return { ok: true };
@@ -68,6 +80,7 @@ export function AiTemperatureResult({
           moduleId: moduleConfig.moduleId,
           themeSlug: moduleConfig.slug,
           anonymousSessionId: getClientAnonymousSessionId(),
+          source,
         }),
       });
 
@@ -97,6 +110,17 @@ export function AiTemperatureResult({
       return {
         ok: true,
       };
+    }
+  }
+
+  async function handleInlineResultCta() {
+    scrollToNextStep();
+    await revealContact("inline_result_cta");
+
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => {
+        scrollToNextStep();
+      }, 80);
     }
   }
 
@@ -281,6 +305,25 @@ export function AiTemperatureResult({
         <p className="anyu-reassurance">{result.reassurance}</p>
       </Card>
 
+      <Card className="anyu-transition-card">
+        <div className="anyu-transition-copy">
+          <p className="anyu-kicker">next step</p>
+          <h2 className="anyu-section-title">想知道下一句怎麼回？</h2>
+          <p className="anyu-copy">
+            解鎖 3 種不失控的回法，從主動推進、低壓試探到暫時拉開。
+          </p>
+        </div>
+        <Button
+          type="button"
+          className="anyu-button-block anyu-button-secondary"
+          onClick={() => {
+            void handleInlineResultCta();
+          }}
+        >
+          看下一句怎麼回
+        </Button>
+      </Card>
+
       <p className="anyu-subtle-note">{uiNotices.resultDisclaimer}</p>
 
       <ShareCardPreview
@@ -292,26 +335,30 @@ export function AiTemperatureResult({
         onCopyShareText={handleCopyShareText}
       />
 
-      <PaidPreviewCard
-        headline={result.paidHeadline}
-        price={result.paidPrice || moduleConfig.price}
-        includedSections={result.paidIncludedSections}
-        previewCopy={result.paidPreviewCopy}
-        onRevealContact={revealContact}
-      />
+      <div ref={paidPreviewRef}>
+        <PaidPreviewCard
+          headline={result.paidHeadline}
+          price={result.paidPrice || moduleConfig.price}
+          includedSections={result.paidIncludedSections}
+          previewCopy={result.paidPreviewCopy}
+          onRevealContact={revealContact}
+        />
+      </div>
 
-      <ContactCapture
-        visible={showContact}
-        lineAddUrl={lineAddUrl}
-        noticeMessage={
-          unlockIntentFailed
-            ? "內測記錄暫時無法建立，但你仍可留下聯絡方式。"
-            : undefined
-        }
-        onLineAddClick={handleLineAddClick}
-        onEmailFallbackOpen={handleEmailFallbackOpen}
-        onSubmit={submitContact}
-      />
+      <div ref={contactPanelRef}>
+        <ContactCapture
+          visible={showContact}
+          lineAddUrl={lineAddUrl}
+          noticeMessage={
+            unlockIntentFailed
+              ? "內測記錄暫時無法建立，但你仍可留下聯絡方式。"
+              : undefined
+          }
+          onLineAddClick={handleLineAddClick}
+          onEmailFallbackOpen={handleEmailFallbackOpen}
+          onSubmit={submitContact}
+        />
+      </div>
 
       <LegalFooter />
     </section>

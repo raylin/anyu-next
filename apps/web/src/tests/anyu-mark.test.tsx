@@ -43,7 +43,7 @@ describe("AnyuMark", () => {
 
     expect(defaultWordmark).not.toContain("anyu-wordmark-mark");
     expect(lockupWordmark).toContain("anyu-wordmark-mark");
-    expect(lockupWordmark).toContain("ANYU brand mark");
+    expect(lockupWordmark).toContain('aria-label="暗語 ANYU"');
   });
 
   it("renders the loading state with the animated mark instead of the old moon/dots", () => {

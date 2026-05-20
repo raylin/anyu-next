@@ -12,6 +12,8 @@ describe("contact capture line-first UI", () => {
     expect(html).toContain("加入 LINE，收到開放通知");
     expect(html).toContain("改用 Email 接收通知");
     expect(html).toContain("完整分析與新測驗開放");
+    expect(html).toContain("你可以隨時封鎖官方帳號，或來信 hello@anyu.tw 要求刪除資料。");
+    expect(html).not.toContain("LINE 會是主要的內測通知與完整分析開放通知管道");
   });
 
   it("shows the missing-url fallback note when no LINE url is configured", () => {

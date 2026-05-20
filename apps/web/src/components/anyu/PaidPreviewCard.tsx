@@ -48,7 +48,7 @@ export function PaidPreviewCard({
 
   return (
     <Card className="anyu-paid-card">
-      <p className="anyu-kicker">one-time · no sub</p>
+      <p className="anyu-kicker">一次性查看 · 無訂閱</p>
 
       <div className="anyu-paid-head">
         <div>
@@ -59,7 +59,10 @@ export function PaidPreviewCard({
             給你 3 種不失控的回法：主動推進、低壓試探、暫時拉開。
           </p>
         </div>
-        <span className="anyu-paid-price">{price}</span>
+        <div className="anyu-paid-price-block">
+          <span className="anyu-paid-price">{price}</span>
+          <span className="anyu-paid-price-note">一次性 · no subscription</span>
+        </div>
       </div>
 
       <div className="anyu-paid-grid">
@@ -85,7 +88,7 @@ export function PaidPreviewCard({
           </div>
           <p className="anyu-reply-title">低壓試探</p>
           <p className="anyu-reply-copy anyu-reply-copy-locked">{lockedPreviewBodies[0]}</p>
-          <span className="anyu-reply-lock">尚未解鎖</span>
+          <span className="anyu-reply-lock">⋯ 尚未解鎖</span>
         </article>
 
         <article className="anyu-reply-card anyu-reply-card-locked" aria-hidden="true">
@@ -97,14 +100,14 @@ export function PaidPreviewCard({
           </div>
           <p className="anyu-reply-title">尊嚴守門</p>
           <p className="anyu-reply-copy anyu-reply-copy-locked">{lockedPreviewBodies[1]}</p>
-          <span className="anyu-reply-lock">尚未解鎖</span>
+          <span className="anyu-reply-lock">⋯ 尚未解鎖</span>
         </article>
       </div>
 
       <p className="anyu-small-note">
         {revealed
-          ? "目前內測中，這次不會真的收費。"
-          : "目前內測 · 點下後可加入 LINE 收到開放通知，或改用 Email。"}
+          ? "目前內測中，這次不會真的收費。開放後可查看完整分析。"
+          : "目前內測中，這次不會真的收費。點下後可加入 LINE 收到開放通知，或改用 Email。"}
       </p>
 
       <Button type="button" className="anyu-button-block" onClick={handleReveal} disabled={isLoading}>

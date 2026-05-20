@@ -3174,3 +3174,37 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact real-browser/mobile rendering feel of Instrument Serif on wordmark and large numerals
 - whether the next step should be human browser/device funnel QA before any later typography phase
+
+## 2026-05-21 - Conversion / CTA Rhythm Polish v0
+
+### Completed Changes
+
+- added an inline result-page next-step CTA that reuses the existing unlock/contact flow
+- made the share action more social/button-like with clearer support copy
+- clarified the paid preview hierarchy with softer locked-state treatment and clearer one-time/no-subscription cues
+- compressed the LINE panel by removing repeated configured-LINE explanatory copy while keeping the same flow
+- added focused render/event tests for the new CTA rhythm and metadata source path
+
+### Learnings
+
+- the result page can expose the next useful action earlier without turning into a hard-sell/paywall pattern
+- reusing the existing `paid_unlock_clicked` event with a safe `source` field is cleaner than creating a new event name for this pass
+- reducing repeated LINE explanation improves clarity without changing legal semantics or backend behavior
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- staging demo-result smoke: pending at summary-write time
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact human perception of the new CTA rhythm and share emphasis on a real phone viewport
+- whether the next step should be a dedicated staging QA pass before any broader conversion/paywall polish
