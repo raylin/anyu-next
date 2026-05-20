@@ -1604,6 +1604,25 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether staging abuse verification should include repeated protected-preview bursts from a browser session
 - when the process-local IP guard should be replaced by a durable shared limiter
 
+## 2026-05-20 - Module 01 Staging Abuse Guard Verification v0
+
+### Completed Changes
+
+- verified the live staging guard behavior for valid, short, overly long, prompt-injection, unrelated-content, and borderline relationship-like synthetic inputs
+- confirmed staging was serving a fresh deployment at or newer than `803fbdc`
+- recorded the limits of direct staging DB inspection from this shell while still documenting privacy-safe response behavior
+
+### Learnings
+
+- the soft max behaves correctly: `2000–4000` is still allowed while `>4000` is rejected
+- the current relationship-content heuristic is acceptable for v0 because longer generic coding input was rejected while borderline relationship language still passed
+- preview env pull in this shell context exposes env names but not usable secret values, which limits direct DB verification
+
+### Unresolved Questions
+
+- whether a later authenticated browser + direct DB access pass should explicitly verify blocked-case row absence on the preview DB
+- whether preview should carry explicit `ANALYSIS_*` overrides or continue relying on code defaults
+
 ## 2026-05-20 — Module 01 Haiku Staging Trial v0
 
 ### Task Completed
