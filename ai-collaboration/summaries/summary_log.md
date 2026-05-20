@@ -3343,3 +3343,37 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact real-browser/mobile rendering feel of `LXGW WenKai` on the lead quote and share quote
 - whether the next step should be a narrow staging QA pass before shifting back to technical UX work
+
+## 2026-05-21 - Font Migration Phase 3 Staging QA v0
+
+### Completed Changes
+
+- completed a focused staging QA pass for the LXGW WenKai kai-quote rollout
+- verified staging is serving `3d7aa7d` or newer
+- confirmed the external `LXGW WenKai` stylesheet loads on landing, demo result, and one runtime result surface
+- confirmed kai remains scoped to the result hook quote and share-card quote, while `t-reading` remains on the long-form paragraphs
+- ran one synthetic runtime funnel covering analyze, result load, unlock intent, and Email fallback
+
+### Learnings
+
+- the kai treatment remains visually narrow because it is confined to short quote surfaces and does not interfere with the long-form Newsreader rhythm
+- the three-way font split is now structurally clear in the app: display, reading, and whisper/quote each stay in their own lane
+- protected staging HTML plus source verification is enough to establish scope correctness, but not final human judgment on exact quote feel on real devices
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- live staging landing, demo result, runtime result, unlock intent, and Email fallback checks passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact human perception of LXGW WenKai on a real phone viewport
+- whether a later true browser/device pass finds any subjective decorative or FOUT issue
