@@ -6,6 +6,10 @@ Date: 2026-05-20
 
 This runbook defines the manual, human-approved process for deploying ANYU Module 01 to production.
 
+Current approved low-key launch record:
+
+- `ai-collaboration/decisions/2026-05-20-production-launch-decision-final-v0.md`
+
 ## 2. Production Deployment Principle
 
 Production deployment follows a stricter rule than staging:

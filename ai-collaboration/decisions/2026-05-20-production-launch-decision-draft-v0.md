@@ -1,5 +1,9 @@
 # Production Launch Decision Draft v0
 
+Superseded by final decision:
+
+- `ai-collaboration/decisions/2026-05-20-production-launch-decision-final-v0.md`
+
 Date: 2026-05-20
 
 ## 1. Decision Summary
