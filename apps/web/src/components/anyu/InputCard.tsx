@@ -67,8 +67,8 @@ export function InputCard({
           >
             <div className="anyu-guidance-head">
               <span className="anyu-guidance-label">{inputGuidance.label}</span>
-              {inputGuidance.showMaxCounter ? (
-                <span className="anyu-guidance-meta">{inputValue.trim().length} / 4000</span>
+              {inputGuidance.counterText ? (
+                <span className="anyu-guidance-meta">{inputGuidance.counterText}</span>
               ) : null}
             </div>
             <p className="anyu-guidance-copy">{inputGuidance.detail}</p>

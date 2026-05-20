@@ -585,6 +585,39 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
 
+## 2026-05-20 - Module 01 Input Guidance Counter Tuning v0.6
+
+### Completed
+
+- restored numeric progress for the `<30` input state as `current / 30`
+- kept the softened v0.5 guidance copy and avoided duplicate remaining-count messaging
+- kept the hard-limit `current / 4000` counter for over-limit input
+
+### Learnings
+
+- the useful signal was the numeric threshold progress itself, not the old “再補 N 個字” sentence
+- the existing helper layer could support this tuning without touching thresholds or runtime behavior
+
+### Unresolved Questions
+
+- whether the short-input counter feels helpful enough on a real phone without reading as pressure
+- whether the `30–119` band ever needs a subtle optional `current / 120` cue
+
+### Validation
+
+- `python3 -m compileall oradar` passed
+- `cd apps/web && corepack pnpm lint` passed
+- `cd apps/web && corepack pnpm test` passed
+- `cd apps/web && corepack pnpm build` passed
+
+### Commit Hash
+
+- Pending at summary-write time; final commit hash is reported in the final Codex Completion Summary because a commit cannot contain its own final hash without changing that hash.
+
+### Staging Push Status
+
+- Pending at summary-write time; final staging push status is reported in the final Codex Completion Summary after commit/push are attempted.
+
 ## 2026-05-18 Module 01 UI Port v0
 
 ### Task Completed

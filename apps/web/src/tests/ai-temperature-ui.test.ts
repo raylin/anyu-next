@@ -30,6 +30,7 @@ describe("ai-temperature UI helpers", () => {
       state: "too_short" satisfies AnalyzeInputGuidanceState,
       label: "還差一點點",
       detail: "多給一點互動脈絡，ANYU 才讀得出節奏。",
+      counterText: "3 / 30",
     });
   });
 
@@ -61,7 +62,7 @@ describe("ai-temperature UI helpers", () => {
       state: "too_long" satisfies AnalyzeInputGuidanceState,
       label: "內容太長了",
       detail: "請刪到 4000 字以內，再送出分析。",
-      showMaxCounter: true,
+      counterText: `${MAX_ANALYZE_LENGTH + 1} / ${MAX_ANALYZE_LENGTH}`,
     });
     expect(getAnalyzeButtonLabel("a".repeat(MAX_ANALYZE_LENGTH + 1))).toBe("內容太長了");
   });
@@ -86,6 +87,14 @@ describe("ai-temperature UI helpers", () => {
       expect(state.detail).not.toMatch(/再補\s*\d+\s*個字/);
       expect(state.detail).not.toMatch(/還剩\s*\d+\s*個字/);
     }
+  });
+
+  it("shows numeric progress for the first threshold without duplicate pressure copy", () => {
+    const shortGuidance = getAnalyzeInputGuidance("曖昧中");
+
+    expect(shortGuidance.counterText).toBe("3 / 30");
+    expect(shortGuidance.label).toBe("還差一點點");
+    expect(shortGuidance.detail).not.toMatch(/再補\s*\d+\s*個字/);
   });
 
   it("renders the expected module label and chip inventory", () => {

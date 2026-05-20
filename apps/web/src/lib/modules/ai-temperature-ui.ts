@@ -26,7 +26,7 @@ export type AnalyzeInputGuidance = {
   state: AnalyzeInputGuidanceState;
   label: string;
   detail: string;
-  showMaxCounter?: boolean;
+  counterText?: string;
 };
 
 export type ObservedSignalViewModel = {
@@ -90,7 +90,7 @@ export function getAnalyzeInputGuidance(input: string): AnalyzeInputGuidance {
       state: "too_long",
       label: "內容太長了",
       detail: "請刪到 4000 字以內，再送出分析。",
-      showMaxCounter: true,
+      counterText: `${trimmedLength} / ${MAX_ANALYZE_LENGTH}`,
     };
   }
 
@@ -122,6 +122,7 @@ export function getAnalyzeInputGuidance(input: string): AnalyzeInputGuidance {
     state: "too_short",
     label: "還差一點點",
     detail: "多給一點互動脈絡，ANYU 才讀得出節奏。",
+    counterText: `${trimmedLength} / ${MIN_ANALYZE_LENGTH}`,
   };
 }
 
