@@ -77,7 +77,8 @@ Completed a narrow Module 01 result-page polish pass focused on conversion rhyth
 - `cd apps/web && corepack pnpm lint` passed
 - `cd apps/web && corepack pnpm test` passed
 - `cd apps/web && corepack pnpm build` passed
-- staging demo-result smoke: pending until post-push verification
+- live staging demo-result smoke passed after push
+- `staging.anyu.tw` served the new inline CTA, updated share support copy, and revised paid-preview copy on the demo result surface
 
 ## 9. Remaining Conversion Backlog
 

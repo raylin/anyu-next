@@ -20,6 +20,8 @@ Completed a narrow result-page conversion polish pass for Module 01. The page no
 - `apps/web/src/lib/modules/ai-temperature-ui.ts`
 - `apps/web/src/app/api/unlock-intent/route.ts`
 - `apps/web/src/styles/globals.css`
+- `apps/web/vitest.config.ts`
+- `apps/web/src/tests/anyu-mark.test.tsx`
 - `apps/web/src/tests/contact-capture.test.tsx`
 - `apps/web/src/tests/event-metadata.test.ts`
 - `ai-collaboration/summaries/summary_log.md`
@@ -65,7 +67,7 @@ Completed a narrow result-page conversion polish pass for Module 01. The page no
 - `cd apps/web && corepack pnpm lint` passed
 - `cd apps/web && corepack pnpm test` passed
 - `cd apps/web && corepack pnpm build` passed
-- staging demo-result smoke: pending until post-push verification
+- live staging demo-result smoke passed after push
 
 ## Known Technical Debt
 
@@ -86,6 +88,7 @@ Completed a narrow result-page conversion polish pass for Module 01. The page no
 
 - Removed one layer of repeated LINE explanatory copy without changing legal semantics or backend behavior.
 - Reused the existing unlock event instead of expanding the event taxonomy.
+- Fixed the Vitest include pattern so `.test.tsx` render tests are actually executed, and updated one newly-activated pre-existing assertion to match current `Wordmark` accessibility markup.
 
 ### Deferred Cleanup Candidates
 
@@ -103,12 +106,12 @@ Completed a narrow result-page conversion polish pass for Module 01. The page no
 
 ## Git Commit
 
-- Commit hash: pending
+- Commit hash: `06f7d2a`
 - Commit message: `design: polish result conversion rhythm`
 
 ## Staging Push
 
-- Push status: pending
+- Push status: `pushed to origin/staging`
 - Push command: `git push origin HEAD:staging`
 
 ## Remaining Uncertainties

@@ -3190,6 +3190,7 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - the result page can expose the next useful action earlier without turning into a hard-sell/paywall pattern
 - reusing the existing `paid_unlock_clicked` event with a safe `source` field is cleaner than creating a new event name for this pass
 - reducing repeated LINE explanation improves clarity without changing legal semantics or backend behavior
+- the repo had an existing Vitest include gap that excluded `.test.tsx` render tests until this pass corrected it
 
 ### Validation Results
 
@@ -3197,12 +3198,12 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - `corepack pnpm lint` passed
 - `corepack pnpm test` passed
 - `corepack pnpm build` passed
-- staging demo-result smoke: pending at summary-write time
+- live staging demo-result smoke passed after push
 
 ### Commit / Push
 
-- commit: pending at summary-write time
-- staging push: pending at summary-write time
+- commit: `06f7d2a`
+- staging push: `pushed to origin/staging`
 
 ### Unresolved Questions
 
