@@ -125,10 +125,30 @@ corepack pnpm install
 corepack pnpm dev
 corepack pnpm lint
 corepack pnpm test
+corepack pnpm test:e2e:local
+corepack pnpm test:e2e:ui
+corepack pnpm verify:ui
 corepack pnpm build
 corepack pnpm db:generate
 corepack pnpm db:migrate
 corepack pnpm brand:export
+```
+
+## Local UI Smoke Tests
+
+Run:
+
+```bash
+corepack pnpm test:e2e:local
+```
+
+These tests are local-only and are not part of CI.
+They protect Module 01's landing, demo result, legal routes, inline CTA, LINE CTA, and Email fallback affordances.
+
+If Chromium is missing locally, install it with:
+
+```bash
+corepack pnpm playwright:install
 ```
 
 ## Notes

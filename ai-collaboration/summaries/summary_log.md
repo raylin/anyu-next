@@ -3476,3 +3476,37 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact mobile screenshot feel of the softened CTA, loading state, and layered cards
 - whether external design review will want any stronger share/persona emphasis once real screenshots are available
+
+## 2026-05-21 - Local Playwright UI Smoke v0
+
+### Completed Changes
+
+- added a local-only Playwright smoke layer under `apps/web/e2e/`
+- added local scripts for Playwright install, build, smoke run, UI mode, and chromium-only verification
+- configured a local production-like Playwright server on `127.0.0.1:3001`
+- added smoke coverage for landing/input guidance, demo result, inline CTA reveal, LINE-first / Email fallback flow, and legal routes
+- documented the local smoke command in `apps/web/README.md` and noted the optional use in the production runbook
+
+### Learnings
+
+- the demo route is enough to protect the core polished UI funnel without introducing provider or DB dependencies into local browser tests
+- same-tab LINE navigation is harder to verify than an anchor href, so a tiny testability-only attribute is useful without affecting UI behavior
+- the existing repo-local `.playwright-browsers/` cache can be reused, but a new Playwright package revision may still require a matching Chromium install step
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether future runtime analyze smoke should use a mock path or a safe local provider-backed path
+- whether the LINE CTA should remain button-driven long term or eventually expose a directly inspectable link primitive

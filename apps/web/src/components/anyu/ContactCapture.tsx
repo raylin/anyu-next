@@ -130,6 +130,7 @@ export function ContactCapture({
             type="button"
             className="anyu-button-block"
             onClick={handleLinePrimaryClick}
+            data-line-add-url={lineAddUrl ?? ""}
           >
             {LINE_PRIMARY_CTA}
           </Button>

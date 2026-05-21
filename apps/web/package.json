@@ -6,9 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:test": "next start --port 3001",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",
+    "playwright:install": "PLAYWRIGHT_BROWSERS_PATH=../../.playwright-browsers playwright install chromium",
+    "build:e2e": "NEXT_PUBLIC_LINE_ADD_URL=https://lin.ee/S6dnbJO corepack pnpm build",
+    "test:e2e:local": "corepack pnpm build:e2e && PLAYWRIGHT_BROWSERS_PATH=../../.playwright-browsers playwright test",
+    "test:e2e:ui": "corepack pnpm build:e2e && PLAYWRIGHT_BROWSERS_PATH=../../.playwright-browsers playwright test --ui",
+    "verify:ui": "corepack pnpm build:e2e && PLAYWRIGHT_BROWSERS_PATH=../../.playwright-browsers playwright test --project=chromium",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "brand:export": "node scripts/export-brand-assets.mjs"
@@ -22,6 +28,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -204,6 +204,8 @@ Gate before smoke:
 
 Use synthetic content only for QA.
 
+For UI-heavy changes, optionally run local Playwright smoke before handoff completion.
+
 Minimal happy-path production smoke evidence should include:
 
 - analyze response success
