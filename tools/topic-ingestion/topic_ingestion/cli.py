@@ -11,7 +11,7 @@ from .exporters import export_jsonl
 from .extractors import extract_topic_candidates
 from .loaders import load_jsonl_records
 from .schema import QuestionSeed, TopicCandidate
-from .transformers import topic_candidates_to_question_seeds
+from .transformers import question_seeds_to_module_seeds, topic_candidates_to_question_seeds
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -26,10 +26,16 @@ def build_parser() -> argparse.ArgumentParser:
     questions_parser.add_argument("--input", type=Path, required=True)
     questions_parser.add_argument("--output", type=Path, required=True)
 
+    modules_parser = subparsers.add_parser("modules", help="Generate module seeds from question-seed JSONL.")
+    modules_parser.add_argument("--input", type=Path, required=True)
+    modules_parser.add_argument("--topics", type=Path, required=False)
+    modules_parser.add_argument("--output", type=Path, required=True)
+
     pipeline_parser = subparsers.add_parser("pipeline", help="Run extract and questions in sequence.")
     pipeline_parser.add_argument("--input", type=Path, required=True)
     pipeline_parser.add_argument("--topics-output", type=Path, required=True)
     pipeline_parser.add_argument("--questions-output", type=Path, required=True)
+    pipeline_parser.add_argument("--modules-output", type=Path, required=False)
 
     return parser
 
@@ -54,16 +60,31 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Output: {args.output}")
         return 0
 
+    if args.command == "modules":
+        questions = load_question_seeds(args.input)
+        topics = load_topic_candidates(args.topics) if args.topics else None
+        modules = question_seeds_to_module_seeds(questions, topics)
+        export_jsonl(modules, args.output)
+        print(f"Module seeds: {len(modules)}")
+        print(f"Output: {args.output}")
+        return 0
+
     if args.command == "pipeline":
         records = load_jsonl_records(args.input)
         topics = extract_topic_candidates(records)
         questions = topic_candidates_to_question_seeds(topics)
         export_jsonl(topics, args.topics_output)
         export_jsonl(questions, args.questions_output)
+        if args.modules_output:
+            modules = question_seeds_to_module_seeds(questions, topics)
+            export_jsonl(modules, args.modules_output)
         print(f"Topic candidates: {len(topics)}")
         print(f"Questions: {len(questions)}")
         print(f"Topics output: {args.topics_output}")
         print(f"Questions output: {args.questions_output}")
+        if args.modules_output:
+            print(f"Module seeds: {len(modules)}")
+            print(f"Modules output: {args.modules_output}")
         return 0
 
     parser.print_help()
@@ -98,6 +119,34 @@ def load_topic_candidates(path: Path) -> list[TopicCandidate]:
             )
         )
     return topics
+
+
+def load_question_seeds(path: Path) -> list[QuestionSeed]:
+    if not path.exists() or not path.is_file():
+        raise FileNotFoundError(f"Question seed file not found: {path}")
+    questions: list[QuestionSeed] = []
+    for lineno, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        line = raw_line.strip()
+        if not line:
+            continue
+        try:
+            value = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid JSONL at line {lineno}: {exc}") from exc
+        if not isinstance(value, dict):
+            raise ValueError(f"Invalid question seed at line {lineno}: expected object")
+        questions.append(
+            QuestionSeed(
+                question_id=str(value["question_id"] if "question_id" in value else value["questionId"]),
+                topic_id=str(value["topic_id"] if "topic_id" in value else value["topicId"]),
+                question=str(value["question"]),
+                module_fit=str(value["module_fit"] if "module_fit" in value else value["moduleFit"]),
+                why_it_works=str(value["why_it_works"] if "why_it_works" in value else value["whyItWorks"]),
+                tone=str(value["tone"]),
+                created_at=str(value["created_at"] if "created_at" in value else value["createdAt"]),
+            )
+        )
+    return questions
 
 
 if __name__ == "__main__":

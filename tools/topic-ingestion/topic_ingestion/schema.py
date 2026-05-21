@@ -41,3 +41,21 @@ class QuestionSeed:
     why_it_works: str
     tone: str
     created_at: str
+
+
+@dataclass(frozen=True)
+class ModuleSeed:
+    module_id: str
+    topic_id: str
+    question_ids: list[str]
+    title: str
+    format: str
+    audience: str
+    emotional_hook: str
+    user_promise: str
+    input_needed: list[str]
+    output_sections: list[str]
+    monetization_fit: str
+    tone: str
+    confidence: float
+    created_at: str

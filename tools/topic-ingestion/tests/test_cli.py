@@ -48,3 +48,75 @@ class CliTest(unittest.TestCase):
             lines = [json.loads(line) for line in questions.read_text(encoding="utf-8").splitlines() if line.strip()]
             self.assertGreaterEqual(len(lines), 1)
             self.assertIn("questionId", lines[0])
+
+    def test_modules_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            topics = Path(tmpdir) / "topics.jsonl"
+            questions = Path(tmpdir) / "questions.jsonl"
+            modules = Path(tmpdir) / "modules.jsonl"
+            self.assertEqual(
+                self.run_cli("extract", "--input", str(EXAMPLE_INPUT), "--output", str(topics)).returncode,
+                0,
+            )
+            self.assertEqual(
+                self.run_cli("questions", "--input", str(topics), "--output", str(questions)).returncode,
+                0,
+            )
+
+            module_result = self.run_cli(
+                "modules",
+                "--input",
+                str(questions),
+                "--topics",
+                str(topics),
+                "--output",
+                str(modules),
+            )
+            self.assertEqual(module_result.returncode, 0, module_result.stderr)
+            lines = [json.loads(line) for line in modules.read_text(encoding="utf-8").splitlines() if line.strip()]
+            self.assertGreaterEqual(len(lines), 1)
+            self.assertIn("moduleId", lines[0])
+            self.assertIn("inputNeeded", lines[0])
+            self.assertIn("outputSections", lines[0])
+
+    def test_pipeline_command_with_modules_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            topics = Path(tmpdir) / "topics.jsonl"
+            questions = Path(tmpdir) / "questions.jsonl"
+            modules = Path(tmpdir) / "modules.jsonl"
+
+            result = self.run_cli(
+                "pipeline",
+                "--input",
+                str(EXAMPLE_INPUT),
+                "--topics-output",
+                str(topics),
+                "--questions-output",
+                str(questions),
+                "--modules-output",
+                str(modules),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(topics.exists())
+            self.assertTrue(questions.exists())
+            self.assertTrue(modules.exists())
+
+    def test_pipeline_command_preserves_old_behavior_without_modules_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            topics = Path(tmpdir) / "topics.jsonl"
+            questions = Path(tmpdir) / "questions.jsonl"
+            modules = Path(tmpdir) / "modules.jsonl"
+
+            result = self.run_cli(
+                "pipeline",
+                "--input",
+                str(EXAMPLE_INPUT),
+                "--topics-output",
+                str(topics),
+                "--questions-output",
+                str(questions),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(topics.exists())
+            self.assertTrue(questions.exists())
+            self.assertFalse(modules.exists())

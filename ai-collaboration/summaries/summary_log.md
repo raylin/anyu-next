@@ -3739,3 +3739,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether a later pass should add module-idea seed generation once upstream sourcing stabilizes
 - whether older topic-related scripts should eventually be archived after this extracted path becomes the preferred local workflow
+
+## 2026-05-21 - Topic Ingestion Module Seed v0
+
+### Completed Changes
+
+- extended `tools/topic-ingestion/` with deterministic module-seed generation on top of topic candidates and question seeds
+- added a `modules` CLI command plus optional `--modules-output` support for the existing `pipeline` command
+- added synthetic module-seed examples and tests covering contract shape, defaults, and old pipeline compatibility
+
+### Learnings
+
+- the most natural v0 module-seed path is question-driven with optional topic enrichment, not topic-only generation
+- the extracted tool can now complete a full local ideation loop without needing any provider or crawler dependency
+- keeping the public JSONL contract in camelCase avoids downstream ambiguity while internal Python code stays simple
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether a later pass should add a separate module-seed review/ranking pack for human ideation workflows
+- whether non-relationship topics will need broader default `inputNeeded` / `outputSections` sets once sourcing expands

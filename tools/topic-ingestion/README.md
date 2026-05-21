@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This tool extracts reusable, source-agnostic topic candidates and question seeds from structured JSONL input.
+This tool extracts reusable, source-agnostic topic candidates, question seeds, and module idea seeds from structured JSONL input.
 
 It exists to support a future ANYU trend-driven module pipeline:
 
@@ -21,7 +21,8 @@ structured jsonl input
 - maps Dcard-like field names into a generic record shape when present
 - extracts deterministic topic candidates using heuristic rules
 - generates deterministic question seeds from topic candidates
-- exports topic candidates and question seeds as JSONL
+- generates deterministic module seeds from question/topic context
+- exports topic candidates, question seeds, and module seeds as JSONL
 
 ## What This Tool Does Not Do
 
@@ -104,6 +105,29 @@ Each question seed is exported as JSONL, for example:
 }
 ```
 
+## Module Seed Output
+
+Each module seed is exported as JSONL, for example:
+
+```json
+{
+  "moduleId": "ambiguous-temperature-followup",
+  "topicId": "topic-yi-du-bu-hui",
+  "questionIds": ["question-topic-yi-du-bu-hui-1", "question-topic-yi-du-bu-hui-2"],
+  "title": "他是真的忙，還是其實在冷掉？",
+  "format": "mini-test",
+  "audience": "22–35 relationship-curious users",
+  "emotionalHook": "已讀不回、等待焦慮的矛盾感",
+  "userPromise": "幫你判斷多人討論回覆中斷、等待焦慮與投入不確定的情境。更接近降溫、觀望，還是只是節奏不同。",
+  "inputNeeded": ["對話片段", "最近互動變化", "見面或邀約情境"],
+  "outputSections": ["溫度分數", "三個小訊號", "下一句怎麼回"],
+  "monetizationFit": "paid follow-up reply strategy",
+  "tone": "warm, subtle, slightly mysterious",
+  "confidence": 0.45,
+  "createdAt": "2026-05-21T00:00:00+00:00"
+}
+```
+
 ## CLI Usage
 
 Direct module usage without install:
@@ -121,10 +145,18 @@ PYTHONPATH=tools/topic-ingestion python3 -m topic_ingestion.cli questions \
 ```
 
 ```bash
+PYTHONPATH=tools/topic-ingestion python3 -m topic_ingestion.cli modules \
+  --input /tmp/question-seeds.jsonl \
+  --topics /tmp/topic-candidates.jsonl \
+  --output /tmp/module-seeds.jsonl
+```
+
+```bash
 PYTHONPATH=tools/topic-ingestion python3 -m topic_ingestion.cli pipeline \
   --input tools/topic-ingestion/examples/sample-input.jsonl \
   --topics-output /tmp/topic-candidates.jsonl \
-  --questions-output /tmp/question-seeds.jsonl
+  --questions-output /tmp/question-seeds.jsonl \
+  --modules-output /tmp/module-seeds.jsonl
 ```
 
 Optional editable install path:
@@ -141,6 +173,37 @@ Example files:
 - `tools/topic-ingestion/examples/sample-input.jsonl`
 - `tools/topic-ingestion/examples/topic-candidates.example.jsonl`
 - `tools/topic-ingestion/examples/question-seeds.example.jsonl`
+- `tools/topic-ingestion/examples/module-seeds.example.jsonl`
+
+## modules Command
+
+- input: question-seed JSONL
+- optional `--topics`: topic-candidate JSONL for stronger inherited audience / signal context
+- output: module-seed JSONL
+
+If `--topics` is omitted, the command still works with question seeds alone and falls back to default relationship-oriented assumptions.
+
+## Pipeline With Modules Output
+
+- `pipeline` preserves the old behavior if `--modules-output` is omitted
+- if `--modules-output` is provided, the pipeline emits topic candidates, question seeds, and module seeds in one local run
+
+## How Module Seeds Should Be Used
+
+- ideation input for future ANYU module review
+- weekly or biweekly trend synthesis
+- lightweight opportunity-radar product packaging discussions
+
+These seeds are intended to help decide what to prototype next, not to act as shipping product definitions.
+
+## What Is Not Final Product Copy
+
+- module seed `title`
+- `emotionalHook`
+- `userPromise`
+- `monetizationFit`
+
+These are heuristic scaffolding fields for downstream product thinking. They are not reviewed UX copy, not legal copy, and not final module spec language.
 
 ## Privacy / Fixture Rules
 
