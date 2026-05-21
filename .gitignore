@@ -40,7 +40,15 @@ __pycache__/
 # Local experiment outputs
 outputs/experiments/**/*.jsonl
 outputs/experiments/**/experiment_report.md
+outputs/raw/*
+!outputs/raw/.gitkeep
+outputs/product_eval/raw/*.txt
+outputs/product_samples/raw/*
+!outputs/product_samples/raw/.gitkeep
 ai-collaboration/output-*.jsonl
+ai-collaboration/inbox/
+blob-report/
+*.trace.zip
 
 # OS / editor
 .DS_Store

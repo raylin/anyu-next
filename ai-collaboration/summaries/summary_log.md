@@ -3642,3 +3642,35 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether committed raw sample text under `outputs/` should remain in git
 - whether `oradar/`, `scripts/`, and `experiments/ambiguous_temperature_v0/` should stay in the main repo root as active reference material or move toward a clearer archive boundary
+
+## 2026-05-21 - Repo Cleanup Pass v0
+
+### Completed Changes
+
+- removed committed raw text fixtures from `outputs/raw/`, `outputs/product_eval/raw/`, and `outputs/product_samples/raw/`
+- strengthened `.gitignore` so future raw fixtures, trace archives, blob reports, and `ai-collaboration/inbox/` stay untracked
+- added `ai-collaboration/README.md` and `docs/operations/repo-maintenance.md`
+- documented `oradar/` as mostly reusable extraction tooling plus one historical Python-side product runtime helper
+
+### Learnings
+
+- the highest-confidence repo cleanup win was privacy-risk reduction, not broad archival
+- `oradar/` is not the Dcard crawler itself; the fetch/browser-calibration path mostly lives in `scripts/`
+- generated and structured outputs can stay committed while raw text fixtures move back to local-only status
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether historical product-eval and sample-generation scripts should later get fresh private local fixtures outside git
+- whether `oradar/product_runtime.py` should remain in place until a later extraction/archive pass
