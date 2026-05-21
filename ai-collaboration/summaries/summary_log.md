@@ -4047,3 +4047,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Unresolved Questions
 
 - whether an app version/commit health marker should be added in a future ops-hardening task
+
+## 2026-05-21 - Production Low-Key Monitoring Follow-up v1
+
+### Completed Changes
+
+- saved the Production Low-Key Monitoring Follow-up v1 handoff into `ai-collaboration/handoffs/`
+- checked production route health after the request-state production refresh
+- reviewed aggregate analyze/request-state/cache/latency/funnel/privacy/abuse indicators for the post-refresh window
+- checked retention cleanup route authorization behavior and direct overdue DB counts
+- documented findings in the production monitoring report and execution report
+
+### Learnings
+
+- production remains healthy in the post-refresh window
+- request-state and cache behavior are working together: one fresh request and one cache hit, with no failed/stuck requests
+- retention overdue counts are zero, but authorized dry-run verification needs an operator context with a usable cleanup secret
+- provider latency remains the main perceived-wait risk in synchronous v0
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 22 files / 79 tests
+- `corepack pnpm build` passed
+- local Playwright not run because no app code changed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether the next scheduled cron run has executed after the production refresh
+- whether an app version/commit health marker should be added for future freshness checks
