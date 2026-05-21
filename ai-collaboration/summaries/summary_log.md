@@ -3674,3 +3674,35 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether historical product-eval and sample-generation scripts should later get fresh private local fixtures outside git
 - whether `oradar/product_runtime.py` should remain in place until a later extraction/archive pass
+
+## 2026-05-21 - Oradar Topic Tool Extraction Plan v0
+
+### Completed Changes
+
+- inventoried all tracked `oradar/` source files and adjacent topic-related `scripts/`
+- classified reusable ingestion/tooling pieces versus historical Python product runtime and legacy Dcard acquisition paths
+- created the extraction plan at `ai-collaboration/research/2026-05-21-oradar-topic-tool-extraction-plan-v0.md`
+
+### Learnings
+
+- `oradar/` itself is not the Dcard crawler layer; the blocked acquisition logic mainly lives in `scripts/`
+- the strongest future extraction candidate is `scripts/external_dcard_json_calibration.py`, not the fetch/browser scripts
+- Python is the most natural first extraction target because the reusable current logic is already Python and not app-runtime coupled
+
+### Validation Results
+
+- planning/inventory task only; no runtime, schema, or app behavior change was made
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether future topic-ingestion should stay heuristic-first or include optional provider-assisted enrichment
+- whether `oradar/product_runtime.py` should eventually be archived once historical Python product-eval usage is no longer needed
