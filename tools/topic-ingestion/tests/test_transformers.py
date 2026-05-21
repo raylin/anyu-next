@@ -76,3 +76,25 @@ class TransformersTest(unittest.TestCase):
         questions = topic_candidates_to_question_seeds([risky_topic])
         modules = question_seeds_to_module_seeds(questions, [risky_topic])
         self.assertIn("appearance_discrimination", modules[0].risk_flags)
+
+    def test_brand_safe_reframing_avoids_toxic_raw_phrasing(self) -> None:
+        topic = TopicCandidate(
+            topic_id="topic-appearance-vs-personality-debate",
+            source_ids=["ptt-001"],
+            title="外貌與個性拉扯",
+            summary="多人在外貌吸引與個性相處之間來回拉扯。",
+            signals=["外貌個性拉扯", "第一眼壓力", "相處價值"],
+            audience="22–35 relationship-curious users",
+            evidence_count=1,
+            score=0.5,
+            risk_flags=["appearance_discrimination"],
+            source_mix={"ptt": 1},
+            source_weight=0.7,
+            created_at="2026-05-21T00:00:00+00:00",
+        )
+        questions = topic_candidates_to_question_seeds([topic])
+        modules = question_seeds_to_module_seeds(questions, [topic])
+        joined_text = " ".join([questions[0].question, modules[0].title, modules[0].user_promise])
+        self.assertIn("第一印象", joined_text)
+        self.assertNotIn("普男", joined_text)
+        self.assertNotIn("淘汰", joined_text)

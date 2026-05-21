@@ -68,6 +68,46 @@ QUESTION_TEMPLATES: dict[str, list[str]] = {
         "你不安的是互動太假，還是真的踩到風險訊號？",
         "這段互動讓你警覺，是節奏怪，還是真實性有問題？",
     ],
+    "交友平台比較": [
+        "你適合哪一種交友平台節奏？",
+        "換平台有用，還是要先換互動策略？",
+    ],
+    "交友檔案策略": [
+        "你卡住的是照片、自介，還是第一句話？",
+        "你的交友檔案傳出的訊號，跟你想像的一樣嗎？",
+    ],
+    "現實認識機會": [
+        "你適合線上配對，還是現實慢慢認識？",
+        "你的生活圈還有自然認識的機會嗎？",
+    ],
+    "關係市場自我定位": [
+        "你低估自己，還是把壓力放錯地方？",
+        "現在該調整的是條件、自介，還是互動節奏？",
+    ],
+    "承諾壓力": [
+        "你們是在靠近未來，還是在互相要答案？",
+        "這段關係需要承諾，還是需要更多共識？",
+    ],
+    "家庭婚姻價值衝突": [
+        "你們談的是感情，還是兩個家庭的期待？",
+        "婚後分工焦慮，現在該怎麼被說清楚？",
+    ],
+    "伴侶邊界與誤會": [
+        "這是誤會，還是界線一直沒有被說清楚？",
+        "你們的溝通卡住，是語氣問題還是期待落差？",
+    ],
+    "外貌與個性拉扯": [
+        "第一印象和相處感，哪一個正在拖住你？",
+        "你擔心的是外貌門檻，還是互動沒有被看見？",
+    ],
+    "金錢與狀態定位": [
+        "條件壓力是真的卡關，還是你把自己放太低？",
+        "收入與狀態焦慮，正在怎麼影響你的互動？",
+    ],
+    "交友詐騙與假帳號焦慮": [
+        "這段互動是真人熱度，還是平台噪音？",
+        "你看到的是心動訊號，還是風險訊號？",
+    ],
 }
 
 DEFAULT_INPUT_NEEDED = [
@@ -114,9 +154,9 @@ def _why_it_works(topic: TopicCandidate) -> str:
         return "這類題目帶有高不確定性，容易轉成輕量測驗。"
     if topic.title == "關係邊界":
         return "這類題目有明確情緒張力，也容易延伸成判斷型互動測驗。"
-    if topic.title in {"交友疲勞", "外貌焦慮", "自介與檔案包裝", "聊天能力落差", "回覆節奏控制"}:
+    if topic.title in {"交友疲勞", "外貌焦慮", "自介與檔案包裝", "聊天能力落差", "回覆節奏控制", "交友平台比較", "交友檔案策略", "現實認識機會", "關係市場自我定位", "外貌與個性拉扯", "金錢與狀態定位"}:
         return "這類題目同時有強情緒與可行動感，適合包裝成低門檻自我診斷。"
-    if topic.title in {"婚姻與價值壓力", "AI 詐騙戀愛焦慮", "算命當感情工具"}:
+    if topic.title in {"婚姻與價值壓力", "家庭婚姻價值衝突", "承諾壓力", "伴侶邊界與誤會", "AI 詐騙戀愛焦慮", "交友詐騙與假帳號焦慮", "算命當感情工具"}:
         return "這類題目有高焦慮與高判斷需求，適合先做觀察型種子而非直接強推。"
     return "這類題目具備可辨識情境與可轉譯成測驗的情緒拉力。"
 
@@ -196,14 +236,31 @@ def _user_promise(topic: TopicCandidate | None, question: QuestionSeed) -> str:
 
 
 def _monetization_fit(topic: TopicCandidate | None, question: QuestionSeed) -> str:
-    relationship_titles = {"已讀不回", "忽冷忽熱", "回訊變慢", "曖昧不確定", "社群微訊號", "交友疲勞", "外貌焦慮", "自介與檔案包裝", "聊天能力落差", "回覆節奏控制"}
+    relationship_titles = {
+        "已讀不回",
+        "忽冷忽熱",
+        "回訊變慢",
+        "曖昧不確定",
+        "社群微訊號",
+        "交友疲勞",
+        "外貌焦慮",
+        "自介與檔案包裝",
+        "聊天能力落差",
+        "回覆節奏控制",
+        "交友平台比較",
+        "交友檔案策略",
+        "現實認識機會",
+        "關係市場自我定位",
+        "外貌與個性拉扯",
+        "金錢與狀態定位",
+    }
     if question.module_fit == "ambiguous-temperature":
         return "paid follow-up reply strategy"
     if topic and topic.title in relationship_titles:
         return "paid follow-up reply strategy"
     if topic and topic.title == "關係邊界":
         return "paid boundary-setting guidance"
-    if topic and topic.title == "AI 詐騙戀愛焦慮":
+    if topic and topic.title in {"AI 詐騙戀愛焦慮", "交友詐騙與假帳號焦慮"}:
         return "paid risk-check guidance"
     return "paid follow-up insight"
 
@@ -212,7 +269,9 @@ def _confidence(topic: TopicCandidate | None, questions: list[QuestionSeed]) -> 
     topic_score = topic.score if topic else 0.45
     evidence = min((topic.evidence_count if topic else 1) * 0.04, 0.12)
     question_bonus = min(len(questions) * 0.03, 0.08)
-    source_bonus = (topic.source_weight if topic else 0.5) * 0.08
-    risk_penalty = min(len(topic.risk_flags) * 0.03, 0.12) if topic else 0.0
+    source_bonus = (topic.source_weight if topic else 0.5) * 0.06
+    risk_penalty = min(len(topic.risk_flags) * 0.04, 0.18) if topic else 0.0
     confidence = topic_score * 0.72 + evidence + question_bonus + source_bonus - risk_penalty
+    if topic and set(topic.source_mix) == {"mobile01"}:
+        confidence = min(confidence, 0.56)
     return round(min(0.95, max(0.4, confidence)), 2)

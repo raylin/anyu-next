@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import datetime, timezone
+import math
 import re
 
 from .risk import infer_risk_flags
@@ -11,6 +12,16 @@ from .schema import GenericRecord, TopicCandidate
 
 
 TOPIC_RULES: list[tuple[str, tuple[str, ...], list[str], str]] = [
+    ("交友平台比較", ("哪個交友軟體", "交友app", "交友 app", "平台比較", "用哪個平台", "軟體推薦", "平台推薦"), ["平台選擇", "使用情境", "投入成本"], "多人比較不同交友平台的使用感、受眾與投入成本。"),
+    ("交友檔案策略", ("照片怎麼拍", "照片怎麼選", "自介怎麼寫", "檔案怎麼改", "profile", "個人檔案", "頭貼"), ["檔案優化", "第一印象", "自我呈現"], "多人討論交友檔案、照片與自介如何影響第一步互動。"),
+    ("現實認識機會", ("現實認識", "朋友介紹", "活動認識", "共同朋友", "生活圈", "脫單管道", "哪裡認識"), ["現實場域", "低壓認識", "機會稀缺"], "多人討論除了交友平台之外，現實生活中還能在哪裡自然認識人。"),
+    ("關係市場自我定位", ("市場定位", "自己幾分", "競爭力", "配得上", "條件差", "條件普通", "定位"), ["自我定位", "比較壓力", "條件焦慮"], "多人試圖判斷自己在關係市場中的位置與可調整方向。"),
+    ("承諾壓力", ("承諾", "給答案", "確認關係", "要不要在一起", "未來規劃", "給交代"), ["承諾壓力", "關係定義", "答案焦慮"], "多人在關係推進時感受到承諾、定義與給答案的壓力。"),
+    ("家庭婚姻價值衝突", ("家人催婚", "父母催婚", "婆家", "娘家", "家庭價值", "婚後分工", "家務"), ["家庭壓力", "婚姻價值", "分工衝突"], "多人討論家庭期待、婚姻分工與價值觀不一致造成的壓力。"),
+    ("伴侶邊界與誤會", ("誤會", "溝通不清", "界線不清", "踩線", "冷戰", "講不清楚", "不讀空氣"), ["邊界溝通", "誤會累積", "互動失焦"], "多人描述伴侶或曖昧對象之間的界線不清與溝通誤會。"),
+    ("外貌與個性拉扯", ("外貌重要", "個性重要", "看個性", "只看臉", "外表 vs", "外表還是個性", "外貌還是個性"), ["外貌個性拉扯", "第一眼壓力", "相處價值"], "多人在外貌吸引與個性相處之間來回拉扯。"),
+    ("金錢與狀態定位", ("收入", "薪水", "年薪", "存款", "買房", "車", "工程師", "經濟條件", "社經"), ["金錢焦慮", "狀態定位", "條件比較"], "多人把收入、職業與資產條件放進關係選擇與自我定位中。"),
+    ("交友詐騙與假帳號焦慮", ("假帳號", "詐騙", "騙感情", "投資群", "殺豬盤", "ai 代聊", "ai代聊", "機器人"), ["詐騙疑慮", "真實性不安", "平台噪音"], "多人擔心交友互動中的假帳號、詐騙或非真人訊號。"),
     ("已讀不回", ("已讀不回", "讀不回", "不回訊息"), ["已讀不回", "等待焦慮", "投入不確定"], "多人討論回覆中斷、等待焦慮與投入不確定的情境。"),
     ("忽冷忽熱", ("忽冷忽熱", "忽熱忽冷", "一下熱一下冷", "若即若離"), ["溫差互動", "投入波動", "關係不確定"], "多人描述互動忽冷忽熱、很難判斷對方真實投入。"),
     ("回訊變慢", ("回訊變慢", "回很慢", "回覆變慢", "回覆速度"), ["回覆變慢", "主動猶豫", "節奏失衡"], "多人討論訊息節奏下降後，是否該繼續主動的困惑。"),
@@ -89,11 +100,22 @@ def infer_topic_metadata(topic_name: str) -> tuple[list[str], str]:
 
 def score_topic(records: list[GenericRecord]) -> float:
     evidence = len(records)
-    weighted_engagement = sum(((record.likes + record.comments * 2 + record.shares * 3 + record.dislikes * 0.5) * record.source_weight) for record in records)
-    content_bonus = sum(1 for record in records if len(record.content) >= 30)
-    source_bonus = sum(record.source_weight for record in records) / max(evidence, 1) * 0.08
-    raw_score = evidence * 0.18 + min(weighted_engagement / 900.0, 0.45) + min(content_bonus * 0.05, 0.15) + source_bonus
-    return round(min(0.95, max(0.28, raw_score)), 2)
+    weighted_engagement = sum(
+        ((record.likes + record.comments * 1.6 + record.shares * 2.2 + record.dislikes * 0.25) * record.source_weight)
+        for record in records
+    )
+    source_mix = summarize_source_mix(records)
+    average_source_weight = summarize_source_weight(records)
+    source_diversity_bonus = min((len(source_mix) - 1) * 0.035, 0.07)
+    evidence_score = min(math.log1p(evidence) / math.log(16), 1.0) * 0.24
+    engagement_score = min(math.log1p(weighted_engagement) / math.log(1200), 1.0) * 0.26
+    content_score = min(sum(1 for record in records if len(record.content) >= 30) / max(evidence, 1), 1.0) * 0.08
+    source_score = average_source_weight * 0.16
+    risk_penalty = min(len(infer_risk_flags(*(record.title for record in records), *(record.content for record in records))) * 0.018, 0.09)
+    raw_score = 0.22 + evidence_score + engagement_score + content_score + source_score + source_diversity_bonus - risk_penalty
+    if set(source_mix) == {"mobile01"}:
+        raw_score = min(raw_score, 0.62)
+    return round(min(0.91, max(0.24, raw_score)), 2)
 
 
 def summarize_source_mix(records: list[GenericRecord]) -> dict[str, int]:
@@ -125,6 +147,16 @@ def slugify(value: str) -> str:
         "關係邊界": "guan-xi-bian-jie",
         "交友疲勞": "dating-app-fatigue",
         "外貌焦慮": "dating-market-appearance-anxiety",
+        "交友平台比較": "dating-app-platform-comparison",
+        "交友檔案策略": "dating-app-profile-strategy",
+        "現實認識機會": "real-world-meeting-chance",
+        "關係市場自我定位": "relationship-market-self-positioning",
+        "承諾壓力": "commitment-pressure",
+        "家庭婚姻價值衝突": "family-marriage-value-conflict",
+        "伴侶邊界與誤會": "partner-boundary-and-miscommunication",
+        "外貌與個性拉扯": "appearance-vs-personality-debate",
+        "金錢與狀態定位": "money-and-status-positioning",
+        "交友詐騙與假帳號焦慮": "dating-app-scam-or-fake-account-anxiety",
         "線下介紹懷疑": "offline-matchmaking-skepticism",
         "自介與檔案包裝": "profile-self-presentation",
         "聊天能力落差": "conversation-skill-gap",

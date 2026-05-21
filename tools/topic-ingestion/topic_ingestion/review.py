@@ -153,22 +153,28 @@ def rank_module_seeds(
 
 def _ranking_score(module: ModuleSeed, topic: TopicCandidate | None, questions: list[QuestionSeed]) -> float:
     topic_score = topic.score if topic else 0.42
-    evidence_bonus = min((topic.evidence_count if topic else 1) * 0.03, 0.12)
+    evidence_bonus = min((topic.evidence_count if topic else 1) * 0.022, 0.09)
     hook_bonus = 0.05 if module.emotional_hook.strip() else 0.0
     format_bonus = 0.05 if module.format == "mini-test" else 0.0
     monetization_bonus = 0.05 if "paid follow-up" in module.monetization_fit else 0.02
     relevance_bonus = 0.05 if any(question.module_fit == "ambiguous-temperature" for question in questions) else 0.0
-    source_bonus = (topic.source_weight if topic else 0.5) * 0.08
-    risk_penalty = min(len(module.risk_flags) * 0.04, 0.16)
+    source_bonus = (topic.source_weight if topic else 0.5) * 0.06
+    risk_penalty = min(len(module.risk_flags) * 0.055, 0.24)
     score = module.confidence * 0.6 + topic_score * 0.2 + evidence_bonus + hook_bonus + format_bonus + monetization_bonus + relevance_bonus + source_bonus - risk_penalty
+    if _is_mobile01_only(module, topic):
+        score = min(score, 0.58)
     return round(min(0.99, max(0.2, score)), 2)
 
 
 def _recommended_action(module: ModuleSeed, ranking_score: float) -> str:
+    if _is_mobile01_only(module, None):
+        return "watch" if ranking_score >= 0.5 else "defer"
     if "high_toxicity" in module.risk_flags or "adult_service_reference" in module.risk_flags:
         return "defer" if ranking_score < 0.7 else "watch"
     if "gender_polarized" in module.risk_flags or "body_shaming" in module.risk_flags:
         return "watch" if ranking_score >= 0.55 else "defer"
+    if "appearance_discrimination" in module.risk_flags:
+        return "watch" if ranking_score >= 0.58 else "defer"
     if ranking_score >= 0.62 and module.format == "mini-test" and bool(module.emotional_hook.strip()):
         return "build"
     if ranking_score >= 0.48:
@@ -188,6 +194,8 @@ def _rationale(module: ModuleSeed, topic: TopicCandidate | None, questions: list
         rationale_parts.append(f"source weight {topic.source_weight:.2f}")
     if module.risk_flags:
         rationale_parts.append(f"risk flags {', '.join(module.risk_flags)}")
+    if _is_mobile01_only(module, topic):
+        rationale_parts.append("Mobile01-only reference signal")
     if module.emotional_hook.strip():
         rationale_parts.append("clear emotional hook")
     return "; ".join(rationale_parts)
@@ -283,3 +291,8 @@ def _source_mix_text(source_mix: dict[str, int]) -> str:
     if not source_mix:
         return "unknown"
     return ", ".join(f"{source}:{count}" for source, count in sorted(source_mix.items(), key=lambda entry: (-entry[1], entry[0])))
+
+
+def _is_mobile01_only(module: ModuleSeed, topic: TopicCandidate | None) -> bool:
+    source_mix = topic.source_mix if topic else module.source_mix
+    return bool(source_mix) and set(source_mix) == {"mobile01"}

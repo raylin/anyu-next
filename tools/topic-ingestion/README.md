@@ -103,6 +103,8 @@ These weights affect topic scoring and review ranking in a small, deterministic 
 - PTT is useful for stronger controversy and counter-signal evidence.
 - Mobile01 is treated as low-weight reference material.
 
+Mobile01-only candidates are capped more conservatively in scoring and should normally land as `watch` or `defer`, not `build`, unless reinforced by Dcard or PTT signals in a later batch.
+
 ## Risk Flags
 
 Topic candidates and module seeds can now carry deterministic `riskFlags`, for example:
@@ -117,6 +119,8 @@ Topic candidates and module seeds can now carry deterministic `riskFlags`, for e
 - `scam_or_fraud_reference`
 
 These flags do not auto-delete candidates, but they can reduce ranking and push recommendations toward `watch` or `defer`.
+
+High-toxicity, adult-service, gender-polarized, body-shaming, or appearance-discrimination flags now affect action labels directly. They remain useful as watch signals, but should not become build recommendations without explicit human review and brand-safe reframing.
 
 ## Brand-safe Reframing
 
@@ -209,6 +213,12 @@ The review pack also surfaces:
 - source mix notes
 - risk flags
 - heuristic action labels that prefer safer, more actionable ideas over higher-toxicity controversy
+
+## Scoring Notes
+
+Topic scores use dampened engagement and evidence scaling so high-volume topics do not all collapse to the same maximum score. Source diversity helps, source weight helps, and Mobile01-only topics are reference-capped.
+
+Scores remain heuristic scaffolding. They are meant to create review separation, not to prove demand.
 
 ## CLI Usage
 

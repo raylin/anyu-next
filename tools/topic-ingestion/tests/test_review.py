@@ -96,3 +96,26 @@ class ReviewTest(unittest.TestCase):
         )
         ranked = rank_module_seeds([risky_module])
         self.assertIn(ranked[0].recommended_action, {"watch", "defer"})
+
+    def test_mobile01_only_candidate_is_not_build_by_default(self) -> None:
+        mobile_module = ModuleSeed(
+            module_id="ambiguous-temperature-reference-only",
+            topic_id="topic-money-and-status-positioning",
+            question_ids=["question-topic-money-1"],
+            title="條件壓力是真的卡關，還是你把自己放太低？",
+            format="mini-test",
+            audience="22–35 relationship-curious users",
+            emotional_hook="金錢焦慮、狀態定位的矛盾感",
+            user_promise="幫你判斷收入與狀態焦慮正在怎麼影響互動。",
+            input_needed=["對話片段", "最近互動變化", "見面或邀約情境"],
+            output_sections=["溫度分數", "三個小訊號", "下一句怎麼回"],
+            monetization_fit="paid follow-up reply strategy",
+            tone="warm, subtle, slightly mysterious",
+            confidence=0.7,
+            risk_flags=[],
+            source_mix={"mobile01": 3},
+            created_at="2026-05-21T00:00:00+00:00",
+        )
+        ranked = rank_module_seeds([mobile_module])
+        self.assertIn(ranked[0].recommended_action, {"watch", "defer"})
+        self.assertLessEqual(ranked[0].ranking_score, 0.58)

@@ -3871,3 +3871,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether Mobile01 should be penalized more aggressively in review ranking
 - whether the next refinement should focus on bucket coverage or on relaxing score saturation first
+
+## 2026-05-21 - Topic Ingestion Heuristic Refinement v0
+
+### Completed Changes
+
+- refined `tools/topic-ingestion/` buckets, scoring, Mobile01 handling, risk action rules, and brand-safe templates based on the first private dry-run report
+- added synthetic tests for new bucket coverage, Dcard/Mobile01 score separation, Mobile01 action behavior, score distribution, and brand-safe reframing
+- reran the private batch locally under `.local/` and recorded only sanitized aggregate deltas in the review bundle
+
+### Learnings
+
+- uncategorized evidence dropped from 24 to 12 after adding targeted buckets, but it is still not negligible
+- score saturation improved: the private rerun had a 0.53 to 0.87 score range and 15 unique scores
+- Mobile01 and risk penalties now make the private review output much more conservative, producing 0 build / 8 watch / 8 defer
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether the zero-build result is the right level of conservatism for a risk-heavy private batch
+- whether remaining uncategorized records should get another bucket pass or stay as broad review-only signals
