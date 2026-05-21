@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAnalysisRequestRecord, createAnalysisResultRecord, insertEvent } from "@/lib/db/runtime";
-import { getProviderUserMessage, isProviderConfigError } from "@/lib/ai/provider";
-import { generateModuleResult } from "@/lib/ai/runtime";
+import {
+  createAnalysisRequestRecord,
+  createAnalysisResultRecord,
+  getCachedAnalysisResult,
+  insertEvent,
+} from "@/lib/db/runtime";
+import {
+  getActiveProviderInfo,
+  getProviderUserMessage,
+  isProviderConfigError,
+} from "@/lib/ai/provider";
+import { buildAnalyzeCacheKey } from "@/lib/ai/result-cache";
+import { generateModuleResult, resolveRuntimeStrategy } from "@/lib/ai/runtime";
 import { isDbConfigured } from "@/lib/db/client";
 import { validateAnalyzeInput } from "@/lib/modules/ai-temperature-ui";
 import { getModuleBySlug } from "@/lib/modules/registry";
@@ -122,6 +132,90 @@ export async function POST(
   }
 
   try {
+    const redaction = redactUserInput(validatedInput.text);
+    timing.mark("input_redacted");
+    const providerInfo = getActiveProviderInfo();
+    const runtimeStrategy = resolveRuntimeStrategy(providerInfo);
+    const cacheKey = buildAnalyzeCacheKey({
+      moduleSlug: moduleConfig.slug,
+      redactedText: redaction.redactedText,
+      situation: validatedInput.situation,
+      promptVersion: moduleConfig.promptVersion,
+      schemaVersion: moduleConfig.schemaVersion,
+      modelStrategy: runtimeStrategy.strategy,
+      provider: providerInfo.provider,
+      primaryModel: runtimeStrategy.primaryModel,
+    });
+    const retentionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    if (cacheKey) {
+      const cachedAnalysis = await getCachedAnalysisResult({
+        moduleId: moduleConfig.moduleId,
+        themeSlug: moduleConfig.slug,
+        cacheKeyVersion: cacheKey.cacheKeyVersion,
+        cacheKeyHash: cacheKey.cacheKeyHash,
+      });
+
+      if (cachedAnalysis) {
+        timing.mark("response_ready");
+
+        await insertEvent({
+          eventName: "input_submitted",
+          moduleId: moduleConfig.moduleId,
+          themeSlug: moduleConfig.slug,
+          experimentId: moduleConfig.experimentId,
+          visualVariant: "B",
+          promptVersion: moduleConfig.promptVersion,
+          schemaVersion: moduleConfig.schemaVersion,
+          situationType: validatedInput.situation,
+          anonymousSessionId: validatedInput.anonymousSessionId,
+          metadata: {
+            inputCharCount: validatedInput.inputCharCount,
+            cacheHit: true,
+          },
+        });
+
+        await insertEvent({
+          eventName: "analysis_completed",
+          moduleId: moduleConfig.moduleId,
+          themeSlug: moduleConfig.slug,
+          experimentId: moduleConfig.experimentId,
+          visualVariant: "B",
+          promptVersion: moduleConfig.promptVersion,
+          schemaVersion: moduleConfig.schemaVersion,
+          situationType: validatedInput.situation,
+          scoreBucket: cachedAnalysis.result.scoreBucket,
+          anonymousSessionId: validatedInput.anonymousSessionId,
+          metadata: {
+            resultId: cachedAnalysis.result.id,
+            privacyFlags: cachedAnalysis.request.privacyFlags,
+            modelStrategy: cachedAnalysis.request.modelStrategy ?? runtimeStrategy.strategy,
+            primaryModel: cachedAnalysis.request.primaryModel ?? runtimeStrategy.primaryModel,
+            finalModel:
+              cachedAnalysis.result.providerModel ??
+              cachedAnalysis.request.primaryModel ??
+              runtimeStrategy.primaryModel,
+            retryCount: 0,
+            fallbackUsed:
+              Boolean(cachedAnalysis.result.providerModel) &&
+              cachedAnalysis.result.providerModel !==
+                (cachedAnalysis.request.primaryModel ?? runtimeStrategy.primaryModel),
+            schemaValidationPassed: true,
+            cacheHit: true,
+            cacheKeyVersion: cacheKey.cacheKeyVersion,
+            timingMs: getEventTimingMetrics(timing.summarize()),
+          },
+        });
+
+        return NextResponse.json({
+          ok: true,
+          resultId: cachedAnalysis.result.id,
+          redirectTo: `/m/${moduleConfig.slug}/result/${cachedAnalysis.result.id}`,
+          cacheHit: true,
+        });
+      }
+    }
+
     const persistedLimitResult = await checkPersistedAnalyzeLimits({
       moduleId: moduleConfig.moduleId,
       themeSlug: moduleConfig.slug,
@@ -132,9 +226,6 @@ export async function POST(
       return errorResponse(429, persistedLimitResult.error, persistedLimitResult.message);
     }
 
-    const retentionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    const redaction = redactUserInput(validatedInput.text);
-    timing.mark("input_redacted");
     const analysisRequest = await createAnalysisRequestRecord({
       moduleId: moduleConfig.moduleId,
       themeSlug: moduleConfig.slug,
@@ -145,6 +236,10 @@ export async function POST(
       situationType: validatedInput.situation,
       inputCharCount: validatedInput.inputCharCount,
       rawInputRedacted: redaction.redactedText,
+      cacheKeyVersion: cacheKey?.cacheKeyVersion,
+      cacheKeyHash: cacheKey?.cacheKeyHash,
+      modelStrategy: runtimeStrategy.strategy,
+      primaryModel: runtimeStrategy.primaryModel,
       privacyFlags: redaction.flags,
       retentionExpiresAt,
     });
@@ -162,6 +257,7 @@ export async function POST(
       anonymousSessionId: validatedInput.anonymousSessionId,
       metadata: {
         inputCharCount: validatedInput.inputCharCount,
+        cacheHit: false,
       },
     });
 
@@ -214,6 +310,8 @@ export async function POST(
         retryCount: generated.runtimeModel.retryCount,
         fallbackUsed: generated.runtimeModel.fallbackUsed,
         schemaValidationPassed: generated.runtimeModel.schemaValidationPassed,
+        cacheHit: false,
+        cacheKeyVersion: cacheKey?.cacheKeyVersion ?? null,
         timingMs: getEventTimingMetrics(timing.summarize()),
       },
     });
@@ -222,6 +320,7 @@ export async function POST(
       ok: true,
       resultId: analysisResult.id,
       redirectTo: `/m/${moduleConfig.slug}/result/${analysisResult.id}`,
+      cacheHit: false,
     });
   } catch (error) {
     if (isProviderConfigError(error)) {

@@ -18,6 +18,7 @@ The current Module 01 experience supports:
 - elapsed-time wait-state copy with a client timeout guard
 - schema-validated result normalization
 - DB-backed result loading when `DATABASE_URL` is configured
+- 24-hour idempotent analyze-result reuse for identical redacted input when cache hashing is configured
 - fake-door unlock intent + contact capture APIs
 - safe runtime timing metadata attached to `analysis_completed` events
 
@@ -56,6 +57,7 @@ Copy `apps/web/.env.example` and provide the values you need locally:
 - `OPENAI_MODEL=`
 - `ORADAR_PROVIDER=anthropic`
 - `MODEL_STRATEGY=sonnet_default`
+- `ANALYSIS_CACHE_HASH_SECRET=`
 - `ANALYSIS_SESSION_DAILY_LIMIT=3`
 - `ANALYSIS_IP_HOURLY_LIMIT=10`
 - `ANALYSIS_GLOBAL_DAILY_LIMIT=200`
@@ -71,6 +73,8 @@ Launch-readiness behavior:
 - `/m/ambiguous-temperature/result/demo` works without env
 - unconfigured runtime APIs should return friendly non-technical errors
 - wait-state instrumentation must not include raw input or contact values in events
+- identical redacted input only reuses a prior result when module slug, situation, prompt version, schema version, model strategy, provider, and primary model still match
+- production should set `ANALYSIS_CACHE_HASH_SECRET`; local/test may fall back to a non-production dev secret
 - analyze input is guarded by a 30-char minimum, 4,000-char hard max, lightweight relationship-content checks, prompt-injection checks, and pragmatic session/IP/global caps
 - Module 01 now supports a LINE-first contact-notification UI when `NEXT_PUBLIC_LINE_ADD_URL` is configured; Email remains a secondary fallback
 
@@ -104,6 +108,7 @@ Preview env required for live analyze:
 - `ANTHROPIC_FALLBACK_MODEL` for guarded Haiku staging trials
 - `ORADAR_PROVIDER=anthropic`
 - `MODEL_STRATEGY`
+- `ANALYSIS_CACHE_HASH_SECRET`
 - `NEXT_PUBLIC_APP_URL`
 
 Suggested manual preview commands if Vercel CLI access is available:

@@ -8,6 +8,13 @@
       "when": 1779124337993,
       "tag": "0000_short_harrier",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779329007115,
+      "tag": "0001_wooden_king_cobra",
+      "breakpoints": true
     }
   ]
 }

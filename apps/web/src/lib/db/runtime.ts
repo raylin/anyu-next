@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import { requireDb } from "@/lib/db/client";
 import {
   analysisRequests,
@@ -59,6 +59,10 @@ export async function createAnalysisRequestRecord(input: {
   situationType?: string | null;
   inputCharCount: number;
   rawInputRedacted?: string | null;
+  cacheKeyVersion?: string | null;
+  cacheKeyHash?: string | null;
+  modelStrategy?: string | null;
+  primaryModel?: string | null;
   privacyFlags?: string[];
   retentionExpiresAt?: Date | null;
 }) {
@@ -78,12 +82,50 @@ export async function createAnalysisRequestRecord(input: {
       situationType: input.situationType ?? null,
       inputCharCount: input.inputCharCount,
       rawInputRedacted: input.rawInputRedacted ?? null,
+      cacheKeyVersion: input.cacheKeyVersion ?? null,
+      cacheKeyHash: input.cacheKeyHash ?? null,
+      modelStrategy: input.modelStrategy ?? null,
+      primaryModel: input.primaryModel ?? null,
       privacyFlags: input.privacyFlags ?? [],
       retentionExpiresAt: input.retentionExpiresAt ?? null,
     })
     .returning();
 
   return record;
+}
+
+export async function getCachedAnalysisResult(input: {
+  moduleId: string;
+  themeSlug: string;
+  cacheKeyVersion: string;
+  cacheKeyHash: string;
+  now?: Date;
+}) {
+  const db = requireDb();
+  const currentTime = input.now ?? new Date();
+
+  const [record] = await db
+    .select({
+      request: analysisRequests,
+      result: analysisResults,
+    })
+    .from(analysisRequests)
+    .innerJoin(analysisResults, eq(analysisResults.requestId, analysisRequests.id))
+    .where(
+      and(
+        eq(analysisRequests.moduleId, input.moduleId),
+        eq(analysisRequests.themeSlug, input.themeSlug),
+        eq(analysisRequests.cacheKeyVersion, input.cacheKeyVersion),
+        eq(analysisRequests.cacheKeyHash, input.cacheKeyHash),
+        isNull(analysisRequests.deletedAt),
+        gt(analysisRequests.retentionExpiresAt, currentTime),
+        gt(analysisResults.retentionExpiresAt, currentTime),
+      ),
+    )
+    .orderBy(desc(analysisResults.createdAt))
+    .limit(1);
+
+  return record ?? null;
 }
 
 export async function createAnalysisResultRecord(input: {

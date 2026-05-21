@@ -1,0 +1,214 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const {
+  mockCreateAnalysisRequestRecord,
+  mockCreateAnalysisResultRecord,
+  mockGetCachedAnalysisResult,
+  mockInsertEvent,
+  mockGenerateModuleResult,
+  mockCheckPersistedAnalyzeLimits,
+  mockResolveRuntimeStrategy,
+} = vi.hoisted(() => ({
+  mockCreateAnalysisRequestRecord: vi.fn(),
+  mockCreateAnalysisResultRecord: vi.fn(),
+  mockGetCachedAnalysisResult: vi.fn(),
+  mockInsertEvent: vi.fn(),
+  mockGenerateModuleResult: vi.fn(),
+  mockCheckPersistedAnalyzeLimits: vi.fn(),
+  mockResolveRuntimeStrategy: vi.fn(),
+}));
+
+vi.mock("@/lib/db/runtime", () => ({
+  createAnalysisRequestRecord: mockCreateAnalysisRequestRecord,
+  createAnalysisResultRecord: mockCreateAnalysisResultRecord,
+  getCachedAnalysisResult: mockGetCachedAnalysisResult,
+  insertEvent: mockInsertEvent,
+}));
+
+vi.mock("@/lib/ai/runtime", () => ({
+  generateModuleResult: mockGenerateModuleResult,
+  resolveRuntimeStrategy: mockResolveRuntimeStrategy,
+}));
+
+vi.mock("@/lib/ai/provider", () => ({
+  getActiveProviderInfo: () => ({
+    provider: "anthropic",
+    model: "claude-sonnet-4-20250514",
+  }),
+  getProviderUserMessage: () => "provider error",
+  isProviderConfigError: () => false,
+}));
+
+vi.mock("@/lib/db/client", () => ({
+  isDbConfigured: () => true,
+}));
+
+vi.mock("@/lib/runtime/abuse-guard", () => ({
+  checkIpHourlyLimit: () => ({ ok: true }),
+  checkPersistedAnalyzeLimits: mockCheckPersistedAnalyzeLimits,
+  getAnalysisGuardConfig: () => ({ ipHourlyLimit: 10 }),
+  getClientIpAddress: () => null,
+  looksLikePromptInjection: () => false,
+  looksLikeUnsupportedRelationshipContent: () => false,
+}));
+
+import { POST as analyzePost } from "@/app/api/modules/[moduleSlug]/analyze/route";
+
+describe("module analyze cache route behavior", () => {
+  const validBody = {
+    text: "他昨天說晚點回我，今天還有看限動但一直沒回，這樣到底是不是在冷掉？",
+    situation: "已讀不回",
+    anonymousSessionId: "cache-test-session",
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockResolveRuntimeStrategy.mockReturnValue({
+      strategy: "sonnet_default",
+      provider: "anthropic",
+      primaryModel: "claude-sonnet-4-20250514",
+      retryOnInvalid: false,
+      fallbackModel: null,
+    });
+    mockCheckPersistedAnalyzeLimits.mockResolvedValue({ ok: true });
+  });
+
+  it("returns the cached result without calling the provider", async () => {
+    mockGetCachedAnalysisResult.mockResolvedValue({
+      request: {
+        id: "request-1",
+        privacyFlags: ["email"],
+        modelStrategy: "sonnet_default",
+        primaryModel: "claude-sonnet-4-20250514",
+      },
+      result: {
+        id: "result-1",
+        scoreBucket: "warm",
+        providerModel: "claude-sonnet-4-20250514",
+      },
+    });
+
+    const response = await analyzePost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(validBody),
+      }),
+      {
+        params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      resultId: "result-1",
+      cacheHit: true,
+    });
+    expect(mockGenerateModuleResult).not.toHaveBeenCalled();
+    expect(mockCreateAnalysisRequestRecord).not.toHaveBeenCalled();
+    expect(mockCheckPersistedAnalyzeLimits).not.toHaveBeenCalled();
+    expect(mockInsertEvent).toHaveBeenCalledTimes(2);
+    expect(mockInsertEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        eventName: "input_submitted",
+        metadata: expect.objectContaining({
+          cacheHit: true,
+        }),
+      }),
+    );
+    expect(mockInsertEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        eventName: "analysis_completed",
+        metadata: expect.objectContaining({
+          resultId: "result-1",
+          cacheHit: true,
+          modelStrategy: "sonnet_default",
+        }),
+      }),
+    );
+  });
+
+  it("creates a fresh request and result on a cache miss", async () => {
+    mockGetCachedAnalysisResult.mockResolvedValue(null);
+    mockCreateAnalysisRequestRecord.mockResolvedValue({ id: "request-2" });
+    mockGenerateModuleResult.mockResolvedValue({
+      result: {
+        free_result: {
+          temperature_score: 78,
+          state_label: "有戲",
+        },
+      },
+      provider: "anthropic",
+      providerModel: "claude-sonnet-4-20250514",
+      providerRawJson: { id: "provider-response" },
+      redactedText: "redacted",
+      privacyFlags: ["name"],
+      scoreBucket: "warm",
+      runtimeModel: {
+        modelStrategy: "sonnet_default",
+        primaryModel: "claude-sonnet-4-20250514",
+        finalModel: "claude-sonnet-4-20250514",
+        retryCount: 0,
+        fallbackUsed: false,
+        schemaValidationPassed: true,
+      },
+    });
+    mockCreateAnalysisResultRecord.mockResolvedValue({ id: "result-2" });
+
+    const response = await analyzePost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(validBody),
+      }),
+      {
+        params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      resultId: "result-2",
+      cacheHit: false,
+    });
+    expect(mockCheckPersistedAnalyzeLimits).toHaveBeenCalledTimes(1);
+    expect(mockCreateAnalysisRequestRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cacheKeyVersion: "v1",
+        cacheKeyHash: expect.any(String),
+        modelStrategy: "sonnet_default",
+        primaryModel: "claude-sonnet-4-20250514",
+      }),
+    );
+    expect(mockGenerateModuleResult).toHaveBeenCalledTimes(1);
+    expect(mockCreateAnalysisResultRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: "request-2",
+      }),
+    );
+    expect(mockInsertEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        eventName: "input_submitted",
+        metadata: expect.objectContaining({
+          cacheHit: false,
+        }),
+      }),
+    );
+    expect(mockInsertEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        eventName: "analysis_completed",
+        metadata: expect.objectContaining({
+          resultId: "result-2",
+          cacheHit: false,
+        }),
+      }),
+    );
+  });
+});

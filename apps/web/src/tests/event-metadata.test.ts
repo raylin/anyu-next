@@ -22,6 +22,8 @@ describe("event metadata guard", () => {
         retryCount: 1,
         fallbackUsed: true,
         schemaValidationPassed: true,
+        cacheHit: false,
+        cacheKeyVersion: "v1",
         timingMs: {
           totalLatencyMs: 28000,
           providerLatencyMs: 24000,

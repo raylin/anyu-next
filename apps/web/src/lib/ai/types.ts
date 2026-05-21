@@ -10,6 +10,7 @@ export type AnalyzeSuccessResponse = {
   ok: true;
   resultId: string;
   redirectTo: string;
+  cacheHit?: boolean;
 };
 
 export type ApiErrorResponse = {

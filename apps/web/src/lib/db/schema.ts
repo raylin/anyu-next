@@ -63,6 +63,10 @@ export const analysisRequests = pgTable(
     situationType: text("situation_type"),
     inputCharCount: integer("input_char_count").notNull(),
     rawInputRedacted: text("raw_input_redacted"),
+    cacheKeyVersion: text("cache_key_version"),
+    cacheKeyHash: text("cache_key_hash"),
+    modelStrategy: text("model_strategy"),
+    primaryModel: text("primary_model"),
     privacyFlags: jsonb("privacy_flags").$type<string[]>().default([]).notNull(),
     retentionExpiresAt: timestamp("retention_expires_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
@@ -70,6 +74,12 @@ export const analysisRequests = pgTable(
   },
   (table) => ({
     requestModuleIdx: index("analysis_requests_module_idx").on(table.moduleId, table.themeSlug),
+    cacheLookupIdx: index("analysis_requests_cache_idx").on(
+      table.moduleId,
+      table.themeSlug,
+      table.cacheKeyVersion,
+      table.cacheKeyHash,
+    ),
   }),
 );
 

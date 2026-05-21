@@ -3510,3 +3510,37 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether future runtime analyze smoke should use a mock path or a safe local provider-backed path
 - whether the LINE CTA should remain button-driven long term or eventually expose a directly inspectable link primitive
+
+## 2026-05-21 - Result Cache + Idempotent Analyze v0
+
+### Completed Changes
+
+- added request-side analyze cache metadata to `analysis_requests`
+- generated Drizzle migration `apps/web/drizzle/0001_wooden_king_cobra.sql`
+- added normalized redacted-input cache hashing via `ANALYSIS_CACHE_HASH_SECRET`
+- updated the analyze route to reuse an existing unexpired result before persisted limits or provider work
+- added focused tests for cache hashing plus analyze-route cache hit/miss behavior
+- documented the new env / production migration expectations in `apps/web/README.md` and `docs/operations/production-deployment-runbook.md`
+
+### Learnings
+
+- request-side cache metadata is enough for a narrow v0 retry/idempotency layer without introducing a separate cache table
+- moving cache lookup ahead of persisted daily limits gives the expected “same result on retry” behavior without consuming extra analysis rows
+- production should not silently fall back to a weak cache secret; disabling reuse is safer than pretending the cache is active
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether a future pass should add explicit concurrency control for simultaneous identical analyze requests
+- when the new migration should be applied in the live production DB relative to other launch operations

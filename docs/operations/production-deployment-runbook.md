@@ -83,6 +83,7 @@ ANTHROPIC_API_KEY=
 ANTHROPIC_MODEL=claude-sonnet-4-20250514
 ORADAR_PROVIDER=anthropic
 MODEL_STRATEGY=sonnet_default
+ANALYSIS_CACHE_HASH_SECRET=<strong random secret>
 ANTHROPIC_FAST_MODEL=claude-haiku-4-5-20251001 optional / not default
 ANTHROPIC_FALLBACK_MODEL=claude-sonnet-4-20250514 optional
 NEXT_PUBLIC_APP_URL=https://anyu.tw
@@ -114,6 +115,7 @@ Neon production checklist:
 Production migration checklist:
 
 - review generated migration files before production use
+- current launch baseline includes the idempotent analyze cache migration `apps/web/drizzle/0001_wooden_king_cobra.sql`
 - run migration against production only after explicit approval
 - record migration command and result in the launch record or launch report
 - verify required tables exist after migration
@@ -191,6 +193,7 @@ Gate before smoke:
 
 - runtime must see non-empty `DATABASE_URL`
 - production branch schema must already contain required runtime tables
+- production env should include non-empty `ANALYSIS_CACHE_HASH_SECRET` so identical-input cache reuse stays active after deploy
 
 1. open `/m/ambiguous-temperature`
 2. confirm landing loads and CTA behavior is correct
