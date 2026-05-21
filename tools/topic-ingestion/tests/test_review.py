@@ -17,6 +17,9 @@ class ReviewTest(unittest.TestCase):
             audience="22–35 relationship-curious users",
             evidence_count=1,
             score=0.46,
+            risk_flags=[],
+            source_mix={"dcard": 1},
+            source_weight=1.0,
             created_at="2026-05-21T00:00:00+00:00",
         )
         self.question = QuestionSeed(
@@ -42,6 +45,8 @@ class ReviewTest(unittest.TestCase):
             monetization_fit="paid follow-up reply strategy",
             tone="warm, subtle, slightly mysterious",
             confidence=0.45,
+            risk_flags=[],
+            source_mix={"dcard": 1},
             created_at="2026-05-21T00:00:00+00:00",
         )
 
@@ -63,8 +68,31 @@ class ReviewTest(unittest.TestCase):
         self.assertIn("## 8. Candidate Table", pack)
         self.assertIn(HEURISTIC_DISCLAIMER, pack)
         self.assertIn("recommendedAction", pack)
+        self.assertIn("source mix note", pack)
 
     def test_build_trend_review_pack_without_optional_context_still_renders(self) -> None:
         pack = build_trend_review_pack([self.module], generated_at="2026-05-21T00:00:00+00:00")
         self.assertIn(self.module.module_id, pack)
         self.assertIn("## 9. Deferred / Low-Fit Candidates", pack)
+
+    def test_high_toxicity_candidate_is_not_build(self) -> None:
+        risky_module = ModuleSeed(
+            module_id="ambiguous-temperature-appearance",
+            topic_id="topic-dating-market-appearance-anxiety",
+            question_ids=["question-topic-appearance-1"],
+            title="你卡住的是照片、自介，還是聊天節奏？",
+            format="mini-test",
+            audience="22–35 relationship-curious users",
+            emotional_hook="被挑選感與比較焦慮的矛盾感",
+            user_promise="幫你判斷卡住的是平台節奏還是第一印象呈現。",
+            input_needed=["對話片段", "最近互動變化", "見面或邀約情境"],
+            output_sections=["溫度分數", "三個小訊號", "下一句怎麼回"],
+            monetization_fit="paid follow-up reply strategy",
+            tone="warm, subtle, slightly mysterious",
+            confidence=0.62,
+            risk_flags=["high_toxicity", "appearance_discrimination"],
+            source_mix={"ptt": 1},
+            created_at="2026-05-21T00:00:00+00:00",
+        )
+        ranked = rank_module_seeds([risky_module])
+        self.assertIn(ranked[0].recommended_action, {"watch", "defer"})

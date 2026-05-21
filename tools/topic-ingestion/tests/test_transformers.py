@@ -17,6 +17,9 @@ class TransformersTest(unittest.TestCase):
             audience="22–35 relationship-curious users",
             evidence_count=1,
             score=0.46,
+            risk_flags=[],
+            source_mix={"manual": 1},
+            source_weight=0.8,
             created_at="2026-05-21T00:00:00+00:00",
         )
 
@@ -38,6 +41,7 @@ class TransformersTest(unittest.TestCase):
         self.assertTrue(modules[0].output_sections)
         self.assertGreaterEqual(modules[0].confidence, 0.4)
         self.assertLessEqual(modules[0].confidence, 0.95)
+        self.assertEqual(modules[0].source_mix, {"manual": 1})
 
     def test_generate_module_seeds_without_topics_uses_defaults(self) -> None:
         question = QuestionSeed(
@@ -53,3 +57,22 @@ class TransformersTest(unittest.TestCase):
         self.assertEqual(len(modules), 1)
         self.assertEqual(modules[0].audience, "22–35 relationship-curious users")
         self.assertEqual(modules[0].input_needed, ["對話片段", "最近互動變化", "見面或邀約情境"])
+
+    def test_generate_module_seeds_carries_risk_flags(self) -> None:
+        risky_topic = TopicCandidate(
+            topic_id="topic-dating-market-appearance-anxiety",
+            source_ids=["ptt-001"],
+            title="外貌焦慮",
+            summary="多人把卡關原因歸在外貌、照片與第一眼條件壓力。",
+            signals=["外貌焦慮", "自我呈現壓力", "被挑選感"],
+            audience="22–35 relationship-curious users",
+            evidence_count=1,
+            score=0.52,
+            risk_flags=["appearance_discrimination", "high_toxicity"],
+            source_mix={"ptt": 1},
+            source_weight=0.7,
+            created_at="2026-05-21T00:00:00+00:00",
+        )
+        questions = topic_candidates_to_question_seeds([risky_topic])
+        modules = question_seeds_to_module_seeds(questions, [risky_topic])
+        self.assertIn("appearance_discrimination", modules[0].risk_flags)

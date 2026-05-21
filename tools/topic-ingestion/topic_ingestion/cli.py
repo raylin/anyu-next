@@ -137,6 +137,9 @@ def load_topic_candidates(path: Path) -> list[TopicCandidate]:
                 audience=str(value["audience"]),
                 evidence_count=int(value["evidence_count"] if "evidence_count" in value else value["evidenceCount"]),
                 score=float(value["score"]),
+                risk_flags=list(value["risk_flags"] if "risk_flags" in value else value.get("riskFlags", [])),
+                source_mix=dict(value["source_mix"] if "source_mix" in value else value.get("sourceMix", {})),
+                source_weight=float(value["source_weight"] if "source_weight" in value else value.get("sourceWeight", 0.5)),
                 created_at=str(value["created_at"] if "created_at" in value else value["createdAt"]),
             )
         )
@@ -200,6 +203,8 @@ def load_module_seeds(path: Path) -> list[ModuleSeed]:
                 monetization_fit=str(value["monetization_fit"] if "monetization_fit" in value else value["monetizationFit"]),
                 tone=str(value["tone"]),
                 confidence=float(value["confidence"]),
+                risk_flags=list(value["risk_flags"] if "risk_flags" in value else value.get("riskFlags", [])),
+                source_mix=dict(value["source_mix"] if "source_mix" in value else value.get("sourceMix", {})),
                 created_at=str(value["created_at"] if "created_at" in value else value["createdAt"]),
             )
         )

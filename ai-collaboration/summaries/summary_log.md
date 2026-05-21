@@ -3805,3 +3805,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether a later pass should emit a compact JSON review summary in addition to Markdown
 - whether broader non-relationship topics will need different default risk/review-question heuristics
+
+## 2026-05-21 - Topic Ingestion Real Input Calibration v0
+
+### Completed Changes
+
+- calibrated `tools/topic-ingestion/` toward the described real-world PTT/forum JSONL shape without committing any raw input
+- added source weighting, wider relationship-forum topic buckets, deterministic risk flags, and safer review ranking behavior
+- added helper modules for normalization and risk handling plus synthetic tests for PTT-like records and toxic-discourse cases
+
+### Learnings
+
+- the current tool benefits from explicit source weighting because Dcard-like and PTT-like signals should not rank equally by default
+- PTT-style inputs need comment-aware normalization and title cleanup more than new ingestion architecture
+- risk flags are enough for a useful v0 brand-safety guard without needing provider moderation or hidden filtering
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- a true private-batch dry run is still needed because no raw calibration JSONL file was present in the accessible local paths for this session
+- first-match topic routing may need widening if real PTT batches frequently contain overlapping themes in one record

@@ -37,6 +37,7 @@ def build_trend_review_pack(
         f"- watch candidates: {sum(1 for item in ranked if item.recommended_action == 'watch')}",
         f"- defer candidates: {sum(1 for item in ranked if item.recommended_action == 'defer')}",
         f"- top confidence range: {ranked[0].module.confidence:.2f} max" if ranked else "- no module seeds provided",
+        f"- source mix note: {_source_mix_note(ranked)}",
         f"- note: {HEURISTIC_DISCLAIMER}",
     ]
 
@@ -67,6 +68,8 @@ def build_trend_review_pack(
                     f"- emotionalHook: {module.emotional_hook}",
                     f"- userPromise: {module.user_promise}",
                     f"- monetizationFit: {module.monetization_fit}",
+                    f"- sourceMix: {_source_mix_text(module.source_mix)}",
+                    f"- riskFlags: {', '.join(module.risk_flags) if module.risk_flags else 'none'}",
                     f"- tone: {module.tone}",
                     f"- confidence: {module.confidence:.2f}",
                     f"- recommendedAction: `{item.recommended_action}`",
@@ -155,11 +158,17 @@ def _ranking_score(module: ModuleSeed, topic: TopicCandidate | None, questions: 
     format_bonus = 0.05 if module.format == "mini-test" else 0.0
     monetization_bonus = 0.05 if "paid follow-up" in module.monetization_fit else 0.02
     relevance_bonus = 0.05 if any(question.module_fit == "ambiguous-temperature" for question in questions) else 0.0
-    score = module.confidence * 0.6 + topic_score * 0.2 + evidence_bonus + hook_bonus + format_bonus + monetization_bonus + relevance_bonus
+    source_bonus = (topic.source_weight if topic else 0.5) * 0.08
+    risk_penalty = min(len(module.risk_flags) * 0.04, 0.16)
+    score = module.confidence * 0.6 + topic_score * 0.2 + evidence_bonus + hook_bonus + format_bonus + monetization_bonus + relevance_bonus + source_bonus - risk_penalty
     return round(min(0.99, max(0.2, score)), 2)
 
 
 def _recommended_action(module: ModuleSeed, ranking_score: float) -> str:
+    if "high_toxicity" in module.risk_flags or "adult_service_reference" in module.risk_flags:
+        return "defer" if ranking_score < 0.7 else "watch"
+    if "gender_polarized" in module.risk_flags or "body_shaming" in module.risk_flags:
+        return "watch" if ranking_score >= 0.55 else "defer"
     if ranking_score >= 0.62 and module.format == "mini-test" and bool(module.emotional_hook.strip()):
         return "build"
     if ranking_score >= 0.48:
@@ -175,6 +184,10 @@ def _rationale(module: ModuleSeed, topic: TopicCandidate | None, questions: list
     if questions:
         rationale_parts.append("mini-test fit present")
         rationale_parts.extend(question.why_it_works for question in questions[:1])
+    if topic:
+        rationale_parts.append(f"source weight {topic.source_weight:.2f}")
+    if module.risk_flags:
+        rationale_parts.append(f"risk flags {', '.join(module.risk_flags)}")
     if module.emotional_hook.strip():
         rationale_parts.append("clear emotional hook")
     return "; ".join(rationale_parts)
@@ -222,6 +235,15 @@ def _risk_lines(ranked: list[RankedModuleSeed], topics_by_id: dict[str, TopicCan
         lines.append("- boundary-related themes may require extra sensitivity review before being turned into lighter-weight tests.")
     if any("paid follow-up" in item.module.monetization_fit for item in ranked):
         lines.append("- monetization fit here only means packaging potential, not proof of willingness to pay.")
+    flagged = [item for item in ranked if item.module.risk_flags]
+    if flagged:
+        lines.append("- flagged candidates:")
+        lines.extend(
+            [
+                f"  - `{item.module.module_id}`: {', '.join(item.module.risk_flags)}"
+                for item in flagged[:5]
+            ]
+        )
     return lines
 
 
@@ -245,3 +267,19 @@ def _deferred_lines(ranked: list[RankedModuleSeed]) -> list[str]:
         f"- `{item.module.module_id}`: {item.module.title} ({item.rationale})"
         for item in deferred
     ]
+
+
+def _source_mix_note(ranked: list[RankedModuleSeed]) -> str:
+    counts: dict[str, int] = {}
+    for item in ranked:
+        for source, count in item.module.source_mix.items():
+            counts[source] = counts.get(source, 0) + count
+    if not counts:
+        return "no source metadata available"
+    return ", ".join(f"{source}={count}" for source, count in sorted(counts.items(), key=lambda entry: (-entry[1], entry[0])))
+
+
+def _source_mix_text(source_mix: dict[str, int]) -> str:
+    if not source_mix:
+        return "unknown"
+    return ", ".join(f"{source}:{count}" for source, count in sorted(source_mix.items(), key=lambda entry: (-entry[1], entry[0])))

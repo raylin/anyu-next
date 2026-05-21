@@ -14,9 +14,12 @@ class GenericRecord:
     url: str | None
     published_at: str | None
     likes: int
+    dislikes: int
     comments: int
     shares: int
     tags: list[str]
+    comment_texts: list[str]
+    source_weight: float
 
 
 @dataclass(frozen=True)
@@ -29,6 +32,9 @@ class TopicCandidate:
     audience: str
     evidence_count: int
     score: float
+    risk_flags: list[str]
+    source_mix: dict[str, int]
+    source_weight: float
     created_at: str
 
 
@@ -58,4 +64,6 @@ class ModuleSeed:
     monetization_fit: str
     tone: str
     confidence: float
+    risk_flags: list[str]
+    source_mix: dict[str, int]
     created_at: str

@@ -72,6 +72,65 @@ The loader also maps Dcard-like fields such as:
 - `topics` → `tags`
 - `excerpt` is merged into `content` when useful
 
+PTT-like records are also supported in v0, including:
+
+- `platform`
+- `platform_post_id`
+- `board`
+- `content_raw`
+- `created_at`
+- `dislike_count`
+- `comments`
+- `extra.push_count`
+- `extra.boo_count`
+- `extra.raw_title`
+
+PTT title cleanup removes leading `Re:` and preserves title tags such as `[求助]` as tags instead of leaving them in the visible title.
+
+## Source Weighting
+
+Default source weights:
+
+- `dcard`: `1.00`
+- `ptt`: `0.70`
+- `mobile01`: `0.35`
+- `manual`: `0.80`
+- `unknown`: `0.50`
+
+These weights affect topic scoring and review ranking in a small, deterministic way.
+
+- Dcard is treated as the closest consumer-tone signal.
+- PTT is useful for stronger controversy and counter-signal evidence.
+- Mobile01 is treated as low-weight reference material.
+
+## Risk Flags
+
+Topic candidates and module seeds can now carry deterministic `riskFlags`, for example:
+
+- `gender_polarized`
+- `body_shaming`
+- `adult_service_reference`
+- `appearance_discrimination`
+- `high_toxicity`
+- `sensitive_health_or_family`
+- `money_status_anxiety`
+- `scam_or_fraud_reference`
+
+These flags do not auto-delete candidates, but they can reduce ranking and push recommendations toward `watch` or `defer`.
+
+## Brand-safe Reframing
+
+The tool is allowed to ingest rougher source language, but generated question and module seed output should stay brand-safe.
+
+In practice that means:
+
+- avoid accusatory gender-war framing
+- avoid body-shaming copy
+- avoid adult-service-forward framing
+- prefer actionable self-reflection or interaction-interpretation wording
+
+The module seeds and review pack are still ideation scaffolding, not final ANYU copy.
+
 ## Topic Candidate Output
 
 Each topic candidate is exported as JSONL, for example:
@@ -144,6 +203,12 @@ The review pack includes:
 - recommended human review questions
 - candidate table
 - deferred / low-fit candidates
+
+The review pack also surfaces:
+
+- source mix notes
+- risk flags
+- heuristic action labels that prefer safer, more actionable ideas over higher-toxicity controversy
 
 ## CLI Usage
 
