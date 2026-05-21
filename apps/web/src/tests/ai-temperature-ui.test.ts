@@ -243,6 +243,9 @@ describe("ai-temperature UI helpers", () => {
     expect(appTokens).toContain('.t-quote   { font: 400 var(--anyu-type-quote-size)/var(--anyu-type-quote-lh) var(--anyu-font-kai);');
     expect(appTokens).toContain('.t-reading { font: 400 16px/1.75 var(--anyu-font-reading);');
     expect(appTokens).toContain('.t-reading-lg { font: 400 18px/1.7 var(--anyu-font-reading);');
+    expect(appTokens).toContain('.t-label-accent { color: var(--anyu-accent); }');
+    expect(appTokens).toContain('.t-label-dim { color: var(--anyu-dim); }');
+    expect(appTokens).toContain('.t-label-faint { color: var(--anyu-faint); }');
     expect(appTokens).not.toContain("Cormorant Garamond");
     expect(appTokens).toBe(canonicalTokens);
   });

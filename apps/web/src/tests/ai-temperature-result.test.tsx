@@ -55,6 +55,7 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("⋯ 尚未解鎖");
     expect(html).toContain("一次性查看 · 無訂閱");
     expect(html).toContain("一次性 · no subscription");
+    expect(html).toContain('class="anyu-reply-lock-mark"');
     expect(html).toContain("目前內測中，這次不會真的收費。點下後可加入 LINE 收到開放通知，或改用 Email。");
   });
 
@@ -88,8 +89,25 @@ describe("ai-temperature result conversion polish", () => {
 
     expect(html).toContain('class="anyu-lead-quote t-quote"');
     expect(html).toContain('class="anyu-share-quote t-kai-quote"');
+    expect(html).toContain("「現在最不該做的，是把壓力全部丟到自己身上。」");
     expect(html).not.toContain('class="anyu-copy t-kai"');
     expect(html).not.toContain('class="anyu-reassurance t-kai"');
     expect(html).not.toContain('class="anyu-button anyu-button-block t-kai-quote"');
+  });
+
+  it("normalizes result and share labels onto the tokenized mono label helpers", () => {
+    const html = renderToStaticMarkup(
+      <AiTemperatureResult
+        moduleConfig={aiTemperatureModule}
+        result={resultFixture}
+        mode="demo"
+        resultId="demo-result"
+      />,
+    );
+
+    expect(html).toContain('class="anyu-kicker t-label-accent"');
+    expect(html).toContain('class="anyu-meta t-label-dim"');
+    expect(html).toContain('class="anyu-kicker t-label-dim"');
+    expect(html).toContain('class="anyu-kicker t-label-faint"');
   });
 });

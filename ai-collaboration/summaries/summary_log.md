@@ -3409,3 +3409,38 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether the share/persona card should get only subtle background layering or a very light stamp-like accent in the final pass
 - exact screenshot-level judgment will still depend on the future post-implementation review pass
+
+## 2026-05-21 - Final UI Finishing Pass v0
+
+### Completed Changes
+
+- completed the final narrow Module 01 UI finishing pass from the reconciliation plan
+- softened the landing disabled CTA treatment and lowered the visual weight of the privacy helper
+- added a subtle inline de-identification reminder above the landing submit CTA
+- made the result quote card warmer and more intentional, added the approved insight soft-ending line, and softened the inline next-step CTA card
+- normalized key landing/result/share labels onto reusable tokenized mono-label helper classes
+- added subtle share/persona layer polish and a light locked B/C preview refinement
+- updated render/token tests and kept canonical/app token files in sync
+
+### Learnings
+
+- the remaining open polish work was mostly about tone and rhythm, not structure; small surface changes were enough to move the UI closer to the final desired mood
+- tokenized label helpers are cleaner than scattering small label-tone overrides across components
+- the AnyuMark direction still holds without needing any moon restoration once the surrounding quote/card surfaces are tuned properly
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact screenshot-level judgment of the softened CTA, quote-card treatment, and share-card layering on a real phone viewport
+- whether a future review wants any stronger share/persona accent or treats this pass as visually complete

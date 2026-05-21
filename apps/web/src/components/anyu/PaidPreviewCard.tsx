@@ -48,7 +48,7 @@ export function PaidPreviewCard({
 
   return (
     <Card className="anyu-paid-card">
-      <p className="anyu-kicker">一次性查看 · 無訂閱</p>
+      <p className="anyu-kicker t-label-dim">一次性查看 · 無訂閱</p>
 
       <div className="anyu-paid-head">
         <div>
@@ -88,6 +88,9 @@ export function PaidPreviewCard({
           </div>
           <p className="anyu-reply-title">低壓試探</p>
           <p className="anyu-reply-copy anyu-reply-copy-locked">{lockedPreviewBodies[0]}</p>
+          <span className="anyu-reply-lock-mark" aria-hidden="true">
+            ⋯
+          </span>
           <span className="anyu-reply-lock">⋯ 尚未解鎖</span>
         </article>
 
@@ -100,6 +103,9 @@ export function PaidPreviewCard({
           </div>
           <p className="anyu-reply-title">尊嚴守門</p>
           <p className="anyu-reply-copy anyu-reply-copy-locked">{lockedPreviewBodies[1]}</p>
+          <span className="anyu-reply-lock-mark" aria-hidden="true">
+            ⋯
+          </span>
           <span className="anyu-reply-lock">⋯ 尚未解鎖</span>
         </article>
       </div>

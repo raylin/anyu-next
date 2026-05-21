@@ -44,21 +44,21 @@ export function ShareCardPreview({
         </div>
 
         <div className="anyu-share-body">
-          <span className="anyu-kicker">my persona</span>
+          <span className="anyu-kicker t-label-dim">my persona</span>
           <strong className="anyu-share-persona">{persona}</strong>
           <p className="anyu-share-quote t-kai-quote">「{quote}」</p>
         </div>
 
         <div className="anyu-share-footer">
           <div>
-            <span className="anyu-kicker">temperature</span>
+            <span className="anyu-kicker t-label-faint">temperature</span>
             <div className="anyu-share-temp">
               <span className="anyu-share-score">{score}°</span>
               <span className="anyu-share-state">{stateLabel}</span>
             </div>
           </div>
           <div className="anyu-share-link">
-            <span className="anyu-kicker">測一次 ↗</span>
+            <span className="anyu-kicker t-label-faint">測一次 ↗</span>
             <span>anyu.app</span>
           </div>
         </div>

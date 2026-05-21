@@ -274,12 +274,12 @@ export function AiTemperatureResult({
       <section className="anyu-signals-card" aria-labelledby="anyu-observed-signals-title">
         <div className="anyu-section-head">
           <div>
-            <p className="anyu-kicker">他這邊的訊號</p>
+            <p className="anyu-kicker t-label-accent">他這邊的訊號</p>
             <h2 id="anyu-observed-signals-title" className="anyu-section-title">
               觀察到的三個小訊號
             </h2>
           </div>
-          <span className="anyu-meta">3 個維度</span>
+          <span className="anyu-meta t-label-dim">3 個維度</span>
         </div>
 
         <div className="anyu-signal-list">
@@ -299,15 +299,18 @@ export function AiTemperatureResult({
       </section>
 
       <Card className="anyu-insight-card">
-        <p className="anyu-kicker">insight layer</p>
+        <p className="anyu-kicker t-label-dim">insight layer</p>
         <h2 className="anyu-section-title">{result.insightTitle}</h2>
         <p className="anyu-copy t-reading">{result.insight}</p>
         <p className="anyu-reassurance t-reading">{result.reassurance}</p>
+        <p className="anyu-insight-soft-end t-kai-quote">
+          「現在最不該做的，是把壓力全部丟到自己身上。」
+        </p>
       </Card>
 
-      <Card className="anyu-transition-card">
+      <Card className="anyu-transition-card anyu-transition-card-soft">
         <div className="anyu-transition-copy">
-          <p className="anyu-kicker">next step</p>
+          <p className="anyu-kicker t-label-dim">next step</p>
           <h2 className="anyu-section-title">想知道下一句怎麼回？</h2>
           <p className="anyu-copy">
             解鎖 3 種不失控的回法，從主動推進、低壓試探到暫時拉開。

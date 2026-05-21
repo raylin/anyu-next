@@ -201,7 +201,7 @@ export function AiTemperatureLanding({
       </header>
 
       <section className="anyu-hero-block anyu-hero-block-landing" aria-labelledby="anyu-hero-title">
-        <p className="anyu-kicker">{getModuleLabel(moduleConfig)}</p>
+        <p className="anyu-kicker t-label-dim">{getModuleLabel(moduleConfig)}</p>
         <div className="anyu-hero-copy">
           <div className="anyu-hero-glow" aria-hidden="true" />
           <h1 id="anyu-hero-title" className="anyu-hero-title">

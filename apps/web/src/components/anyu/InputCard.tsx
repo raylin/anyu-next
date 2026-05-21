@@ -46,7 +46,7 @@ export function InputCard({
     <Card className="anyu-input-card">
       <form className="anyu-form-grid" onSubmit={onSubmit}>
         <div className="anyu-card-head">
-          <p className="anyu-kicker">{"// 貼一段對話 · 或用自己的話描述"}</p>
+          <p className="anyu-kicker t-label-dim">{"// 貼一段對話 · 或用自己的話描述"}</p>
         </div>
 
         <label className="anyu-field-group" htmlFor="anyu-input-text">
@@ -64,7 +64,7 @@ export function InputCard({
 
         {inputGuidance ? (
           <div
-            className={`anyu-guidance-card anyu-guidance-${inputGuidance.state}`}
+            className={`anyu-guidance-card anyu-guidance-soft anyu-guidance-${inputGuidance.state}`}
             aria-live="polite"
           >
             <div className="anyu-guidance-head">
@@ -104,7 +104,21 @@ export function InputCard({
           />
         </div>
 
-        <Button type="submit" disabled={ctaDisabled} className="anyu-button-block">
+        <div className="anyu-input-privacy-inline">
+          <span className="anyu-input-privacy-inline-rule" aria-hidden="true" />
+          <p>ANYU 會先盡量去識別化，再進行分析。</p>
+        </div>
+
+        <Button
+          type="submit"
+          disabled={ctaDisabled}
+          className={[
+            "anyu-button-block",
+            ctaDisabled ? "anyu-button-soft-disabled" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
           {ctaLabel}
         </Button>
 
