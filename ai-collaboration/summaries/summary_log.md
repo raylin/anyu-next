@@ -4121,3 +4121,38 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - exact LINE channel / LIFF scope behavior must be verified with the current OA setup
 - product must confirm whether existing normalized result data is sufficient for a credible complete-analysis page
 - final expiration windows for short codes and unlocked tokens need product/security approval
+
+## 2026-05-21 - LINE Fulfillment Setup Record Templates v0
+
+### Completed Changes
+
+- saved the LINE Fulfillment Setup Record Templates v0 handoff into `ai-collaboration/handoffs/`
+- created staging/test LINE OA setup template at `ai-collaboration/research/line/line-oa-staging-setup.md`
+- created production LINE OA setup template at `ai-collaboration/research/line/line-oa-production-setup.md`
+- created LINE fulfillment env matrix at `ai-collaboration/research/line/line-fulfillment-env-matrix.md`
+- created execution report at `ai-collaboration/reports/2026-05-21-line-fulfillment-setup-record-templates-v0-execution-report.md`
+
+### Learnings
+
+- staging/test LINE OA and production LINE OA need separate records to prevent cross-environment fulfillment mistakes
+- the env matrix should be the source-of-truth template for future implementation and ops review
+- secret fields should remain status-only in repo docs; actual values belong only in Vercel/LINE consoles
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 22 files / 79 tests
+- `corepack pnpm build` passed
+- local Playwright not run because no app code changed
+
+### Commit / Push
+
+- commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- actual staging/test OA and production OA setup values remain pending until an operator fills them from LINE/Vercel consoles
