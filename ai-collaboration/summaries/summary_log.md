@@ -4304,3 +4304,52 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether production deployment should be refreshed before or after the next real test-OA short-code staging smoke
 - whether LINE console webhook verification now passes with corrected staging public env
+
+## 2026-05-21 - LINE Fulfillment Real Staging Test OA Smoke v0
+
+### Completed Changes
+
+- saved the LINE Fulfillment Real Staging Test OA Smoke v0 handoff into `ai-collaboration/handoffs/`
+- verified staging `/api/unlock-intent` returns the staging LIFF URL and test OA add-friend URL
+- verified staging DB has the LINE fulfillment migration columns and indexes
+- created a synthetic staging result/unlock intent and verified valid/invalid unlocked routes
+- verified LIFF page load, invalid bind rejection, valid synthetic LIFF bind, and invalid webhook signature rejection
+- verified staging event metadata excludes raw input, LINE user ID, code, token, email, message text, provider output, and server secrets
+- updated the staging LINE setup record with route-level smoke status
+- created review bundle at `ai-collaboration/research/2026-05-21-line-fulfillment-real-staging-test-oa-smoke-v0-review-bundle.md`
+- created execution report at `ai-collaboration/reports/2026-05-21-line-fulfillment-real-staging-test-oa-smoke-v0-execution-report.md`
+
+### Learnings
+
+- staging public LINE env is now live and correctly points to LIFF `2010157793-Q4JeeYv0` and test OA add URL `https://lin.ee/5uL4e9q`
+- LIFF bind can mark a staging unlock intent as delivered without leaking LINE user ID into events
+- route-level webhook signature rejection works, but true bot reply smoke still requires LINE console webhook verification and a human LINE message
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 23 files / 85 tests
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed, 9 Playwright tests
+
+### Staging Smoke
+
+- route-level smoke passed
+- real test OA short-code reply not run; pending LINE console webhook verification / human device smoke
+
+### Production Smoke
+
+- not run; production deploy, env changes, migration, and production OA messages were out of scope
+
+### Commit / Push
+
+- commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- whether LINE console webhook verification passes for the test OA
+- whether the real test OA short-code reply succeeds after a human sends a fresh code through LINE
