@@ -22,6 +22,7 @@ structured jsonl input
 - extracts deterministic topic candidates using heuristic rules
 - generates deterministic question seeds from topic candidates
 - generates deterministic module seeds from question/topic context
+- generates deterministic markdown trend review packs from module/topic/question context
 - exports topic candidates, question seeds, and module seeds as JSONL
 
 ## What This Tool Does Not Do
@@ -128,6 +129,22 @@ Each module seed is exported as JSONL, for example:
 }
 ```
 
+## Trend Review Pack
+
+The review pack is a Markdown artifact for human review. It is meant to support a weekly or biweekly decision loop after deterministic seeds have already been generated.
+
+The review pack includes:
+
+- summary counts
+- top module seed candidates
+- best mini-test opportunities
+- relationship / ambiguity themes
+- monetization fit notes
+- risk / sensitivity notes
+- recommended human review questions
+- candidate table
+- deferred / low-fit candidates
+
 ## CLI Usage
 
 Direct module usage without install:
@@ -152,11 +169,20 @@ PYTHONPATH=tools/topic-ingestion python3 -m topic_ingestion.cli modules \
 ```
 
 ```bash
+PYTHONPATH=tools/topic-ingestion python3 -m topic_ingestion.cli review \
+  --modules /tmp/module-seeds.jsonl \
+  --topics /tmp/topic-candidates.jsonl \
+  --questions /tmp/question-seeds.jsonl \
+  --output /tmp/trend-review-pack.md
+```
+
+```bash
 PYTHONPATH=tools/topic-ingestion python3 -m topic_ingestion.cli pipeline \
   --input tools/topic-ingestion/examples/sample-input.jsonl \
   --topics-output /tmp/topic-candidates.jsonl \
   --questions-output /tmp/question-seeds.jsonl \
-  --modules-output /tmp/module-seeds.jsonl
+  --modules-output /tmp/module-seeds.jsonl \
+  --review-output /tmp/trend-review-pack.md
 ```
 
 Optional editable install path:
@@ -174,6 +200,7 @@ Example files:
 - `tools/topic-ingestion/examples/topic-candidates.example.jsonl`
 - `tools/topic-ingestion/examples/question-seeds.example.jsonl`
 - `tools/topic-ingestion/examples/module-seeds.example.jsonl`
+- `tools/topic-ingestion/examples/trend-review-pack.example.md`
 
 ## modules Command
 
@@ -187,6 +214,34 @@ If `--topics` is omitted, the command still works with question seeds alone and 
 
 - `pipeline` preserves the old behavior if `--modules-output` is omitted
 - if `--modules-output` is provided, the pipeline emits topic candidates, question seeds, and module seeds in one local run
+
+## review Command
+
+- input: module-seed JSONL
+- optional `--topics`: topic-candidate JSONL for stronger theme/evidence summaries
+- optional `--questions`: question-seed JSONL for rationale context
+- output: markdown review pack
+
+If `--topics` or `--questions` are omitted, the review pack still renders using module-seed fields alone.
+
+## Pipeline With Review Output
+
+- `pipeline` preserves earlier behavior if `--review-output` is omitted
+- if `--review-output` is supplied, the pipeline will generate module seeds internally even if you do not separately save `--modules-output`
+- the review pack is always markdown-first in v0
+
+## How To Use The Review Pack
+
+- treat it as a local decision-support artifact
+- use it in weekly or biweekly trend review
+- use it to decide what to prototype, watch, or defer
+- pass it to a human reviewer or ChatGPT/Claude for discussion, not for automatic execution
+
+## Scores Are Heuristic
+
+- ranking and recommended actions are deterministic heuristics
+- they are useful scaffolding for review, not objective product truth
+- they should not be used as final strategy without human judgment
 
 ## How Module Seeds Should Be Used
 

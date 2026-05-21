@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict
 import json
 from pathlib import Path
 
 from .exporters import export_jsonl
 from .extractors import extract_topic_candidates
 from .loaders import load_jsonl_records
-from .schema import QuestionSeed, TopicCandidate
+from .review import build_trend_review_pack
+from .schema import ModuleSeed, QuestionSeed, TopicCandidate
 from .transformers import question_seeds_to_module_seeds, topic_candidates_to_question_seeds
 
 
@@ -31,11 +31,18 @@ def build_parser() -> argparse.ArgumentParser:
     modules_parser.add_argument("--topics", type=Path, required=False)
     modules_parser.add_argument("--output", type=Path, required=True)
 
+    review_parser = subparsers.add_parser("review", help="Generate a human-readable trend review pack from module seeds.")
+    review_parser.add_argument("--modules", type=Path, required=True)
+    review_parser.add_argument("--topics", type=Path, required=False)
+    review_parser.add_argument("--questions", type=Path, required=False)
+    review_parser.add_argument("--output", type=Path, required=True)
+
     pipeline_parser = subparsers.add_parser("pipeline", help="Run extract and questions in sequence.")
     pipeline_parser.add_argument("--input", type=Path, required=True)
     pipeline_parser.add_argument("--topics-output", type=Path, required=True)
     pipeline_parser.add_argument("--questions-output", type=Path, required=True)
     pipeline_parser.add_argument("--modules-output", type=Path, required=False)
+    pipeline_parser.add_argument("--review-output", type=Path, required=False)
 
     return parser
 
@@ -69,22 +76,37 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Output: {args.output}")
         return 0
 
+    if args.command == "review":
+        modules = load_module_seeds(args.modules)
+        topics = load_topic_candidates(args.topics) if args.topics else None
+        questions = load_question_seeds(args.questions) if args.questions else None
+        pack = build_trend_review_pack(modules, topics=topics, questions=questions)
+        write_text_output(args.output, pack)
+        print(f"Module seeds reviewed: {len(modules)}")
+        print(f"Output: {args.output}")
+        return 0
+
     if args.command == "pipeline":
         records = load_jsonl_records(args.input)
         topics = extract_topic_candidates(records)
         questions = topic_candidates_to_question_seeds(topics)
         export_jsonl(topics, args.topics_output)
         export_jsonl(questions, args.questions_output)
-        if args.modules_output:
-            modules = question_seeds_to_module_seeds(questions, topics)
+        modules = question_seeds_to_module_seeds(questions, topics) if (args.modules_output or args.review_output) else None
+        if args.modules_output and modules is not None:
             export_jsonl(modules, args.modules_output)
+        if args.review_output and modules is not None:
+            pack = build_trend_review_pack(modules, topics=topics, questions=questions)
+            write_text_output(args.review_output, pack)
         print(f"Topic candidates: {len(topics)}")
         print(f"Questions: {len(questions)}")
         print(f"Topics output: {args.topics_output}")
         print(f"Questions output: {args.questions_output}")
-        if args.modules_output:
+        if args.modules_output and modules is not None:
             print(f"Module seeds: {len(modules)}")
             print(f"Modules output: {args.modules_output}")
+        if args.review_output and modules is not None:
+            print(f"Review output: {args.review_output}")
         return 0
 
     parser.print_help()
@@ -147,6 +169,46 @@ def load_question_seeds(path: Path) -> list[QuestionSeed]:
             )
         )
     return questions
+
+
+def load_module_seeds(path: Path) -> list[ModuleSeed]:
+    if not path.exists() or not path.is_file():
+        raise FileNotFoundError(f"Module seed file not found: {path}")
+    modules = []
+    for lineno, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        line = raw_line.strip()
+        if not line:
+            continue
+        try:
+            value = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid JSONL at line {lineno}: {exc}") from exc
+        if not isinstance(value, dict):
+            raise ValueError(f"Invalid module seed at line {lineno}: expected object")
+        modules.append(
+            ModuleSeed(
+                module_id=str(value["module_id"] if "module_id" in value else value["moduleId"]),
+                topic_id=str(value["topic_id"] if "topic_id" in value else value["topicId"]),
+                question_ids=list(value["question_ids"] if "question_ids" in value else value["questionIds"]),
+                title=str(value["title"]),
+                format=str(value["format"]),
+                audience=str(value["audience"]),
+                emotional_hook=str(value["emotional_hook"] if "emotional_hook" in value else value["emotionalHook"]),
+                user_promise=str(value["user_promise"] if "user_promise" in value else value["userPromise"]),
+                input_needed=list(value["input_needed"] if "input_needed" in value else value["inputNeeded"]),
+                output_sections=list(value["output_sections"] if "output_sections" in value else value["outputSections"]),
+                monetization_fit=str(value["monetization_fit"] if "monetization_fit" in value else value["monetizationFit"]),
+                tone=str(value["tone"]),
+                confidence=float(value["confidence"]),
+                created_at=str(value["created_at"] if "created_at" in value else value["createdAt"]),
+            )
+        )
+    return modules
+
+
+def write_text_output(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
 
 
 if __name__ == "__main__":

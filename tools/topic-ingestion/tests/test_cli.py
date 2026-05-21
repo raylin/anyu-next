@@ -120,3 +120,60 @@ class CliTest(unittest.TestCase):
             self.assertTrue(topics.exists())
             self.assertTrue(questions.exists())
             self.assertFalse(modules.exists())
+
+    def test_review_command_writes_markdown(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            topics = Path(tmpdir) / "topics.jsonl"
+            questions = Path(tmpdir) / "questions.jsonl"
+            modules = Path(tmpdir) / "modules.jsonl"
+            review = Path(tmpdir) / "trend-review-pack.md"
+            self.assertEqual(
+                self.run_cli("extract", "--input", str(EXAMPLE_INPUT), "--output", str(topics)).returncode,
+                0,
+            )
+            self.assertEqual(
+                self.run_cli("questions", "--input", str(topics), "--output", str(questions)).returncode,
+                0,
+            )
+            self.assertEqual(
+                self.run_cli("modules", "--input", str(questions), "--topics", str(topics), "--output", str(modules)).returncode,
+                0,
+            )
+            review_result = self.run_cli(
+                "review",
+                "--modules",
+                str(modules),
+                "--topics",
+                str(topics),
+                "--questions",
+                str(questions),
+                "--output",
+                str(review),
+            )
+            self.assertEqual(review_result.returncode, 0, review_result.stderr)
+            text = review.read_text(encoding="utf-8")
+            self.assertIn("# Topic Ingestion Trend Review Pack", text)
+            self.assertIn("Scores are heuristic ranking scaffolding, not a truth metric.", text)
+
+    def test_pipeline_command_with_review_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            topics = Path(tmpdir) / "topics.jsonl"
+            questions = Path(tmpdir) / "questions.jsonl"
+            modules = Path(tmpdir) / "modules.jsonl"
+            review = Path(tmpdir) / "trend-review-pack.md"
+            result = self.run_cli(
+                "pipeline",
+                "--input",
+                str(EXAMPLE_INPUT),
+                "--topics-output",
+                str(topics),
+                "--questions-output",
+                str(questions),
+                "--modules-output",
+                str(modules),
+                "--review-output",
+                str(review),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(review.exists())
+            self.assertIn("## 1. Summary", review.read_text(encoding="utf-8"))

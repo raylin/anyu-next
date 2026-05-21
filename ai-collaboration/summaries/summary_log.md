@@ -3772,3 +3772,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether a later pass should add a separate module-seed review/ranking pack for human ideation workflows
 - whether non-relationship topics will need broader default `inputNeeded` / `outputSections` sets once sourcing expands
+
+## 2026-05-21 - Topic Ingestion Trend Review Pack v0
+
+### Completed Changes
+
+- added a markdown-first trend review pack generator to `tools/topic-ingestion/`
+- added a `review` CLI command plus optional `--review-output` support in `pipeline`
+- added a synthetic markdown review example and tests for ranking, action labels, markdown generation, and pipeline compatibility
+
+### Learnings
+
+- the first useful human-review layer works well as Markdown rather than another structured schema
+- module seeds alone are enough to render a review pack, but topic/question context improves theme and rationale sections
+- heuristic review output is most useful as decision scaffolding, not as a hidden strategy engine
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether a later pass should emit a compact JSON review summary in addition to Markdown
+- whether broader non-relationship topics will need different default risk/review-question heuristics
