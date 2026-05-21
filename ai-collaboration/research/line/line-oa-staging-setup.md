@@ -29,8 +29,8 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 | Messaging API channel status | enabled |
 | Webhook URL | `https://staging.anyu.tw/api/line/webhook` |
 | Webhook enabled status | saved |
-| Webhook verification status | pending |
-| Add friend option / linked bot | pending |
+| Webhook verification status | working in manual staging smoke |
+| Add friend option / linked bot | working in manual staging smoke |
 
 ## LIFF App
 
@@ -61,15 +61,16 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - Short-code fallback should reply with an unlocked result link only after code match.
 - Keep this record free of channel secret and access token values.
 - 2026-05-21 staging smoke initially found a live env mismatch; the public Vercel Preview env was synced and redeployed, and `/api/unlock-intent` now returns the staging LIFF URL and test OA add-friend URL.
-- 2026-05-21 real staging smoke verified route-level LINE fulfillment behavior on staging. Actual test-OA short-code message delivery remains pending LINE console webhook verification / human device smoke.
+- 2026-05-21 real staging smoke verified route-level LINE fulfillment behavior on staging.
+- 2026-05-21 manual staging/test OA short-code smoke passed. Record only sanitized pass status; do not store LINE user IDs, codes, tokens, tokenized URLs, raw input, or private message content.
 
 ## Smoke Checklist
 
-- [ ] Webhook URL configured in LINE console.
-- [ ] Webhook verification passes.
+- [x] Webhook URL configured in LINE console.
+- [x] Webhook verification passes in manual staging smoke.
 - [ ] LIFF endpoint opens on mobile.
 - [ ] LIFF endpoint opens from LINE in-app browser.
-- [ ] Desktop fallback path can display or use short-code flow after implementation.
+- [x] Desktop fallback / short-code flow works through the staging/test OA.
 - [x] Test OA add-friend URL is not confused with production OA.
 - [x] No secret values are documented in repo files.
 - [x] Live `/api/unlock-intent` response returns staging LIFF URL and test OA add-friend URL.
@@ -81,4 +82,5 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 | 2026-05-21 | Created setup record template. | Codex |
 | 2026-05-21 | Recorded staging smoke env mismatch for public LIFF/add URL runtime config. | Codex |
 | 2026-05-21 | Synced Vercel Preview public LINE env and verified live staging unlock response. | Codex |
-| 2026-05-21 | Verified staging LIFF bind, unlocked route, invalid-signature webhook handling, and event privacy; real test-OA short-code smoke remains pending. | Codex |
+| 2026-05-21 | Verified staging LIFF bind, unlocked route, invalid-signature webhook handling, and event privacy. | Codex |
+| 2026-05-21 | Recorded sanitized manual staging/test OA short-code smoke pass; production was not touched. | Codex |

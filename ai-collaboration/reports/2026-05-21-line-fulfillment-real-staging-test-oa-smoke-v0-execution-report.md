@@ -6,11 +6,12 @@ Date: 2026-05-21
 
 Ran a staging-only LINE fulfillment smoke against `https://staging.anyu.tw` after public Preview/Staging LINE env correction. Route-level staging behavior passed for unlock intent, LIFF page load, LIFF bind API, unlocked route, invalid-token handling, invalid webhook signature rejection, migration shape, and event privacy boundaries.
 
-Real human-device test OA short-code reply remains pending because LINE console webhook verification is still documented as pending and terminal execution cannot send a real LINE app message.
+The manual human-device staging/test OA short-code smoke was subsequently completed by the user and recorded with sanitized pass status only. Production was not touched.
 
 ## Files Created
 
 - `ai-collaboration/handoffs/2026-05-21-line-fulfillment-real-staging-test-oa-smoke-v0-handoff.md`
+- `ai-collaboration/handoffs/2026-05-21-record-staging-line-fulfillment-manual-smoke-v0-handoff.md`
 - `ai-collaboration/research/2026-05-21-line-fulfillment-real-staging-test-oa-smoke-v0-review-bundle.md`
 - `ai-collaboration/reports/2026-05-21-line-fulfillment-real-staging-test-oa-smoke-v0-execution-report.md`
 
@@ -40,12 +41,22 @@ Real human-device test OA short-code reply remains pending because LINE console 
 - Staging DB fulfillment status after bind: passed, delivered via LIFF.
 - Webhook invalid signature rejection: passed.
 - Valid signed webhook payload: not run, because it would require direct server secret use.
+- Manual staging/test OA short-code smoke: passed.
 
 ## Test OA Result
 
-Actual test OA short-code reply was not completed in this terminal-only pass.
+Actual test OA short-code reply passed in a manual user-run staging smoke.
 
-Blocker: the staging setup record still lists webhook verification as pending, and a real test requires a human LINE app message to `暗語 ANYU Test`. Route-level behavior is ready for that manual smoke once LINE console verification is confirmed.
+Sanitized manual result:
+
+- Staging test OA webhook worked.
+- User pasted the fulfillment short code into the staging/test LINE OA.
+- Bot replied with the complete-analysis unlocked URL.
+- Opening the unlocked URL worked.
+- Unlocked content was correct.
+- Production was not touched.
+
+No real LINE user ID, code, token, URL with token, raw input, or private message content is recorded in this report.
 
 ## Event / Privacy Status
 
@@ -76,7 +87,7 @@ No raw input, LINE user ID, fulfillment code, unlock token, email, LINE message 
 
 - Unlock token is stored in `unlock_intents` for v0 delivery. Future hardening should consider hash-only token verification if recoverable token storage is no longer necessary.
 - Webhook duplicate event idempotency is not implemented yet.
-- Real LINE webhook verification and manual test OA short-code smoke remain operational prerequisites before production promotion.
+- Manual staging/test OA short-code smoke is complete; production promotion still requires explicit production approval and a separate production smoke plan.
 
 ## Tech Debt Review
 
@@ -84,12 +95,12 @@ No raw input, LINE user ID, fulfillment code, unlock token, email, LINE message 
 - Existing technical debt observed: recoverable unlock token storage and deferred webhook idempotency.
 - Opportunistic cleanup completed: staging setup record now reflects route-level smoke outcome and no-secrets checklist status.
 - Deferred cleanup candidates: add webhook event idempotency after live duplicate behavior is understood.
-- Recommended follow-up: run manual test OA short-code smoke after LINE console webhook verification passes.
+- Recommended follow-up: review the completed staging/test OA smoke before deciding whether to plan a separate production fulfillment smoke.
 
 ## Deviations From Handoff
 
 - Valid signed webhook synthetic payload was skipped to avoid handling the server-only LINE channel secret.
-- Real test OA short-code smoke was skipped because it requires LINE console verification and a human LINE app action.
+- Real test OA short-code smoke was initially skipped during terminal execution, then completed manually by the user and recorded as sanitized pass status.
 - No implementation code was changed because no staging-blocking bug was found.
 
 ## Git Commit
@@ -102,9 +113,8 @@ Pending at report finalization time.
 
 ## Remaining Uncertainties
 
-- Whether LINE console webhook verification now passes for the test OA.
-- Whether the real test OA short-code reply succeeds once a human sends the code through LINE.
+- None for staging/test OA short-code smoke. Production remains a separate approval workflow.
 
 ## Recommended Next Step
 
-Confirm the test OA webhook in LINE console, then run one manual staging short-code smoke with a fresh fulfillment code and verify the bot replies with a staging unlocked link.
+Review the completed staging/test OA smoke record with ChatGPT/user before any separate production decision.

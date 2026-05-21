@@ -4353,3 +4353,42 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether LINE console webhook verification passes for the test OA
 - whether the real test OA short-code reply succeeds after a human sends a fresh code through LINE
+
+## 2026-05-21 - Record Staging LINE Fulfillment Manual Smoke v0
+
+### Completed Changes
+
+- saved the manual staging LINE fulfillment smoke recording handoff into `ai-collaboration/handoffs/`
+- updated the real staging smoke review bundle with sanitized manual pass status
+- updated the execution report with sanitized manual pass status
+- updated the staging LINE setup record to mark webhook and short-code smoke working
+- recorded that production was not touched
+
+### Learnings
+
+- staging/test OA webhook worked in the manual smoke
+- user-pasted fulfillment short code triggered a bot reply with a complete-analysis unlocked URL
+- opening the returned unlocked URL worked and showed correct unlocked content
+- no real LINE user ID, code, token, tokenized URL, raw input, or private message content was recorded
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 23 files / 85 tests
+- `corepack pnpm build` passed
+
+### Production Smoke
+
+- not run; production remained untouched
+
+### Commit / Push
+
+- commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- none for the staging/test OA manual smoke record
