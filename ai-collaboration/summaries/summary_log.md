@@ -3377,3 +3377,35 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact human perception of LXGW WenKai on a real phone viewport
 - whether a later true browser/device pass finds any subjective decorative or FOUT issue
+
+## 2026-05-21 - Claude Patch Reconciliation + Final UI Finishing Plan v0
+
+### Completed Changes
+
+- reconciled the latest Claude Design polish direction against the current implemented ANYU UI state
+- reviewed the preserved staging audit and font migration references together with the consolidated UI backlog
+- documented the moon-versus-AnyuMark decision explicitly so the next pass does not regress brand direction
+- produced a narrow final UI finishing plan with adopt/adapt/defer/reject classifications
+
+### Learnings
+
+- the current app has already completed most of the original audit’s structural/system work, so the remaining pass should be a finishing pass rather than another broad redesign
+- “restore moon icons” is best treated as a request for stronger spiritual/brand accent, not literal icon restoration
+- the final open UI work is now mostly about tone, hierarchy, spacing, and card finishing, not typography or brand-foundation changes
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether the share/persona card should get only subtle background layering or a very light stamp-like accent in the final pass
+- exact screenshot-level judgment will still depend on the future post-implementation review pass
