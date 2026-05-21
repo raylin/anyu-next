@@ -3610,3 +3610,35 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether future retention policy should extend explicit timestamps and scheduled cleanup to `unlock_intents` and `contact_submissions`
 - whether daily cadence remains sufficient if production volume grows beyond the current low-key launch
+
+## 2026-05-21 - Repo Architecture + MVP Leftover Audit v0
+
+### Completed Changes
+
+- audited the current repo structure after low-key production launch, UI stabilization, local Playwright smoke, result cache rollout, and scheduled retention cleanup
+- classified active production paths, historical evidence, legacy prototype areas, archive candidates, and security/privacy review areas
+- created the audit report at `ai-collaboration/research/2026-05-21-repo-architecture-mvp-leftover-audit-v0.md`
+
+### Learnings
+
+- active production-critical code is now concentrated cleanly in `apps/web/`, but repo sprawl has shifted into collaboration history and retained prototype/research evidence
+- there is no sign of committed live secrets, but committed raw sample text in `outputs/` deserves explicit human review before broader growth
+- the next cleanup pass should focus on indexing and archive boundaries first, not deletion
+
+### Validation Results
+
+- audit/reporting task only; no runtime or schema change was made
+- `python3 -m compileall oradar` passed
+- `cd apps/web && corepack pnpm lint` passed
+- `cd apps/web && corepack pnpm test` passed
+- `cd apps/web && corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether committed raw sample text under `outputs/` should remain in git
+- whether `oradar/`, `scripts/`, and `experiments/ambiguous_temperature_v0/` should stay in the main repo root as active reference material or move toward a clearer archive boundary
