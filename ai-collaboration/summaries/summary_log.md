@@ -4084,3 +4084,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether the next scheduled cron run has executed after the production refresh
 - whether an app version/commit health marker should be added for future freshness checks
+
+## 2026-05-21 - LINE Fulfillment Automation Architecture v0
+
+### Completed Changes
+
+- saved the LINE Fulfillment Automation Architecture v0 handoff into `ai-collaboration/handoffs/`
+- reviewed the current Module 01 unlock/contact flow, current `unlock_intents` shape, event boundaries, legal/UI notices, and existing LINE funnel/OA documentation
+- created the architecture report at `ai-collaboration/research/2026-05-21-line-fulfillment-automation-architecture-v0.md`
+- created the execution report at `ai-collaboration/reports/2026-05-21-line-fulfillment-automation-architecture-v0-execution-report.md`
+
+### Learnings
+
+- current LINE-first capture is notification-oriented; it records unlock intent and sends users to the LINE add URL but cannot bind a LINE user to a result or deliver an unlocked link
+- the recommended MVP is a dual path: LIFF for mobile-primary automatic binding and short-code matching through LINE OA for desktop/fallback
+- extending `unlock_intents` is the simplest v0 data model because it already owns the result/module/session context for one fulfillment lifecycle
+- unlocked content should use already persisted result data in v0; adding new paid-result generation needs a separate prompt/schema decision
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 22 files / 79 tests
+- `corepack pnpm build` passed
+- local Playwright not run because no app code changed
+
+### Commit / Push
+
+- commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- exact LINE channel / LIFF scope behavior must be verified with the current OA setup
+- product must confirm whether existing normalized result data is sufficient for a credible complete-analysis page
+- final expiration windows for short codes and unlocked tokens need product/security approval
