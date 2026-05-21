@@ -5,6 +5,7 @@ const {
   mockCreateAnalysisResultRecord,
   mockGetCachedAnalysisResult,
   mockInsertEvent,
+  mockUpdateAnalysisRequestState,
   mockGenerateModuleResult,
   mockCheckPersistedAnalyzeLimits,
   mockResolveRuntimeStrategy,
@@ -13,6 +14,7 @@ const {
   mockCreateAnalysisResultRecord: vi.fn(),
   mockGetCachedAnalysisResult: vi.fn(),
   mockInsertEvent: vi.fn(),
+  mockUpdateAnalysisRequestState: vi.fn(),
   mockGenerateModuleResult: vi.fn(),
   mockCheckPersistedAnalyzeLimits: vi.fn(),
   mockResolveRuntimeStrategy: vi.fn(),
@@ -23,6 +25,7 @@ vi.mock("@/lib/db/runtime", () => ({
   createAnalysisResultRecord: mockCreateAnalysisResultRecord,
   getCachedAnalysisResult: mockGetCachedAnalysisResult,
   insertEvent: mockInsertEvent,
+  updateAnalysisRequestState: mockUpdateAnalysisRequestState,
 }));
 
 vi.mock("@/lib/ai/runtime", () => ({
@@ -72,6 +75,7 @@ describe("module analyze cache route behavior", () => {
       fallbackModel: null,
     });
     mockCheckPersistedAnalyzeLimits.mockResolvedValue({ ok: true });
+    mockUpdateAnalysisRequestState.mockResolvedValue({ id: "request-2" });
   });
 
   it("returns the cached result without calling the provider", async () => {
@@ -103,11 +107,13 @@ describe("module analyze cache route behavior", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
       ok: true,
+      status: "completed",
       resultId: "result-1",
       cacheHit: true,
     });
     expect(mockGenerateModuleResult).not.toHaveBeenCalled();
     expect(mockCreateAnalysisRequestRecord).not.toHaveBeenCalled();
+    expect(mockUpdateAnalysisRequestState).not.toHaveBeenCalled();
     expect(mockCheckPersistedAnalyzeLimits).not.toHaveBeenCalled();
     expect(mockInsertEvent).toHaveBeenCalledTimes(2);
     expect(mockInsertEvent).toHaveBeenNthCalledWith(
@@ -173,6 +179,8 @@ describe("module analyze cache route behavior", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
       ok: true,
+      status: "completed",
+      requestId: "request-2",
       resultId: "result-2",
       cacheHit: false,
     });
@@ -189,6 +197,19 @@ describe("module analyze cache route behavior", () => {
     expect(mockCreateAnalysisResultRecord).toHaveBeenCalledWith(
       expect.objectContaining({
         requestId: "request-2",
+      }),
+    );
+    expect(mockUpdateAnalysisRequestState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: "request-2",
+        status: "analyzing",
+      }),
+    );
+    expect(mockUpdateAnalysisRequestState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: "request-2",
+        status: "completed",
+        resultId: "result-2",
       }),
     );
     expect(mockInsertEvent).toHaveBeenNthCalledWith(
@@ -208,6 +229,37 @@ describe("module analyze cache route behavior", () => {
           resultId: "result-2",
           cacheHit: false,
         }),
+      }),
+    );
+  });
+
+  it("marks a persisted request failed when provider generation fails", async () => {
+    mockGetCachedAnalysisResult.mockResolvedValue(null);
+    mockCreateAnalysisRequestRecord.mockResolvedValue({ id: "request-failed" });
+    mockGenerateModuleResult.mockRejectedValue(new Error("provider failed"));
+
+    const response = await analyzePost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(validBody),
+      }),
+      {
+        params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      },
+    );
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: "provider_error",
+    });
+    expect(mockUpdateAnalysisRequestState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: "request-failed",
+        status: "failed",
+        errorCode: "provider_error",
+        errorCategory: "provider",
       }),
     );
   });

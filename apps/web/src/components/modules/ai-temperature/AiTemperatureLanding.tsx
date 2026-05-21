@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { InputCard } from "@/components/anyu/InputCard";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { trackClientEvent } from "@/lib/events/client";
 import {
+  ANALYZE_POLL_INTERVAL_MS,
+  ANALYZE_POLL_TIMEOUT_MS,
+  ANALYZE_RECOVERY_STORAGE_KEY,
   ANALYZE_REQUEST_TIMEOUT_MS,
   getAnalyzeLoadingMessage,
   getAnalyzeLoadingSubtitle,
@@ -17,12 +20,59 @@ import {
   getModuleLabel,
   isAnalyzeInputReady,
 } from "@/lib/modules/ai-temperature-ui";
-import type { AnalyzeResponse } from "@/lib/ai/types";
+import type {
+  AnalyzeRequestStatusResponse,
+  AnalyzeResponse,
+  ApiErrorResponse,
+} from "@/lib/ai/types";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 
 type AiTemperatureLandingProps = {
   moduleConfig: ProductModuleConfig;
 };
+
+type AnalyzeRecoveryState = {
+  moduleSlug: string;
+  requestId?: string;
+  resultId?: string;
+  pollUrl?: string;
+  createdAt: number;
+};
+
+function readAnalyzeRecoveryState(moduleSlug: string): AnalyzeRecoveryState | null {
+  try {
+    const rawValue = window.localStorage.getItem(ANALYZE_RECOVERY_STORAGE_KEY);
+
+    if (!rawValue) {
+      return null;
+    }
+
+    const parsed = JSON.parse(rawValue) as Partial<AnalyzeRecoveryState>;
+
+    if (parsed.moduleSlug !== moduleSlug || !parsed.createdAt) {
+      return null;
+    }
+
+    return {
+      moduleSlug: parsed.moduleSlug,
+      requestId: parsed.requestId,
+      resultId: parsed.resultId,
+      pollUrl: parsed.pollUrl,
+      createdAt: parsed.createdAt,
+    };
+  } catch {
+    window.localStorage.removeItem(ANALYZE_RECOVERY_STORAGE_KEY);
+    return null;
+  }
+}
+
+function writeAnalyzeRecoveryState(state: AnalyzeRecoveryState) {
+  window.localStorage.setItem(ANALYZE_RECOVERY_STORAGE_KEY, JSON.stringify(state));
+}
+
+function clearAnalyzeRecoveryState() {
+  window.localStorage.removeItem(ANALYZE_RECOVERY_STORAGE_KEY);
+}
 
 export function AiTemperatureLanding({
   moduleConfig,
@@ -36,7 +86,55 @@ export function AiTemperatureLanding({
   const hasTrackedInputStarted = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const loadingRef = useRef<HTMLDivElement | null>(null);
+  const pollTimeoutRef = useRef<number | null>(null);
   const titleParts = moduleConfig.title.split("，");
+
+  const pollAnalyzeRequest = useCallback(async (pollUrl: string): Promise<void> => {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt <= ANALYZE_POLL_TIMEOUT_MS) {
+      const response = await fetch(pollUrl, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      const data = (await response.json()) as AnalyzeRequestStatusResponse | ApiErrorResponse;
+
+      if (!response.ok || !data.ok) {
+        clearAnalyzeRecoveryState();
+        setErrorMessage(getAnalyzeErrorMessage("provider_error"));
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (data.status === "completed") {
+        writeAnalyzeRecoveryState({
+          moduleSlug: moduleConfig.slug,
+          resultId: data.resultId,
+          createdAt: Date.now(),
+        });
+        clearAnalyzeRecoveryState();
+        router.push(data.redirectTo);
+        return;
+      }
+
+      if (data.status === "failed" || data.status === "expired") {
+        clearAnalyzeRecoveryState();
+        setErrorMessage(data.message || getAnalyzeErrorMessage(data.errorCode));
+        setIsSubmitting(false);
+        return;
+      }
+
+      await new Promise<void>((resolve) => {
+        pollTimeoutRef.current = window.setTimeout(resolve, ANALYZE_POLL_INTERVAL_MS);
+      });
+    }
+
+    clearAnalyzeRecoveryState();
+    setErrorMessage(getAnalyzeErrorMessage("request_timeout"));
+    setIsSubmitting(false);
+  }, [moduleConfig.slug, router]);
 
   useEffect(() => {
     const anonymousSessionId = getClientAnonymousSessionId();
@@ -52,6 +150,37 @@ export function AiTemperatureLanding({
   }, [moduleConfig]);
 
   useEffect(() => {
+    const recoveryState = readAnalyzeRecoveryState(moduleConfig.slug);
+
+    if (!recoveryState) {
+      return;
+    }
+
+    if (recoveryState.resultId) {
+      clearAnalyzeRecoveryState();
+      router.push(`/m/${moduleConfig.slug}/result/${recoveryState.resultId}`);
+      return;
+    }
+
+    if (recoveryState.requestId && Date.now() - recoveryState.createdAt <= ANALYZE_POLL_TIMEOUT_MS) {
+      const timeoutId = window.setTimeout(() => {
+        setIsSubmitting(true);
+        setErrorMessage("");
+        void pollAnalyzeRequest(
+          recoveryState.pollUrl ??
+            `/api/modules/${moduleConfig.slug}/analyze/requests/${recoveryState.requestId}`,
+        );
+      }, 0);
+
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
+    }
+
+    clearAnalyzeRecoveryState();
+  }, [moduleConfig.slug, pollAnalyzeRequest, router]);
+
+  useEffect(() => {
     if (!isSubmitting) {
       return;
     }
@@ -65,6 +194,14 @@ export function AiTemperatureLanding({
       window.clearInterval(intervalId);
     };
   }, [isSubmitting]);
+
+  useEffect(() => {
+    return () => {
+      if (pollTimeoutRef.current) {
+        window.clearTimeout(pollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!isSubmitting) {
@@ -162,6 +299,24 @@ export function AiTemperatureLanding({
           return;
         }
 
+        if (data.status === "processing") {
+          writeAnalyzeRecoveryState({
+            moduleSlug: moduleConfig.slug,
+            requestId: data.requestId,
+            pollUrl: data.pollUrl,
+            createdAt: Date.now(),
+          });
+          await pollAnalyzeRequest(data.pollUrl);
+          return;
+        }
+
+        writeAnalyzeRecoveryState({
+          moduleSlug: moduleConfig.slug,
+          requestId: data.requestId,
+          resultId: data.resultId,
+          createdAt: Date.now(),
+        });
+        clearAnalyzeRecoveryState();
         router.push(data.redirectTo);
       } finally {
         window.clearTimeout(timeoutId);

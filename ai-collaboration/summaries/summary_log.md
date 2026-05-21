@@ -3938,3 +3938,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether `答案壓力計` should remain the public name or be softened before first user-facing test
 - whether the first module scope should include established relationships or focus only on ambiguous/situationship pressure
 - how much safety/coercion guardrail copy should appear in the user-facing result without making the module clinical
+
+## 2026-05-21 - Analyze Request State + Polling UX v0
+
+### Completed Changes
+
+- saved the Analyze Request State + Polling UX v0 handoff into `ai-collaboration/handoffs/`
+- added request-state fields and migration for `analysis_requests`
+- updated the analyze route to record request phases, completion, and failure state
+- added a privacy-safe request status endpoint at `/api/modules/[moduleSlug]/analyze/requests/[requestId]`
+- updated the Module 01 client flow to support safe recovery metadata and future processing/poll responses without storing raw input
+- updated docs and runbook with request-state behavior and migration requirements
+
+### Learnings
+
+- the current app can support honest request-state recovery metadata, but not true async provider execution without a new worker/queue architecture
+- cache hits remain the strongest immediate resilience path because they skip duplicate provider calls and duplicate request/result rows
+- request status metadata must stay narrow: request/result IDs, status/phase, elapsed time, retryability, and safe error categories only
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 22 files / 79 tests
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed, 9 tests
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether a future worker/queue is worth the complexity if provider latency remains around 25-30 seconds
+- whether internal QA needs a visible request-status inspection surface or API-only status is sufficient

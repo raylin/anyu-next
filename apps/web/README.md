@@ -7,6 +7,7 @@ Module 01 now has a runtime + persistence integration path for:
 - `/m/ambiguous-temperature`
 - `/m/ambiguous-temperature/result/demo`
 - `/api/modules/ambiguous-temperature/analyze`
+- `/api/modules/ambiguous-temperature/analyze/requests/[requestId]`
 - `/api/events`
 - `/api/unlock-intent`
 - `/api/contact`
@@ -16,6 +17,7 @@ The current Module 01 experience supports:
 - landing input + chip selection
 - analyze submit flow
 - elapsed-time wait-state copy with a client timeout guard
+- persisted analyze request state with a privacy-safe polling/status endpoint
 - schema-validated result normalization
 - DB-backed result loading when `DATABASE_URL` is configured
 - 24-hour idempotent analyze-result reuse for identical redacted input when cache hashing is configured
@@ -90,6 +92,7 @@ Before the first low-key launch review, confirm:
 - Neon project is created in `ap-southeast-1`
 - Drizzle migration has been generated and applied in the target environment
 - a live analyze inserts rows into `analysis_results`, `events`, and `contact_submissions`
+- a live analyze writes `analysis_requests.status` transitions and exposes only request/result/status metadata through the polling endpoint
 - privacy review confirms raw text is excluded from events
 - runtime timing review confirms only aggregate latency metadata is stored in events
 - manual QA is completed for landing, runtime result, demo result, unlock fallback, and contact submit flows
@@ -143,6 +146,20 @@ corepack pnpm db:generate
 corepack pnpm db:migrate
 corepack pnpm brand:export
 ```
+
+## Analyze Request State
+
+`POST /api/modules/ambiguous-temperature/analyze` is still synchronous in v0 because there is no queue or worker runtime. The route now records request status before and after provider execution, returns `status: "completed"` plus `requestId`/`resultId` when work finishes, and keeps cache hits immediate with `cacheHit: true`.
+
+`GET /api/modules/ambiguous-temperature/analyze/requests/[requestId]` returns privacy-safe status metadata only:
+
+- `processing` with `phase` and `elapsedMs`
+- `completed` with `resultId` and result route
+- `failed` or `expired` with a friendly retryable message
+
+The client stores only `moduleSlug`, `requestId`, `resultId`, `pollUrl`, and timestamp for refresh/recovery. It must not store raw input, redacted input, provider output, or contact values.
+
+Production rollout note: apply the latest Drizzle migration before relying on request-state writes in a deployed environment.
 
 Retention cleanup dry run:
 

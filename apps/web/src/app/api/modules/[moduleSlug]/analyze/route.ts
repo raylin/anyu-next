@@ -4,6 +4,7 @@ import {
   createAnalysisResultRecord,
   getCachedAnalysisResult,
   insertEvent,
+  updateAnalysisRequestState,
 } from "@/lib/db/runtime";
 import {
   getActiveProviderInfo,
@@ -131,6 +132,8 @@ export async function POST(
     return errorResponse(429, ipLimitResult.error, ipLimitResult.message);
   }
 
+  let analysisRequestId: string | null = null;
+
   try {
     const redaction = redactUserInput(validatedInput.text);
     timing.mark("input_redacted");
@@ -209,6 +212,7 @@ export async function POST(
 
         return NextResponse.json({
           ok: true,
+          status: "completed",
           resultId: cachedAnalysis.result.id,
           redirectTo: `/m/${moduleConfig.slug}/result/${cachedAnalysis.result.id}`,
           cacheHit: true,
@@ -243,7 +247,13 @@ export async function POST(
       privacyFlags: redaction.flags,
       retentionExpiresAt,
     });
+    analysisRequestId = analysisRequest.id;
     timing.mark("analysis_request_stored");
+    await updateAnalysisRequestState({
+      requestId: analysisRequest.id,
+      status: "analyzing",
+      startedAt: new Date(),
+    });
 
     await insertEvent({
       eventName: "input_submitted",
@@ -256,18 +266,31 @@ export async function POST(
       situationType: validatedInput.situation,
       anonymousSessionId: validatedInput.anonymousSessionId,
       metadata: {
+        requestId: analysisRequest.id,
+        status: "analyzing",
         inputCharCount: validatedInput.inputCharCount,
         cacheHit: false,
       },
     });
 
-    const generated = await generateModuleResult({
-      moduleConfig,
-      redactedText: redaction.redactedText,
-      privacyFlags: redaction.flags,
-      situation: validatedInput.situation,
-    }, {
-      mark: timing.mark,
+    const generated = await generateModuleResult(
+      {
+        moduleConfig,
+        redactedText: redaction.redactedText,
+        privacyFlags: redaction.flags,
+        situation: validatedInput.situation,
+      },
+      {
+        mark: timing.mark,
+      },
+    );
+    await updateAnalysisRequestState({
+      requestId: analysisRequest.id,
+      status: "validating_result",
+    });
+    await updateAnalysisRequestState({
+      requestId: analysisRequest.id,
+      status: "persisting",
     });
 
     const analysisResult = await createAnalysisResultRecord({
@@ -288,6 +311,12 @@ export async function POST(
       retentionExpiresAt,
     });
     timing.mark("analysis_result_stored");
+    await updateAnalysisRequestState({
+      requestId: analysisRequest.id,
+      status: "completed",
+      completedAt: new Date(),
+      resultId: analysisResult.id,
+    });
     timing.mark("response_ready");
 
     await insertEvent({
@@ -302,6 +331,8 @@ export async function POST(
       scoreBucket: generated.scoreBucket,
       anonymousSessionId: validatedInput.anonymousSessionId,
       metadata: {
+        requestId: analysisRequest.id,
+        status: "completed",
         resultId: analysisResult.id,
         privacyFlags: generated.privacyFlags,
         modelStrategy: generated.runtimeModel.modelStrategy,
@@ -318,11 +349,27 @@ export async function POST(
 
     return NextResponse.json({
       ok: true,
+      status: "completed",
+      requestId: analysisRequest.id,
       resultId: analysisResult.id,
       redirectTo: `/m/${moduleConfig.slug}/result/${analysisResult.id}`,
       cacheHit: false,
     });
   } catch (error) {
+    if (analysisRequestId) {
+      try {
+        await updateAnalysisRequestState({
+          requestId: analysisRequestId,
+          status: "failed",
+          failedAt: new Date(),
+          errorCode: isProviderConfigError(error) ? "config_error" : "provider_error",
+          errorCategory: isProviderConfigError(error) ? "configuration" : "provider",
+        });
+      } catch {
+        // Preserve the original user-facing analyze failure if status persistence also fails.
+      }
+    }
+
     if (isProviderConfigError(error)) {
       return errorResponse(503, "config_error", getProviderUserMessage());
     }

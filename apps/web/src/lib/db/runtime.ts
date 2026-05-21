@@ -11,6 +11,16 @@ import {
 import type { ProductResult } from "@/lib/ai/product-result-schema";
 import type { EventPayload } from "@/lib/events/types";
 
+export type AnalysisRequestStatus =
+  | "created"
+  | "validating"
+  | "analyzing"
+  | "validating_result"
+  | "persisting"
+  | "completed"
+  | "failed"
+  | "expired";
+
 export async function ensureSession(anonymousSessionId?: string | null) {
   if (!anonymousSessionId?.trim()) {
     return;
@@ -86,12 +96,90 @@ export async function createAnalysisRequestRecord(input: {
       cacheKeyHash: input.cacheKeyHash ?? null,
       modelStrategy: input.modelStrategy ?? null,
       primaryModel: input.primaryModel ?? null,
+      status: "created",
       privacyFlags: input.privacyFlags ?? [],
       retentionExpiresAt: input.retentionExpiresAt ?? null,
     })
     .returning();
 
   return record;
+}
+
+export async function updateAnalysisRequestState(input: {
+  requestId: string;
+  status: AnalysisRequestStatus;
+  startedAt?: Date | null;
+  completedAt?: Date | null;
+  failedAt?: Date | null;
+  errorCode?: string | null;
+  errorCategory?: string | null;
+  resultId?: string | null;
+  lastHeartbeatAt?: Date | null;
+}) {
+  const db = requireDb();
+  const values: Partial<typeof analysisRequests.$inferInsert> = {
+    status: input.status,
+    lastHeartbeatAt: input.lastHeartbeatAt ?? new Date(),
+  };
+
+  if (input.startedAt !== undefined) {
+    values.startedAt = input.startedAt;
+  }
+
+  if (input.completedAt !== undefined) {
+    values.completedAt = input.completedAt;
+  }
+
+  if (input.failedAt !== undefined) {
+    values.failedAt = input.failedAt;
+  }
+
+  if (input.errorCode !== undefined) {
+    values.errorCode = input.errorCode;
+  }
+
+  if (input.errorCategory !== undefined) {
+    values.errorCategory = input.errorCategory;
+  }
+
+  if (input.resultId !== undefined) {
+    values.resultId = input.resultId;
+  }
+
+  const [record] = await db
+    .update(analysisRequests)
+    .set(values)
+    .where(eq(analysisRequests.id, input.requestId))
+    .returning();
+
+  return record ?? null;
+}
+
+export async function getAnalysisRequestStatusRecord(input: {
+  requestId: string;
+  moduleId: string;
+  themeSlug: string;
+}) {
+  const db = requireDb();
+
+  const [record] = await db
+    .select({
+      request: analysisRequests,
+      result: analysisResults,
+    })
+    .from(analysisRequests)
+    .leftJoin(analysisResults, eq(analysisResults.requestId, analysisRequests.id))
+    .where(
+      and(
+        eq(analysisRequests.id, input.requestId),
+        eq(analysisRequests.moduleId, input.moduleId),
+        eq(analysisRequests.themeSlug, input.themeSlug),
+        isNull(analysisRequests.deletedAt),
+      ),
+    )
+    .limit(1);
+
+  return record ?? null;
 }
 
 export async function getCachedAnalysisResult(input: {

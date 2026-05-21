@@ -8,9 +8,19 @@ export type AnalyzeRequestPayload = {
 
 export type AnalyzeSuccessResponse = {
   ok: true;
+  status: "completed";
+  requestId?: string;
   resultId: string;
   redirectTo: string;
   cacheHit?: boolean;
+};
+
+export type AnalyzeProcessingResponse = {
+  ok: true;
+  status: "processing";
+  requestId: string;
+  pollUrl: string;
+  cacheHit?: false;
 };
 
 export type ApiErrorResponse = {
@@ -19,7 +29,36 @@ export type ApiErrorResponse = {
   message: string;
 };
 
-export type AnalyzeResponse = AnalyzeSuccessResponse | ApiErrorResponse;
+export type AnalyzeRequestStatusResponse =
+  | {
+      ok: true;
+      status: "processing";
+      phase: string;
+      elapsedMs: number;
+      retryable: boolean;
+    }
+  | {
+      ok: true;
+      status: "completed";
+      resultId: string;
+      redirectTo: string;
+      elapsedMs: number;
+      retryable: false;
+    }
+  | {
+      ok: true;
+      status: "failed" | "expired";
+      errorCode: string;
+      errorCategory: string;
+      message: string;
+      elapsedMs: number;
+      retryable: boolean;
+    };
+
+export type AnalyzeResponse =
+  | AnalyzeSuccessResponse
+  | AnalyzeProcessingResponse
+  | ApiErrorResponse;
 
 export type ProviderCallResult = {
   text: string;

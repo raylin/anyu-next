@@ -67,6 +67,14 @@ export const analysisRequests = pgTable(
     cacheKeyHash: text("cache_key_hash"),
     modelStrategy: text("model_strategy"),
     primaryModel: text("primary_model"),
+    status: text("status").default("created").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    failedAt: timestamp("failed_at", { withTimezone: true }),
+    errorCode: text("error_code"),
+    errorCategory: text("error_category"),
+    resultId: uuid("result_id"),
+    lastHeartbeatAt: timestamp("last_heartbeat_at", { withTimezone: true }),
     privacyFlags: jsonb("privacy_flags").$type<string[]>().default([]).notNull(),
     retentionExpiresAt: timestamp("retention_expires_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
@@ -80,6 +88,7 @@ export const analysisRequests = pgTable(
       table.cacheKeyVersion,
       table.cacheKeyHash,
     ),
+    requestStatusIdx: index("analysis_requests_status_idx").on(table.status, table.createdAt),
   }),
 );
 

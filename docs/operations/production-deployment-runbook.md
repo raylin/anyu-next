@@ -117,6 +117,7 @@ Production migration checklist:
 
 - review generated migration files before production use
 - current launch baseline includes the idempotent analyze cache migration `apps/web/drizzle/0001_wooden_king_cobra.sql`
+- request-state / polling UX requires `apps/web/drizzle/0002_analyze_request_state.sql`
 - run migration against production only after explicit approval
 - record migration command and result in the launch record or launch report
 - verify required tables exist after migration
@@ -195,6 +196,7 @@ Gate before smoke:
 
 - runtime must see non-empty `DATABASE_URL`
 - production branch schema must already contain required runtime tables
+- production branch schema must include request-state columns on `analysis_requests`
 - production env should include non-empty `ANALYSIS_CACHE_HASH_SECRET` so identical-input cache reuse stays active after deploy
 
 1. open `/m/ambiguous-temperature`
@@ -214,6 +216,7 @@ For UI-heavy changes, optionally run local Playwright smoke before handoff compl
 Minimal happy-path production smoke evidence should include:
 
 - analyze response success
+- analyze request status row reaches `completed`, or the status endpoint returns completed for the synthetic request
 - real result route `200`
 - unlock intent success
 - synthetic Email fallback success if tested
