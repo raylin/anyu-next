@@ -50,9 +50,9 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 |---|---|---|
 | `LINE_CHANNEL_SECRET` | configured | Server-only secret. Do not record value here. |
 | `LINE_CHANNEL_ACCESS_TOKEN` | configured | Server-only secret. Do not record value here. |
-| `NEXT_PUBLIC_LINE_LIFF_ID` | unknown | Public env. Setup record has staging LIFF details, but live unlock response returned no LIFF URL on 2026-05-21 smoke. |
-| `NEXT_PUBLIC_LINE_LIFF_URL` | unknown | Public env. Live unlock response returned `liffUrl: null` on 2026-05-21 smoke. |
-| `NEXT_PUBLIC_LINE_ADD_URL` | mismatch | Public env. Live unlock response returned the old production OA add-friend URL instead of the test OA URL on 2026-05-21 smoke. |
+| `NEXT_PUBLIC_LINE_LIFF_ID` | configured | Public env. Live unlock response returned staging LIFF ID `2010157793-Q4JeeYv0` after 2026-05-21 env sync. |
+| `NEXT_PUBLIC_LINE_LIFF_URL` | configured | Public env. Live unlock response returned the staging LIFF URL after 2026-05-21 env sync. |
+| `NEXT_PUBLIC_LINE_ADD_URL` | configured | Public env. Live unlock response returned the test OA add-friend URL after 2026-05-21 env sync. |
 
 ## Implementation Notes
 
@@ -60,7 +60,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - LINE webhook must verify signatures with `LINE_CHANNEL_SECRET`.
 - Short-code fallback should reply with an unlocked result link only after code match.
 - Keep this record free of channel secret and access token values.
-- 2026-05-21 staging smoke found a live env mismatch: `/api/unlock-intent` returned `liffUrl: null` and the old production OA add-friend URL. Recheck Vercel Preview env and redeploy staging before real test-OA smoke.
+- 2026-05-21 staging smoke initially found a live env mismatch; the public Vercel Preview env was synced and redeployed, and `/api/unlock-intent` now returns the staging LIFF URL and test OA add-friend URL.
 
 ## Smoke Checklist
 
@@ -69,9 +69,9 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - [ ] LIFF endpoint opens on mobile.
 - [ ] LIFF endpoint opens from LINE in-app browser.
 - [ ] Desktop fallback path can display or use short-code flow after implementation.
-- [ ] Test OA add-friend URL is not confused with production OA.
+- [x] Test OA add-friend URL is not confused with production OA.
 - [ ] No secret values are documented in repo files.
-- [ ] Live `/api/unlock-intent` response returns staging LIFF URL and test OA add-friend URL.
+- [x] Live `/api/unlock-intent` response returns staging LIFF URL and test OA add-friend URL.
 
 ## Change Log
 
@@ -79,3 +79,4 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 |---|---|---|
 | 2026-05-21 | Created setup record template. | Codex |
 | 2026-05-21 | Recorded staging smoke env mismatch for public LIFF/add URL runtime config. | Codex |
+| 2026-05-21 | Synced Vercel Preview public LINE env and verified live staging unlock response. | Codex |

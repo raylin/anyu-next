@@ -4257,3 +4257,50 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether Vercel Preview env values are incorrect or only missing from the current deployment build
 - whether LINE console webhook verification passes after env correction
 - whether real test OA short-code reply succeeds after public env correction and redeploy
+
+## 2026-05-21 - LINE Public Env Sync v0
+
+### Completed Changes
+
+- saved the LINE Public Env Sync v0 handoff into `ai-collaboration/handoffs/`
+- read staging, production, and env-matrix LINE setup docs
+- set Vercel Preview `(staging)` public LINE env values for staging LIFF and test OA
+- set Vercel Production public LINE env values for production LIFF and real OA
+- triggered a fresh staging rebuild via docs-only push `72d601e`
+- verified staging `/api/unlock-intent` now returns a non-null staging LIFF URL and test OA add-friend URL
+- updated staging setup docs and env matrix to mark Preview/Staging public LINE env live-verified
+- created execution report at `ai-collaboration/reports/2026-05-21-line-public-env-sync-v0-execution-report.md`
+
+### Learnings
+
+- Preview/Staging needed branch-scoped `Preview (staging)` public env overrides, not the stale broad Preview value
+- staging now emits `https://liff.line.me/2010157793-Q4JeeYv0` and `https://lin.ee/5uL4e9q` from unlock intent
+- production public env values are set, but production still needs a fresh deployment before those `NEXT_PUBLIC_*` values are live
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 23 files / 85 tests
+- `corepack pnpm build` passed
+
+### Staging Redeploy
+
+- triggered via docs-only staging branch push `72d601e`
+- live staging env verification passed after redeploy
+
+### Production Redeploy
+
+- not run; pending explicit approval
+
+### Commit / Push
+
+- commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- whether production deployment should be refreshed before or after the next real test-OA short-code staging smoke
+- whether LINE console webhook verification now passes with corrected staging public env
