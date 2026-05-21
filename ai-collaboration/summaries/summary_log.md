@@ -3975,3 +3975,40 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether a future worker/queue is worth the complexity if provider latency remains around 25-30 seconds
 - whether internal QA needs a visible request-status inspection surface or API-only status is sufficient
+
+## 2026-05-21 - Analyze Request State Migration + Live Verification v0
+
+### Completed Changes
+
+- saved the Analyze Request State Migration + Live Verification v0 handoff into `ai-collaboration/handoffs/`
+- applied `0002_analyze_request_state.sql` to the Neon staging/preview branch
+- verified staging request-state schema, fresh analyze completion, poll endpoint, cache hit, result page, unlock intent, Email fallback, and event metadata privacy
+- applied `0002_analyze_request_state.sql` to the Neon production branch
+- verified production request-state schema
+- stopped production smoke before analyze because the live production app does not yet serve the request-state poll endpoint
+
+### Learnings
+
+- staging is fully migrated and request-state behavior is working end to end
+- production DB is migrated, but production app freshness is not aligned with commit `1d9700d`
+- future live-verification handoffs should check live app route/version freshness before applying production DB migrations
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 22 files / 79 tests
+- `corepack pnpm build` passed
+- local Playwright not rerun because this task changed no UI code
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- which deployment or commit currently backs `https://anyu.tw`
+- whether production should be refreshed from `origin/staging` or another approved production commit path before rerunning production request-state smoke
