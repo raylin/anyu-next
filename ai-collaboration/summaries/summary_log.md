@@ -3838,3 +3838,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - a true private-batch dry run is still needed because no raw calibration JSONL file was present in the accessible local paths for this session
 - first-match topic routing may need widening if real PTT batches frequently contain overlapping themes in one record
+
+## 2026-05-21 - Topic Ingestion Private Batch Dry Run v0
+
+### Completed Changes
+
+- confirmed the private batch input exists at `.local/topic-ingestion/private-batch/input.jsonl`
+- added `.local/` to `.gitignore` and ran the full local topic-ingestion pipeline under `.local/`
+- recorded a sanitized dry-run report with aggregate counts, source mix, top topic buckets, risk-flag counts, and extractor observations
+
+### Learnings
+
+- the dry run is structurally useful, but the current calibrated extractor still leaves too much volume in `uncategorized`
+- Dcard/PTT/Mobile01 weighting works, but Mobile01 still has meaningful influence when batch volume is high
+- risk surfacing is useful and the build/watch/defer distribution now feels conservative enough for human review
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether Mobile01 should be penalized more aggressively in review ranking
+- whether the next refinement should focus on bucket coverage or on relaxing score saturation first
