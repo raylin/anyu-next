@@ -131,6 +131,14 @@ Accepted operating policy for the first low-key launch:
 
 - manual retention cleanup every `24–48h` is accepted
 - before paid ads or broader public traffic, scheduled cleanup should be implemented or explicitly re-approved
+- scheduled cleanup is now implemented for:
+  - `analysis_requests`
+  - `analysis_results`
+- non-target tables still requiring separate policy before automation:
+  - `events`
+  - `unlock_intents`
+  - `contact_submissions`
+  - `sessions`
 
 Privacy wording note:
 

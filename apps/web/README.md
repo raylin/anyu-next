@@ -21,6 +21,7 @@ The current Module 01 experience supports:
 - 24-hour idempotent analyze-result reuse for identical redacted input when cache hashing is configured
 - fake-door unlock intent + contact capture APIs
 - safe runtime timing metadata attached to `analysis_completed` events
+- scheduled retention cleanup for expired `analysis_requests` and `analysis_results` via `/api/cron/retention-cleanup`
 
 The current Module 01 experience still defers:
 
@@ -29,7 +30,7 @@ The current Module 01 experience still defers:
 - share PNG / OG generation
 - email or LINE delivery
 - advanced PII detection
-- retention cleanup jobs
+- broader retention cleanup policy beyond the analysis tables
 
 Public legal/trust routes now exist for:
 
@@ -58,6 +59,7 @@ Copy `apps/web/.env.example` and provide the values you need locally:
 - `ORADAR_PROVIDER=anthropic`
 - `MODEL_STRATEGY=sonnet_default`
 - `ANALYSIS_CACHE_HASH_SECRET=`
+- `RETENTION_CLEANUP_SECRET=`
 - `ANALYSIS_SESSION_DAILY_LIMIT=3`
 - `ANALYSIS_IP_HOURLY_LIMIT=10`
 - `ANALYSIS_GLOBAL_DAILY_LIMIT=200`
@@ -76,6 +78,7 @@ Launch-readiness behavior:
 - identical redacted input only reuses a prior result when module slug, situation, prompt version, schema version, model strategy, provider, and primary model still match
 - production should set `ANALYSIS_CACHE_HASH_SECRET`; local/test may fall back to a non-production dev secret
 - after adding or changing `ANALYSIS_CACHE_HASH_SECRET` in Vercel, redeploy the target environment before expecting live cache hits
+- scheduled retention cleanup requires `RETENTION_CLEANUP_SECRET` or `CRON_SECRET`
 - analyze input is guarded by a 30-char minimum, 4,000-char hard max, lightweight relationship-content checks, prompt-injection checks, and pragmatic session/IP/global caps
 - Module 01 now supports a LINE-first contact-notification UI when `NEXT_PUBLIC_LINE_ADD_URL` is configured; Email remains a secondary fallback
 
@@ -110,6 +113,7 @@ Preview env required for live analyze:
 - `ORADAR_PROVIDER=anthropic`
 - `MODEL_STRATEGY`
 - `ANALYSIS_CACHE_HASH_SECRET`
+- `RETENTION_CLEANUP_SECRET` or `CRON_SECRET`
 - `NEXT_PUBLIC_APP_URL`
 
 Suggested manual preview commands if Vercel CLI access is available:
@@ -138,6 +142,13 @@ corepack pnpm build
 corepack pnpm db:generate
 corepack pnpm db:migrate
 corepack pnpm brand:export
+```
+
+Retention cleanup dry run:
+
+```bash
+curl -H "Authorization: Bearer $RETENTION_CLEANUP_SECRET" \
+  "http://localhost:3000/api/cron/retention-cleanup?dryRun=1"
 ```
 
 ## Local UI Smoke Tests

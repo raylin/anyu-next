@@ -84,6 +84,7 @@ ANTHROPIC_MODEL=claude-sonnet-4-20250514
 ORADAR_PROVIDER=anthropic
 MODEL_STRATEGY=sonnet_default
 ANALYSIS_CACHE_HASH_SECRET=<strong random secret>
+RETENTION_CLEANUP_SECRET=<strong random secret> or CRON_SECRET=<strong random secret>
 ANTHROPIC_FAST_MODEL=claude-haiku-4-5-20251001 optional / not default
 ANTHROPIC_FALLBACK_MODEL=claude-sonnet-4-20250514 optional
 NEXT_PUBLIC_APP_URL=https://anyu.tw
@@ -271,10 +272,29 @@ Until stronger automation exists, production needs an explicit retention cleanup
 - verify events still exclude raw input and contact values
 - document cleanup completion in an ops log or launch operations note
 
+Scheduled retention cleanup v0 now covers only:
+
+- `analysis_requests`
+- `analysis_results`
+
+Current mechanism:
+
+- Vercel cron path: `/api/cron/retention-cleanup`
+- cadence: daily at `17:00 UTC`
+- secret required: `RETENTION_CLEANUP_SECRET` or `CRON_SECRET`
+- `dryRun=1` returns aggregate counts only
+
+Still not cleaned automatically in v0:
+
+- `events`
+- `unlock_intents`
+- `contact_submissions`
+- `sessions`
+
 Pre-launch rule:
 
 - scheduled deletion is still a known risk if not implemented
-- manual cleanup is acceptable only if the human operator explicitly accepts that burden for v0
+- manual cleanup is still required only for the non-target tables above unless a later retention-policy decision expands scope
 
 ## 17. Rollback Plan
 
@@ -315,6 +335,7 @@ Known production-launch risks:
 - production DB migration may still diverge from preview if done carelessly
 - LINE CTA flow can be operationally correct in code but still fail if env or alias freshness is wrong
 - retention cleanup is still partly manual
+- only `analysis_requests` and `analysis_results` are scheduled-cleanup targets in v0
 - current model remains provider-dominant in latency, which affects perceived responsiveness
 - protected staging verification does not fully replace production real-user conditions
 

@@ -3577,3 +3577,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - no blocking uncertainty remains for live cache activation
 - simultaneous identical misses still are not concurrency-locked by design
+
+## 2026-05-21 - Scheduled Retention Cleanup v0
+
+### Completed Changes
+
+- added a secret-guarded scheduled cleanup route at `/api/cron/retention-cleanup`
+- added runtime cleanup logic for expired `analysis_requests` and `analysis_results`
+- added a daily Vercel cron schedule in `apps/web/vercel.json`
+- updated app/ops docs and the final production launch decision to reflect scheduled cleanup coverage
+- verified unauthorized and authorized dry-run behavior live on preview and production
+
+### Learnings
+
+- the active Vercel plan rejected the intended 12-hour cron cadence, so the rollout had to settle on a valid daily schedule
+- the current schema makes in-place scrubbing safer than hard deletion because result rows are still referenced downstream
+- live cron verification is straightforward once the secret and fresh deployment are both in place
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether future retention policy should extend explicit timestamps and scheduled cleanup to `unlock_intents` and `contact_submissions`
+- whether daily cadence remains sufficient if production volume grows beyond the current low-key launch
