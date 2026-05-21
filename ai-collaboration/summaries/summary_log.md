@@ -3444,3 +3444,35 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - exact screenshot-level judgment of the softened CTA, quote-card treatment, and share-card layering on a real phone viewport
 - whether a future review wants any stronger share/persona accent or treats this pass as visually complete
+
+## 2026-05-21 - Module 01 Final UI Screenshot Review Pack v0
+
+### Completed Changes
+
+- created the final Module 01 UI screenshot/review pack artifact
+- confirmed staging landing and demo-result surfaces are serving the final finishing-pass UI markers
+- ran one synthetic staging analyze, fetched the runtime result, verified unlock intent, and verified synthetic Email fallback
+- verified staging legal routes and documented exact manual screenshot instructions because screenshot capture was unavailable in this session
+
+### Learnings
+
+- live staging HTML is enough to confirm the final finishing-pass markers, typography loaders, and major UI copy hierarchy even when screenshot tooling is unavailable
+- the UI now appears materially aligned with the approved AnyuMark direction, the three font phases, and the final finishing plan
+- the only major remaining review gap is subjective screenshot/device judgment, not structural implementation uncertainty
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- exact mobile screenshot feel of the softened CTA, loading state, and layered cards
+- whether external design review will want any stronger share/persona emphasis once real screenshots are available
