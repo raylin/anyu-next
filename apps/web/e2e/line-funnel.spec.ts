@@ -6,7 +6,7 @@ test.describe("module 01 line funnel smoke", () => {
 
     await page.getByRole("button", { name: "解鎖下一句怎麼回 — NT$49" }).click();
 
-    const lineButton = page.getByRole("button", { name: "加入 LINE，收到開放通知" });
+    const lineButton = page.getByRole("button", { name: "用 LINE 領取完整分析" });
     await expect(lineButton).toBeVisible();
     await expect(lineButton).toHaveAttribute("data-line-add-url", "https://lin.ee/S6dnbJO");
 

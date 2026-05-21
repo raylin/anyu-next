@@ -10,6 +10,7 @@ import {
   LINE_PRIMARY_BODY,
   LINE_PRIMARY_CTA,
   LINE_PRIMARY_PANEL_TITLE,
+  LINE_FULFILLMENT_FALLBACK_INTRO,
   MISSING_LINE_URL_MESSAGE,
 } from "@/lib/modules/ai-temperature-ui";
 
@@ -23,6 +24,9 @@ type ContactCaptureProps = {
   visible?: boolean;
   noticeMessage?: string;
   lineAddUrl?: string | null;
+  liffUrl?: string | null;
+  fulfillmentCode?: string | null;
+  fulfillmentExpiresAt?: string | null;
   onLineAddClick?: () => Promise<void> | void;
   onEmailFallbackOpen?: () => Promise<void> | void;
   onSubmit?: (
@@ -34,6 +38,9 @@ export function ContactCapture({
   visible = true,
   noticeMessage,
   lineAddUrl,
+  liffUrl,
+  fulfillmentCode,
+  fulfillmentExpiresAt,
   onLineAddClick,
   onEmailFallbackOpen,
   onSubmit,
@@ -61,7 +68,9 @@ export function ContactCapture({
   }
 
   async function handleLinePrimaryClick() {
-    if (!lineAddUrl) {
+    const lineTargetUrl = liffUrl ?? lineAddUrl;
+
+    if (!lineTargetUrl) {
       setErrorMessage(MISSING_LINE_URL_MESSAGE);
       await openEmailFallback();
       return;
@@ -70,7 +79,7 @@ export function ContactCapture({
     await onLineAddClick?.();
 
     if (typeof window !== "undefined") {
-      window.location.href = lineAddUrl;
+      window.location.href = lineTargetUrl;
     }
   }
 
@@ -131,9 +140,20 @@ export function ContactCapture({
             className="anyu-button-block"
             onClick={handleLinePrimaryClick}
             data-line-add-url={lineAddUrl ?? ""}
+            data-line-liff-url={liffUrl ?? ""}
           >
             {LINE_PRIMARY_CTA}
           </Button>
+
+          {fulfillmentCode ? (
+            <div className="anyu-contact-code-box" data-fulfillment-code={fulfillmentCode}>
+              <p className="anyu-subtle-note">{LINE_FULFILLMENT_FALLBACK_INTRO}</p>
+              <strong>{fulfillmentCode}</strong>
+              {fulfillmentExpiresAt ? (
+                <p className="anyu-subtle-note">短碼約 30 分鐘內有效。</p>
+              ) : null}
+            </div>
+          ) : null}
 
           <button
             type="button"

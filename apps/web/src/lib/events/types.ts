@@ -7,6 +7,13 @@ export const EVENT_NAMES = [
   "analysis_completed",
   "paid_unlock_clicked",
   "line_add_clicked",
+  "fulfillment_liff_opened",
+  "fulfillment_liff_bound",
+  "fulfillment_code_shown",
+  "fulfillment_code_matched",
+  "fulfillment_link_delivered",
+  "fulfillment_failed",
+  "line_webhook_received",
   "email_fallback_opened",
   "contact_submitted",
   "share_card_clicked",
@@ -29,7 +36,19 @@ export type EventPayload = {
   metadata?: Record<string, unknown>;
 };
 
-const FORBIDDEN_METADATA_KEYS = ["text", "rawtext", "input", "conversation"];
+const FORBIDDEN_METADATA_KEYS = [
+  "text",
+  "rawtext",
+  "input",
+  "conversation",
+  "email",
+  "line_message_text",
+  "displayname",
+  "display_name",
+  "provider_output",
+  "secret",
+  "token",
+];
 
 export function isAllowedEventName(value: string): value is EventName {
   return EVENT_NAMES.includes(value as EventName);

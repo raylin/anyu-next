@@ -1007,6 +1007,22 @@ textarea {
   gap: 0.85rem;
 }
 
+.anyu-contact-code-box {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem 1rem;
+  border: 1px dashed rgba(42, 36, 25, 0.28);
+  border-radius: var(--anyu-radius-xl);
+  background: rgba(255, 251, 241, 0.72);
+}
+
+.anyu-contact-code-box strong {
+  color: var(--anyu-ink);
+  font-family: var(--anyu-font-label);
+  font-size: 1.45rem;
+  letter-spacing: 0.18em;
+}
+
 .anyu-contact-field {
   display: grid;
   gap: 0.5rem;
@@ -1041,6 +1057,16 @@ textarea {
   color: var(--anyu-dim);
   font-size: var(--anyu-type-caption-size);
   line-height: var(--anyu-type-caption-lh);
+}
+
+.anyu-plain-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-body-size);
+  line-height: var(--anyu-type-body-lh);
 }
 
 .anyu-status-panel {

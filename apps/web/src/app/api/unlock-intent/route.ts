@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { isDbConfigured } from "@/lib/db/client";
 import { createUnlockIntentRecord, insertEvent } from "@/lib/db/runtime";
+import { getPublicLineConfig } from "@/lib/line/config";
+import {
+  buildFulfillmentExpiry,
+  generateFulfillmentCode,
+  generateUnlockToken,
+  hashFulfillmentSecret,
+} from "@/lib/line/fulfillment";
 import { getModuleBySlug } from "@/lib/modules/registry";
 
 type UnlockIntentPayload = {
@@ -51,11 +58,26 @@ export async function POST(request: Request) {
   }
 
   try {
+    const fulfillmentCode = generateFulfillmentCode();
+    const unlockToken = generateUnlockToken();
+    const expiry = buildFulfillmentExpiry();
+
     const unlockIntent = await createUnlockIntentRecord({
       resultId: body.resultId,
       moduleId: body.moduleId,
       themeSlug: body.themeSlug,
       anonymousSessionId: body.anonymousSessionId ?? null,
+      fulfillmentCodeHash: hashFulfillmentSecret(fulfillmentCode),
+      fulfillmentToken: unlockToken,
+      fulfillmentTokenHash: hashFulfillmentSecret(unlockToken),
+      fulfillmentExpiresAt: expiry.fulfillmentExpiresAt,
+      unlockTokenExpiresAt: expiry.unlockTokenExpiresAt,
+    });
+
+    const publicLineConfig = getPublicLineConfig({
+      unlockIntentId: unlockIntent.id,
+      unlockToken,
+      fulfillmentCode,
     });
 
     await insertEvent({
@@ -74,7 +96,32 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ ok: true, unlockIntentId: unlockIntent.id });
+    await insertEvent({
+      eventName: "fulfillment_code_shown",
+      moduleId: body.moduleId,
+      themeSlug: body.themeSlug,
+      experimentId: moduleConfig.experimentId,
+      visualVariant: "B",
+      promptVersion: moduleConfig.promptVersion,
+      schemaVersion: moduleConfig.schemaVersion,
+      anonymousSessionId: body.anonymousSessionId ?? null,
+      metadata: {
+        resultId: body.resultId,
+        unlockIntentId: unlockIntent.id,
+        channel: publicLineConfig.liffUrl ? "liff" : "line_code",
+        status: "pending",
+      },
+    });
+
+    return NextResponse.json({
+      ok: true,
+      unlockIntentId: unlockIntent.id,
+      fulfillmentCode,
+      fulfillmentExpiresAt: expiry.fulfillmentExpiresAt.toISOString(),
+      unlockToken,
+      liffUrl: publicLineConfig.liffUrl,
+      lineAddUrl: publicLineConfig.lineAddUrl,
+    });
   } catch {
     return NextResponse.json(
       { ok: false, error: "unlock_store_failed", message: "目前解鎖收集服務忙碌中，請稍後再試。" },

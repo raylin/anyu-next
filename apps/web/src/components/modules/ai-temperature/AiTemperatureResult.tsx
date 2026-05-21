@@ -28,6 +28,14 @@ type AiTemperatureResultProps = {
   resultId: string;
 };
 
+type UnlockFulfillmentState = {
+  fulfillmentCode: string | null;
+  fulfillmentExpiresAt: string | null;
+  unlockToken: string | null;
+  liffUrl: string | null;
+  lineAddUrl: string | null;
+};
+
 export function AiTemperatureResult({
   moduleConfig,
   result,
@@ -36,6 +44,8 @@ export function AiTemperatureResult({
 }: AiTemperatureResultProps) {
   const [showContact, setShowContact] = useState(false);
   const [unlockIntentId, setUnlockIntentId] = useState<string | null>(null);
+  const [unlockFulfillment, setUnlockFulfillment] =
+    useState<UnlockFulfillmentState | null>(null);
   const [unlockIntentFailed, setUnlockIntentFailed] = useState(false);
   const paidPreviewRef = useRef<HTMLDivElement | null>(null);
   const contactPanelRef = useRef<HTMLDivElement | null>(null);
@@ -87,11 +97,17 @@ export function AiTemperatureResult({
       const data = (await response.json()) as {
         ok: boolean;
         unlockIntentId?: string;
+        fulfillmentCode?: string;
+        fulfillmentExpiresAt?: string;
+        unlockToken?: string;
+        liffUrl?: string | null;
+        lineAddUrl?: string | null;
         message?: string;
       };
 
       if (!response.ok || !data.ok || !data.unlockIntentId) {
         setUnlockIntentId(null);
+        setUnlockFulfillment(null);
         setUnlockIntentFailed(true);
         setShowContact(true);
         return {
@@ -100,11 +116,19 @@ export function AiTemperatureResult({
       }
 
       setUnlockIntentId(data.unlockIntentId);
+      setUnlockFulfillment({
+        fulfillmentCode: data.fulfillmentCode ?? null,
+        fulfillmentExpiresAt: data.fulfillmentExpiresAt ?? null,
+        unlockToken: data.unlockToken ?? null,
+        liffUrl: data.liffUrl ?? null,
+        lineAddUrl: data.lineAddUrl ?? null,
+      });
       setUnlockIntentFailed(false);
       setShowContact(true);
       return { ok: true };
     } catch {
       setUnlockIntentId(null);
+      setUnlockFulfillment(null);
       setUnlockIntentFailed(true);
       setShowContact(true);
       return {
@@ -351,7 +375,10 @@ export function AiTemperatureResult({
       <div ref={contactPanelRef}>
         <ContactCapture
           visible={showContact}
-          lineAddUrl={lineAddUrl}
+          lineAddUrl={unlockFulfillment?.lineAddUrl ?? lineAddUrl}
+          liffUrl={unlockFulfillment?.liffUrl}
+          fulfillmentCode={unlockFulfillment?.fulfillmentCode}
+          fulfillmentExpiresAt={unlockFulfillment?.fulfillmentExpiresAt}
           noticeMessage={
             unlockIntentFailed
               ? "內測記錄暫時無法建立，但你仍可留下聯絡方式。"

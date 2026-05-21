@@ -10,6 +10,8 @@ Module 01 now has a runtime + persistence integration path for:
 - `/api/modules/ambiguous-temperature/analyze/requests/[requestId]`
 - `/api/events`
 - `/api/unlock-intent`
+- `/api/line/fulfillment/bind-liff`
+- `/api/line/webhook`
 - `/api/contact`
 
 The current Module 01 experience supports:
@@ -22,6 +24,7 @@ The current Module 01 experience supports:
 - DB-backed result loading when `DATABASE_URL` is configured
 - 24-hour idempotent analyze-result reuse for identical redacted input when cache hashing is configured
 - fake-door unlock intent + contact capture APIs
+- LINE fulfillment MVP with LIFF binding, short-code fallback, and unlocked result route
 - safe runtime timing metadata attached to `analysis_completed` events
 - scheduled retention cleanup for expired `analysis_requests` and `analysis_results` via `/api/cron/retention-cleanup`
 
@@ -30,7 +33,8 @@ The current Module 01 experience still defers:
 - real payment
 - auth
 - share PNG / OG generation
-- email or LINE delivery
+- email delivery
+- production LINE fulfillment activation before LINE/Vercel setup smoke passes
 - advanced PII detection
 - broader retention cleanup policy beyond the analysis tables
 
@@ -67,6 +71,11 @@ Copy `apps/web/.env.example` and provide the values you need locally:
 - `ANALYSIS_GLOBAL_DAILY_LIMIT=200`
 - `NEXT_PUBLIC_APP_URL=`
 - `NEXT_PUBLIC_LINE_ADD_URL=`
+- `NEXT_PUBLIC_LINE_LIFF_ID=`
+- `NEXT_PUBLIC_LINE_LIFF_URL=`
+- `LINE_CHANNEL_SECRET=`
+- `LINE_CHANNEL_ACCESS_TOKEN=`
+- `FULFILLMENT_TOKEN_SECRET=`
 
 Provider priority in v0 is Anthropic first. OpenAI is available as a lightweight fallback path.
 
@@ -82,7 +91,34 @@ Launch-readiness behavior:
 - after adding or changing `ANALYSIS_CACHE_HASH_SECRET` in Vercel, redeploy the target environment before expecting live cache hits
 - scheduled retention cleanup requires `RETENTION_CLEANUP_SECRET` or `CRON_SECRET`
 - analyze input is guarded by a 30-char minimum, 4,000-char hard max, lightweight relationship-content checks, prompt-injection checks, and pragmatic session/IP/global caps
-- Module 01 now supports a LINE-first contact-notification UI when `NEXT_PUBLIC_LINE_ADD_URL` is configured; Email remains a secondary fallback
+- Module 01 now supports LINE fulfillment when LINE env is configured: LIFF is primary, LINE OA short code is fallback, and Email remains capture-only
+
+## LINE Fulfillment
+
+LINE fulfillment config must come from env only:
+
+- `LINE_CHANNEL_SECRET`
+- `LINE_CHANNEL_ACCESS_TOKEN`
+- `NEXT_PUBLIC_LINE_LIFF_ID`
+- `NEXT_PUBLIC_LINE_LIFF_URL`
+- `NEXT_PUBLIC_LINE_ADD_URL`
+- optional `FULFILLMENT_TOKEN_SECRET`
+
+Routes:
+
+- `POST /api/unlock-intent` creates the fulfillment code/token for a result.
+- `GET /m/ambiguous-temperature/line/fulfill` is the LIFF bridge page.
+- `POST /api/line/fulfillment/bind-liff` binds a LIFF user to an unlock intent.
+- `POST /api/line/webhook` verifies LINE signatures and handles short-code messages.
+- `GET /m/ambiguous-temperature/unlock/[unlockToken]` renders persisted paid-result content.
+
+Operational source-of-truth docs:
+
+- `ai-collaboration/research/line/line-fulfillment-env-matrix.md`
+- `ai-collaboration/research/line/line-oa-staging-setup.md`
+- `ai-collaboration/research/line/line-oa-production-setup.md`
+
+Do not hard-code staging or production LINE URLs in implementation code. Vercel Preview env should point to the test OA / staging LIFF. Vercel Production env should point to the production OA / production LIFF.
 
 ## Launch Readiness
 

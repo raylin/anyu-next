@@ -9,6 +9,9 @@ describe("event metadata guard", () => {
     expect(hasForbiddenEventMetadata({ nested: { input: "raw conversation" } })).toBe(
       true,
     );
+    expect(hasForbiddenEventMetadata({ email: "person@example.com" })).toBe(true);
+    expect(hasForbiddenEventMetadata({ line_message_text: "A7K2Q9" })).toBe(true);
+    expect(hasForbiddenEventMetadata({ token: "secret-token" })).toBe(true);
   });
 
   it("allows safe event metadata", () => {
@@ -40,6 +43,9 @@ describe("event metadata guard", () => {
     expect(EVENT_NAMES).toContain("line_add_clicked");
     expect(EVENT_NAMES).toContain("email_fallback_opened");
     expect(EVENT_NAMES).toContain("share_card_clicked");
+    expect(EVENT_NAMES).toContain("fulfillment_liff_bound");
+    expect(EVENT_NAMES).toContain("fulfillment_code_matched");
+    expect(EVENT_NAMES).toContain("line_webhook_received");
   });
 
   it("keeps the inline result CTA source on the existing paid unlock event", () => {

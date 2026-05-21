@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import { requireDb } from "@/lib/db/client";
 import {
   analysisRequests,
@@ -285,6 +285,11 @@ export async function createUnlockIntentRecord(input: {
   moduleId: string;
   themeSlug: string;
   anonymousSessionId?: string | null;
+  fulfillmentCodeHash?: string | null;
+  fulfillmentToken?: string | null;
+  fulfillmentTokenHash?: string | null;
+  fulfillmentExpiresAt?: Date | null;
+  unlockTokenExpiresAt?: Date | null;
 }) {
   const db = requireDb();
 
@@ -297,10 +302,99 @@ export async function createUnlockIntentRecord(input: {
       moduleId: input.moduleId,
       themeSlug: input.themeSlug,
       anonymousSessionId: input.anonymousSessionId ?? null,
+      fulfillmentCodeHash: input.fulfillmentCodeHash ?? null,
+      fulfillmentToken: input.fulfillmentToken ?? null,
+      fulfillmentTokenHash: input.fulfillmentTokenHash ?? null,
+      fulfillmentStatus: "pending",
+      fulfillmentExpiresAt: input.fulfillmentExpiresAt ?? null,
+      unlockTokenExpiresAt: input.unlockTokenExpiresAt ?? null,
     })
     .returning();
 
   return record;
+}
+
+export async function getUnlockIntentByTokenHash(tokenHash: string) {
+  const db = requireDb();
+
+  const [record] = await db
+    .select({
+      unlockIntent: unlockIntents,
+      result: analysisResults,
+    })
+    .from(unlockIntents)
+    .innerJoin(analysisResults, eq(analysisResults.id, unlockIntents.resultId))
+    .where(eq(unlockIntents.fulfillmentTokenHash, tokenHash))
+    .limit(1);
+
+  return record ?? null;
+}
+
+export async function getUnlockIntentByCodeHash(codeHash: string) {
+  const db = requireDb();
+
+  const [record] = await db
+    .select({
+      unlockIntent: unlockIntents,
+      result: analysisResults,
+    })
+    .from(unlockIntents)
+    .innerJoin(analysisResults, eq(analysisResults.id, unlockIntents.resultId))
+    .where(eq(unlockIntents.fulfillmentCodeHash, codeHash))
+    .orderBy(desc(unlockIntents.createdAt))
+    .limit(1);
+
+  return record ?? null;
+}
+
+export async function bindUnlockIntentToLine(input: {
+  unlockIntentId: string;
+  lineUserId: string;
+  channel: "liff" | "line_code";
+  delivered?: boolean;
+  lastDeliveryError?: string | null;
+}) {
+  const db = requireDb();
+  const now = new Date();
+
+  const [record] = await db
+    .update(unlockIntents)
+    .set({
+      lineUserId: input.lineUserId,
+      fulfillmentChannel: input.channel,
+      fulfillmentStatus: input.delivered ? "delivered" : "bound",
+      lineBoundAt: now,
+      fulfilledAt: input.delivered ? now : null,
+      lastDeliveryAt: input.delivered ? now : null,
+      lastDeliveryError: input.lastDeliveryError ?? null,
+    })
+    .where(eq(unlockIntents.id, input.unlockIntentId))
+    .returning();
+
+  return record ?? null;
+}
+
+export async function markUnlockIntentDeliveryAttempt(input: {
+  unlockIntentId: string;
+  status: "delivered" | "failed";
+  error?: string | null;
+}) {
+  const db = requireDb();
+  const now = new Date();
+
+  const [record] = await db
+    .update(unlockIntents)
+    .set({
+      fulfillmentStatus: input.status,
+      fulfilledAt: input.status === "delivered" ? now : null,
+      lastDeliveryAt: now,
+      lastDeliveryError: input.error ?? null,
+      deliveryAttemptCount: sql`${unlockIntents.deliveryAttemptCount} + 1`,
+    })
+    .where(eq(unlockIntents.id, input.unlockIntentId))
+    .returning();
+
+  return record ?? null;
 }
 
 export async function createContactSubmissionRecord(input: {

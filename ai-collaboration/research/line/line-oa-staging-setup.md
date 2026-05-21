@@ -17,18 +17,18 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 
 | Field | Value |
 |---|---|
-| OA name | pending |
-| Display name | pending |
-| Add-friend URL | pending |
-| QR URL | pending |
+| OA name | @558avbes |
+| Display name | 暗語 ANYU Test |
+| Add-friend URL | https://lin.ee/5uL4e9q |
+| QR URL | <img src="https://qr-official.line.me/gs/M_558avbes_GW.png?oat_content=qr"> |
 
 ## Messaging API
 
 | Field | Value |
 |---|---|
-| Messaging API channel status | pending |
+| Messaging API channel status | enabled |
 | Webhook URL | `https://staging.anyu.tw/api/line/webhook` |
-| Webhook enabled status | pending |
+| Webhook enabled status | saved |
 | Webhook verification status | pending |
 | Add friend option / linked bot | pending |
 
@@ -36,23 +36,30 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 
 | Field | Value |
 |---|---|
-| LIFF app name | pending |
-| LIFF ID | pending |
-| LIFF URL | pending |
+| LIFF app name | 暗語 ANYU - Staging |
+| LIFF ID | 2010157793-Q4JeeYv0 |
+| LIFF URL | https://liff.line.me/2010157793-Q4JeeYv0 |
 | LIFF endpoint URL | `https://staging.anyu.tw/m/ambiguous-temperature/line/fulfill` |
-| LIFF size | pending |
-| LIFF scopes | pending |
-| Add friend option / linked bot | pending |
+| LIFF size | full |
+| LIFF scopes | email, profile |
+| Add friend option / linked bot | enabled |
 
 ## Vercel Preview Env Status
 
 | Variable | Status | Notes |
 |---|---|---|
-| `LINE_CHANNEL_SECRET` | pending | Server-only secret. Do not record value here. |
-| `LINE_CHANNEL_ACCESS_TOKEN` | pending | Server-only secret. Do not record value here. |
-| `NEXT_PUBLIC_LINE_LIFF_ID` | pending | Public env. Should point to staging LIFF app. |
-| `NEXT_PUBLIC_LINE_LIFF_URL` | pending | Public env. Should point to staging LIFF URL. |
-| `NEXT_PUBLIC_LINE_ADD_URL` | pending | Public env. Should point to test OA add-friend URL. |
+| `LINE_CHANNEL_SECRET` | configured | Server-only secret. Do not record value here. |
+| `LINE_CHANNEL_ACCESS_TOKEN` | configured | Server-only secret. Do not record value here. |
+| `NEXT_PUBLIC_LINE_LIFF_ID` | configured | Public env. Should point to staging LIFF app. |
+| `NEXT_PUBLIC_LINE_LIFF_URL` | configured | Public env. Should point to staging LIFF URL. |
+| `NEXT_PUBLIC_LINE_ADD_URL` | configured | Public env. Should point to test OA add-friend URL. |
+
+## Implementation Notes
+
+- LIFF primary path should use `NEXT_PUBLIC_LINE_LIFF_URL` and never hard-code this LIFF ID in app code.
+- LINE webhook must verify signatures with `LINE_CHANNEL_SECRET`.
+- Short-code fallback should reply with an unlocked result link only after code match.
+- Keep this record free of channel secret and access token values.
 
 ## Smoke Checklist
 

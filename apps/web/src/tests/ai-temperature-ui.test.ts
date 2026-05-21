@@ -294,10 +294,10 @@ describe("ai-temperature UI helpers", () => {
     expect(getLineAddUrl(undefined)).toBeNull();
   });
 
-  it("keeps the line-first contact copy explicit and the email fallback secondary", () => {
-    expect(LINE_PRIMARY_PANEL_TITLE).toBe("加入 LINE，收到完整分析開放通知");
-    expect(LINE_PRIMARY_BODY).toContain("完整分析與新測驗開放");
-    expect(LINE_PRIMARY_CTA).toBe("加入 LINE，收到開放通知");
+  it("keeps the line-first fulfillment copy explicit and the email fallback secondary", () => {
+    expect(LINE_PRIMARY_PANEL_TITLE).toBe("用 LINE 領取完整分析");
+    expect(LINE_PRIMARY_BODY).toContain("我們會把完整分析連結送給你");
+    expect(LINE_PRIMARY_CTA).toBe("用 LINE 領取完整分析");
     expect(EMAIL_FALLBACK_LABEL).toBe("改用 Email 接收通知");
     expect(EMAIL_FALLBACK_BODY).toContain("不寄日常電子報");
     expect(MISSING_LINE_URL_MESSAGE).toBe(

@@ -4156,3 +4156,52 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Unresolved Questions
 
 - actual staging/test OA and production OA setup values remain pending until an operator fills them from LINE/Vercel consoles
+
+## 2026-05-21 - LINE Fulfillment Automation MVP v0
+
+### Completed Changes
+
+- saved the LINE Fulfillment Automation MVP v0 handoff into `ai-collaboration/handoffs/`
+- extended `unlock_intents` with LINE fulfillment migration/schema fields
+- added fulfillment helpers for code generation, token generation, hashing, expiry, LIFF URL building, and LINE signature verification
+- updated `/api/unlock-intent` to return fulfillment code/token, LIFF URL, add-friend URL, and expiry
+- added LIFF bind API, LINE webhook API, LIFF bridge page, and unlocked result route
+- updated the result contact panel to fulfillment-oriented LINE copy with short-code fallback
+- updated setup docs, app README, production runbook, tests, and Playwright expectations
+- created review bundle at `ai-collaboration/research/2026-05-21-line-fulfillment-automation-mvp-v0-review-bundle.md`
+- created execution report at `ai-collaboration/reports/2026-05-21-line-fulfillment-automation-mvp-v0-execution-report.md`
+
+### Learnings
+
+- short-code webhook delivery needs access to the unlock token after code matching, so the MVP stores the high-entropy token plus token hash
+- LIFF path can be implemented as a bridge page that redirects to the canonical unlocked route and leaves result rendering outside LIFF
+- staging and production LINE smoke require deploy + migration first; local validation can verify code paths but not live LINE console behavior
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 23 files / 85 tests
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed, 9 Playwright tests
+
+### Staging Smoke
+
+- not run; requires staging deploy and `0003_line_fulfillment.sql` migration first
+
+### Production Smoke
+
+- not run; requires explicit production deployment/migration approval after staging smoke passes
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether current LINE LIFF setup should support server-side ID token verification in the next hardening pass
+- whether staging webhook verification passes after deploy
+- whether production promotion should wait for another review after staging smoke

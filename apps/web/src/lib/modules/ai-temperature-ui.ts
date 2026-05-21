@@ -11,14 +11,16 @@ export const ANALYZE_REQUEST_TIMEOUT_MS = 65_000;
 export const ANALYZE_POLL_INTERVAL_MS = 2_000;
 export const ANALYZE_POLL_TIMEOUT_MS = 10 * 60_000;
 export const LINE_ADD_URL_CONFIG_KEY = "NEXT_PUBLIC_LINE_ADD_URL";
-export const LINE_PRIMARY_PANEL_TITLE = "加入 LINE，收到完整分析開放通知";
+export const LINE_PRIMARY_PANEL_TITLE = "用 LINE 領取完整分析";
 export const LINE_PRIMARY_BODY =
-  "目前內測中，這次不會真的收費。加入後，我們會優先通知你完整分析與新測驗開放。";
-export const LINE_PRIMARY_CTA = "加入 LINE，收到開放通知";
+  "目前內測中，這次不會真的收費。加入 LINE 後，我們會把完整分析連結送給你。";
+export const LINE_PRIMARY_CTA = "用 LINE 領取完整分析";
 export const EMAIL_FALLBACK_LABEL = "改用 Email 接收通知";
 export const EMAIL_FALLBACK_BODY =
   "留下 Email，我們會在完整分析或新測驗開放時通知你。不寄日常電子報，也不分享給第三方。";
 export const MISSING_LINE_URL_MESSAGE = "LINE 連結暫時還沒準備好，請先改用 Email 接收通知。";
+export const LINE_FULFILLMENT_FALLBACK_INTRO =
+  "如果沒有自動帶入，請把這組短碼貼給暗語 ANYU：";
 
 export type ScoreBucket = "cold" | "cool" | "warm" | "hot" | "unknown";
 export type AnalyzeWaitStage =

@@ -133,10 +133,33 @@ export const unlockIntents = pgTable(
     moduleId: text("module_id").notNull(),
     themeSlug: text("theme_slug").notNull(),
     anonymousSessionId: text("anonymous_session_id"),
+    fulfillmentCodeHash: text("fulfillment_code_hash"),
+    fulfillmentToken: text("fulfillment_token"),
+    fulfillmentTokenHash: text("fulfillment_token_hash"),
+    fulfillmentStatus: text("fulfillment_status").default("pending").notNull(),
+    fulfillmentChannel: text("fulfillment_channel"),
+    lineUserId: text("line_user_id"),
+    lineBoundAt: timestamp("line_bound_at", { withTimezone: true }),
+    fulfilledAt: timestamp("fulfilled_at", { withTimezone: true }),
+    fulfillmentExpiresAt: timestamp("fulfillment_expires_at", { withTimezone: true }),
+    unlockTokenExpiresAt: timestamp("unlock_token_expires_at", { withTimezone: true }),
+    deliveryAttemptCount: integer("delivery_attempt_count").default(0).notNull(),
+    lastDeliveryError: text("last_delivery_error"),
+    lastDeliveryAt: timestamp("last_delivery_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     resultIdIdx: index("unlock_intents_result_id_idx").on(table.resultId),
+    fulfillmentCodeHashIdx: index("unlock_intents_fulfillment_code_hash_idx").on(
+      table.fulfillmentCodeHash,
+    ),
+    fulfillmentTokenHashIdx: index("unlock_intents_fulfillment_token_hash_idx").on(
+      table.fulfillmentTokenHash,
+    ),
+    fulfillmentStatusIdx: index("unlock_intents_fulfillment_status_idx").on(
+      table.fulfillmentStatus,
+      table.fulfillmentExpiresAt,
+    ),
   }),
 );
 

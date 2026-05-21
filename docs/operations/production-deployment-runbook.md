@@ -88,7 +88,12 @@ RETENTION_CLEANUP_SECRET=<strong random secret> or CRON_SECRET=<strong random se
 ANTHROPIC_FAST_MODEL=claude-haiku-4-5-20251001 optional / not default
 ANTHROPIC_FALLBACK_MODEL=claude-sonnet-4-20250514 optional
 NEXT_PUBLIC_APP_URL=https://anyu.tw
-NEXT_PUBLIC_LINE_ADD_URL=https://lin.ee/S6dnbJO
+NEXT_PUBLIC_LINE_ADD_URL=<production LINE OA add-friend URL>
+NEXT_PUBLIC_LINE_LIFF_ID=<production LIFF ID>
+NEXT_PUBLIC_LINE_LIFF_URL=<production LIFF URL>
+LINE_CHANNEL_SECRET=<production LINE channel secret>
+LINE_CHANNEL_ACCESS_TOKEN=<production LINE channel access token>
+FULFILLMENT_TOKEN_SECRET=<strong random secret>
 ANALYSIS_SESSION_DAILY_LIMIT=3
 ANALYSIS_IP_HOURLY_LIMIT=10
 ANALYSIS_GLOBAL_DAILY_LIMIT=200
@@ -118,6 +123,7 @@ Production migration checklist:
 - review generated migration files before production use
 - current launch baseline includes the idempotent analyze cache migration `apps/web/drizzle/0001_wooden_king_cobra.sql`
 - request-state / polling UX requires `apps/web/drizzle/0002_analyze_request_state.sql`
+- LINE fulfillment requires `apps/web/drizzle/0003_line_fulfillment.sql`
 - run migration against production only after explicit approval
 - record migration command and result in the launch record or launch report
 - verify required tables exist after migration
@@ -198,16 +204,18 @@ Gate before smoke:
 - production branch schema must already contain required runtime tables
 - production branch schema must include request-state columns on `analysis_requests`
 - production env should include non-empty `ANALYSIS_CACHE_HASH_SECRET` so identical-input cache reuse stays active after deploy
+- production env should include LINE fulfillment env only after production LINE OA / LIFF setup is confirmed
 
 1. open `/m/ambiguous-temperature`
 2. confirm landing loads and CTA behavior is correct
 3. submit one synthetic analyze input
 4. confirm real result route loads
-5. confirm paid unlock opens the LINE-first panel
-6. confirm LINE CTA exists
-7. confirm Email fallback still works
-8. confirm legal footer links load
-9. confirm `/m/ambiguous-temperature/result/demo` still works if retained intentionally
+5. confirm paid unlock opens the LINE fulfillment panel
+6. confirm LINE CTA exists and points at the production LIFF URL through env-built config
+7. confirm short-code fallback appears
+8. confirm Email fallback still works
+9. confirm legal footer links load
+10. confirm `/m/ambiguous-temperature/result/demo` still works if retained intentionally
 
 Use synthetic content only for QA.
 
@@ -219,6 +227,9 @@ Minimal happy-path production smoke evidence should include:
 - analyze request status row reaches `completed`, or the status endpoint returns completed for the synthetic request
 - real result route `200`
 - unlock intent success
+- fulfillment code/token generated
+- unlocked route loads for the synthetic result
+- LINE webhook rejects an invalid signature
 - synthetic Email fallback success if tested
 - privacy-safe event verification with no raw input or contact leakage
 
@@ -236,22 +247,31 @@ Before production:
   - LINE automation if not true
   - automatic deletion guarantees that are not yet implemented
 
-## 14. LINE Funnel Checklist
+## 14. LINE Funnel / Fulfillment Checklist
 
 Before production:
 
 - `NEXT_PUBLIC_LINE_ADD_URL` is configured in production env
-- same-tab handoff to LINE has been browser-verified
-- LINE-first contact UI is live
+- `NEXT_PUBLIC_LINE_LIFF_ID` is configured in production env
+- `NEXT_PUBLIC_LINE_LIFF_URL` is configured in production env
+- `LINE_CHANNEL_SECRET` is configured as a server-only production env var
+- `LINE_CHANNEL_ACCESS_TOKEN` is configured as a server-only production env var
+- production LINE webhook URL is `https://anyu.tw/api/line/webhook`
+- production LIFF endpoint URL is `https://anyu.tw/m/ambiguous-temperature/line/fulfill`
+- LIFF primary path has been verified with an operator-owned LINE account
+- short-code fallback path has been verified with an operator-owned LINE account
+- LINE fulfillment panel is live
 - Email fallback is live
 - welcome-message and OA profile basics are set in LINE backend
-- product copy still says notification / opening when immediate delivery is not yet true
+- product copy promises complete-analysis link only after fulfillment is verified
+- no raw input, LINE message text, email, or token values appear in events/logs
 
 Reference record:
 
 - `ai-collaboration/research/2026-05-20-anyu-line-oa-setup-record-v0.md`
+- `ai-collaboration/research/line/line-oa-production-setup.md`
+- `ai-collaboration/research/line/line-fulfillment-env-matrix.md`
 - profile image asset: `docs/design-system/brand/exports/line-profile-1024.png`
-- current public `NEXT_PUBLIC_LINE_ADD_URL`: `https://lin.ee/S6dnbJO`
 
 ## 15. Abuse Guard / Cost Cap Checklist
 
