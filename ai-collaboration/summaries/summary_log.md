@@ -3544,3 +3544,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether a future pass should add explicit concurrency control for simultaneous identical analyze requests
 - when the new migration should be applied in the live production DB relative to other launch operations
+
+## 2026-05-21 - Result Cache Migration + Live Verification v0
+
+### Completed Changes
+
+- added `ANALYSIS_CACHE_HASH_SECRET` to the staging preview branch env and production env
+- applied the cache metadata migration live on Neon `preview` and `production`
+- verified staging miss → hit behavior after a deployment refresh
+- verified production miss → hit behavior after a fresh production code deploy of the cache-enabled app
+- documented the deployment-refresh requirement for `ANALYSIS_CACHE_HASH_SECRET` in app/ops docs
+
+### Learnings
+
+- Vercel env-secret presence alone was not enough; the cache only became live after a fresh deployment
+- production verification required the actual cache-enabled app code to be deployed, not just a redeploy of the older production snapshot
+- the current v0 implementation behaves correctly once env, schema, and deployed code are aligned
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- no blocking uncertainty remains for live cache activation
+- simultaneous identical misses still are not concurrency-locked by design

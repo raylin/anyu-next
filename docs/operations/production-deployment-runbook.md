@@ -180,6 +180,7 @@ Open question:
 Important operational rule:
 
 - any change to `NEXT_PUBLIC_*` env variables requires rebuild and redeploy
+- server-side env changes that affect runtime behavior, including `ANALYSIS_CACHE_HASH_SECRET`, also require a fresh deployment before the new value is active
 - after redeploy, verify the alias or domain points to the new deployment
 - do not assume Vercel env changes affect already-built frontend bundles
 

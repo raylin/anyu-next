@@ -75,6 +75,7 @@ Launch-readiness behavior:
 - wait-state instrumentation must not include raw input or contact values in events
 - identical redacted input only reuses a prior result when module slug, situation, prompt version, schema version, model strategy, provider, and primary model still match
 - production should set `ANALYSIS_CACHE_HASH_SECRET`; local/test may fall back to a non-production dev secret
+- after adding or changing `ANALYSIS_CACHE_HASH_SECRET` in Vercel, redeploy the target environment before expecting live cache hits
 - analyze input is guarded by a 30-char minimum, 4,000-char hard max, lightweight relationship-content checks, prompt-injection checks, and pragmatic session/IP/global caps
 - Module 01 now supports a LINE-first contact-notification UI when `NEXT_PUBLIC_LINE_ADD_URL` is configured; Email remains a secondary fallback
 
