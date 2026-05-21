@@ -18,9 +18,9 @@ Purpose: source-of-truth template for LINE fulfillment environment configuration
 |---|---|---|---|---|---|---|
 | Preview / Staging | `LINE_CHANNEL_SECRET` | LINE Developers console, test OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
 | Preview / Staging | `LINE_CHANNEL_ACCESS_TOKEN` | LINE Developers console, test OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
-| Preview / Staging | `NEXT_PUBLIC_LINE_LIFF_ID` | Staging LIFF app | Yes | No | configured | Public client config for staging LIFF. |
-| Preview / Staging | `NEXT_PUBLIC_LINE_LIFF_URL` | Staging LIFF app | Yes | No | configured | Should target staging LIFF URL. |
-| Preview / Staging | `NEXT_PUBLIC_LINE_ADD_URL` | Test OA add-friend URL | Yes | No | configured | Should target test OA, not production OA. |
+| Preview / Staging | `NEXT_PUBLIC_LINE_LIFF_ID` | Staging LIFF app | Yes | No | unknown | Setup record has staging LIFF details; live smoke returned no LIFF URL. |
+| Preview / Staging | `NEXT_PUBLIC_LINE_LIFF_URL` | Staging LIFF app | Yes | No | unknown | Live smoke returned `liffUrl: null`; recheck Vercel Preview env and redeploy. |
+| Preview / Staging | `NEXT_PUBLIC_LINE_ADD_URL` | Test OA add-friend URL | Yes | No | mismatch | Live smoke returned old production OA URL; should target test OA before real test-OA smoke. |
 | Production | `LINE_CHANNEL_SECRET` | LINE Developers console, production OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
 | Production | `LINE_CHANNEL_ACCESS_TOKEN` | LINE Developers console, production OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
 | Production | `NEXT_PUBLIC_LINE_LIFF_ID` | Production LIFF app | Yes | No | configured | Public client config for production LIFF. |
@@ -45,10 +45,11 @@ Vercel Production env must point to the production OA and production LIFF.
 
 ## Review Checklist
 
-- [x] Preview / Staging env status is recorded as configured from operator-provided setup context.
+- [ ] Preview / Staging env status is live-verified against test OA assets.
 - [x] Production env status is recorded as configured from operator-provided setup context.
 - [ ] Preview / Staging env points only to test OA assets.
 - [ ] Production env points only to production OA assets.
 - [ ] Server-only secrets are not exposed through `NEXT_PUBLIC_` variables.
 - [ ] No secret values are committed to repo documentation.
 - [ ] Implementation code does not hard-code environment-specific LINE URLs.
+- [ ] Live staging `/api/unlock-intent` response returns staging LIFF URL and test OA add-friend URL.

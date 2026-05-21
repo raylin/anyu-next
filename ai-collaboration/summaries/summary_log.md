@@ -4205,3 +4205,55 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether current LINE LIFF setup should support server-side ID token verification in the next hardening pass
 - whether staging webhook verification passes after deploy
 - whether production promotion should wait for another review after staging smoke
+
+## 2026-05-21 - LINE Fulfillment Staging Deploy + Smoke v0
+
+### Completed Changes
+
+- saved the LINE Fulfillment Staging Deploy + Smoke v0 handoff into `ai-collaboration/handoffs/`
+- applied `apps/web/drizzle/0003_line_fulfillment.sql` to the staging/preview Neon branch `br-fragrant-union-aoh4udf1`
+- verified new `unlock_intents` fulfillment columns and indexes on staging
+- verified staging serves new LINE fulfillment routes
+- ran synthetic staging analyze, unlock intent, unlocked route, LIFF bind API, webhook invalid-signature, and event/privacy checks
+- updated staging LINE setup docs and env matrix to reflect live public-env mismatch
+- created review bundle at `ai-collaboration/research/2026-05-21-line-fulfillment-staging-deploy-smoke-v0-review-bundle.md`
+- created execution report at `ai-collaboration/reports/2026-05-21-line-fulfillment-staging-deploy-smoke-v0-execution-report.md`
+
+### Learnings
+
+- staging migration succeeded and the core fulfillment backend paths work on the preview DB
+- staging currently returns `liffUrl: null` from unlock intent and emits the old production OA add-friend URL, so Preview public LINE env is mismatched or stale
+- route freshness proves the implementation is live, but Vercel CLI is unavailable in this shell for exact deployment commit/env inspection
+- real test OA short-code smoke should wait until public staging LINE env is corrected and redeployed
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 23 files / 85 tests
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed, 9 Playwright tests
+
+### Staging Smoke
+
+- partial pass
+- migration passed
+- analyze/unlock/unlocked route/LIFF bind/webhook invalid-signature/event privacy checks passed
+- blocked for real test OA smoke by public LINE env mismatch
+
+### Production Smoke
+
+- not run; production deploy and migration were explicitly out of scope
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether Vercel Preview env values are incorrect or only missing from the current deployment build
+- whether LINE console webhook verification passes after env correction
+- whether real test OA short-code reply succeeds after public env correction and redeploy
