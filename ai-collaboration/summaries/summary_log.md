@@ -4012,3 +4012,38 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - which deployment or commit currently backs `https://anyu.tw`
 - whether production should be refreshed from `origin/staging` or another approved production commit path before rerunning production request-state smoke
+
+## 2026-05-21 - Production App Refresh + Request-State Smoke v0
+
+### Completed Changes
+
+- saved the Production App Refresh + Request-State Smoke v0 handoff into `ai-collaboration/handoffs/`
+- deployed current repo HEAD `9433a01` to Vercel production for project `anyu-next`
+- confirmed `https://anyu.tw` now serves the request-state poll route instead of generic app 404
+- ran one synthetic production analyze and verified completed request state
+- verified poll endpoint completed response, same-input cache hit, result page, unlock intent, LINE panel, Email fallback, and event metadata privacy
+
+### Learnings
+
+- production app freshness is now aligned with request-state DB migration
+- the poll route freshness check is a useful pre-analyze guard for future production smoke tasks
+- an app-exposed version/commit marker would make future deployment freshness checks less indirect
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 22 files / 79 tests
+- `corepack pnpm build` passed
+- local Playwright not rerun because no app code changed; production browser-level smoke covered the affected funnel path
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether an app version/commit health marker should be added in a future ops-hardening task
