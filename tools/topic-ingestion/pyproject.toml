@@ -1,0 +1,13 @@
+[project]
+name = "topic-ingestion"
+version = "0.1.0"
+description = "Source-agnostic JSONL to topic/question seed tooling for ANYU."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+topic-ingestion = "topic_ingestion.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

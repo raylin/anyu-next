@@ -3706,3 +3706,36 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether future topic-ingestion should stay heuristic-first or include optional provider-assisted enrichment
 - whether `oradar/product_runtime.py` should eventually be archived once historical Python product-eval usage is no longer needed
+
+## 2026-05-21 - Extract Topic Ingestion Tools v0
+
+### Completed Changes
+
+- created `tools/topic-ingestion/` as a standalone local Python tool for JSONL normalization, topic extraction, and question-seed generation
+- added `extract`, `questions`, and `pipeline` CLI commands plus synthetic examples and README usage docs
+- added focused tests covering tolerant loaders, heuristic topic grouping, deterministic question generation, and end-to-end CLI output contracts
+
+### Learnings
+
+- the extracted tool works best as a source-agnostic downstream transformer, not as a crawler or acquisition layer
+- internal Python dataclasses can stay snake_case while the public JSONL contract still exports the required camelCase fields
+- a small dedicated `tools/` boundary is clearer than widening `oradar/` for this use case
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-write time
+- staging push: pending at summary-write time
+
+### Unresolved Questions
+
+- whether a later pass should add module-idea seed generation once upstream sourcing stabilizes
+- whether older topic-related scripts should eventually be archived after this extracted path becomes the preferred local workflow
