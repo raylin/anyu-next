@@ -50,6 +50,7 @@ Purpose: production LINE OA and LIFF setup record for LINE fulfillment automatio
 |---|---|---|
 | `LINE_CHANNEL_SECRET` | configured | Server-only secret. Do not record value here. |
 | `LINE_CHANNEL_ACCESS_TOKEN` | configured | Server-only secret. Do not record value here. |
+| `LINE_LOGIN_CHANNEL_ID` | optional | Server-side ID token verification derives the channel ID from LIFF ID if this is not set. |
 | `NEXT_PUBLIC_LINE_LIFF_ID` | configured | Public env. Should point to production LIFF app. |
 | `NEXT_PUBLIC_LINE_LIFF_URL` | configured | Public env. Should point to production LIFF URL. |
 | `NEXT_PUBLIC_LINE_ADD_URL` | configured | Public env. Should point to production OA add-friend URL. |
@@ -57,7 +58,9 @@ Purpose: production LINE OA and LIFF setup record for LINE fulfillment automatio
 ## Implementation Notes
 
 - LIFF primary path should use `NEXT_PUBLIC_LINE_LIFF_URL` and never hard-code this LIFF ID in app code.
+- LIFF bind must verify a LINE ID token server-side and bind only the verified LINE subject.
 - LINE webhook must verify signatures with `LINE_CHANNEL_SECRET`.
+- LINE webhook requires database-backed dedupe and invalid-code rate guard tables from `0004_line_webhook_hardening.sql`.
 - Short-code fallback should reply with an unlocked result link only after code match.
 - Keep this record free of channel secret and access token values.
 
@@ -65,6 +68,7 @@ Purpose: production LINE OA and LIFF setup record for LINE fulfillment automatio
 
 - [ ] Production webhook URL configured in LINE console.
 - [ ] Webhook verification passes.
+- [ ] Production database has `0004_line_webhook_hardening.sql` applied after explicit approval.
 - [ ] LIFF endpoint opens on mobile.
 - [ ] LIFF endpoint opens from LINE in-app browser.
 - [ ] Production OA add-friend URL is confirmed before launch.

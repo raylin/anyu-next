@@ -18,11 +18,13 @@ Purpose: source-of-truth template for LINE fulfillment environment configuration
 |---|---|---|---|---|---|---|
 | Preview / Staging | `LINE_CHANNEL_SECRET` | LINE Developers console, test OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
 | Preview / Staging | `LINE_CHANNEL_ACCESS_TOKEN` | LINE Developers console, test OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
+| Preview / Staging | `LINE_LOGIN_CHANNEL_ID` | LINE Login / LIFF channel | No | No | optional | Used for server-side ID token verification when not derivable from `NEXT_PUBLIC_LINE_LIFF_ID`. |
 | Preview / Staging | `NEXT_PUBLIC_LINE_LIFF_ID` | Staging LIFF app | Yes | No | configured | Live unlock response returned staging LIFF ID after 2026-05-21 env sync. |
 | Preview / Staging | `NEXT_PUBLIC_LINE_LIFF_URL` | Staging LIFF app | Yes | No | configured | Live unlock response returned staging LIFF URL after 2026-05-21 env sync. |
 | Preview / Staging | `NEXT_PUBLIC_LINE_ADD_URL` | Test OA add-friend URL | Yes | No | configured | Live unlock response returned test OA add-friend URL after 2026-05-21 env sync. |
 | Production | `LINE_CHANNEL_SECRET` | LINE Developers console, production OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
 | Production | `LINE_CHANNEL_ACCESS_TOKEN` | LINE Developers console, production OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
+| Production | `LINE_LOGIN_CHANNEL_ID` | LINE Login / LIFF channel | No | No | optional | Used for server-side ID token verification when not derivable from `NEXT_PUBLIC_LINE_LIFF_ID`. |
 | Production | `NEXT_PUBLIC_LINE_LIFF_ID` | Production LIFF app | Yes | No | configured | Public client config for production LIFF. |
 | Production | `NEXT_PUBLIC_LINE_LIFF_URL` | Production LIFF app | Yes | No | configured | Should target production LIFF URL. |
 | Production | `NEXT_PUBLIC_LINE_ADD_URL` | Production OA add-friend URL | Yes | No | configured | Should target real production OA. |
@@ -33,6 +35,7 @@ Implementation must read config only from env:
 
 - `LINE_CHANNEL_SECRET`
 - `LINE_CHANNEL_ACCESS_TOKEN`
+- `LINE_LOGIN_CHANNEL_ID` optional
 - `NEXT_PUBLIC_LINE_LIFF_ID`
 - `NEXT_PUBLIC_LINE_LIFF_URL`
 - `NEXT_PUBLIC_LINE_ADD_URL`
@@ -42,6 +45,8 @@ Do not hard-code staging or production URLs in implementation code except route 
 Vercel Preview env must point to the test OA and staging LIFF.
 
 Vercel Production env must point to the production OA and production LIFF.
+
+LIFF bind implementation must verify LINE ID tokens server-side and bind only the verified LINE subject. Webhook implementation must use database-backed event dedupe and invalid-code rate guard tables from `apps/web/drizzle/0004_line_webhook_hardening.sql`.
 
 ## Review Checklist
 

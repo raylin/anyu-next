@@ -75,6 +75,7 @@ Copy `apps/web/.env.example` and provide the values you need locally:
 - `NEXT_PUBLIC_LINE_LIFF_URL=`
 - `LINE_CHANNEL_SECRET=`
 - `LINE_CHANNEL_ACCESS_TOKEN=`
+- `LINE_LOGIN_CHANNEL_ID=` optional; defaults to the numeric prefix of `NEXT_PUBLIC_LINE_LIFF_ID`
 - `FULFILLMENT_TOKEN_SECRET=`
 
 Provider priority in v0 is Anthropic first. OpenAI is available as a lightweight fallback path.
@@ -103,14 +104,22 @@ LINE fulfillment config must come from env only:
 - `NEXT_PUBLIC_LINE_LIFF_URL`
 - `NEXT_PUBLIC_LINE_ADD_URL`
 - optional `FULFILLMENT_TOKEN_SECRET`
+- optional `LINE_LOGIN_CHANNEL_ID`
 
 Routes:
 
 - `POST /api/unlock-intent` creates the fulfillment code/token for a result.
 - `GET /m/ambiguous-temperature/line/fulfill` is the LIFF bridge page.
-- `POST /api/line/fulfillment/bind-liff` binds a LIFF user to an unlock intent.
-- `POST /api/line/webhook` verifies LINE signatures and handles short-code messages.
+- `POST /api/line/fulfillment/bind-liff` verifies the LINE ID token server-side, then binds the verified LINE subject to an unlock intent.
+- `POST /api/line/webhook` verifies LINE signatures, deduplicates webhook events, rate-guards invalid short-code attempts, and handles short-code messages.
 - `GET /m/ambiguous-temperature/unlock/[unlockToken]` renders persisted paid-result content.
+
+LINE fulfillment hardening:
+
+- The LIFF bridge must send a LINE ID token from `liff.getIDToken()`, not a client-provided user ID.
+- The server verifies ID tokens with LINE's verify endpoint using `LINE_LOGIN_CHANNEL_ID` or the LIFF ID prefix.
+- Webhook idempotency and invalid-code rate guard require `apps/web/drizzle/0004_line_webhook_hardening.sql`.
+- Event metadata must not include LINE user IDs, fulfillment codes, unlock tokens, tokenized URLs, raw message text, raw input, contact values, provider output, or secrets.
 
 Operational source-of-truth docs:
 

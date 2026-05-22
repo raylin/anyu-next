@@ -11,6 +11,12 @@ describe("event metadata guard", () => {
     );
     expect(hasForbiddenEventMetadata({ email: "person@example.com" })).toBe(true);
     expect(hasForbiddenEventMetadata({ line_message_text: "A7K2Q9" })).toBe(true);
+    expect(hasForbiddenEventMetadata({ line_user_id: "line-user" })).toBe(true);
+    expect(hasForbiddenEventMetadata({ fulfillment_code: "A7K2Q9" })).toBe(true);
+    expect(hasForbiddenEventMetadata({ unlock_token: "unlock-token" })).toBe(true);
+    expect(hasForbiddenEventMetadata({ url: "https://example.test/unlock/token" })).toBe(true);
+    expect(hasForbiddenEventMetadata({ DATABASE_URL: "postgres://example" })).toBe(true);
+    expect(hasForbiddenEventMetadata({ LINE_CHANNEL_SECRET: "secret" })).toBe(true);
     expect(hasForbiddenEventMetadata({ token: "secret-token" })).toBe(true);
   });
 

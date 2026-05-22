@@ -3,12 +3,13 @@ import { isDbConfigured } from "@/lib/db/client";
 import { bindUnlockIntentToLine, getUnlockIntentByTokenHash, insertEvent } from "@/lib/db/runtime";
 import { getAppBaseUrl } from "@/lib/line/config";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
+import { verifyLineIdToken } from "@/lib/line/liff";
 import { getModuleBySlug } from "@/lib/modules/registry";
 
 type BindLiffPayload = {
   unlockIntentId?: string;
   unlockToken?: string;
-  liffUserId?: string;
+  idToken?: string;
 };
 
 export async function POST(request: Request) {
@@ -31,12 +32,21 @@ export async function POST(request: Request) {
   }
 
   const unlockToken = body.unlockToken?.trim();
-  const lineUserId = body.liffUserId?.trim();
+  const idToken = body.idToken?.trim();
 
-  if (!body.unlockIntentId || !unlockToken || !lineUserId) {
+  if (!body.unlockIntentId || !unlockToken || !idToken) {
     return NextResponse.json(
       { ok: false, error: "invalid_input", message: "缺少 LINE 領取資料。" },
       { status: 400 },
+    );
+  }
+
+  const lineIdentity = await verifyLineIdToken({ idToken });
+
+  if (!lineIdentity.ok) {
+    return NextResponse.json(
+      { ok: false, error: "invalid_line_identity", message: "LINE 身分驗證失敗，請改用短碼。" },
+      { status: 401 },
     );
   }
 
@@ -61,7 +71,7 @@ export async function POST(request: Request) {
 
   await bindUnlockIntentToLine({
     unlockIntentId: record.unlockIntent.id,
-    lineUserId,
+    lineUserId: lineIdentity.lineUserId,
     channel: "liff",
     delivered: true,
   });

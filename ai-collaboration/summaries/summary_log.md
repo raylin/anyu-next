@@ -4392,3 +4392,56 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 ### Unresolved Questions
 
 - none for the staging/test OA manual smoke record
+
+## 2026-05-21 - LIFF ID Token Verification + Webhook Hardening v0
+
+### Completed Changes
+
+- saved the LIFF ID Token Verification + Webhook Hardening v0 handoff into `ai-collaboration/handoffs/`
+- changed LIFF bind to send and verify LINE ID tokens server-side instead of trusting client-provided user IDs
+- added database-backed LINE webhook event dedupe
+- added database-backed invalid short-code attempt rate guard
+- strengthened event metadata guard for LINE identity, code, token, URL, raw text, provider output, and secret-like keys
+- added `apps/web/drizzle/0004_line_webhook_hardening.sql`
+- applied and verified the hardening tables on the staging Neon branch only
+- updated LINE fulfillment docs and production runbook with the new migration/env requirements
+- created review bundle at `ai-collaboration/research/2026-05-21-liff-id-token-webhook-hardening-v0-review-bundle.md`
+- created execution report at `ai-collaboration/reports/2026-05-21-liff-id-token-webhook-hardening-v0-execution-report.md`
+
+### Learnings
+
+- LINE ID token verification can use optional `LINE_LOGIN_CHANNEL_ID` or derive the channel ID from the LIFF ID prefix
+- webhook dedupe can use LINE `webhookEventId` when present and a hashed fallback key otherwise
+- invalid-code rate guard can stay privacy-safe by storing hashed LINE user ID only
+
+### Migration Status
+
+- staging migration applied: yes
+- production migration applied: no
+- production migration required before production LINE fulfillment activation: `apps/web/drizzle/0004_line_webhook_hardening.sql`
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 24 files / 94 tests
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed, 9 Playwright tests
+
+### Staging Verification Status
+
+- staging DB migration verified
+- staging invalid-signature webhook smoke passed
+- new deployed route-level smoke pending staging deployment from this commit
+
+### Commit / Push
+
+- commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- whether staging LIFF runtime returns an ID token with the expected channel audience after deployment
+- whether production should explicitly set `LINE_LOGIN_CHANNEL_ID` or rely on LIFF ID prefix derivation

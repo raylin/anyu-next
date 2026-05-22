@@ -50,6 +50,45 @@ export const events = pgTable(
   }),
 );
 
+export const lineWebhookEvents = pgTable(
+  "line_webhook_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    dedupeKey: text("dedupe_key").notNull(),
+    eventType: text("event_type").notNull(),
+    status: text("status").default("processing").notNull(),
+    errorCode: text("error_code"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+  },
+  (table) => ({
+    dedupeKeyIdx: uniqueIndex("line_webhook_events_dedupe_key_idx").on(table.dedupeKey),
+    statusIdx: index("line_webhook_events_status_idx").on(table.status, table.createdAt),
+  }),
+);
+
+export const lineWebhookRateLimits = pgTable(
+  "line_webhook_rate_limits",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    lineUserIdHash: text("line_user_id_hash").notNull(),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+    invalidAttemptCount: integer("invalid_attempt_count").default(1).notNull(),
+    lastAttemptAt: timestamp("last_attempt_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    lineUserIdHashIdx: uniqueIndex("line_webhook_rate_limits_user_idx").on(
+      table.lineUserIdHash,
+    ),
+    windowIdx: index("line_webhook_rate_limits_window_idx").on(
+      table.windowStart,
+      table.invalidAttemptCount,
+    ),
+  }),
+);
+
 export const analysisRequests = pgTable(
   "analysis_requests",
   {

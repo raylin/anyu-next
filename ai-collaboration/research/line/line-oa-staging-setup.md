@@ -50,6 +50,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 |---|---|---|
 | `LINE_CHANNEL_SECRET` | configured | Server-only secret. Do not record value here. |
 | `LINE_CHANNEL_ACCESS_TOKEN` | configured | Server-only secret. Do not record value here. |
+| `LINE_LOGIN_CHANNEL_ID` | optional | Server-side ID token verification derives the channel ID from LIFF ID if this is not set. |
 | `NEXT_PUBLIC_LINE_LIFF_ID` | configured | Public env. Live unlock response returned staging LIFF ID `2010157793-Q4JeeYv0` after 2026-05-21 env sync. |
 | `NEXT_PUBLIC_LINE_LIFF_URL` | configured | Public env. Live unlock response returned the staging LIFF URL after 2026-05-21 env sync. |
 | `NEXT_PUBLIC_LINE_ADD_URL` | configured | Public env. Live unlock response returned the test OA add-friend URL after 2026-05-21 env sync. |
@@ -57,7 +58,9 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 ## Implementation Notes
 
 - LIFF primary path should use `NEXT_PUBLIC_LINE_LIFF_URL` and never hard-code this LIFF ID in app code.
+- LIFF bind must verify a LINE ID token server-side and bind only the verified LINE subject.
 - LINE webhook must verify signatures with `LINE_CHANNEL_SECRET`.
+- LINE webhook uses database-backed dedupe and invalid-code rate guard tables from `0004_line_webhook_hardening.sql`.
 - Short-code fallback should reply with an unlocked result link only after code match.
 - Keep this record free of channel secret and access token values.
 - 2026-05-21 staging smoke initially found a live env mismatch; the public Vercel Preview env was synced and redeployed, and `/api/unlock-intent` now returns the staging LIFF URL and test OA add-friend URL.
@@ -84,3 +87,4 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 | 2026-05-21 | Synced Vercel Preview public LINE env and verified live staging unlock response. | Codex |
 | 2026-05-21 | Verified staging LIFF bind, unlocked route, invalid-signature webhook handling, and event privacy. | Codex |
 | 2026-05-21 | Recorded sanitized manual staging/test OA short-code smoke pass; production was not touched. | Codex |
+| 2026-05-21 | Applied staging webhook hardening migration and documented ID-token verification requirement. | Codex |

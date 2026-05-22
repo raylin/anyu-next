@@ -5,17 +5,23 @@ export const LINE_WEBHOOK_SIGNATURE_HEADER = "x-line-signature";
 export type LineWebhookEvent =
   | {
       type: "follow";
+      webhookEventId?: string;
+      timestamp?: number;
       replyToken?: string;
       source?: { userId?: string };
     }
   | {
       type: "message";
+      webhookEventId?: string;
+      timestamp?: number;
       replyToken?: string;
       source?: { userId?: string };
       message?: { type?: string; text?: string };
     }
   | {
       type: string;
+      webhookEventId?: string;
+      timestamp?: number;
       replyToken?: string;
       source?: { userId?: string };
       message?: { type?: string; text?: string };
@@ -86,3 +92,6 @@ export function buildLineSuccessMessage(url: string) {
 
 export const LINE_INVALID_CODE_MESSAGE =
   "我找不到這組短碼。請回到剛剛的結果頁重新產生一次，或改用 Email 接收。";
+
+export const LINE_RATE_LIMITED_MESSAGE =
+  "短時間內嘗試太多次了。請稍等一下，再回到結果頁重新產生短碼。";

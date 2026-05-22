@@ -5,12 +5,21 @@ import {
   getUnlockIntentByCodeHash,
   insertEvent,
   markUnlockIntentDeliveryAttempt,
+  markLineWebhookEventProcessed,
+  recordLineWebhookInvalidAttempt,
+  tryCreateLineWebhookEvent,
 } from "@/lib/db/runtime";
 import { getAppBaseUrl } from "@/lib/line/config";
 import { hashFulfillmentSecret, isExpired, isFulfillmentCodeShape, normalizeFulfillmentCode } from "@/lib/line/fulfillment";
 import {
+  buildLineWebhookDedupeKey,
+  getLineWebhookRateWindowStart,
+  isLineWebhookRateLimited,
+} from "@/lib/line/webhook-hardening";
+import {
   buildLineSuccessMessage,
   LINE_INVALID_CODE_MESSAGE,
+  LINE_RATE_LIMITED_MESSAGE,
   LINE_WEBHOOK_SIGNATURE_HEADER,
   LINE_WELCOME_MESSAGE,
   replyLineText,
@@ -46,18 +55,34 @@ export async function POST(request: Request) {
   }
 
   for (const event of payload.events ?? []) {
+    const dedupeKey = buildLineWebhookDedupeKey(event);
+    const dedupeStatus = await tryCreateLineWebhookEvent({
+      dedupeKey,
+      eventType: event.type,
+    });
+
+    if (dedupeStatus === "duplicate") {
+      continue;
+    }
+
     const replyToken = event.replyToken;
 
     if (event.type === "follow" && replyToken) {
-      await replyLineText({
+      const reply = await replyLineText({
         replyToken,
         text: LINE_WELCOME_MESSAGE,
         channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+      });
+      await markLineWebhookEventProcessed({
+        dedupeKey,
+        status: reply.ok ? "processed" : "failed",
+        errorCode: reply.ok ? null : reply.error,
       });
       continue;
     }
 
     if (event.type !== "message" || event.message?.type !== "text" || !replyToken) {
+      await markLineWebhookEventProcessed({ dedupeKey, status: "ignored" });
       continue;
     }
 
@@ -66,10 +91,16 @@ export async function POST(request: Request) {
     const normalizedCode = normalizeFulfillmentCode(text);
 
     if (!lineUserId || !isFulfillmentCodeShape(normalizedCode)) {
-      await replyLineText({
+      const limited = lineUserId ? await recordInvalidAttempt(lineUserId) : false;
+      const reply = await replyLineText({
         replyToken,
-        text: LINE_INVALID_CODE_MESSAGE,
+        text: limited ? LINE_RATE_LIMITED_MESSAGE : LINE_INVALID_CODE_MESSAGE,
         channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+      });
+      await markLineWebhookEventProcessed({
+        dedupeKey,
+        status: limited ? "rate_limited" : reply.ok ? "processed" : "failed",
+        errorCode: limited ? "rate_limited" : reply.ok ? null : reply.error,
       });
       continue;
     }
@@ -78,10 +109,16 @@ export async function POST(request: Request) {
     const isCodeExpired = !record || isExpired(record.unlockIntent.fulfillmentExpiresAt);
 
     if (isCodeExpired) {
-      await replyLineText({
+      const limited = await recordInvalidAttempt(lineUserId);
+      const reply = await replyLineText({
         replyToken,
-        text: LINE_INVALID_CODE_MESSAGE,
+        text: limited ? LINE_RATE_LIMITED_MESSAGE : LINE_INVALID_CODE_MESSAGE,
         channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+      });
+      await markLineWebhookEventProcessed({
+        dedupeKey,
+        status: limited ? "rate_limited" : reply.ok ? "processed" : "failed",
+        errorCode: limited ? "rate_limited" : reply.ok ? null : reply.error,
       });
       continue;
     }
@@ -99,6 +136,11 @@ export async function POST(request: Request) {
         text: LINE_INVALID_CODE_MESSAGE,
         channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
       });
+      await markLineWebhookEventProcessed({
+        dedupeKey,
+        status: "failed",
+        errorCode: "expired_unlock_token",
+      });
       continue;
     }
 
@@ -115,6 +157,11 @@ export async function POST(request: Request) {
         replyToken,
         text: LINE_INVALID_CODE_MESSAGE,
         channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+      });
+      await markLineWebhookEventProcessed({
+        dedupeKey,
+        status: "failed",
+        errorCode: "missing_unlock_token",
       });
       continue;
     }
@@ -139,6 +186,11 @@ export async function POST(request: Request) {
       status: reply.ok ? "delivered" : "failed",
       error: reply.ok ? null : reply.error,
     });
+    await markLineWebhookEventProcessed({
+      dedupeKey,
+      status: reply.ok ? "processed" : "failed",
+      errorCode: reply.ok ? null : reply.error,
+    });
 
     if (moduleConfig) {
       await insertEvent({
@@ -156,6 +208,8 @@ export async function POST(request: Request) {
           unlockIntentId: record.unlockIntent.id,
           channel: "line_code",
           status: "matched",
+          dedupeStatus: "created",
+          rateLimited: false,
         },
       });
 
@@ -175,6 +229,8 @@ export async function POST(request: Request) {
           channel: "line_code",
           status: reply.ok ? "delivered" : "failed",
           errorCode: reply.ok ? null : reply.error,
+          dedupeStatus: "created",
+          rateLimited: false,
         },
       });
 
@@ -194,10 +250,23 @@ export async function POST(request: Request) {
           channel: "line_code",
           status: reply.ok ? "delivered" : "failed",
           errorCode: reply.ok ? null : reply.error,
+          dedupeStatus: "created",
+          rateLimited: false,
         },
       });
     }
   }
 
   return NextResponse.json({ ok: true });
+}
+
+async function recordInvalidAttempt(lineUserId: string) {
+  const record = await recordLineWebhookInvalidAttempt({
+    lineUserIdHash: hashFulfillmentSecret(lineUserId),
+    windowStart: getLineWebhookRateWindowStart(),
+  });
+
+  return isLineWebhookRateLimited({
+    invalidAttemptCount: record.invalidAttemptCount,
+  });
 }

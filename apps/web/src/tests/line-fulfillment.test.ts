@@ -10,7 +10,13 @@ import {
   normalizeFulfillmentCode,
 } from "@/lib/line/fulfillment";
 import { buildLineLiffUrl } from "@/lib/line/config";
+import { getLineLoginChannelId, verifyLineIdToken } from "@/lib/line/liff";
 import { verifyLineSignature } from "@/lib/line/webhook";
+import {
+  buildLineWebhookDedupeKey,
+  getLineWebhookRateWindowStart,
+  isLineWebhookRateLimited,
+} from "@/lib/line/webhook-hardening";
 
 describe("LINE fulfillment helpers", () => {
   it("generates short codes with the expected safe shape", () => {
@@ -63,5 +69,86 @@ describe("LINE fulfillment helpers", () => {
     expect(verifyLineSignature({ body, signature: "bad-signature", channelSecret: secret })).toBe(
       false,
     );
+  });
+
+  it("derives LINE Login channel ID from env or LIFF ID", () => {
+    expect(
+      getLineLoginChannelId({
+        explicitChannelId: "2000000000",
+        liffId: "1234567890-abc",
+      }),
+    ).toBe("2000000000");
+    expect(getLineLoginChannelId({ liffId: "1234567890-abc" })).toBe("1234567890");
+  });
+
+  it("verifies LINE ID tokens through the LINE verify endpoint", async () => {
+    const calls: Array<{ url: string; body: string }> = [];
+    const fetchImpl = async (url: string | URL | Request, init?: RequestInit) => {
+      calls.push({
+        url: String(url),
+        body: String(init?.body),
+      });
+
+      return Response.json({ sub: "line-user-1", aud: "1234567890" });
+    };
+
+    const result = await verifyLineIdToken({
+      idToken: "id-token",
+      channelId: "1234567890",
+      fetchImpl: fetchImpl as typeof fetch,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      lineUserId: "line-user-1",
+      audience: "1234567890",
+    });
+    expect(calls[0]?.url).toBe("https://api.line.me/oauth2/v2.1/verify");
+    expect(calls[0]?.body).toContain("id_token=id-token");
+    expect(calls[0]?.body).toContain("client_id=1234567890");
+  });
+
+  it("rejects missing or unverifiable LINE ID tokens", async () => {
+    await expect(verifyLineIdToken({ idToken: "", channelId: "123" })).resolves.toEqual({
+      ok: false,
+      error: "missing_token",
+    });
+    await expect(
+      verifyLineIdToken({
+        idToken: "bad-token",
+        channelId: "123",
+        fetchImpl: (async () => new Response("bad", { status: 401 })) as typeof fetch,
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      error: "line_verify_failed",
+    });
+  });
+
+  it("builds safe webhook dedupe keys without raw reply tokens", () => {
+    expect(
+      buildLineWebhookDedupeKey({
+        type: "message",
+        webhookEventId: "01HARDENED",
+        replyToken: "reply-token",
+      }),
+    ).toBe("event:01HARDENED");
+
+    const derived = buildLineWebhookDedupeKey({
+      type: "message",
+      timestamp: 123,
+      replyToken: "reply-token",
+    });
+
+    expect(derived).toMatch(/^derived:[a-f0-9]{64}$/);
+    expect(derived).not.toContain("reply-token");
+  });
+
+  it("tracks webhook rate windows and limits invalid attempts", () => {
+    expect(getLineWebhookRateWindowStart(new Date("2026-05-21T10:12:34Z")).toISOString()).toBe(
+      "2026-05-21T10:10:00.000Z",
+    );
+    expect(isLineWebhookRateLimited({ invalidAttemptCount: 5 })).toBe(false);
+    expect(isLineWebhookRateLimited({ invalidAttemptCount: 6 })).toBe(true);
   });
 });

@@ -15,6 +15,7 @@ declare global {
       isLoggedIn: () => boolean;
       login: (input?: { redirectUri?: string }) => void;
       getProfile: () => Promise<{ userId: string }>;
+      getIDToken: () => string | null;
     };
   }
 }
@@ -62,14 +63,14 @@ export default function LineFulfillPage() {
           return;
         }
 
-        const profile = await window.liff.getProfile();
+        const idToken = window.liff.getIDToken();
         const response = await fetch("/api/line/fulfillment/bind-liff", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             unlockIntentId: params.unlockIntentId,
             unlockToken: params.unlockToken,
-            liffUserId: profile.userId,
+            idToken,
           }),
         });
         const payload = (await response.json()) as {

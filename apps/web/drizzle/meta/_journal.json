@@ -29,6 +29,13 @@
       "when": 1779350400000,
       "tag": "0003_line_fulfillment",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779354000000,
+      "tag": "0004_line_webhook_hardening",
+      "breakpoints": true
     }
   ]
 }

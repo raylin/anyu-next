@@ -93,6 +93,7 @@ NEXT_PUBLIC_LINE_LIFF_ID=<production LIFF ID>
 NEXT_PUBLIC_LINE_LIFF_URL=<production LIFF URL>
 LINE_CHANNEL_SECRET=<production LINE channel secret>
 LINE_CHANNEL_ACCESS_TOKEN=<production LINE channel access token>
+LINE_LOGIN_CHANNEL_ID=<production LINE Login channel ID, optional if LIFF ID prefix matches>
 FULFILLMENT_TOKEN_SECRET=<strong random secret>
 ANALYSIS_SESSION_DAILY_LIMIT=3
 ANALYSIS_IP_HOURLY_LIMIT=10
@@ -124,6 +125,7 @@ Production migration checklist:
 - current launch baseline includes the idempotent analyze cache migration `apps/web/drizzle/0001_wooden_king_cobra.sql`
 - request-state / polling UX requires `apps/web/drizzle/0002_analyze_request_state.sql`
 - LINE fulfillment requires `apps/web/drizzle/0003_line_fulfillment.sql`
+- LINE webhook idempotency/rate guard requires `apps/web/drizzle/0004_line_webhook_hardening.sql`
 - run migration against production only after explicit approval
 - record migration command and result in the launch record or launch report
 - verify required tables exist after migration
@@ -256,8 +258,10 @@ Before production:
 - `NEXT_PUBLIC_LINE_LIFF_URL` is configured in production env
 - `LINE_CHANNEL_SECRET` is configured as a server-only production env var
 - `LINE_CHANNEL_ACCESS_TOKEN` is configured as a server-only production env var
+- `LINE_LOGIN_CHANNEL_ID` is configured if the production LINE Login channel ID cannot be derived from the LIFF ID prefix
 - production LINE webhook URL is `https://anyu.tw/api/line/webhook`
 - production LIFF endpoint URL is `https://anyu.tw/m/ambiguous-temperature/line/fulfill`
+- production DB has `0004_line_webhook_hardening.sql` applied after explicit approval
 - LIFF primary path has been verified with an operator-owned LINE account
 - short-code fallback path has been verified with an operator-owned LINE account
 - LINE fulfillment panel is live

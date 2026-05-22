@@ -5,6 +5,8 @@ import {
   analysisResults,
   contactSubmissions,
   events,
+  lineWebhookEvents,
+  lineWebhookRateLimits,
   sessions,
   unlockIntents,
 } from "@/lib/db/schema";
@@ -53,6 +55,77 @@ export async function insertEvent(payload: EventPayload) {
       scoreBucket: payload.scoreBucket ?? null,
       anonymousSessionId: payload.anonymousSessionId ?? null,
       metadataJson: payload.metadata ?? null,
+    })
+    .returning();
+
+  return record;
+}
+
+export async function tryCreateLineWebhookEvent(input: {
+  dedupeKey: string;
+  eventType: string;
+}) {
+  const db = requireDb();
+
+  const [record] = await db
+    .insert(lineWebhookEvents)
+    .values({
+      dedupeKey: input.dedupeKey,
+      eventType: input.eventType,
+      status: "processing",
+    })
+    .onConflictDoNothing({
+      target: lineWebhookEvents.dedupeKey,
+    })
+    .returning();
+
+  return record ? "created" : "duplicate";
+}
+
+export async function markLineWebhookEventProcessed(input: {
+  dedupeKey: string;
+  status: "processed" | "ignored" | "failed" | "rate_limited";
+  errorCode?: string | null;
+}) {
+  const db = requireDb();
+
+  const [record] = await db
+    .update(lineWebhookEvents)
+    .set({
+      status: input.status,
+      errorCode: input.errorCode ?? null,
+      processedAt: new Date(),
+    })
+    .where(eq(lineWebhookEvents.dedupeKey, input.dedupeKey))
+    .returning();
+
+  return record ?? null;
+}
+
+export async function recordLineWebhookInvalidAttempt(input: {
+  lineUserIdHash: string;
+  windowStart: Date;
+}) {
+  const db = requireDb();
+  const now = new Date();
+
+  const [record] = await db
+    .insert(lineWebhookRateLimits)
+    .values({
+      lineUserIdHash: input.lineUserIdHash,
+      windowStart: input.windowStart,
+      invalidAttemptCount: 1,
+      lastAttemptAt: now,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: lineWebhookRateLimits.lineUserIdHash,
+      set: {
+        windowStart: input.windowStart,
+        invalidAttemptCount: sql`CASE WHEN ${lineWebhookRateLimits.windowStart} = ${input.windowStart} THEN ${lineWebhookRateLimits.invalidAttemptCount} + 1 ELSE 1 END`,
+        lastAttemptAt: now,
+        updatedAt: now,
+      },
     })
     .returning();
 
