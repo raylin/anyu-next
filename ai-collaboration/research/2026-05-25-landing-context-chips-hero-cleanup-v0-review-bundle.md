@@ -90,7 +90,7 @@ Implemented.
 ## 11. Known Limitations
 
 - The hidden/default `situation` field remains for API compatibility and analytics continuity.
-- The `description` field remains in module config but is no longer rendered in the landing hero.
+- None for the hero support line; the stale AI-forward description was removed from the module config.
 
 ## 12. Recommended Next Step
 

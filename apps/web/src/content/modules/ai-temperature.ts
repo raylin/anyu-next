@@ -5,7 +5,6 @@ export const aiTemperatureModule = {
   brand: "暗語 ANYU",
   title: "曖昧溫度計",
   subtitle: "他是真的忙，還是其實在冷掉？",
-  description: "貼上對話或描述情境，AI 幫你讀出關係溫度，與下一句怎麼回。",
   chips: ["已讀不回", "忽冷忽熱", "回訊變慢但看限動", "不確定 / 跳過"],
   visualModule: "ai-temperature",
   promptVersion: "product_result_prompt_v0.4",

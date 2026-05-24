@@ -69,7 +69,7 @@ Completed scoped landing/input cleanup for Module 01. The hero now uses the appr
 ## Known Technical Debt
 
 - The hidden/default `situation` field remains for compatibility, but its visible UI has been removed.
-- Module config still includes the previous `description` copy, though the landing no longer renders it.
+- The stale AI-forward hero description was removed from module config, not only hidden from the hero.
 
 ## Tech Debt Review
 

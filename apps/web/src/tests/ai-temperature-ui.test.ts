@@ -112,9 +112,7 @@ describe("ai-temperature UI helpers", () => {
     expect(getModuleLabel(aiTemperatureModule)).toBe("MODULE · 01");
     expect(aiTemperatureModule.title).toBe("曖昧溫度計");
     expect(aiTemperatureModule.subtitle).toBe("他是真的忙，還是其實在冷掉？");
-    expect(aiTemperatureModule.description).toBe(
-      "貼上對話或描述情境，AI 幫你讀出關係溫度，與下一句怎麼回。",
-    );
+    expect(aiTemperatureModule.description).toBeUndefined();
     expect(aiTemperatureModule.chips).toEqual([
       "已讀不回",
       "忽冷忽熱",
