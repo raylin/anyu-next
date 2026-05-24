@@ -353,6 +353,28 @@ textarea {
   line-height: var(--anyu-type-caption-lh);
 }
 
+.anyu-context-toggle {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--anyu-ink);
+  font: inherit;
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
+  cursor: pointer;
+}
+
+.anyu-context-toggle:hover {
+  color: var(--anyu-accent);
+}
+
+.anyu-context-toggle:focus-visible {
+  outline: 2px solid var(--anyu-accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
 .anyu-guidance-card {
   display: grid;
   gap: 0.45rem;

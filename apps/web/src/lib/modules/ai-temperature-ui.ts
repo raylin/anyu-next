@@ -224,7 +224,8 @@ export function getAnalyzeLoadingSubtitle(elapsedMs: number): string {
 }
 
 export function getModuleLabel(moduleConfig: ProductModuleConfig): string {
-  return `module · 01 · ${moduleConfig.family}`;
+  void moduleConfig;
+  return "MODULE · 01";
 }
 
 export function getModuleMetadataTitle(moduleConfig: ProductModuleConfig): string {

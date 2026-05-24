@@ -49,10 +49,7 @@ describe("AnyuMark", () => {
   it("renders the loading state with the animated mark instead of the old moon/dots", () => {
     const html = renderToStaticMarkup(
       <InputCard
-        chips={["對方忽冷忽熱"]}
-        selectedChip="對方忽冷忽熱"
         inputValue="這是一段足夠長的測試內容，讓分析按鈕可以進入正常可分析狀態。"
-        onChipSelect={() => {}}
         onInputChange={() => {}}
         onSubmit={() => {}}
         ctaLabel="分析我的曖昧溫度"

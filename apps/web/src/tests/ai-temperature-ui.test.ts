@@ -109,7 +109,7 @@ describe("ai-temperature UI helpers", () => {
   });
 
   it("renders the expected module label and chip inventory", () => {
-    expect(getModuleLabel(aiTemperatureModule)).toBe("module · 01 · 曖昧溫度計");
+    expect(getModuleLabel(aiTemperatureModule)).toBe("MODULE · 01");
     expect(aiTemperatureModule.title).toBe("曖昧溫度計");
     expect(aiTemperatureModule.subtitle).toBe("他是真的忙，還是其實在冷掉？");
     expect(aiTemperatureModule.description).toBe(
@@ -168,6 +168,12 @@ describe("ai-temperature UI helpers", () => {
     });
 
     expect(AI_TEMPERATURE_CONTEXT_GROUPS).toHaveLength(4);
+    expect(AI_TEMPERATURE_CONTEXT_GROUPS.map((group) => group.label)).toContain(
+      "你想回給對方的語氣 · 可選",
+    );
+    expect(
+      AI_TEMPERATURE_CONTEXT_GROUPS.find((group) => group.key === "replyTone")?.options,
+    ).toContain("坦白但不施壓");
     expect(result.ok).toBe(true);
     expect(unknown.ok).toBe(false);
 

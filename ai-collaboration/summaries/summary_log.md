@@ -4695,3 +4695,19 @@ Learnings:
 
 Unresolved questions:
 - Staging visual verification should be confirmed after the completed commit is deployed to staging.
+## 2026-05-25 - Landing Context Chips + Hero Cleanup v0
+
+Completed changes:
+- Saved the landing context chips and hero cleanup handoff under `ai-collaboration/handoffs/`.
+- Removed the redundant AI-forward hero support line from Module 01 landing.
+- Reduced repeated `曖昧溫度計` in the hero area by removing the top-left module label and changing the eyebrow to `MODULE · 01`.
+- Removed the visible top-level `情境` chip group while preserving the existing `situation` API fallback.
+- Added a collapsible optional context section labeled `讓結果更貼近你（選填）`.
+- Clarified reply-tone copy to `你想回給對方的語氣 · 可選` and replaced `直接但不逼` with `坦白但不施壓`.
+
+Learnings:
+- The textarea plus `最卡的點` carries the useful situational signal without needing a separate visible `情境` chip group.
+- Keeping the hidden `situation` fallback avoids unnecessary analyze/cache/API contract churn.
+
+Unresolved questions:
+- Full validation passed; commit hash, staging push status, and staging route freshness to be recorded after completion.

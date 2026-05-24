@@ -72,7 +72,7 @@ export const aiTemperatureDemoProductResult: ProductResult = {
     replyStrategies: [
       {
         label: "主動推進",
-        tone: "直接但不逼",
+        tone: "坦白但不施壓",
         whenToUse: "你還想給一次明確機會，而且不想把邀約弄得太沉重。",
         whyItWorks: "把邀請縮小成容易回答的小選項，可以降低壓力，也更容易看出對方是否願意接球。",
         possibleReaction: "如果對方還願意接球，通常會給出時間、替代方案，或至少延伸話題。",

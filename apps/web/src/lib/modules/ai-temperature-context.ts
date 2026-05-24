@@ -16,8 +16,8 @@ export const AI_TEMPERATURE_CONTEXT_GROUPS = [
   },
   {
     key: "replyTone",
-    label: "回覆語氣 · 可選",
-    options: ["有界線但不冷", "輕鬆像聊天", "自然一點", "低壓試探", "直接但不逼", "不確定 / 跳過"],
+    label: "你想回給對方的語氣 · 可選",
+    options: ["有界線但不冷", "輕鬆像聊天", "自然一點", "低壓試探", "坦白但不施壓", "不確定 / 跳過"],
   },
 ] as const;
 

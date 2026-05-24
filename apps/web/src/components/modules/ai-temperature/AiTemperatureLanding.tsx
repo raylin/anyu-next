@@ -84,7 +84,7 @@ export function AiTemperatureLanding({
   moduleConfig,
 }: AiTemperatureLandingProps) {
   const router = useRouter();
-  const [selectedChip, setSelectedChip] = useState(moduleConfig.chips[0] ?? "");
+  const [selectedChip] = useState(moduleConfig.chips[moduleConfig.chips.length - 1] ?? "");
   const [userContext, setUserContext] = useState<AiTemperatureUserContext>({});
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -373,7 +373,7 @@ export function AiTemperatureLanding({
   return (
     <section className="anyu-module-page">
       <header className="anyu-topbar anyu-topbar-landing">
-        <p className="anyu-topbar-tag">{moduleConfig.family}</p>
+        <span aria-hidden="true" />
         <Wordmark className="anyu-wordmark-quiet" showMark />
       </header>
 
@@ -385,17 +385,11 @@ export function AiTemperatureLanding({
             {moduleConfig.title}
           </h1>
           <p className="anyu-copy">{moduleConfig.subtitle}</p>
-          {moduleConfig.description ? (
-            <p className="anyu-subtle-note">{moduleConfig.description}</p>
-          ) : null}
         </div>
       </section>
 
       <InputCard
-        chips={moduleConfig.chips}
-        selectedChip={selectedChip}
         inputValue={inputValue}
-        onChipSelect={setSelectedChip}
         contextGroups={AI_TEMPERATURE_CONTEXT_GROUPS}
         selectedContext={userContext}
         onContextSelect={handleContextSelect}

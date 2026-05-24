@@ -1,4 +1,6 @@
-import type { ChangeEventHandler, FormEventHandler, RefObject } from "react";
+"use client";
+
+import { useState, type ChangeEventHandler, type FormEventHandler, type RefObject } from "react";
 import { AnyuMark } from "@/components/anyu/AnyuMark";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
@@ -13,10 +15,7 @@ import type {
 import type { AnalyzeInputGuidance } from "@/lib/modules/ai-temperature-ui";
 
 type InputCardProps = {
-  chips: readonly string[];
-  selectedChip: string;
   inputValue: string;
-  onChipSelect: (chip: string) => void;
   contextGroups?: readonly AiTemperatureContextGroup[];
   selectedContext?: AiTemperatureUserContext;
   onContextSelect?: (key: AiTemperatureContextKey, value: string) => void;
@@ -34,10 +33,7 @@ type InputCardProps = {
 };
 
 export function InputCard({
-  chips,
-  selectedChip,
   inputValue,
-  onChipSelect,
   contextGroups = [],
   selectedContext = {},
   onContextSelect,
@@ -53,6 +49,10 @@ export function InputCard({
   statusMessage,
   statusDetail,
 }: InputCardProps) {
+  const [contextExpanded, setContextExpanded] = useState(false);
+  const hasSelectedContext = Object.values(selectedContext).some(Boolean);
+  const showContextBody = contextExpanded || hasSelectedContext;
+
   return (
     <Card className="anyu-input-card">
       <form className="anyu-form-grid" onSubmit={onSubmit}>
@@ -104,39 +104,36 @@ export function InputCard({
 
         <PrivacyHelper />
 
-        <div className="anyu-field-group">
-          <div className="anyu-field-stack">
-            <span className="anyu-field-label">情境 · 可選</span>
-          </div>
-          <SituationChips
-            chips={chips}
-            selectedChip={selectedChip}
-            onSelect={onChipSelect}
-            ariaLabel="情境類型"
-          />
-        </div>
-
         {contextGroups.length > 0 ? (
           <div className="anyu-field-group">
             <div className="anyu-field-stack">
-              <span className="anyu-field-label">讓結果更貼近你 · 可選</span>
+              <button
+                type="button"
+                className="anyu-context-toggle"
+                aria-expanded={showContextBody}
+                onClick={() => setContextExpanded((current) => !current)}
+              >
+                讓結果更貼近你（選填）
+              </button>
               <p className="anyu-subtle-note">
                 這些只會當作分析偏好，不會取代你貼上的互動內容。
               </p>
             </div>
-            <div className="anyu-form-grid">
-              {contextGroups.map((group) => (
-                <div key={group.key} className="anyu-field-stack">
-                  <span className="anyu-field-label">{group.label}</span>
-                  <SituationChips
-                    chips={group.options}
-                    selectedChip={selectedContext[group.key]}
-                    onSelect={(value) => onContextSelect?.(group.key, value)}
-                    ariaLabel={group.label}
-                  />
-                </div>
-              ))}
-            </div>
+            {showContextBody ? (
+              <div className="anyu-form-grid">
+                {contextGroups.map((group) => (
+                  <div key={group.key} className="anyu-field-stack">
+                    <span className="anyu-field-label">{group.label}</span>
+                    <SituationChips
+                      chips={group.options}
+                      selectedChip={selectedContext[group.key]}
+                      onSelect={(value) => onContextSelect?.(group.key, value)}
+                      ariaLabel={group.label}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
         ) : null}
 

@@ -9,7 +9,9 @@ test.describe("module 01 local ui smoke", () => {
     await expect(page.getByText("他是真的忙，還是其實在冷掉？")).toBeVisible();
     await expect(
       page.getByText("貼上對話或描述情境，AI 幫你讀出關係溫度，與下一句怎麼回。"),
-    ).toBeVisible();
+    ).toHaveCount(0);
+    await expect(page.getByText("MODULE · 01 · 曖昧溫度計")).toHaveCount(0);
+    await expect(page.getByText("MODULE · 01")).toBeVisible();
     await expect(page.getByLabel("情境描述")).toBeVisible();
     await expect(page.getByRole("button", { name: "再寫一點…" })).toBeDisabled();
     await expect(page.getByText("0 / 30")).toBeVisible();
@@ -17,11 +19,13 @@ test.describe("module 01 local ui smoke", () => {
       page.getByText("請不要貼姓名、電話、地址或其他能識別身份的資訊。分析僅供關係觀察與自我理解參考。"),
     ).toBeVisible();
 
-    const chip = page.getByRole("button", { name: "回訊變慢但看限動" });
-    await chip.click();
-    await expect(chip).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByText("情境 · 可選")).toHaveCount(0);
 
-    await expect(page.getByText("讓結果更貼近你 · 可選")).toBeVisible();
+    await expect(page.getByRole("button", { name: "讓結果更貼近你（選填）" })).toBeVisible();
+    await expect(page.getByText("你想回給對方的語氣 · 可選")).toHaveCount(0);
+    await page.getByRole("button", { name: "讓結果更貼近你（選填）" }).click();
+    await expect(page.getByText("你想回給對方的語氣 · 可選")).toBeVisible();
+    await expect(page.getByRole("button", { name: "坦白但不施壓" })).toBeVisible();
     const contextChip = page.getByRole("button", { name: "我該怎麼回" });
     await contextChip.click();
     await expect(contextChip).toHaveAttribute("aria-pressed", "true");
