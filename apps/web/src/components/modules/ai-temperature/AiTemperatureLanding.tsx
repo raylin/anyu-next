@@ -94,7 +94,6 @@ export function AiTemperatureLanding({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const loadingRef = useRef<HTMLDivElement | null>(null);
   const pollTimeoutRef = useRef<number | null>(null);
-  const titleParts = moduleConfig.title.split("，");
 
   const pollAnalyzeRequest = useCallback(async (pollUrl: string): Promise<void> => {
     const startedAt = Date.now();
@@ -383,17 +382,12 @@ export function AiTemperatureLanding({
         <div className="anyu-hero-copy">
           <div className="anyu-hero-glow" aria-hidden="true" />
           <h1 id="anyu-hero-title" className="anyu-hero-title">
-            {titleParts.length > 1 ? (
-              <>
-                {titleParts[0]}，
-                <br />
-                {titleParts.slice(1).join("，")}
-              </>
-            ) : (
-              moduleConfig.title
-            )}
+            {moduleConfig.title}
           </h1>
           <p className="anyu-copy">{moduleConfig.subtitle}</p>
+          {moduleConfig.description ? (
+            <p className="anyu-subtle-note">{moduleConfig.description}</p>
+          ) : null}
         </div>
       </section>
 

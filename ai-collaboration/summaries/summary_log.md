@@ -4680,3 +4680,18 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether semantic validation should retry once instead of failing safe
 - whether ChatGPT wants one more paid-result tone sample before title hierarchy polish
+## 2026-05-25 - Landing / Share Title Hierarchy Polish v0
+
+Completed changes:
+- Saved the landing/share title hierarchy polish handoff under `ai-collaboration/handoffs/`.
+- Updated Module 01 so `曖昧溫度計` is the primary title and `他是真的忙，還是其實在冷掉？` is the subtitle.
+- Preserved the previous helper sentence as module description copy and rendered it quieter on the landing hero.
+- Updated share preview and route metadata/Open Graph copy to use the module-first hierarchy.
+- Updated unit and Playwright smoke assertions for the new copy contract.
+
+Learnings:
+- The previous landing implementation split the emotional question on punctuation for display; the new shorter module title no longer needs that behavior.
+- Share preview readability improves when the module identity appears before persona-specific copy.
+
+Unresolved questions:
+- Staging visual verification should be confirmed after the completed commit is deployed to staging.

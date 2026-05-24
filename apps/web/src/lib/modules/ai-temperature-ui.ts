@@ -227,6 +227,14 @@ export function getModuleLabel(moduleConfig: ProductModuleConfig): string {
   return `module · 01 · ${moduleConfig.family}`;
 }
 
+export function getModuleMetadataTitle(moduleConfig: ProductModuleConfig): string {
+  return `${moduleConfig.title}｜${moduleConfig.brand}`;
+}
+
+export function getModuleMetadataDescription(moduleConfig: ProductModuleConfig): string {
+  return `${moduleConfig.subtitle}貼上一段互動，讓暗語幫你讀出曖昧裡的微訊號。`;
+}
+
 export function getLineAddUrl(envValue = process.env.NEXT_PUBLIC_LINE_ADD_URL): string | null {
   const candidate = envValue?.trim();
 

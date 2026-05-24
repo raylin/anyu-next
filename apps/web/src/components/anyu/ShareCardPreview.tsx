@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Wordmark } from "@/components/anyu/Wordmark";
 
 type ShareCardPreviewProps = {
+  moduleTitle: string;
+  moduleSubtitle: string;
   persona: string;
   quote: string;
   score: number;
@@ -13,6 +15,8 @@ type ShareCardPreviewProps = {
 };
 
 export function ShareCardPreview({
+  moduleTitle,
+  moduleSubtitle,
   persona,
   quote,
   score,
@@ -44,9 +48,11 @@ export function ShareCardPreview({
         </div>
 
         <div className="anyu-share-body">
-          <span className="anyu-kicker t-label-dim">my persona</span>
-          <strong className="anyu-share-persona">{persona}</strong>
-          <p className="anyu-share-quote t-kai-quote">「{quote}」</p>
+          <span className="anyu-kicker t-label-dim">module</span>
+          <strong className="anyu-share-persona">{moduleTitle}</strong>
+          <p className="anyu-share-quote t-kai-quote">{moduleSubtitle}</p>
+          <span className="anyu-kicker t-label-dim">my persona · {persona}</span>
+          <p className="anyu-subtle-note">「{quote}」</p>
         </div>
 
         <div className="anyu-share-footer">

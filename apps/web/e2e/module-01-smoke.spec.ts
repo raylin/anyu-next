@@ -5,7 +5,11 @@ test.describe("module 01 local ui smoke", () => {
     const response = await page.goto("/m/ambiguous-temperature");
 
     expect(response?.ok()).toBeTruthy();
-    await expect(page.getByText("他是真的忙")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "曖昧溫度計" })).toBeVisible();
+    await expect(page.getByText("他是真的忙，還是其實在冷掉？")).toBeVisible();
+    await expect(
+      page.getByText("貼上對話或描述情境，AI 幫你讀出關係溫度，與下一句怎麼回。"),
+    ).toBeVisible();
     await expect(page.getByLabel("情境描述")).toBeVisible();
     await expect(page.getByRole("button", { name: "再寫一點…" })).toBeDisabled();
     await expect(page.getByText("0 / 30")).toBeVisible();

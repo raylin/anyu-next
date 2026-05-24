@@ -52,6 +52,10 @@ describe("ai-temperature result conversion polish", () => {
 
     expect(html).toContain("分享這個結果");
     expect(html).toContain("複製成 LINE / Threads 可以貼上的文字");
+    expect(html).toContain("module");
+    expect(html).toContain("曖昧溫度計");
+    expect(html).toContain("他是真的忙，還是其實在冷掉？");
+    expect(html).toContain("my persona · 微訊號觀察家");
     expect(html).toContain("⋯ 尚未解鎖");
     expect(html).toContain("一次性查看 · 無訂閱");
     expect(html).toContain("一次性 · no subscription");

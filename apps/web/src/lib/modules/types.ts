@@ -5,6 +5,7 @@ export type ProductModuleConfig = {
   brand: string;
   title: string;
   subtitle: string;
+  description?: string;
   chips: readonly string[];
   visualModule: string;
   promptVersion: string;

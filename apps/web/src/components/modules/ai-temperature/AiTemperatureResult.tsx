@@ -354,6 +354,8 @@ export function AiTemperatureResult({
       <p className="anyu-subtle-note">{uiNotices.resultDisclaimer}</p>
 
       <ShareCardPreview
+        moduleTitle={moduleConfig.title}
+        moduleSubtitle={moduleConfig.subtitle}
         persona={result.persona}
         quote={result.shareQuote}
         score={result.score}

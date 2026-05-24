@@ -25,6 +25,8 @@ import {
   getAnalyzeLoadingMessage,
   getAnalyzeLoadingSubtitle,
   getAnalyzeWaitStage,
+  getModuleMetadataDescription,
+  getModuleMetadataTitle,
   getModuleLabel,
   isAnalyzeInputReady,
   scoreToBucket,
@@ -108,8 +110,9 @@ describe("ai-temperature UI helpers", () => {
 
   it("renders the expected module label and chip inventory", () => {
     expect(getModuleLabel(aiTemperatureModule)).toBe("module · 01 · 曖昧溫度計");
-    expect(aiTemperatureModule.title).toBe("他是真的忙，還是其實在冷掉？");
-    expect(aiTemperatureModule.subtitle).toBe(
+    expect(aiTemperatureModule.title).toBe("曖昧溫度計");
+    expect(aiTemperatureModule.subtitle).toBe("他是真的忙，還是其實在冷掉？");
+    expect(aiTemperatureModule.description).toBe(
       "貼上對話或描述情境，AI 幫你讀出關係溫度，與下一句怎麼回。",
     );
     expect(aiTemperatureModule.chips).toEqual([
@@ -118,6 +121,13 @@ describe("ai-temperature UI helpers", () => {
       "回訊變慢但看限動",
       "不確定 / 跳過",
     ]);
+  });
+
+  it("builds module metadata from the title-first hierarchy", () => {
+    expect(getModuleMetadataTitle(aiTemperatureModule)).toBe("曖昧溫度計｜暗語 ANYU");
+    expect(getModuleMetadataDescription(aiTemperatureModule)).toBe(
+      "他是真的忙，還是其實在冷掉？貼上一段互動，讓暗語幫你讀出曖昧裡的微訊號。",
+    );
   });
 
   it("normalizes analyze input against the allowed chips", () => {

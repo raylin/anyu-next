@@ -72,6 +72,8 @@ describe("AnyuMark", () => {
   it("renders the share surface with the mini brand lockup instead of the old purple dot", () => {
     const html = renderToStaticMarkup(
       <ShareCardPreview
+        moduleTitle="曖昧溫度計"
+        moduleSubtitle="他是真的忙，還是其實在冷掉？"
         persona="慢熱觀察派"
         quote="他沒有退，但也還沒往前。"
         score={62}
