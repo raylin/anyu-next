@@ -143,7 +143,7 @@ async function runValidatedAttempt(input: {
   );
 
   return {
-    result: validateProductResultText(providerResult.text),
+    result: validateProductResultText(providerResult.text, input.moduleConfig.schemaVersion),
     provider: providerResult.provider,
     model: providerResult.model,
     rawResponse: providerResult.rawResponse,

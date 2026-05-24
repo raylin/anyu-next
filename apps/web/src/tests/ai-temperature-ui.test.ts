@@ -143,8 +143,9 @@ describe("ai-temperature UI helpers", () => {
       text: "我昨天約他週末見面，但他今天已讀後沒回，晚上卻還在發限動，我真的有點猜不透。",
       situation: "已讀不回",
       userContext: {
-        userGoal: "想自然推進",
-        replyTone: "低壓試探",
+        userGoal: "我該怎麼回",
+        primaryPain: "回覆變慢",
+        replyTone: "有界線但不冷",
       },
       allowedChips: aiTemperatureModule.chips,
     });
@@ -162,11 +163,12 @@ describe("ai-temperature UI helpers", () => {
 
     if (result.ok) {
       expect(result.userContext).toEqual({
-        userGoal: "想自然推進",
-        replyTone: "低壓試探",
+        userGoal: "我該怎麼回",
+        primaryPain: "回覆變慢",
+        replyTone: "有界線但不冷",
       });
       expect(result.userContextProvided).toBe(true);
-      expect(result.userContextFieldCount).toBe(2);
+      expect(result.userContextFieldCount).toBe(3);
     }
   });
 

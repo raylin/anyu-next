@@ -18,7 +18,7 @@ test.describe("module 01 local ui smoke", () => {
     await expect(chip).toHaveAttribute("aria-pressed", "true");
 
     await expect(page.getByText("讓結果更貼近你 · 可選")).toBeVisible();
-    const contextChip = page.getByRole("button", { name: "想自然推進" });
+    const contextChip = page.getByRole("button", { name: "我該怎麼回" });
     await contextChip.click();
     await expect(contextChip).toHaveAttribute("aria-pressed", "true");
 

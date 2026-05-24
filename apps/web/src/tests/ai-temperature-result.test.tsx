@@ -20,7 +20,7 @@ const resultFixture: AiTemperatureResultViewModel = {
   shareQuote: "有些曖昧不是沒訊號，是訊號太小聲。",
   paidHeadline: "解鎖下一句怎麼回",
   paidPrice: "NT$49",
-  paidIncludedSections: ["把主導權留在你手上", "低壓試探", "尊嚴守門"],
+  paidIncludedSections: ["3 種下一句回法", "對方可能的 3 種狀態", "48 小時觀察策略", "可收藏摘要卡"],
   paidPreviewCopy: "「你先忙你的，等你比較有空再來找我。」",
 };
 
@@ -36,7 +36,7 @@ describe("ai-temperature result conversion polish", () => {
     );
 
     expect(html).toContain("想知道下一句怎麼回？");
-    expect(html).toContain("解鎖 3 種不失控的回法");
+    expect(html).toContain("解鎖 3 種下一句回法");
     expect(html).toContain("看下一句怎麼回");
   });
 

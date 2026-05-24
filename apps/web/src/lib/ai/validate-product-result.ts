@@ -1,30 +1,40 @@
 import fs from "node:fs";
 import Ajv2020 from "ajv/dist/2020";
 import type { AnySchema, ErrorObject } from "ajv";
-import { getProductSchemaPath } from "@/lib/ai/repo-paths";
+import { getProductSchemaPathForVersion } from "@/lib/ai/repo-paths";
 import type { ProductResult } from "@/lib/ai/product-result-schema";
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 
-let cachedSchemaText: string | null = null;
-let cachedValidator:
-  | ReturnType<typeof ajv.compile<ProductResult>>
-  | null = null;
+const cachedSchemaTextByVersion = new Map<string, string>();
+const cachedValidatorByVersion = new Map<string, ReturnType<typeof ajv.compile<ProductResult>>>();
 
-function loadSchemaJson(): AnySchema {
-  if (!cachedSchemaText) {
-    cachedSchemaText = fs.readFileSync(getProductSchemaPath(), "utf-8");
+function loadSchemaJson(schemaVersion: string): AnySchema {
+  if (!cachedSchemaTextByVersion.has(schemaVersion)) {
+    cachedSchemaTextByVersion.set(
+      schemaVersion,
+      fs.readFileSync(getProductSchemaPathForVersion(schemaVersion), "utf-8"),
+    );
   }
 
-  return JSON.parse(cachedSchemaText) as AnySchema;
+  return JSON.parse(cachedSchemaTextByVersion.get(schemaVersion) ?? "{}") as AnySchema;
 }
 
-function getValidator() {
-  if (!cachedValidator) {
-    cachedValidator = ajv.compile<ProductResult>(loadSchemaJson());
+function getValidator(schemaVersion: string) {
+  if (!cachedValidatorByVersion.has(schemaVersion)) {
+    cachedValidatorByVersion.set(
+      schemaVersion,
+      ajv.compile<ProductResult>(loadSchemaJson(schemaVersion)),
+    );
   }
 
-  return cachedValidator;
+  const validator = cachedValidatorByVersion.get(schemaVersion);
+
+  if (!validator) {
+    throw new Error(`Product schema validator was not initialized for ${schemaVersion}.`);
+  }
+
+  return validator;
 }
 
 function stripMarkdownFences(text: string): string {
@@ -52,8 +62,11 @@ function buildValidationErrorMessage(
     .join("; ");
 }
 
-export function validateProductResultObject(value: unknown): ProductResult {
-  const validator = getValidator();
+export function validateProductResultObject(
+  value: unknown,
+  schemaVersion = "product_result_schema_v1",
+): ProductResult {
+  const validator = getValidator(schemaVersion);
 
   if (!validator(value)) {
     throw new Error(buildValidationErrorMessage(validator.errors));
@@ -62,7 +75,10 @@ export function validateProductResultObject(value: unknown): ProductResult {
   return value as ProductResult;
 }
 
-export function validateProductResultText(text: string): ProductResult {
+export function validateProductResultText(
+  text: string,
+  schemaVersion = "product_result_schema_v1",
+): ProductResult {
   let parsed: unknown;
 
   try {
@@ -75,5 +91,5 @@ export function validateProductResultText(text: string): ProductResult {
     );
   }
 
-  return validateProductResultObject(parsed);
+  return validateProductResultObject(parsed, schemaVersion);
 }

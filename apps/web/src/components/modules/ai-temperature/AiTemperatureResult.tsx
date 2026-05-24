@@ -337,7 +337,7 @@ export function AiTemperatureResult({
           <p className="anyu-kicker t-label-dim">next step</p>
           <h2 className="anyu-section-title">想知道下一句怎麼回？</h2>
           <p className="anyu-copy">
-            解鎖 3 種不失控的回法，從主動推進、低壓試探到暫時拉開。
+            解鎖 3 種下一句回法、對方可能的 3 種狀態、48 小時觀察策略與可收藏摘要卡。
           </p>
         </div>
         <Button

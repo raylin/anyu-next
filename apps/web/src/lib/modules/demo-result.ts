@@ -24,12 +24,13 @@ export const aiTemperatureDemoProductResult: ProductResult = {
     headline: "解鎖下一句怎麼回",
     price: "NT$49",
     included_sections: [
-      "現在最不該做的一件事",
-      "三種不失控回法",
-      "怎麼測對方投入度但不把自己放低",
+      "3 種下一句回法",
+      "對方可能的 3 種狀態",
+      "48 小時觀察策略",
+      "可收藏摘要卡",
     ],
     preview_copy:
-      "解鎖後你會看到：現在最不該做的一件事、三種不失控回法，以及怎麼測對方投入度但不把自己放低。",
+      "解鎖後你會看到：3 種下一句回法、對方可能的 3 種狀態、48 小時觀察策略，以及可收藏摘要卡。",
   },
   paid_result: {
     fullSummary:

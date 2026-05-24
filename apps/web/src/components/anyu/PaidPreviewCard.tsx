@@ -56,7 +56,7 @@ export function PaidPreviewCard({
             {headline} — {price}
           </h2>
           <p className="anyu-copy">
-            給你 3 種不失控的回法：主動推進、低壓試探、暫時拉開。
+            給你下一句回法、3 種可能狀態、48 小時觀察策略與可收藏摘要卡。
           </p>
         </div>
         <div className="anyu-paid-price-block">
@@ -98,10 +98,10 @@ export function PaidPreviewCard({
           <div className="anyu-reply-head">
             <span className="anyu-reply-letter">C</span>
             <span className="anyu-reply-tag anyu-reply-tag-locked">
-              {includedSections[2] ?? "尊嚴守門"}
+              {includedSections[2] ?? "48 小時觀察"}
             </span>
           </div>
-          <p className="anyu-reply-title">尊嚴守門</p>
+          <p className="anyu-reply-title">48 小時觀察</p>
           <p className="anyu-reply-copy anyu-reply-copy-locked">{lockedPreviewBodies[1]}</p>
           <span className="anyu-reply-lock-mark" aria-hidden="true">
             ⋯

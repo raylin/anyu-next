@@ -15,6 +15,8 @@ type ProviderCallOptions = {
   model?: string;
 };
 
+export const ANTHROPIC_MAX_OUTPUT_TOKENS = 4096;
+
 function getPreferredProvider(): ProviderName {
   return process.env.ORADAR_PROVIDER === "openai" ? "openai" : "anthropic";
 }
@@ -189,7 +191,7 @@ async function callAnthropic(prompt: string, provider: ResolvedProvider): Promis
     },
     body: JSON.stringify({
       model: provider.model,
-      max_tokens: 2048,
+      max_tokens: ANTHROPIC_MAX_OUTPUT_TOKENS,
       messages: [
         {
           role: "user",

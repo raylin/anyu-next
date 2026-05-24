@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "product_result_schema_v0.json",
-  "title": "Opportunity Radar Product Result Schema v0",
+  "$id": "product_result_schema_v1.json",
+  "title": "Opportunity Radar Product Result Schema v1",
   "description": "User-facing product runtime result contract for the 曖昧溫度計 fake-door experiment. This schema is separate from the research signal schema.",
   "type": "object",
   "additionalProperties": false,
@@ -109,44 +109,143 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "deeper_signal_analysis",
-        "possible_interpretation",
-        "risk_warning",
-        "what_not_to_do",
-        "reply_strategies"
+        "fullSummary",
+        "possibleStates",
+        "signalDeepDive",
+        "replyStrategies",
+        "next48HourPlan",
+        "avoidDoing",
+        "softInsight",
+        "summaryCard"
       ],
       "properties": {
-        "deeper_signal_analysis": {
+        "fullSummary": {
           "type": "string"
         },
-        "possible_interpretation": {
-          "type": "string"
-        },
-        "risk_warning": {
-          "type": "string"
-        },
-        "what_not_to_do": {
+        "possibleStates": {
           "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "likelihood",
+              "explanation"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "likelihood": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "explanation": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "signalDeepDive": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "title",
+              "evidence",
+              "whatItMayMean"
+            ],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "evidence": {
+                "type": "string"
+              },
+              "whatItMayMean": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "replyStrategies": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "whenToUse",
+              "whyItWorks",
+              "copyableMessages"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "whenToUse": {
+                "type": "string"
+              },
+              "whyItWorks": {
+                "type": "string"
+              },
+              "copyableMessages": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 3,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "next48HourPlan": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 5,
           "items": {
             "type": "string"
           }
         },
-        "reply_strategies": {
+        "avoidDoing": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        },
+        "softInsight": {
+          "type": "string"
+        },
+        "summaryCard": {
           "type": "object",
           "additionalProperties": false,
           "required": [
-            "主動推進",
-            "低壓試探",
-            "暫時拉開"
+            "headline",
+            "body",
+            "nextMove"
           ],
           "properties": {
-            "主動推進": {
+            "headline": {
               "type": "string"
             },
-            "低壓試探": {
+            "body": {
               "type": "string"
             },
-            "暫時拉開": {
+            "nextMove": {
               "type": "string"
             }
           }
