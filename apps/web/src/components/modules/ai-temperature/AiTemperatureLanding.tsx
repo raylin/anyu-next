@@ -7,6 +7,12 @@ import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { trackClientEvent } from "@/lib/events/client";
 import {
+  AI_TEMPERATURE_CONTEXT_GROUPS,
+  compactUserContext,
+  type AiTemperatureContextKey,
+  type AiTemperatureUserContext,
+} from "@/lib/modules/ai-temperature-context";
+import {
   ANALYZE_POLL_INTERVAL_MS,
   ANALYZE_POLL_TIMEOUT_MS,
   ANALYZE_RECOVERY_STORAGE_KEY,
@@ -79,6 +85,7 @@ export function AiTemperatureLanding({
 }: AiTemperatureLandingProps) {
   const router = useRouter();
   const [selectedChip, setSelectedChip] = useState(moduleConfig.chips[0] ?? "");
+  const [userContext, setUserContext] = useState<AiTemperatureUserContext>({});
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -237,6 +244,13 @@ export function AiTemperatureLanding({
     }
   }
 
+  function handleContextSelect(key: AiTemperatureContextKey, value: string) {
+    setUserContext((current) => compactUserContext({
+      ...current,
+      [key]: value,
+    }));
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -250,6 +264,8 @@ export function AiTemperatureLanding({
     setLoadingElapsedMs(0);
 
     const anonymousSessionId = getClientAnonymousSessionId();
+    const compactedContext = compactUserContext(userContext);
+    const contextFieldCount = Object.keys(compactedContext).length;
 
     void trackClientEvent({
       eventName: "analysis_started",
@@ -258,6 +274,8 @@ export function AiTemperatureLanding({
       situationType: selectedChip,
       metadata: {
         inputCharCount: inputValue.trim().length,
+        userContextProvided: contextFieldCount > 0,
+        userContextFieldCount: contextFieldCount,
       },
     });
 
@@ -276,6 +294,7 @@ export function AiTemperatureLanding({
             text: inputValue,
             situation: selectedChip,
             anonymousSessionId,
+            userContext: compactedContext,
           }),
           signal: abortController.signal,
         });
@@ -294,6 +313,8 @@ export function AiTemperatureLanding({
             situationType: selectedChip,
             metadata: {
               reason: normalizedError,
+              userContextProvided: contextFieldCount > 0,
+              userContextFieldCount: contextFieldCount,
             },
           });
           return;
@@ -335,6 +356,8 @@ export function AiTemperatureLanding({
         situationType: selectedChip,
         metadata: {
           reason: normalizedReason,
+          userContextProvided: contextFieldCount > 0,
+          userContextFieldCount: contextFieldCount,
         },
       });
     } finally {
@@ -379,6 +402,9 @@ export function AiTemperatureLanding({
         selectedChip={selectedChip}
         inputValue={inputValue}
         onChipSelect={setSelectedChip}
+        contextGroups={AI_TEMPERATURE_CONTEXT_GROUPS}
+        selectedContext={userContext}
+        onContextSelect={handleContextSelect}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         textareaRef={textareaRef}

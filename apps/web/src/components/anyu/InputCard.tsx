@@ -5,6 +5,11 @@ import { Card } from "@/components/anyu/Card";
 import { PrivacyHelper } from "@/components/anyu/PrivacyHelper";
 import { SituationChips } from "@/components/anyu/SituationChips";
 import { uiNotices } from "@/content/legal";
+import type {
+  AiTemperatureContextGroup,
+  AiTemperatureContextKey,
+  AiTemperatureUserContext,
+} from "@/lib/modules/ai-temperature-context";
 import type { AnalyzeInputGuidance } from "@/lib/modules/ai-temperature-ui";
 
 type InputCardProps = {
@@ -12,6 +17,9 @@ type InputCardProps = {
   selectedChip: string;
   inputValue: string;
   onChipSelect: (chip: string) => void;
+  contextGroups?: readonly AiTemperatureContextGroup[];
+  selectedContext?: AiTemperatureUserContext;
+  onContextSelect?: (key: AiTemperatureContextKey, value: string) => void;
   onInputChange: ChangeEventHandler<HTMLTextAreaElement>;
   onSubmit: FormEventHandler<HTMLFormElement>;
   textareaRef?: RefObject<HTMLTextAreaElement | null>;
@@ -30,6 +38,9 @@ export function InputCard({
   selectedChip,
   inputValue,
   onChipSelect,
+  contextGroups = [],
+  selectedContext = {},
+  onContextSelect,
   onInputChange,
   onSubmit,
   textareaRef,
@@ -101,8 +112,33 @@ export function InputCard({
             chips={chips}
             selectedChip={selectedChip}
             onSelect={onChipSelect}
+            ariaLabel="情境類型"
           />
         </div>
+
+        {contextGroups.length > 0 ? (
+          <div className="anyu-field-group">
+            <div className="anyu-field-stack">
+              <span className="anyu-field-label">讓結果更貼近你 · 可選</span>
+              <p className="anyu-subtle-note">
+                這些只會當作分析偏好，不會取代你貼上的互動內容。
+              </p>
+            </div>
+            <div className="anyu-form-grid">
+              {contextGroups.map((group) => (
+                <div key={group.key} className="anyu-field-stack">
+                  <span className="anyu-field-label">{group.label}</span>
+                  <SituationChips
+                    chips={group.options}
+                    selectedChip={selectedContext[group.key]}
+                    onSelect={(value) => onContextSelect?.(group.key, value)}
+                    ariaLabel={group.label}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div className="anyu-input-privacy-inline">
           <span className="anyu-input-privacy-inline-rule" aria-hidden="true" />

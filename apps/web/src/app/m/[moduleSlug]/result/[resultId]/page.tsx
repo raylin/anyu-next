@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/anyu/Card";
 import { AiTemperatureResult } from "@/components/modules/ai-temperature/AiTemperatureResult";
-import { validateProductResultObject } from "@/lib/ai/validate-product-result";
+import { normalizeProductResultForDisplay } from "@/lib/ai/product-result-schema";
 import { isDbConfigured } from "@/lib/db/client";
 import { getAnalysisResultRecordById } from "@/lib/db/runtime";
 import {
@@ -75,7 +75,7 @@ export default async function ResultPage({ params }: ResultPageProps) {
     );
   }
 
-  const normalizedResult = validateProductResultObject(record.normalizedResultJson);
+  const normalizedResult = normalizeProductResultForDisplay(record.normalizedResultJson);
 
   return (
     <main className="anyu-shell">

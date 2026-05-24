@@ -10,6 +10,10 @@ import type {
   ModelStrategyName,
   RuntimeModelMetadata,
 } from "@/lib/ai/types";
+import {
+  buildUserContextPromptNotes,
+  type AiTemperatureUserContext,
+} from "@/lib/modules/ai-temperature-context";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import { scoreToBucket } from "@/lib/modules/ai-temperature-ui";
 import type { TimingPhaseName } from "@/lib/runtime/timing";
@@ -49,6 +53,7 @@ function buildPromptMetadata(
     moduleConfig: ProductModuleConfig;
     redactedText: string;
     situation: string;
+    userContext: AiTemperatureUserContext;
   },
   provider: string,
   model: string,
@@ -61,6 +66,8 @@ function buildPromptMetadata(
     variant: "B",
     model_provider: provider,
     model_name: model,
+    user_context: input.userContext,
+    user_context_notes: buildUserContextPromptNotes(input.userContext),
   } as const;
 }
 
@@ -123,6 +130,7 @@ async function runValidatedAttempt(input: {
   moduleConfig: ProductModuleConfig;
   redactedText: string;
   situation: string;
+  userContext: AiTemperatureUserContext;
   provider: "anthropic" | "openai";
   model: string;
 }): Promise<ValidatedProviderResult> {
@@ -147,6 +155,7 @@ export async function generateModuleResult(input: {
   redactedText: string;
   privacyFlags: string[];
   situation: string;
+  userContext: AiTemperatureUserContext;
 }, timing: RuntimeTimingHooks = {}): Promise<GeneratedProductRuntime> {
   const providerInfo = getActiveProviderInfo();
   const strategy = resolveRuntimeStrategy(providerInfo);
@@ -160,6 +169,7 @@ export async function generateModuleResult(input: {
       moduleConfig: input.moduleConfig,
       redactedText: input.redactedText,
       situation: input.situation,
+      userContext: input.userContext,
       provider: strategy.provider,
       model: strategy.primaryModel,
     });
@@ -179,6 +189,7 @@ export async function generateModuleResult(input: {
         moduleConfig: input.moduleConfig,
         redactedText: input.redactedText,
         situation: input.situation,
+        userContext: input.userContext,
         provider: strategy.provider,
         model: strategy.primaryModel,
       });
@@ -192,6 +203,7 @@ export async function generateModuleResult(input: {
         moduleConfig: input.moduleConfig,
         redactedText: input.redactedText,
         situation: input.situation,
+        userContext: input.userContext,
         provider: strategy.provider,
         model: strategy.fallbackModel,
       });

@@ -4541,3 +4541,44 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether context chips should ship with the schema/prompt upgrade or immediately after it
 - exact final paid-result length after staging value review
+
+## 2026-05-24 - Paid Result Prompt Schema Upgrade v0
+
+### Completed Changes
+
+- saved the Paid Result Prompt Schema Upgrade v0 handoff into `ai-collaboration/handoffs/`
+- implemented optional context chips for Module 01 landing/input flow
+- added server-side allowlist validation for `relationshipStage`, `userGoal`, `primaryPain`, and `replyTone`
+- passed context as structured prompt metadata and safe behavioral notes
+- upgraded generated `paid_result` to v1 richer sections with possible states, signal deep dives, reply strategies, next-48-hour plan, avoid list, soft insight, and summary card
+- bumped prompt version to `product_result_prompt_v0.3`, schema version to `product_result_schema_v1`, and analysis cache key version to `v2`
+- included context dimensions in cache key hashing
+- updated unlocked/result routes to render rich paid results while adapting legacy old-format results for display
+- updated demo result, retention cleanup placeholder, and tests
+
+### Learnings
+
+- the existing JSON result storage can support the richer paid output without a DB schema migration
+- legacy paid-result compatibility belongs in the display adapter, not the generation schema
+- event metadata can safely track context adoption with booleans/counts only
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 24 files / 97 tests
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed, 9 Playwright tests
+
+### Commit / Push
+
+- commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- whether the first context chip set is too broad or should be simplified after staging review
+- whether the unlocked page should add copy buttons for each paid reply message
+- whether schema file resolution should become version-aware before adding another schema version

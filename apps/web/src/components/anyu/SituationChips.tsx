@@ -2,15 +2,17 @@ type SituationChipsProps = {
   chips: readonly string[];
   selectedChip?: string;
   onSelect?: (chip: string) => void;
+  ariaLabel?: string;
 };
 
 export function SituationChips({
   chips,
   selectedChip,
   onSelect,
+  ariaLabel = "情境類型",
 }: SituationChipsProps) {
   return (
-    <div className="anyu-chip-list" role="group" aria-label="情境類型">
+    <div className="anyu-chip-list" role="group" aria-label={ariaLabel}>
       {chips.map((chip) => (
         <button
           key={chip}

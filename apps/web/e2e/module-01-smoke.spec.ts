@@ -17,6 +17,11 @@ test.describe("module 01 local ui smoke", () => {
     await chip.click();
     await expect(chip).toHaveAttribute("aria-pressed", "true");
 
+    await expect(page.getByText("讓結果更貼近你 · 可選")).toBeVisible();
+    const contextChip = page.getByRole("button", { name: "想自然推進" });
+    await contextChip.click();
+    await expect(contextChip).toHaveAttribute("aria-pressed", "true");
+
     await page.getByLabel("情境描述").fill(
       "他最近回訊息變慢，但還是會看我的限動。我不知道他是真的忙，還是已經沒那麼喜歡我了。",
     );

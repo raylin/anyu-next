@@ -57,7 +57,10 @@ function isAnalyzeRequestPayload(body: unknown): body is AnalyzeRequestPayload {
     ("situation" in candidate && candidate.situation !== undefined && typeof candidate.situation !== "string") ||
     ("anonymousSessionId" in candidate &&
       candidate.anonymousSessionId !== undefined &&
-      typeof candidate.anonymousSessionId !== "string")
+      typeof candidate.anonymousSessionId !== "string") ||
+    ("userContext" in candidate &&
+      candidate.userContext !== undefined &&
+      (typeof candidate.userContext !== "object" || candidate.userContext === null || Array.isArray(candidate.userContext)))
   ) {
     return false;
   }
@@ -98,6 +101,7 @@ export async function POST(
     text: body.text,
     situation: body.situation,
     anonymousSessionId: body.anonymousSessionId,
+    userContext: body.userContext,
     allowedChips: moduleConfig.chips,
   });
 
@@ -143,6 +147,7 @@ export async function POST(
       moduleSlug: moduleConfig.slug,
       redactedText: redaction.redactedText,
       situation: validatedInput.situation,
+      userContext: validatedInput.userContext,
       promptVersion: moduleConfig.promptVersion,
       schemaVersion: moduleConfig.schemaVersion,
       modelStrategy: runtimeStrategy.strategy,
@@ -174,6 +179,8 @@ export async function POST(
           anonymousSessionId: validatedInput.anonymousSessionId,
           metadata: {
             inputCharCount: validatedInput.inputCharCount,
+            userContextProvided: validatedInput.userContextProvided,
+            userContextFieldCount: validatedInput.userContextFieldCount,
             cacheHit: true,
           },
         });
@@ -204,6 +211,8 @@ export async function POST(
               cachedAnalysis.result.providerModel !==
                 (cachedAnalysis.request.primaryModel ?? runtimeStrategy.primaryModel),
             schemaValidationPassed: true,
+            userContextProvided: validatedInput.userContextProvided,
+            userContextFieldCount: validatedInput.userContextFieldCount,
             cacheHit: true,
             cacheKeyVersion: cacheKey.cacheKeyVersion,
             timingMs: getEventTimingMetrics(timing.summarize()),
@@ -269,6 +278,8 @@ export async function POST(
         requestId: analysisRequest.id,
         status: "analyzing",
         inputCharCount: validatedInput.inputCharCount,
+        userContextProvided: validatedInput.userContextProvided,
+        userContextFieldCount: validatedInput.userContextFieldCount,
         cacheHit: false,
       },
     });
@@ -279,6 +290,7 @@ export async function POST(
         redactedText: redaction.redactedText,
         privacyFlags: redaction.flags,
         situation: validatedInput.situation,
+        userContext: validatedInput.userContext,
       },
       {
         mark: timing.mark,
@@ -341,6 +353,8 @@ export async function POST(
         retryCount: generated.runtimeModel.retryCount,
         fallbackUsed: generated.runtimeModel.fallbackUsed,
         schemaValidationPassed: generated.runtimeModel.schemaValidationPassed,
+        userContextProvided: validatedInput.userContextProvided,
+        userContextFieldCount: validatedInput.userContextFieldCount,
         cacheHit: false,
         cacheKeyVersion: cacheKey?.cacheKeyVersion ?? null,
         timingMs: getEventTimingMetrics(timing.summarize()),

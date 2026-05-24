@@ -8,6 +8,7 @@ import { isDbConfigured } from "@/lib/db/client";
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import { normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
 
 type UnlockPageProps = {
   params: Promise<{
@@ -39,7 +40,7 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
   }
 
   const result = record.result.normalizedResultJson;
-  const paidResult = result.paid_result;
+  const paidResult = normalizePaidResultForDisplay(result.paid_result);
 
   return (
     <main className="anyu-shell">
@@ -65,18 +66,46 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
         <Card className="anyu-insight-card">
           <p className="anyu-kicker t-label-dim">deeper signal</p>
           <h2 className="anyu-section-title">更深一層的訊號</h2>
-          <p className="anyu-copy t-reading">{paidResult.deeper_signal_analysis}</p>
-          <p className="anyu-copy t-reading">{paidResult.possible_interpretation}</p>
+          <p className="anyu-copy t-reading">{paidResult.fullSummary}</p>
+          <div className="anyu-signal-list">
+            {paidResult.signalDeepDive.map((item) => (
+              <article key={item.title} className="anyu-signal-item">
+                <strong>{item.title}</strong>
+                <p className="anyu-subtle-note">{item.evidence}</p>
+                <p className="anyu-subtle-note">{item.whatItMayMean}</p>
+              </article>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <p className="anyu-kicker t-label-dim">possible states</p>
+          <h2 className="anyu-section-title">三種可能狀態</h2>
+          <div className="anyu-signal-list">
+            {paidResult.possibleStates.map((state) => (
+              <article key={state.label} className="anyu-signal-item">
+                <strong>{state.label}</strong>
+                <p className="anyu-subtle-note">可能性：{state.likelihood}</p>
+                <p className="anyu-subtle-note">{state.explanation}</p>
+              </article>
+            ))}
+          </div>
         </Card>
 
         <Card>
           <p className="anyu-kicker t-label-dim">reply strategy</p>
           <h2 className="anyu-section-title">三種不失控的回法</h2>
           <div className="anyu-signal-list">
-            {Object.entries(paidResult.reply_strategies).map(([label, copy]) => (
-              <article key={label} className="anyu-signal-item">
-                <strong>{label}</strong>
-                <p className="anyu-subtle-note">{copy}</p>
+            {paidResult.replyStrategies.map((strategy) => (
+              <article key={strategy.label} className="anyu-signal-item">
+                <strong>{strategy.label}</strong>
+                <p className="anyu-subtle-note">{strategy.whenToUse}</p>
+                <p className="anyu-subtle-note">{strategy.whyItWorks}</p>
+                <ul className="anyu-plain-list">
+                  {strategy.copyableMessages.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
               </article>
             ))}
           </div>
@@ -85,12 +114,29 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
         <Card>
           <p className="anyu-kicker t-label-dim">risk guardrail</p>
           <h2 className="anyu-section-title">先不要做的事</h2>
-          <p className="anyu-copy t-reading">{paidResult.risk_warning}</p>
+          <p className="anyu-copy t-reading">{paidResult.softInsight}</p>
           <ul className="anyu-plain-list">
-            {paidResult.what_not_to_do.map((item) => (
+            {paidResult.avoidDoing.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
+        </Card>
+
+        <Card>
+          <p className="anyu-kicker t-label-dim">next 48 hours</p>
+          <h2 className="anyu-section-title">接下來 48 小時</h2>
+          <ul className="anyu-plain-list">
+            {paidResult.next48HourPlan.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </Card>
+
+        <Card className="anyu-quote-card">
+          <p className="anyu-kicker t-label-dim">summary card</p>
+          <h2 className="anyu-section-title">{paidResult.summaryCard.headline}</h2>
+          <p className="anyu-copy t-reading">{paidResult.summaryCard.body}</p>
+          <p className="anyu-copy t-reading">{paidResult.summaryCard.nextMove}</p>
         </Card>
 
         <LegalFooter />

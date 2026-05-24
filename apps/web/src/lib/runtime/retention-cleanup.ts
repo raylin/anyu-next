@@ -38,14 +38,68 @@ const SCRUBBED_RESULT_PLACEHOLDER: ProductResult = {
     preview_copy: "若你仍想查看新的分析，請重新提交目前的互動情境。",
   },
   paid_result: {
-    deeper_signal_analysis: "完整分析內容已依保留政策清除。",
-    possible_interpretation: "完整分析內容已依保留政策清除。",
-    risk_warning: "完整分析內容已依保留政策清除。",
-    what_not_to_do: ["不要依賴已過期的舊分析做判斷。"],
-    reply_strategies: {
-      主動推進: "內容已清除",
-      低壓試探: "內容已清除",
-      暫時拉開: "內容已清除",
+    fullSummary: "完整分析內容已依保留政策清除。",
+    possibleStates: [
+      {
+        label: "內容已清除",
+        likelihood: "low",
+        explanation: "完整分析內容已依保留政策清除。",
+      },
+      {
+        label: "內容已清除",
+        likelihood: "low",
+        explanation: "完整分析內容已依保留政策清除。",
+      },
+      {
+        label: "內容已清除",
+        likelihood: "low",
+        explanation: "完整分析內容已依保留政策清除。",
+      },
+    ],
+    signalDeepDive: [
+      {
+        title: "內容已清除",
+        evidence: "完整分析內容已依保留政策清除。",
+        whatItMayMean: "完整分析內容已依保留政策清除。",
+      },
+      {
+        title: "內容已清除",
+        evidence: "完整分析內容已依保留政策清除。",
+        whatItMayMean: "完整分析內容已依保留政策清除。",
+      },
+      {
+        title: "內容已清除",
+        evidence: "完整分析內容已依保留政策清除。",
+        whatItMayMean: "完整分析內容已依保留政策清除。",
+      },
+    ],
+    replyStrategies: [
+      {
+        label: "主動推進",
+        whenToUse: "內容已清除",
+        whyItWorks: "內容已清除",
+        copyableMessages: ["內容已清除", "內容已清除"],
+      },
+      {
+        label: "低壓試探",
+        whenToUse: "內容已清除",
+        whyItWorks: "內容已清除",
+        copyableMessages: ["內容已清除", "內容已清除"],
+      },
+      {
+        label: "暫時拉開",
+        whenToUse: "內容已清除",
+        whyItWorks: "內容已清除",
+        copyableMessages: ["內容已清除", "內容已清除"],
+      },
+    ],
+    next48HourPlan: ["不要依賴已過期的舊分析做判斷。", "如仍需要分析，請重新提交目前情境。", "重新提交前請移除不必要的個人資訊。"],
+    avoidDoing: ["不要依賴已過期的舊分析做判斷。", "不要將已清除內容視為目前建議。"],
+    softInsight: "這份完整分析已依保留政策清除。",
+    summaryCard: {
+      headline: "內容已清除",
+      body: "這份結果已依保留政策清除。",
+      nextMove: "如仍需要分析，請重新提交目前情境。",
     },
   },
   share_card: {

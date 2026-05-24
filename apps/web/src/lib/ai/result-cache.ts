@@ -1,7 +1,8 @@
 import { createHmac } from "node:crypto";
 import type { ModelStrategyName } from "@/lib/ai/types";
+import type { AiTemperatureUserContext } from "@/lib/modules/ai-temperature-context";
 
-export const ANALYSIS_CACHE_KEY_VERSION = "v1";
+export const ANALYSIS_CACHE_KEY_VERSION = "v2";
 const DEVELOPMENT_FALLBACK_CACHE_SECRET = "local-dev-analysis-cache-secret-v1";
 
 export function normalizeAnalyzeCacheText(input: string): string {
@@ -22,6 +23,7 @@ export function buildAnalyzeCacheKey(input: {
   moduleSlug: string;
   redactedText: string;
   situation: string;
+  userContext?: AiTemperatureUserContext;
   promptVersion: string;
   schemaVersion: string;
   modelStrategy: ModelStrategyName;
@@ -38,6 +40,12 @@ export function buildAnalyzeCacheKey(input: {
     moduleSlug: input.moduleSlug,
     redactedText: normalizeAnalyzeCacheText(input.redactedText),
     situation: input.situation,
+    userContext: {
+      relationshipStage: input.userContext?.relationshipStage ?? "",
+      userGoal: input.userContext?.userGoal ?? "",
+      primaryPain: input.userContext?.primaryPain ?? "",
+      replyTone: input.userContext?.replyTone ?? "",
+    },
     promptVersion: input.promptVersion,
     schemaVersion: input.schemaVersion,
     modelStrategy: input.modelStrategy,

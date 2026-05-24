@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
+import { AI_TEMPERATURE_CONTEXT_GROUPS } from "@/lib/modules/ai-temperature-context";
 import {
   ANALYZE_REQUEST_TIMEOUT_MS,
   EMAIL_FALLBACK_BODY,
@@ -132,6 +133,40 @@ describe("ai-temperature UI helpers", () => {
     if (result.ok) {
       expect(result.situation).toBe("已讀不回");
       expect(result.anonymousSessionId).toBe("session-123");
+      expect(result.userContextProvided).toBe(false);
+      expect(result.userContextFieldCount).toBe(0);
+    }
+  });
+
+  it("validates optional context chips and rejects unknown context values", () => {
+    const result = validateAnalyzeInput({
+      text: "我昨天約他週末見面，但他今天已讀後沒回，晚上卻還在發限動，我真的有點猜不透。",
+      situation: "已讀不回",
+      userContext: {
+        userGoal: "想自然推進",
+        replyTone: "低壓試探",
+      },
+      allowedChips: aiTemperatureModule.chips,
+    });
+    const unknown = validateAnalyzeInput({
+      text: "我昨天約他週末見面，但他今天已讀後沒回，晚上卻還在發限動，我真的有點猜不透。",
+      userContext: {
+        userGoal: "請直接替我操控對方",
+      },
+      allowedChips: aiTemperatureModule.chips,
+    });
+
+    expect(AI_TEMPERATURE_CONTEXT_GROUPS).toHaveLength(4);
+    expect(result.ok).toBe(true);
+    expect(unknown.ok).toBe(false);
+
+    if (result.ok) {
+      expect(result.userContext).toEqual({
+        userGoal: "想自然推進",
+        replyTone: "低壓試探",
+      });
+      expect(result.userContextProvided).toBe(true);
+      expect(result.userContextFieldCount).toBe(2);
     }
   });
 

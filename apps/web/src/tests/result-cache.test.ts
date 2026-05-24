@@ -10,8 +10,8 @@ describe("analysis result cache", () => {
     moduleSlug: "ambiguous-temperature",
     redactedText: "他昨天說晚點回我， 今天又看了限動還沒回。",
     situation: "已讀不回",
-    promptVersion: "product_result_prompt_v0.2",
-    schemaVersion: "product_result_schema_v0",
+    promptVersion: "product_result_prompt_v0.3",
+    schemaVersion: "product_result_schema_v1",
     modelStrategy: "sonnet_default" as const,
     provider: "anthropic" as const,
     primaryModel: "claude-sonnet-4-20250514",
@@ -52,7 +52,7 @@ describe("analysis result cache", () => {
     const changedPrompt = buildAnalyzeCacheKey(
       {
         ...baseInput,
-        promptVersion: "product_result_prompt_v0.3",
+        promptVersion: "product_result_prompt_v0.4",
       },
       {
         NODE_ENV: "test",
@@ -71,6 +71,29 @@ describe("analysis result cache", () => {
 
     expect(changedPrompt?.cacheKeyHash).not.toBe(baseKey?.cacheKeyHash);
     expect(changedModel?.cacheKeyHash).not.toBe(baseKey?.cacheKeyHash);
+  });
+
+  it("invalidates the key when optional user context changes", () => {
+    const baseKey = buildAnalyzeCacheKey(
+      baseInput,
+      {
+        NODE_ENV: "test",
+      } as NodeJS.ProcessEnv,
+    );
+    const contextKey = buildAnalyzeCacheKey(
+      {
+        ...baseInput,
+        userContext: {
+          userGoal: "想自然推進",
+          replyTone: "低壓試探",
+        },
+      },
+      {
+        NODE_ENV: "test",
+      } as NodeJS.ProcessEnv,
+    );
+
+    expect(contextKey?.cacheKeyHash).not.toBe(baseKey?.cacheKeyHash);
   });
 
   it("disables caching in production when the secret is missing", () => {

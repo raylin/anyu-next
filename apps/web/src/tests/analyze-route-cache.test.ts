@@ -187,13 +187,19 @@ describe("module analyze cache route behavior", () => {
     expect(mockCheckPersistedAnalyzeLimits).toHaveBeenCalledTimes(1);
     expect(mockCreateAnalysisRequestRecord).toHaveBeenCalledWith(
       expect.objectContaining({
-        cacheKeyVersion: "v1",
+        cacheKeyVersion: "v2",
         cacheKeyHash: expect.any(String),
         modelStrategy: "sonnet_default",
         primaryModel: "claude-sonnet-4-20250514",
       }),
     );
     expect(mockGenerateModuleResult).toHaveBeenCalledTimes(1);
+    expect(mockGenerateModuleResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userContext: {},
+      }),
+      expect.any(Object),
+    );
     expect(mockCreateAnalysisResultRecord).toHaveBeenCalledWith(
       expect.objectContaining({
         requestId: "request-2",

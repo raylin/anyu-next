@@ -1,5 +1,9 @@
 import type { ProductResult } from "@/lib/ai/product-result-schema";
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
+import {
+  normalizeUserContext,
+  type AiTemperatureUserContext,
+} from "@/lib/modules/ai-temperature-context";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 
 export const MIN_ANALYZE_LENGTH = 30;
@@ -71,6 +75,9 @@ export type AnalyzeInputValidationResult =
       text: string;
       situation: string;
       anonymousSessionId: string | null;
+      userContext: AiTemperatureUserContext;
+      userContextProvided: boolean;
+      userContextFieldCount: number;
       inputCharCount: number;
     }
   | {
@@ -263,9 +270,19 @@ export function validateAnalyzeInput(input: {
   text?: string;
   situation?: string;
   anonymousSessionId?: string;
+  userContext?: unknown;
   allowedChips: readonly string[];
 }): AnalyzeInputValidationResult {
   const text = input.text?.trim() ?? "";
+  const normalizedContext = normalizeUserContext(input.userContext);
+
+  if ("ok" in normalizedContext && normalizedContext.ok === false) {
+    return {
+      ok: false,
+      error: "validation_error",
+      message: "送出的內容格式不正確，請重新整理後再試。",
+    };
+  }
 
   if (text.length < MIN_ANALYZE_LENGTH) {
       return {
@@ -288,6 +305,9 @@ export function validateAnalyzeInput(input: {
     text,
     situation: normalizeSituationType(input.situation, input.allowedChips),
     anonymousSessionId: input.anonymousSessionId?.trim() || null,
+    userContext: normalizedContext.context,
+    userContextProvided: normalizedContext.provided,
+    userContextFieldCount: normalizedContext.fieldCount,
     inputCharCount: text.length,
   };
 }
@@ -333,8 +353,8 @@ export function mapProductResultToViewModel(
     insightTitle: result.insight_layer.title,
     insight: result.insight_layer.explanation,
     reassurance:
-      result.paid_result.risk_warning ||
-      result.paid_result.what_not_to_do[0] ||
+      result.paid_result.softInsight ||
+      result.paid_result.avoidDoing[0] ||
       result.free_result.uncertainty_note,
     persona: result.share_card.relationship_persona,
     shareQuote: result.share_card.card_sentence,

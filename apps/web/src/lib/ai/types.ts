@@ -1,9 +1,11 @@
 import type { ProductResult } from "@/lib/ai/product-result-schema";
+import type { AiTemperatureUserContext } from "@/lib/modules/ai-temperature-context";
 
 export type AnalyzeRequestPayload = {
   text: string;
   situation?: string;
   anonymousSessionId?: string;
+  userContext?: AiTemperatureUserContext;
 };
 
 export type AnalyzeSuccessResponse = {
@@ -88,6 +90,8 @@ export type PromptMetadata = {
   variant: string;
   model_provider: string;
   model_name: string;
+  user_context: AiTemperatureUserContext;
+  user_context_notes: Record<string, string>;
 };
 
 export type StoredAnalysisResult = {

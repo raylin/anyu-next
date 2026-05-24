@@ -1,4 +1,4 @@
-# Product Result Prompt v0.2 — 曖昧溫度計
+# Product Result Prompt v0.3 — 曖昧溫度計
 
 Use this prompt to generate one user-facing product result for the `曖昧溫度計` fake-door experiment.
 
@@ -6,7 +6,7 @@ This prompt belongs to the Product Runtime Track:
 
 ```text
 prompts/product_result_prompt_v0.md
-schemas/product_result_schema_v0.json
+schemas/product_result_schema_v1.json
 ```
 
 It is separate from the Research Signal Track:
@@ -64,13 +64,22 @@ Primary v0 situation types:
 
 The user may paste a short conversation or describe what happened.
 
+Optional structured user context may be present in source metadata:
+
+- `user_context.relationshipStage`
+- `user_context.userGoal`
+- `user_context.primaryPain`
+- `user_context.replyTone`
+
+Use these only as soft behavioral priors. They are not raw evidence. Do not quote them as if they came from the conversation, and never let them override the actual input. Use `user_context_notes` to tune which reply strategies and copyable messages are most useful.
+
 ## Output Rules
 
 - Return valid JSON only.
 - Do not include markdown.
 - Do not include commentary.
 - Do not include code fences.
-- The JSON must conform to `schemas/product_result_schema_v0.json`.
+- The JSON must conform to `schemas/product_result_schema_v1.json`.
 - Use Traditional Chinese for all user-facing values.
 - Keep metadata values factual and concise.
 - Keep raw conversation text out of `share_card`.
@@ -232,7 +241,7 @@ Good preview copy:
 
 ### `paid_result`
 
-The paid result should help the user decide what to do next.
+The paid result is the unlocked value. It should help the user understand the likely interaction states, decide what to do next, and copy a message without feeling needy or manipulative.
 
 Rules:
 
@@ -240,21 +249,18 @@ Rules:
 - Write like a smart friend who understands interaction patterns, not like a consultant report.
 - Do not claim to know the other person's true intent.
 - Do not use `意圖`, `真實`, or `完整意義`; use softer phrasing such as `投入度`, `互動意願`, `目前訊號`, or `對方的回應模式`.
-- `what_not_to_do` should be specific and practical.
-- Reply strategies should feel natural in Traditional Chinese.
-- Each reply strategy string should include:
-  - a short strategy explanation
-  - one concrete message example that sounds natural in Traditional Chinese
-- Every one of the three strategy values must literally contain the substring `可以這樣回：「`
-- Every one of the three strategy values must also contain the closing quote `」`
-- Do not describe a strategy without giving the concrete example sentence.
-- Format each strategy string like:
-
-```text
-低壓試探：先不要追問已讀不回，改用不需要對方立刻承諾的輕話題測試溫度。可以這樣回：「我先不催你～只是剛剛想到那家店好像真的不錯，之後有空再說。」
-```
-
+- `fullSummary`: one practical unlocked summary, not a repeat of the free result.
+- `possibleStates`: exactly 3 plausible states. Each state needs `label`, `likelihood`, and `explanation`. Use likelihood values only: `low`, `medium`, `high`.
+- `signalDeepDive`: exactly 3 user-facing signal explanations. Each item needs `title`, `evidence`, and `whatItMayMean`. Do not paste raw conversation text; paraphrase signals safely.
+- `replyStrategies`: exactly 3 strategies with labels `主動推進`, `低壓試探`, and `暫時拉開`. Each needs `whenToUse`, `whyItWorks`, and 2–3 `copyableMessages`.
+- Each `copyableMessages` value must be a message the user could paste directly in Traditional Chinese.
+- At least one copyable message in each strategy should sound casual and Taiwan-native.
+- `next48HourPlan`: 3–5 concrete steps for the next two days.
+- `avoidDoing`: 2–5 specific practical guardrails.
+- `softInsight`: a gentle personal insight that preserves dignity and uncertainty.
+- `summaryCard`: a compact unlocked takeaway with `headline`, `body`, and `nextMove`.
 - Avoid manipulative, cruel, or game-playing advice.
+- Use optional user context only to choose emphasis and tone. Do not invent evidence from it.
 
 Avoid consultant-like wording:
 
@@ -425,14 +431,68 @@ Return only valid JSON with this exact top-level shape:
     "preview_copy": ""
   },
   "paid_result": {
-    "deeper_signal_analysis": "",
-    "possible_interpretation": "",
-    "risk_warning": "",
-    "what_not_to_do": [],
-    "reply_strategies": {
-      "主動推進": "",
-      "低壓試探": "",
-      "暫時拉開": ""
+    "fullSummary": "",
+    "possibleStates": [
+      {
+        "label": "",
+        "likelihood": "medium",
+        "explanation": ""
+      },
+      {
+        "label": "",
+        "likelihood": "medium",
+        "explanation": ""
+      },
+      {
+        "label": "",
+        "likelihood": "medium",
+        "explanation": ""
+      }
+    ],
+    "signalDeepDive": [
+      {
+        "title": "",
+        "evidence": "",
+        "whatItMayMean": ""
+      },
+      {
+        "title": "",
+        "evidence": "",
+        "whatItMayMean": ""
+      },
+      {
+        "title": "",
+        "evidence": "",
+        "whatItMayMean": ""
+      }
+    ],
+    "replyStrategies": [
+      {
+        "label": "主動推進",
+        "whenToUse": "",
+        "whyItWorks": "",
+        "copyableMessages": ["", ""]
+      },
+      {
+        "label": "低壓試探",
+        "whenToUse": "",
+        "whyItWorks": "",
+        "copyableMessages": ["", ""]
+      },
+      {
+        "label": "暫時拉開",
+        "whenToUse": "",
+        "whyItWorks": "",
+        "copyableMessages": ["", ""]
+      }
+    ],
+    "next48HourPlan": ["", "", ""],
+    "avoidDoing": ["", ""],
+    "softInsight": "",
+    "summaryCard": {
+      "headline": "",
+      "body": "",
+      "nextMove": ""
     }
   },
   "share_card": {
