@@ -1,0 +1,363 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "product_result_schema_v2.json",
+  "title": "Opportunity Radar Product Result Schema v2",
+  "description": "User-facing product runtime result contract for the 曖昧溫度計 fake-door experiment. This schema is separate from the research signal schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "free_result",
+    "insight_layer",
+    "paid_preview",
+    "paid_result",
+    "share_card",
+    "personal_pattern_candidate",
+    "metadata"
+  ],
+  "properties": {
+    "free_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "temperature_score",
+        "state_label",
+        "one_sentence_read",
+        "observed_signals",
+        "uncertainty_note",
+        "paid_teaser"
+      ],
+      "properties": {
+        "temperature_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "state_label": {
+          "type": "string"
+        },
+        "one_sentence_read": {
+          "type": "string"
+        },
+        "observed_signals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "type": "string"
+          }
+        },
+        "uncertainty_note": {
+          "type": "string"
+        },
+        "paid_teaser": {
+          "type": "string"
+        }
+      }
+    },
+    "insight_layer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "explanation",
+        "principle",
+        "user_facing"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "principle": {
+          "type": "string"
+        },
+        "user_facing": {
+          "type": "boolean"
+        }
+      }
+    },
+    "paid_preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "headline",
+        "price",
+        "included_sections",
+        "preview_copy"
+      ],
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "price": {
+          "type": "string"
+        },
+        "included_sections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preview_copy": {
+          "type": "string"
+        }
+      }
+    },
+    "paid_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fullSummary",
+        "possibleStates",
+        "signalDeepDive",
+        "replyStrategies",
+        "next48HourPlan",
+        "avoidDoing",
+        "softInsight",
+        "summaryCard"
+      ],
+      "properties": {
+        "fullSummary": {
+          "type": "string"
+        },
+        "possibleStates": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "likelihood",
+              "explanation"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "likelihood": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "explanation": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "signalDeepDive": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "title",
+              "evidence",
+              "whatItMayMean"
+            ],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "evidence": {
+                "type": "string"
+              },
+              "whatItMayMean": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "replyStrategies": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "tone",
+              "whenToUse",
+              "whyItWorks",
+              "possibleReaction",
+              "followUpIfTheyReply",
+              "copyableMessages"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "tone": {
+                "type": "string"
+              },
+              "whenToUse": {
+                "type": "string"
+              },
+              "whyItWorks": {
+                "type": "string"
+              },
+              "possibleReaction": {
+                "type": "string"
+              },
+              "followUpIfTheyReply": {
+                "type": "string"
+              },
+              "copyableMessages": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 3,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "next48HourPlan": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        },
+        "avoidDoing": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        },
+        "softInsight": {
+          "type": "string"
+        },
+        "summaryCard": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "headline",
+            "body",
+            "nextMove"
+          ],
+          "properties": {
+            "headline": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            },
+            "nextMove": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "share_card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "temperature_label",
+        "state_label",
+        "relationship_persona",
+        "card_sentence"
+      ],
+      "properties": {
+        "temperature_label": {
+          "type": "string"
+        },
+        "state_label": {
+          "type": "string"
+        },
+        "relationship_persona": {
+          "type": "string"
+        },
+        "card_sentence": {
+          "type": "string"
+        }
+      }
+    },
+    "personal_pattern_candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pattern",
+        "confidence",
+        "evidence",
+        "should_store",
+        "user_facing_summary"
+      ],
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "evidence": {
+          "type": "string"
+        },
+        "should_store": {
+          "type": "boolean"
+        },
+        "user_facing_summary": {
+          "type": "string"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "situation_type",
+        "input_length",
+        "generated_at",
+        "experiment_id",
+        "variant",
+        "model_provider",
+        "model_name"
+      ],
+      "properties": {
+        "situation_type": {
+          "type": "string"
+        },
+        "input_length": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "generated_at": {
+          "type": "string"
+        },
+        "experiment_id": {
+          "type": "string",
+          "const": "ambiguous-temperature-fake-door-v0"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "model_provider": {
+          "type": "string"
+        },
+        "model_name": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

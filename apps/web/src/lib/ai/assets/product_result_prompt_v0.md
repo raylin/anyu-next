@@ -1,4 +1,4 @@
-# Product Result Prompt v0.3 — 曖昧溫度計
+# Product Result Prompt v0.4 — 曖昧溫度計
 
 Use this prompt to generate one user-facing product result for the `曖昧溫度計` fake-door experiment.
 
@@ -6,7 +6,7 @@ This prompt belongs to the Product Runtime Track:
 
 ```text
 prompts/product_result_prompt_v0.md
-schemas/product_result_schema_v1.json
+schemas/product_result_schema_v2.json
 ```
 
 It is separate from the Research Signal Track:
@@ -79,7 +79,7 @@ Use these only as soft behavioral priors. They are not raw evidence. Do not quot
 - Do not include markdown.
 - Do not include commentary.
 - Do not include code fences.
-- The JSON must conform to `schemas/product_result_schema_v1.json`.
+- The JSON must conform to `schemas/product_result_schema_v2.json`.
 - Use Traditional Chinese for all user-facing values.
 - Keep metadata values factual and concise.
 - Keep raw conversation text out of `share_card`.
@@ -254,14 +254,29 @@ Rules:
 - `possibleStates`: exactly 3 plausible states. Each state needs `label`, `likelihood`, and `explanation`. Use likelihood values only: `low`, `medium`, `high`.
 - `signalDeepDive`: exactly 3 user-facing signal explanations. Each item needs `title`, `evidence`, and `whatItMayMean`. Do not paste raw conversation text; paraphrase signals safely.
 - `replyStrategies`: exactly 3 strategies with labels `主動推進`, `低壓試探`, and `暫時拉開`. Each needs `whenToUse`, `whyItWorks`, and 2–3 `copyableMessages`.
+- Each reply strategy must also include `tone`, `possibleReaction`, and `followUpIfTheyReply`.
 - Each `copyableMessages` value must be a message the user could paste directly in Traditional Chinese.
 - At least one copyable message in each strategy should sound casual and Taiwan-native.
+- Across all reply strategies, generate 6–9 copyable messages total.
 - `next48HourPlan`: 3–5 concrete steps for the next two days.
 - `avoidDoing`: 2–5 specific practical guardrails.
 - `softInsight`: a gentle personal insight that preserves dignity and uncertainty.
 - `summaryCard`: a compact unlocked takeaway with `headline`, `body`, and `nextMove`.
 - Avoid manipulative, cruel, or game-playing advice.
 - Use optional user context only to choose emphasis and tone. Do not invent evidence from it.
+- Target about 1,800–2,800 Traditional Chinese characters across `paid_result`.
+- Make `next48HourPlan` specific enough that the user knows what to observe or send in the next 24/48 hours.
+- Make `summaryCard.nextMove` concrete; do not use vague phrases such as `觀察看看` without a specific signal.
+
+Safety rules for paid result:
+
+- Do not diagnose the relationship or the other person's state as fact.
+- Do not tell the user to stay, leave, punish, test, or control the other person.
+- Do not present mind-reading as certainty.
+- Do not use clinical or shaming language.
+- Avoid phrases that imply manipulation or importance games.
+- Never use the phrase `讓對方意識到你的重要性`.
+- Prefer `讓你看見對方是否願意接球`, `保留你的節奏`, or `把壓力降到最低`.
 
 Avoid consultant-like wording:
 
@@ -470,20 +485,29 @@ Return only valid JSON with this exact top-level shape:
     "replyStrategies": [
       {
         "label": "主動推進",
+        "tone": "",
         "whenToUse": "",
         "whyItWorks": "",
+        "possibleReaction": "",
+        "followUpIfTheyReply": "",
         "copyableMessages": ["", ""]
       },
       {
         "label": "低壓試探",
+        "tone": "",
         "whenToUse": "",
         "whyItWorks": "",
+        "possibleReaction": "",
+        "followUpIfTheyReply": "",
         "copyableMessages": ["", ""]
       },
       {
         "label": "暫時拉開",
+        "tone": "",
         "whenToUse": "",
         "whyItWorks": "",
+        "possibleReaction": "",
+        "followUpIfTheyReply": "",
         "copyableMessages": ["", ""]
       }
     ],
@@ -564,11 +588,14 @@ The final JSON must not contain these substrings:
 - `過度分析`
 - `依賴`
 - `控制`
+- `操控`
 - `焦慮型`
 - `創傷`
+- `讓對方意識到你的重要性`
 
 If any forbidden substring appears, rewrite that field with softer wording before returning the JSON.
 For example, replace `真實` with softer words such as `明顯`, `實際`, `確實`, or remove the phrase.
 Also verify that `share_card` is identity-safe and contains no raw conversation text.
 Also verify that `share_card.relationship_persona` is not being repeated lazily when another fitting persona would work.
 Also verify that `personal_pattern_candidate.should_store` is always `false` in v0.
+Also verify that `paid_result` has enough depth: 3 states, 3 signal deep dives, 3 reply strategies, 6–9 copyable messages, concrete 48-hour steps, and a concrete summary card.

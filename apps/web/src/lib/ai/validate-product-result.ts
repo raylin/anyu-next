@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import Ajv2020 from "ajv/dist/2020";
 import type { AnySchema, ErrorObject } from "ajv";
+import { validatePaidResultSemantics } from "@/lib/ai/paid-result-semantic-validation";
 import { getProductSchemaPathForVersion } from "@/lib/ai/repo-paths";
 import type { ProductResult } from "@/lib/ai/product-result-schema";
 
@@ -64,7 +65,7 @@ function buildValidationErrorMessage(
 
 export function validateProductResultObject(
   value: unknown,
-  schemaVersion = "product_result_schema_v1",
+  schemaVersion = "product_result_schema_v2",
 ): ProductResult {
   const validator = getValidator(schemaVersion);
 
@@ -72,12 +73,18 @@ export function validateProductResultObject(
     throw new Error(buildValidationErrorMessage(validator.errors));
   }
 
-  return value as ProductResult;
+  const result = value as ProductResult;
+
+  if (schemaVersion === "product_result_schema_v2") {
+    return validatePaidResultSemantics(result);
+  }
+
+  return result;
 }
 
 export function validateProductResultText(
   text: string,
-  schemaVersion = "product_result_schema_v1",
+  schemaVersion = "product_result_schema_v2",
 ): ProductResult {
   let parsed: unknown;
 

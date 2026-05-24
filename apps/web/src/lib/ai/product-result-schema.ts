@@ -12,8 +12,11 @@ export type PaidResultSignalDeepDive = {
 
 export type PaidResultReplyStrategy = {
   label: string;
+  tone?: string;
   whenToUse: string;
   whyItWorks: string;
+  possibleReaction?: string;
+  followUpIfTheyReply?: string;
   copyableMessages: string[];
 };
 
@@ -127,6 +130,12 @@ export function normalizePaidResultForDisplay(value: unknown): RichPaidResult {
         whenToUse: "沿用舊版完整分析的回覆建議。",
         whyItWorks: typeof strategy === "string" ? strategy : "",
         copyableMessages: typeof strategy === "string" ? [strategy] : [],
+      }))
+      .map((strategy) => ({
+        ...strategy,
+        tone: "",
+        possibleReaction: "",
+        followUpIfTheyReply: "",
       }))
     : [];
 

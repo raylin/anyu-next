@@ -15,5 +15,9 @@ export function getProductSchemaPathForVersion(schemaVersion: string): string {
     return path.join(process.cwd(), "src/lib/ai/assets/product_result_schema_v1.json");
   }
 
+  if (normalizedVersion === "product_result_schema_v2") {
+    return path.join(process.cwd(), "src/lib/ai/assets/product_result_schema_v2.json");
+  }
+
   return getProductSchemaPath();
 }

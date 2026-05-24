@@ -21,4 +21,11 @@ describe("app-local AI asset paths", () => {
     expect(schemaPath).toContain("product_result_schema_v1.json");
     expect(fs.existsSync(schemaPath)).toBe(true);
   });
+
+  it("resolves product result schema v2 to the v2 asset", () => {
+    const schemaPath = getProductSchemaPathForVersion("product_result_schema_v2");
+
+    expect(schemaPath).toContain("product_result_schema_v2.json");
+    expect(fs.existsSync(schemaPath)).toBe(true);
+  });
 });

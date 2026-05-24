@@ -74,8 +74,8 @@ function buildRuntimeRecord() {
     },
     result: {
       visualVariant: "B",
-      promptVersion: "product_result_prompt_v0.3",
-      schemaVersion: "product_result_schema_v1",
+      promptVersion: "product_result_prompt_v0.4",
+      schemaVersion: "product_result_schema_v2",
       scoreBucket: "warm",
     },
   };

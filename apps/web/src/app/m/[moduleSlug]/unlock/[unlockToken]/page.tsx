@@ -99,13 +99,22 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
             {paidResult.replyStrategies.map((strategy) => (
               <article key={strategy.label} className="anyu-signal-item">
                 <strong>{strategy.label}</strong>
+                {strategy.tone ? (
+                  <p className="anyu-subtle-note">語氣：{strategy.tone}</p>
+                ) : null}
                 <p className="anyu-subtle-note">{strategy.whenToUse}</p>
                 <p className="anyu-subtle-note">{strategy.whyItWorks}</p>
+                {strategy.possibleReaction ? (
+                  <p className="anyu-subtle-note">可能反應：{strategy.possibleReaction}</p>
+                ) : null}
                 <ul className="anyu-plain-list">
                   {strategy.copyableMessages.map((message) => (
                     <li key={message}>{message}</li>
                   ))}
                 </ul>
+                {strategy.followUpIfTheyReply ? (
+                  <p className="anyu-subtle-note">如果他回了：{strategy.followUpIfTheyReply}</p>
+                ) : null}
               </article>
             ))}
           </div>

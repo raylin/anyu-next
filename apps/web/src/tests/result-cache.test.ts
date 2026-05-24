@@ -10,8 +10,8 @@ describe("analysis result cache", () => {
     moduleSlug: "ambiguous-temperature",
     redactedText: "他昨天說晚點回我， 今天又看了限動還沒回。",
     situation: "已讀不回",
-    promptVersion: "product_result_prompt_v0.3",
-    schemaVersion: "product_result_schema_v1",
+    promptVersion: "product_result_prompt_v0.4",
+    schemaVersion: "product_result_schema_v2",
     modelStrategy: "sonnet_default" as const,
     provider: "anthropic" as const,
     primaryModel: "claude-sonnet-4-20250514",
@@ -52,7 +52,7 @@ describe("analysis result cache", () => {
     const changedPrompt = buildAnalyzeCacheKey(
       {
         ...baseInput,
-        promptVersion: "product_result_prompt_v0.4",
+        promptVersion: "product_result_prompt_v0.5",
       },
       {
         NODE_ENV: "test",
