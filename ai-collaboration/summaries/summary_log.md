@@ -4632,3 +4632,51 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether forbidden paid-result substrings should be enforced with semantic validation and provider retry
 - whether to enforce a paid-result minimum length target in prompt only or runtime validation
 - whether to add copy buttons for unlocked reply messages
+
+## 2026-05-25 - Paid Result Prompt Safety / Value Refinement v0
+
+### Completed Changes
+
+- saved the Paid Result Prompt Safety / Value Refinement v0 handoff into `ai-collaboration/handoffs/`
+- read the paid-result staging value review, execution report, schema-upgrade review bundle, and value/context plan
+- refined paid-result prompt guidance to v0.4
+- added product result schema v2 with required reply strategy `tone`, `possibleReaction`, and `followUpIfTheyReply`
+- added runtime paid-result semantic validation for forbidden phrasing and minimum value depth
+- updated Module 01 prompt/schema versions to `product_result_prompt_v0.4` and `product_result_schema_v2`
+- updated demo/retention fixtures, unlocked route rendering, and tests
+- refreshed staging and ran one synthetic-safe staging review
+- created review bundle and execution report
+
+### Safety / Value Refinement Summary
+
+- forbidden paid-result substrings are now runtime-enforced for schema v2 outputs
+- semantic validation checks section counts, copyable message count, concrete 48-hour plan, summary card, avoid list, soft insight, and aggregate paid-result text length
+- staging synthetic result passed with 3 states, 3 signal dives, 3 reply strategies, 6 copyable messages, v2 fields present, 2,246 paid-result JSON chars, and no forbidden substring match
+- repeat same input/context returned a cache hit under the new prompt/schema versions
+- event metadata still excludes raw context values and paid result text
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 24 files / 104 tests
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed, 9 Playwright tests
+
+### Staging Review Status
+
+- refreshed staging deployment and alias for implementation commit `d754dfb`
+- staging synthetic review passed
+
+### Commit / Push
+
+- implementation commit: `d754dfb`, pushed to `origin/staging`
+- final docs/report commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- whether semantic validation should retry once instead of failing safe
+- whether ChatGPT wants one more paid-result tone sample before title hierarchy polish
