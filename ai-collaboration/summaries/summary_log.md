@@ -4582,3 +4582,53 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 - whether the first context chip set is too broad or should be simplified after staging review
 - whether the unlocked page should add copy buttons for each paid reply message
 - whether schema file resolution should become version-aware before adding another schema version
+
+## 2026-05-25 - Paid Result Staging Value Review v0
+
+### Completed Changes
+
+- saved the Paid Result Staging Value Review v0 handoff into `ai-collaboration/handoffs/`
+- ran staging synthetic value review for paid result v1
+- fixed context allowlist mismatch so the handoff's recommended context values are accepted
+- split `product_result_schema_v1.json` from the legacy v0 schema file and added version-aware schema resolution
+- raised Anthropic output token budget for richer paid-result JSON
+- refreshed staging preview deployment and reassigned `staging.anyu.tw`
+- verified rich unlocked result structure, cache behavior, invalid unlock safety, paid preview copy, and event metadata privacy
+- created review bundle and execution report
+
+### Staging Value Review Summary
+
+- paid result v1 is materially richer than the free result and includes the expected structured sections
+- same text/context produced a cache hit on repeat; same text with different context produced a cache miss and a separate result
+- event metadata stores context booleans/counts only and did not include raw context values or forbidden operational markers
+- primary reviewed paid result was slightly below the rough 1,800+ character target
+- one generated guardrail used a phrase from the prompt's forbidden substring list, so prompt/validator safety needs one more pass
+
+### Opportunistic Cleanup Summary
+
+- completed version-aware schema file resolution
+- restored v0 schema file to legacy v0 and added v1 schema file
+- updated paid preview copy to promise 3 next replies, 3 possible states, 48-hour strategy, and summary card
+- aligned tests with the revised context chips and schema resolution
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 24 files / 98 tests
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed, 9 Playwright tests
+
+### Commit / Push
+
+- stabilization commit: `71026c0`, pushed to `origin/staging`
+- final review commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- whether forbidden paid-result substrings should be enforced with semantic validation and provider retry
+- whether to enforce a paid-result minimum length target in prompt only or runtime validation
+- whether to add copy buttons for unlocked reply messages
