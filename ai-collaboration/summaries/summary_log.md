@@ -4445,3 +4445,64 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether staging LIFF runtime returns an ID token with the expected channel audience after deployment
 - whether production should explicitly set `LINE_LOGIN_CHANNEL_ID` or rely on LIFF ID prefix derivation
+
+## 2026-05-24 - LINE Fulfillment Hardening Staging Smoke v0
+
+### Completed Changes
+
+- saved the LINE Fulfillment Hardening Staging Smoke v0 handoff into `ai-collaboration/handoffs/`
+- verified staging DB has `line_webhook_events` and `line_webhook_rate_limits` plus expected indexes
+- verified staging public LINE env still returns staging LIFF ID and test OA add URL
+- verified existing synthetic analyze/unlock/unlocked route flow still works
+- verified hardened LIFF bind rejects client-only user ID and invalid ID token
+- verified webhook invalid signature rejection on staging
+- verified staging event metadata remains safe
+- updated staging setup notes
+- created review bundle at `ai-collaboration/research/2026-05-21-line-fulfillment-hardening-staging-smoke-v0-review-bundle.md`
+- created execution report at `ai-collaboration/reports/2026-05-21-line-fulfillment-hardening-staging-smoke-v0-execution-report.md`
+
+### Staging Hardening Smoke Status
+
+- route-level smoke passed
+- exact commit marker not exposed; freshness verified by hardened LIFF bind behavior
+
+### Migration Status
+
+- staging migration `0004` objects verified
+- production migration not run
+
+### LIFF Verification Status
+
+- client-only `liffUserId` rejected
+- invalid `idToken` rejected
+- valid live ID token test pending manual LIFF in-app smoke
+
+### Webhook Hardening Status
+
+- invalid signature rejection passed
+- duplicate/rate guard DB objects verified
+- signed duplicate/rate guard live smoke not run because it requires server secret handling
+
+### Manual Test OA Status
+
+- not repeated in this pass; previous manual staging/test OA short-code smoke remains passed
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 24 files / 94 tests
+- `corepack pnpm build` passed
+- `corepack pnpm test:e2e:local` passed, 9 Playwright tests
+
+### Commit / Push
+
+- commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- whether real staging LIFF in-app runtime returns and binds a valid ID token as expected
+- whether production should explicitly configure `LINE_LOGIN_CHANNEL_ID`

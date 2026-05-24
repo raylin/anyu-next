@@ -66,6 +66,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - 2026-05-21 staging smoke initially found a live env mismatch; the public Vercel Preview env was synced and redeployed, and `/api/unlock-intent` now returns the staging LIFF URL and test OA add-friend URL.
 - 2026-05-21 real staging smoke verified route-level LINE fulfillment behavior on staging.
 - 2026-05-21 manual staging/test OA short-code smoke passed. Record only sanitized pass status; do not store LINE user IDs, codes, tokens, tokenized URLs, raw input, or private message content.
+- 2026-05-24 hardening smoke verified staging serves the hardened LIFF bind route, rejects client-only user IDs, rejects invalid ID tokens, preserves staging/test OA public env, and keeps event metadata safe.
 
 ## Smoke Checklist
 
@@ -88,3 +89,4 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 | 2026-05-21 | Verified staging LIFF bind, unlocked route, invalid-signature webhook handling, and event privacy. | Codex |
 | 2026-05-21 | Recorded sanitized manual staging/test OA short-code smoke pass; production was not touched. | Codex |
 | 2026-05-21 | Applied staging webhook hardening migration and documented ID-token verification requirement. | Codex |
+| 2026-05-24 | Recorded hardened staging route smoke pass for public env, missing/invalid LIFF ID token rejection, invalid webhook signature, unlocked route, and event privacy. | Codex |
