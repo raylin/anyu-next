@@ -4506,3 +4506,38 @@ Persistent agent memory for Opportunity Radar summaries under `ai-collaboration/
 
 - whether real staging LIFF in-app runtime returns and binds a valid ID token as expected
 - whether production should explicitly configure `LINE_LOGIN_CHANNEL_ID`
+
+## 2026-05-24 - Paid Result Value + Context Input Plan v0
+
+### Completed Changes
+
+- saved the Paid Result Value + Context Input Plan v0 handoff into `ai-collaboration/handoffs/`
+- audited the current `paid_result` schema and unlocked page structure
+- created paid result upgrade plan at `ai-collaboration/research/2026-05-21-paid-result-value-context-input-plan-v0.md`
+- created execution report at `ai-collaboration/reports/2026-05-21-paid-result-value-context-input-plan-v0-execution-report.md`
+- made no app code, prompt/schema, DB, UI, LINE fulfillment, model, provider, or production changes
+
+### Learnings
+
+- current unlocked result is structurally closer to a free-result extension than a paid-quality NT$49 package
+- target paid result should include 7-9 sections, 6-9 copyable messages, 3 possible states, 3 signal deep dives, a 24/48-hour plan, and a summary card
+- optional context chips should map into structured prompt variables and cache-key fields, not raw appended prompt text
+
+### Validation Results
+
+- `python3 -m compileall oradar` passed
+- `python3 -m compileall tools/topic-ingestion` passed
+- `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests
+- `corepack pnpm lint` passed
+- `corepack pnpm test` passed, 24 files / 94 tests
+- `corepack pnpm build` passed
+
+### Commit / Push
+
+- commit: pending at summary-update time
+- staging push: pending at summary-update time
+
+### Unresolved Questions
+
+- whether context chips should ship with the schema/prompt upgrade or immediately after it
+- exact final paid-result length after staging value review
