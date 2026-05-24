@@ -49,7 +49,7 @@ export function InputCard({
   statusMessage,
   statusDetail,
 }: InputCardProps) {
-  const [contextExpanded, setContextExpanded] = useState(false);
+  const [contextExpanded, setContextExpanded] = useState(true);
   const hasSelectedContext = Object.values(selectedContext).some(Boolean);
   const showContextBody = contextExpanded || hasSelectedContext;
 

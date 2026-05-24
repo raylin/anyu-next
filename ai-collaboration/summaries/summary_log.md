@@ -4711,3 +4711,16 @@ Learnings:
 
 Unresolved questions:
 - Full validation passed; commit hash, staging push status, and staging route freshness to be recorded after completion.
+## 2026-05-25 - Context Chips Default Expanded v0
+
+Completed changes:
+- Saved the context chips default-expanded handoff under `ai-collaboration/handoffs/`.
+- Changed Module 01 optional context chips to render expanded by default.
+- Kept the existing toggle so users can still collapse and reopen the section.
+- Updated Playwright smoke expectations for default-visible context chips.
+
+Learnings:
+- The optional context section can remain visible without changing payload semantics or making any field required.
+
+Unresolved questions:
+- Validation passed; commit hash and staging push status to be recorded after completion.

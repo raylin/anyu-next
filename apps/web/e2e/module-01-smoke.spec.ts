@@ -22,10 +22,11 @@ test.describe("module 01 local ui smoke", () => {
     await expect(page.getByText("情境 · 可選")).toHaveCount(0);
 
     await expect(page.getByRole("button", { name: "讓結果更貼近你（選填）" })).toBeVisible();
-    await expect(page.getByText("你想回給對方的語氣 · 可選")).toHaveCount(0);
-    await page.getByRole("button", { name: "讓結果更貼近你（選填）" }).click();
     await expect(page.getByText("你想回給對方的語氣 · 可選")).toBeVisible();
     await expect(page.getByRole("button", { name: "坦白但不施壓" })).toBeVisible();
+    await page.getByRole("button", { name: "讓結果更貼近你（選填）" }).click();
+    await expect(page.getByText("你想回給對方的語氣 · 可選")).toHaveCount(0);
+    await page.getByRole("button", { name: "讓結果更貼近你（選填）" }).click();
     const contextChip = page.getByRole("button", { name: "我該怎麼回" });
     await contextChip.click();
     await expect(contextChip).toHaveAttribute("aria-pressed", "true");
