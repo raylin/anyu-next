@@ -4724,3 +4724,22 @@ Learnings:
 
 Unresolved questions:
 - Validation passed; commit hash and staging push status to be recorded after completion.
+## 2026-05-25 - LINE Fulfillment Production Activation v0
+
+Completed changes:
+- Saved the production activation handoff under `ai-collaboration/handoffs/`.
+- Verified required Vercel Production LINE env names without printing server secret values.
+- Verified production public LINE values for production LIFF and production OA.
+- Applied production Neon migrations `0003_line_fulfillment.sql` and `0004_line_webhook_hardening.sql`.
+- Deployed current approved app code to production and aliased it to `https://anyu.tw`.
+- Ran synthetic production analyze, unlock intent, unlocked route, LIFF page, LIFF bind hardening, and webhook invalid-signature smoke checks.
+- Updated production LINE setup docs and env matrix with sanitized activation status.
+
+Learnings:
+- Safe Vercel production env pull still returns an empty `DATABASE_URL`, so direct Neon production branch tooling remained necessary for migration verification/application.
+- Production app/database fulfillment is activated, but real OA short-code smoke depends on LINE Console webhook verification and linked bot confirmation.
+
+Unresolved questions:
+- LINE Console production webhook verification / linked bot status.
+- Real production OA short-code smoke with an operator-owned LINE account remains pending.
+- Local validation passed; commit hash and staging push status to be recorded after completion.

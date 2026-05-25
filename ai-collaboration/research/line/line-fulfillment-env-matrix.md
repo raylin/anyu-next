@@ -25,9 +25,9 @@ Purpose: source-of-truth template for LINE fulfillment environment configuration
 | Production | `LINE_CHANNEL_SECRET` | LINE Developers console, production OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
 | Production | `LINE_CHANNEL_ACCESS_TOKEN` | LINE Developers console, production OA channel | No | Yes | configured | Server-only. Do not record value in repo. |
 | Production | `LINE_LOGIN_CHANNEL_ID` | LINE Login / LIFF channel | No | No | optional | Used for server-side ID token verification when not derivable from `NEXT_PUBLIC_LINE_LIFF_ID`. |
-| Production | `NEXT_PUBLIC_LINE_LIFF_ID` | Production LIFF app | Yes | No | configured | Public client config for production LIFF. |
-| Production | `NEXT_PUBLIC_LINE_LIFF_URL` | Production LIFF app | Yes | No | configured | Should target production LIFF URL. |
-| Production | `NEXT_PUBLIC_LINE_ADD_URL` | Production OA add-friend URL | Yes | No | configured | Should target real production OA. |
+| Production | `NEXT_PUBLIC_LINE_LIFF_ID` | Production LIFF app | Yes | No | configured | Live production unlock response returned production LIFF ID after 2026-05-25 production activation. |
+| Production | `NEXT_PUBLIC_LINE_LIFF_URL` | Production LIFF app | Yes | No | configured | Live production unlock response returned production LIFF URL after 2026-05-25 production activation. |
+| Production | `NEXT_PUBLIC_LINE_ADD_URL` | Production OA add-friend URL | Yes | No | configured | Live production unlock response returned real production OA URL after 2026-05-25 production activation. |
 
 ## Implementation Rules
 
@@ -53,7 +53,7 @@ LIFF bind implementation must verify LINE ID tokens server-side and bind only th
 - [x] Preview / Staging env status is live-verified against test OA assets.
 - [x] Production env status is recorded as configured from operator-provided setup context.
 - [x] Preview / Staging env points only to test OA assets.
-- [ ] Production env points only to production OA assets.
+- [x] Production env points only to production OA assets.
 - [ ] Server-only secrets are not exposed through `NEXT_PUBLIC_` variables.
 - [ ] No secret values are committed to repo documentation.
 - [ ] Implementation code does not hard-code environment-specific LINE URLs.

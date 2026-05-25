@@ -68,8 +68,8 @@ Purpose: production LINE OA and LIFF setup record for LINE fulfillment automatio
 
 - [ ] Production webhook URL configured in LINE console.
 - [ ] Webhook verification passes.
-- [ ] Production database has `0004_line_webhook_hardening.sql` applied after explicit approval.
-- [ ] LIFF endpoint opens on mobile.
+- [x] Production database has `0004_line_webhook_hardening.sql` applied after explicit approval.
+- [x] LIFF endpoint opens on production route.
 - [ ] LIFF endpoint opens from LINE in-app browser.
 - [ ] Production OA add-friend URL is confirmed before launch.
 - [ ] Production setup has been tested with one operator-owned LINE account.
@@ -80,3 +80,4 @@ Purpose: production LINE OA and LIFF setup record for LINE fulfillment automatio
 | Date | Change | Operator |
 |---|---|---|
 | 2026-05-21 | Created setup record template. | Codex |
+| 2026-05-25 | Applied production LINE fulfillment/hardening migrations and verified production route-level smoke. LINE Console webhook verification and real OA short-code smoke remain pending. | Codex |
