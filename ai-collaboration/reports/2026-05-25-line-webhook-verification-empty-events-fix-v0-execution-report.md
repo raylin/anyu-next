@@ -49,7 +49,12 @@ Updated the LINE webhook route so LINE Console verification pings with `events: 
 
 ## Production Deployment
 
-- Pending until staging push completes.
+- Deployed to production after staging push.
+- Deployment ID: `dpl_3XzaJiw58oJs2DLLJ4o9QU2RCNHC`
+- Deployment URL: `https://anyu-next-44b2yjc5z-studioanyu-1488s-projects.vercel.app`
+- Production alias: `https://anyu.tw`
+- Production empty-events verification check returned HTTP 200 with `{ "ok": true }`.
+- Production non-empty invalid-signature check returned HTTP 401 with `invalid_signature`.
 
 ## Tech Debt Review
 
@@ -61,8 +66,8 @@ Updated the LINE webhook route so LINE Console verification pings with `events: 
 
 ## Git Commit
 
-Pending.
+`57a83b5`
 
 ## Staging Push
 
-Pending.
+Pushed to `origin/staging`.

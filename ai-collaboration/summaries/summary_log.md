@@ -4755,4 +4755,6 @@ Learnings:
 - LINE Console verification can use an empty event batch, so it needs a safe no-op path distinct from real webhook deliveries.
 
 Unresolved questions:
-- Full validation passed; production deploy, commit hash, and staging push status to be recorded after completion.
+- Full validation passed.
+- Commit `57a83b5` pushed to `origin/staging`.
+- Production deployed as `dpl_3XzaJiw58oJs2DLLJ4o9QU2RCNHC`; empty-events verification returned 200 and non-empty invalid signature returned 401.
