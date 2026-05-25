@@ -4779,3 +4779,24 @@ Unresolved questions:
 - Analyze remains close to the synchronous request ceiling; async request-state/polling should be considered for reliability.
 - Human review should confirm that the concise paid result still feels valuable enough.
 - Commit hash and staging push status to be recorded after completion.
+## 2026-05-26 - Two-tier Free/Paid Result + LINE Fulfillment Architecture v0
+
+Completed changes:
+- Saved the two-tier architecture handoff under `ai-collaboration/handoffs/`.
+- Created a docs-only architecture plan for splitting initial free-result generation from deferred paid-result generation.
+- Recommended Phase 1 beta flow: free result first, paid result generated after LINE bind / short-code match.
+- Recommended first LINE friend free unlock: one complete analysis per verified LINE user.
+- Documented future paywall insertion after free result and before paid generation.
+- Documented future data/cache/fulfillment/payment implications without changing schema or code.
+
+Learnings:
+- Two-tier architecture is the cleanest path to reduce first-result latency and provider cost while preserving richer paid output.
+- LINE should be treated as owned-channel acquisition/retention infrastructure, not only a delivery mechanism.
+- Future implementation needs explicit paid generation state and pending delivery behavior before payment is added.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, and web build.
+
+Unresolved questions:
+- Whether first-free unlock is global per LINE user or per module.
+- Whether Phase 1 paid generation should trigger immediately after LINE bind or after an explicit claim action.
+- Whether schema should use nullable paid fields on `analysis_results` or a separate `analysis_paid_results` table.
+- Commit hash and staging push status to be recorded in final completion summary.
