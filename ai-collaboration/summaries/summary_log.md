@@ -4800,3 +4800,24 @@ Unresolved questions:
 - Whether Phase 1 paid generation should trigger immediately after LINE bind or after an explicit claim action.
 - Whether schema should use nullable paid fields on `analysis_results` or a separate `analysis_paid_results` table.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Two-tier Free Analyze + Deferred Paid Generation v0 Implementation Plan
+
+Completed changes:
+- Saved the implementation-plan handoff under `ai-collaboration/handoffs/`.
+- Inspected current DB schema, migrations, analyze route, result cache, runtime prompt path, unlock intent route, LIFF bind, LINE webhook, result page, and unlock page.
+- Created a schema-aware implementation plan for free-first analyze and deferred paid generation.
+- Recommended separate `analysis_paid_results` storage instead of nullable paid fields on `analysis_results`.
+- Recommended adding `analysis_requests.user_context_json` so deferred paid generation can use the original context without a second user submission.
+- Recommended Phase 1 additive schema/service seams before any behavior switch.
+
+Learnings:
+- Current `ProductResult` requires `paid_result`, and the free result page still reads paid-result content for reassurance, so a display adapter is required before free-only analyze can ship.
+- Unlock page and LINE fulfillment assume paid content already exists, so pending paid-generation states must be added before deferred fulfillment.
+- LINE webhook should not block on paid generation; a small idempotent background processor is needed for short-code flow.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, and web build.
+
+Unresolved questions:
+- Whether Vercel Cron/internal processing is acceptable for Phase 1/3 paid generation, or whether a queue should be required.
+- Whether paid generation should trigger automatically after LINE bind or after explicit in-LIFF claim.
+- Whether first-free unlock should be enabled with Phase 3 or deferred until after pending fulfillment is stable.
+- Commit hash and staging push status to be recorded in final completion summary.
