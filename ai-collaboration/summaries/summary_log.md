@@ -4841,3 +4841,23 @@ Unresolved questions:
 - Whether to add cache-hit shadow backfill after migration verification.
 - Whether `analysis_paid_results` retention cleanup should ship before Phase 2 or before broader traffic.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Two-tier Phase 1 Migration Live Verification v0
+
+Completed changes:
+- Saved the migration live-verification handoff under `ai-collaboration/handoffs/`.
+- Applied `0005_two_tier_phase_1.sql` to Neon staging/preview.
+- Verified staging schema: `analysis_paid_results`, `analysis_requests.user_context_json`, and expected indexes exist.
+- Ran staging analyze checks: cached analyze passed, but two fresh analyze attempts failed with `provider_error` before result persistence.
+- Verified `user_context_json` persisted 4 allowlisted fields on failed fresh request records.
+- Verified staging result/unlock/LIFF/webhook route-level regressions using an existing cached result.
+- Skipped production migration because staging did not pass the fresh analyze/shadow-write gate.
+
+Learnings:
+- The additive staging migration is valid and context persistence works even when provider generation fails.
+- Shadow paid-result verification needs a successful fresh analyze because cache hits intentionally do not backfill shadow rows.
+- Production must not move to the Phase 1 runtime until production `0005` is applied, but production `0005` should wait until staging fresh analyze is healthy.
+
+Unresolved questions:
+- Root cause of staging fresh analyze `provider_error` failures.
+- Whether live shadow writes succeed once fresh analyze succeeds.
+- Commit hash and staging push status to be recorded in final completion summary.
