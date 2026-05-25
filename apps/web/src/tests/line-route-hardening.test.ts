@@ -152,6 +152,88 @@ describe("LINE route hardening", () => {
     );
   });
 
+  it("allows LINE console webhook verification pings with empty events and no signature", async () => {
+    const response = await webhookPost(
+      new Request("http://localhost/api/line/webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          destination: "test",
+          events: [],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ ok: true });
+    expect(mockTryCreateLineWebhookEvent).not.toHaveBeenCalled();
+    expect(mockReplyLineText).not.toHaveBeenCalled();
+    expect(mockInsertEvent).not.toHaveBeenCalled();
+    expect(mockBindUnlockIntentToLine).not.toHaveBeenCalled();
+    expect(mockMarkLineWebhookEventProcessed).not.toHaveBeenCalled();
+  });
+
+  it("rejects non-empty webhook events without a signature", async () => {
+    const body = JSON.stringify({
+      events: [
+        {
+          type: "message",
+          webhookEventId: "event-missing-signature",
+          replyToken: "reply-token",
+          source: { userId: "line-user" },
+          message: { type: "text", text: "A7K2Q9" },
+        },
+      ],
+    });
+
+    const response = await webhookPost(
+      new Request("http://localhost/api/line/webhook", {
+        method: "POST",
+        body,
+      }),
+    );
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: "invalid_signature",
+    });
+    expect(mockTryCreateLineWebhookEvent).not.toHaveBeenCalled();
+    expect(mockInsertEvent).not.toHaveBeenCalled();
+  });
+
+  it("rejects non-empty webhook events with an invalid signature", async () => {
+    const body = JSON.stringify({
+      events: [
+        {
+          type: "message",
+          webhookEventId: "event-invalid-signature",
+          replyToken: "reply-token",
+          source: { userId: "line-user" },
+          message: { type: "text", text: "A7K2Q9" },
+        },
+      ],
+    });
+
+    const response = await webhookPost(
+      new Request("http://localhost/api/line/webhook", {
+        method: "POST",
+        headers: {
+          "x-line-signature": "invalid",
+        },
+        body,
+      }),
+    );
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: "invalid_signature",
+    });
+    expect(mockTryCreateLineWebhookEvent).not.toHaveBeenCalled();
+    expect(mockInsertEvent).not.toHaveBeenCalled();
+  });
+
   it("ignores duplicate webhook events without replying twice", async () => {
     mockTryCreateLineWebhookEvent.mockResolvedValue("duplicate");
     const body = JSON.stringify({

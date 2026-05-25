@@ -30,6 +30,17 @@ import { getModuleBySlug } from "@/lib/modules/registry";
 export async function POST(request: Request) {
   const rawBody = await request.text();
   const signature = request.headers.get(LINE_WEBHOOK_SIGNATURE_HEADER);
+  let payload: LineWebhookPayload;
+
+  try {
+    payload = JSON.parse(rawBody) as LineWebhookPayload;
+  } catch {
+    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+  }
+
+  if (Array.isArray(payload.events) && payload.events.length === 0) {
+    return NextResponse.json({ ok: true });
+  }
 
   const { verifyLineSignature } = await import("@/lib/line/webhook");
   if (
@@ -44,14 +55,6 @@ export async function POST(request: Request) {
 
   if (!isDbConfigured()) {
     return NextResponse.json({ ok: false, error: "config_error" }, { status: 503 });
-  }
-
-  let payload: LineWebhookPayload;
-
-  try {
-    payload = JSON.parse(rawBody) as LineWebhookPayload;
-  } catch {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
   }
 
   for (const event of payload.events ?? []) {

@@ -4743,3 +4743,16 @@ Unresolved questions:
 - LINE Console production webhook verification / linked bot status.
 - Real production OA short-code smoke with an operator-owned LINE account remains pending.
 - Local validation passed; commit hash and staging push status to be recorded after completion.
+## 2026-05-25 - LINE Webhook Verification Empty Events Fix v0
+
+Completed changes:
+- Saved the webhook verification fix handoff under `ai-collaboration/handoffs/`.
+- Updated `/api/line/webhook` so LINE Console verification pings with `events: []` return HTTP 200 without requiring a signature.
+- Preserved signature enforcement for non-empty webhook events.
+- Added tests for empty verification ping, missing signature rejection, and invalid signature rejection.
+
+Learnings:
+- LINE Console verification can use an empty event batch, so it needs a safe no-op path distinct from real webhook deliveries.
+
+Unresolved questions:
+- Full validation passed; production deploy, commit hash, and staging push status to be recorded after completion.
