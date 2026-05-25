@@ -257,14 +257,15 @@ Rules:
 - Each reply strategy must also include `tone`, `possibleReaction`, and `followUpIfTheyReply`.
 - Each `copyableMessages` value must be a message the user could paste directly in Traditional Chinese.
 - At least one copyable message in each strategy should sound casual and Taiwan-native.
-- Across all reply strategies, generate 6–9 copyable messages total.
+- Across all reply strategies, generate exactly 6 copyable messages total.
 - `next48HourPlan`: 3–5 concrete steps for the next two days.
 - `avoidDoing`: 2–5 specific practical guardrails.
 - `softInsight`: a gentle personal insight that preserves dignity and uncertainty.
 - `summaryCard`: a compact unlocked takeaway with `headline`, `body`, and `nextMove`.
 - Avoid manipulative, cruel, or game-playing advice.
 - Use optional user context only to choose emphasis and tone. Do not invent evidence from it.
-- Target about 1,800–2,800 Traditional Chinese characters across `paid_result`.
+- Target about 1,200–1,800 Traditional Chinese characters across `paid_result`.
+- Keep each paid_result field useful but concise; do not add filler just to increase length.
 - Make `next48HourPlan` specific enough that the user knows what to observe or send in the next 24/48 hours.
 - Make `summaryCard.nextMove` concrete; do not use vague phrases such as `觀察看看` without a specific signal.
 
@@ -598,4 +599,4 @@ For example, replace `真實` with softer words such as `明顯`, `實際`, `確
 Also verify that `share_card` is identity-safe and contains no raw conversation text.
 Also verify that `share_card.relationship_persona` is not being repeated lazily when another fitting persona would work.
 Also verify that `personal_pattern_candidate.should_store` is always `false` in v0.
-Also verify that `paid_result` has enough depth: 3 states, 3 signal deep dives, 3 reply strategies, 6–9 copyable messages, concrete 48-hour steps, and a concrete summary card.
+Also verify that `paid_result` has enough depth: 3 states, 3 signal deep dives, 3 reply strategies, exactly 6 copyable messages, concrete 48-hour steps, and a concrete summary card.

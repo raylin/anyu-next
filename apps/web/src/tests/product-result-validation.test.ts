@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
 import type { ProductResult } from "@/lib/ai/product-result-schema";
 import { normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
@@ -15,9 +17,19 @@ describe("product result schema validation", () => {
     );
   });
 
+  it("keeps the paid result prompt concise enough for synchronous analyze", () => {
+    const prompt = readFileSync(
+      resolve(process.cwd(), "src/lib/ai/assets/product_result_prompt_v0.md"),
+      "utf8",
+    );
+
+    expect(prompt).toContain("Target about 1,200–1,800 Traditional Chinese characters");
+    expect(prompt).toContain("exactly 6 copyable messages");
+  });
+
   it("rejects forbidden paid result phrasing", () => {
     const result = cloneDemoResult();
-    result.paid_result.avoidDoing[0] = "不要過度分析每一個小動作。";
+    result.paid_result.avoidDoing[0] = "不要用操控對方的方式推進關係。";
 
     expect(() => validateProductResultObject(result)).toThrow(/forbidden phrasing/);
   });

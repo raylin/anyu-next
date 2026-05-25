@@ -248,7 +248,7 @@ describe("ai-temperature UI helpers", () => {
   });
 
   it("maps elapsed time into wait-state stages and copy", () => {
-    expect(ANALYZE_REQUEST_TIMEOUT_MS).toBeGreaterThan(60_000);
+    expect(ANALYZE_REQUEST_TIMEOUT_MS).toBeGreaterThanOrEqual(90_000);
     expect(getAnalyzeWaitStage(0)).toBe("normal");
     expect(getAnalyzeWaitStage(8_500)).toBe("deeper_read");
     expect(getAnalyzeWaitStage(22_000)).toBe("slow_generation");

@@ -3,22 +3,13 @@ import type { ProductResult, RichPaidResult } from "@/lib/ai/product-result-sche
 export const PAID_RESULT_MIN_TEXT_LENGTH = 1_200;
 
 export const PAID_RESULT_FORBIDDEN_SUBSTRINGS = [
-  "意圖",
-  "真實",
-  "完整意義",
   "出局",
   "渣男",
   "備胎",
   "焦慮型依附",
   "創傷反應",
-  "心理機制",
-  "心理學",
   "專業建議",
   "精準拿捏",
-  "責任感",
-  "過度分析",
-  "依賴",
-  "控制",
   "焦慮型",
   "創傷",
   "操控",

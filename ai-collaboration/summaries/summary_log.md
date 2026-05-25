@@ -4758,3 +4758,24 @@ Unresolved questions:
 - Full validation passed.
 - Commit `57a83b5` pushed to `origin/staging`.
 - Production deployed as `dpl_3XzaJiw58oJs2DLLJ4o9QU2RCNHC`; empty-events verification returned 200 and non-empty invalid signature returned 401.
+## 2026-05-25 - Analyze Timeout Diagnosis + Hotfix v0
+
+Completed changes:
+- Saved the analyze timeout diagnosis hotfix handoff under `ai-collaboration/handoffs/`.
+- Diagnosed the analyze CTA timeout as a synchronous route duration/client timeout mismatch plus a brittle paidResult v2 semantic-validation false-fail.
+- Added explicit analyze route `maxDuration = 90`.
+- Increased client analyze timeout from 65s to 95s.
+- Tightened paid-result prompt output from 1,800-2,800 characters to 1,200-1,800 characters and exactly 6 copyable messages.
+- Relaxed broad semantic forbidden substrings while keeping unsafe/shaming/manipulative phrases blocked.
+- Added tests covering route duration, client timeout, prompt concision, output budget guard, and semantic rejection behavior.
+- Deployed staging and production; sanitized analyze smoke passed on both.
+
+Learnings:
+- The post-paidResult v2 analyze path can take 60-70s even when healthy, so a 65s client timeout was too low.
+- Reducing Anthropic output budget to 3,072 tokens caused truncation/validation risk; v2 still needs 4,096 token headroom.
+- Semantic validation should not hard-fail broad style terms because the model can produce safe text that still contains common words.
+
+Unresolved questions:
+- Analyze remains close to the synchronous request ceiling; async request-state/polling should be considered for reliability.
+- Human review should confirm that the concise paid result still feels valuable enough.
+- Commit hash and staging push status to be recorded after completion.

@@ -28,6 +28,8 @@ import {
 import { createTimingTracker, getEventTimingMetrics } from "@/lib/runtime/timing";
 import type { AnalyzeRequestPayload, ApiErrorResponse } from "@/lib/ai/types";
 
+export const maxDuration = 90;
+
 type ModuleAnalyzeRouteProps = {
   params: Promise<{
     moduleSlug: string;

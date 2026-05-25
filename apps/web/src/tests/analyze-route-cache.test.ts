@@ -55,7 +55,7 @@ vi.mock("@/lib/runtime/abuse-guard", () => ({
   looksLikeUnsupportedRelationshipContent: () => false,
 }));
 
-import { POST as analyzePost } from "@/app/api/modules/[moduleSlug]/analyze/route";
+import { maxDuration, POST as analyzePost } from "@/app/api/modules/[moduleSlug]/analyze/route";
 
 describe("module analyze cache route behavior", () => {
   const validBody = {
@@ -76,6 +76,10 @@ describe("module analyze cache route behavior", () => {
     });
     mockCheckPersistedAnalyzeLimits.mockResolvedValue({ ok: true });
     mockUpdateAnalysisRequestState.mockResolvedValue({ id: "request-2" });
+  });
+
+  it("declares enough serverless time for synchronous provider generation", () => {
+    expect(maxDuration).toBe(90);
   });
 
   it("returns the cached result without calling the provider", async () => {

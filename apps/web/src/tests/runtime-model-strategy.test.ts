@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { ANTHROPIC_MAX_OUTPUT_TOKENS } from "@/lib/ai/provider";
 import { resolveRuntimeStrategy } from "@/lib/ai/runtime";
 
 const originalModelStrategy = process.env.MODEL_STRATEGY;
@@ -26,6 +27,10 @@ afterEach(() => {
 });
 
 describe("runtime model strategy", () => {
+  it("keeps Anthropic output budget bounded for synchronous analyze requests", () => {
+    expect(ANTHROPIC_MAX_OUTPUT_TOKENS).toBeLessThanOrEqual(4096);
+  });
+
   it("defaults to the current provider model when no guarded strategy is requested", () => {
     delete process.env.MODEL_STRATEGY;
 
