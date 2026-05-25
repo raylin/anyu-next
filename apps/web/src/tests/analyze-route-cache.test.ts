@@ -9,6 +9,7 @@ const {
   mockGenerateModuleResult,
   mockCheckPersistedAnalyzeLimits,
   mockResolveRuntimeStrategy,
+  mockCreateCompletedPaidResultShadowRecord,
 } = vi.hoisted(() => ({
   mockCreateAnalysisRequestRecord: vi.fn(),
   mockCreateAnalysisResultRecord: vi.fn(),
@@ -18,6 +19,7 @@ const {
   mockGenerateModuleResult: vi.fn(),
   mockCheckPersistedAnalyzeLimits: vi.fn(),
   mockResolveRuntimeStrategy: vi.fn(),
+  mockCreateCompletedPaidResultShadowRecord: vi.fn(),
 }));
 
 vi.mock("@/lib/db/runtime", () => ({
@@ -26,6 +28,10 @@ vi.mock("@/lib/db/runtime", () => ({
   getCachedAnalysisResult: mockGetCachedAnalysisResult,
   insertEvent: mockInsertEvent,
   updateAnalysisRequestState: mockUpdateAnalysisRequestState,
+}));
+
+vi.mock("@/lib/db/paid-results", () => ({
+  createCompletedPaidResultShadowRecord: mockCreateCompletedPaidResultShadowRecord,
 }));
 
 vi.mock("@/lib/ai/runtime", () => ({
@@ -56,12 +62,17 @@ vi.mock("@/lib/runtime/abuse-guard", () => ({
 }));
 
 import { maxDuration, POST as analyzePost } from "@/app/api/modules/[moduleSlug]/analyze/route";
+import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
 
 describe("module analyze cache route behavior", () => {
   const validBody = {
     text: "他昨天說晚點回我，今天還有看限動但一直沒回，這樣到底是不是在冷掉？",
     situation: "已讀不回",
     anonymousSessionId: "cache-test-session",
+    userContext: {
+      relationshipStage: "曖昧中",
+      userGoal: "我該怎麼回",
+    },
   };
 
   beforeEach(() => {
@@ -117,6 +128,7 @@ describe("module analyze cache route behavior", () => {
     });
     expect(mockGenerateModuleResult).not.toHaveBeenCalled();
     expect(mockCreateAnalysisRequestRecord).not.toHaveBeenCalled();
+    expect(mockCreateCompletedPaidResultShadowRecord).not.toHaveBeenCalled();
     expect(mockUpdateAnalysisRequestState).not.toHaveBeenCalled();
     expect(mockCheckPersistedAnalyzeLimits).not.toHaveBeenCalled();
     expect(mockInsertEvent).toHaveBeenCalledTimes(2);
@@ -146,12 +158,7 @@ describe("module analyze cache route behavior", () => {
     mockGetCachedAnalysisResult.mockResolvedValue(null);
     mockCreateAnalysisRequestRecord.mockResolvedValue({ id: "request-2" });
     mockGenerateModuleResult.mockResolvedValue({
-      result: {
-        free_result: {
-          temperature_score: 78,
-          state_label: "有戲",
-        },
-      },
+      result: aiTemperatureDemoProductResult,
       provider: "anthropic",
       providerModel: "claude-sonnet-4-20250514",
       providerRawJson: { id: "provider-response" },
@@ -195,14 +202,32 @@ describe("module analyze cache route behavior", () => {
         cacheKeyHash: expect.any(String),
         modelStrategy: "sonnet_default",
         primaryModel: "claude-sonnet-4-20250514",
+        userContextJson: {
+          relationshipStage: "曖昧中",
+          userGoal: "我該怎麼回",
+        },
       }),
     );
     expect(mockGenerateModuleResult).toHaveBeenCalledTimes(1);
     expect(mockGenerateModuleResult).toHaveBeenCalledWith(
       expect.objectContaining({
-        userContext: {},
+        userContext: {
+          relationshipStage: "曖昧中",
+          userGoal: "我該怎麼回",
+        },
       }),
       expect.any(Object),
+    );
+    expect(mockCreateCompletedPaidResultShadowRecord).toHaveBeenCalledWith(
+      expect.objectContaining({
+        analysisResultId: "result-2",
+        moduleId: "ai-temperature",
+        themeSlug: "ambiguous-temperature",
+        paidResultJson: aiTemperatureDemoProductResult.paid_result,
+        promptVersion: "product_result_prompt_v0.4",
+        schemaVersion: "product_result_schema_v2",
+        model: "claude-sonnet-4-20250514",
+      }),
     );
     expect(mockCreateAnalysisResultRecord).toHaveBeenCalledWith(
       expect.objectContaining({

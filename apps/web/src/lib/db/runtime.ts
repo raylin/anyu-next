@@ -12,6 +12,7 @@ import {
 } from "@/lib/db/schema";
 import type { ProductResult } from "@/lib/ai/product-result-schema";
 import type { EventPayload } from "@/lib/events/types";
+import type { AiTemperatureUserContext } from "@/lib/modules/ai-temperature-context";
 
 export type AnalysisRequestStatus =
   | "created"
@@ -147,6 +148,7 @@ export async function createAnalysisRequestRecord(input: {
   modelStrategy?: string | null;
   primaryModel?: string | null;
   privacyFlags?: string[];
+  userContextJson?: AiTemperatureUserContext | null;
   retentionExpiresAt?: Date | null;
 }) {
   const db = requireDb();
@@ -171,6 +173,7 @@ export async function createAnalysisRequestRecord(input: {
       primaryModel: input.primaryModel ?? null,
       status: "created",
       privacyFlags: input.privacyFlags ?? [],
+      userContextJson: input.userContextJson ?? null,
       retentionExpiresAt: input.retentionExpiresAt ?? null,
     })
     .returning();

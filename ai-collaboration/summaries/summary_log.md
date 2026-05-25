@@ -4821,3 +4821,23 @@ Unresolved questions:
 - Whether paid generation should trigger automatically after LINE bind or after explicit in-LIFF claim.
 - Whether first-free unlock should be enabled with Phase 3 or deferred until after pending fulfillment is stable.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Two-tier Phase 1 Schema + Service Seams v0
+
+Completed changes:
+- Saved the Phase 1 schema/service-seams handoff under `ai-collaboration/handoffs/`.
+- Added additive migration `apps/web/drizzle/0005_two_tier_phase_1.sql`.
+- Added nullable `analysis_requests.user_context_json` for validated context chips.
+- Added `analysis_paid_results` table and Drizzle schema relations for future paid-result lifecycle separation.
+- Added paid-result repository helpers and free/paid result adapter helpers.
+- Preserved current analyze/result/unlock/LINE behavior while adding best-effort shadow paid-result writes on fresh analyze.
+- Added tests for migration/schema seams, adapters, context persistence, unchanged analyze response shape, and shadow writes.
+
+Learnings:
+- Phase 1 can be additive with no user-visible behavior switch.
+- Fresh analyze now depends on the additive migration for `user_context_json` and `analysis_paid_results`, so live environments need migration verification before deployment.
+- Cache-hit shadow backfill and paid-result retention cleanup should remain separate follow-up tasks.
+
+Unresolved questions:
+- Whether to add cache-hit shadow backfill after migration verification.
+- Whether `analysis_paid_results` retention cleanup should ship before Phase 2 or before broader traffic.
+- Commit hash and staging push status to be recorded in final completion summary.

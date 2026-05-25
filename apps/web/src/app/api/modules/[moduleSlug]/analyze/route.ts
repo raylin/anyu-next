@@ -13,9 +13,11 @@ import {
 } from "@/lib/ai/provider";
 import { buildAnalyzeCacheKey } from "@/lib/ai/result-cache";
 import { generateModuleResult, resolveRuntimeStrategy } from "@/lib/ai/runtime";
+import { createCompletedPaidResultShadowRecord } from "@/lib/db/paid-results";
 import { isDbConfigured } from "@/lib/db/client";
 import { validateAnalyzeInput } from "@/lib/modules/ai-temperature-ui";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import { extractPaidResult } from "@/lib/modules/result-adapters";
 import { redactUserInput } from "@/lib/privacy/pii";
 import {
   checkIpHourlyLimit,
@@ -256,6 +258,7 @@ export async function POST(
       modelStrategy: runtimeStrategy.strategy,
       primaryModel: runtimeStrategy.primaryModel,
       privacyFlags: redaction.flags,
+      userContextJson: validatedInput.userContext,
       retentionExpiresAt,
     });
     analysisRequestId = analysisRequest.id;
@@ -324,6 +327,24 @@ export async function POST(
       providerRawJson: generated.providerRawJson,
       retentionExpiresAt,
     });
+    const paidResult = extractPaidResult(generated.result);
+
+    if (paidResult) {
+      try {
+        await createCompletedPaidResultShadowRecord({
+          analysisResultId: analysisResult.id,
+          moduleId: moduleConfig.moduleId,
+          themeSlug: moduleConfig.slug,
+          paidResultJson: paidResult,
+          promptVersion: moduleConfig.promptVersion,
+          schemaVersion: moduleConfig.schemaVersion,
+          model: generated.providerModel,
+          retentionExpiresAt,
+        });
+      } catch {
+        // Shadow paid-result storage must not break the current full-result analyze flow.
+      }
+    }
     timing.mark("analysis_result_stored");
     await updateAnalysisRequestState({
       requestId: analysisRequest.id,

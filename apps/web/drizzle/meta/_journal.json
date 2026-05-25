@@ -36,6 +36,13 @@
       "when": 1779354000000,
       "tag": "0004_line_webhook_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779379200000,
+      "tag": "0005_two_tier_phase_1",
+      "breakpoints": true
     }
   ]
 }

@@ -11,6 +11,8 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import type { ProductResult } from "@/lib/ai/product-result-schema";
+import type { RichPaidResult } from "@/lib/ai/product-result-schema";
+import type { AiTemperatureUserContext } from "@/lib/modules/ai-temperature-context";
 
 export const sessions = pgTable(
   "sessions",
@@ -115,6 +117,7 @@ export const analysisRequests = pgTable(
     resultId: uuid("result_id"),
     lastHeartbeatAt: timestamp("last_heartbeat_at", { withTimezone: true }),
     privacyFlags: jsonb("privacy_flags").$type<string[]>().default([]).notNull(),
+    userContextJson: jsonb("user_context_json").$type<AiTemperatureUserContext>(),
     retentionExpiresAt: timestamp("retention_expires_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -202,6 +205,44 @@ export const unlockIntents = pgTable(
   }),
 );
 
+export const analysisPaidResults = pgTable(
+  "analysis_paid_results",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    analysisResultId: uuid("analysis_result_id")
+      .notNull()
+      .references(() => analysisResults.id),
+    moduleId: text("module_id").notNull(),
+    themeSlug: text("theme_slug").notNull(),
+    paidResultJson: jsonb("paid_result_json").$type<RichPaidResult>(),
+    status: text("status").default("pending").notNull(),
+    requestedByUnlockIntentId: uuid("requested_by_unlock_intent_id").references(() => unlockIntents.id),
+    requestedReason: text("requested_reason"),
+    promptVersion: text("prompt_version"),
+    schemaVersion: text("schema_version"),
+    model: text("model"),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    failedAt: timestamp("failed_at", { withTimezone: true }),
+    errorCode: text("error_code"),
+    retryCount: integer("retry_count").default(0).notNull(),
+    retentionExpiresAt: timestamp("retention_expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    analysisResultIdx: index("analysis_paid_results_result_idx").on(table.analysisResultId),
+    unlockIntentIdx: index("analysis_paid_results_unlock_intent_idx").on(table.requestedByUnlockIntentId),
+    statusIdx: index("analysis_paid_results_status_idx").on(table.status, table.createdAt),
+    cacheLookupIdx: index("analysis_paid_results_lookup_idx").on(
+      table.moduleId,
+      table.themeSlug,
+      table.status,
+      table.retentionExpiresAt,
+    ),
+  }),
+);
+
 export const contactSubmissions = pgTable(
   "contact_submissions",
   {
@@ -234,6 +275,7 @@ export const analysisResultRelations = relations(analysisResults, ({ one, many }
     fields: [analysisResults.requestId],
     references: [analysisRequests.id],
   }),
+  paidResults: many(analysisPaidResults),
   unlockIntents: many(unlockIntents),
   contactSubmissions: many(contactSubmissions),
 }));
@@ -243,7 +285,19 @@ export const unlockIntentRelations = relations(unlockIntents, ({ one, many }) =>
     fields: [unlockIntents.resultId],
     references: [analysisResults.id],
   }),
+  paidResults: many(analysisPaidResults),
   contactSubmissions: many(contactSubmissions),
+}));
+
+export const analysisPaidResultRelations = relations(analysisPaidResults, ({ one }) => ({
+  result: one(analysisResults, {
+    fields: [analysisPaidResults.analysisResultId],
+    references: [analysisResults.id],
+  }),
+  requestedByUnlockIntent: one(unlockIntents, {
+    fields: [analysisPaidResults.requestedByUnlockIntentId],
+    references: [unlockIntents.id],
+  }),
 }));
 
 export const contactSubmissionRelations = relations(contactSubmissions, ({ one }) => ({
