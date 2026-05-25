@@ -12,7 +12,7 @@ import {
   isProviderConfigError,
 } from "@/lib/ai/provider";
 import { buildAnalyzeCacheKey } from "@/lib/ai/result-cache";
-import { generateModuleResult, resolveRuntimeStrategy } from "@/lib/ai/runtime";
+import { generateModuleResult, isOutputValidationError, resolveRuntimeStrategy } from "@/lib/ai/runtime";
 import { createCompletedPaidResultShadowRecord } from "@/lib/db/paid-results";
 import { isDbConfigured } from "@/lib/db/client";
 import { validateAnalyzeInput } from "@/lib/modules/ai-temperature-ui";
@@ -393,21 +393,28 @@ export async function POST(
       cacheHit: false,
     });
   } catch (error) {
+    const isConfigurationError = isProviderConfigError(error);
+    const isProviderOutputValidationError = isOutputValidationError(error);
+
     if (analysisRequestId) {
       try {
         await updateAnalysisRequestState({
           requestId: analysisRequestId,
           status: "failed",
           failedAt: new Date(),
-          errorCode: isProviderConfigError(error) ? "config_error" : "provider_error",
-          errorCategory: isProviderConfigError(error) ? "configuration" : "provider",
+          errorCode: isConfigurationError ? "config_error" : "provider_error",
+          errorCategory: isConfigurationError
+            ? "configuration"
+            : isProviderOutputValidationError
+              ? "output_validation"
+              : "provider",
         });
       } catch {
         // Preserve the original user-facing analyze failure if status persistence also fails.
       }
     }
 
-    if (isProviderConfigError(error)) {
+    if (isConfigurationError) {
       return errorResponse(503, "config_error", getProviderUserMessage());
     }
 

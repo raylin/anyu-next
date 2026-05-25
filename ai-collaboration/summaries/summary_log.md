@@ -4861,3 +4861,24 @@ Unresolved questions:
 - Root cause of staging fresh analyze `provider_error` failures.
 - Whether live shadow writes succeed once fresh analyze succeeds.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Staging Analyze Provider Error Follow-up v0
+
+Completed changes:
+- Saved the follow-up handoff under `ai-collaboration/handoffs/`.
+- Diagnosed the staging fresh analyze failure path across provider generation, paid-result v2 validation, request/result persistence, user context persistence, and shadow paid-result storage.
+- Confirmed shadow paid-result writes are best-effort and cannot cause analyze failure.
+- Added runtime classification so `PaidResultSemanticValidationError` is treated as output validation for guarded retry/fallback paths.
+- Added sanitized internal `output_validation` failure categorization for future analyze request failures.
+- Added tests for semantic-validation retry classification and sanitized failure categorization.
+- Redeployed staging and verified fresh analyze now completes with a completed shadow `analysis_paid_results` row.
+
+Learnings:
+- The historical failed records only stored generic `provider_error` / `provider`, so their exact provider subcause was not recoverable after the fact.
+- The final fresh staging analyze completed with 4 allowlisted user context fields persisted and a completed shadow paid-result row.
+- Exact requested synthetic input had become a cache hit, so a near-identical synthetic variant was needed to verify fresh persistence.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, web build, and local Playwright smoke.
+
+Unresolved questions:
+- Production `0005` remains pending and was intentionally not applied.
+- Production deploy remains pending until the production migration gate is approved.
+- Commit hash and staging push status to be recorded in final completion summary.

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { ANTHROPIC_MAX_OUTPUT_TOKENS } from "@/lib/ai/provider";
-import { resolveRuntimeStrategy } from "@/lib/ai/runtime";
+import { PaidResultSemanticValidationError } from "@/lib/ai/paid-result-semantic-validation";
+import { isOutputValidationError, resolveRuntimeStrategy } from "@/lib/ai/runtime";
 
 const originalModelStrategy = process.env.MODEL_STRATEGY;
 const originalFastModel = process.env.ANTHROPIC_FAST_MODEL;
@@ -29,6 +30,14 @@ afterEach(() => {
 describe("runtime model strategy", () => {
   it("keeps Anthropic output budget bounded for synchronous analyze requests", () => {
     expect(ANTHROPIC_MAX_OUTPUT_TOKENS).toBeLessThanOrEqual(4096);
+  });
+
+  it("treats paid result semantic validation failures as retryable output validation", () => {
+    expect(
+      isOutputValidationError(
+        new PaidResultSemanticValidationError("paid_result contains forbidden phrasing."),
+      ),
+    ).toBe(true);
   });
 
   it("defaults to the current provider model when no guarded strategy is requested", () => {

@@ -14,6 +14,7 @@ import {
   buildUserContextPromptNotes,
   type AiTemperatureUserContext,
 } from "@/lib/modules/ai-temperature-context";
+import { PaidResultSemanticValidationError } from "@/lib/ai/paid-result-semantic-validation";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import { scoreToBucket } from "@/lib/modules/ai-temperature-ui";
 import type { TimingPhaseName } from "@/lib/runtime/timing";
@@ -71,10 +72,11 @@ function buildPromptMetadata(
   } as const;
 }
 
-function isOutputValidationError(error: unknown): error is Error {
+export function isOutputValidationError(error: unknown): error is Error {
   return (
     error instanceof Error &&
-    (error.message.startsWith("Model output was not valid JSON:") ||
+    (error instanceof PaidResultSemanticValidationError ||
+      error.message.startsWith("Model output was not valid JSON:") ||
       error.message.includes(" is invalid"))
   );
 }

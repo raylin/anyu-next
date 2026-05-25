@@ -7,6 +7,7 @@ const {
   mockInsertEvent,
   mockUpdateAnalysisRequestState,
   mockGenerateModuleResult,
+  mockIsOutputValidationError,
   mockCheckPersistedAnalyzeLimits,
   mockResolveRuntimeStrategy,
   mockCreateCompletedPaidResultShadowRecord,
@@ -17,6 +18,7 @@ const {
   mockInsertEvent: vi.fn(),
   mockUpdateAnalysisRequestState: vi.fn(),
   mockGenerateModuleResult: vi.fn(),
+  mockIsOutputValidationError: vi.fn(),
   mockCheckPersistedAnalyzeLimits: vi.fn(),
   mockResolveRuntimeStrategy: vi.fn(),
   mockCreateCompletedPaidResultShadowRecord: vi.fn(),
@@ -36,6 +38,7 @@ vi.mock("@/lib/db/paid-results", () => ({
 
 vi.mock("@/lib/ai/runtime", () => ({
   generateModuleResult: mockGenerateModuleResult,
+  isOutputValidationError: mockIsOutputValidationError,
   resolveRuntimeStrategy: mockResolveRuntimeStrategy,
 }));
 
@@ -87,6 +90,7 @@ describe("module analyze cache route behavior", () => {
     });
     mockCheckPersistedAnalyzeLimits.mockResolvedValue({ ok: true });
     mockUpdateAnalysisRequestState.mockResolvedValue({ id: "request-2" });
+    mockIsOutputValidationError.mockReturnValue(false);
   });
 
   it("declares enough serverless time for synchronous provider generation", () => {
@@ -295,6 +299,38 @@ describe("module analyze cache route behavior", () => {
         status: "failed",
         errorCode: "provider_error",
         errorCategory: "provider",
+      }),
+    );
+  });
+
+  it("marks output validation failures with a sanitized internal category", async () => {
+    mockGetCachedAnalysisResult.mockResolvedValue(null);
+    mockCreateAnalysisRequestRecord.mockResolvedValue({ id: "request-output-validation-failed" });
+    mockGenerateModuleResult.mockRejectedValue(new Error("paid_result contains forbidden phrasing."));
+    mockIsOutputValidationError.mockReturnValue(true);
+
+    const response = await analyzePost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(validBody),
+      }),
+      {
+        params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      },
+    );
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: "provider_error",
+    });
+    expect(mockUpdateAnalysisRequestState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: "request-output-validation-failed",
+        status: "failed",
+        errorCode: "provider_error",
+        errorCategory: "output_validation",
       }),
     );
   });
