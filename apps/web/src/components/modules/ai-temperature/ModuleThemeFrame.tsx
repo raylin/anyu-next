@@ -160,7 +160,7 @@ type ModuleThemeToggleProps = {
 
 function ModuleThemeToggle({ activeVariant, onSwitch }: ModuleThemeToggleProps) {
   return (
-    <div className="anyu-theme-toggle" aria-label="視覺風格">
+    <div className="anyu-theme-toggle" aria-label="主題切換">
       <button
         type="button"
         className={[

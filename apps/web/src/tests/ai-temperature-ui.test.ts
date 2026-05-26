@@ -315,10 +315,13 @@ describe("ai-temperature UI helpers", () => {
     const globals = readFileSync(resolve(process.cwd(), "src/styles/globals.css"), "utf8");
 
     expect(globals).toContain(".anyu-share-preview {\n  width: 100%;\n  max-width: none;");
+    expect(globals).toContain("display: grid;");
     expect(globals).toContain(".anyu-share-actions {\n  display: grid;\n  gap: 0.45rem;\n  margin-top: var(--anyu-space-3);");
-    expect(globals).toContain(".anyu-share-shell {\n  aspect-ratio: 4 / 5;");
+    expect(globals).toContain(".anyu-share-shell {\n  display: grid;\n  grid-template-rows: auto minmax(0, 1fr) auto;");
+    expect(globals).toContain("min-height: clamp(25rem, 72vw, 32rem);");
     expect(globals).toContain("background: var(--anyu-card);");
-    expect(globals).toContain(".anyu-share-action-primary {\n  background: var(--anyu-ink-dark);");
+    expect(globals).toContain(".anyu-share-action {\n  width: 100%;\n}");
+    expect(globals).toContain(".anyu-share-action-primary {\n  border-color: var(--anyu-ink-dark);");
     expect(globals).toContain(".anyu-reply-card-open .anyu-reply-tag {\n  color: var(--anyu-ink-onDark);");
     expect(globals).toContain(".anyu-reply-why span {\n  color: var(--anyu-accent2);");
     expect(globals).toContain(".anyu-v2 .anyu-signature-card {\n  position: relative;\n  background: var(--anyu-card);");

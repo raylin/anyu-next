@@ -39,10 +39,13 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("解鎖 3 種下一句回法");
     expect(html).toContain("看下一句怎麼回");
     expect(html).toContain('data-module-theme="classic"');
+    expect(html).toContain('aria-label="主題切換"');
     expect(html).toContain('aria-label="切換為柔和主題"');
     expect(html).toContain('aria-label="切換為鮮明主題"');
     expect(html).not.toContain(">柔和<");
     expect(html).not.toContain(">鮮明<");
+    expect(html).not.toContain(">視覺<");
+    expect(html).not.toContain("視覺風格");
     expect(html).not.toContain(">manual<");
     expect(html).not.toContain(">a/b<");
   });
@@ -58,6 +61,7 @@ describe("ai-temperature result conversion polish", () => {
     );
 
     expect(html).toContain("分享這個結果");
+    expect(html).toContain('class="anyu-button anyu-share-action anyu-share-action-primary"');
     expect(html).toContain("複製成 LINE / Threads 可以貼上的文字");
     expect(html).toContain("module");
     expect(html).toContain("曖昧溫度計");

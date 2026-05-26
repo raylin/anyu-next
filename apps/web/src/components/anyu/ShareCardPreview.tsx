@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/anyu/Button";
 import { Wordmark } from "@/components/anyu/Wordmark";
 
 type ShareCardPreviewProps = {
@@ -71,9 +72,13 @@ export function ShareCardPreview({
       </div>
 
       <div className="anyu-share-actions">
-        <button type="button" className="anyu-share-action anyu-share-action-primary" onClick={handlePrimaryShare}>
+        <Button
+          type="button"
+          className="anyu-share-action anyu-share-action-primary"
+          onClick={handlePrimaryShare}
+        >
           分享這個結果
-        </button>
+        </Button>
         <p className="anyu-share-action-detail">複製成 LINE / Threads 可以貼上的文字</p>
       </div>
       {shareStatus ? <p className="anyu-status-message">{shareStatus}</p> : null}

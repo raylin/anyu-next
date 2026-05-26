@@ -784,13 +784,14 @@ textarea {
   width: 100%;
   max-width: none;
   justify-self: stretch;
+  display: grid;
 }
 
 .anyu-share-shell {
-  aspect-ratio: 4 / 5;
   display: grid;
-  align-content: space-between;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: var(--anyu-space-4);
+  min-height: clamp(25rem, 72vw, 32rem);
   padding: 1.2rem;
   background: var(--anyu-card);
   border: 1px solid var(--anyu-line);
@@ -811,16 +812,21 @@ textarea {
 
 .anyu-share-body {
   display: grid;
-  gap: 0.7rem;
+  align-content: center;
+  gap: 0.85rem;
+  max-width: 26rem;
+  padding-block: var(--anyu-space-3);
 }
 
 .anyu-share-persona {
-  font-size: clamp(1.35rem, 3vw, 1.7rem);
+  font-size: clamp(1.7rem, 5vw, 2.45rem);
+  letter-spacing: -0.02em;
 }
 
 .anyu-share-quote {
   margin: 0;
   color: var(--anyu-dim);
+  max-width: 20em;
 }
 
 .anyu-share-temp {
@@ -1228,19 +1234,6 @@ textarea {
 
 .anyu-share-action {
   width: 100%;
-  min-height: 3rem;
-  border: 1px solid var(--anyu-line);
-  border-radius: var(--anyu-radius-xl);
-  background: var(--anyu-surface);
-  color: var(--anyu-ink);
-  font: inherit;
-  text-align: center;
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  transition:
-    transform 120ms ease-out,
-    border-color 180ms ease-out,
-    background-color 180ms ease-out;
 }
 
 .anyu-share-actions {
@@ -1250,12 +1243,7 @@ textarea {
 }
 
 .anyu-share-action-primary {
-  background: var(--anyu-ink-dark);
   border-color: var(--anyu-ink-dark);
-  color: var(--anyu-ink-onDark);
-  box-shadow:
-    0 1px 0 rgba(42, 36, 25, 0.04),
-    0 14px 36px rgba(42, 36, 25, 0.14);
 }
 
 .anyu-share-action:hover {
@@ -1315,6 +1303,10 @@ textarea {
 @media (max-width: 640px) {
   .anyu-shell {
     padding-inline: var(--anyu-space-4);
+  }
+
+  .anyu-share-shell {
+    min-height: 24rem;
   }
 
   .anyu-topbar,

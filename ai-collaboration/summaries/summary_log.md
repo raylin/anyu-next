@@ -5296,3 +5296,22 @@ Learnings:
 Unresolved questions:
 - Staging real-device QA is still needed for Theme B LIFF and short-code unlocked-route continuity.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Module 01 Share Card + Theme Switch Fix v0
+
+Completed changes:
+- Saved the share-card/theme-switch fix handoff under `ai-collaboration/handoffs/`.
+- Updated the shared share-card wrapper and shell so desktop width/margins align with other major cards across Theme A and Theme B.
+- Rebalanced the share-card poster composition to reduce unused middle whitespace without adding private/source content.
+- Routed the share CTA through the shared `Button` component and reduced one-off button styling.
+- Kept the theme switch as compact visual swatches with accessibility labels only, with no visible theme/debug wording.
+- Updated result, CSS contract, and Playwright smoke tests for the visual fixes.
+
+Learnings:
+- The remaining share-card issue was a shared container/composition problem, not a Theme B-only styling issue.
+- The CTA was better fixed by using the existing shared button path rather than theme-specific share-card CSS.
+- The theme switch behavior already persisted and carried over correctly; this pass only removed the remaining visible wrapper wording.
+
+Unresolved questions:
+- Staging screenshot QA is still needed to confirm final desktop share-card alignment in both themes.
+- Local Playwright may remain blocked by the known Chromium/MachPort permission issue.
+- Commit hash and staging push status to be recorded in final completion summary.
