@@ -26,7 +26,7 @@ The current Module 01 experience supports:
 - fake-door unlock intent + contact capture APIs
 - LINE fulfillment MVP with LIFF binding, short-code fallback, and unlocked result route
 - safe runtime timing metadata attached to `analysis_completed` events
-- scheduled retention cleanup for expired `analysis_requests` and `analysis_results` via `/api/cron/retention-cleanup`
+- scheduled retention cleanup for expired `analysis_requests`, `analysis_results`, and `analysis_paid_results` via `/api/cron/retention-cleanup`
 
 The current Module 01 experience still defers:
 
@@ -212,6 +212,8 @@ Retention cleanup dry run:
 curl -H "Authorization: Bearer $RETENTION_CLEANUP_SECRET" \
   "http://localhost:3000/api/cron/retention-cleanup?dryRun=1"
 ```
+
+Dry-run output includes aggregate `analysisPaidResults` counts only. Cleanup scrubs expired paid-result rows in place by clearing `paid_result_json` and marking the row expired; it does not return raw paid-result JSON.
 
 ## Local UI Smoke Tests
 

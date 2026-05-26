@@ -4905,3 +4905,25 @@ Unresolved questions:
 - `analysis_paid_results` retention cleanup remains pending and should be added before broader production traffic or ads.
 - Whether output-validation retry metrics should be monitored separately as traffic grows.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Analysis Paid Results Retention Cleanup v0
+
+Completed changes:
+- Saved the retention cleanup handoff under `ai-collaboration/handoffs/`.
+- Added `analysis_paid_results` to scheduled retention cleanup coverage.
+- Implemented scrub-in-place cleanup for expired paid-result rows by clearing `paid_result_json` and marking rows expired.
+- Extended dry-run output with aggregate `analysisPaidResults` counts.
+- Added tests for paid-result dry-run counts, cleanup scrub count, already scrubbed rows, and route response shape.
+- Updated the production runbook and web README.
+- Deployed refreshed staging and production builds.
+
+Learnings:
+- Staging and production both have `analysis_paid_results` rows with retention timestamps and no overdue eligible rows at verification time.
+- Unauthorized retention route checks returned HTTP 401 on staging and production.
+- Authorized live route dry-run could not be completed from local tooling because env pulls did not provide a usable cleanup secret value.
+- Direct Neon aggregate checks verified staging `analysis_paid_results` total 2 / eligible 0 and production total 1 / eligible 0.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, and web build.
+
+Unresolved questions:
+- Need one authorized production route dry-run from an environment with direct cleanup-secret access.
+- Retention policy for `events`, `unlock_intents`, contact data, and sessions remains future work.
+- Commit hash and staging push status to be recorded in final completion summary.

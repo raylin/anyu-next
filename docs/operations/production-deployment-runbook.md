@@ -299,17 +299,28 @@ Until stronger automation exists, production needs an explicit retention cleanup
 - verify events still exclude raw input and contact values
 - document cleanup completion in an ops log or launch operations note
 
-Scheduled retention cleanup v0 now covers only:
+Scheduled retention cleanup v0 now covers:
 
 - `analysis_requests`
 - `analysis_results`
+- `analysis_paid_results`
 
 Current mechanism:
 
 - Vercel cron path: `/api/cron/retention-cleanup`
 - cadence: daily at `17:00 UTC`
 - secret required: `RETENTION_CLEANUP_SECRET` or `CRON_SECRET`
-- `dryRun=1` returns aggregate counts only
+- `dryRun=1` returns aggregate counts only, including an `analysisPaidResults` block
+
+`analysis_paid_results` cleanup policy:
+
+- uses `analysis_paid_results.retention_expires_at`
+- scrubs in place rather than hard-deleting rows
+- sets `paid_result_json = NULL`
+- sets `status = 'expired'`
+- sets `error_code = 'retention_expired'`
+- preserves identifiers and analysis-result links for aggregate/reference integrity
+- never returns raw paid-result JSON in dry-run output
 
 Still not cleaned automatically in v0:
 
@@ -362,7 +373,7 @@ Known production-launch risks:
 - production DB migration may still diverge from preview if done carelessly
 - LINE CTA flow can be operationally correct in code but still fail if env or alias freshness is wrong
 - retention cleanup is still partly manual
-- only `analysis_requests` and `analysis_results` are scheduled-cleanup targets in v0
+- `events`, `unlock_intents`, contact data, and sessions remain outside scheduled retention cleanup v0
 - current model remains provider-dominant in latency, which affects perceived responsiveness
 - protected staging verification does not fully replace production real-user conditions
 

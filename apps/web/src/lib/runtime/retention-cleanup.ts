@@ -7,6 +7,13 @@ export type RetentionCleanupSummary = {
   dryRun: boolean;
   analysisRequestsDeleted: number;
   analysisResultsDeleted: number;
+  analysisPaidResults: {
+    total: number;
+    withRetention: number;
+    overdue: number;
+    eligibleForCleanup: number;
+    scrubbed: number;
+  };
   startedAt: string;
   finishedAt: string;
   durationMs: number;
@@ -14,6 +21,13 @@ export type RetentionCleanupSummary = {
 
 type CountRow = {
   count: number;
+};
+
+type AnalysisPaidResultsRetentionRow = {
+  total: number;
+  with_retention: number;
+  overdue: number;
+  eligible_for_cleanup: number;
 };
 
 const SCRUBBED_RESULT_PLACEHOLDER: ProductResult = {
@@ -169,6 +183,37 @@ async function getCount(
   return Number(row?.count ?? 0);
 }
 
+async function getAnalysisPaidResultsRetentionCounts(
+  db: AppDatabase,
+  cleanupNow: Date,
+): Promise<RetentionCleanupSummary["analysisPaidResults"]> {
+  const result = await db.execute(sql`
+    SELECT
+      COUNT(*)::int AS total,
+      COUNT(*) FILTER (WHERE retention_expires_at IS NOT NULL)::int AS with_retention,
+      COUNT(*) FILTER (
+        WHERE retention_expires_at IS NOT NULL
+          AND retention_expires_at < ${cleanupNow}
+      )::int AS overdue,
+      COUNT(*) FILTER (
+        WHERE retention_expires_at IS NOT NULL
+          AND retention_expires_at < ${cleanupNow}
+          AND paid_result_json IS NOT NULL
+      )::int AS eligible_for_cleanup
+    FROM public.analysis_paid_results
+  `);
+  const row = (result.rows[0] ?? null) as AnalysisPaidResultsRetentionRow | null;
+  const eligibleForCleanup = Number(row?.eligible_for_cleanup ?? 0);
+
+  return {
+    total: Number(row?.total ?? 0),
+    withRetention: Number(row?.with_retention ?? 0),
+    overdue: Number(row?.overdue ?? 0),
+    eligibleForCleanup,
+    scrubbed: eligibleForCleanup,
+  };
+}
+
 export async function runScheduledRetentionCleanup(
   input: {
     dryRun?: boolean;
@@ -212,8 +257,25 @@ export async function runScheduledRetentionCleanup(
         )
     `,
   );
+  const analysisPaidResults = await getAnalysisPaidResultsRetentionCounts(
+    db,
+    cleanupNow,
+  );
 
   if (!input.dryRun) {
+    if (analysisPaidResults.eligibleForCleanup > 0) {
+      await db.execute(sql`
+        UPDATE public.analysis_paid_results
+        SET paid_result_json = NULL,
+            status = 'expired',
+            error_code = 'retention_expired',
+            updated_at = ${cleanupNow}
+        WHERE retention_expires_at IS NOT NULL
+          AND retention_expires_at < ${cleanupNow}
+          AND paid_result_json IS NOT NULL
+      `);
+    }
+
     if (analysisResultsDeleted > 0) {
       await db.execute(sql`
         UPDATE public.analysis_results
@@ -260,6 +322,10 @@ export async function runScheduledRetentionCleanup(
     dryRun: Boolean(input.dryRun),
     analysisRequestsDeleted,
     analysisResultsDeleted,
+    analysisPaidResults: {
+      ...analysisPaidResults,
+      scrubbed: input.dryRun ? 0 : analysisPaidResults.eligibleForCleanup,
+    },
     startedAt: toIsoString(startedAtDate),
     finishedAt: toIsoString(finishedAtDate),
     durationMs: Math.max(0, finishedAtDate.getTime() - startedAtDate.getTime()),
