@@ -123,6 +123,16 @@ export function AiTemperatureResult({
         liffUrl: data.liffUrl ?? null,
         lineAddUrl: data.lineAddUrl ?? null,
       });
+      void fetch(`/api/modules/${moduleConfig.slug}/paid-result/request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          resultId,
+          unlockIntentId: data.unlockIntentId,
+        }),
+      });
       setUnlockIntentFailed(false);
       setShowContact(true);
       return { ok: true };

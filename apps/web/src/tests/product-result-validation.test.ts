@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
+import { buildProviderFallbackPaidResult } from "@/lib/ai/paid-result-generation";
 import type { ProductResult } from "@/lib/ai/product-result-schema";
 import { normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
 import { validateProductResultObject } from "@/lib/ai/validate-product-result";
@@ -34,6 +35,25 @@ describe("product result schema validation", () => {
     expect(
       validateProductResultObject(freeResult, "product_result_schema_free_v1"),
     ).toEqual(freeResult);
+  });
+
+  it("builds a valid provider-fallback paid result for deferred generation", () => {
+    const freeResult = extractFreeResult(aiTemperatureDemoProductResult);
+    const paidResult = buildProviderFallbackPaidResult({
+      freeResult,
+      userContext: {
+        relationshipStage: "曖昧中",
+        userGoal: "我該怎麼回",
+        primaryPain: "回覆變慢",
+        replyTone: "有界線但不冷",
+      },
+    });
+
+    expect(validateProductResultObject({ ...freeResult, paid_result: paidResult })).toEqual({
+      ...freeResult,
+      paid_result: paidResult,
+    });
+    expect(paidResult.replyStrategies.flatMap((strategy) => strategy.copyableMessages)).toHaveLength(6);
   });
 
   it("rejects forbidden paid result phrasing", () => {

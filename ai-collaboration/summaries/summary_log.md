@@ -4969,3 +4969,28 @@ Unresolved questions:
 - Deferred paid-result generation and LINE delivery completion remain for Phase 2B/3.
 - Production deployment was intentionally skipped pending explicit approval.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Two-tier Phase 2B Deferred Paid Generation Service v0
+
+Completed changes:
+- Saved the Phase 2B handoff under `ai-collaboration/handoffs/`.
+- Added a deferred paid-generation API route for Module 01 unlock intents.
+- Added paid prompt/schema assets and a paid-generation service that stores completed paid content in `analysis_paid_results`.
+- Kept initial analyze free-only and kept paid generation separate from the free result cache.
+- Updated unlocked route states for completed, processing, failed, missing, and legacy embedded paid content.
+- Added client-side unlock follow-up call to request paid generation after unlock intent creation.
+- Added safe paid-generation events and tests for route behavior, asset paths, and fallback paid-result validity.
+- Deployed staging and verified synthetic deferred paid generation completed, duplicate request reused the completed row, and unlocked route rendered paid content.
+
+Learnings:
+- CLI preview deployments do not automatically use branch-scoped `Preview (staging)` model strategy env values, so staging verification used non-secret model env overrides.
+- Deferred provider paid generation was unreliable in staging, surfacing as provider/runtime failures and then output-validation failures.
+- A controlled template fallback using only free-result and allowlisted-context data allowed the paid lifecycle to complete while still validating schema/semantic requirements.
+- Final staging DB verification showed initial result stayed free-only, 4 context fields persisted, `analysis_paid_results` completed with retention set, and event metadata keys remained operational only.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, web build, and local Playwright smoke.
+
+Unresolved questions:
+- Whether the controlled fallback is acceptable beyond staging proof or should be replaced by a background/provider retry path before production.
+- Whether Phase 3 should use synchronous route generation, background execution, or polling for LINE delivery.
+- A database uniqueness/index strategy for one paid row per result/prompt/schema remains deferred.
+- Production deployment was intentionally skipped pending explicit approval.
+- Commit hash and staging push status to be recorded in final completion summary.

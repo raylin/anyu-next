@@ -4,6 +4,8 @@ import {
   getProductPromptPath,
   getProductSchemaPath,
   getProductSchemaPathForVersion,
+  getPaidResultPromptPath,
+  getPaidResultSchemaPath,
 } from "@/lib/ai/repo-paths";
 
 describe("app-local AI asset paths", () => {
@@ -37,5 +39,10 @@ describe("app-local AI asset paths", () => {
     expect(schemaPath).toContain("product_result_schema_free_v1.json");
     expect(fs.existsSync(promptPath)).toBe(true);
     expect(fs.existsSync(schemaPath)).toBe(true);
+  });
+
+  it("resolves paid-result prompt and schema assets", () => {
+    expect(fs.existsSync(getPaidResultPromptPath())).toBe(true);
+    expect(fs.existsSync(getPaidResultSchemaPath())).toBe(true);
   });
 });

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "paid_result_schema_v1.json",
+  "title": "Opportunity Radar Paid Result Schema v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fullSummary",
+    "possibleStates",
+    "signalDeepDive",
+    "replyStrategies",
+    "next48HourPlan",
+    "avoidDoing",
+    "softInsight",
+    "summaryCard"
+  ],
+  "properties": {
+    "fullSummary": { "type": "string" },
+    "possibleStates": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "likelihood", "explanation"],
+        "properties": {
+          "label": { "type": "string" },
+          "likelihood": { "type": "string", "enum": ["low", "medium", "high"] },
+          "explanation": { "type": "string" }
+        }
+      }
+    },
+    "signalDeepDive": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "evidence", "whatItMayMean"],
+        "properties": {
+          "title": { "type": "string" },
+          "evidence": { "type": "string" },
+          "whatItMayMean": { "type": "string" }
+        }
+      }
+    },
+    "replyStrategies": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "tone",
+          "whenToUse",
+          "whyItWorks",
+          "possibleReaction",
+          "followUpIfTheyReply",
+          "copyableMessages"
+        ],
+        "properties": {
+          "label": { "type": "string" },
+          "tone": { "type": "string" },
+          "whenToUse": { "type": "string" },
+          "whyItWorks": { "type": "string" },
+          "possibleReaction": { "type": "string" },
+          "followUpIfTheyReply": { "type": "string" },
+          "copyableMessages": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "next48HourPlan": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "type": "string" }
+    },
+    "avoidDoing": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "type": "string" }
+    },
+    "softInsight": { "type": "string" },
+    "summaryCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["headline", "body", "nextMove"],
+      "properties": {
+        "headline": { "type": "string" },
+        "body": { "type": "string" },
+        "nextMove": { "type": "string" }
+      }
+    }
+  }
+}

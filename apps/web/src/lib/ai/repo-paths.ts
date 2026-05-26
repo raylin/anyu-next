@@ -29,3 +29,11 @@ export function getProductSchemaPathForVersion(schemaVersion: string): string {
 
   return getProductSchemaPath();
 }
+
+export function getPaidResultPromptPath(): string {
+  return path.join(process.cwd(), "src/lib/ai/assets/paid_result_prompt_v0.md");
+}
+
+export function getPaidResultSchemaPath(): string {
+  return path.join(process.cwd(), "src/lib/ai/assets/paid_result_schema_v1.json");
+}

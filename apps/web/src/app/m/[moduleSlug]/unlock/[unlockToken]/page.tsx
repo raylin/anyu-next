@@ -6,9 +6,11 @@ import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { isDbConfigured } from "@/lib/db/client";
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
+import { getPaidResultForAnalysisResult } from "@/lib/db/paid-results";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { hasPaidResult, normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
+import { PAID_RESULT_PROMPT_VERSION, PAID_RESULT_SCHEMA_VERSION } from "@/lib/ai/paid-result-generation";
 
 type UnlockPageProps = {
   params: Promise<{
@@ -40,12 +42,27 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
   }
 
   const result = record.result.normalizedResultJson;
+  const storedPaidResult = await getPaidResultForAnalysisResult({
+    analysisResultId: record.result.id,
+    promptVersion: PAID_RESULT_PROMPT_VERSION,
+    schemaVersion: PAID_RESULT_SCHEMA_VERSION,
+  });
 
-  if (!hasPaidResult(result)) {
+  if (!hasPaidResult(result) && !storedPaidResult?.paidResultJson) {
+    if (storedPaidResult?.status === "processing") {
+      return <UnlockState moduleSlug={moduleSlug} title="完整分析正在整理中" message="我們正在把免費結果延伸成完整分析。請稍後重新整理這個頁面。" />;
+    }
+
+    if (storedPaidResult?.status === "failed") {
+      return <UnlockState moduleSlug={moduleSlug} title="完整分析暫時整理失敗" message="這次完整分析沒有成功產生。請回到結果頁重新領取，或稍後再試。" />;
+    }
+
     return <UnlockPending moduleSlug={moduleSlug} />;
   }
 
-  const paidResult = normalizePaidResultForDisplay(result.paid_result);
+  const paidResult = normalizePaidResultForDisplay(
+    storedPaidResult?.paidResultJson ?? result.paid_result,
+  );
 
   return (
     <main className="anyu-shell">
@@ -161,6 +178,16 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
 
 function UnlockPending({ moduleSlug }: { moduleSlug: string }) {
   return (
+    <UnlockState
+      moduleSlug={moduleSlug}
+      title="完整分析目前仍在封測流程中"
+      message="你的免費分析已經完成。完整分析的自動整理與 LINE 通知會在下一階段接上；目前請先回到結果頁保留這份免費結果。"
+    />
+  );
+}
+
+function UnlockState({ moduleSlug, title, message }: { moduleSlug: string; title: string; message: string }) {
+  return (
     <main className="anyu-shell">
       <section className="anyu-result-stack">
         <div className="anyu-result-topbar">
@@ -171,10 +198,8 @@ function UnlockPending({ moduleSlug }: { moduleSlug: string }) {
         </div>
         <Card className="anyu-quote-card">
           <p className="anyu-kicker">完整分析</p>
-          <h1 className="anyu-section-title">完整分析目前仍在封測流程中</h1>
-          <p className="anyu-copy">
-            你的免費分析已經完成。完整分析的自動整理與 LINE 通知會在下一階段接上；目前請先回到結果頁保留這份免費結果。
-          </p>
+          <h1 className="anyu-section-title">{title}</h1>
+          <p className="anyu-copy">{message}</p>
           <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
             回到輸入頁
           </Link>

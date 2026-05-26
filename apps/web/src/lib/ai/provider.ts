@@ -1,7 +1,14 @@
 import type { ProviderCallResult } from "@/lib/ai/types";
 
 export class ProviderConfigError extends Error {}
-class ProviderRuntimeError extends Error {}
+class ProviderRuntimeError extends Error {
+  constructor(
+    message: string,
+    readonly code: string = "provider",
+  ) {
+    super(message);
+  }
+}
 
 type ProviderName = "anthropic" | "openai";
 
@@ -13,6 +20,7 @@ type ResolvedProvider = {
 
 type ProviderCallOptions = {
   model?: string;
+  maxOutputTokens?: number;
 };
 
 export const ANTHROPIC_MAX_OUTPUT_TOKENS = 4096;
@@ -145,7 +153,15 @@ function extractAnthropicText(payload: unknown): string {
   throw new ProviderRuntimeError("Anthropic response did not contain model text.");
 }
 
-async function callOpenAi(prompt: string, provider: ResolvedProvider): Promise<ProviderCallResult> {
+function resolveMaxOutputTokens(options: ProviderCallOptions) {
+  return options.maxOutputTokens ?? ANTHROPIC_MAX_OUTPUT_TOKENS;
+}
+
+async function callOpenAi(
+  prompt: string,
+  provider: ResolvedProvider,
+  options: ProviderCallOptions,
+): Promise<ProviderCallResult> {
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
@@ -162,6 +178,7 @@ async function callOpenAi(prompt: string, provider: ResolvedProvider): Promise<P
         },
         { role: "user", content: prompt },
       ],
+      max_output_tokens: resolveMaxOutputTokens(options),
       temperature: 0,
     }),
     signal: AbortSignal.timeout(90_000),
@@ -170,7 +187,10 @@ async function callOpenAi(prompt: string, provider: ResolvedProvider): Promise<P
   const payload = await readJsonResponse(response);
 
   if (!response.ok) {
-    throw new ProviderRuntimeError("OpenAI request failed.");
+    throw new ProviderRuntimeError(
+      "OpenAI request failed.",
+      `provider_http_${response.status}`,
+    );
   }
 
   return {
@@ -181,7 +201,11 @@ async function callOpenAi(prompt: string, provider: ResolvedProvider): Promise<P
   };
 }
 
-async function callAnthropic(prompt: string, provider: ResolvedProvider): Promise<ProviderCallResult> {
+async function callAnthropic(
+  prompt: string,
+  provider: ResolvedProvider,
+  options: ProviderCallOptions,
+): Promise<ProviderCallResult> {
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -191,7 +215,7 @@ async function callAnthropic(prompt: string, provider: ResolvedProvider): Promis
     },
     body: JSON.stringify({
       model: provider.model,
-      max_tokens: ANTHROPIC_MAX_OUTPUT_TOKENS,
+      max_tokens: resolveMaxOutputTokens(options),
       messages: [
         {
           role: "user",
@@ -207,7 +231,10 @@ async function callAnthropic(prompt: string, provider: ResolvedProvider): Promis
   const payload = await readJsonResponse(response);
 
   if (!response.ok) {
-    throw new ProviderRuntimeError("Anthropic request failed.");
+    throw new ProviderRuntimeError(
+      "Anthropic request failed.",
+      `provider_http_${response.status}`,
+    );
   }
 
   return {
@@ -225,14 +252,18 @@ export async function callAiProvider(
   const provider = resolveProvider(options);
 
   if (provider.name === "anthropic") {
-    return callAnthropic(prompt, provider);
+    return callAnthropic(prompt, provider, options);
   }
 
-  return callOpenAi(prompt, provider);
+  return callOpenAi(prompt, provider, options);
 }
 
 export function isProviderConfigError(error: unknown): error is ProviderConfigError {
   return error instanceof ProviderConfigError;
+}
+
+export function getProviderRuntimeErrorCode(error: unknown) {
+  return error instanceof ProviderRuntimeError ? error.code : null;
 }
 
 export function getProviderUserMessage(): string {

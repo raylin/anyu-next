@@ -356,6 +356,32 @@ export async function getAnalysisResultRecordById(
   return record ?? null;
 }
 
+export async function getAnalysisResultWithRequestById(
+  id: string,
+  moduleId: string,
+  themeSlug: string,
+) {
+  const db = requireDb();
+
+  const [record] = await db
+    .select({
+      result: analysisResults,
+      request: analysisRequests,
+    })
+    .from(analysisResults)
+    .innerJoin(analysisRequests, eq(analysisRequests.id, analysisResults.requestId))
+    .where(
+      and(
+        eq(analysisResults.id, id),
+        eq(analysisResults.moduleId, moduleId),
+        eq(analysisResults.themeSlug, themeSlug),
+      ),
+    )
+    .limit(1);
+
+  return record ?? null;
+}
+
 export async function createUnlockIntentRecord(input: {
   resultId: string;
   moduleId: string;
@@ -401,6 +427,18 @@ export async function getUnlockIntentByTokenHash(tokenHash: string) {
     .from(unlockIntents)
     .innerJoin(analysisResults, eq(analysisResults.id, unlockIntents.resultId))
     .where(eq(unlockIntents.fulfillmentTokenHash, tokenHash))
+    .limit(1);
+
+  return record ?? null;
+}
+
+export async function getUnlockIntentById(id: string) {
+  const db = requireDb();
+
+  const [record] = await db
+    .select()
+    .from(unlockIntents)
+    .where(eq(unlockIntents.id, id))
     .limit(1);
 
   return record ?? null;

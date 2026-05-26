@@ -76,6 +76,8 @@ export async function createCompletedPaidResultShadowRecord(input: {
 export async function getPaidResultForAnalysisResult(input: {
   analysisResultId: string;
   status?: PaidResultStatus;
+  promptVersion?: string;
+  schemaVersion?: string;
 }) {
   const db = requireDb();
 
@@ -86,6 +88,8 @@ export async function getPaidResultForAnalysisResult(input: {
       and(
         eq(analysisPaidResults.analysisResultId, input.analysisResultId),
         input.status ? eq(analysisPaidResults.status, input.status) : undefined,
+        input.promptVersion ? eq(analysisPaidResults.promptVersion, input.promptVersion) : undefined,
+        input.schemaVersion ? eq(analysisPaidResults.schemaVersion, input.schemaVersion) : undefined,
       ),
     )
     .orderBy(desc(analysisPaidResults.createdAt))
@@ -97,6 +101,9 @@ export async function getPaidResultForAnalysisResult(input: {
 export async function markPaidResultProcessing(input: {
   paidResultId: string;
   startedAt?: Date;
+  requestedByUnlockIntentId?: string | null;
+  promptVersion?: string | null;
+  schemaVersion?: string | null;
 }) {
   const db = requireDb();
   const now = new Date();
@@ -106,6 +113,9 @@ export async function markPaidResultProcessing(input: {
     .set({
       status: "processing",
       startedAt: input.startedAt ?? now,
+      requestedByUnlockIntentId: input.requestedByUnlockIntentId ?? undefined,
+      promptVersion: input.promptVersion ?? undefined,
+      schemaVersion: input.schemaVersion ?? undefined,
       failedAt: null,
       errorCode: null,
       updatedAt: now,
