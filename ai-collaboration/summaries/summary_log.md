@@ -5374,3 +5374,22 @@ Unresolved questions:
 - Compile, unit, lint, and build validation passed; commit hash and staging push status to be recorded in final completion summary.
 - Staging visual QA is still recommended because this was a timing-sensitive transition issue.
 - Local Playwright may remain blocked by the known Chromium/MachPort permission issue.
+## 2026-05-27 - Module 01 Pre-production Staging QA v0
+
+Completed changes:
+- Saved the pre-production staging QA handoff under `ai-collaboration/handoffs/`.
+- Ran staging-safe route/API QA against `https://staging.anyu.tw`.
+- Verified health, landing, demo result, input threshold rejection, valid analyze completion, runtime result render, unlock intent, LIFF URL shape, global bridge, pending paid UI, paid-generation status, unlocked paid route, theme carryover, and hidden downstream theme switch.
+- Created the required review bundle and execution report.
+- Did not change code or deploy production.
+
+Learnings:
+- Staging served latest behavioral indicators including the 80-character input floor and deployed `正在打開結果⋯` navigating copy.
+- Fresh staging analyze completed successfully in roughly 20.5 seconds during this pass.
+- Generated LIFF URLs retained the fixed `https://liff.line.me/:liffId?<context>` shape with no extra path after the LIFF ID.
+- No P0 or P1 issues were found in automated staging checks.
+
+Unresolved questions:
+- Exact deployed commit is still not exposed by the runtime.
+- Real mobile LIFF and real staging/test OA short-code flows were not re-run in this task; prior manual smoke records remain the basis for those checks.
+- Required no-code-change validation passed; commit hash and staging push status to be recorded in final completion summary.
