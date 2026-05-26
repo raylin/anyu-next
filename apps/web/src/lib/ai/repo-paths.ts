@@ -1,6 +1,10 @@
 import path from "node:path";
 
-export function getProductPromptPath(): string {
+export function getProductPromptPath(promptVersion = "product_result_prompt_v0.4"): string {
+  if (promptVersion.trim() === "product_result_prompt_free_v0.1") {
+    return path.join(process.cwd(), "src/lib/ai/assets/product_result_prompt_free_v0.md");
+  }
+
   return path.join(process.cwd(), "src/lib/ai/assets/product_result_prompt_v0.md");
 }
 
@@ -17,6 +21,10 @@ export function getProductSchemaPathForVersion(schemaVersion: string): string {
 
   if (normalizedVersion === "product_result_schema_v2") {
     return path.join(process.cwd(), "src/lib/ai/assets/product_result_schema_v2.json");
+  }
+
+  if (normalizedVersion === "product_result_schema_free_v1") {
+    return path.join(process.cwd(), "src/lib/ai/assets/product_result_schema_free_v1.json");
   }
 
   return getProductSchemaPath();

@@ -4946,3 +4946,26 @@ Learnings:
 Unresolved questions:
 - An operator with direct `RETENTION_CLEANUP_SECRET` or `CRON_SECRET` access still needs to run the exact authorized route dry-run.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Two-tier Phase 2A Free-only Analyze Compatibility v0
+
+Completed changes:
+- Saved the Phase 2A handoff under `ai-collaboration/handoffs/`.
+- Added free-only prompt/schema assets: `product_result_prompt_free_v0.1` and `product_result_schema_free_v1`.
+- Switched Module 01 analyze to generate the free result first without `paid_result`.
+- Made product-result display and unlocked route compatible with missing paid content.
+- Kept legacy full-result support for existing/demo results.
+- Updated tests for free-only validation, analyze persistence, cache/shadow behavior, and asset paths.
+- Deployed staging and ran synthetic free-only analyze compatibility smoke.
+
+Learnings:
+- Fresh staging free-only analyze completed in about 20.7s versus the prior 60-70s full paid-result baseline.
+- Repeat staging analyze for the same text/context returned a cache hit in about 1.5s.
+- New free-only result persisted without `paid_result`, created no `analysis_paid_results` shadow row, and retained 4 allowlisted user context fields.
+- Result page, unlock intent, unlocked pending page, and LIFF route all returned HTTP 200.
+- Event metadata remained privacy-safe, with operational keys only.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, web build, and local Playwright smoke.
+
+Unresolved questions:
+- Deferred paid-result generation and LINE delivery completion remain for Phase 2B/3.
+- Production deployment was intentionally skipped pending explicit approval.
+- Commit hash and staging push status to be recorded in final completion summary.

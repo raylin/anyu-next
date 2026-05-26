@@ -51,6 +51,11 @@ function assertNonEmptyString(value: unknown, fieldName: string) {
 
 export function validatePaidResultSemantics(result: ProductResult): ProductResult {
   const paidResult = result.paid_result;
+
+  if (!paidResult) {
+    throw new PaidResultSemanticValidationError("paid_result is missing.");
+  }
+
   const paidStrings = collectStrings(paidResult);
   const forbiddenMatch = PAID_RESULT_FORBIDDEN_SUBSTRINGS.find((forbidden) =>
     paidStrings.some((value) => value.includes(forbidden)),

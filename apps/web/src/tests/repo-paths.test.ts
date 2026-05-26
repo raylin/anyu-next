@@ -28,4 +28,14 @@ describe("app-local AI asset paths", () => {
     expect(schemaPath).toContain("product_result_schema_v2.json");
     expect(fs.existsSync(schemaPath)).toBe(true);
   });
+
+  it("resolves free-result prompt and schema assets", () => {
+    const promptPath = getProductPromptPath("product_result_prompt_free_v0.1");
+    const schemaPath = getProductSchemaPathForVersion("product_result_schema_free_v1");
+
+    expect(promptPath).toContain("product_result_prompt_free_v0.md");
+    expect(schemaPath).toContain("product_result_schema_free_v1.json");
+    expect(fs.existsSync(promptPath)).toBe(true);
+    expect(fs.existsSync(schemaPath)).toBe(true);
+  });
 });

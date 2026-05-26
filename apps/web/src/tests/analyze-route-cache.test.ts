@@ -66,6 +66,7 @@ vi.mock("@/lib/runtime/abuse-guard", () => ({
 
 import { maxDuration, POST as analyzePost } from "@/app/api/modules/[moduleSlug]/analyze/route";
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
+import { extractFreeResult } from "@/lib/modules/result-adapters";
 
 describe("module analyze cache route behavior", () => {
   const validBody = {
@@ -162,7 +163,7 @@ describe("module analyze cache route behavior", () => {
     mockGetCachedAnalysisResult.mockResolvedValue(null);
     mockCreateAnalysisRequestRecord.mockResolvedValue({ id: "request-2" });
     mockGenerateModuleResult.mockResolvedValue({
-      result: aiTemperatureDemoProductResult,
+      result: extractFreeResult(aiTemperatureDemoProductResult),
       provider: "anthropic",
       providerModel: "claude-sonnet-4-20250514",
       providerRawJson: { id: "provider-response" },
@@ -222,20 +223,15 @@ describe("module analyze cache route behavior", () => {
       }),
       expect.any(Object),
     );
-    expect(mockCreateCompletedPaidResultShadowRecord).toHaveBeenCalledWith(
-      expect.objectContaining({
-        analysisResultId: "result-2",
-        moduleId: "ai-temperature",
-        themeSlug: "ambiguous-temperature",
-        paidResultJson: aiTemperatureDemoProductResult.paid_result,
-        promptVersion: "product_result_prompt_v0.4",
-        schemaVersion: "product_result_schema_v2",
-        model: "claude-sonnet-4-20250514",
-      }),
-    );
+    expect(mockCreateCompletedPaidResultShadowRecord).not.toHaveBeenCalled();
     expect(mockCreateAnalysisResultRecord).toHaveBeenCalledWith(
       expect.objectContaining({
         requestId: "request-2",
+        promptVersion: "product_result_prompt_free_v0.1",
+        schemaVersion: "product_result_schema_free_v1",
+        normalizedResultJson: expect.not.objectContaining({
+          paid_result: expect.anything(),
+        }),
       }),
     );
     expect(mockUpdateAnalysisRequestState).toHaveBeenCalledWith(

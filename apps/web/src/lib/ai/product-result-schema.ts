@@ -68,7 +68,7 @@ export type ProductResult = {
     included_sections: string[];
     preview_copy: string;
   };
-  paid_result: RichPaidResult;
+  paid_result?: RichPaidResult;
   share_card: {
     temperature_label: string;
     state_label: string;
@@ -116,6 +116,10 @@ export function isRichPaidResult(value: unknown): value is RichPaidResult {
     typeof value.softInsight === "string" &&
     isRecord(value.summaryCard)
   );
+}
+
+export function hasPaidResult(value: unknown): value is { paid_result: RichPaidResult | LegacyPaidResult } {
+  return isRecord(value) && "paid_result" in value && value.paid_result != null;
 }
 
 export function normalizePaidResultForDisplay(value: unknown): RichPaidResult {
@@ -182,11 +186,12 @@ export function normalizePaidResultForDisplay(value: unknown): RichPaidResult {
 
 export function normalizeProductResultForDisplay(value: unknown): ProductResult {
   const result = value as ProductResult;
+  const paidResult = hasPaidResult(value)
+    ? normalizePaidResultForDisplay(value.paid_result)
+    : undefined;
 
   return {
     ...result,
-    paid_result: normalizePaidResultForDisplay(
-      isRecord(value) ? value.paid_result : undefined,
-    ),
+    ...(paidResult ? { paid_result: paidResult } : {}),
   };
 }

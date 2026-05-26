@@ -140,6 +140,7 @@ async function runValidatedAttempt(input: {
     await buildProductPrompt(
       input.redactedText,
       buildPromptMetadata(input, input.provider, input.model),
+      input.moduleConfig.promptVersion,
     ),
     { model: input.model },
   );

@@ -362,8 +362,8 @@ export function mapProductResultToViewModel(
     insightTitle: result.insight_layer.title,
     insight: result.insight_layer.explanation,
     reassurance:
-      result.paid_result.softInsight ||
-      result.paid_result.avoidDoing[0] ||
+      result.paid_result?.softInsight ||
+      result.paid_result?.avoidDoing[0] ||
       result.free_result.uncertainty_note,
     persona: result.share_card.relationship_persona,
     shareQuote: result.share_card.card_sentence,

@@ -8,7 +8,7 @@ import { isDbConfigured } from "@/lib/db/client";
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
 import { getModuleBySlug } from "@/lib/modules/registry";
-import { normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
+import { hasPaidResult, normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
 
 type UnlockPageProps = {
   params: Promise<{
@@ -40,6 +40,11 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
   }
 
   const result = record.result.normalizedResultJson;
+
+  if (!hasPaidResult(result)) {
+    return <UnlockPending moduleSlug={moduleSlug} />;
+  }
+
   const paidResult = normalizePaidResultForDisplay(result.paid_result);
 
   return (
@@ -148,6 +153,32 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
           <p className="anyu-copy t-reading">{paidResult.summaryCard.nextMove}</p>
         </Card>
 
+        <LegalFooter />
+      </section>
+    </main>
+  );
+}
+
+function UnlockPending({ moduleSlug }: { moduleSlug: string }) {
+  return (
+    <main className="anyu-shell">
+      <section className="anyu-result-stack">
+        <div className="anyu-result-topbar">
+          <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
+            ← 回到測驗
+          </Link>
+          <Wordmark showMark />
+        </div>
+        <Card className="anyu-quote-card">
+          <p className="anyu-kicker">完整分析</p>
+          <h1 className="anyu-section-title">完整分析目前仍在封測流程中</h1>
+          <p className="anyu-copy">
+            你的免費分析已經完成。完整分析的自動整理與 LINE 通知會在下一階段接上；目前請先回到結果頁保留這份免費結果。
+          </p>
+          <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
+            回到輸入頁
+          </Link>
+        </Card>
         <LegalFooter />
       </section>
     </main>

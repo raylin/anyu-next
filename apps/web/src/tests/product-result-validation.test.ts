@@ -5,6 +5,7 @@ import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
 import type { ProductResult } from "@/lib/ai/product-result-schema";
 import { normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
 import { validateProductResultObject } from "@/lib/ai/validate-product-result";
+import { extractFreeResult } from "@/lib/modules/result-adapters";
 
 function cloneDemoResult(): ProductResult {
   return structuredClone(aiTemperatureDemoProductResult);
@@ -27,37 +28,45 @@ describe("product result schema validation", () => {
     expect(prompt).toContain("exactly 6 copyable messages");
   });
 
+  it("accepts free-only results without running paid semantic validation", () => {
+    const freeResult = extractFreeResult(aiTemperatureDemoProductResult);
+
+    expect(
+      validateProductResultObject(freeResult, "product_result_schema_free_v1"),
+    ).toEqual(freeResult);
+  });
+
   it("rejects forbidden paid result phrasing", () => {
     const result = cloneDemoResult();
-    result.paid_result.avoidDoing[0] = "不要用操控對方的方式推進關係。";
+    result.paid_result!.avoidDoing[0] = "不要用操控對方的方式推進關係。";
 
     expect(() => validateProductResultObject(result)).toThrow(/forbidden phrasing/);
   });
 
   it("rejects insufficient reply strategies", () => {
     const result = cloneDemoResult();
-    result.paid_result.replyStrategies = result.paid_result.replyStrategies.slice(0, 2);
+    result.paid_result!.replyStrategies = result.paid_result!.replyStrategies.slice(0, 2);
 
     expect(() => validateProductResultObject(result)).toThrow(/replyStrategies|must NOT have fewer/);
   });
 
   it("rejects insufficient copyable messages", () => {
     const result = cloneDemoResult();
-    result.paid_result.replyStrategies[0].copyableMessages = ["這週如果你有空，我們喝杯咖啡就好。"];
+    result.paid_result!.replyStrategies[0].copyableMessages = ["這週如果你有空，我們喝杯咖啡就好。"];
 
     expect(() => validateProductResultObject(result)).toThrow(/copyableMessages|must NOT have fewer/);
   });
 
   it("rejects missing next48HourPlan depth", () => {
     const result = cloneDemoResult();
-    result.paid_result.next48HourPlan = ["先等等"];
+    result.paid_result!.next48HourPlan = ["先等等"];
 
     expect(() => validateProductResultObject(result)).toThrow(/next48HourPlan|must NOT have fewer/);
   });
 
   it("rejects missing summary card depth", () => {
     const result = cloneDemoResult();
-    result.paid_result.summaryCard.nextMove = "";
+    result.paid_result!.summaryCard.nextMove = "";
 
     expect(() => validateProductResultObject(result)).toThrow(/summaryCard|too thin/);
   });

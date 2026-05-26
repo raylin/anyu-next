@@ -2,22 +2,26 @@ import fs from "node:fs/promises";
 import { getProductPromptPath } from "@/lib/ai/repo-paths";
 import type { PromptMetadata } from "@/lib/ai/types";
 
-let cachedPromptTemplate: string | null = null;
+const cachedPromptTemplateByVersion = new Map<string, string>();
 
-export async function loadProductPromptTemplate(): Promise<string> {
-  if (cachedPromptTemplate) {
-    return cachedPromptTemplate;
+export async function loadProductPromptTemplate(
+  promptVersion = "product_result_prompt_v0.4",
+): Promise<string> {
+  if (cachedPromptTemplateByVersion.has(promptVersion)) {
+    return cachedPromptTemplateByVersion.get(promptVersion) ?? "";
   }
 
-  cachedPromptTemplate = await fs.readFile(getProductPromptPath(), "utf-8");
-  return cachedPromptTemplate;
+  const promptTemplate = await fs.readFile(getProductPromptPath(promptVersion), "utf-8");
+  cachedPromptTemplateByVersion.set(promptVersion, promptTemplate);
+  return promptTemplate;
 }
 
 export async function buildProductPrompt(
   rawContent: string,
   metadata: PromptMetadata,
+  promptVersion?: string,
 ): Promise<string> {
-  const template = await loadProductPromptTemplate();
+  const template = await loadProductPromptTemplate(promptVersion);
 
   return template
     .replace("{{RAW_CONTENT}}", rawContent)

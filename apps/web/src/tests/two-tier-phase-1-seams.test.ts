@@ -44,7 +44,7 @@ describe("two-tier phase 1 seams", () => {
     expect(adapted.freeResult).toEqual(freeResult);
     expect(adapted.paidResult).toEqual(paidResult);
     expect(
-      combineFreeAndPaidForLegacyDisplay(freeResult, aiTemperatureDemoProductResult.paid_result),
+      combineFreeAndPaidForLegacyDisplay(freeResult, aiTemperatureDemoProductResult.paid_result!),
     ).toEqual(aiTemperatureDemoProductResult);
   });
 
