@@ -68,6 +68,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - 2026-05-21 manual staging/test OA short-code smoke passed. Record only sanitized pass status; do not store LINE user IDs, codes, tokens, tokenized URLs, raw input, or private message content.
 - 2026-05-24 hardening smoke verified staging serves the hardened LIFF bind route, rejects client-only user IDs, rejects invalid ID tokens, preserves staging/test OA public env, and keeps event metadata safe.
 - 2026-05-26 Phase 3 shell-safe staging smoke verified deferred paid generation still completes through provider after LINE bind trigger implementation. Real LIFF bind and real test-OA short-code smoke remain pending manual operator verification.
+- 2026-05-26 LIFF redirect context fix verified staging unlock responses now generate LIFF URLs with the module fulfillment route and required context parameters; direct query and `liff.state` route-level checks render the LINE fulfillment page instead of homepage. Real mobile LIFF smoke remains pending.
 
 ## Smoke Checklist
 
@@ -79,6 +80,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - [x] Test OA add-friend URL is not confused with production OA.
 - [x] No secret values are documented in repo files.
 - [x] Live `/api/unlock-intent` response returns staging LIFF URL and test OA add-friend URL.
+- [x] Live `/api/unlock-intent` response returns a staging LIFF URL with `/m/ambiguous-temperature/line/fulfill` route context and required fulfillment context params.
 - [ ] Phase 3 real LIFF bind triggers paid generation and lands on completed paid content.
 - [ ] Phase 3 real test-OA short-code flow replies with pending link and paid content completes.
 
@@ -94,3 +96,4 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 | 2026-05-21 | Applied staging webhook hardening migration and documented ID-token verification requirement. | Codex |
 | 2026-05-24 | Recorded hardened staging route smoke pass for public env, missing/invalid LIFF ID token rejection, invalid webhook signature, unlocked route, and event privacy. | Codex |
 | 2026-05-26 | Recorded Phase 3 shell-safe staging verification and pending real LIFF/test-OA manual smoke. | Codex |
+| 2026-05-26 | Verified LIFF route-level context fix for generated LIFF path, direct query context, and `liff.state` context. | Codex |

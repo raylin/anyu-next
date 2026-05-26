@@ -10,6 +10,7 @@ import {
   normalizeFulfillmentCode,
 } from "@/lib/line/fulfillment";
 import { buildLineLiffUrl } from "@/lib/line/config";
+import { parseLineFulfillmentContext } from "@/lib/line/liff-context";
 import { getLineLoginChannelId, verifyLineIdToken } from "@/lib/line/liff";
 import { verifyLineSignature } from "@/lib/line/webhook";
 import {
@@ -56,8 +57,44 @@ describe("LINE fulfillment helpers", () => {
         unlockIntentId: "intent-1",
         unlockToken: "token-1",
         fulfillmentCode: "A7K2Q9",
+        moduleSlug: "ambiguous-temperature",
       }),
-    ).toBe("https://liff.line.me/123-abc?unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9");
+    ).toBe(
+      "https://liff.line.me/123-abc/m/ambiguous-temperature/line/fulfill?unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
+    );
+  });
+
+  it("keeps LIFF fulfillment context from direct query params", () => {
+    expect(
+      parseLineFulfillmentContext("?unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9"),
+    ).toEqual({
+      unlockIntentId: "intent-1",
+      unlockToken: "token-1",
+      code: "A7K2Q9",
+      statePath: null,
+    });
+  });
+
+  it("keeps LIFF fulfillment context from liff.state redirects", () => {
+    const state = encodeURIComponent(
+      "/m/ambiguous-temperature/line/fulfill?unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
+    );
+
+    expect(parseLineFulfillmentContext(`?liff.state=${state}`)).toEqual({
+      unlockIntentId: "intent-1",
+      unlockToken: "token-1",
+      code: "A7K2Q9",
+      statePath: "/m/ambiguous-temperature/line/fulfill",
+    });
+  });
+
+  it("returns an empty context when LIFF state is missing instead of inventing a redirect", () => {
+    expect(parseLineFulfillmentContext("")).toEqual({
+      unlockIntentId: "",
+      unlockToken: "",
+      code: "",
+      statePath: null,
+    });
   });
 
   it("verifies LINE webhook signatures", () => {

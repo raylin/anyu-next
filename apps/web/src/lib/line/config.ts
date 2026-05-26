@@ -16,6 +16,7 @@ export function buildLineLiffUrl(input: {
   unlockIntentId: string;
   unlockToken: string;
   fulfillmentCode: string;
+  moduleSlug?: string;
   baseUrl?: string | null;
 }) {
   const baseUrl = input.baseUrl ?? getLineLiffBaseUrl();
@@ -25,6 +26,10 @@ export function buildLineLiffUrl(input: {
   }
 
   const url = new URL(baseUrl);
+  if (url.hostname === "liff.line.me" && input.moduleSlug) {
+    const liffIdPath = url.pathname.replace(/\/$/, "");
+    url.pathname = `${liffIdPath}/m/${input.moduleSlug}/line/fulfill`;
+  }
   url.searchParams.set("unlockIntentId", input.unlockIntentId);
   url.searchParams.set("unlockToken", input.unlockToken);
   url.searchParams.set("code", input.fulfillmentCode);
@@ -36,6 +41,7 @@ export function getPublicLineConfig(input: {
   unlockIntentId: string;
   unlockToken: string;
   fulfillmentCode: string;
+  moduleSlug?: string;
 }) {
   return {
     lineAddUrl: getLineAddUrl(),

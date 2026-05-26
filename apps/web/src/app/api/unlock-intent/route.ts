@@ -78,6 +78,7 @@ export async function POST(request: Request) {
       unlockIntentId: unlockIntent.id,
       unlockToken,
       fulfillmentCode,
+      moduleSlug: body.themeSlug,
     });
 
     await insertEvent({

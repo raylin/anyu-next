@@ -5085,3 +5085,25 @@ Unresolved questions:
 - Real staging/test OA short-code smoke remains pending.
 - Production deployment was intentionally skipped.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - LIFF Fulfillment Redirect Context Fix v0
+
+Completed changes:
+- Saved the LIFF fulfillment redirect context fix handoff under `ai-collaboration/handoffs/`.
+- Updated LIFF URL generation so staging LINE CTA URLs include the module fulfillment route path on `liff.line.me`.
+- Added a LIFF context parser that reads direct query params and LINE `liff.state` redirects.
+- Updated the LIFF bridge page to use the parser and retain safe short-code fallback when context is missing.
+- Updated tests for LIFF URL generation, `liff.state` parsing, missing-context behavior, and bind response unlock target.
+- Refreshed staging alias to a preview deployment with the fix and ran route-level staging smoke.
+
+Learnings:
+- The likely redirect failure was context loss through LINE LIFF redirect/login mechanics; the bridge only read direct query params before this fix.
+- Staging setup docs still expect endpoint `https://staging.anyu.tw/m/ambiguous-temperature/line/fulfill`.
+- Route-level staging smoke verified generated LIFF URLs now include `/m/ambiguous-temperature/line/fulfill` and required context params.
+- Direct query and `liff.state` route checks rendered the LINE fulfillment page and did not render homepage.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, web build, and local Playwright smoke after port-binding escalation.
+
+Unresolved questions:
+- Real mobile LINE/LIFF smoke still requires human/operator verification with the staging test OA.
+- If LINE Console endpoint differs from the setup record, it should be corrected before production consideration.
+- Production deployment was intentionally skipped.
+- Commit hash and staging push status to be recorded in final completion summary.

@@ -6,6 +6,7 @@ import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { getLineLiffId } from "@/lib/line/config";
+import { parseLineFulfillmentContext } from "@/lib/line/liff-context";
 import { LINE_FULFILLMENT_FALLBACK_INTRO } from "@/lib/modules/ai-temperature-ui";
 
 declare global {
@@ -29,15 +30,10 @@ export default function LineFulfillPage() {
 
   const params = useMemo(() => {
     if (typeof window === "undefined") {
-      return { unlockIntentId: "", unlockToken: "", code: "" };
+      return { unlockIntentId: "", unlockToken: "", code: "", statePath: null };
     }
 
-    const searchParams = new URLSearchParams(window.location.search);
-    return {
-      unlockIntentId: searchParams.get("unlockIntentId") ?? "",
-      unlockToken: searchParams.get("unlockToken") ?? "",
-      code: searchParams.get("code") ?? "",
-    };
+    return parseLineFulfillmentContext(window.location.search);
   }, []);
 
   useEffect(() => {

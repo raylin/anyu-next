@@ -146,7 +146,11 @@ describe("LINE route hardening", () => {
     );
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({ ok: true });
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      unlockedUrl: "http://localhost/m/ambiguous-temperature/unlock/unlock-token-1",
+      paidStatus: "completed",
+    });
     expect(mockRequestDeferredPaidGeneration).toHaveBeenCalledWith(
       expect.objectContaining({
         resultId: "result-1",
