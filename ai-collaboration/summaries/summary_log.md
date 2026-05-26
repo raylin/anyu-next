@@ -5216,3 +5216,21 @@ Unresolved questions:
 - Real staging/test OA short-code smoke remains pending.
 - No sensitive runtime values were recorded; docs intentionally contain only sanitized pass/fail status.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Record Short-code Staging Smoke v0
+
+Completed changes:
+- Saved the documentation follow-up handoff under `ai-collaboration/handoffs/`.
+- Updated the Two-tier Phase 3 staging manual smoke execution report with sanitized real staging/test OA short-code pass status.
+- Updated the corresponding review bundle with sanitized short-code pass status.
+- Updated the staging LINE setup record checklist and change log.
+
+Learnings:
+- Real staging/test OA short-code flow now passes.
+- The user pasted the fulfillment short code into the staging/test OA; the bot replied successfully.
+- The returned link opened, reached the correct unlocked route, and paid content rendered successfully.
+- Production was not touched.
+
+Unresolved questions:
+- No sensitive runtime values were recorded; docs intentionally contain only sanitized pass/fail status.
+- Production activation still requires a separate manual decision record.
+- Commit hash and staging push status to be recorded in final completion summary.

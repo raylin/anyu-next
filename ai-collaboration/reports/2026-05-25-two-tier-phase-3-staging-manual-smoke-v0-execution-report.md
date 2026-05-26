@@ -2,7 +2,7 @@
 
 ## Summary
 
-Verified staging deployment freshness and reran shell-safe staging paid-generation smoke after Phase 3. Follow-up manual operator verification confirmed the real mobile staging LIFF flow now passes after the LIFF URL path duplication fix.
+Verified staging deployment freshness and reran shell-safe staging paid-generation smoke after Phase 3. Follow-up manual operator verification confirmed both real mobile staging LIFF and real staging/test OA short-code flows pass.
 
 Production was not deployed or touched.
 
@@ -24,7 +24,7 @@ Original shell run could not complete real LINE smoke because it required operat
 Follow-up status:
 
 - Real mobile staging LIFF smoke: passed after the LIFF URL path duplication fix.
-- Real staging/test OA short-code smoke: still pending manual operator verification.
+- Real staging/test OA short-code smoke: passed.
 
 ## LIFF Result
 
@@ -43,17 +43,18 @@ Sanitized fields:
 
 ## Short-code Result
 
-Status: pending manual operator verification.
+Status: passed in real staging/test OA short-code smoke.
 
 Sanitized fields:
 
-- short-code smoke: pending
-- bot reply received: unknown
-- reply type: unknown
-- link opened: unknown
-- paid content completed: unknown
-- processing stuck: unknown
-- provider source: unknown
+- short-code smoke: passed
+- fulfillment short code pasted into staging/test OA: yes
+- bot reply received: yes
+- returned link opened: yes
+- post-link route: reached correct unlocked route
+- paid content completed/rendered: yes
+- processing/failure state seen: no
+- production touched: no
 
 ## Paid Generation Result
 
@@ -74,13 +75,12 @@ No raw input, fulfillment code, unlock token, tokenized URL, LINE user ID, LINE 
 
 ## Next-after Risk Assessment
 
-Current decision: do not accept Next `after` as production-ready from this task.
+Current decision: both real staging LIFF and short-code smoke now pass, so Next `after` is acceptable for low-volume beta from this staging evidence. Production activation remains a separate manual decision.
 
 Recommendation:
 
 - Keep Next `after` as staging / low-volume beta MVP only.
-- Run real staging test-OA short-code smoke next.
-- If short-code smoke also passes, accept Next `after` for low-key beta.
+- Do not treat this documentation update as production approval.
 - If manual smoke gets stuck processing, add durable background delivery or polling before production.
 
 ## Validation Results
@@ -96,7 +96,7 @@ Passed:
 
 ## Known Technical Debt
 
-Real mobile LIFF smoke now passes. Real short-code test-OA smoke remains pending. The current webhook trigger uses Next `after`, not a durable queue.
+Real mobile LIFF smoke and real short-code test-OA smoke now pass. The current webhook trigger uses Next `after`, not a durable queue.
 
 ## Tech Debt Review
 
@@ -107,7 +107,7 @@ None. This was documentation and smoke verification only.
 ### Existing Technical Debt Observed
 
 - Next `after` is not durable background delivery.
-- Manual LINE test-OA short-code verification is still required before production activation.
+- Next `after` is not durable background delivery.
 
 ### Opportunistic Cleanup Completed
 
@@ -120,11 +120,11 @@ None. This was documentation and smoke verification only.
 
 ### Recommended Follow-up
 
-Run real staging short-code test-OA smoke with a human operator, then record sanitized pass/fail results.
+Proceed to a separate production activation decision if desired; do not merge this documentation update with production deployment approval.
 
 ## Deviations From Handoff
 
-- Original shell run could not complete real LIFF smoke because no LINE client/operator facts were available. This report was updated after the operator provided sanitized real mobile LIFF pass facts.
+- Original shell run could not complete real LIFF or short-code smoke because no LINE client/operator facts were available. This report was updated after the operator provided sanitized pass facts for both manual flows.
 
 ## Git Commit
 
@@ -137,8 +137,8 @@ Pending.
 ## Remaining Uncertainties
 
 - Real LIFF bind behavior after LINE login is now verified as passing on staging.
-- Real short-code bot reply and after-response paid generation behavior remain unverified in this task.
+- Real short-code bot reply and after-response paid generation behavior are now verified as passing on staging.
 
 ## Recommended Next Step
 
-Run the manual staging test OA short-code smoke and report sanitized pass/fail facts.
+Proceed to a separate production activation decision record if production rollout is desired.

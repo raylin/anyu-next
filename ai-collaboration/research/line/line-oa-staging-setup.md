@@ -70,13 +70,14 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - 2026-05-21 real staging smoke verified route-level LINE fulfillment behavior on staging.
 - 2026-05-21 manual staging/test OA short-code smoke passed. Record only sanitized pass status; do not store LINE user IDs, codes, tokens, tokenized URLs, raw input, or private message content.
 - 2026-05-24 hardening smoke verified staging serves the hardened LIFF bind route, rejects client-only user IDs, rejects invalid ID tokens, preserves staging/test OA public env, and keeps event metadata safe.
-- 2026-05-26 Phase 3 shell-safe staging smoke verified deferred paid generation still completes through provider after LINE bind trigger implementation. Real LIFF bind later passed in mobile staging smoke; real test-OA short-code smoke remains pending manual operator verification.
+- 2026-05-26 Phase 3 shell-safe staging smoke verified deferred paid generation still completes through provider after LINE bind trigger implementation. Real LIFF bind and real test-OA short-code smoke later passed in manual staging verification.
 - 2026-05-26 LIFF redirect context fix verified staging unlock responses now generate LIFF URLs with the module fulfillment route and required context parameters; direct query and `liff.state` route-level checks render the LINE fulfillment page instead of homepage. Real mobile LIFF smoke remains pending.
 - 2026-05-26 global LIFF bridge implementation changed the canonical staging LIFF Console endpoint to `https://staging.anyu.tw/line/fulfill`; module-specific `/m/ambiguous-temperature/line/fulfill` remains compatibility-only.
 - 2026-05-26 LIFF post-bind redirect fix changed bind success navigation to a validated root-relative unlock path shaped `/m/ambiguous-temperature/unlock/<token>`; staging route-level smoke confirmed the redacted route shape returns HTTP 200.
 - 2026-05-26 temporary LIFF runtime diagnostic mode was added for staging investigation. Use `/line/fulfill?debug=1` and share only the rendered sanitized diagnostic panel, not the address bar, page source, network logs, tokens, LINE identifiers, or full URLs.
 - 2026-05-26 LIFF URL path duplication fix verified live staging unlock-intent now returns LIFF URLs shaped `https://liff.line.me/{LIFF_ID}?<context>`, without `/line/fulfill` or `/m/` after the LIFF ID. `debug=1` can be carried through generated context from a debug result page.
 - 2026-05-26 real mobile staging LIFF smoke passed after the LIFF URL path duplication fix: no generic 404, no homepage drop, LIFF bind succeeded, the post-bind flow reached the unlocked route, and paid content rendered. Production was not touched.
+- 2026-05-26 real staging/test OA short-code smoke passed: the user pasted the fulfillment short code into the staging/test OA, the bot replied successfully, the returned link opened, the flow reached the unlocked route, and paid content rendered. Production was not touched.
 
 ## Smoke Checklist
 
@@ -91,7 +92,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - [x] Live `/api/unlock-intent` response returns a staging LIFF URL with base-only LIFF ID path and required fulfillment context query params.
 - [ ] LINE Console LIFF endpoint updated to `https://staging.anyu.tw/line/fulfill`.
 - [x] Phase 3 real LIFF bind triggers paid generation and lands on completed paid content.
-- [ ] Phase 3 real test-OA short-code flow replies with pending link and paid content completes.
+- [x] Phase 3 real test-OA short-code flow replies with pending link and paid content completes.
 
 ## Change Log
 
@@ -111,3 +112,4 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 | 2026-05-26 | Documented temporary sanitized LIFF runtime diagnostic mode for real mobile staging investigation. | Codex |
 | 2026-05-26 | Documented LIFF URL path duplication fix and base-only generated LIFF URL requirement. | Codex |
 | 2026-05-26 | Recorded sanitized real mobile staging LIFF smoke pass after LIFF URL path duplication fix. | Codex |
+| 2026-05-26 | Recorded sanitized real staging/test OA short-code smoke pass. | Codex |
