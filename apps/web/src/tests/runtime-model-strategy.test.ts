@@ -40,7 +40,7 @@ describe("runtime model strategy", () => {
     ).toBe(true);
   });
 
-  it("defaults to the current provider model when no guarded strategy is requested", () => {
+  it("defaults to same-model retry on output validation when no guarded strategy is requested", () => {
     delete process.env.MODEL_STRATEGY;
 
     expect(
@@ -52,7 +52,7 @@ describe("runtime model strategy", () => {
       strategy: "sonnet_default",
       provider: "anthropic",
       primaryModel: "claude-sonnet-4-20250514",
-      retryOnInvalid: false,
+      retryOnInvalid: true,
       fallbackModel: null,
     });
   });
@@ -90,7 +90,7 @@ describe("runtime model strategy", () => {
       strategy: "sonnet_default",
       provider: "openai",
       primaryModel: "gpt-5.5",
-      retryOnInvalid: false,
+      retryOnInvalid: true,
       fallbackModel: null,
     });
   });

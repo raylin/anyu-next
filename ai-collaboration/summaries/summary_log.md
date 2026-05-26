@@ -4882,3 +4882,26 @@ Unresolved questions:
 - Production `0005` remains pending and was intentionally not applied.
 - Production deploy remains pending until the production migration gate is approved.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Two-tier Phase 1 Production Migration + Smoke v0
+
+Completed changes:
+- Saved the production migration/smoke handoff under `ai-collaboration/handoffs/`.
+- Verified production Phase 1 schema objects were missing, then applied `0005_two_tier_phase_1.sql` to Neon production.
+- Verified production `analysis_requests.user_context_json`, `analysis_paid_results`, expected indexes, and constraints.
+- Deployed production after migration.
+- Diagnosed first production smoke failure as sanitized `output_validation`.
+- Added one same-model retry for output-validation failures without changing prompt/schema/provider/model defaults.
+- Redeployed production and verified final synthetic fresh analyze returned HTTP 200.
+- Verified production user context persistence, shadow paid-result creation, result/unlock/unlocked/LIFF routes, invalid LIFF bind rejection, invalid webhook signature rejection, and empty-events webhook verification handling.
+
+Learnings:
+- Production schema migration was additive and applied cleanly.
+- Production fresh analyze can still be sensitive to model output variability; same-model retry recovered the smoke path while preserving current behavior.
+- Final production smoke persisted 4 allowlisted context fields and created a completed `analysis_paid_results` shadow row.
+- Event metadata remained privacy-safe, with operational keys only.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, web build, and local Playwright smoke.
+
+Unresolved questions:
+- `analysis_paid_results` retention cleanup remains pending and should be added before broader production traffic or ads.
+- Whether output-validation retry metrics should be monitored separately as traffic grows.
+- Commit hash and staging push status to be recorded in final completion summary.

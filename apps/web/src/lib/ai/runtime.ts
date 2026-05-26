@@ -95,7 +95,7 @@ export function resolveRuntimeStrategy(
       strategy: "sonnet_default",
       provider: providerInfo.provider,
       primaryModel: providerInfo.model,
-      retryOnInvalid: false,
+      retryOnInvalid: true,
       fallbackModel: null,
     };
   }
@@ -105,7 +105,7 @@ export function resolveRuntimeStrategy(
       strategy: "sonnet_default",
       provider: providerInfo.provider,
       primaryModel: providerInfo.model,
-      retryOnInvalid: false,
+      retryOnInvalid: true,
       fallbackModel: null,
     };
   }
