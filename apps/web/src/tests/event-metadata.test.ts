@@ -37,6 +37,8 @@ describe("event metadata guard", () => {
           totalLatencyMs: 28000,
           providerLatencyMs: 24000,
         },
+        themeVariant: "riso",
+        themeSource: "manual_override",
       }),
     ).toBe(false);
   });
@@ -44,6 +46,7 @@ describe("event metadata guard", () => {
   it("includes the launch-readiness passive events", () => {
     expect(EVENT_NAMES).toContain("page_view");
     expect(EVENT_NAMES).toContain("input_started");
+    expect(EVENT_NAMES).toContain("theme_switch_clicked");
     expect(EVENT_NAMES).toContain("analysis_started");
     expect(EVENT_NAMES).toContain("analysis_failed");
     expect(EVENT_NAMES).toContain("line_add_clicked");

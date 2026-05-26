@@ -5234,3 +5234,24 @@ Unresolved questions:
 - No sensitive runtime values were recorded; docs intentionally contain only sanitized pass/fail status.
 - Production activation still requires a separate manual decision record.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Module 01 Dual Theme v2 Riso Implementation v0
+
+Completed changes:
+- Saved the provided dual-theme v2 Riso handoff under `ai-collaboration/handoffs/`.
+- Added a Module 01-only theme variant layer with `classic` and `riso`.
+- Added client-first 50/50 A/B assignment with localStorage persistence.
+- Added a manual `柔和 / 鮮明` toggle that persists manual override.
+- Implemented scoped `.anyu-v2` Riso Editorial styling across landing/input, chips, loading, result, paid preview, contact/LINE, share, and unlocked surfaces.
+- Added safe `themeVariant` and `themeSource` metadata where practical.
+- Added unit and Playwright smoke coverage for theme assignment/toggle behavior.
+
+Learnings:
+- The existing `tokens.css` is intentionally snapshot-tested as the Theme A v1.1 canonical token copy, so Theme B tokens must remain scoped outside that file.
+- Theme B preserves product/data contracts by styling current components instead of replacing funnel logic.
+- Client-first assignment avoids cookies/global theming but can briefly show Theme A before hydration.
+- Required compile, unit, lint, and build validation passed after implementation.
+
+Unresolved questions:
+- Full visual fidelity needs staging/mobile screenshot review against the v2 source files.
+- Local Playwright e2e remains blocked by the known Chromium MachPort permission issue before page-level assertions run.
+- Commit hash and staging push status to be recorded in final completion summary.

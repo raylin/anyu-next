@@ -1,6 +1,7 @@
 export const EVENT_NAMES = [
   "page_view",
   "input_started",
+  "theme_switch_clicked",
   "analysis_started",
   "analysis_failed",
   "input_submitted",

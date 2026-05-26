@@ -1339,3 +1339,596 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+@media (min-width: 768px) {
+  .anyu-v2 {
+    --anyu-type-display-size: 40px;
+    --anyu-type-num-xl-size: 76px;
+  }
+}
+
+/* ============================================================
+ * Module 01 dual theme controls
+ * ============================================================ */
+
+.anyu-module-theme {
+  position: relative;
+  display: grid;
+  gap: var(--anyu-space-5);
+}
+
+.anyu-theme-toggle {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: var(--anyu-radius-pill);
+  background: var(--anyu-card);
+  box-shadow: var(--anyu-shadow-xs);
+  color: var(--anyu-dim);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.anyu-theme-toggle-label,
+.anyu-theme-toggle-source {
+  padding-inline: 0.35rem;
+  font-family: var(--anyu-font-mono);
+  letter-spacing: var(--anyu-track-mono);
+  text-transform: uppercase;
+}
+
+.anyu-theme-toggle-source {
+  color: var(--anyu-faint);
+}
+
+.anyu-theme-toggle-option {
+  min-height: 1.8rem;
+  border: 0;
+  border-radius: var(--anyu-radius-pill);
+  background: transparent;
+  color: var(--anyu-dim);
+  padding: 0.35rem 0.55rem;
+  font: inherit;
+}
+
+.anyu-theme-toggle-option.is-active {
+  background: var(--anyu-ink-dark);
+  color: var(--anyu-ink-onDark);
+}
+
+/* ============================================================
+ * Module 01 Theme B · Riso Editorial visual layer
+ * ============================================================ */
+
+.anyu-v2 {
+  --anyu-font-serif: "Noto Serif TC", "Songti TC", "Source Han Serif TC", serif;
+  --anyu-font-sans: "Noto Sans TC", "PingFang TC", "Inter", system-ui, -apple-system, sans-serif;
+  --anyu-font-latin: "Fraunces", "Instrument Serif", "Noto Serif TC", serif;
+  --anyu-font-mono: "Space Mono", "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --anyu-track-tight: -0.4px;
+  --anyu-track-wide: 0.3px;
+  --anyu-track-mono: 1.6px;
+  --anyu-track-wordmark: 2.5px;
+  --anyu-type-display-size: 34px;
+  --anyu-type-display-lh: 1.2;
+  --anyu-type-h1-size: 24px;
+  --anyu-type-h1-lh: 1.4;
+  --anyu-type-h2-size: 19px;
+  --anyu-type-h2-lh: 1.45;
+  --anyu-type-h3-size: 17px;
+  --anyu-type-h3-lh: 1.5;
+  --anyu-type-quote-size: 16px;
+  --anyu-type-quote-lh: 1.65;
+  --anyu-type-body-lg-size: 15px;
+  --anyu-type-body-lg-lh: 1.7;
+  --anyu-type-body-size: 14px;
+  --anyu-type-body-lh: 1.7;
+  --anyu-type-caption-size: 13px;
+  --anyu-type-caption-lh: 1.65;
+  --anyu-type-label-size: 11px;
+  --anyu-type-label-lh: 1;
+  --anyu-type-num-xl-size: 64px;
+  --anyu-type-num-lg-size: 32px;
+  --anyu-type-num-md-size: 24px;
+  --anyu-radius-sm: 2px;
+  --anyu-radius-md: 2px;
+  --anyu-radius-lg: 2px;
+  --anyu-radius-xl: 3px;
+  --anyu-radius-2xl: 4px;
+  --anyu-radius-3xl: 4px;
+  --anyu-border-base: 1.5px;
+  --anyu-border-heavy: 2px;
+  --anyu-bg: #faf6ee;
+  --anyu-surface: #f5eee0;
+  --anyu-card: #ffffff;
+  --anyu-mist: #ece2cf;
+  --anyu-ink: #1a1626;
+  --anyu-dim: rgba(26, 22, 38, .78);
+  --anyu-faint: rgba(26, 22, 38, .55);
+  --anyu-line: rgba(26, 22, 38, .85);
+  --anyu-line-soft: rgba(26, 22, 38, .12);
+  --anyu-ink-dark: #15111f;
+  --anyu-ink-onDark: #f5ecdd;
+  --anyu-dim-onDark: rgba(245, 236, 221, .82);
+  --anyu-faint-onDark: rgba(245, 236, 221, .55);
+  --anyu-line-onDark: rgba(245, 236, 221, .22);
+  --anyu-accent: #5b3aa3;
+  --anyu-accent-12: rgba(91, 58, 163, .12);
+  --anyu-accent-20: rgba(91, 58, 163, .22);
+  --anyu-accent-45: rgba(91, 58, 163, .50);
+  --anyu-accent2: #ec4e8c;
+  --anyu-accent2-15: rgba(236, 78, 140, .18);
+  --anyu-accent2-30: rgba(236, 78, 140, .40);
+  --anyu-rose: #f08c5a;
+  --anyu-rose-20: rgba(240, 140, 90, .25);
+  --anyu-shadow-xs: 1px 1px 0 var(--anyu-ink);
+  --anyu-shadow-sm: 2px 2px 0 var(--anyu-ink);
+  --anyu-shadow-md: 3px 3px 0 var(--anyu-ink);
+  --anyu-shadow-lg: 4px 4px 0 var(--anyu-ink);
+  --anyu-shadow-xl: 6px 6px 0 var(--anyu-ink);
+  --anyu-shadow-acc: 4px 4px 0 var(--anyu-accent);
+  --anyu-shadow-acc2: 4px 4px 0 var(--anyu-accent2);
+  --anyu-shadow-rose: 4px 4px 0 var(--anyu-rose);
+  --anyu-shadow-focus: 0 0 0 3px var(--anyu-accent-20);
+  --anyu-grain: radial-gradient(rgba(26, 22, 38, .35) 0.6px, transparent 0.6px) 0 0 / 3px 3px;
+  --anyu-stripe-temp: repeating-linear-gradient(45deg, var(--anyu-accent) 0 4px, var(--anyu-accent2) 4px 8px);
+  --anyu-stripe-signal: repeating-linear-gradient(90deg, var(--anyu-accent) 0 3px, var(--anyu-surface) 3px 6px);
+  margin: calc(var(--anyu-space-6) * -1) calc(var(--anyu-space-6) * -1) calc(var(--anyu-space-14) * -1);
+  padding: var(--anyu-space-5) var(--anyu-space-6) var(--anyu-space-14);
+  background: var(--anyu-bg);
+  color: var(--anyu-ink);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.anyu-v2::before,
+.anyu-v2::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.anyu-v2::before {
+  inset: 0;
+  background: var(--anyu-grain);
+  mix-blend-mode: multiply;
+  opacity: 0.05;
+}
+
+.anyu-v2::after {
+  top: 4.4rem;
+  right: -2.2rem;
+  width: 6.1rem;
+  height: 6.1rem;
+  border: var(--anyu-border-heavy) solid var(--anyu-line);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 0 48%, var(--anyu-accent2-15) 49% 100%),
+    var(--anyu-card);
+  box-shadow: var(--anyu-shadow-acc2);
+  transform: rotate(5deg);
+}
+
+.anyu-v2 .anyu-module-page,
+.anyu-v2 .anyu-result-stack {
+  gap: var(--anyu-space-6);
+}
+
+.anyu-v2 .anyu-topbar,
+.anyu-v2 .anyu-result-topbar {
+  align-items: center;
+  min-height: 3.5rem;
+}
+
+.anyu-v2 .anyu-wordmark {
+  color: var(--anyu-dim);
+}
+
+.anyu-v2 .anyu-wordmark-en,
+.anyu-v2 .anyu-score-value,
+.anyu-v2 .anyu-share-score,
+.anyu-v2 .anyu-paid-price {
+  font-family: var(--anyu-font-latin);
+  font-style: italic;
+  font-weight: 700;
+}
+
+.anyu-v2 .anyu-wordmark-mark,
+.anyu-v2 .anyu-wordmark-share .anyu-wordmark-mark {
+  color: var(--anyu-accent2);
+}
+
+.anyu-v2 .anyu-kicker,
+.anyu-v2 .anyu-meta,
+.anyu-v2 .anyu-field-label,
+.anyu-v2 .anyu-guidance-label,
+.anyu-v2 .anyu-guidance-meta,
+.anyu-v2 .anyu-reply-tag,
+.anyu-v2 .anyu-loading-hint,
+.anyu-v2 .anyu-loading-tip-kicker {
+  font-family: var(--anyu-font-mono);
+  font-weight: 700;
+  letter-spacing: var(--anyu-track-mono);
+}
+
+.anyu-v2 .anyu-hero-block {
+  padding-block: var(--anyu-space-4) var(--anyu-space-2);
+}
+
+.anyu-v2 .anyu-hero-copy {
+  gap: var(--anyu-space-2);
+}
+
+.anyu-v2 .anyu-hero-copy::before {
+  content: "01";
+  position: absolute;
+  top: -1.6rem;
+  right: 0;
+  color: var(--anyu-accent2);
+  font-family: var(--anyu-font-latin);
+  font-size: 4.1rem;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.9;
+  text-shadow: 2px 2px 0 var(--anyu-accent);
+  z-index: -1;
+}
+
+.anyu-v2 .anyu-hero-glow {
+  display: none;
+}
+
+.anyu-v2 .anyu-hero-title {
+  max-width: 9em;
+  font-size: var(--anyu-type-display-size);
+}
+
+.anyu-v2 .anyu-card,
+.anyu-v2 .anyu-textarea,
+.anyu-v2 .anyu-input,
+.anyu-v2 .anyu-select,
+.anyu-v2 .anyu-guidance-card,
+.anyu-v2 .anyu-contact-code-box,
+.anyu-v2 .anyu-status-panel,
+.anyu-v2 .anyu-loading-tip,
+.anyu-v2 .anyu-share-action {
+  border: var(--anyu-border-base) solid var(--anyu-line);
+  border-radius: var(--anyu-radius-2xl);
+  box-shadow: var(--anyu-shadow-lg);
+}
+
+.anyu-v2 .anyu-card {
+  padding: 1.15rem;
+}
+
+.anyu-v2 .anyu-input-card {
+  background: var(--anyu-card);
+  box-shadow: var(--anyu-shadow-acc);
+}
+
+.anyu-v2 .anyu-textarea,
+.anyu-v2 .anyu-input,
+.anyu-v2 .anyu-select {
+  background: var(--anyu-surface);
+  box-shadow: var(--anyu-shadow-sm);
+}
+
+.anyu-v2 .anyu-privacy-helper,
+.anyu-v2 .anyu-guidance-card,
+.anyu-v2 .anyu-guidance-too_short,
+.anyu-v2 .anyu-guidance-can_analyze,
+.anyu-v2 .anyu-guidance-ideal,
+.anyu-v2 .anyu-guidance-long,
+.anyu-v2 .anyu-guidance-too_long,
+.anyu-v2 .anyu-transition-card,
+.anyu-v2 .anyu-transition-card-soft,
+.anyu-v2 .anyu-reply-card-locked,
+.anyu-v2 .anyu-share-action-primary,
+.anyu-v2 .anyu-quote-card {
+  background: var(--anyu-card);
+  box-shadow: var(--anyu-shadow-md);
+}
+
+.anyu-v2 .anyu-privacy-helper,
+.anyu-v2 .anyu-input-privacy-inline-rule,
+.anyu-v2 .anyu-helper-rule,
+.anyu-v2 .anyu-insight-soft-end {
+  border-color: var(--anyu-line-soft);
+}
+
+.anyu-v2 .anyu-context-toggle {
+  color: var(--anyu-ink);
+  font-family: var(--anyu-font-mono);
+  font-weight: 700;
+  letter-spacing: var(--anyu-track-mono);
+  text-transform: uppercase;
+}
+
+.anyu-v2 .anyu-chip {
+  min-height: 2.28rem;
+  border: var(--anyu-border-base) solid var(--anyu-line);
+  border-radius: var(--anyu-radius-lg);
+  background: var(--anyu-surface);
+  color: var(--anyu-ink);
+  box-shadow: none;
+  font-weight: 600;
+}
+
+.anyu-v2 .anyu-chip-active {
+  background: var(--anyu-accent);
+  border-color: var(--anyu-line);
+  color: var(--anyu-ink-onDark);
+  box-shadow: var(--anyu-shadow-acc2);
+}
+
+.anyu-v2 .anyu-button {
+  border: var(--anyu-border-base) solid var(--anyu-line);
+  border-radius: var(--anyu-radius-lg);
+  background: var(--anyu-ink-dark);
+  color: var(--anyu-ink-onDark);
+  box-shadow: var(--anyu-shadow-acc2);
+  font-family: var(--anyu-font-serif);
+  font-weight: 600;
+}
+
+.anyu-v2 .anyu-button-secondary {
+  background: var(--anyu-card);
+  color: var(--anyu-ink);
+  box-shadow: var(--anyu-shadow-acc);
+}
+
+.anyu-v2 .anyu-button:hover:not(:disabled),
+.anyu-v2 .anyu-share-action:hover {
+  filter: none;
+  transform: translate(-1px, -1px);
+}
+
+.anyu-v2 .anyu-button:disabled,
+.anyu-v2 .anyu-button-soft-disabled:disabled {
+  background: var(--anyu-mist);
+  color: var(--anyu-dim);
+  opacity: 1;
+  box-shadow: var(--anyu-shadow-xs);
+}
+
+.anyu-v2 .anyu-signature-card {
+  position: relative;
+  background: var(--anyu-ink-dark);
+  color: var(--anyu-ink-onDark);
+  border-color: var(--anyu-line);
+  box-shadow: var(--anyu-shadow-acc2);
+  overflow: hidden;
+}
+
+.anyu-v2 .anyu-signature-card::before {
+  content: "";
+  position: absolute;
+  right: -2rem;
+  bottom: -1.5rem;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  background: var(--anyu-grain);
+  opacity: 0.22;
+}
+
+.anyu-v2 .anyu-signature-card .anyu-kicker,
+.anyu-v2 .anyu-signature-card .anyu-section-title,
+.anyu-v2 .anyu-signature-card .anyu-state-label,
+.anyu-v2 .anyu-signature-card .anyu-score-value,
+.anyu-v2 .anyu-signature-card .anyu-score-unit,
+.anyu-v2 .anyu-signature-card .anyu-meter-labels {
+  color: var(--anyu-ink-onDark);
+}
+
+.anyu-v2 .anyu-score-wrap {
+  position: relative;
+}
+
+.anyu-v2 .anyu-score-value {
+  color: var(--anyu-accent2);
+  text-shadow: 2px 2px 0 var(--anyu-accent);
+}
+
+.anyu-v2 .anyu-meter {
+  height: 0.55rem;
+  border: var(--anyu-border-base) solid var(--anyu-line);
+  border-radius: var(--anyu-radius-sm);
+  background: var(--anyu-mist);
+}
+
+.anyu-v2 .anyu-meter-fill {
+  border-radius: 0;
+  background: var(--anyu-stripe-temp);
+}
+
+.anyu-v2 .anyu-signal-item {
+  position: relative;
+  padding: 0.95rem 0 1.05rem 3rem;
+  border-bottom: var(--anyu-border-base) dashed var(--anyu-line-soft);
+}
+
+.anyu-v2 .anyu-signal-item::before {
+  content: "0" counter(signal-row);
+  position: absolute;
+  left: 0;
+  top: 0.95rem;
+  color: var(--anyu-accent);
+  font-family: var(--anyu-font-latin);
+  font-size: 1.35rem;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 2px 2px 0 var(--anyu-accent2);
+}
+
+.anyu-v2 .anyu-signal-list {
+  counter-reset: signal-row;
+}
+
+.anyu-v2 .anyu-signal-item {
+  counter-increment: signal-row;
+}
+
+.anyu-v2 .anyu-signal-item:nth-child(n + 10)::before {
+  content: counter(signal-row);
+}
+
+.anyu-v2 .anyu-signal-top span {
+  color: var(--anyu-accent);
+  font-family: var(--anyu-font-latin);
+  font-style: italic;
+  font-weight: 700;
+}
+
+.anyu-v2 .anyu-signal-item .anyu-meter {
+  height: 0.38rem;
+}
+
+.anyu-v2 .anyu-signal-item .anyu-meter-fill {
+  background: var(--anyu-stripe-signal);
+}
+
+.anyu-v2 .anyu-quote-card {
+  position: relative;
+  box-shadow: var(--anyu-shadow-rose);
+}
+
+.anyu-v2 .anyu-quote-card::before {
+  color: var(--anyu-accent2);
+  font-family: var(--anyu-font-latin);
+  font-weight: 700;
+}
+
+.anyu-v2 .anyu-insight-card {
+  background: var(--anyu-surface);
+  box-shadow: var(--anyu-shadow-lg);
+}
+
+.anyu-v2 .anyu-paid-card {
+  box-shadow: var(--anyu-shadow-acc);
+}
+
+.anyu-v2 .anyu-paid-price {
+  color: var(--anyu-accent);
+  text-shadow: 2px 2px 0 var(--anyu-accent2);
+}
+
+.anyu-v2 .anyu-reply-card-open {
+  border-color: var(--anyu-line);
+  background: var(--anyu-ink-dark);
+  box-shadow: var(--anyu-shadow-acc2);
+}
+
+.anyu-v2 .anyu-reply-card-locked {
+  background: var(--anyu-card);
+  border-color: var(--anyu-line);
+}
+
+.anyu-v2 .anyu-reply-copy-locked {
+  filter: none;
+  color: var(--anyu-dim);
+}
+
+.anyu-v2 .anyu-reply-letter {
+  border-radius: var(--anyu-radius-sm);
+  border-color: var(--anyu-line);
+  font-family: var(--anyu-font-latin);
+  font-weight: 700;
+}
+
+.anyu-v2 .anyu-contact-card {
+  background: var(--anyu-card);
+  box-shadow: var(--anyu-shadow-rose);
+}
+
+.anyu-v2 .anyu-contact-code-box {
+  border-style: dashed;
+  background: var(--anyu-surface);
+}
+
+.anyu-v2 .anyu-contact-code-box strong {
+  font-family: var(--anyu-font-mono);
+  font-weight: 700;
+  color: var(--anyu-accent);
+}
+
+.anyu-v2 .anyu-status-panel {
+  background: var(--anyu-ink-dark);
+  color: var(--anyu-ink-onDark);
+  box-shadow: var(--anyu-shadow-acc);
+}
+
+.anyu-v2 .anyu-status-panel .anyu-loading-title,
+.anyu-v2 .anyu-status-panel .anyu-loading-detail,
+.anyu-v2 .anyu-status-panel .anyu-loading-tip-copy {
+  color: var(--anyu-ink-onDark);
+}
+
+.anyu-v2 .anyu-status-panel .anyu-loading-hint {
+  color: var(--anyu-dim-onDark);
+}
+
+.anyu-v2 .anyu-loading-tip {
+  background: transparent;
+  border-color: var(--anyu-line-onDark);
+  box-shadow: none;
+}
+
+.anyu-v2 .anyu-share-shell {
+  border: var(--anyu-border-heavy) solid var(--anyu-line);
+  border-radius: var(--anyu-radius-2xl);
+  background:
+    var(--anyu-grain),
+    var(--anyu-card);
+  box-shadow: var(--anyu-shadow-acc2);
+}
+
+.anyu-v2 .anyu-share-shell::after {
+  border-color: var(--anyu-line-soft);
+}
+
+.anyu-v2 .anyu-share-score {
+  color: var(--anyu-accent);
+  text-shadow: 2px 2px 0 var(--anyu-accent2);
+}
+
+.anyu-v2 .anyu-share-action-primary {
+  background: var(--anyu-card);
+  box-shadow: var(--anyu-shadow-acc);
+}
+
+.anyu-v2 .anyu-theme-toggle {
+  border-radius: var(--anyu-radius-lg);
+  background: var(--anyu-surface);
+  box-shadow: var(--anyu-shadow-sm);
+}
+
+.anyu-v2 .anyu-theme-toggle-option {
+  border-radius: var(--anyu-radius-sm);
+  font-family: var(--anyu-font-mono);
+  font-weight: 700;
+  letter-spacing: var(--anyu-track-mono);
+}
+
+.anyu-v2 .anyu-theme-toggle-option.is-active {
+  background: var(--anyu-accent);
+  color: var(--anyu-ink-onDark);
+}
+
+@media (max-width: 640px) {
+  .anyu-v2 {
+    margin-inline: calc(var(--anyu-space-4) * -1);
+    padding-inline: var(--anyu-space-4);
+  }
+
+  .anyu-v2 .anyu-theme-toggle {
+    justify-self: stretch;
+    justify-content: flex-end;
+  }
+}

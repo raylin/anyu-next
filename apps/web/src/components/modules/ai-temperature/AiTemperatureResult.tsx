@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
@@ -10,8 +10,10 @@ import { PaidPreviewCard } from "@/components/anyu/PaidPreviewCard";
 import { ShareCardPreview } from "@/components/anyu/ShareCardPreview";
 import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
+import { ModuleThemeShell, useModuleThemeController } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { uiNotices } from "@/content/legal";
 import { trackClientEvent, trackClientEventBeacon } from "@/lib/events/client";
+import { getModuleThemeEventMetadata } from "@/lib/modules/module-theme";
 import {
   buildShareText,
   getClientAnonymousSessionId,
@@ -47,11 +49,19 @@ export function AiTemperatureResult({
   const [unlockFulfillment, setUnlockFulfillment] =
     useState<UnlockFulfillmentState | null>(null);
   const [unlockIntentFailed, setUnlockIntentFailed] = useState(false);
+  const hasTrackedPageView = useRef(false);
   const paidPreviewRef = useRef<HTMLDivElement | null>(null);
   const contactPanelRef = useRef<HTMLDivElement | null>(null);
   const lineAddUrl = getLineAddUrl();
+  const { theme, switchTheme } = useModuleThemeController(moduleConfig);
+  const themeMetadata = useMemo(() => getModuleThemeEventMetadata(theme), [theme]);
 
   useEffect(() => {
+    if (!theme.hydrated || hasTrackedPageView.current) {
+      return;
+    }
+
+    hasTrackedPageView.current = true;
     void trackClientEvent({
       eventName: "page_view",
       moduleConfig,
@@ -60,9 +70,10 @@ export function AiTemperatureResult({
       metadata: {
         pageType: mode === "demo" ? "result_demo" : "result_runtime",
         resultId,
+        ...themeMetadata,
       },
     });
-  }, [mode, moduleConfig, result.score, resultId]);
+  }, [mode, moduleConfig, result.score, resultId, theme.hydrated, themeMetadata]);
 
   function scrollToNextStep() {
     const target = contactPanelRef.current ?? paidPreviewRef.current;
@@ -216,6 +227,7 @@ export function AiTemperatureResult({
       scoreBucket: scoreToBucket(result.score),
       metadata: {
         resultId,
+        ...themeMetadata,
       },
     });
   }
@@ -230,6 +242,7 @@ export function AiTemperatureResult({
         resultId,
         unlockIntentId,
         source: "contact_capture",
+        ...themeMetadata,
       },
     });
   }
@@ -244,6 +257,7 @@ export function AiTemperatureResult({
         resultId,
         unlockIntentId,
         source: "contact_capture",
+        ...themeMetadata,
       },
     });
   }
@@ -294,7 +308,8 @@ export function AiTemperatureResult({
   }
 
   return (
-    <section className="anyu-result-stack">
+    <ModuleThemeShell surface="result" theme={theme} onSwitchTheme={switchTheme}>
+      <section className="anyu-result-stack">
       <div className="anyu-result-topbar">
         <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">
           ← 重新整理輸入
@@ -405,7 +420,8 @@ export function AiTemperatureResult({
         />
       </div>
 
-      <LegalFooter />
-    </section>
+        <LegalFooter />
+      </section>
+    </ModuleThemeShell>
   );
 }

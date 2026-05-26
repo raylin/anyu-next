@@ -4,11 +4,13 @@ import { Card } from "@/components/anyu/Card";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
+import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { isDbConfigured } from "@/lib/db/client";
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
 import { getPaidResultForAnalysisResult } from "@/lib/db/paid-results";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import type { ProductModuleConfig } from "@/lib/modules/types";
 import { hasPaidResult, normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
 import { PAID_RESULT_PROMPT_VERSION, PAID_RESULT_SCHEMA_VERSION } from "@/lib/ai/paid-result-generation";
 
@@ -28,17 +30,17 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
   }
 
   if (!isDbConfigured()) {
-    return <UnlockError moduleSlug={moduleSlug} message="完整分析服務尚未設定完成，請稍後再試。" />;
+    return <UnlockError moduleConfig={moduleConfig} message="完整分析服務尚未設定完成，請稍後再試。" />;
   }
 
   const record = await getUnlockIntentByTokenHash(hashFulfillmentSecret(unlockToken));
 
   if (!record || record.unlockIntent.themeSlug !== moduleSlug) {
-    return <UnlockError moduleSlug={moduleSlug} message="這組完整分析連結無效，請回到結果頁重新領取。" />;
+    return <UnlockError moduleConfig={moduleConfig} message="這組完整分析連結無效，請回到結果頁重新領取。" />;
   }
 
   if (isExpired(record.unlockIntent.unlockTokenExpiresAt)) {
-    return <UnlockError moduleSlug={moduleSlug} message="這組完整分析連結已過期，請回到結果頁重新領取。" />;
+    return <UnlockError moduleConfig={moduleConfig} message="這組完整分析連結已過期，請回到結果頁重新領取。" />;
   }
 
   const result = record.result.normalizedResultJson;
@@ -50,14 +52,14 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
 
   if (!hasPaidResult(result) && !storedPaidResult?.paidResultJson) {
     if (storedPaidResult?.status === "processing") {
-      return <UnlockState moduleSlug={moduleSlug} title="完整分析正在整理中" message="我們正在把免費結果延伸成完整分析。請稍後重新整理這個頁面。" />;
+      return <UnlockState moduleConfig={moduleConfig} title="完整分析正在整理中" message="我們正在把免費結果延伸成完整分析。請稍後重新整理這個頁面。" />;
     }
 
     if (storedPaidResult?.status === "failed") {
-      return <UnlockState moduleSlug={moduleSlug} title="完整分析暫時整理失敗" message="這次完整分析沒有成功產生。請回到結果頁重新領取，或稍後再試。" />;
+      return <UnlockState moduleConfig={moduleConfig} title="完整分析暫時整理失敗" message="這次完整分析沒有成功產生。請回到結果頁重新領取，或稍後再試。" />;
     }
 
-    return <UnlockPending moduleSlug={moduleSlug} />;
+    return <UnlockPending moduleConfig={moduleConfig} />;
   }
 
   const paidResult = normalizePaidResultForDisplay(
@@ -66,13 +68,14 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
 
   return (
     <main className="anyu-shell">
-      <section className="anyu-result-stack">
-        <div className="anyu-result-topbar">
-          <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
-            ← 回到測驗
-          </Link>
-          <Wordmark showMark />
-        </div>
+      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock">
+        <section className="anyu-result-stack">
+          <div className="anyu-result-topbar">
+            <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
+              ← 回到測驗
+            </Link>
+            <Wordmark showMark />
+          </div>
 
         <Card className="anyu-quote-card">
           <p className="anyu-kicker">完整分析</p>
@@ -170,63 +173,76 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
           <p className="anyu-copy t-reading">{paidResult.summaryCard.nextMove}</p>
         </Card>
 
-        <LegalFooter />
-      </section>
+          <LegalFooter />
+        </section>
+      </ModuleThemeBoundary>
     </main>
   );
 }
 
-function UnlockPending({ moduleSlug }: { moduleSlug: string }) {
+function UnlockPending({ moduleConfig }: { moduleConfig: ProductModuleConfig }) {
   return (
     <UnlockState
-      moduleSlug={moduleSlug}
+      moduleConfig={moduleConfig}
       title="完整分析目前仍在封測流程中"
       message="你的免費分析已經完成。完整分析的自動整理與 LINE 通知會在下一階段接上；目前請先回到結果頁保留這份免費結果。"
     />
   );
 }
 
-function UnlockState({ moduleSlug, title, message }: { moduleSlug: string; title: string; message: string }) {
+function UnlockState({
+  moduleConfig,
+  title,
+  message,
+}: {
+  moduleConfig: ProductModuleConfig;
+  title: string;
+  message: string;
+}) {
   return (
     <main className="anyu-shell">
-      <section className="anyu-result-stack">
-        <div className="anyu-result-topbar">
-          <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
-            ← 回到測驗
-          </Link>
-          <Wordmark showMark />
-        </div>
-        <Card className="anyu-quote-card">
-          <p className="anyu-kicker">完整分析</p>
-          <h1 className="anyu-section-title">{title}</h1>
-          <p className="anyu-copy">{message}</p>
-          <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
-            回到輸入頁
-          </Link>
-        </Card>
-        <LegalFooter />
-      </section>
+      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock">
+        <section className="anyu-result-stack">
+          <div className="anyu-result-topbar">
+            <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">
+              ← 回到測驗
+            </Link>
+            <Wordmark showMark />
+          </div>
+          <Card className="anyu-quote-card">
+            <p className="anyu-kicker">完整分析</p>
+            <h1 className="anyu-section-title">{title}</h1>
+            <p className="anyu-copy">{message}</p>
+            <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">
+              回到輸入頁
+            </Link>
+          </Card>
+          <LegalFooter />
+        </section>
+      </ModuleThemeBoundary>
     </main>
   );
 }
 
-function UnlockError({ moduleSlug, message }: { moduleSlug: string; message: string }) {
+function UnlockError({ moduleConfig, message }: { moduleConfig: ProductModuleConfig; message: string }) {
   return (
     <main className="anyu-shell">
-      <section className="anyu-result-stack">
-        <div className="anyu-result-topbar">
-          <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
-            ← 回到測驗
-          </Link>
-          <Wordmark showMark />
-        </div>
-        <Card>
-          <p className="anyu-kicker">完整分析</p>
-          <h1 className="anyu-section-title">連結暫時不能使用</h1>
-          <p className="anyu-copy">{message}</p>
-        </Card>
-        <LegalFooter />
-      </section>
+      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock">
+        <section className="anyu-result-stack">
+          <div className="anyu-result-topbar">
+            <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">
+              ← 回到測驗
+            </Link>
+            <Wordmark showMark />
+          </div>
+          <Card>
+            <p className="anyu-kicker">完整分析</p>
+            <h1 className="anyu-section-title">連結暫時不能使用</h1>
+            <p className="anyu-copy">{message}</p>
+          </Card>
+          <LegalFooter />
+        </section>
+      </ModuleThemeBoundary>
     </main>
   );
 }

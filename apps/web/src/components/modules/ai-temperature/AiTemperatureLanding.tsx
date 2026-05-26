@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { InputCard } from "@/components/anyu/InputCard";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { Wordmark } from "@/components/anyu/Wordmark";
+import { ModuleThemeShell, useModuleThemeController } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { trackClientEvent } from "@/lib/events/client";
+import { getModuleThemeEventMetadata } from "@/lib/modules/module-theme";
 import {
   AI_TEMPERATURE_CONTEXT_GROUPS,
   compactUserContext,
@@ -91,9 +93,12 @@ export function AiTemperatureLanding({
   const [errorMessage, setErrorMessage] = useState("");
   const [loadingElapsedMs, setLoadingElapsedMs] = useState(0);
   const hasTrackedInputStarted = useRef(false);
+  const hasTrackedPageView = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const loadingRef = useRef<HTMLDivElement | null>(null);
   const pollTimeoutRef = useRef<number | null>(null);
+  const { theme, switchTheme } = useModuleThemeController(moduleConfig);
+  const themeMetadata = useMemo(() => getModuleThemeEventMetadata(theme), [theme]);
 
   const pollAnalyzeRequest = useCallback(async (pollUrl: string): Promise<void> => {
     const startedAt = Date.now();
@@ -143,6 +148,11 @@ export function AiTemperatureLanding({
   }, [moduleConfig.slug, router]);
 
   useEffect(() => {
+    if (!theme.hydrated || hasTrackedPageView.current) {
+      return;
+    }
+
+    hasTrackedPageView.current = true;
     const anonymousSessionId = getClientAnonymousSessionId();
 
     void trackClientEvent({
@@ -151,9 +161,10 @@ export function AiTemperatureLanding({
       anonymousSessionId,
       metadata: {
         pageType: "landing",
+        ...themeMetadata,
       },
     });
-  }, [moduleConfig]);
+  }, [moduleConfig, theme.hydrated, themeMetadata]);
 
   useEffect(() => {
     const recoveryState = readAnalyzeRecoveryState(moduleConfig.slug);
@@ -239,6 +250,7 @@ export function AiTemperatureLanding({
         moduleConfig,
         anonymousSessionId: getClientAnonymousSessionId(),
         situationType: selectedChip,
+        metadata: themeMetadata,
       });
     }
   }
@@ -275,6 +287,7 @@ export function AiTemperatureLanding({
         inputCharCount: inputValue.trim().length,
         userContextProvided: contextFieldCount > 0,
         userContextFieldCount: contextFieldCount,
+        ...themeMetadata,
       },
     });
 
@@ -314,6 +327,7 @@ export function AiTemperatureLanding({
               reason: normalizedError,
               userContextProvided: contextFieldCount > 0,
               userContextFieldCount: contextFieldCount,
+              ...themeMetadata,
             },
           });
           return;
@@ -357,6 +371,7 @@ export function AiTemperatureLanding({
           reason: normalizedReason,
           userContextProvided: contextFieldCount > 0,
           userContextFieldCount: contextFieldCount,
+          ...themeMetadata,
         },
       });
     } finally {
@@ -371,42 +386,44 @@ export function AiTemperatureLanding({
   const statusDetail = isSubmitting ? getAnalyzeLoadingSubtitle(loadingElapsedMs) : "";
 
   return (
-    <section className="anyu-module-page">
-      <header className="anyu-topbar anyu-topbar-landing">
-        <span aria-hidden="true" />
-        <Wordmark className="anyu-wordmark-quiet" showMark />
-      </header>
+    <ModuleThemeShell surface="landing" theme={theme} onSwitchTheme={switchTheme}>
+      <section className="anyu-module-page">
+        <header className="anyu-topbar anyu-topbar-landing">
+          <span aria-hidden="true" />
+          <Wordmark className="anyu-wordmark-quiet" showMark />
+        </header>
 
-      <section className="anyu-hero-block anyu-hero-block-landing" aria-labelledby="anyu-hero-title">
-        <p className="anyu-kicker t-label-dim">{getModuleLabel(moduleConfig)}</p>
-        <div className="anyu-hero-copy">
-          <div className="anyu-hero-glow" aria-hidden="true" />
-          <h1 id="anyu-hero-title" className="anyu-hero-title">
-            {moduleConfig.title}
-          </h1>
-          <p className="anyu-copy">{moduleConfig.subtitle}</p>
-        </div>
+        <section className="anyu-hero-block anyu-hero-block-landing" aria-labelledby="anyu-hero-title">
+          <p className="anyu-kicker t-label-dim">{getModuleLabel(moduleConfig)}</p>
+          <div className="anyu-hero-copy">
+            <div className="anyu-hero-glow" aria-hidden="true" />
+            <h1 id="anyu-hero-title" className="anyu-hero-title">
+              {moduleConfig.title}
+            </h1>
+            <p className="anyu-copy">{moduleConfig.subtitle}</p>
+          </div>
+        </section>
+
+        <InputCard
+          inputValue={inputValue}
+          contextGroups={AI_TEMPERATURE_CONTEXT_GROUPS}
+          selectedContext={userContext}
+          onContextSelect={handleContextSelect}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          textareaRef={textareaRef}
+          loadingRef={loadingRef}
+          ctaLabel={ctaLabel}
+          ctaDisabled={ctaDisabled}
+          isLoading={isSubmitting}
+          errorMessage={errorMessage}
+          inputGuidance={inputGuidance}
+          statusMessage={statusMessage}
+          statusDetail={statusDetail}
+        />
+
+        <LegalFooter />
       </section>
-
-      <InputCard
-        inputValue={inputValue}
-        contextGroups={AI_TEMPERATURE_CONTEXT_GROUPS}
-        selectedContext={userContext}
-        onContextSelect={handleContextSelect}
-        onInputChange={handleInputChange}
-        onSubmit={handleSubmit}
-        textareaRef={textareaRef}
-        loadingRef={loadingRef}
-        ctaLabel={ctaLabel}
-        ctaDisabled={ctaDisabled}
-        isLoading={isSubmitting}
-        errorMessage={errorMessage}
-        inputGuidance={inputGuidance}
-        statusMessage={statusMessage}
-        statusDetail={statusDetail}
-      />
-
-      <LegalFooter />
-    </section>
+    </ModuleThemeShell>
   );
 }
