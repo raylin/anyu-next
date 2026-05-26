@@ -73,6 +73,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - 2026-05-26 LIFF redirect context fix verified staging unlock responses now generate LIFF URLs with the module fulfillment route and required context parameters; direct query and `liff.state` route-level checks render the LINE fulfillment page instead of homepage. Real mobile LIFF smoke remains pending.
 - 2026-05-26 global LIFF bridge implementation changed the canonical staging LIFF Console endpoint to `https://staging.anyu.tw/line/fulfill`; module-specific `/m/ambiguous-temperature/line/fulfill` remains compatibility-only.
 - 2026-05-26 LIFF post-bind redirect fix changed bind success navigation to a validated root-relative unlock path shaped `/m/ambiguous-temperature/unlock/<token>`; staging route-level smoke confirmed the redacted route shape returns HTTP 200.
+- 2026-05-26 temporary LIFF runtime diagnostic mode was added for staging investigation. Use `/line/fulfill?debug=1` and share only the rendered sanitized diagnostic panel, not the address bar, page source, network logs, tokens, LINE identifiers, or full URLs.
 
 ## Smoke Checklist
 
@@ -104,3 +105,4 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 | 2026-05-26 | Verified LIFF route-level context fix for generated LIFF path, direct query context, and `liff.state` context. | Codex |
 | 2026-05-26 | Documented global LIFF bridge endpoint as the canonical staging LIFF Console endpoint. | Codex |
 | 2026-05-26 | Documented LIFF post-bind redirect fix and redacted route-shape verification. | Codex |
+| 2026-05-26 | Documented temporary sanitized LIFF runtime diagnostic mode for real mobile staging investigation. | Codex |

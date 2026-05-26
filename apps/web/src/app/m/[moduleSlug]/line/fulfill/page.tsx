@@ -1,4 +1,5 @@
 import { LineFulfillBridge } from "@/components/line/LineFulfillBridge";
+import { LineFulfillServerDiagnostic } from "@/components/line/LineFulfillServerDiagnostic";
 
 type RouteParams = Promise<{ moduleSlug?: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -11,27 +12,12 @@ export default async function ModuleLineFulfillPage({
   searchParams: SearchParams;
 }) {
   const routeParams = await params;
+  const resolvedSearchParams = await searchParams;
 
   return (
-    <LineFulfillBridge
-      defaultModuleSlug={routeParams.moduleSlug}
-      initialSearch={serializeSearchParams(await searchParams)}
-    />
+    <>
+      <LineFulfillBridge defaultModuleSlug={routeParams.moduleSlug} />
+      <LineFulfillServerDiagnostic searchParams={resolvedSearchParams} />
+    </>
   );
-}
-
-function serializeSearchParams(searchParams: Record<string, string | string[] | undefined>) {
-  const params = new URLSearchParams();
-
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        params.append(key, item);
-      }
-    } else if (value) {
-      params.set(key, value);
-    }
-  }
-
-  return params.toString();
 }

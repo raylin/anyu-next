@@ -5156,3 +5156,24 @@ Unresolved questions:
 - Local Playwright browser execution remains blocked by Chromium MachPort permission errors in this harness.
 - Production deployment was intentionally skipped.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - LIFF Runtime Navigation Diagnostic v0
+
+Completed changes:
+- Saved the LIFF runtime navigation diagnostic handoff under `ai-collaboration/handoffs/`.
+- Added temporary `/line/fulfill?debug=1` diagnostic panel for the LIFF bridge.
+- Added sanitized diagnostic formatting for pathname, search param keys, context source, context-presence booleans, allowlisted module slug, bind status, unlocked-path shape, navigation method, and safe error code.
+- Suppressed automatic post-bind navigation in debug mode so a real mobile operator can capture the rendered sanitized panel.
+- Added tests for diagnostic redaction, direct-query context, `liff.state` context, legacy-state context, and debug flag behavior.
+- Refreshed staging alias and verified `/line/fulfill?debug=1` returns HTTP 200 with the diagnostic panel.
+
+Learnings:
+- Route-level smoke still cannot reproduce the real mobile LIFF 404 because the bind path requires a real LINE runtime and ID token.
+- Diagnostic output must be limited to rendered panel fields; full URLs, page source, and network logs can include runtime/query data and should not be shared.
+- The diagnostic panel intentionally reports token/code/intent presence only, never actual values.
+- Validation passed for compileall, topic-ingestion unit tests, web lint, web unit tests, and web build.
+
+Unresolved questions:
+- Real mobile LIFF post-bind 404 still needs a human/operator screenshot or copy of only the sanitized diagnostic panel.
+- Local Playwright browser execution remains blocked by Chromium MachPort permission errors in this harness.
+- Production deployment was intentionally skipped.
+- Commit hash and staging push status to be recorded in final completion summary.

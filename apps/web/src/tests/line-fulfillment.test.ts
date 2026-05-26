@@ -10,6 +10,7 @@ import {
   normalizeFulfillmentCode,
 } from "@/lib/line/fulfillment";
 import { buildLineLiffUrl, buildModuleUnlockPath } from "@/lib/line/config";
+import { buildLiffDiagnosticSnapshot, isLiffDebugEnabled } from "@/lib/line/liff-diagnostics";
 import { parseLineFulfillmentContext } from "@/lib/line/liff-context";
 import { getLineLoginChannelId, verifyLineIdToken } from "@/lib/line/liff";
 import { verifyLineSignature } from "@/lib/line/webhook";
@@ -141,6 +142,84 @@ describe("LINE fulfillment helpers", () => {
       code: "A7K2Q9",
       statePath: null,
     });
+  });
+
+  it("formats LIFF diagnostics without token values or full URLs", () => {
+    const search =
+      "?debug=1&moduleSlug=ambiguous-temperature&unlockIntentId=intent-secret&unlockToken=token-secret&code=A7K2Q9";
+    const context = parseLineFulfillmentContext(search);
+    const diagnostic = buildLiffDiagnosticSnapshot({
+      pathname: "/line/fulfill",
+      search,
+      context,
+      allowlistedModuleSlugs: ["ambiguous-temperature"],
+      bindAttemptStatus: "success",
+      bindResponseTarget: "/m/ambiguous-temperature/unlock/token-secret",
+      navigationMethod: "window.location.assign",
+    });
+    const serialized = JSON.stringify(diagnostic);
+
+    expect(diagnostic).toMatchObject({
+      currentPathname: "/line/fulfill",
+      searchParamKeys: ["code", "debug", "moduleSlug", "unlockIntentId", "unlockToken"],
+      contextSource: "direct_query",
+      hasModuleSlug: true,
+      moduleSlug: "ambiguous-temperature",
+      hasUnlockIntentId: true,
+      hasUnlockToken: true,
+      hasFallbackCode: true,
+      bindAttemptStatus: "success",
+      bindResponseHasUnlockedPath: true,
+      unlockedPathShape: "/m/:moduleSlug/unlock/:token",
+      navigationMethod: "window.location.assign",
+    });
+    expect(serialized).not.toContain("token-secret");
+    expect(serialized).not.toContain("intent-secret");
+    expect(serialized).not.toContain("A7K2Q9");
+    expect(serialized).not.toContain("/m/ambiguous-temperature/unlock/token-secret");
+  });
+
+  it("reports liff.state context source without exposing state values", () => {
+    const state = encodeURIComponent(
+      "/line/fulfill?moduleSlug=ambiguous-temperature&unlockIntentId=intent-secret&unlockToken=token-secret&code=A7K2Q9",
+    );
+    const search = `?debug=1&liff.state=${state}`;
+    const diagnostic = buildLiffDiagnosticSnapshot({
+      pathname: "/line/fulfill",
+      search,
+      context: parseLineFulfillmentContext(search),
+      allowlistedModuleSlugs: ["ambiguous-temperature"],
+    });
+    const serialized = JSON.stringify(diagnostic);
+
+    expect(diagnostic.contextSource).toBe("liff_state");
+    expect(diagnostic.searchParamKeys).toEqual(["debug", "liff.state"]);
+    expect(diagnostic.hasUnlockToken).toBe(true);
+    expect(serialized).not.toContain("token-secret");
+    expect(serialized).not.toContain("intent-secret");
+    expect(serialized).not.toContain("A7K2Q9");
+  });
+
+  it("reports legacy liff.state context source safely", () => {
+    const state = encodeURIComponent(
+      "/m/ambiguous-temperature/line/fulfill?unlockIntentId=intent-secret&unlockToken=token-secret&code=A7K2Q9",
+    );
+    const search = `?debug=1&liff.state=${state}`;
+    const diagnostic = buildLiffDiagnosticSnapshot({
+      pathname: "/line/fulfill",
+      search,
+      context: parseLineFulfillmentContext(search),
+      allowlistedModuleSlugs: ["ambiguous-temperature"],
+    });
+
+    expect(diagnostic.contextSource).toBe("legacy_state");
+    expect(diagnostic.moduleSlug).toBe("ambiguous-temperature");
+    expect(JSON.stringify(diagnostic)).not.toContain("token-secret");
+  });
+
+  it("enables LIFF debug mode only when the safe query flag is present", () => {
+    expect(isLiffDebugEnabled("?debug=1")).toBe(true);
+    expect(isLiffDebugEnabled("?debug=0")).toBe(false);
   });
 
   it("returns an empty context when LIFF state is missing instead of inventing a redirect", () => {

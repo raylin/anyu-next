@@ -6,8 +6,14 @@ import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { getLineLiffId } from "@/lib/line/config";
+import {
+  buildLiffDiagnosticSnapshot,
+  isLiffDebugEnabled,
+  type LiffBindAttemptStatus,
+  type LiffDiagnosticSnapshot,
+} from "@/lib/line/liff-diagnostics";
 import { parseLineFulfillmentContext } from "@/lib/line/liff-context";
-import { getModuleBySlug } from "@/lib/modules/registry";
+import { getModuleBySlug, listModules } from "@/lib/modules/registry";
 import { LINE_FULFILLMENT_FALLBACK_INTRO } from "@/lib/modules/ai-temperature-ui";
 
 declare global {
@@ -26,26 +32,24 @@ type BindState = "idle" | "loading" | "success" | "fallback" | "error";
 
 export function LineFulfillBridge({
   defaultModuleSlug,
-  initialSearch = "",
 }: {
   defaultModuleSlug?: string;
-  initialSearch?: string;
 }) {
   const initialParams = useMemo(() => {
-    if (initialSearch) {
-      return parseLineFulfillmentContext(initialSearch, { defaultModuleSlug });
-    }
-
     if (typeof window === "undefined") {
       return parseLineFulfillmentContext("", { defaultModuleSlug });
     }
 
     return parseLineFulfillmentContext(window.location.search, { defaultModuleSlug });
-  }, [defaultModuleSlug, initialSearch]);
+  }, [defaultModuleSlug]);
   const initialFallbackMessage = getFallbackMessage(initialParams);
   const [state, setState] = useState<BindState>(initialFallbackMessage ? "fallback" : "idle");
   const [message, setMessage] = useState(initialFallbackMessage ?? "正在準備 LINE 領取流程…");
   const [unlockedPath, setUnlockedPath] = useState<string | null>(null);
+  const [diagnostic, setDiagnostic] = useState<LiffDiagnosticSnapshot | null>(() =>
+    buildInitialDiagnostic(initialParams),
+  );
+  const isDebugEnabled = Boolean(diagnostic);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,17 +60,34 @@ export function LineFulfillBridge({
       const fallbackMessage = getFallbackMessage(initialParams);
 
       if (fallbackMessage || !moduleConfig) {
+        updateDiagnostic({
+          setDiagnostic,
+          context: initialParams,
+          bindAttemptStatus: "failed",
+          lastSafeErrorCode: fallbackMessage ? "invalid_context" : "unsupported_module",
+        });
         setState("fallback");
         setMessage(fallbackMessage ?? "LINE 領取連結缺少有效測驗資料，請回到結果頁重新產生，或改用短碼。");
         return;
       }
 
       if (!liffId) {
+        updateDiagnostic({
+          setDiagnostic,
+          context: initialParams,
+          bindAttemptStatus: "failed",
+          lastSafeErrorCode: "missing_liff_id",
+        });
         setState("fallback");
         setMessage("LINE 自動帶入暫時不可用，請改用短碼。");
         return;
       }
 
+      updateDiagnostic({
+        setDiagnostic,
+        context: initialParams,
+        bindAttemptStatus: "pending",
+      });
       setState("loading");
 
       try {
@@ -74,6 +95,12 @@ export function LineFulfillBridge({
         await window.liff?.init({ liffId });
 
         if (!window.liff?.isLoggedIn()) {
+          updateDiagnostic({
+            setDiagnostic,
+            context: initialParams,
+            bindAttemptStatus: "pending",
+            navigationMethod: "liff.login_redirect",
+          });
           window.liff?.login({ redirectUri: window.location.href });
           return;
         }
@@ -103,16 +130,38 @@ export function LineFulfillBridge({
         const redirectTarget = normalizeUnlockRedirectTarget(payload.unlockedPath ?? payload.unlockedUrl);
 
         if (!response.ok || !payload.ok || !redirectTarget) {
+          updateDiagnostic({
+            setDiagnostic,
+            context: initialParams,
+            bindAttemptStatus: "failed",
+            bindResponseTarget: payload.unlockedPath ?? payload.unlockedUrl ?? null,
+            lastSafeErrorCode: !response.ok ? "bind_response_not_ok" : "invalid_redirect_target",
+          });
           setState("fallback");
           setMessage(payload.message ?? "LINE 自動領取失敗，請改用短碼。");
           return;
         }
 
+        updateDiagnostic({
+          setDiagnostic,
+          context: initialParams,
+          bindAttemptStatus: "success",
+          bindResponseTarget: redirectTarget,
+          navigationMethod: "window.location.assign",
+        });
         setUnlockedPath(redirectTarget);
         setState("success");
-        window.location.assign(redirectTarget);
+        if (!isDebugEnabled) {
+          window.location.assign(redirectTarget);
+        }
       } catch {
         if (!cancelled) {
+          updateDiagnostic({
+            setDiagnostic,
+            context: initialParams,
+            bindAttemptStatus: "failed",
+            lastSafeErrorCode: "bind_exception",
+          });
           setState("fallback");
           setMessage("LINE 自動領取失敗，請改用短碼。");
         }
@@ -124,7 +173,7 @@ export function LineFulfillBridge({
     return () => {
       cancelled = true;
     };
-  }, [initialParams]);
+  }, [initialParams, isDebugEnabled]);
 
   return (
     <main className="anyu-shell">
@@ -156,12 +205,110 @@ export function LineFulfillBridge({
           {state === "fallback" || state === "error" ? (
             <div className="anyu-contact-code-box">
               <p className="anyu-subtle-note">{LINE_FULFILLMENT_FALLBACK_INTRO}</p>
-              <strong>{initialParams.code || "請回到結果頁重新產生"}</strong>
+              <strong>{diagnostic ? "短碼已隱藏" : initialParams.code || "請回到結果頁重新產生"}</strong>
             </div>
           ) : null}
+
+          {diagnostic ? <LiffDiagnosticPanel diagnostic={diagnostic} /> : null}
         </Card>
       </section>
     </main>
+  );
+}
+
+function buildInitialDiagnostic(
+  context: ReturnType<typeof parseLineFulfillmentContext>,
+) {
+  const search = getRuntimeSearch();
+
+  if (!isLiffDebugEnabled(search)) {
+    return null;
+  }
+
+  return buildLiffDiagnosticSnapshot({
+    pathname: getRuntimePathname(),
+    search,
+    context,
+    allowlistedModuleSlugs: listModules().map((moduleConfig) => moduleConfig.slug),
+  });
+}
+
+function updateDiagnostic(input: {
+  setDiagnostic: (value: LiffDiagnosticSnapshot | null) => void;
+  context: ReturnType<typeof parseLineFulfillmentContext>;
+  bindAttemptStatus: LiffBindAttemptStatus;
+  bindResponseTarget?: string | null;
+  navigationMethod?: string;
+  lastSafeErrorCode?: string | null;
+}) {
+  const search = getRuntimeSearch();
+
+  if (!isLiffDebugEnabled(search)) {
+    return;
+  }
+
+  input.setDiagnostic(
+    buildLiffDiagnosticSnapshot({
+      pathname: getRuntimePathname(),
+      search,
+      context: input.context,
+      allowlistedModuleSlugs: listModules().map((moduleConfig) => moduleConfig.slug),
+      bindAttemptStatus: input.bindAttemptStatus,
+      bindResponseTarget: input.bindResponseTarget,
+      navigationMethod: input.navigationMethod,
+      lastSafeErrorCode: input.lastSafeErrorCode,
+    }),
+  );
+}
+
+function getRuntimeSearch() {
+  if (typeof window !== "undefined") {
+    return window.location.search;
+  }
+
+  return "";
+}
+
+function getRuntimePathname() {
+  if (typeof window !== "undefined") {
+    return window.location.pathname;
+  }
+
+  return "/line/fulfill";
+}
+
+function LiffDiagnosticPanel({ diagnostic }: { diagnostic: LiffDiagnosticSnapshot }) {
+  const rows: Array<[string, string]> = [
+    ["currentPathname", diagnostic.currentPathname],
+    ["searchParamKeys", diagnostic.searchParamKeys.join(",") || "none"],
+    ["contextSource", diagnostic.contextSource],
+    ["hasModuleSlug", String(diagnostic.hasModuleSlug)],
+    ["moduleSlug", diagnostic.moduleSlug ?? "none"],
+    ["hasUnlockIntentId", String(diagnostic.hasUnlockIntentId)],
+    ["hasUnlockToken", String(diagnostic.hasUnlockToken)],
+    ["hasFallbackCode", String(diagnostic.hasFallbackCode)],
+    ["bindAttemptStatus", diagnostic.bindAttemptStatus],
+    ["bindResponseHasUnlockedPath", String(diagnostic.bindResponseHasUnlockedPath)],
+    ["unlockedPathShape", diagnostic.unlockedPathShape ?? "none"],
+    ["navigationMethod", diagnostic.navigationMethod],
+    ["lastSafeErrorCode", diagnostic.lastSafeErrorCode ?? "none"],
+  ];
+
+  return (
+    <div className="anyu-contact-code-box" data-liff-diagnostic="safe">
+      <p className="anyu-kicker">LIFF diagnostic</p>
+      <p className="anyu-subtle-note">
+        Safe debug only. Do not share full browser URLs, tokens, LINE IDs, or private messages.
+      </p>
+      <dl className="anyu-diagnostic-list">
+        {rows.map(([label, value]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 
