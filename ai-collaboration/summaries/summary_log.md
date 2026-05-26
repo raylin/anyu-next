@@ -5315,3 +5315,22 @@ Unresolved questions:
 - Staging screenshot QA is still needed to confirm final desktop share-card alignment in both themes.
 - Local Playwright may remain blocked by the known Chromium/MachPort permission issue.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Module 01 Theme Carryover Bridge + Accent Direction Fix v0
+
+Completed changes:
+- Saved the theme carryover bridge/accent fix handoff under `ai-collaboration/handoffs/`.
+- Moved the Theme B quote-card accent back to the left edge with reserved left padding to avoid text overlap.
+- Updated LIFF fulfillment context parsing so unlock-token suffixes can recover the selected theme when explicit query hints are absent.
+- Wrapped the LIFF bridge transition surface in the existing Module 01 theme boundary when a supported module is available.
+- Passed server search params into global and compatibility LIFF bridge pages so carried theme hints can render before hydration.
+- Added tests for bridge theme rendering, token-suffix recovery, and quote-card left-edge accent CSS.
+
+Learnings:
+- The bridge visual discontinuity came from the transition component rendering outside the Module 01 theme wrapper, not from LIFF bind logic.
+- Query / LIFF state theme hints already existed in generated URLs; the bridge needed to apply them visually.
+- Unlock-token suffixes are useful as a non-sensitive fallback when a WebView loses explicit query theme context.
+
+Unresolved questions:
+- Staging real-device LIFF visual QA is still needed to verify the transition surface in LINE WebView for both themes.
+- Local Playwright may remain blocked by the known Chromium/MachPort permission issue.
+- Commit hash and staging push status to be recorded in final completion summary.

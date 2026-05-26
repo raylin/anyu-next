@@ -1,7 +1,9 @@
 import {
   getModuleThemeFromSearchParams,
+  getModuleThemeFromUnlockToken,
   normalizeModuleThemeSource,
   normalizeModuleThemeVariant,
+  type ModuleThemeState,
   type ModuleThemeSource,
   type ModuleThemeVariant,
 } from "@/lib/modules/module-theme";
@@ -25,25 +27,47 @@ export function parseLineFulfillmentContext(
   const directModuleSlug = searchParams.get("moduleSlug") ?? searchParams.get("module");
   const stateModuleSlug = stateParams.params.get("moduleSlug") ?? stateParams.params.get("module");
   const pathModuleSlug = extractModuleSlugFromPath(stateParams.path);
+  const unlockToken = searchParams.get("unlockToken") ?? stateParams.params.get("unlockToken") ?? "";
   const themeFromDirect = getModuleThemeFromSearchParams(searchParams);
   const themeFromState = getModuleThemeFromSearchParams(stateParams.params);
+  const themeFromToken = getModuleThemeFromUnlockToken(unlockToken);
   const themeVariant =
     themeFromDirect?.variant ??
     themeFromState?.variant ??
+    themeFromToken?.variant ??
     normalizeModuleThemeVariant(searchParams.get("themeVariant")) ??
     normalizeModuleThemeVariant(stateParams.params.get("themeVariant"));
+  const themeSource = normalizeModuleThemeSource(
+    themeFromDirect?.source ??
+      themeFromState?.source ??
+      themeFromToken?.source ??
+      searchParams.get("themeSource") ??
+      stateParams.params.get("themeSource"),
+  );
 
   return {
     moduleSlug:
       directModuleSlug ?? stateModuleSlug ?? pathModuleSlug ?? input?.defaultModuleSlug?.trim() ?? "",
     unlockIntentId: searchParams.get("unlockIntentId") ?? stateParams.params.get("unlockIntentId") ?? "",
-    unlockToken: searchParams.get("unlockToken") ?? stateParams.params.get("unlockToken") ?? "",
+    unlockToken,
     code: searchParams.get("code") ?? stateParams.params.get("code") ?? "",
     statePath: stateParams.path,
     themeVariant,
-    themeSource: normalizeModuleThemeSource(
-      themeFromDirect?.source ?? themeFromState?.source ?? searchParams.get("themeSource") ?? stateParams.params.get("themeSource"),
-    ),
+    themeSource,
+  };
+}
+
+export function getModuleThemeFromLineFulfillmentContext(
+  context: Pick<LineFulfillmentContext, "themeVariant" | "themeSource">,
+): ModuleThemeState | null {
+  if (!context.themeVariant) {
+    return null;
+  }
+
+  return {
+    variant: context.themeVariant,
+    source: normalizeModuleThemeSource(context.themeSource),
+    hydrated: true,
   };
 }
 

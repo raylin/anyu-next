@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { Wordmark } from "@/components/anyu/Wordmark";
+import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { getLineLiffId } from "@/lib/line/config";
 import {
   buildLiffDiagnosticSnapshot,
@@ -12,7 +13,10 @@ import {
   type LiffBindAttemptStatus,
   type LiffDiagnosticSnapshot,
 } from "@/lib/line/liff-diagnostics";
-import { parseLineFulfillmentContext } from "@/lib/line/liff-context";
+import {
+  getModuleThemeFromLineFulfillmentContext,
+  parseLineFulfillmentContext,
+} from "@/lib/line/liff-context";
 import { getModuleBySlug, listModules } from "@/lib/modules/registry";
 import { LINE_FULFILLMENT_FALLBACK_INTRO } from "@/lib/modules/ai-temperature-ui";
 
@@ -32,17 +36,24 @@ type BindState = "idle" | "loading" | "success" | "fallback" | "error";
 
 export function LineFulfillBridge({
   defaultModuleSlug,
+  initialSearch,
 }: {
   defaultModuleSlug?: string;
+  initialSearch?: string;
 }) {
   const initialParams = useMemo(() => {
     if (typeof window === "undefined") {
-      return parseLineFulfillmentContext("", { defaultModuleSlug });
+      return parseLineFulfillmentContext(initialSearch ?? "", { defaultModuleSlug });
     }
 
     return parseLineFulfillmentContext(window.location.search, { defaultModuleSlug });
-  }, [defaultModuleSlug]);
+  }, [defaultModuleSlug, initialSearch]);
   const initialFallbackMessage = getFallbackMessage(initialParams);
+  const themeModuleConfig =
+    getModuleBySlug(initialParams.moduleSlug) ??
+    getModuleBySlug(defaultModuleSlug ?? "") ??
+    getModuleBySlug("ambiguous-temperature");
+  const initialTheme = getModuleThemeFromLineFulfillmentContext(initialParams);
   const [state, setState] = useState<BindState>(initialFallbackMessage ? "fallback" : "idle");
   const [message, setMessage] = useState(initialFallbackMessage ?? "正在準備 LINE 領取流程…");
   const [unlockedPath, setUnlockedPath] = useState<string | null>(null);
@@ -177,7 +188,7 @@ export function LineFulfillBridge({
     };
   }, [initialParams, isDebugEnabled]);
 
-  return (
+  const bridgeContent = (
     <main className="anyu-shell">
       <section className="anyu-result-stack">
         <div className="anyu-result-topbar">
@@ -215,6 +226,20 @@ export function LineFulfillBridge({
         </Card>
       </section>
     </main>
+  );
+
+  if (!themeModuleConfig) {
+    return bridgeContent;
+  }
+
+  return (
+    <ModuleThemeBoundary
+      moduleConfig={themeModuleConfig}
+      surface="unlock"
+      initialTheme={initialTheme}
+    >
+      {bridgeContent}
+    </ModuleThemeBoundary>
   );
 }
 

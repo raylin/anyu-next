@@ -1,5 +1,8 @@
 import { createHmac } from "node:crypto";
-import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+import { LineFulfillBridge } from "@/components/line/LineFulfillBridge";
 import {
   buildFulfillmentExpiry,
   generateFulfillmentCode,
@@ -225,6 +228,88 @@ describe("LINE fulfillment helpers", () => {
       themeVariant: "classic",
       themeSource: "query_hint",
     });
+  });
+
+  it("recovers bridge theme from unlock-token suffix when explicit query hints are absent", () => {
+    expect(
+      parseLineFulfillmentContext(
+        "?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1.r&code=A7K2Q9",
+      ),
+    ).toMatchObject({
+      themeVariant: "riso",
+      themeSource: "query_hint",
+    });
+  });
+
+  it("applies riso theme on the LIFF bridge from query context without a fresh assignment", () => {
+    const originalWindow = globalThis.window;
+    const randomSpy = vi.spyOn(Math, "random");
+
+    vi.stubGlobal("window", {
+      location: {
+        pathname: "/line/fulfill",
+        search:
+          "?moduleSlug=ambiguous-temperature&themeVariant=riso&themeSource=manual_override&unlockIntentId=intent-1&unlockToken=token-1.r&code=A7K2Q9",
+      },
+    });
+
+    try {
+      const html = renderToStaticMarkup(createElement(LineFulfillBridge));
+
+      expect(html).toContain('data-module-theme="riso"');
+      expect(html).toContain('data-module-theme-source="manual_override"');
+      expect(html).toContain("anyu-v2");
+      expect(randomSpy).not.toHaveBeenCalled();
+    } finally {
+      vi.stubGlobal("window", originalWindow);
+      randomSpy.mockRestore();
+    }
+  });
+
+  it("server-renders the LIFF bridge with the provided theme hint before hydration", () => {
+    const originalWindow = globalThis.window;
+    const randomSpy = vi.spyOn(Math, "random");
+
+    vi.stubGlobal("window", undefined);
+
+    try {
+      const html = renderToStaticMarkup(
+        createElement(LineFulfillBridge, {
+          initialSearch:
+            "moduleSlug=ambiguous-temperature&themeVariant=riso&themeSource=query_hint&unlockIntentId=intent-1&unlockToken=token-1.r&code=A7K2Q9",
+        }),
+      );
+
+      expect(html).toContain('data-module-theme="riso"');
+      expect(html).toContain('data-module-theme-source="query_hint"');
+      expect(html).toContain("anyu-v2");
+      expect(randomSpy).not.toHaveBeenCalled();
+    } finally {
+      vi.stubGlobal("window", originalWindow);
+      randomSpy.mockRestore();
+    }
+  });
+
+  it("applies classic theme on the LIFF bridge from token suffix context", () => {
+    const originalWindow = globalThis.window;
+
+    vi.stubGlobal("window", {
+      location: {
+        pathname: "/line/fulfill",
+        search:
+          "?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1.c&code=A7K2Q9",
+      },
+    });
+
+    try {
+      const html = renderToStaticMarkup(createElement(LineFulfillBridge));
+
+      expect(html).toContain('data-module-theme="classic"');
+      expect(html).toContain('data-module-theme-source="query_hint"');
+      expect(html).not.toContain("anyu-v2");
+    } finally {
+      vi.stubGlobal("window", originalWindow);
+    }
   });
 
   it("formats LIFF diagnostics without token values or full URLs", () => {

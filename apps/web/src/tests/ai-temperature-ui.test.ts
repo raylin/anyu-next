@@ -326,7 +326,9 @@ describe("ai-temperature UI helpers", () => {
     expect(globals).toContain(".anyu-reply-why span {\n  color: var(--anyu-accent2);");
     expect(globals).toContain(".anyu-v2 .anyu-signature-card {\n  position: relative;\n  background: var(--anyu-card);");
     expect(globals).toContain(".anyu-v2 .anyu-quote-card::before {\n  content: \"\";");
-    expect(globals).toContain("width: 0.45rem;\n  border-left: var(--anyu-border-base) solid var(--anyu-line);");
+    expect(globals).toContain(".anyu-v2 .anyu-quote-card {\n  position: relative;\n  padding-left: calc(1.15rem + 0.7rem);");
+    expect(globals).toContain("inset: 0 auto 0 0;\n  width: 0.45rem;\n  border-right: var(--anyu-border-base) solid var(--anyu-line);");
+    expect(globals).not.toContain(".anyu-v2 .anyu-quote-card {\n  position: relative;\n  padding-right: calc(1.15rem + 0.7rem);");
     expect(globals).toContain("radial-gradient(ellipse 12rem 7rem at 12% 10%");
     expect(globals).not.toContain(".anyu-v2 .anyu-share-shell {\n  border: var(--anyu-border-heavy) solid var(--anyu-line);\n  border-radius: var(--anyu-radius-2xl);\n  background:\n    var(--anyu-grain),");
   });
