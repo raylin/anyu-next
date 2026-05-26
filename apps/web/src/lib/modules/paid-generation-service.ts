@@ -1,9 +1,11 @@
 import {
   buildProviderFallbackPaidResult,
   generatePaidResult,
+  getPaidResultValidationDiagnostics,
   PAID_RESULT_PROVIDER_FALLBACK_MODEL,
   PAID_RESULT_PROMPT_VERSION,
   PAID_RESULT_SCHEMA_VERSION,
+  type PaidResultValidationDiagnostics,
 } from "@/lib/ai/paid-result-generation";
 import { isOutputValidationError, resolveRuntimeStrategy } from "@/lib/ai/runtime";
 import {
@@ -166,6 +168,7 @@ export async function requestDeferredPaidGeneration(input: {
       model: string;
       source: PaidGenerationSource;
       fallbackReason?: string;
+      validationDiagnostics?: PaidResultValidationDiagnostics | null;
     };
 
     try {
@@ -201,6 +204,7 @@ export async function requestDeferredPaidGeneration(input: {
             model: PAID_RESULT_PROVIDER_FALLBACK_MODEL,
             source: "fallback",
             fallbackReason: getSafeErrorCode(retryError),
+            validationDiagnostics: getPaidResultValidationDiagnostics(retryError),
           };
         }
       } else {
@@ -212,6 +216,7 @@ export async function requestDeferredPaidGeneration(input: {
           model: PAID_RESULT_PROVIDER_FALLBACK_MODEL,
           source: "fallback",
           fallbackReason: getSafeErrorCode(error),
+          validationDiagnostics: getPaidResultValidationDiagnostics(error),
         };
       }
     }
@@ -238,6 +243,7 @@ export async function requestDeferredPaidGeneration(input: {
         status: "completed",
         source: generated.source,
         fallbackReason: generated.fallbackReason,
+        validationDiagnostics: generated.validationDiagnostics,
         elapsedMs: Date.now() - startedAt,
         retryCount: paidRecord.retryCount,
       },

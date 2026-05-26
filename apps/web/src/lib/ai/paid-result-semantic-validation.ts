@@ -23,24 +23,24 @@ export class PaidResultSemanticValidationError extends Error {
   }
 }
 
-function collectStrings(value: unknown): string[] {
+export function collectPaidResultStrings(value: unknown): string[] {
   if (typeof value === "string") {
     return [value];
   }
 
   if (Array.isArray(value)) {
-    return value.flatMap((item) => collectStrings(item));
+    return value.flatMap((item) => collectPaidResultStrings(item));
   }
 
   if (value && typeof value === "object") {
-    return Object.values(value).flatMap((item) => collectStrings(item));
+    return Object.values(value).flatMap((item) => collectPaidResultStrings(item));
   }
 
   return [];
 }
 
-function getAggregateTextLength(value: RichPaidResult): number {
-  return collectStrings(value).join("").trim().length;
+export function getPaidResultAggregateTextLength(value: RichPaidResult): number {
+  return collectPaidResultStrings(value).join("").trim().length;
 }
 
 function assertNonEmptyString(value: unknown, fieldName: string) {
@@ -56,7 +56,7 @@ export function validatePaidResultSemantics(result: ProductResult): ProductResul
     throw new PaidResultSemanticValidationError("paid_result is missing.");
   }
 
-  const paidStrings = collectStrings(paidResult);
+  const paidStrings = collectPaidResultStrings(paidResult);
   const forbiddenMatch = PAID_RESULT_FORBIDDEN_SUBSTRINGS.find((forbidden) =>
     paidStrings.some((value) => value.includes(forbidden)),
   );
@@ -108,7 +108,7 @@ export function validatePaidResultSemantics(result: ProductResult): ProductResul
   assertNonEmptyString(paidResult.summaryCard.body, "paid_result.summaryCard.body");
   assertNonEmptyString(paidResult.summaryCard.nextMove, "paid_result.summaryCard.nextMove");
 
-  if (getAggregateTextLength(paidResult) < PAID_RESULT_MIN_TEXT_LENGTH) {
+  if (getPaidResultAggregateTextLength(paidResult) < PAID_RESULT_MIN_TEXT_LENGTH) {
     throw new PaidResultSemanticValidationError("paid_result aggregate value is too thin.");
   }
 

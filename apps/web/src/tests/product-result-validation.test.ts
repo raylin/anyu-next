@@ -4,6 +4,8 @@ import { resolve } from "node:path";
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
 import {
   buildProviderFallbackPaidResult,
+  getPaidResultValidationDiagnostics,
+  PAID_RESULT_MAX_OUTPUT_TOKENS,
   validatePaidResultText,
 } from "@/lib/ai/paid-result-generation";
 import { PAID_RESULT_MIN_TEXT_LENGTH } from "@/lib/ai/paid-result-semantic-validation";
@@ -35,6 +37,10 @@ describe("product result schema validation", () => {
 
   it("keeps deferred paid result semantic depth compatible with compact provider output", () => {
     expect(PAID_RESULT_MIN_TEXT_LENGTH).toBeLessThanOrEqual(900);
+  });
+
+  it("keeps deferred paid result output budget large enough for complete JSON", () => {
+    expect(PAID_RESULT_MAX_OUTPUT_TOKENS).toBeGreaterThanOrEqual(3_600);
   });
 
   it("accepts free-only results without running paid semantic validation", () => {
@@ -72,6 +78,51 @@ describe("product result schema validation", () => {
     );
 
     expect(paidResult).toEqual(aiTemperatureDemoProductResult.paid_result);
+  });
+
+  it("returns sanitized diagnostics for schema validation failures", async () => {
+    const freeResult = extractFreeResult(aiTemperatureDemoProductResult);
+
+    await expect(
+      validatePaidResultText(
+        JSON.stringify({
+          fullSummary: "摘要",
+          possibleStates: [],
+          signalDeepDive: [],
+          replyStrategies: [{ label: "主動推進", copyableMessages: [] }],
+          next48HourPlan: [],
+          avoidDoing: [],
+          softInsight: "提醒",
+          summaryCard: {},
+        }),
+        freeResult,
+      ),
+    ).rejects.toSatisfy((error) => {
+      const diagnostics = getPaidResultValidationDiagnostics(error);
+
+      expect(diagnostics).toMatchObject({
+        parse: "success",
+        copyableMessagesCount: 0,
+      });
+      expect(diagnostics?.schemaFailurePaths).toContain("/replyStrategies/0");
+      expect(diagnostics?.missingFields).toEqual(
+        expect.arrayContaining([
+          "/replyStrategies/0.tone",
+          "/replyStrategies/0.whenToUse",
+          "/replyStrategies/0.whyItWorks",
+        ]),
+      );
+      expect(diagnostics?.arrayCounts).toMatchObject({
+        possibleStates: 0,
+        signalDeepDive: 0,
+        replyStrategies: 1,
+        next48HourPlan: 0,
+        avoidDoing: 0,
+        "replyStrategies.0.copyableMessages": 0,
+      });
+
+      return true;
+    });
   });
 
   it("rejects forbidden paid result phrasing", () => {

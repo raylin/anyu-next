@@ -5017,3 +5017,26 @@ Unresolved questions:
 - Need secure transient provider-output diagnostics or sanitized validation-debug tooling before Phase 3 treats provider paid generation as stable.
 - Production deployment was intentionally skipped.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Secure Provider Output Diagnostic v0
+
+Completed changes:
+- Saved the secure provider diagnostic handoff under `ai-collaboration/handoffs/`.
+- Added in-memory sanitized diagnostics for paid provider parse/schema/semantic validation failures.
+- Attached diagnostics only to fallback completion metadata; no raw provider output or paid JSON is persisted.
+- Ran staging synthetic diagnostic flow and identified parse failure before schema/semantic validation.
+- Increased paid-generation provider output budget from 2,400 to 3,600 tokens.
+- Redeployed staging and verified paid generation completed through provider without fallback.
+- Added tests for sanitized diagnostics, output budget, and fallback metadata.
+
+Learnings:
+- The previous fallback reason `output_validation` was caused by parse failure, consistent with malformed/truncated JSON.
+- After raising output budget, final staging paid row used provider model `claude-haiku-4-5-20251001` and event metadata recorded `source: provider`.
+- Repeat paid request reused the completed row and unlocked route rendered paid content.
+- Fallback remains available but was not used in the final smoke.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, web build, and local Playwright smoke.
+
+Unresolved questions:
+- Only one final synthetic staging case was verified after the output-budget fix.
+- Deferred paid generation remains synchronous and should still be revisited before broader LINE traffic.
+- Production deployment was intentionally skipped.
+- Commit hash and staging push status to be recorded in final completion summary.

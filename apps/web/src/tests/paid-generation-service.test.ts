@@ -4,6 +4,7 @@ const {
   mockBuildProviderFallbackPaidResult,
   mockCreatePaidResultRecord,
   mockGeneratePaidResult,
+  mockGetPaidResultValidationDiagnostics,
   mockGetAnalysisResultWithRequestById,
   mockGetPaidResultForAnalysisResult,
   mockGetUnlockIntentById,
@@ -17,6 +18,7 @@ const {
   mockBuildProviderFallbackPaidResult: vi.fn(),
   mockCreatePaidResultRecord: vi.fn(),
   mockGeneratePaidResult: vi.fn(),
+  mockGetPaidResultValidationDiagnostics: vi.fn(),
   mockGetAnalysisResultWithRequestById: vi.fn(),
   mockGetPaidResultForAnalysisResult: vi.fn(),
   mockGetUnlockIntentById: vi.fn(),
@@ -35,6 +37,7 @@ vi.mock("@/lib/ai/paid-result-generation", async (importOriginal) => {
     ...actual,
     buildProviderFallbackPaidResult: mockBuildProviderFallbackPaidResult,
     generatePaidResult: mockGeneratePaidResult,
+    getPaidResultValidationDiagnostics: mockGetPaidResultValidationDiagnostics,
   };
 });
 
@@ -113,6 +116,7 @@ describe("deferred paid generation service", () => {
     mockBaseRecords();
     mockIsOutputValidationError.mockReturnValue(false);
     mockBuildProviderFallbackPaidResult.mockReturnValue(paidResult);
+    mockGetPaidResultValidationDiagnostics.mockReturnValue(null);
   });
 
   it("stores provider-generated paid results and records provider source metadata", async () => {
@@ -192,6 +196,19 @@ describe("deferred paid generation service", () => {
     mockGeneratePaidResult
       .mockRejectedValueOnce(new Error("Model output was not valid JSON: truncated"))
       .mockRejectedValueOnce(new Error("/replyStrategies/0/tone is invalid"));
+    mockGetPaidResultValidationDiagnostics.mockReturnValue({
+      parse: "success",
+      schemaFailurePaths: ["/replyStrategies/0"],
+      missingFields: ["/replyStrategies/0.tone"],
+      invalidTypeFields: [],
+      arrayCounts: {
+        replyStrategies: 3,
+        "replyStrategies.0.copyableMessages": 2,
+      },
+      semanticCategory: null,
+      aggregateTextLength: 850,
+      copyableMessagesCount: 6,
+    });
 
     const result = await requestDeferredPaidGeneration({
       moduleConfig: aiTemperatureModule,
@@ -217,6 +234,12 @@ describe("deferred paid generation service", () => {
         metadata: expect.objectContaining({
           source: "fallback",
           fallbackReason: "output_validation",
+          validationDiagnostics: expect.objectContaining({
+            parse: "success",
+            schemaFailurePaths: ["/replyStrategies/0"],
+            missingFields: ["/replyStrategies/0.tone"],
+            copyableMessagesCount: 6,
+          }),
         }),
       }),
     );

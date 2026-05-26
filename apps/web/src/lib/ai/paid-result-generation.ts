@@ -1,19 +1,44 @@
 import fs from "node:fs/promises";
+import type { ErrorObject } from "ajv";
 import Ajv2020 from "ajv/dist/2020";
 import { callAiProvider } from "@/lib/ai/provider";
-import { validatePaidResultSemantics } from "@/lib/ai/paid-result-semantic-validation";
+import {
+  getPaidResultAggregateTextLength,
+  validatePaidResultSemantics,
+} from "@/lib/ai/paid-result-semantic-validation";
 import { getPaidResultPromptPath, getPaidResultSchemaPath } from "@/lib/ai/repo-paths";
 import type { ProductResult, RichPaidResult } from "@/lib/ai/product-result-schema";
 import type { AiTemperatureUserContext } from "@/lib/modules/ai-temperature-context";
 
 export const PAID_RESULT_PROMPT_VERSION = "paid_result_prompt_v0.1";
 export const PAID_RESULT_SCHEMA_VERSION = "paid_result_schema_v1";
-export const PAID_RESULT_MAX_OUTPUT_TOKENS = 2_400;
+export const PAID_RESULT_MAX_OUTPUT_TOKENS = 3_600;
 export const PAID_RESULT_PROVIDER_FALLBACK_MODEL = "paid_template_fallback_v0";
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 let cachedPrompt: string | null = null;
 let cachedValidator: ReturnType<typeof ajv.compile<RichPaidResult>> | null = null;
+
+export type PaidResultValidationDiagnostics = {
+  parse: "success" | "failure";
+  schemaFailurePaths: string[];
+  missingFields: string[];
+  invalidTypeFields: string[];
+  arrayCounts: Record<string, number>;
+  semanticCategory: string | null;
+  aggregateTextLength: number | null;
+  copyableMessagesCount: number | null;
+};
+
+export class PaidResultProviderOutputError extends Error {
+  constructor(
+    message: string,
+    readonly diagnostics: PaidResultValidationDiagnostics,
+  ) {
+    super(message);
+    this.name = "PaidResultProviderOutputError";
+  }
+}
 
 async function loadPaidPromptTemplate() {
   if (cachedPrompt) {
@@ -61,6 +86,114 @@ function unwrapPaidResultCandidate(value: unknown): unknown {
   return value;
 }
 
+function getArrayCount(value: unknown, path: string): number | null {
+  const segments = path.split(".").filter(Boolean);
+  let current = value;
+
+  for (const segment of segments) {
+    if (current && typeof current === "object" && !Array.isArray(current)) {
+      current = (current as Record<string, unknown>)[segment];
+    } else {
+      return null;
+    }
+  }
+
+  return Array.isArray(current) ? current.length : null;
+}
+
+function buildArrayCounts(value: unknown) {
+  const counts: Record<string, number> = {};
+
+  for (const path of ["possibleStates", "signalDeepDive", "replyStrategies", "next48HourPlan", "avoidDoing"]) {
+    const count = getArrayCount(value, path);
+    if (count !== null) {
+      counts[path] = count;
+    }
+  }
+
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const strategies = (value as { replyStrategies?: unknown }).replyStrategies;
+    if (Array.isArray(strategies)) {
+      for (const [index, strategy] of strategies.entries()) {
+        const count = getArrayCount(strategy, "copyableMessages");
+        if (count !== null) {
+          counts[`replyStrategies.${index}.copyableMessages`] = count;
+        }
+      }
+    }
+  }
+
+  return counts;
+}
+
+function countCopyableMessages(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const strategies = (value as { replyStrategies?: unknown }).replyStrategies;
+
+  if (!Array.isArray(strategies)) {
+    return null;
+  }
+
+  return strategies.reduce((count, strategy) => {
+    if (!strategy || typeof strategy !== "object" || Array.isArray(strategy)) {
+      return count;
+    }
+
+    const messages = (strategy as { copyableMessages?: unknown }).copyableMessages;
+    return count + (Array.isArray(messages) ? messages.length : 0);
+  }, 0);
+}
+
+function sanitizeSchemaPath(issue: ErrorObject) {
+  return issue.instancePath || "$";
+}
+
+function getMissingField(issue: ErrorObject) {
+  return issue.keyword === "required" &&
+    issue.params &&
+    typeof issue.params === "object" &&
+    "missingProperty" in issue.params &&
+    typeof issue.params.missingProperty === "string"
+    ? `${issue.instancePath || "$"}.${issue.params.missingProperty}`.replace("$.", "")
+    : null;
+}
+
+function getInvalidTypeField(issue: ErrorObject) {
+  return issue.keyword === "type" ? issue.instancePath || "$" : null;
+}
+
+function buildDiagnostics(input: {
+  parse: "success" | "failure";
+  candidate?: unknown;
+  schemaErrors?: ErrorObject[] | null;
+  semanticCategory?: string | null;
+}): PaidResultValidationDiagnostics {
+  const candidate = input.candidate;
+  const richCandidate = candidate as RichPaidResult;
+
+  return {
+    parse: input.parse,
+    schemaFailurePaths: Array.from(new Set((input.schemaErrors ?? []).map(sanitizeSchemaPath))).slice(0, 12),
+    missingFields: Array.from(
+      new Set((input.schemaErrors ?? []).map(getMissingField).filter((field): field is string => Boolean(field))),
+    ).slice(0, 12),
+    invalidTypeFields: Array.from(
+      new Set((input.schemaErrors ?? []).map(getInvalidTypeField).filter((field): field is string => Boolean(field))),
+    ).slice(0, 12),
+    arrayCounts: buildArrayCounts(candidate),
+    semanticCategory: input.semanticCategory ?? null,
+    aggregateTextLength: candidate ? getPaidResultAggregateTextLength(richCandidate) : null,
+    copyableMessagesCount: countCopyableMessages(candidate),
+  };
+}
+
+export function getPaidResultValidationDiagnostics(error: unknown) {
+  return error instanceof PaidResultProviderOutputError ? error.diagnostics : null;
+}
+
 export async function validatePaidResultText(
   text: string,
   freeResult: ProductResult,
@@ -70,28 +203,46 @@ export async function validatePaidResultText(
   try {
     parsed = unwrapPaidResultCandidate(JSON.parse(stripMarkdownFences(text)));
   } catch (error) {
-    throw new Error(
+    throw new PaidResultProviderOutputError(
       error instanceof Error
         ? `Model output was not valid JSON: ${error.message}`
         : "Model output was not valid JSON.",
+      buildDiagnostics({ parse: "failure" }),
     );
   }
 
   const validator = await getPaidValidator();
 
   if (!validator(parsed)) {
-    throw new Error(
+    throw new PaidResultProviderOutputError(
       validator.errors
         ?.map((issue) => `${issue.instancePath || "$"} ${issue.message ?? "is invalid"}`)
         .join("; ") ?? "Paid result failed schema validation.",
+      buildDiagnostics({
+        parse: "success",
+        candidate: parsed,
+        schemaErrors: validator.errors,
+      }),
     );
   }
 
   const paidResult = parsed as RichPaidResult;
-  validatePaidResultSemantics({
-    ...freeResult,
-    paid_result: paidResult,
-  });
+  try {
+    validatePaidResultSemantics({
+      ...freeResult,
+      paid_result: paidResult,
+    });
+  } catch (error) {
+    throw new PaidResultProviderOutputError(
+      error instanceof Error ? error.message : "Paid result failed semantic validation.",
+      buildDiagnostics({
+        parse: "success",
+        candidate: parsed,
+        semanticCategory: error instanceof Error ? error.message : "semantic_validation",
+      }),
+    );
+  }
+
   return paidResult;
 }
 
