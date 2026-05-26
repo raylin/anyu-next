@@ -4,9 +4,9 @@ Date: 2026-05-25
 
 ## 1. Summary
 
-This task verified staging deployment freshness and reran the shell-safe synthetic staging flow after Phase 3 LINE bind trigger delivery.
+This task verified staging deployment freshness and reran the shell-safe synthetic staging flow after Phase 3 LINE bind trigger delivery. Follow-up operator verification confirmed the real mobile staging LIFF flow now passes after the LIFF URL path duplication fix.
 
-Manual real LINE LIFF bind and test-OA short-code smoke could not be completed from shell because they require a LINE client/operator action. They remain pending and should not be represented as passed.
+Real staging/test OA short-code smoke remains pending and should not be represented as passed.
 
 Production was not touched.
 
@@ -23,20 +23,17 @@ Sanitized deployment status:
 
 ## 3. LIFF Bind Manual Smoke
 
-Status: not completed from shell.
+Status: passed by real mobile staging LIFF smoke after LIFF URL path duplication fix.
 
-Reason:
+Sanitized result:
 
-- Requires real LINE LIFF session and ID token from a LINE client.
-- Shell cannot safely manufacture a valid LINE ID token.
-
-Recorded result:
-
-- LIFF bind smoke: pending manual operator verification
-- paid generation completed: not verified through real LIFF
-- provider source: unknown for real LIFF path
-- unlocked paid content visible: not verified through real LIFF
-- processing/failure state seen: not verified through real LIFF
+- LIFF bind smoke: passed
+- generic 404 after opening LIFF: not observed after fix
+- homepage fallback/drop: not observed after fix
+- post-bind route: reached correct unlocked route
+- paid content completed/rendered: yes
+- processing/failure state seen: no
+- production touched: no
 
 ## 4. Short-code Test OA Manual Smoke
 
@@ -101,22 +98,21 @@ Not recorded:
 
 ## 8. Next-after Risk Decision
 
-Decision for production gate: do not accept Next `after` as production-ready until real staging LIFF and short-code smoke both pass.
+Decision for production gate: do not accept Next `after` as production-ready until real staging short-code smoke also passes.
 
 Current recommendation:
 
 - Keep Next `after` as staging / low-volume beta MVP only.
 - Do not proceed to production activation from this task.
-- Run manual test-OA smoke next.
+- Run manual test-OA short-code smoke next.
 
-If both manual flows pass, it is reasonable to accept Next `after` for low-key beta. If either flow gets stuck processing, add durable background delivery or polling before production.
+If short-code smoke also passes, it is reasonable to accept Next `after` for low-key beta. If short-code flow gets stuck processing, add durable background delivery or polling before production.
 
 ## 9. Known Limitations
 
-- No real LINE client LIFF bind was performed.
 - No real test-OA short-code message was sent.
 - Webhook post-response generation still uses Next `after`, not a durable queue.
 
 ## 10. Recommended Next Step
 
-Have the operator run the real staging LIFF bind and test-OA short-code smoke, then record sanitized pass/fail results in a follow-up report.
+Have the operator run the real staging test-OA short-code smoke, then record sanitized pass/fail results in a follow-up report.

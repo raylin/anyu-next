@@ -2,7 +2,7 @@
 
 ## Summary
 
-Verified staging deployment freshness and reran shell-safe staging paid-generation smoke after Phase 3. Real LIFF bind and test-OA short-code manual smoke were not completed because they require a human LINE client/operator.
+Verified staging deployment freshness and reran shell-safe staging paid-generation smoke after Phase 3. Follow-up manual operator verification confirmed the real mobile staging LIFF flow now passes after the LIFF URL path duplication fix.
 
 Production was not deployed or touched.
 
@@ -19,25 +19,27 @@ Production was not deployed or touched.
 
 ## Manual Smoke Results
 
-Manual real LINE smoke was not completed in this task.
+Original shell run could not complete real LINE smoke because it required operator interaction.
 
-Reason:
+Follow-up status:
 
-- LIFF bind requires a real LINE client ID-token flow.
-- Short-code smoke requires an operator to send the generated short code to the staging/test OA.
-- The shell cannot safely perform either without real LINE client interaction.
+- Real mobile staging LIFF smoke: passed after the LIFF URL path duplication fix.
+- Real staging/test OA short-code smoke: still pending manual operator verification.
 
 ## LIFF Result
 
-Status: pending manual operator verification.
+Status: passed in real mobile staging LIFF smoke.
 
 Sanitized fields:
 
-- LIFF bind smoke: pending
-- paid generation completed through real LIFF: unknown
-- provider source: unknown
-- unlocked paid content visible through real LIFF: unknown
-- processing/failure state seen: unknown
+- LIFF bind smoke: passed
+- generic 404 after opening LIFF: not observed after fix
+- homepage fallback/drop: not observed after fix
+- post-bind route: reached correct unlocked route
+- paid generation completed through real LIFF: yes
+- unlocked paid content visible through real LIFF: yes
+- processing/failure state seen: no
+- production touched: no
 
 ## Short-code Result
 
@@ -77,8 +79,8 @@ Current decision: do not accept Next `after` as production-ready from this task.
 Recommendation:
 
 - Keep Next `after` as staging / low-volume beta MVP only.
-- Run real staging test-OA LIFF and short-code smoke next.
-- If manual smoke passes, accept Next `after` for low-key beta.
+- Run real staging test-OA short-code smoke next.
+- If short-code smoke also passes, accept Next `after` for low-key beta.
 - If manual smoke gets stuck processing, add durable background delivery or polling before production.
 
 ## Validation Results
@@ -94,7 +96,7 @@ Passed:
 
 ## Known Technical Debt
 
-Real manual LINE smoke remains pending. The current webhook trigger uses Next `after`, not a durable queue.
+Real mobile LIFF smoke now passes. Real short-code test-OA smoke remains pending. The current webhook trigger uses Next `after`, not a durable queue.
 
 ## Tech Debt Review
 
@@ -105,7 +107,7 @@ None. This was documentation and smoke verification only.
 ### Existing Technical Debt Observed
 
 - Next `after` is not durable background delivery.
-- Manual LINE test-OA verification is still required before production activation.
+- Manual LINE test-OA short-code verification is still required before production activation.
 
 ### Opportunistic Cleanup Completed
 
@@ -118,11 +120,11 @@ None. This was documentation and smoke verification only.
 
 ### Recommended Follow-up
 
-Run real staging LIFF bind and short-code test-OA smoke with a human operator, then record sanitized pass/fail results.
+Run real staging short-code test-OA smoke with a human operator, then record sanitized pass/fail results.
 
 ## Deviations From Handoff
 
-- Real LIFF and test-OA manual smoke were not completed because no LINE client/operator facts were available in this shell session.
+- Original shell run could not complete real LIFF smoke because no LINE client/operator facts were available. This report was updated after the operator provided sanitized real mobile LIFF pass facts.
 
 ## Git Commit
 
@@ -134,9 +136,9 @@ Pending.
 
 ## Remaining Uncertainties
 
-- Real LIFF bind behavior after LINE login remains unverified in this task.
+- Real LIFF bind behavior after LINE login is now verified as passing on staging.
 - Real short-code bot reply and after-response paid generation behavior remain unverified in this task.
 
 ## Recommended Next Step
 
-Run the manual staging test OA smoke and report sanitized pass/fail facts.
+Run the manual staging test OA short-code smoke and report sanitized pass/fail facts.

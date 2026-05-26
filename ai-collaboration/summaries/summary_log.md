@@ -5198,3 +5198,21 @@ Unresolved questions:
 - Local Playwright browser execution remains blocked by Chromium MachPort permission errors in this harness.
 - Production deployment was intentionally skipped.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Record Successful LIFF Staging Smoke v0
+
+Completed changes:
+- Saved the documentation follow-up handoff under `ai-collaboration/handoffs/`.
+- Updated the Two-tier Phase 3 staging manual smoke execution report with sanitized real mobile LIFF pass status.
+- Updated the corresponding review bundle with sanitized pass status and remaining short-code smoke gap.
+- Updated the staging LINE setup record checklist and change log.
+
+Learnings:
+- Real mobile staging LIFF now passes after the LIFF URL path duplication fix.
+- The flow no longer hits a generic 404 and no longer drops to homepage.
+- LIFF bind succeeds, post-bind navigation reaches the correct unlocked route, and paid content renders successfully.
+- Production was not touched.
+
+Unresolved questions:
+- Real staging/test OA short-code smoke remains pending.
+- No sensitive runtime values were recorded; docs intentionally contain only sanitized pass/fail status.
+- Commit hash and staging push status to be recorded in final completion summary.
