@@ -5255,3 +5255,24 @@ Unresolved questions:
 - Full visual fidelity needs staging/mobile screenshot review against the v2 source files.
 - Local Playwright e2e remains blocked by the known Chromium MachPort permission issue before page-level assertions run.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Module 01 Dual Theme Visual Fidelity Pass v0
+
+Completed changes:
+- Saved the visual fidelity pass handoff under `ai-collaboration/handoffs/`.
+- Fixed Theme B temperature card background so it uses a light/white surface instead of black fill.
+- Removed unintended decorative background treatment from the share card surface.
+- Updated the share CTA through shared share-action primary styling so both themes use the intended dark button treatment.
+- Aligned share-card width through the shared share-preview constraint.
+- Adjusted the featured paid preview block to keep dark body, white text, and magenta lower-note/accent treatment.
+- Restored subtle editorial background blobs for Theme B only.
+- Added a CSS contract test for the fidelity fixes.
+
+Learnings:
+- The black temperature panel and patterned share card came from Theme B CSS overrides, not product components.
+- Share CTA and share width were shared design consistency issues and are better fixed in shared CSS constraints.
+- The fidelity pass did not require changes to analyze, paid generation, LINE, routing, prompts, schemas, cache, DB, or event semantics.
+- Required compile, unit, lint, and build validation passed; Playwright remained blocked before page assertions by the local Chromium MachPort permission issue.
+
+Unresolved questions:
+- Final fidelity still needs staging/mobile screenshot review.
+- Commit hash and staging push status to be recorded in final completion summary.

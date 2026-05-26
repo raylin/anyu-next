@@ -311,6 +311,20 @@ describe("ai-temperature UI helpers", () => {
     expect(layoutSource).not.toContain("Cormorant");
   });
 
+  it("keeps the dual-theme fidelity fixes in shared and scoped CSS", () => {
+    const globals = readFileSync(resolve(process.cwd(), "src/styles/globals.css"), "utf8");
+
+    expect(globals).toContain(".anyu-share-preview {\n  width: 100%;\n  max-width: none;");
+    expect(globals).toContain(".anyu-share-shell {\n  aspect-ratio: 4 / 5;");
+    expect(globals).toContain("background: var(--anyu-card);");
+    expect(globals).toContain(".anyu-share-action-primary {\n  background: var(--anyu-ink-dark);");
+    expect(globals).toContain(".anyu-reply-card-open .anyu-reply-tag {\n  color: var(--anyu-ink-onDark);");
+    expect(globals).toContain(".anyu-reply-why span {\n  color: var(--anyu-accent2);");
+    expect(globals).toContain(".anyu-v2 .anyu-signature-card {\n  position: relative;\n  background: var(--anyu-card);");
+    expect(globals).toContain("radial-gradient(ellipse 12rem 7rem at 12% 10%");
+    expect(globals).not.toContain(".anyu-v2 .anyu-share-shell {\n  border: var(--anyu-border-heavy) solid var(--anyu-line);\n  border-radius: var(--anyu-radius-2xl);\n  background:\n    var(--anyu-grain),");
+  });
+
   it("builds identity-safe share text from result data", () => {
     const shareText = buildShareText(
       {
