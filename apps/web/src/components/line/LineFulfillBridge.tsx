@@ -45,7 +45,7 @@ export function LineFulfillBridge({
   const initialFallbackMessage = getFallbackMessage(initialParams);
   const [state, setState] = useState<BindState>(initialFallbackMessage ? "fallback" : "idle");
   const [message, setMessage] = useState(initialFallbackMessage ?? "正在準備 LINE 領取流程…");
-  const [unlockedUrl, setUnlockedUrl] = useState<string | null>(null);
+  const [unlockedPath, setUnlockedPath] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,6 +91,7 @@ export function LineFulfillBridge({
         });
         const payload = (await response.json()) as {
           ok: boolean;
+          unlockedPath?: string;
           unlockedUrl?: string;
           message?: string;
         };
@@ -99,15 +100,17 @@ export function LineFulfillBridge({
           return;
         }
 
-        if (!response.ok || !payload.ok || !payload.unlockedUrl) {
+        const redirectTarget = normalizeUnlockRedirectTarget(payload.unlockedPath ?? payload.unlockedUrl);
+
+        if (!response.ok || !payload.ok || !redirectTarget) {
           setState("fallback");
           setMessage(payload.message ?? "LINE 自動領取失敗，請改用短碼。");
           return;
         }
 
-        setUnlockedUrl(payload.unlockedUrl);
+        setUnlockedPath(redirectTarget);
         setState("success");
-        window.location.href = payload.unlockedUrl;
+        window.location.assign(redirectTarget);
       } catch {
         if (!cancelled) {
           setState("fallback");
@@ -138,12 +141,12 @@ export function LineFulfillBridge({
           <h1 className="anyu-section-title">正在領取完整分析</h1>
           <p className="anyu-copy">{message}</p>
 
-          {state === "success" && unlockedUrl ? (
+          {state === "success" && unlockedPath ? (
             <Button
               type="button"
               className="anyu-button-block"
               onClick={() => {
-                window.location.href = unlockedUrl;
+                window.location.assign(unlockedPath);
               }}
             >
               打開完整分析
@@ -160,6 +163,24 @@ export function LineFulfillBridge({
       </section>
     </main>
   );
+}
+
+function normalizeUnlockRedirectTarget(target?: string) {
+  if (!target) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(target, "https://anyu.tw");
+
+    if (!parsed.pathname.match(/^\/m\/[^/]+\/unlock\/[^/]+$/)) {
+      return null;
+    }
+
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return null;
+  }
 }
 
 function getFallbackMessage(params: ReturnType<typeof parseLineFulfillmentContext>) {

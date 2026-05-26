@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isDbConfigured } from "@/lib/db/client";
 import { bindUnlockIntentToLine, getUnlockIntentByTokenHash, insertEvent } from "@/lib/db/runtime";
-import { getAppBaseUrl } from "@/lib/line/config";
+import { buildModuleUnlockPath } from "@/lib/line/config";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
 import { verifyLineIdToken } from "@/lib/line/liff";
 import { getModuleBySlug } from "@/lib/modules/registry";
@@ -76,7 +76,10 @@ export async function POST(request: Request) {
   }
 
   const moduleConfig = getModuleBySlug(record.unlockIntent.themeSlug);
-  const unlockedUrl = `${getAppBaseUrl(request.url)}/m/${record.unlockIntent.themeSlug}/unlock/${unlockToken}`;
+  const unlockedPath = buildModuleUnlockPath({
+    moduleSlug: record.unlockIntent.themeSlug,
+    unlockToken,
+  });
 
   await bindUnlockIntentToLine({
     unlockIntentId: record.unlockIntent.id,
@@ -135,7 +138,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    unlockedUrl,
+    unlockedPath,
     paidStatus: paidGeneration?.ok ? paidGeneration.status : "missing",
   });
 }

@@ -55,6 +55,10 @@ export function getPublicLineConfig(input: {
   };
 }
 
+export function buildModuleUnlockPath(input: { moduleSlug: string; unlockToken: string }) {
+  return `/m/${encodeURIComponent(input.moduleSlug)}/unlock/${encodeURIComponent(input.unlockToken)}`;
+}
+
 export function getAppBaseUrl(requestUrl?: string) {
   const configured =
     process.env.NEXT_PUBLIC_APP_URL?.trim() ||

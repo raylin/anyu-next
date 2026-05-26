@@ -9,7 +9,7 @@ import {
   isFulfillmentCodeShape,
   normalizeFulfillmentCode,
 } from "@/lib/line/fulfillment";
-import { buildLineLiffUrl } from "@/lib/line/config";
+import { buildLineLiffUrl, buildModuleUnlockPath } from "@/lib/line/config";
 import { parseLineFulfillmentContext } from "@/lib/line/liff-context";
 import { getLineLoginChannelId, verifyLineIdToken } from "@/lib/line/liff";
 import { verifyLineSignature } from "@/lib/line/webhook";
@@ -76,6 +76,15 @@ describe("LINE fulfillment helpers", () => {
     ).toBe(
       "https://staging.anyu.tw/line/fulfill?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
     );
+  });
+
+  it("builds root-relative module unlock paths for LIFF bind redirects", () => {
+    expect(
+      buildModuleUnlockPath({
+        moduleSlug: "ambiguous-temperature",
+        unlockToken: "token-1",
+      }),
+    ).toBe("/m/ambiguous-temperature/unlock/token-1");
   });
 
   it("keeps LIFF fulfillment context from direct query params", () => {

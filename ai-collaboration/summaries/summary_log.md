@@ -5133,3 +5133,26 @@ Unresolved questions:
 - Real mobile staging LIFF smoke remains pending after the console endpoint update.
 - Production deployment was intentionally skipped.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - LIFF Post-bind Unlock Redirect 404 Fix v0
+
+Completed changes:
+- Saved the LIFF post-bind redirect fix handoff under `ai-collaboration/handoffs/`.
+- Replaced environment-derived absolute LIFF bind redirect URL with a root-relative `unlockedPath`.
+- Added `buildModuleUnlockPath` for `/m/{moduleSlug}/unlock/{unlockToken}` path generation.
+- Updated LIFF bridge navigation to normalize and validate redirect target shape before `window.location.assign`.
+- Preserved compatibility for legacy absolute `unlockedUrl` responses by normalizing them to same-origin path shape.
+- Updated bind route and fulfillment helper tests.
+- Refreshed staging alias and verified the redacted unlock route shape returns HTTP 200.
+
+Learnings:
+- The likely mobile 404 cause was fragile absolute URL construction after bind.
+- The safer LIFF bind contract is a root-relative path that never depends on Vercel/base-url env resolution.
+- Route-level staging smoke can verify the unlock route shape and status without recording tokens.
+- Full post-bind verification still requires a real LINE ID token from mobile LIFF.
+- Validation passed for compileall, topic-ingestion tests, web lint, web unit tests, and web build.
+
+Unresolved questions:
+- Real mobile staging LIFF smoke remains pending.
+- Local Playwright browser execution remains blocked by Chromium MachPort permission errors in this harness.
+- Production deployment was intentionally skipped.
+- Commit hash and staging push status to be recorded in final completion summary.
