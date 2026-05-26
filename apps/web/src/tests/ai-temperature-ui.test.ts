@@ -150,6 +150,21 @@ describe("ai-temperature UI helpers", () => {
     expect(globals).toContain("@keyframes anyuPaidWaitSlide");
   });
 
+  it("keeps analyze submit in a navigating state after successful result creation", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "src/components/modules/ai-temperature/AiTemperatureLanding.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain('type AnalyzeSubmitPhase = "idle" | "analyzing" | "navigating";');
+    expect(source).toContain('setSubmitPhase("navigating");\n        router.push(data.redirectTo);');
+    expect(source).toContain("shouldResetToIdle = false;");
+    expect(source).toContain('submitPhase === "navigating"');
+    expect(source).toContain('"正在打開結果⋯"');
+    expect(source).toContain("if (shouldResetToIdle) {\n        setSubmitPhase(\"idle\");\n      }");
+    expect(source).not.toContain("} finally {\n      setIsSubmitting(false);\n    }");
+  });
+
   it("renders the expected module label and chip inventory", () => {
     expect(getModuleLabel(aiTemperatureModule)).toBe("MODULE · 01");
     expect(aiTemperatureModule.title).toBe("曖昧溫度計");

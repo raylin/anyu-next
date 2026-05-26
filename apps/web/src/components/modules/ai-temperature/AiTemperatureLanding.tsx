@@ -47,6 +47,8 @@ type AnalyzeRecoveryState = {
   createdAt: number;
 };
 
+type AnalyzeSubmitPhase = "idle" | "analyzing" | "navigating";
+
 function readAnalyzeRecoveryState(moduleSlug: string): AnalyzeRecoveryState | null {
   try {
     const rawValue = window.localStorage.getItem(ANALYZE_RECOVERY_STORAGE_KEY);
@@ -89,7 +91,7 @@ export function AiTemperatureLanding({
   const [selectedChip] = useState(moduleConfig.chips[moduleConfig.chips.length - 1] ?? "");
   const [userContext, setUserContext] = useState<AiTemperatureUserContext>({});
   const [inputValue, setInputValue] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitPhase, setSubmitPhase] = useState<AnalyzeSubmitPhase>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [loadingElapsedMs, setLoadingElapsedMs] = useState(0);
   const hasTrackedInputStarted = useRef(false);
@@ -99,8 +101,9 @@ export function AiTemperatureLanding({
   const pollTimeoutRef = useRef<number | null>(null);
   const { theme, switchTheme } = useModuleThemeController(moduleConfig);
   const themeMetadata = useMemo(() => getModuleThemeEventMetadata(theme), [theme]);
+  const isSubmitting = submitPhase !== "idle";
 
-  const pollAnalyzeRequest = useCallback(async (pollUrl: string): Promise<void> => {
+  const pollAnalyzeRequest = useCallback(async (pollUrl: string): Promise<AnalyzeSubmitPhase> => {
     const startedAt = Date.now();
 
     while (Date.now() - startedAt <= ANALYZE_POLL_TIMEOUT_MS) {
@@ -115,8 +118,8 @@ export function AiTemperatureLanding({
       if (!response.ok || !data.ok) {
         clearAnalyzeRecoveryState();
         setErrorMessage(getAnalyzeErrorMessage("provider_error"));
-        setIsSubmitting(false);
-        return;
+        setSubmitPhase("idle");
+        return "idle";
       }
 
       if (data.status === "completed") {
@@ -126,15 +129,16 @@ export function AiTemperatureLanding({
           createdAt: Date.now(),
         });
         clearAnalyzeRecoveryState();
+        setSubmitPhase("navigating");
         router.push(data.redirectTo);
-        return;
+        return "navigating";
       }
 
       if (data.status === "failed" || data.status === "expired") {
         clearAnalyzeRecoveryState();
         setErrorMessage(data.message || getAnalyzeErrorMessage(data.errorCode));
-        setIsSubmitting(false);
-        return;
+        setSubmitPhase("idle");
+        return "idle";
       }
 
       await new Promise<void>((resolve) => {
@@ -144,7 +148,8 @@ export function AiTemperatureLanding({
 
     clearAnalyzeRecoveryState();
     setErrorMessage(getAnalyzeErrorMessage("request_timeout"));
-    setIsSubmitting(false);
+    setSubmitPhase("idle");
+    return "idle";
   }, [moduleConfig.slug, router]);
 
   useEffect(() => {
@@ -175,13 +180,19 @@ export function AiTemperatureLanding({
 
     if (recoveryState.resultId) {
       clearAnalyzeRecoveryState();
-      router.push(`/m/${moduleConfig.slug}/result/${recoveryState.resultId}`);
-      return;
+      const timeoutId = window.setTimeout(() => {
+        setSubmitPhase("navigating");
+        router.push(`/m/${moduleConfig.slug}/result/${recoveryState.resultId}`);
+      }, 0);
+
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
     }
 
     if (recoveryState.requestId && Date.now() - recoveryState.createdAt <= ANALYZE_POLL_TIMEOUT_MS) {
       const timeoutId = window.setTimeout(() => {
-        setIsSubmitting(true);
+        setSubmitPhase("analyzing");
         setErrorMessage("");
         void pollAnalyzeRequest(
           recoveryState.pollUrl ??
@@ -270,7 +281,7 @@ export function AiTemperatureLanding({
     }
 
     textareaRef.current?.blur();
-    setIsSubmitting(true);
+    setSubmitPhase("analyzing");
     setErrorMessage("");
     setLoadingElapsedMs(0);
 
@@ -290,6 +301,8 @@ export function AiTemperatureLanding({
         ...themeMetadata,
       },
     });
+
+    let shouldResetToIdle = true;
 
     try {
       const abortController = new AbortController();
@@ -340,7 +353,8 @@ export function AiTemperatureLanding({
             pollUrl: data.pollUrl,
             createdAt: Date.now(),
           });
-          await pollAnalyzeRequest(data.pollUrl);
+          const nextPhase = await pollAnalyzeRequest(data.pollUrl);
+          shouldResetToIdle = nextPhase !== "navigating";
           return;
         }
 
@@ -351,6 +365,8 @@ export function AiTemperatureLanding({
           createdAt: Date.now(),
         });
         clearAnalyzeRecoveryState();
+        shouldResetToIdle = false;
+        setSubmitPhase("navigating");
         router.push(data.redirectTo);
       } finally {
         window.clearTimeout(timeoutId);
@@ -375,15 +391,32 @@ export function AiTemperatureLanding({
         },
       });
     } finally {
-      setIsSubmitting(false);
+      if (shouldResetToIdle) {
+        setSubmitPhase("idle");
+      }
     }
   }
 
-  const ctaLabel = isSubmitting ? "分析中..." : getAnalyzeButtonLabel(inputValue);
+  const ctaLabel =
+    submitPhase === "navigating"
+      ? "正在打開結果⋯"
+      : isSubmitting
+        ? "分析中..."
+        : getAnalyzeButtonLabel(inputValue);
   const ctaDisabled = isSubmitting || !isAnalyzeInputReady(inputValue);
   const inputGuidance = getAnalyzeInputGuidance(inputValue);
-  const statusMessage = isSubmitting ? getAnalyzeLoadingMessage(loadingElapsedMs) : "";
-  const statusDetail = isSubmitting ? getAnalyzeLoadingSubtitle(loadingElapsedMs) : "";
+  const statusMessage =
+    submitPhase === "navigating"
+      ? "正在打開結果⋯"
+      : isSubmitting
+        ? getAnalyzeLoadingMessage(loadingElapsedMs)
+        : "";
+  const statusDetail =
+    submitPhase === "navigating"
+      ? "結果準備好了，正在帶你過去。"
+      : isSubmitting
+        ? getAnalyzeLoadingSubtitle(loadingElapsedMs)
+        : "";
 
   return (
     <ModuleThemeShell surface="landing" theme={theme} onSwitchTheme={switchTheme}>

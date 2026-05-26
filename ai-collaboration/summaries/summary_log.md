@@ -5355,3 +5355,22 @@ Unresolved questions:
 - Full final validation, commit hash, and staging push status to be recorded in final completion summary.
 - Staging manual QA is still needed for live LINE/LIFF pending-to-completed behavior.
 - Local Playwright may remain blocked by the known Chromium/MachPort permission issue.
+## 2026-05-27 - Analyze Submit Transition Flicker Fix v0
+
+Completed changes:
+- Saved the analyze submit transition flicker handoff under `ai-collaboration/handoffs/`.
+- Replaced the Module 01 landing submit boolean with explicit `idle`, `analyzing`, and `navigating` phases.
+- Kept the CTA disabled/loading after successful analyze by entering `navigating` before result navigation.
+- Added `正在打開結果⋯` transition copy so the success-to-result handoff does not look idle.
+- Preserved failure/timeout behavior so the UI can return to idle with safe retry/error copy.
+- Added a regression test for the success/navigating state and guarded idle reset.
+
+Learnings:
+- The flicker came from an outer `finally` cleanup resetting submit state after `router.push(...)` was started.
+- A tiny local state machine is enough here; broader routing or analyze API changes were unnecessary.
+- Both Theme A and Theme B inherit the fix because they share the same landing submit component.
+
+Unresolved questions:
+- Compile, unit, lint, and build validation passed; commit hash and staging push status to be recorded in final completion summary.
+- Staging visual QA is still recommended because this was a timing-sensitive transition issue.
+- Local Playwright may remain blocked by the known Chromium/MachPort permission issue.
