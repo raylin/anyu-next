@@ -59,6 +59,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 
 - LIFF primary path should use `NEXT_PUBLIC_LINE_LIFF_URL` and never hard-code this LIFF ID in app code.
 - LINE Console LIFF endpoint should use the global bridge `https://staging.anyu.tw/line/fulfill`, not a module-specific route.
+- Generated LIFF URLs must use the LIFF base only, shaped `https://liff.line.me/{LIFF_ID}?<context>`. Do not append `/line/fulfill` or module paths after the LIFF ID.
 - Generated LIFF URLs must carry `moduleSlug`, unlock intent, unlock token, and short-code fallback context through query params or `liff.state`.
 - LIFF bind must verify a LINE ID token server-side and bind only the verified LINE subject.
 - LINE webhook must verify signatures with `LINE_CHANNEL_SECRET`.
@@ -74,6 +75,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - 2026-05-26 global LIFF bridge implementation changed the canonical staging LIFF Console endpoint to `https://staging.anyu.tw/line/fulfill`; module-specific `/m/ambiguous-temperature/line/fulfill` remains compatibility-only.
 - 2026-05-26 LIFF post-bind redirect fix changed bind success navigation to a validated root-relative unlock path shaped `/m/ambiguous-temperature/unlock/<token>`; staging route-level smoke confirmed the redacted route shape returns HTTP 200.
 - 2026-05-26 temporary LIFF runtime diagnostic mode was added for staging investigation. Use `/line/fulfill?debug=1` and share only the rendered sanitized diagnostic panel, not the address bar, page source, network logs, tokens, LINE identifiers, or full URLs.
+- 2026-05-26 LIFF URL path duplication fix verified live staging unlock-intent now returns LIFF URLs shaped `https://liff.line.me/{LIFF_ID}?<context>`, without `/line/fulfill` or `/m/` after the LIFF ID. `debug=1` can be carried through generated context from a debug result page.
 
 ## Smoke Checklist
 
@@ -85,7 +87,7 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 - [x] Test OA add-friend URL is not confused with production OA.
 - [x] No secret values are documented in repo files.
 - [x] Live `/api/unlock-intent` response returns staging LIFF URL and test OA add-friend URL.
-- [x] Live `/api/unlock-intent` response returns a staging LIFF URL with `/m/ambiguous-temperature/line/fulfill` route context and required fulfillment context params.
+- [x] Live `/api/unlock-intent` response returns a staging LIFF URL with base-only LIFF ID path and required fulfillment context query params.
 - [ ] LINE Console LIFF endpoint updated to `https://staging.anyu.tw/line/fulfill`.
 - [ ] Phase 3 real LIFF bind triggers paid generation and lands on completed paid content.
 - [ ] Phase 3 real test-OA short-code flow replies with pending link and paid content completes.
@@ -106,3 +108,4 @@ Purpose: test LINE OA and LIFF setup for LINE fulfillment automation before prod
 | 2026-05-26 | Documented global LIFF bridge endpoint as the canonical staging LIFF Console endpoint. | Codex |
 | 2026-05-26 | Documented LIFF post-bind redirect fix and redacted route-shape verification. | Codex |
 | 2026-05-26 | Documented temporary sanitized LIFF runtime diagnostic mode for real mobile staging investigation. | Codex |
+| 2026-05-26 | Documented LIFF URL path duplication fix and base-only generated LIFF URL requirement. | Codex |

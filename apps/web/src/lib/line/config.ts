@@ -18,6 +18,7 @@ export function buildLineLiffUrl(input: {
   fulfillmentCode: string;
   moduleSlug?: string;
   baseUrl?: string | null;
+  debug?: boolean;
 }) {
   const baseUrl = input.baseUrl ?? getLineLiffBaseUrl();
 
@@ -27,13 +28,16 @@ export function buildLineLiffUrl(input: {
 
   const url = new URL(baseUrl);
   if (url.hostname === "liff.line.me") {
-    const liffIdPath = url.pathname.replace(/\/$/, "");
-    url.pathname = `${liffIdPath}/line/fulfill`;
+    const [liffId] = url.pathname.split("/").filter(Boolean);
+    url.pathname = liffId ? `/${liffId}` : url.pathname.replace(/\/$/, "");
   } else {
     url.pathname = "/line/fulfill";
   }
   if (input.moduleSlug) {
     url.searchParams.set("moduleSlug", input.moduleSlug);
+  }
+  if (input.debug) {
+    url.searchParams.set("debug", "1");
   }
   url.searchParams.set("unlockIntentId", input.unlockIntentId);
   url.searchParams.set("unlockToken", input.unlockToken);
@@ -47,6 +51,7 @@ export function getPublicLineConfig(input: {
   unlockToken: string;
   fulfillmentCode: string;
   moduleSlug?: string;
+  debug?: boolean;
 }) {
   return {
     lineAddUrl: getLineAddUrl(),

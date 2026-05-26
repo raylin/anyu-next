@@ -91,6 +91,9 @@ export function AiTemperatureResult({
           themeSlug: moduleConfig.slug,
           anonymousSessionId: getClientAnonymousSessionId(),
           source,
+          debug:
+            typeof window !== "undefined" &&
+            new URLSearchParams(window.location.search).get("debug") === "1",
         }),
       });
 

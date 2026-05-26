@@ -16,6 +16,7 @@ type UnlockIntentPayload = {
   themeSlug?: string;
   anonymousSessionId?: string;
   source?: string;
+  debug?: boolean;
 };
 
 export async function POST(request: Request) {
@@ -79,6 +80,7 @@ export async function POST(request: Request) {
       unlockToken,
       fulfillmentCode,
       moduleSlug: body.themeSlug,
+      debug: body.debug === true,
     });
 
     await insertEvent({

@@ -5177,3 +5177,24 @@ Unresolved questions:
 - Local Playwright browser execution remains blocked by Chromium MachPort permission errors in this harness.
 - Production deployment was intentionally skipped.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - LIFF URL Path Duplication 404 Fix v0
+
+Completed changes:
+- Saved the LIFF URL path duplication fix handoff under `ai-collaboration/handoffs/`.
+- Updated LIFF URL generation so `liff.line.me` URLs keep only the LIFF ID path and carry fulfillment context as query params.
+- Added defensive normalization for stale LIFF base env values that accidentally include `/line/fulfill`.
+- Added optional debug propagation from result pages to `/api/unlock-intent` so generated LIFF URLs can carry `debug=1`.
+- Updated LINE fulfillment unit tests for base-only LIFF URLs, route-path stripping, debug propagation, direct query parsing, and `liff.state` parsing.
+- Refreshed staging alias to a preview deployment and verified live unlock-intent LIFF URL shape.
+
+Learnings:
+- The likely real mobile 404 cause was generated LIFF URL path duplication: the app appended `/line/fulfill` after the LIFF ID while LINE Console already pointed to the app bridge endpoint.
+- Live staging unlock-intent now returns a LIFF URL shaped `https://liff.line.me/{LIFF_ID}?<context>`.
+- Live staging shape check confirmed no `/line/fulfill` or `/m/` path after the LIFF ID, and confirmed `debug=1` can travel through generated query context.
+- Validation passed for compileall, topic-ingestion unit tests, web lint, web unit tests, and web build.
+
+Unresolved questions:
+- Real mobile staging LIFF retest remains pending.
+- Local Playwright browser execution remains blocked by Chromium MachPort permission errors in this harness.
+- Production deployment was intentionally skipped.
+- Commit hash and staging push status to be recorded in final completion summary.

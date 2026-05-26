@@ -51,7 +51,7 @@ describe("LINE fulfillment helpers", () => {
     expect(isExpired(now, expiry.fulfillmentExpiresAt)).toBe(true);
   });
 
-  it("builds LIFF URLs from env-provided base URLs", () => {
+  it("builds LIFF URLs from env-provided base URLs without appending a route path", () => {
     expect(
       buildLineLiffUrl({
         baseUrl: "https://liff.line.me/123-abc",
@@ -61,7 +61,38 @@ describe("LINE fulfillment helpers", () => {
         moduleSlug: "ambiguous-temperature",
       }),
     ).toBe(
-      "https://liff.line.me/123-abc/line/fulfill?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
+      "https://liff.line.me/123-abc?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
+    );
+  });
+
+  it("does not append bridge or module paths after the LIFF ID", () => {
+    const liffUrl = buildLineLiffUrl({
+      baseUrl: "https://liff.line.me/123-abc/line/fulfill",
+      unlockIntentId: "intent-1",
+      unlockToken: "token-1",
+      fulfillmentCode: "A7K2Q9",
+      moduleSlug: "ambiguous-temperature",
+    });
+
+    expect(liffUrl).toBe(
+      "https://liff.line.me/123-abc?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
+    );
+    expect(liffUrl).not.toContain("/123-abc/line/fulfill");
+    expect(liffUrl).not.toContain("/123-abc/m/");
+  });
+
+  it("can carry LIFF debug mode through generated query context", () => {
+    expect(
+      buildLineLiffUrl({
+        baseUrl: "https://liff.line.me/123-abc",
+        unlockIntentId: "intent-1",
+        unlockToken: "token-1",
+        fulfillmentCode: "A7K2Q9",
+        moduleSlug: "ambiguous-temperature",
+        debug: true,
+      }),
+    ).toBe(
+      "https://liff.line.me/123-abc?moduleSlug=ambiguous-temperature&debug=1&unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
     );
   });
 
