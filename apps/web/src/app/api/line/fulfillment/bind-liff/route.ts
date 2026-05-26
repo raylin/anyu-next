@@ -4,6 +4,14 @@ import { bindUnlockIntentToLine, getUnlockIntentByTokenHash, insertEvent } from 
 import { buildModuleUnlockPath } from "@/lib/line/config";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
 import { verifyLineIdToken } from "@/lib/line/liff";
+import {
+  getModuleThemeEventMetadata,
+  getModuleThemeFromUnlockToken,
+  normalizeModuleThemeSource,
+  normalizeModuleThemeVariant,
+  type ModuleThemeSource,
+  type ModuleThemeVariant,
+} from "@/lib/modules/module-theme";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { requestDeferredPaidGeneration } from "@/lib/modules/paid-generation-service";
 
@@ -12,6 +20,8 @@ type BindLiffPayload = {
   unlockIntentId?: string;
   unlockToken?: string;
   idToken?: string;
+  themeVariant?: ModuleThemeVariant;
+  themeSource?: ModuleThemeSource;
 };
 
 export async function POST(request: Request) {
@@ -76,10 +86,21 @@ export async function POST(request: Request) {
   }
 
   const moduleConfig = getModuleBySlug(record.unlockIntent.themeSlug);
+  const tokenTheme = getModuleThemeFromUnlockToken(unlockToken);
+  const themeVariant = normalizeModuleThemeVariant(body.themeVariant) ?? tokenTheme?.variant ?? null;
+  const themeSource = normalizeModuleThemeSource(body.themeSource ?? tokenTheme?.source ?? "query_hint");
   const unlockedPath = buildModuleUnlockPath({
     moduleSlug: record.unlockIntent.themeSlug,
     unlockToken,
+    themeVariant,
+    themeSource,
   });
+  const themeMetadata = themeVariant
+    ? {
+        ...getModuleThemeEventMetadata({ variant: themeVariant, source: themeSource }),
+        themeCarryoverSource: "unlock_intent",
+      }
+    : {};
 
   await bindUnlockIntentToLine({
     unlockIntentId: record.unlockIntent.id,
@@ -113,6 +134,7 @@ export async function POST(request: Request) {
         channel: "liff",
         status: "delivered",
         paidStatus: paidGeneration?.ok ? paidGeneration.status : "unavailable",
+        ...themeMetadata,
       },
     });
 
@@ -132,6 +154,7 @@ export async function POST(request: Request) {
         channel: "liff",
         status: "delivered",
         paidStatus: paidGeneration?.ok ? paidGeneration.status : "unavailable",
+        ...themeMetadata,
       },
     });
   }

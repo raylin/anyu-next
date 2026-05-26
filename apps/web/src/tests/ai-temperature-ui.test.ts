@@ -315,12 +315,15 @@ describe("ai-temperature UI helpers", () => {
     const globals = readFileSync(resolve(process.cwd(), "src/styles/globals.css"), "utf8");
 
     expect(globals).toContain(".anyu-share-preview {\n  width: 100%;\n  max-width: none;");
+    expect(globals).toContain(".anyu-share-actions {\n  display: grid;\n  gap: 0.45rem;\n  margin-top: var(--anyu-space-3);");
     expect(globals).toContain(".anyu-share-shell {\n  aspect-ratio: 4 / 5;");
     expect(globals).toContain("background: var(--anyu-card);");
     expect(globals).toContain(".anyu-share-action-primary {\n  background: var(--anyu-ink-dark);");
     expect(globals).toContain(".anyu-reply-card-open .anyu-reply-tag {\n  color: var(--anyu-ink-onDark);");
     expect(globals).toContain(".anyu-reply-why span {\n  color: var(--anyu-accent2);");
     expect(globals).toContain(".anyu-v2 .anyu-signature-card {\n  position: relative;\n  background: var(--anyu-card);");
+    expect(globals).toContain(".anyu-v2 .anyu-quote-card::before {\n  content: \"\";");
+    expect(globals).toContain("width: 0.45rem;\n  border-left: var(--anyu-border-base) solid var(--anyu-line);");
     expect(globals).toContain("radial-gradient(ellipse 12rem 7rem at 12% 10%");
     expect(globals).not.toContain(".anyu-v2 .anyu-share-shell {\n  border: var(--anyu-border-heavy) solid var(--anyu-line);\n  border-radius: var(--anyu-radius-2xl);\n  background:\n    var(--anyu-grain),");
   });

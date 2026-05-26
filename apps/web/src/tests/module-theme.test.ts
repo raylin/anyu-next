@@ -3,7 +3,10 @@ import {
   MODULE_THEME_SOURCE_STORAGE_KEY,
   MODULE_THEME_VARIANT_STORAGE_KEY,
   assignModuleThemeVariant,
+  encodeModuleThemeInUnlockToken,
   getModuleThemeEventMetadata,
+  getModuleThemeFromSearchParams,
+  getModuleThemeFromUnlockToken,
   readModuleThemeState,
   writeManualModuleThemeVariant,
 } from "@/lib/modules/module-theme";
@@ -53,5 +56,29 @@ describe("Module 01 theme assignment", () => {
       themeVariant: "classic",
       themeSource: "manual_override",
     });
+  });
+
+  it("parses safe query theme hints for fulfillment carryover", () => {
+    expect(
+      getModuleThemeFromSearchParams(
+        new URLSearchParams("themeVariant=riso&themeSource=manual_override"),
+      ),
+    ).toEqual({
+      variant: "riso",
+      source: "manual_override",
+      hydrated: true,
+    });
+    expect(getModuleThemeFromSearchParams(new URLSearchParams("themeVariant=bad"))).toBeNull();
+  });
+
+  it("can encode and recover a compact theme hint from unlock tokens", () => {
+    expect(encodeModuleThemeInUnlockToken("token", "riso")).toBe("token.r");
+    expect(encodeModuleThemeInUnlockToken("token", "classic")).toBe("token.c");
+    expect(getModuleThemeFromUnlockToken("token.r")).toEqual({
+      variant: "riso",
+      source: "query_hint",
+      hydrated: true,
+    });
+    expect(getModuleThemeFromUnlockToken("legacy-token")).toBeNull();
   });
 });

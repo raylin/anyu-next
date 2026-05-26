@@ -29,12 +29,22 @@ const DEFAULT_THEME: ModuleThemeState = {
   hydrated: false,
 };
 
-export function useModuleThemeController(moduleConfig: ProductModuleConfig) {
-  const [theme, setTheme] = useState(DEFAULT_THEME);
+export function useModuleThemeController(
+  moduleConfig: ProductModuleConfig,
+  initialTheme?: ModuleThemeState | null,
+) {
+  const [theme, setTheme] = useState<ModuleThemeState>(
+    initialTheme ? { ...initialTheme, hydrated: true } : DEFAULT_THEME,
+  );
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       try {
+        if (initialTheme?.variant) {
+          setTheme({ ...initialTheme, hydrated: true });
+          return;
+        }
+
         setTheme(readModuleThemeState(window.localStorage));
       } catch {
         setTheme({ ...DEFAULT_THEME, hydrated: true });
@@ -44,7 +54,7 @@ export function useModuleThemeController(moduleConfig: ProductModuleConfig) {
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, []);
+  }, [initialTheme]);
 
   function switchTheme(nextVariant: ModuleThemeVariant) {
     setTheme((current) => {
@@ -91,13 +101,15 @@ export function ModuleThemeFrame({ moduleConfig, surface, children }: ModuleThem
 export function ModuleThemeBoundary({
   moduleConfig,
   surface,
+  initialTheme,
   children,
 }: {
   moduleConfig: ProductModuleConfig;
   surface: ModuleThemeFrameProps["surface"];
+  initialTheme?: ModuleThemeState | null;
   children: ReactNode;
 }) {
-  const { theme, switchTheme } = useModuleThemeController(moduleConfig);
+  const { theme, switchTheme } = useModuleThemeController(moduleConfig, initialTheme);
 
   return (
     <ModuleThemeShell surface={surface} theme={theme} onSwitchTheme={switchTheme}>
@@ -134,7 +146,6 @@ export function ModuleThemeShell({
     >
       <ModuleThemeToggle
         activeVariant={theme.variant}
-        source={theme.source}
         onSwitch={onSwitchTheme}
       />
       {children}
@@ -144,37 +155,38 @@ export function ModuleThemeShell({
 
 type ModuleThemeToggleProps = {
   activeVariant: ModuleThemeVariant;
-  source: ModuleThemeSource;
   onSwitch: (variant: ModuleThemeVariant) => void;
 };
 
-function ModuleThemeToggle({ activeVariant, source, onSwitch }: ModuleThemeToggleProps) {
+function ModuleThemeToggle({ activeVariant, onSwitch }: ModuleThemeToggleProps) {
   return (
     <div className="anyu-theme-toggle" aria-label="視覺風格">
-      <span className="anyu-theme-toggle-label">視覺</span>
       <button
         type="button"
-        className={["anyu-theme-toggle-option", activeVariant === "classic" ? "is-active" : ""]
+        className={[
+          "anyu-theme-toggle-option",
+          "anyu-theme-toggle-option-classic",
+          activeVariant === "classic" ? "is-active" : "",
+        ]
           .filter(Boolean)
           .join(" ")}
         aria-pressed={activeVariant === "classic"}
+        aria-label="切換為柔和主題"
         onClick={() => onSwitch("classic")}
-      >
-        柔和
-      </button>
+      />
       <button
         type="button"
-        className={["anyu-theme-toggle-option", activeVariant === "riso" ? "is-active" : ""]
+        className={[
+          "anyu-theme-toggle-option",
+          "anyu-theme-toggle-option-riso",
+          activeVariant === "riso" ? "is-active" : "",
+        ]
           .filter(Boolean)
           .join(" ")}
         aria-pressed={activeVariant === "riso"}
+        aria-label="切換為鮮明主題"
         onClick={() => onSwitch("riso")}
-      >
-        鮮明
-      </button>
-      <span className="anyu-theme-toggle-source" aria-label="theme source">
-        {source === "manual_override" ? "manual" : "a/b"}
-      </span>
+      />
     </div>
   );
 }

@@ -5276,3 +5276,23 @@ Learnings:
 Unresolved questions:
 - Final fidelity still needs staging/mobile screenshot review.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Module 01 Dual Theme Fidelity + Theme Carryover v0
+
+Completed changes:
+- Saved the fidelity/theme carryover handoff under `ai-collaboration/handoffs/`.
+- Simplified the visible Module 01 theme switch into two compact swatches with accessible labels only.
+- Preserved manual override persistence and first-visit A/B assignment behavior.
+- Added safe theme carryover through unlock intent creation, LIFF URL context, LIFF bind redirect, short-code webhook links, and unlocked route initial theme restoration.
+- Used compact `.c` / `.r` unlock-token suffixes plus `themeVariant` / `themeSource` query hints instead of a DB migration.
+- Fixed the Theme B quote-card accent so it behaves like an edge accent instead of overlapping text.
+- Added tests for theme helper carryover, LIFF URL context, LIFF bind redirects, short-code links, compact switch rendering, safe metadata, and CSS fidelity contracts.
+
+Learnings:
+- LocalStorage alone is insufficient for LIFF and LINE in-app browser continuity, so the selected theme needs to travel in fulfillment context.
+- Theme carryover can be implemented without a DB migration by using safe URL context and a non-sensitive token suffix for new unlock tokens.
+- Legacy unlock tokens without a suffix can safely fall back to localStorage/A-B/default behavior.
+- Required compile, unit, lint, and build validation passed; Playwright remained blocked before page assertions by the local Chromium MachPort permission issue.
+
+Unresolved questions:
+- Staging real-device QA is still needed for Theme B LIFF and short-code unlocked-route continuity.
+- Commit hash and staging push status to be recorded in final completion summary.

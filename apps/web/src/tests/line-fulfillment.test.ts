@@ -96,6 +96,30 @@ describe("LINE fulfillment helpers", () => {
     );
   });
 
+  it("carries selected theme through generated LIFF and unlocked URLs", () => {
+    expect(
+      buildLineLiffUrl({
+        baseUrl: "https://liff.line.me/123-abc",
+        unlockIntentId: "intent-1",
+        unlockToken: "token-1.r",
+        fulfillmentCode: "A7K2Q9",
+        moduleSlug: "ambiguous-temperature",
+        themeVariant: "riso",
+        themeSource: "manual_override",
+      }),
+    ).toBe(
+      "https://liff.line.me/123-abc?moduleSlug=ambiguous-temperature&themeVariant=riso&themeSource=manual_override&unlockIntentId=intent-1&unlockToken=token-1.r&code=A7K2Q9",
+    );
+    expect(
+      buildModuleUnlockPath({
+        moduleSlug: "ambiguous-temperature",
+        unlockToken: "token-1.r",
+        themeVariant: "riso",
+        themeSource: "manual_override",
+      }),
+    ).toBe("/m/ambiguous-temperature/unlock/token-1.r?themeVariant=riso&themeSource=manual_override");
+  });
+
   it("builds global bridge URLs for non-LIFF base URLs too", () => {
     expect(
       buildLineLiffUrl({
@@ -130,6 +154,8 @@ describe("LINE fulfillment helpers", () => {
       unlockToken: "token-1",
       code: "A7K2Q9",
       statePath: null,
+      themeVariant: null,
+      themeSource: "unknown",
     });
   });
 
@@ -144,6 +170,8 @@ describe("LINE fulfillment helpers", () => {
       unlockToken: "token-1",
       code: "A7K2Q9",
       statePath: "/line/fulfill",
+      themeVariant: null,
+      themeSource: "unknown",
     });
   });
 
@@ -158,6 +186,8 @@ describe("LINE fulfillment helpers", () => {
       unlockToken: "token-1",
       code: "A7K2Q9",
       statePath: "/m/ambiguous-temperature/line/fulfill",
+      themeVariant: null,
+      themeSource: "unknown",
     });
   });
 
@@ -172,6 +202,28 @@ describe("LINE fulfillment helpers", () => {
       unlockToken: "token-1",
       code: "A7K2Q9",
       statePath: null,
+      themeVariant: null,
+      themeSource: "unknown",
+    });
+  });
+
+  it("keeps theme hints from direct query and liff.state", () => {
+    expect(
+      parseLineFulfillmentContext(
+        "?moduleSlug=ambiguous-temperature&themeVariant=riso&themeSource=manual_override&unlockIntentId=intent-1&unlockToken=token-1.r&code=A7K2Q9",
+      ),
+    ).toMatchObject({
+      themeVariant: "riso",
+      themeSource: "manual_override",
+    });
+
+    const state = encodeURIComponent(
+      "/line/fulfill?moduleSlug=ambiguous-temperature&themeVariant=classic&themeSource=query_hint&unlockIntentId=intent-1&unlockToken=token-1.c&code=A7K2Q9",
+    );
+
+    expect(parseLineFulfillmentContext(`?liff.state=${state}`)).toMatchObject({
+      themeVariant: "classic",
+      themeSource: "query_hint",
     });
   });
 
@@ -260,6 +312,8 @@ describe("LINE fulfillment helpers", () => {
       unlockToken: "",
       code: "",
       statePath: null,
+      themeVariant: null,
+      themeSource: "unknown",
     });
   });
 

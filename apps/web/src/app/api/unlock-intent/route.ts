@@ -8,6 +8,14 @@ import {
   generateUnlockToken,
   hashFulfillmentSecret,
 } from "@/lib/line/fulfillment";
+import {
+  encodeModuleThemeInUnlockToken,
+  getModuleThemeEventMetadata,
+  normalizeModuleThemeSource,
+  normalizeModuleThemeVariant,
+  type ModuleThemeSource,
+  type ModuleThemeVariant,
+} from "@/lib/modules/module-theme";
 import { getModuleBySlug } from "@/lib/modules/registry";
 
 type UnlockIntentPayload = {
@@ -17,6 +25,8 @@ type UnlockIntentPayload = {
   anonymousSessionId?: string;
   source?: string;
   debug?: boolean;
+  themeVariant?: ModuleThemeVariant;
+  themeSource?: ModuleThemeSource;
 };
 
 export async function POST(request: Request) {
@@ -60,7 +70,9 @@ export async function POST(request: Request) {
 
   try {
     const fulfillmentCode = generateFulfillmentCode();
-    const unlockToken = generateUnlockToken();
+    const themeVariant = normalizeModuleThemeVariant(body.themeVariant);
+    const themeSource = normalizeModuleThemeSource(body.themeSource);
+    const unlockToken = encodeModuleThemeInUnlockToken(generateUnlockToken(), themeVariant);
     const expiry = buildFulfillmentExpiry();
 
     const unlockIntent = await createUnlockIntentRecord({
@@ -81,7 +93,15 @@ export async function POST(request: Request) {
       fulfillmentCode,
       moduleSlug: body.themeSlug,
       debug: body.debug === true,
+      themeVariant,
+      themeSource,
     });
+    const themeMetadata = themeVariant
+      ? {
+          ...getModuleThemeEventMetadata({ variant: themeVariant, source: themeSource }),
+          themeCarryoverSource: "unlock_intent",
+        }
+      : {};
 
     await insertEvent({
       eventName: "paid_unlock_clicked",
@@ -96,6 +116,7 @@ export async function POST(request: Request) {
         resultId: body.resultId,
         unlockIntentId: unlockIntent.id,
         source: body.source === "inline_result_cta" ? "inline_result_cta" : "paid_preview",
+        ...themeMetadata,
       },
     });
 
@@ -113,6 +134,7 @@ export async function POST(request: Request) {
         unlockIntentId: unlockIntent.id,
         channel: publicLineConfig.liffUrl ? "liff" : "line_code",
         status: "pending",
+        ...themeMetadata,
       },
     });
 
@@ -124,6 +146,8 @@ export async function POST(request: Request) {
       unlockToken,
       liffUrl: publicLineConfig.liffUrl,
       lineAddUrl: publicLineConfig.lineAddUrl,
+      themeVariant,
+      themeSource,
     });
   } catch {
     return NextResponse.json(

@@ -39,6 +39,7 @@ describe("event metadata guard", () => {
         },
         themeVariant: "riso",
         themeSource: "manual_override",
+        themeCarryoverSource: "unlock_intent",
       }),
     ).toBe(false);
   });

@@ -1246,6 +1246,7 @@ textarea {
 .anyu-share-actions {
   display: grid;
   gap: 0.45rem;
+  margin-top: var(--anyu-space-3);
 }
 
 .anyu-share-action-primary {
@@ -1364,8 +1365,8 @@ textarea {
   justify-self: end;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem;
+  gap: 0.35rem;
+  padding: 0.35rem;
   border: 1px solid var(--anyu-line);
   border-radius: var(--anyu-radius-pill);
   background: var(--anyu-card);
@@ -1375,31 +1376,34 @@ textarea {
   line-height: 1;
 }
 
-.anyu-theme-toggle-label,
-.anyu-theme-toggle-source {
-  padding-inline: 0.35rem;
-  font-family: var(--anyu-font-mono);
-  letter-spacing: var(--anyu-track-mono);
-  text-transform: uppercase;
-}
-
-.anyu-theme-toggle-source {
-  color: var(--anyu-faint);
-}
-
 .anyu-theme-toggle-option {
-  min-height: 1.8rem;
-  border: 0;
+  position: relative;
+  width: 1.35rem;
+  height: 1.35rem;
+  min-height: 1.35rem;
+  border: 1px solid var(--anyu-line);
   border-radius: var(--anyu-radius-pill);
-  background: transparent;
-  color: var(--anyu-dim);
-  padding: 0.35rem 0.55rem;
+  background: var(--anyu-surface);
+  color: transparent;
+  padding: 0;
   font: inherit;
 }
 
+.anyu-theme-toggle-option-classic {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.92) 0 22%, transparent 24%),
+    var(--anyu-surface);
+}
+
+.anyu-theme-toggle-option-riso {
+  background:
+    linear-gradient(135deg, var(--anyu-accent) 0 48%, var(--anyu-accent2) 50% 100%);
+}
+
 .anyu-theme-toggle-option.is-active {
-  background: var(--anyu-ink-dark);
-  color: var(--anyu-ink-onDark);
+  box-shadow:
+    0 0 0 2px var(--anyu-card),
+    0 0 0 4px var(--anyu-accent-45);
 }
 
 /* ============================================================
@@ -1810,13 +1814,19 @@ textarea {
 
 .anyu-v2 .anyu-quote-card {
   position: relative;
+  padding-right: calc(1.15rem + 0.7rem);
   box-shadow: var(--anyu-shadow-rose);
+  overflow: hidden;
 }
 
 .anyu-v2 .anyu-quote-card::before {
-  color: var(--anyu-accent2);
-  font-family: var(--anyu-font-latin);
-  font-weight: 700;
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 0.45rem;
+  border-left: var(--anyu-border-base) solid var(--anyu-line);
+  background: var(--anyu-accent2);
+  pointer-events: none;
 }
 
 .anyu-v2 .anyu-insight-card {
@@ -1932,15 +1942,13 @@ textarea {
 }
 
 .anyu-v2 .anyu-theme-toggle-option {
-  border-radius: var(--anyu-radius-sm);
-  font-family: var(--anyu-font-mono);
-  font-weight: 700;
-  letter-spacing: var(--anyu-track-mono);
+  border-radius: 999px;
 }
 
 .anyu-v2 .anyu-theme-toggle-option.is-active {
-  background: var(--anyu-accent);
-  color: var(--anyu-ink-onDark);
+  box-shadow:
+    0 0 0 2px var(--anyu-bg),
+    2px 2px 0 var(--anyu-ink);
 }
 
 @media (max-width: 640px) {
@@ -1950,7 +1958,6 @@ textarea {
   }
 
   .anyu-v2 .anyu-theme-toggle {
-    justify-self: stretch;
-    justify-content: flex-end;
+    justify-self: end;
   }
 }

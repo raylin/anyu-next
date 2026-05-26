@@ -9,6 +9,11 @@ import { isDbConfigured } from "@/lib/db/client";
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
 import { getPaidResultForAnalysisResult } from "@/lib/db/paid-results";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
+import {
+  getModuleThemeFromSearchParams,
+  getModuleThemeFromUnlockToken,
+  type ModuleThemeState,
+} from "@/lib/modules/module-theme";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import { hasPaidResult, normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
@@ -19,28 +24,51 @@ type UnlockPageProps = {
     moduleSlug: string;
     unlockToken: string;
   }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function UnlockPage({ params }: UnlockPageProps) {
+export default async function UnlockPage({ params, searchParams }: UnlockPageProps) {
   const { moduleSlug, unlockToken } = await params;
+  const resolvedSearchParams = await searchParams;
   const moduleConfig = getModuleBySlug(moduleSlug);
+  const initialTheme =
+    getModuleThemeFromSearchParams(toUrlSearchParams(resolvedSearchParams)) ??
+    getModuleThemeFromUnlockToken(unlockToken);
 
   if (!moduleConfig) {
     notFound();
   }
 
   if (!isDbConfigured()) {
-    return <UnlockError moduleConfig={moduleConfig} message="完整分析服務尚未設定完成，請稍後再試。" />;
+    return (
+      <UnlockError
+        moduleConfig={moduleConfig}
+        initialTheme={initialTheme}
+        message="完整分析服務尚未設定完成，請稍後再試。"
+      />
+    );
   }
 
   const record = await getUnlockIntentByTokenHash(hashFulfillmentSecret(unlockToken));
 
   if (!record || record.unlockIntent.themeSlug !== moduleSlug) {
-    return <UnlockError moduleConfig={moduleConfig} message="這組完整分析連結無效，請回到結果頁重新領取。" />;
+    return (
+      <UnlockError
+        moduleConfig={moduleConfig}
+        initialTheme={initialTheme}
+        message="這組完整分析連結無效，請回到結果頁重新領取。"
+      />
+    );
   }
 
   if (isExpired(record.unlockIntent.unlockTokenExpiresAt)) {
-    return <UnlockError moduleConfig={moduleConfig} message="這組完整分析連結已過期，請回到結果頁重新領取。" />;
+    return (
+      <UnlockError
+        moduleConfig={moduleConfig}
+        initialTheme={initialTheme}
+        message="這組完整分析連結已過期，請回到結果頁重新領取。"
+      />
+    );
   }
 
   const result = record.result.normalizedResultJson;
@@ -52,14 +80,28 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
 
   if (!hasPaidResult(result) && !storedPaidResult?.paidResultJson) {
     if (storedPaidResult?.status === "processing") {
-      return <UnlockState moduleConfig={moduleConfig} title="完整分析正在整理中" message="我們正在把免費結果延伸成完整分析。請稍後重新整理這個頁面。" />;
+      return (
+        <UnlockState
+          moduleConfig={moduleConfig}
+          initialTheme={initialTheme}
+          title="完整分析正在整理中"
+          message="我們正在把免費結果延伸成完整分析。請稍後重新整理這個頁面。"
+        />
+      );
     }
 
     if (storedPaidResult?.status === "failed") {
-      return <UnlockState moduleConfig={moduleConfig} title="完整分析暫時整理失敗" message="這次完整分析沒有成功產生。請回到結果頁重新領取，或稍後再試。" />;
+      return (
+        <UnlockState
+          moduleConfig={moduleConfig}
+          initialTheme={initialTheme}
+          title="完整分析暫時整理失敗"
+          message="這次完整分析沒有成功產生。請回到結果頁重新領取，或稍後再試。"
+        />
+      );
     }
 
-    return <UnlockPending moduleConfig={moduleConfig} />;
+    return <UnlockPending moduleConfig={moduleConfig} initialTheme={initialTheme} />;
   }
 
   const paidResult = normalizePaidResultForDisplay(
@@ -68,7 +110,7 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
 
   return (
     <main className="anyu-shell">
-      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock">
+      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock" initialTheme={initialTheme}>
         <section className="anyu-result-stack">
           <div className="anyu-result-topbar">
             <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
@@ -180,28 +222,56 @@ export default async function UnlockPage({ params }: UnlockPageProps) {
   );
 }
 
-function UnlockPending({ moduleConfig }: { moduleConfig: ProductModuleConfig }) {
+function UnlockPending({
+  moduleConfig,
+  initialTheme,
+}: {
+  moduleConfig: ProductModuleConfig;
+  initialTheme?: ModuleThemeState | null;
+}) {
   return (
     <UnlockState
       moduleConfig={moduleConfig}
+      initialTheme={initialTheme}
       title="完整分析目前仍在封測流程中"
       message="你的免費分析已經完成。完整分析的自動整理與 LINE 通知會在下一階段接上；目前請先回到結果頁保留這份免費結果。"
     />
   );
 }
 
+function toUrlSearchParams(input?: Record<string, string | string[] | undefined>) {
+  const searchParams = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(input ?? {})) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        searchParams.append(key, item);
+      }
+      continue;
+    }
+
+    if (typeof value === "string") {
+      searchParams.set(key, value);
+    }
+  }
+
+  return searchParams;
+}
+
 function UnlockState({
   moduleConfig,
+  initialTheme,
   title,
   message,
 }: {
   moduleConfig: ProductModuleConfig;
+  initialTheme?: ModuleThemeState | null;
   title: string;
   message: string;
 }) {
   return (
     <main className="anyu-shell">
-      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock">
+      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock" initialTheme={initialTheme}>
         <section className="anyu-result-stack">
           <div className="anyu-result-topbar">
             <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">
@@ -224,10 +294,18 @@ function UnlockState({
   );
 }
 
-function UnlockError({ moduleConfig, message }: { moduleConfig: ProductModuleConfig; message: string }) {
+function UnlockError({
+  moduleConfig,
+  initialTheme,
+  message,
+}: {
+  moduleConfig: ProductModuleConfig;
+  initialTheme?: ModuleThemeState | null;
+  message: string;
+}) {
   return (
     <main className="anyu-shell">
-      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock">
+      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock" initialTheme={initialTheme}>
         <section className="anyu-result-stack">
           <div className="anyu-result-topbar">
             <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">

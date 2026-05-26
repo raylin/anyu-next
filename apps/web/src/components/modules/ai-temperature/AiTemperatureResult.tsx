@@ -105,6 +105,8 @@ export function AiTemperatureResult({
           debug:
             typeof window !== "undefined" &&
             new URLSearchParams(window.location.search).get("debug") === "1",
+          themeVariant: theme.variant,
+          themeSource: theme.source,
         }),
       });
 

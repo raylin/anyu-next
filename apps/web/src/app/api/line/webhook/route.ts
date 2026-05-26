@@ -10,8 +10,13 @@ import {
   recordLineWebhookInvalidAttempt,
   tryCreateLineWebhookEvent,
 } from "@/lib/db/runtime";
-import { getAppBaseUrl } from "@/lib/line/config";
+import { buildModuleUnlockPath, getAppBaseUrl } from "@/lib/line/config";
 import { hashFulfillmentSecret, isExpired, isFulfillmentCodeShape, normalizeFulfillmentCode } from "@/lib/line/fulfillment";
+import {
+  getModuleThemeEventMetadata,
+  getModuleThemeFromUnlockToken,
+  normalizeModuleThemeSource,
+} from "@/lib/modules/module-theme";
 import {
   buildLineWebhookDedupeKey,
   getLineWebhookRateWindowStart,
@@ -181,7 +186,21 @@ export async function POST(request: Request) {
       continue;
     }
 
-    const publicUrl = `${getAppBaseUrl(request.url)}/m/${record.unlockIntent.themeSlug}/unlock/${unlockToken}`;
+    const tokenTheme = getModuleThemeFromUnlockToken(unlockToken);
+    const themeVariant = tokenTheme?.variant ?? null;
+    const themeSource = normalizeModuleThemeSource(tokenTheme?.source ?? "query_hint");
+    const publicUrl = `${getAppBaseUrl(request.url)}${buildModuleUnlockPath({
+      moduleSlug: record.unlockIntent.themeSlug,
+      unlockToken,
+      themeVariant,
+      themeSource,
+    })}`;
+    const themeMetadata = themeVariant
+      ? {
+          ...getModuleThemeEventMetadata({ variant: themeVariant, source: themeSource }),
+          themeCarryoverSource: "unlock_intent",
+        }
+      : {};
 
     await bindUnlockIntentToLine({
       unlockIntentId: record.unlockIntent.id,
@@ -235,6 +254,7 @@ export async function POST(request: Request) {
           status: "matched",
           dedupeStatus: "created",
           rateLimited: false,
+          ...themeMetadata,
         },
       });
 
@@ -256,6 +276,7 @@ export async function POST(request: Request) {
           errorCode: reply.ok ? null : reply.error,
           dedupeStatus: "created",
           rateLimited: false,
+          ...themeMetadata,
         },
       });
 

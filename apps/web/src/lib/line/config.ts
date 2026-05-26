@@ -1,4 +1,5 @@
 import { getLineAddUrl } from "@/lib/modules/ai-temperature-ui";
+import { appendModuleThemeToSearchParams, type ModuleThemeSource, type ModuleThemeVariant } from "@/lib/modules/module-theme";
 
 export function getLineLiffId(envValue = process.env.NEXT_PUBLIC_LINE_LIFF_ID): string | null {
   const candidate = envValue?.trim();
@@ -19,6 +20,8 @@ export function buildLineLiffUrl(input: {
   moduleSlug?: string;
   baseUrl?: string | null;
   debug?: boolean;
+  themeVariant?: ModuleThemeVariant | null;
+  themeSource?: ModuleThemeSource | null;
 }) {
   const baseUrl = input.baseUrl ?? getLineLiffBaseUrl();
 
@@ -39,6 +42,10 @@ export function buildLineLiffUrl(input: {
   if (input.debug) {
     url.searchParams.set("debug", "1");
   }
+  appendModuleThemeToSearchParams(url.searchParams, input.themeVariant ? {
+    variant: input.themeVariant,
+    source: input.themeSource ?? "query_hint",
+  } : null);
   url.searchParams.set("unlockIntentId", input.unlockIntentId);
   url.searchParams.set("unlockToken", input.unlockToken);
   url.searchParams.set("code", input.fulfillmentCode);
@@ -52,6 +59,8 @@ export function getPublicLineConfig(input: {
   fulfillmentCode: string;
   moduleSlug?: string;
   debug?: boolean;
+  themeVariant?: ModuleThemeVariant | null;
+  themeSource?: ModuleThemeSource | null;
 }) {
   return {
     lineAddUrl: getLineAddUrl(),
@@ -60,8 +69,25 @@ export function getPublicLineConfig(input: {
   };
 }
 
-export function buildModuleUnlockPath(input: { moduleSlug: string; unlockToken: string }) {
-  return `/m/${encodeURIComponent(input.moduleSlug)}/unlock/${encodeURIComponent(input.unlockToken)}`;
+export function buildModuleUnlockPath(input: {
+  moduleSlug: string;
+  unlockToken: string;
+  themeVariant?: ModuleThemeVariant | null;
+  themeSource?: ModuleThemeSource | null;
+}) {
+  const path = `/m/${encodeURIComponent(input.moduleSlug)}/unlock/${encodeURIComponent(input.unlockToken)}`;
+
+  if (!input.themeVariant) {
+    return path;
+  }
+
+  const searchParams = new URLSearchParams();
+  appendModuleThemeToSearchParams(searchParams, {
+    variant: input.themeVariant,
+    source: input.themeSource ?? "query_hint",
+  });
+
+  return `${path}?${searchParams.toString()}`;
 }
 
 export function getAppBaseUrl(requestUrl?: string) {

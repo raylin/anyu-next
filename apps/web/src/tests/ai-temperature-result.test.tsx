@@ -39,8 +39,12 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("解鎖 3 種下一句回法");
     expect(html).toContain("看下一句怎麼回");
     expect(html).toContain('data-module-theme="classic"');
-    expect(html).toContain("柔和");
-    expect(html).toContain("鮮明");
+    expect(html).toContain('aria-label="切換為柔和主題"');
+    expect(html).toContain('aria-label="切換為鮮明主題"');
+    expect(html).not.toContain(">柔和<");
+    expect(html).not.toContain(">鮮明<");
+    expect(html).not.toContain(">manual<");
+    expect(html).not.toContain(">a/b<");
   });
 
   it("keeps the share action social and the paid preview hierarchy clearer", () => {

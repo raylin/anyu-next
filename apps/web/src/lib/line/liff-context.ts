@@ -1,9 +1,19 @@
+import {
+  getModuleThemeFromSearchParams,
+  normalizeModuleThemeSource,
+  normalizeModuleThemeVariant,
+  type ModuleThemeSource,
+  type ModuleThemeVariant,
+} from "@/lib/modules/module-theme";
+
 export type LineFulfillmentContext = {
   moduleSlug: string;
   unlockIntentId: string;
   unlockToken: string;
   code: string;
   statePath: string | null;
+  themeVariant: ModuleThemeVariant | null;
+  themeSource: ModuleThemeSource;
 };
 
 export function parseLineFulfillmentContext(
@@ -15,6 +25,13 @@ export function parseLineFulfillmentContext(
   const directModuleSlug = searchParams.get("moduleSlug") ?? searchParams.get("module");
   const stateModuleSlug = stateParams.params.get("moduleSlug") ?? stateParams.params.get("module");
   const pathModuleSlug = extractModuleSlugFromPath(stateParams.path);
+  const themeFromDirect = getModuleThemeFromSearchParams(searchParams);
+  const themeFromState = getModuleThemeFromSearchParams(stateParams.params);
+  const themeVariant =
+    themeFromDirect?.variant ??
+    themeFromState?.variant ??
+    normalizeModuleThemeVariant(searchParams.get("themeVariant")) ??
+    normalizeModuleThemeVariant(stateParams.params.get("themeVariant"));
 
   return {
     moduleSlug:
@@ -23,6 +40,10 @@ export function parseLineFulfillmentContext(
     unlockToken: searchParams.get("unlockToken") ?? stateParams.params.get("unlockToken") ?? "",
     code: searchParams.get("code") ?? stateParams.params.get("code") ?? "",
     statePath: stateParams.path,
+    themeVariant,
+    themeSource: normalizeModuleThemeSource(
+      themeFromDirect?.source ?? themeFromState?.source ?? searchParams.get("themeSource") ?? stateParams.params.get("themeSource"),
+    ),
   };
 }
 

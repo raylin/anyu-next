@@ -16,11 +16,13 @@ test.describe("module 01 local ui smoke", () => {
       "data-module-theme",
       /classic|riso/,
     );
-    await page.getByRole("button", { name: "鮮明" }).click();
+    await expect(page.getByText("柔和")).toHaveCount(0);
+    await expect(page.getByText("鮮明")).toHaveCount(0);
+    await page.getByRole("button", { name: "切換為鮮明主題" }).click();
     await expect(page.locator("[data-module-theme]")).toHaveAttribute("data-module-theme", "riso");
     await page.reload();
     await expect(page.locator("[data-module-theme]")).toHaveAttribute("data-module-theme", "riso");
-    await page.getByRole("button", { name: "柔和" }).click();
+    await page.getByRole("button", { name: "切換為柔和主題" }).click();
     await expect(page.locator("[data-module-theme]")).toHaveAttribute("data-module-theme", "classic");
     await expect(page.getByLabel("情境描述")).toBeVisible();
     await expect(page.getByRole("button", { name: "再寫一點…" })).toBeDisabled();

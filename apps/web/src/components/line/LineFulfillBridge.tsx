@@ -113,6 +113,8 @@ export function LineFulfillBridge({
             moduleSlug: initialParams.moduleSlug,
             unlockIntentId: initialParams.unlockIntentId,
             unlockToken: initialParams.unlockToken,
+            themeVariant: initialParams.themeVariant,
+            themeSource: initialParams.themeSource,
             idToken,
           }),
         });

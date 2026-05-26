@@ -176,6 +176,48 @@ describe("LINE route hardening", () => {
     );
   });
 
+  it("carries fulfillment theme hints through LIFF bind redirects safely", async () => {
+    mockVerifyLineIdToken.mockResolvedValue({
+      ok: true,
+      lineUserId: "verified-line-user",
+      audience: "1234567890",
+    });
+    mockGetUnlockIntentByTokenHash.mockResolvedValue(buildRuntimeRecord());
+    mockBindUnlockIntentToLine.mockResolvedValue({});
+    mockInsertEvent.mockResolvedValue({});
+
+    const response = await bindLiffPost(
+      new Request("http://localhost/api/line/fulfillment/bind-liff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          moduleSlug: "ambiguous-temperature",
+          unlockIntentId: "unlock-intent-1",
+          unlockToken: "unlock-token-1.r",
+          idToken: "line-id-token",
+          themeVariant: "riso",
+          themeSource: "manual_override",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      unlockedPath:
+        "/m/ambiguous-temperature/unlock/unlock-token-1.r?themeVariant=riso&themeSource=manual_override",
+    });
+    expect(mockInsertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          themeVariant: "riso",
+          themeSource: "manual_override",
+          themeCarryoverSource: "unlock_intent",
+        }),
+      }),
+    );
+  });
+
   it("rejects LIFF bind requests when module context does not match the unlock intent", async () => {
     mockVerifyLineIdToken.mockResolvedValue({
       ok: true,
@@ -412,6 +454,60 @@ describe("LINE route hardening", () => {
           lineUserId: expect.anything(),
           fulfillmentCode: expect.anything(),
           unlockToken: expect.anything(),
+        }),
+      }),
+    );
+  });
+
+  it("restores theme hints in short-code unlocked links from the stored fulfillment token", async () => {
+    mockTryCreateLineWebhookEvent.mockResolvedValue("created");
+    mockGetUnlockIntentByCodeHash.mockResolvedValue({
+      ...buildRuntimeRecord(),
+      unlockIntent: {
+        ...buildRuntimeRecord().unlockIntent,
+        fulfillmentToken: "unlock-token-1.r",
+      },
+    });
+    mockBindUnlockIntentToLine.mockResolvedValue({});
+    mockReplyLineText.mockResolvedValue({ ok: true });
+    mockMarkUnlockIntentDeliveryAttempt.mockResolvedValue({});
+    mockMarkLineWebhookEventProcessed.mockResolvedValue({});
+    mockInsertEvent.mockResolvedValue({});
+    const body = JSON.stringify({
+      events: [
+        {
+          type: "message",
+          webhookEventId: "event-themed-code",
+          replyToken: "reply-token",
+          source: { userId: "line-user" },
+          message: { type: "text", text: "A7K2Q9" },
+        },
+      ],
+    });
+
+    const response = await webhookPost(
+      new Request("http://localhost/api/line/webhook", {
+        method: "POST",
+        headers: {
+          "x-line-signature": signLineBody(body),
+        },
+        body,
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockReplyLineText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining(
+          "/m/ambiguous-temperature/unlock/unlock-token-1.r?themeVariant=riso&themeSource=query_hint",
+        ),
+      }),
+    );
+    expect(mockInsertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          themeVariant: "riso",
+          themeCarryoverSource: "unlock_intent",
         }),
       }),
     );
