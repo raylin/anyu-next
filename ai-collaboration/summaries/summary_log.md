@@ -4927,3 +4927,22 @@ Unresolved questions:
 - Need one authorized production route dry-run from an environment with direct cleanup-secret access.
 - Retention policy for `events`, `unlock_intents`, contact data, and sessions remains future work.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Paid Results Retention Authorized Dry-run Follow-up v0
+
+Completed changes:
+- Saved the follow-up handoff under `ai-collaboration/handoffs/`.
+- Confirmed production `CRON_SECRET` is listed as configured in Vercel.
+- Confirmed production retention cleanup route still rejects unauthorized dry-run requests with HTTP 401.
+- Attempted to access the cleanup secret through production env pull without printing values, but no usable secret value was available.
+- Did not run authorized dry-run because direct usable cleanup-secret access was unavailable.
+- Recorded fallback direct Neon aggregate counts in the existing report and review bundle.
+
+Learnings:
+- Production route protection remains active.
+- Current local secure tooling can confirm the secret name exists but cannot retrieve a usable value for authorized manual dry-run.
+- Fallback aggregate counts: `analysisRequests` eligible 1, `analysisResults` eligible 6, `analysisPaidResults` total 1 / with retention 1 / overdue 0 / eligible 0.
+- No destructive cleanup was run and no raw content or secrets were recorded.
+
+Unresolved questions:
+- An operator with direct `RETENTION_CLEANUP_SECRET` or `CRON_SECRET` access still needs to run the exact authorized route dry-run.
+- Commit hash and staging push status to be recorded in final completion summary.

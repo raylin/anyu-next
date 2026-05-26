@@ -56,6 +56,19 @@ Added `analysis_paid_results` to scheduled retention cleanup coverage with aggre
 - Safe Neon aggregate check: total `1`, with retention `1`, overdue `0`, eligible for cleanup `0`.
 - No destructive production cleanup was run.
 
+## Authorized Dry-run Follow-up
+
+- Follow-up date: 2026-05-26.
+- Production `CRON_SECRET` is listed as configured in Vercel, but production env pull returned no usable secret value.
+- Unauthorized production route check remained HTTP 401.
+- Authorized production route dry-run was not run because no direct usable cleanup secret was available through the approved local secure tooling path.
+- No destructive cleanup was run.
+- Fallback direct Neon aggregate check recorded:
+- `analysisRequests` eligible for cleanup: `1`.
+- `analysisResults` eligible for cleanup: `6`.
+- `analysisPaidResults` total `1`, with retention `1`, overdue `0`, eligible for cleanup `0`.
+- No raw row content, result JSON, paid-result JSON, tokens, provider keys, DB URLs, or secrets were selected or recorded.
+
 ## Event / Privacy Status
 
 - Verification used aggregate counts only.
@@ -113,6 +126,7 @@ Pending at report creation time.
 ## Remaining Uncertainties
 
 - Whether Vercel cron currently has a non-empty cleanup secret available in the same way the route does at runtime.
+- Whether an operator with direct secret access can run the authorized production route dry-run and record the route's exact aggregate response.
 
 ## Recommended Next Step
 

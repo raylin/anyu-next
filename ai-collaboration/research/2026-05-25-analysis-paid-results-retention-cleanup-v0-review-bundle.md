@@ -80,6 +80,14 @@ Dry-run sets `scrubbed` to `0` and does not mutate rows.
 - Safe Neon aggregate check on production reported `analysis_paid_results` total `1`, with retention `1`, overdue `0`, eligible for cleanup `0`.
 - No destructive production cleanup was run.
 
+Follow-up on 2026-05-26:
+
+- Production `CRON_SECRET` is listed as configured in Vercel, but production env pull still returned no usable cleanup secret value.
+- Unauthorized production route check remained HTTP 401.
+- Authorized production route dry-run was not run because no direct usable cleanup secret was available through the approved local secure tooling path.
+- Fallback direct Neon aggregate check reported `analysisRequests` eligible `1`, `analysisResults` eligible `6`, and `analysisPaidResults` total `1` / with retention `1` / overdue `0` / eligible `0`.
+- No destructive cleanup was run.
+
 ## 9. Event / Privacy Verification
 
 - Reports and dry-run checks use aggregate counts only.
@@ -95,6 +103,7 @@ Dry-run sets `scrubbed` to `0` and does not mutate rows.
 
 - Authorized live route dry-run could not be completed without access to the cleanup secret.
 - The deployed route was verified for unauthorized protection, and DB aggregates were verified directly through Neon.
+- The exact authorized route response still needs to be captured by an operator with direct cleanup-secret access.
 
 ## 12. Recommended Next Step
 
