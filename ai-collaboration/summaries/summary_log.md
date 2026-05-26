@@ -5063,3 +5063,25 @@ Unresolved questions:
 - Manual staging LINE test OA smoke remains pending.
 - Production deployment was intentionally skipped.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Two-tier Phase 3 Staging Manual Smoke v0
+
+Completed changes:
+- Saved the Phase 3 staging manual smoke handoff under `ai-collaboration/handoffs/`.
+- Verified `staging.anyu.tw` points to a fresh ready Vercel preview deployment after the Phase 3 staging push.
+- Ran shell-safe staging synthetic paid-generation smoke.
+- Verified paid generation completed, duplicate request reused the completed row, and unlocked route rendered paid content.
+- Verified safe DB/event status: provider source, fallback not used, retention set.
+- Recorded real LIFF bind and real test-OA short-code smoke as pending manual operator verification.
+
+Learnings:
+- Shell-safe staging service path remains healthy after Phase 3.
+- Final verification used provider model and did not fall back.
+- The shell cannot complete real LIFF ID-token or test-OA short-code flows without human LINE client interaction.
+- Next-after risk decision remains gated: keep as staging / low-volume beta only until manual LINE smoke passes.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, and web build.
+
+Unresolved questions:
+- Real LIFF bind smoke remains pending.
+- Real staging/test OA short-code smoke remains pending.
+- Production deployment was intentionally skipped.
+- Commit hash and staging push status to be recorded in final completion summary.
