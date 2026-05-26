@@ -8,6 +8,7 @@ import { getModuleBySlug } from "@/lib/modules/registry";
 import { requestDeferredPaidGeneration } from "@/lib/modules/paid-generation-service";
 
 type BindLiffPayload = {
+  moduleSlug?: string;
   unlockIntentId?: string;
   unlockToken?: string;
   idToken?: string;
@@ -64,6 +65,13 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { ok: false, error: "expired_token", message: "這組領取連結已過期，請回到結果頁重新產生。" },
       { status: 410 },
+    );
+  }
+
+  if (body.moduleSlug && body.moduleSlug !== record.unlockIntent.themeSlug) {
+    return NextResponse.json(
+      { ok: false, error: "module_mismatch", message: "這組領取連結與測驗資料不符，請回到結果頁重新產生。" },
+      { status: 400 },
     );
   }
 

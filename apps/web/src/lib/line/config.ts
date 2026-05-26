@@ -26,9 +26,14 @@ export function buildLineLiffUrl(input: {
   }
 
   const url = new URL(baseUrl);
-  if (url.hostname === "liff.line.me" && input.moduleSlug) {
+  if (url.hostname === "liff.line.me") {
     const liffIdPath = url.pathname.replace(/\/$/, "");
-    url.pathname = `${liffIdPath}/m/${input.moduleSlug}/line/fulfill`;
+    url.pathname = `${liffIdPath}/line/fulfill`;
+  } else {
+    url.pathname = "/line/fulfill";
+  }
+  if (input.moduleSlug) {
+    url.searchParams.set("moduleSlug", input.moduleSlug);
   }
   url.searchParams.set("unlockIntentId", input.unlockIntentId);
   url.searchParams.set("unlockToken", input.unlockToken);

@@ -1,23 +1,13 @@
 import { LineFulfillBridge } from "@/components/line/LineFulfillBridge";
 
-type RouteParams = Promise<{ moduleSlug?: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-export default async function ModuleLineFulfillPage({
-  params,
+export default async function GlobalLineFulfillPage({
   searchParams,
 }: {
-  params: RouteParams;
   searchParams: SearchParams;
 }) {
-  const routeParams = await params;
-
-  return (
-    <LineFulfillBridge
-      defaultModuleSlug={routeParams.moduleSlug}
-      initialSearch={serializeSearchParams(await searchParams)}
-    />
-  );
+  return <LineFulfillBridge initialSearch={serializeSearchParams(await searchParams)} />;
 }
 
 function serializeSearchParams(searchParams: Record<string, string | string[] | undefined>) {

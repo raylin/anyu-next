@@ -39,7 +39,7 @@ Purpose: production LINE OA and LIFF setup record for LINE fulfillment automatio
 | LIFF app name | 暗語 ANYU |
 | LIFF ID | 2009959232-LhxoYMDV |
 | LIFF URL | https://liff.line.me/2009959232-LhxoYMDV |
-| LIFF endpoint URL | `https://anyu.tw/m/ambiguous-temperature/line/fulfill` |
+| LIFF endpoint URL | `https://anyu.tw/line/fulfill` |
 | LIFF size | full |
 | LIFF scopes | openid, profile |
 | Add friend option / linked bot | enabled |
@@ -58,6 +58,8 @@ Purpose: production LINE OA and LIFF setup record for LINE fulfillment automatio
 ## Implementation Notes
 
 - LIFF primary path should use `NEXT_PUBLIC_LINE_LIFF_URL` and never hard-code this LIFF ID in app code.
+- LINE Console LIFF endpoint should use the global bridge `https://anyu.tw/line/fulfill`, not a module-specific route.
+- Generated LIFF URLs must carry `moduleSlug`, unlock intent, unlock token, and short-code fallback context through query params or `liff.state`.
 - LIFF bind must verify a LINE ID token server-side and bind only the verified LINE subject.
 - LINE webhook must verify signatures with `LINE_CHANNEL_SECRET`.
 - LINE webhook requires database-backed dedupe and invalid-code rate guard tables from `0004_line_webhook_hardening.sql`.
@@ -81,3 +83,4 @@ Purpose: production LINE OA and LIFF setup record for LINE fulfillment automatio
 |---|---|---|
 | 2026-05-21 | Created setup record template. | Codex |
 | 2026-05-25 | Applied production LINE fulfillment/hardening migrations and verified production route-level smoke. LINE Console webhook verification and real OA short-code smoke remain pending. | Codex |
+| 2026-05-26 | Documented global LIFF bridge endpoint as the canonical production LIFF Console endpoint; production deploy/config change remains separate. | Codex |

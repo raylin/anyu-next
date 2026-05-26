@@ -46,6 +46,13 @@ Vercel Preview env must point to the test OA and staging LIFF.
 
 Vercel Production env must point to the production OA and production LIFF.
 
+Canonical LIFF Console endpoints:
+
+- Preview / Staging: `https://staging.anyu.tw/line/fulfill`
+- Production: `https://anyu.tw/line/fulfill`
+
+The global bridge is module-agnostic. Generated LIFF URLs must include `moduleSlug` and fulfillment context so future modules can share the same LIFF app and LINE Console endpoint.
+
 LIFF bind implementation must verify LINE ID tokens server-side and bind only the verified LINE subject. Webhook implementation must use database-backed event dedupe and invalid-code rate guard tables from `apps/web/drizzle/0004_line_webhook_hardening.sql`.
 
 ## Review Checklist
@@ -58,3 +65,4 @@ LIFF bind implementation must verify LINE ID tokens server-side and bind only th
 - [ ] No secret values are committed to repo documentation.
 - [ ] Implementation code does not hard-code environment-specific LINE URLs.
 - [x] Live staging `/api/unlock-intent` response returns staging LIFF URL and test OA add-friend URL.
+- [ ] LINE Console LIFF endpoints are updated to the canonical global bridge routes for staging and production.

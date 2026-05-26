@@ -5107,3 +5107,29 @@ Unresolved questions:
 - If LINE Console endpoint differs from the setup record, it should be corrected before production consideration.
 - Production deployment was intentionally skipped.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Global LIFF Fulfillment Bridge v0
+
+Completed changes:
+- Saved the global LIFF fulfillment bridge handoff under `ai-collaboration/handoffs/`.
+- Added canonical `/line/fulfill` bridge for module-agnostic LINE Console endpoint use.
+- Kept `/m/[moduleSlug]/line/fulfill` as compatibility route.
+- Updated generated LIFF URLs to use `/line/fulfill` and carry `moduleSlug`, unlock intent, unlock token, and short-code fallback context.
+- Updated context parsing for direct query params, `liff.state`, and legacy module-route state paths.
+- Added server-provided initial search context so missing/unsupported context renders safe fallback without homepage redirect.
+- Added bind API module mismatch validation.
+- Updated staging/production LINE setup docs and env matrix with global LIFF endpoint guidance.
+- Refreshed staging alias and ran sanitized route-level smoke.
+
+Learnings:
+- The likely mobile 404 cause is brittle module-specific LIFF endpoint handling through LINE's redirect/login mechanics.
+- A stable `/line/fulfill` endpoint lets one LIFF app support future modules using `moduleSlug` context.
+- Staging route-level smoke verified the generated LIFF URL path is `/2010157793-Q4JeeYv0/line/fulfill` with module context.
+- Missing/unsupported context routes render safe fallback and do not render homepage.
+- Validation passed for compileall, topic-ingestion tests, web lint, web unit tests, and web build.
+
+Unresolved questions:
+- Local Playwright browser execution is blocked in this harness by Chromium MachPort permission errors, though the e2e build step succeeds.
+- Staging LINE Console must be updated manually to `https://staging.anyu.tw/line/fulfill`.
+- Real mobile staging LIFF smoke remains pending after the console endpoint update.
+- Production deployment was intentionally skipped.
+- Commit hash and staging push status to be recorded in final completion summary.

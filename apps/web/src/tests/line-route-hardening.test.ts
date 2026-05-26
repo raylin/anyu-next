@@ -138,6 +138,7 @@ describe("LINE route hardening", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          moduleSlug: "ambiguous-temperature",
           unlockIntentId: "unlock-intent-1",
           unlockToken: "unlock-token-1",
           idToken: "line-id-token",
@@ -173,6 +174,37 @@ describe("LINE route hardening", () => {
         }),
       }),
     );
+  });
+
+  it("rejects LIFF bind requests when module context does not match the unlock intent", async () => {
+    mockVerifyLineIdToken.mockResolvedValue({
+      ok: true,
+      lineUserId: "verified-line-user",
+      audience: "1234567890",
+    });
+    mockGetUnlockIntentByTokenHash.mockResolvedValue(buildRuntimeRecord());
+
+    const response = await bindLiffPost(
+      new Request("http://localhost/api/line/fulfillment/bind-liff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          moduleSlug: "unsupported-module",
+          unlockIntentId: "unlock-intent-1",
+          unlockToken: "unlock-token-1",
+          idToken: "line-id-token",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: "module_mismatch",
+    });
+    expect(mockBindUnlockIntentToLine).not.toHaveBeenCalled();
+    expect(mockRequestDeferredPaidGeneration).not.toHaveBeenCalled();
+    expect(mockInsertEvent).not.toHaveBeenCalled();
   });
 
   it("allows LINE console webhook verification pings with empty events and no signature", async () => {

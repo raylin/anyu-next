@@ -60,14 +60,31 @@ describe("LINE fulfillment helpers", () => {
         moduleSlug: "ambiguous-temperature",
       }),
     ).toBe(
-      "https://liff.line.me/123-abc/m/ambiguous-temperature/line/fulfill?unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
+      "https://liff.line.me/123-abc/line/fulfill?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
+    );
+  });
+
+  it("builds global bridge URLs for non-LIFF base URLs too", () => {
+    expect(
+      buildLineLiffUrl({
+        baseUrl: "https://staging.anyu.tw/m/ambiguous-temperature/line/fulfill",
+        unlockIntentId: "intent-1",
+        unlockToken: "token-1",
+        fulfillmentCode: "A7K2Q9",
+        moduleSlug: "ambiguous-temperature",
+      }),
+    ).toBe(
+      "https://staging.anyu.tw/line/fulfill?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
     );
   });
 
   it("keeps LIFF fulfillment context from direct query params", () => {
     expect(
-      parseLineFulfillmentContext("?unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9"),
+      parseLineFulfillmentContext(
+        "?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
+      ),
     ).toEqual({
+      moduleSlug: "ambiguous-temperature",
       unlockIntentId: "intent-1",
       unlockToken: "token-1",
       code: "A7K2Q9",
@@ -77,10 +94,25 @@ describe("LINE fulfillment helpers", () => {
 
   it("keeps LIFF fulfillment context from liff.state redirects", () => {
     const state = encodeURIComponent(
+      "/line/fulfill?moduleSlug=ambiguous-temperature&unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
+    );
+
+    expect(parseLineFulfillmentContext(`?liff.state=${state}`)).toEqual({
+      moduleSlug: "ambiguous-temperature",
+      unlockIntentId: "intent-1",
+      unlockToken: "token-1",
+      code: "A7K2Q9",
+      statePath: "/line/fulfill",
+    });
+  });
+
+  it("keeps compatibility module context from legacy liff.state paths", () => {
+    const state = encodeURIComponent(
       "/m/ambiguous-temperature/line/fulfill?unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9",
     );
 
     expect(parseLineFulfillmentContext(`?liff.state=${state}`)).toEqual({
+      moduleSlug: "ambiguous-temperature",
       unlockIntentId: "intent-1",
       unlockToken: "token-1",
       code: "A7K2Q9",
@@ -88,8 +120,23 @@ describe("LINE fulfillment helpers", () => {
     });
   });
 
+  it("uses a compatibility route module slug when query context omits it", () => {
+    expect(
+      parseLineFulfillmentContext("?unlockIntentId=intent-1&unlockToken=token-1&code=A7K2Q9", {
+        defaultModuleSlug: "ambiguous-temperature",
+      }),
+    ).toEqual({
+      moduleSlug: "ambiguous-temperature",
+      unlockIntentId: "intent-1",
+      unlockToken: "token-1",
+      code: "A7K2Q9",
+      statePath: null,
+    });
+  });
+
   it("returns an empty context when LIFF state is missing instead of inventing a redirect", () => {
     expect(parseLineFulfillmentContext("")).toEqual({
+      moduleSlug: "",
       unlockIntentId: "",
       unlockToken: "",
       code: "",
