@@ -5040,3 +5040,26 @@ Unresolved questions:
 - Deferred paid generation remains synchronous and should still be revisited before broader LINE traffic.
 - Production deployment was intentionally skipped.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Two-tier Phase 3 LINE Bind Trigger + Delivery v0
+
+Completed changes:
+- Saved the Phase 3 LINE bind trigger handoff under `ai-collaboration/handoffs/`.
+- Wired LIFF bind to request deferred paid generation after verified LINE identity binding.
+- Updated LIFF bind response with safe `paidStatus`.
+- Changed short-code webhook reply copy to an honest processing message with unlocked link.
+- Scheduled short-code paid generation after webhook response instead of blocking LINE on provider latency.
+- Added tests for LIFF paid-generation trigger and valid short-code pending-link behavior.
+- Deployed staging and verified deferred paid-generation provider path still completed.
+
+Learnings:
+- Trigger decision: LIFF/web can await paid generation; webhook should respond quickly and use after-response generation.
+- Final staging deferred paid verification completed with provider model `claude-haiku-4-5-20251001`; fallback was not used.
+- Existing unlocked route states were sufficient, so no new status API was needed for this MVP.
+- Real LIFF ID-token smoke and manual test-OA short-code smoke cannot be completed from shell and remain manual staging checks.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, web build, and local Playwright smoke.
+
+Unresolved questions:
+- Next `after` is not a durable queue; a future background/polling design may be needed before broader LINE traffic.
+- Manual staging LINE test OA smoke remains pending.
+- Production deployment was intentionally skipped.
+- Commit hash and staging push status to be recorded in final completion summary.

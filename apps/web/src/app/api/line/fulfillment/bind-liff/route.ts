@@ -5,6 +5,7 @@ import { getAppBaseUrl } from "@/lib/line/config";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
 import { verifyLineIdToken } from "@/lib/line/liff";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import { requestDeferredPaidGeneration } from "@/lib/modules/paid-generation-service";
 
 type BindLiffPayload = {
   unlockIntentId?: string;
@@ -76,6 +77,14 @@ export async function POST(request: Request) {
     delivered: true,
   });
 
+  const paidGeneration = moduleConfig
+    ? await requestDeferredPaidGeneration({
+        moduleConfig,
+        resultId: record.unlockIntent.resultId,
+        unlockIntentId: record.unlockIntent.id,
+      })
+    : null;
+
   if (moduleConfig) {
     await insertEvent({
       eventName: "fulfillment_liff_bound",
@@ -92,6 +101,7 @@ export async function POST(request: Request) {
         unlockIntentId: record.unlockIntent.id,
         channel: "liff",
         status: "delivered",
+        paidStatus: paidGeneration?.ok ? paidGeneration.status : "unavailable",
       },
     });
 
@@ -110,9 +120,14 @@ export async function POST(request: Request) {
         unlockIntentId: record.unlockIntent.id,
         channel: "liff",
         status: "delivered",
+        paidStatus: paidGeneration?.ok ? paidGeneration.status : "unavailable",
       },
     });
   }
 
-  return NextResponse.json({ ok: true, unlockedUrl });
+  return NextResponse.json({
+    ok: true,
+    unlockedUrl,
+    paidStatus: paidGeneration?.ok ? paidGeneration.status : "missing",
+  });
 }

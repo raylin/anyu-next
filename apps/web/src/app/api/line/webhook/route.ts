@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { after } from "next/server";
 import { isDbConfigured } from "@/lib/db/client";
 import {
   bindUnlockIntentToLine,
@@ -17,7 +18,7 @@ import {
   isLineWebhookRateLimited,
 } from "@/lib/line/webhook-hardening";
 import {
-  buildLineSuccessMessage,
+  buildLinePendingMessage,
   LINE_INVALID_CODE_MESSAGE,
   LINE_RATE_LIMITED_MESSAGE,
   LINE_WEBHOOK_SIGNATURE_HEADER,
@@ -26,6 +27,17 @@ import {
   type LineWebhookPayload,
 } from "@/lib/line/webhook";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import { requestDeferredPaidGeneration } from "@/lib/modules/paid-generation-service";
+
+function scheduleAfterResponse(task: () => Promise<void>) {
+  try {
+    after(task);
+  } catch {
+    // Unit tests run outside Next's request async-storage. Production uses `after`;
+    // tests fall back to fire-and-forget without blocking route assertions.
+    void task();
+  }
+}
 
 export async function POST(request: Request) {
   const rawBody = await request.text();
@@ -178,9 +190,19 @@ export async function POST(request: Request) {
       delivered: false,
     });
 
+    if (moduleConfig) {
+      scheduleAfterResponse(async () => {
+        await requestDeferredPaidGeneration({
+          moduleConfig,
+          resultId: record.unlockIntent.resultId,
+          unlockIntentId: record.unlockIntent.id,
+        });
+      });
+    }
+
     const reply = await replyLineText({
       replyToken,
-      text: buildLineSuccessMessage(publicUrl),
+      text: buildLinePendingMessage(publicUrl),
       channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
     });
 

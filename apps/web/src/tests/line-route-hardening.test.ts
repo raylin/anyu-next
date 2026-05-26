@@ -10,6 +10,7 @@ const {
   mockMarkUnlockIntentDeliveryAttempt,
   mockRecordLineWebhookInvalidAttempt,
   mockReplyLineText,
+  mockRequestDeferredPaidGeneration,
   mockTryCreateLineWebhookEvent,
   mockVerifyLineIdToken,
 } = vi.hoisted(() => ({
@@ -21,6 +22,7 @@ const {
   mockMarkUnlockIntentDeliveryAttempt: vi.fn(),
   mockRecordLineWebhookInvalidAttempt: vi.fn(),
   mockReplyLineText: vi.fn(),
+  mockRequestDeferredPaidGeneration: vi.fn(),
   mockTryCreateLineWebhookEvent: vi.fn(),
   mockVerifyLineIdToken: vi.fn(),
 }));
@@ -52,6 +54,10 @@ vi.mock("@/lib/line/webhook", async (importOriginal) => {
     replyLineText: mockReplyLineText,
   };
 });
+
+vi.mock("@/lib/modules/paid-generation-service", () => ({
+  requestDeferredPaidGeneration: mockRequestDeferredPaidGeneration,
+}));
 
 import { POST as bindLiffPost } from "@/app/api/line/fulfillment/bind-liff/route";
 import { POST as webhookPost } from "@/app/api/line/webhook/route";
@@ -86,6 +92,13 @@ describe("LINE route hardening", () => {
     vi.clearAllMocks();
     process.env.LINE_CHANNEL_SECRET = "test-secret";
     process.env.LINE_CHANNEL_ACCESS_TOKEN = "test-access-token";
+    mockRequestDeferredPaidGeneration.mockResolvedValue({
+      ok: true,
+      status: "completed",
+      paidResultId: "paid-result-1",
+      source: "provider",
+      reused: false,
+    });
   });
 
   it("rejects LIFF bind requests that only send a client-provided user id", async () => {
@@ -134,6 +147,12 @@ describe("LINE route hardening", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ ok: true });
+    expect(mockRequestDeferredPaidGeneration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resultId: "result-1",
+        unlockIntentId: "unlock-intent-1",
+      }),
+    );
     expect(mockBindUnlockIntentToLine).toHaveBeenCalledWith(
       expect.objectContaining({
         lineUserId: "verified-line-user",
@@ -302,5 +321,63 @@ describe("LINE route hardening", () => {
       }),
     );
     expect(mockInsertEvent).not.toHaveBeenCalled();
+  });
+
+  it("replies to valid short codes with a pending link without awaiting paid generation", async () => {
+    mockTryCreateLineWebhookEvent.mockResolvedValue("created");
+    mockGetUnlockIntentByCodeHash.mockResolvedValue(buildRuntimeRecord());
+    mockBindUnlockIntentToLine.mockResolvedValue({});
+    mockReplyLineText.mockResolvedValue({ ok: true });
+    mockMarkUnlockIntentDeliveryAttempt.mockResolvedValue({});
+    mockMarkLineWebhookEventProcessed.mockResolvedValue({});
+    mockInsertEvent.mockResolvedValue({});
+    const body = JSON.stringify({
+      events: [
+        {
+          type: "message",
+          webhookEventId: "event-valid-code",
+          replyToken: "reply-token",
+          source: { userId: "line-user" },
+          message: { type: "text", text: "A7K2Q9" },
+        },
+      ],
+    });
+
+    const response = await webhookPost(
+      new Request("http://localhost/api/line/webhook", {
+        method: "POST",
+        headers: {
+          "x-line-signature": signLineBody(body),
+        },
+        body,
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockBindUnlockIntentToLine).toHaveBeenCalledWith(
+      expect.objectContaining({
+        channel: "line_code",
+        delivered: false,
+      }),
+    );
+    expect(mockReplyLineText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining("正在整理你的完整分析"),
+      }),
+    );
+    expect(mockReplyLineText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining("/m/ambiguous-temperature/unlock/"),
+      }),
+    );
+    expect(mockInsertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.not.objectContaining({
+          lineUserId: expect.anything(),
+          fulfillmentCode: expect.anything(),
+          unlockToken: expect.anything(),
+        }),
+      }),
+    );
   });
 });

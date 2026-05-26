@@ -90,6 +90,10 @@ export function buildLineSuccessMessage(url: string) {
   return `收到，這是你的完整分析連結：\n${url}`;
 }
 
+export function buildLinePendingMessage(url: string) {
+  return `收到，我正在整理你的完整分析。\n大約需要 30–60 秒，完成後你可以從這個連結查看：\n${url}\n頁面會在完成後顯示結果；如果還在整理中，稍後再打開也可以。`;
+}
+
 export const LINE_INVALID_CODE_MESSAGE =
   "我找不到這組短碼。請回到剛剛的結果頁重新產生一次，或改用 Email 接收。";
 
