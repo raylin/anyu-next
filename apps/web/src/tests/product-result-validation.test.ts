@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
-import { buildProviderFallbackPaidResult } from "@/lib/ai/paid-result-generation";
+import {
+  buildProviderFallbackPaidResult,
+  validatePaidResultText,
+} from "@/lib/ai/paid-result-generation";
+import { PAID_RESULT_MIN_TEXT_LENGTH } from "@/lib/ai/paid-result-semantic-validation";
 import type { ProductResult } from "@/lib/ai/product-result-schema";
 import { normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
 import { validateProductResultObject } from "@/lib/ai/validate-product-result";
@@ -27,6 +31,10 @@ describe("product result schema validation", () => {
 
     expect(prompt).toContain("Target about 1,200–1,800 Traditional Chinese characters");
     expect(prompt).toContain("exactly 6 copyable messages");
+  });
+
+  it("keeps deferred paid result semantic depth compatible with compact provider output", () => {
+    expect(PAID_RESULT_MIN_TEXT_LENGTH).toBeLessThanOrEqual(900);
   });
 
   it("accepts free-only results without running paid semantic validation", () => {
@@ -54,6 +62,16 @@ describe("product result schema validation", () => {
       paid_result: paidResult,
     });
     expect(paidResult.replyStrategies.flatMap((strategy) => strategy.copyableMessages)).toHaveLength(6);
+  });
+
+  it("accepts provider output that wraps the paid result under paid_result", async () => {
+    const freeResult = extractFreeResult(aiTemperatureDemoProductResult);
+    const paidResult = await validatePaidResultText(
+      JSON.stringify({ paid_result: aiTemperatureDemoProductResult.paid_result }),
+      freeResult,
+    );
+
+    expect(paidResult).toEqual(aiTemperatureDemoProductResult.paid_result);
   });
 
   it("rejects forbidden paid result phrasing", () => {

@@ -2,7 +2,7 @@
 
 Generate only the unlocked paid result for an existing free `曖昧溫度計` analysis.
 
-Return valid JSON only. Do not include markdown, commentary, or code fences.
+Return valid JSON only. Do not include markdown, commentary, code fences, or a `paid_result` wrapper.
 
 The JSON must conform to `paid_result_schema_v1`.
 
@@ -42,15 +42,72 @@ Required paid result:
 - `possibleStates`: exactly 3 plausible states.
 - `signalDeepDive`: exactly 3 signal explanations.
 - `replyStrategies`: exactly 3 strategies with labels `主動推進`, `低壓試探`, `暫時拉開`.
-- Across all reply strategies, generate exactly 6 copyable messages total.
+- Each reply strategy must include exactly 2 `copyableMessages`; across all reply strategies, generate exactly 6 copyable messages total.
 - `next48HourPlan`: at least 3 concrete steps.
 - `avoidDoing`: at least 2 concrete guardrails.
 - `softInsight`: one grounded reassurance.
 - `summaryCard`: concise collectible summary.
 
+Required top-level JSON shape:
+
+```json
+{
+  "fullSummary": "string",
+  "possibleStates": [
+    { "label": "string", "likelihood": "low|medium|high", "explanation": "string" },
+    { "label": "string", "likelihood": "low|medium|high", "explanation": "string" },
+    { "label": "string", "likelihood": "low|medium|high", "explanation": "string" }
+  ],
+  "signalDeepDive": [
+    { "title": "string", "evidence": "string", "whatItMayMean": "string" },
+    { "title": "string", "evidence": "string", "whatItMayMean": "string" },
+    { "title": "string", "evidence": "string", "whatItMayMean": "string" }
+  ],
+  "replyStrategies": [
+    {
+      "label": "主動推進",
+      "tone": "string",
+      "whenToUse": "string",
+      "whyItWorks": "string",
+      "possibleReaction": "string",
+      "followUpIfTheyReply": "string",
+      "copyableMessages": ["string", "string"]
+    },
+    {
+      "label": "低壓試探",
+      "tone": "string",
+      "whenToUse": "string",
+      "whyItWorks": "string",
+      "possibleReaction": "string",
+      "followUpIfTheyReply": "string",
+      "copyableMessages": ["string", "string"]
+    },
+    {
+      "label": "暫時拉開",
+      "tone": "string",
+      "whenToUse": "string",
+      "whyItWorks": "string",
+      "possibleReaction": "string",
+      "followUpIfTheyReply": "string",
+      "copyableMessages": ["string", "string"]
+    }
+  ],
+  "next48HourPlan": ["string", "string", "string"],
+  "avoidDoing": ["string", "string"],
+  "softInsight": "string",
+  "summaryCard": {
+    "headline": "string",
+    "body": "string",
+    "nextMove": "string"
+  }
+}
+```
+
+Do not add any other top-level keys.
+
 Length target:
 
-- Keep the full JSON useful but compact, roughly 1,200-1,700 Traditional Chinese characters across user-facing strings.
+- Keep the full JSON useful but compact, roughly 900-1,500 Traditional Chinese characters across user-facing strings.
 - Prefer specific, short sentences over long essays.
 
 Input package:

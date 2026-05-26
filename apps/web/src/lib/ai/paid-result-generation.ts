@@ -47,6 +47,20 @@ function stripMarkdownFences(text: string): string {
     .trim();
 }
 
+function unwrapPaidResultCandidate(value: unknown): unknown {
+  if (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "paid_result" in value &&
+    (value as { paid_result?: unknown }).paid_result
+  ) {
+    return (value as { paid_result: unknown }).paid_result;
+  }
+
+  return value;
+}
+
 export async function validatePaidResultText(
   text: string,
   freeResult: ProductResult,
@@ -54,7 +68,7 @@ export async function validatePaidResultText(
   let parsed: unknown;
 
   try {
-    parsed = JSON.parse(stripMarkdownFences(text));
+    parsed = unwrapPaidResultCandidate(JSON.parse(stripMarkdownFences(text)));
   } catch (error) {
     throw new Error(
       error instanceof Error
@@ -231,5 +245,6 @@ export async function generatePaidResult(input: {
     paidResult,
     provider: providerResult.provider,
     model: providerResult.model,
+    source: "provider" as const,
   };
 }

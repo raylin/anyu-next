@@ -4994,3 +4994,26 @@ Unresolved questions:
 - A database uniqueness/index strategy for one paid row per result/prompt/schema remains deferred.
 - Production deployment was intentionally skipped pending explicit approval.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-26 - Paid Generation Provider Reliability Follow-up v0
+
+Completed changes:
+- Saved the provider reliability follow-up handoff under `ai-collaboration/handoffs/`.
+- Tightened the paid-generation prompt with an explicit JSON skeleton and exact copyable-message counts.
+- Added provider output normalization for `{ paid_result: ... }` wrappers.
+- Added one provider retry on output-validation failures before fallback.
+- Added safe completed-event metadata for `source` and fallback `fallbackReason`.
+- Lowered the compact paid semantic text floor from 1,200 to 900 characters while preserving structural and safety checks.
+- Added unit tests for provider success, retry-before-fallback, fallback source/reason metadata, wrapper normalization, and compact semantic threshold.
+
+Learnings:
+- Provider path did succeed once in staging with model `claude-haiku-4-5-20251001`, but final staging smoke still completed via fallback.
+- Final staging fallback reason was safely recorded as `output_validation`.
+- User-facing deferred paid generation still completed, repeat request reused the completed row, and unlocked route rendered paid content.
+- Local Vercel preview env pull did not provide usable provider secrets, so raw provider-output diagnosis could not be run locally.
+- Validation passed: compileall, topic-ingestion unit tests, web lint, web unit tests, web build, and local Playwright smoke.
+
+Unresolved questions:
+- Provider path is not reliable enough to treat as primary; exact field-level provider mismatch remains unknown.
+- Need secure transient provider-output diagnostics or sanitized validation-debug tooling before Phase 3 treats provider paid generation as stable.
+- Production deployment was intentionally skipped.
+- Commit hash and staging push status to be recorded in final completion summary.

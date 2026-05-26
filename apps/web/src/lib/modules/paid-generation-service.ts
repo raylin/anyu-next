@@ -22,6 +22,11 @@ import { getAnalysisResultWithRequestById, getUnlockIntentById, insertEvent } fr
 import type { ProductModuleConfig } from "@/lib/modules/types";
 
 export type PaidGenerationStatus = "processing" | "completed" | "failed" | "expired";
+type PaidGenerationSource = "provider" | "fallback";
+
+function getPaidGenerationSourceFromModel(model?: string | null): PaidGenerationSource {
+  return model === PAID_RESULT_PROVIDER_FALLBACK_MODEL ? "fallback" : "provider";
+}
 
 function getSafeErrorCode(error: unknown) {
   if (isProviderConfigError(error)) {
@@ -73,6 +78,7 @@ export async function requestDeferredPaidGeneration(input: {
       ok: true as const,
       status: "completed" as PaidGenerationStatus,
       paidResultId: completed.id,
+      source: getPaidGenerationSourceFromModel(completed.model),
       reused: true,
     };
   }
@@ -158,6 +164,8 @@ export async function requestDeferredPaidGeneration(input: {
     let generated: {
       paidResult: Awaited<ReturnType<typeof generatePaidResult>>["paidResult"];
       model: string;
+      source: PaidGenerationSource;
+      fallbackReason?: string;
     };
 
     try {
@@ -172,13 +180,40 @@ export async function requestDeferredPaidGeneration(input: {
         throw error;
       }
 
-      generated = {
-        paidResult: buildProviderFallbackPaidResult({
-          freeResult: record.result.normalizedResultJson,
-          userContext: record.request.userContextJson,
-        }),
-        model: PAID_RESULT_PROVIDER_FALLBACK_MODEL,
-      };
+      if (isOutputValidationError(error)) {
+        try {
+          generated = await generatePaidResult({
+            redactedInput: record.request.rawInputRedacted,
+            freeResult: record.result.normalizedResultJson,
+            userContext: record.request.userContextJson,
+            providerModel: runtimeStrategy.primaryModel,
+          });
+        } catch (retryError) {
+          if (isProviderConfigError(retryError)) {
+            throw retryError;
+          }
+
+          generated = {
+            paidResult: buildProviderFallbackPaidResult({
+              freeResult: record.result.normalizedResultJson,
+              userContext: record.request.userContextJson,
+            }),
+            model: PAID_RESULT_PROVIDER_FALLBACK_MODEL,
+            source: "fallback",
+            fallbackReason: getSafeErrorCode(retryError),
+          };
+        }
+      } else {
+        generated = {
+          paidResult: buildProviderFallbackPaidResult({
+            freeResult: record.result.normalizedResultJson,
+            userContext: record.request.userContextJson,
+          }),
+          model: PAID_RESULT_PROVIDER_FALLBACK_MODEL,
+          source: "fallback",
+          fallbackReason: getSafeErrorCode(error),
+        };
+      }
     }
 
     const completedRecord = await markPaidResultCompleted({
@@ -201,6 +236,8 @@ export async function requestDeferredPaidGeneration(input: {
         resultId: input.resultId,
         unlockIntentId: input.unlockIntentId,
         status: "completed",
+        source: generated.source,
+        fallbackReason: generated.fallbackReason,
         elapsedMs: Date.now() - startedAt,
         retryCount: paidRecord.retryCount,
       },
@@ -210,6 +247,7 @@ export async function requestDeferredPaidGeneration(input: {
       ok: true as const,
       status: "completed" as PaidGenerationStatus,
       paidResultId: completedRecord?.id ?? paidRecord.id,
+      source: generated.source,
       reused: false,
     };
   } catch (error) {

@@ -1,6 +1,6 @@
 import type { ProductResult, RichPaidResult } from "@/lib/ai/product-result-schema";
 
-export const PAID_RESULT_MIN_TEXT_LENGTH = 1_200;
+export const PAID_RESULT_MIN_TEXT_LENGTH = 900;
 
 export const PAID_RESULT_FORBIDDEN_SUBSTRINGS = [
   "出局",
