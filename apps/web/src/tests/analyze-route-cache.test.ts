@@ -70,7 +70,7 @@ import { extractFreeResult } from "@/lib/modules/result-adapters";
 
 describe("module analyze cache route behavior", () => {
   const validBody = {
-    text: "他昨天說晚點回我，今天還有看限動但一直沒回，這樣到底是不是在冷掉？",
+    text: "我們上週末見面時聊得很自然，他也說下次可以再約。但這幾天訊息變慢，常常隔半天才回，雖然還是會看我的限動、偶爾傳生活小事。我不知道他是真的忙，還是其實已經沒那麼想靠近了。",
     situation: "已讀不回",
     anonymousSessionId: "cache-test-session",
     userContext: {

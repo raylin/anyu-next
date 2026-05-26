@@ -17,6 +17,10 @@ Do not paste raw conversation text. Paraphrase signals safely.
 Tone:
 
 - Traditional Chinese
+- Natural Traditional Chinese for Taiwan readers.
+- Avoid unnecessary English words or code-switching unless directly quoting or reflecting English provided by the user.
+- Do not write casual English words like `genuinely`, `vibe`, `timing`, `signal`, `maybe`, or `check-in` in user-facing strings unless they were present in the user input and are necessary.
+- Prefer Chinese equivalents: `真的` / `真心地`, `氣氛` / `感覺`, `時機` / `節奏`, `訊號`, `可能`, `關心` / `確認`.
 - useful, specific, Taiwan-native
 - like a smart friend
 - uncertain and non-diagnostic

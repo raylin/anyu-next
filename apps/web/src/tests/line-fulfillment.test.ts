@@ -259,6 +259,8 @@ describe("LINE fulfillment helpers", () => {
       expect(html).toContain('data-module-theme="riso"');
       expect(html).toContain('data-module-theme-source="manual_override"');
       expect(html).toContain("anyu-v2");
+      expect(html).not.toContain('aria-label="主題切換"');
+      expect(html).not.toContain('aria-label="切換為柔和主題"');
       expect(randomSpy).not.toHaveBeenCalled();
     } finally {
       vi.stubGlobal("window", originalWindow);
@@ -283,6 +285,7 @@ describe("LINE fulfillment helpers", () => {
       expect(html).toContain('data-module-theme="riso"');
       expect(html).toContain('data-module-theme-source="query_hint"');
       expect(html).toContain("anyu-v2");
+      expect(html).not.toContain('aria-label="主題切換"');
       expect(randomSpy).not.toHaveBeenCalled();
     } finally {
       vi.stubGlobal("window", originalWindow);
@@ -307,6 +310,7 @@ describe("LINE fulfillment helpers", () => {
       expect(html).toContain('data-module-theme="classic"');
       expect(html).toContain('data-module-theme-source="query_hint"');
       expect(html).not.toContain("anyu-v2");
+      expect(html).not.toContain('aria-label="主題切換"');
     } finally {
       vi.stubGlobal("window", originalWindow);
     }

@@ -4,11 +4,13 @@ import { Card } from "@/components/anyu/Card";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
+import { PaidResultPendingPoller } from "@/components/modules/ai-temperature/PaidResultPendingPoller";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { isDbConfigured } from "@/lib/db/client";
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
 import { getPaidResultForAnalysisResult } from "@/lib/db/paid-results";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
+import { formatPaidLikelihoodLabel } from "@/lib/modules/ai-temperature-ui";
 import {
   getModuleThemeFromSearchParams,
   getModuleThemeFromUnlockToken,
@@ -81,27 +83,34 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
   if (!hasPaidResult(result) && !storedPaidResult?.paidResultJson) {
     if (storedPaidResult?.status === "processing") {
       return (
-        <UnlockState
+        <UnlockPending
           moduleConfig={moduleConfig}
           initialTheme={initialTheme}
-          title="完整分析正在整理中"
-          message="我們正在把免費結果延伸成完整分析。請稍後重新整理這個頁面。"
+          unlockToken={unlockToken}
+          initialStatus="processing"
         />
       );
     }
 
     if (storedPaidResult?.status === "failed") {
       return (
-        <UnlockState
+        <UnlockPending
           moduleConfig={moduleConfig}
           initialTheme={initialTheme}
-          title="完整分析暫時整理失敗"
-          message="這次完整分析沒有成功產生。請回到結果頁重新領取，或稍後再試。"
+          unlockToken={unlockToken}
+          initialStatus="failed"
         />
       );
     }
 
-    return <UnlockPending moduleConfig={moduleConfig} initialTheme={initialTheme} />;
+    return (
+      <UnlockPending
+        moduleConfig={moduleConfig}
+        initialTheme={initialTheme}
+        unlockToken={unlockToken}
+        initialStatus={getPendingPaidStatus(storedPaidResult?.status)}
+      />
+    );
   }
 
   const paidResult = normalizePaidResultForDisplay(
@@ -110,7 +119,12 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
 
   return (
     <main className="anyu-shell">
-      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock" initialTheme={initialTheme}>
+      <ModuleThemeBoundary
+        moduleConfig={moduleConfig}
+        surface="unlock"
+        initialTheme={initialTheme}
+        showThemeToggle={false}
+      >
         <section className="anyu-result-stack">
           <div className="anyu-result-topbar">
             <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
@@ -152,7 +166,7 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
             {paidResult.possibleStates.map((state) => (
               <article key={state.label} className="anyu-signal-item">
                 <strong>{state.label}</strong>
-                <p className="anyu-subtle-note">可能性：{state.likelihood}</p>
+                <p className="anyu-subtle-note">可能性：{formatPaidLikelihoodLabel(state.likelihood)}</p>
                 <p className="anyu-subtle-note">{state.explanation}</p>
               </article>
             ))}
@@ -225,18 +239,52 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
 function UnlockPending({
   moduleConfig,
   initialTheme,
+  unlockToken,
+  initialStatus,
 }: {
   moduleConfig: ProductModuleConfig;
   initialTheme?: ModuleThemeState | null;
+  unlockToken: string;
+  initialStatus: "missing" | "pending" | "processing" | "failed";
 }) {
   return (
-    <UnlockState
-      moduleConfig={moduleConfig}
-      initialTheme={initialTheme}
-      title="完整分析目前仍在封測流程中"
-      message="你的免費分析已經完成。完整分析的自動整理與 LINE 通知會在下一階段接上；目前請先回到結果頁保留這份免費結果。"
-    />
+    <main className="anyu-shell">
+      <ModuleThemeBoundary
+        moduleConfig={moduleConfig}
+        surface="unlock"
+        initialTheme={initialTheme}
+        showThemeToggle={false}
+      >
+        <section className="anyu-result-stack">
+          <div className="anyu-result-topbar">
+            <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">
+              ← 回到測驗
+            </Link>
+            <Wordmark showMark />
+          </div>
+          <PaidResultPendingPoller
+            moduleSlug={moduleConfig.slug}
+            unlockToken={unlockToken}
+            initialStatus={initialStatus}
+          />
+          <LegalFooter />
+        </section>
+      </ModuleThemeBoundary>
+    </main>
   );
+}
+
+function getPendingPaidStatus(
+  status?: string | null,
+): "missing" | "pending" | "processing" | "failed" {
+  switch (status) {
+    case "pending":
+    case "processing":
+    case "failed":
+      return status;
+    default:
+      return "missing";
+  }
 }
 
 function toUrlSearchParams(input?: Record<string, string | string[] | undefined>) {
@@ -258,42 +306,6 @@ function toUrlSearchParams(input?: Record<string, string | string[] | undefined>
   return searchParams;
 }
 
-function UnlockState({
-  moduleConfig,
-  initialTheme,
-  title,
-  message,
-}: {
-  moduleConfig: ProductModuleConfig;
-  initialTheme?: ModuleThemeState | null;
-  title: string;
-  message: string;
-}) {
-  return (
-    <main className="anyu-shell">
-      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock" initialTheme={initialTheme}>
-        <section className="anyu-result-stack">
-          <div className="anyu-result-topbar">
-            <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">
-              ← 回到測驗
-            </Link>
-            <Wordmark showMark />
-          </div>
-          <Card className="anyu-quote-card">
-            <p className="anyu-kicker">完整分析</p>
-            <h1 className="anyu-section-title">{title}</h1>
-            <p className="anyu-copy">{message}</p>
-            <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">
-              回到輸入頁
-            </Link>
-          </Card>
-          <LegalFooter />
-        </section>
-      </ModuleThemeBoundary>
-    </main>
-  );
-}
-
 function UnlockError({
   moduleConfig,
   initialTheme,
@@ -305,7 +317,12 @@ function UnlockError({
 }) {
   return (
     <main className="anyu-shell">
-      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock" initialTheme={initialTheme}>
+      <ModuleThemeBoundary
+        moduleConfig={moduleConfig}
+        surface="unlock"
+        initialTheme={initialTheme}
+        showThemeToggle={false}
+      >
         <section className="anyu-result-stack">
           <div className="anyu-result-topbar">
             <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">

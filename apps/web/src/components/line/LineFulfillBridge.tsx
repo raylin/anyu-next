@@ -237,6 +237,7 @@ export function LineFulfillBridge({
       moduleConfig={themeModuleConfig}
       surface="unlock"
       initialTheme={initialTheme}
+      showThemeToggle={false}
     >
       {bridgeContent}
     </ModuleThemeBoundary>

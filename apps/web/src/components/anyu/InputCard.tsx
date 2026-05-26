@@ -65,7 +65,7 @@ export function InputCard({
           <textarea
             id="anyu-input-text"
             className="anyu-textarea anyu-textarea-lg"
-            placeholder="例如：我昨天約他週末見面，他已讀後沒回，但晚上還在發限動。"
+            placeholder="例如：我們上週末見面聊得很好，他說下次可以再約。但這幾天回訊變慢，常隔半天才回，卻還是會看限動、偶爾傳生活小事。我不知道他是真的忙，還是熱度在變低。"
             rows={7}
             ref={textareaRef}
             value={inputValue}
@@ -87,16 +87,19 @@ export function InputCard({
             <p className="anyu-guidance-copy">{inputGuidance.detail}</p>
             <div className="anyu-guidance-indicator" aria-hidden="true">
               <span
-                className={`anyu-guidance-dot ${["too_short", "can_analyze", "ideal", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
+                className={`anyu-guidance-dot ${["too_short", "almost_ready", "can_analyze", "ideal", "rich", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
               />
               <span
-                className={`anyu-guidance-dot ${["can_analyze", "ideal", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
+                className={`anyu-guidance-dot ${["almost_ready", "can_analyze", "ideal", "rich", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
               />
               <span
-                className={`anyu-guidance-dot ${["ideal", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
+                className={`anyu-guidance-dot ${["can_analyze", "ideal", "rich", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
               />
               <span
-                className={`anyu-guidance-dot ${["long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
+                className={`anyu-guidance-dot ${["ideal", "rich", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
+              />
+              <span
+                className={`anyu-guidance-dot ${["rich", "long", "too_long"].includes(inputGuidance.state) ? "anyu-guidance-dot-active" : ""}`}
               />
             </div>
           </div>

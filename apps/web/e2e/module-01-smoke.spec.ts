@@ -29,7 +29,7 @@ test.describe("module 01 local ui smoke", () => {
     await expect(page.locator("[data-module-theme]")).toHaveAttribute("data-module-theme", "classic");
     await expect(page.getByLabel("情境描述")).toBeVisible();
     await expect(page.getByRole("button", { name: "再寫一點…" })).toBeDisabled();
-    await expect(page.getByText("0 / 30")).toBeVisible();
+    await expect(page.getByText("0 / 80")).toBeVisible();
     await expect(
       page.getByText("請不要貼姓名、電話、地址或其他能識別身份的資訊。分析僅供關係觀察與自我理解參考。"),
     ).toBeVisible();
@@ -47,10 +47,10 @@ test.describe("module 01 local ui smoke", () => {
     await expect(contextChip).toHaveAttribute("aria-pressed", "true");
 
     await page.getByLabel("情境描述").fill(
-      "他最近回訊息變慢，但還是會看我的限動。我不知道他是真的忙，還是已經沒那麼喜歡我了。",
+      "我們上週末見面時聊得很自然，他也說下次可以再約。但這幾天訊息變慢，常常隔半天才回，雖然還是會看我的限動、偶爾傳生活小事。我不知道他是真的忙，還是其實已經沒那麼想靠近了。",
     );
 
-    await expect(page.getByText("可以分析了")).toBeVisible();
+    await expect(page.getByText("可以分析")).toBeVisible();
     await expect(page.getByRole("button", { name: "分析我的曖昧溫度" })).toBeEnabled();
     await expect(page.getByText("ANYU 會先盡量去識別化，再進行分析。")).toBeVisible();
   });

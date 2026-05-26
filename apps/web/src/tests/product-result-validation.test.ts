@@ -39,6 +39,18 @@ describe("product result schema validation", () => {
     expect(PAID_RESULT_MIN_TEXT_LENGTH).toBeLessThanOrEqual(900);
   });
 
+  it("discourages unnecessary Chinese-English mixing in the paid result prompt", () => {
+    const prompt = readFileSync(
+      resolve(process.cwd(), "src/lib/ai/assets/paid_result_prompt_v0.md"),
+      "utf8",
+    );
+
+    expect(prompt).toContain("Avoid unnecessary English words or code-switching");
+    expect(prompt).toContain("genuinely");
+    expect(prompt).toContain("vibe");
+    expect(prompt).toContain("Prefer Chinese equivalents");
+  });
+
   it("keeps deferred paid result output budget large enough for complete JSON", () => {
     expect(PAID_RESULT_MAX_OUTPUT_TOKENS).toBeGreaterThanOrEqual(3_600);
   });

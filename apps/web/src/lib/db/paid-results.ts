@@ -98,6 +98,36 @@ export async function getPaidResultForAnalysisResult(input: {
   return record ?? null;
 }
 
+export async function getPaidResultStatusForAnalysisResult(input: {
+  analysisResultId: string;
+  promptVersion?: string;
+  schemaVersion?: string;
+}) {
+  const db = requireDb();
+
+  const [record] = await db
+    .select({
+      id: analysisPaidResults.id,
+      status: analysisPaidResults.status,
+      errorCode: analysisPaidResults.errorCode,
+      updatedAt: analysisPaidResults.updatedAt,
+      completedAt: analysisPaidResults.completedAt,
+      failedAt: analysisPaidResults.failedAt,
+    })
+    .from(analysisPaidResults)
+    .where(
+      and(
+        eq(analysisPaidResults.analysisResultId, input.analysisResultId),
+        input.promptVersion ? eq(analysisPaidResults.promptVersion, input.promptVersion) : undefined,
+        input.schemaVersion ? eq(analysisPaidResults.schemaVersion, input.schemaVersion) : undefined,
+      ),
+    )
+    .orderBy(desc(analysisPaidResults.createdAt))
+    .limit(1);
+
+  return record ?? null;
+}
+
 export async function markPaidResultProcessing(input: {
   paidResultId: string;
   startedAt?: Date;

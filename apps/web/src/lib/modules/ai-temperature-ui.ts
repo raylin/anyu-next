@@ -6,7 +6,9 @@ import {
 } from "@/lib/modules/ai-temperature-context";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 
-export const MIN_ANALYZE_LENGTH = 30;
+export const MIN_ANALYZE_LENGTH = 80;
+export const RECOMMENDED_ANALYZE_LENGTH = 140;
+export const RICH_ANALYZE_LENGTH = 240;
 export const SOFT_MAX_ANALYZE_LENGTH = 2000;
 export const MAX_ANALYZE_LENGTH = 4000;
 export const ANONYMOUS_SESSION_STORAGE_KEY = "anyu-ambiguous-temperature-session-id";
@@ -35,8 +37,10 @@ export type AnalyzeWaitStage =
 
 export type AnalyzeInputGuidanceState =
   | "too_short"
+  | "almost_ready"
   | "can_analyze"
   | "ideal"
+  | "rich"
   | "long"
   | "too_long";
 
@@ -90,7 +94,7 @@ const OBSERVED_SIGNAL_LABELS = ["主動度", "即時性", "情緒投入"] as con
 const OBSERVED_SIGNAL_OFFSETS = [-10, 3, -4] as const;
 
 export function isAnalyzeInputReady(input: string): boolean {
-  return input.trim().length >= MIN_ANALYZE_LENGTH;
+  return getVisibleAnalyzeLength(input) >= MIN_ANALYZE_LENGTH && getVisibleAnalyzeLength(input) <= MAX_ANALYZE_LENGTH;
 }
 
 export function getAnalyzeButtonLabel(input: string): string {
@@ -104,7 +108,7 @@ export function getAnalyzeButtonLabel(input: string): string {
 }
 
 export function getAnalyzeInputGuidance(input: string): AnalyzeInputGuidance {
-  const trimmedLength = input.trim().length;
+  const trimmedLength = getVisibleAnalyzeLength(input);
 
   if (trimmedLength > MAX_ANALYZE_LENGTH) {
     return {
@@ -123,28 +127,49 @@ export function getAnalyzeInputGuidance(input: string): AnalyzeInputGuidance {
     };
   }
 
-  if (trimmedLength >= 120) {
+  if (trimmedLength >= RICH_ANALYZE_LENGTH) {
+    return {
+      state: "rich",
+      label: "細節很夠",
+      detail: "很好，這樣完整分析比較能寫出具體下一步。",
+    };
+  }
+
+  if (trimmedLength >= RECOMMENDED_ANALYZE_LENGTH) {
     return {
       state: "ideal",
-      label: "內容剛剛好",
-      detail: "這段互動已經足夠讀出節奏。",
+      label: "更貼近了",
+      detail: "內容夠完整，能看出互動節奏與關係溫度。",
     };
   }
 
   if (trimmedLength >= MIN_ANALYZE_LENGTH) {
     return {
       state: "can_analyze",
-      label: "可以分析了",
-      detail: "如果再多一點前後文，結果會更細。",
+      label: "可以分析",
+      detail: "已經可以分析；如果再補一點時間線或對方反應，結果會更穩。",
+    };
+  }
+
+  if (trimmedLength >= 40) {
+    return {
+      state: "almost_ready",
+      label: "還差一點",
+      detail: "多寫一點對方怎麼回、多久回、最近有沒有變化。",
+      counterText: `${trimmedLength} / ${MIN_ANALYZE_LENGTH}`,
     };
   }
 
   return {
     state: "too_short",
-    label: "還差一點點",
-    detail: "多給一點互動脈絡，ANYU 才讀得出節奏。",
+    label: "太少了",
+    detail: "再補一點互動細節，暗語才不會只靠猜。",
     counterText: `${trimmedLength} / ${MIN_ANALYZE_LENGTH}`,
   };
+}
+
+export function getVisibleAnalyzeLength(input: string): number {
+  return input.trim().replace(/\s+/gu, "").length;
 }
 
 export function getAnalyzeInputHint(input: string): string {
@@ -154,7 +179,7 @@ export function getAnalyzeInputHint(input: string): string {
 export function getAnalyzeErrorMessage(error: string): string {
   switch (error) {
     case "input_too_short":
-      return "再寫一點互動脈絡，ANYU 才讀得出節奏。";
+      return "再補一點互動細節，暗語才不會只靠猜。";
     case "input_too_long":
       return "這段太長了，請保留最近幾段關鍵對話再試一次。";
     case "unsupported_content":
@@ -293,11 +318,13 @@ export function validateAnalyzeInput(input: {
     };
   }
 
-  if (text.length < MIN_ANALYZE_LENGTH) {
+  const visibleLength = getVisibleAnalyzeLength(text);
+
+  if (visibleLength < MIN_ANALYZE_LENGTH) {
       return {
       ok: false,
       error: "input_too_short",
-      message: "再寫一點互動脈絡，ANYU 才讀得出節奏。",
+      message: "再補一點互動細節，暗語才不會只靠猜。",
     };
   }
 
@@ -317,8 +344,21 @@ export function validateAnalyzeInput(input: {
     userContext: normalizedContext.context,
     userContextProvided: normalizedContext.provided,
     userContextFieldCount: normalizedContext.fieldCount,
-    inputCharCount: text.length,
+    inputCharCount: visibleLength,
   };
+}
+
+export function formatPaidLikelihoodLabel(value: string): string {
+  switch (value) {
+    case "high":
+      return "高";
+    case "medium":
+      return "中";
+    case "low":
+      return "低";
+    default:
+      return value;
+  }
 }
 
 export function getClientAnonymousSessionId(): string {

@@ -15,8 +15,11 @@ import {
   MAX_ANALYZE_LENGTH,
   MISSING_LINE_URL_MESSAGE,
   MIN_ANALYZE_LENGTH,
+  RECOMMENDED_ANALYZE_LENGTH,
+  RICH_ANALYZE_LENGTH,
   SOFT_MAX_ANALYZE_LENGTH,
   buildShareText,
+  formatPaidLikelihoodLabel,
   getLineAddUrl,
   getAnalyzeErrorMessage,
   getAnalyzeButtonLabel,
@@ -39,30 +42,41 @@ describe("ai-temperature UI helpers", () => {
     expect(getAnalyzeButtonLabel("太短了")).toBe("再寫一點…");
     expect(getAnalyzeInputGuidance("太短了")).toMatchObject({
       state: "too_short" satisfies AnalyzeInputGuidanceState,
-      label: "還差一點點",
-      detail: "多給一點互動脈絡，ANYU 才讀得出節奏。",
-      counterText: "3 / 30",
+      label: "太少了",
+      detail: "再補一點互動細節，暗語才不會只靠猜。",
+      counterText: `3 / ${MIN_ANALYZE_LENGTH}`,
     });
   });
 
   it("enables the CTA once input reaches the minimum length", () => {
-    const longEnough = "我昨天約他週末見面，但他已讀後沒有回我，今天晚上還在發限動。";
+    const longEnough =
+      "我們上週末見面時聊得很自然，他也說下次可以再約。但這幾天訊息變慢，常常隔半天才回，雖然還是會看我的限動、偶爾傳生活小事。我不知道他是真的忙，還是其實已經沒那麼想靠近了。";
 
     expect(longEnough.trim().length).toBeGreaterThanOrEqual(MIN_ANALYZE_LENGTH);
     expect(isAnalyzeInputReady(longEnough)).toBe(true);
     expect(getAnalyzeButtonLabel(longEnough)).toBe("分析我的曖昧溫度");
     expect(getAnalyzeInputGuidance(longEnough)).toMatchObject({
       state: "can_analyze" satisfies AnalyzeInputGuidanceState,
-      label: "可以分析了",
-      detail: "如果再多一點前後文，結果會更細。",
+      label: "可以分析",
+      detail: "已經可以分析；如果再補一點時間線或對方反應，結果會更穩。",
     });
   });
 
   it("maps context quality bands into guidance states", () => {
-    expect(getAnalyzeInputGuidance("a".repeat(130))).toMatchObject({
+    expect(getAnalyzeInputGuidance("a".repeat(45))).toMatchObject({
+      state: "almost_ready" satisfies AnalyzeInputGuidanceState,
+      label: "還差一點",
+      detail: "多寫一點對方怎麼回、多久回、最近有沒有變化。",
+    });
+    expect(getAnalyzeInputGuidance("a".repeat(RECOMMENDED_ANALYZE_LENGTH))).toMatchObject({
       state: "ideal" satisfies AnalyzeInputGuidanceState,
-      label: "內容剛剛好",
-      detail: "這段互動已經足夠讀出節奏。",
+      label: "更貼近了",
+      detail: "內容夠完整，能看出互動節奏與關係溫度。",
+    });
+    expect(getAnalyzeInputGuidance("a".repeat(RICH_ANALYZE_LENGTH))).toMatchObject({
+      state: "rich" satisfies AnalyzeInputGuidanceState,
+      label: "細節很夠",
+      detail: "很好，這樣完整分析比較能寫出具體下一步。",
     });
     expect(getAnalyzeInputGuidance("a".repeat(SOFT_MAX_ANALYZE_LENGTH + 1))).toMatchObject({
       state: "long" satisfies AnalyzeInputGuidanceState,
@@ -79,7 +93,9 @@ describe("ai-temperature UI helpers", () => {
   });
 
   it("keeps the legacy hint helper aligned with the richer guidance", () => {
-    expect(getAnalyzeInputHint("a".repeat(130))).toBe("這段互動已經足夠讀出節奏。");
+    expect(getAnalyzeInputHint("a".repeat(RECOMMENDED_ANALYZE_LENGTH))).toBe(
+      "內容夠完整，能看出互動節奏與關係溫度。",
+    );
     expect(getAnalyzeInputHint("a".repeat(SOFT_MAX_ANALYZE_LENGTH + 1))).toBe(
       "建議保留最近幾段關鍵對話就好。",
     );
@@ -89,7 +105,7 @@ describe("ai-temperature UI helpers", () => {
     const states = [
       getAnalyzeInputGuidance("太短了"),
       getAnalyzeInputGuidance("a".repeat(MIN_ANALYZE_LENGTH)),
-      getAnalyzeInputGuidance("a".repeat(130)),
+      getAnalyzeInputGuidance("a".repeat(RECOMMENDED_ANALYZE_LENGTH)),
       getAnalyzeInputGuidance("a".repeat(SOFT_MAX_ANALYZE_LENGTH + 1)),
       getAnalyzeInputGuidance("a".repeat(MAX_ANALYZE_LENGTH + 1)),
     ];
@@ -103,9 +119,35 @@ describe("ai-temperature UI helpers", () => {
   it("shows numeric progress for the first threshold without duplicate pressure copy", () => {
     const shortGuidance = getAnalyzeInputGuidance("曖昧中");
 
-    expect(shortGuidance.counterText).toBe("3 / 30");
-    expect(shortGuidance.label).toBe("還差一點點");
+    expect(shortGuidance.counterText).toBe(`3 / ${MIN_ANALYZE_LENGTH}`);
+    expect(shortGuidance.label).toBe("太少了");
     expect(shortGuidance.detail).not.toMatch(/再補\s*\d+\s*個字/);
+  });
+
+  it("sets a richer textarea placeholder that models enough context", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/components/anyu/InputCard.tsx"), "utf8");
+
+    expect(source).toContain("我們上週末見面聊得很好");
+    expect(source).toContain("這幾天回訊變慢");
+    expect(source).toContain("我不知道他是真的忙，還是熱度在變低");
+    expect(source).not.toContain("我昨天約他週末見面，他已讀後沒回，但晚上還在發限動。");
+  });
+
+  it("keeps paid waiting UX explicit and polling-based", () => {
+    const component = readFileSync(
+      resolve(process.cwd(), "src/components/modules/ai-temperature/PaidResultPendingPoller.tsx"),
+      "utf8",
+    );
+    const globals = readFileSync(resolve(process.cwd(), "src/styles/globals.css"), "utf8");
+
+    expect(component).toContain("正在整理你的完整分析");
+    expect(component).toContain("通常需要 30–60 秒");
+    expect(component).toContain("讀取你的互動線索");
+    expect(component).toContain("完成 48 小時觀察策略");
+    expect(component).toContain("paid-result/status");
+    expect(component).toContain("router.refresh()");
+    expect(globals).toContain(".anyu-paid-wait-bar");
+    expect(globals).toContain("@keyframes anyuPaidWaitSlide");
   });
 
   it("renders the expected module label and chip inventory", () => {
@@ -130,7 +172,7 @@ describe("ai-temperature UI helpers", () => {
 
   it("normalizes analyze input against the allowed chips", () => {
     const result = validateAnalyzeInput({
-      text: "我昨天約他週末見面，但他今天已讀後沒回，晚上卻還在發限動，我真的有點猜不透。",
+      text: "我們上週末見面時聊得很自然，他也說下次可以再約。但這幾天訊息變慢，常常隔半天才回，雖然還是會看我的限動、偶爾傳生活小事。我不知道他是真的忙，還是其實已經沒那麼想靠近了。",
       situation: "已讀不回",
       anonymousSessionId: "session-123",
       allowedChips: aiTemperatureModule.chips,
@@ -148,7 +190,7 @@ describe("ai-temperature UI helpers", () => {
 
   it("validates optional context chips and rejects unknown context values", () => {
     const result = validateAnalyzeInput({
-      text: "我昨天約他週末見面，但他今天已讀後沒回，晚上卻還在發限動，我真的有點猜不透。",
+      text: "我們上週末見面時聊得很自然，他也說下次可以再約。但這幾天訊息變慢，常常隔半天才回，雖然還是會看我的限動、偶爾傳生活小事。我不知道他是真的忙，還是其實已經沒那麼想靠近了。",
       situation: "已讀不回",
       userContext: {
         userGoal: "我該怎麼回",
@@ -158,7 +200,7 @@ describe("ai-temperature UI helpers", () => {
       allowedChips: aiTemperatureModule.chips,
     });
     const unknown = validateAnalyzeInput({
-      text: "我昨天約他週末見面，但他今天已讀後沒回，晚上卻還在發限動，我真的有點猜不透。",
+      text: "我們上週末見面時聊得很自然，他也說下次可以再約。但這幾天訊息變慢，常常隔半天才回，雖然還是會看我的限動、偶爾傳生活小事。我不知道他是真的忙，還是其實已經沒那麼想靠近了。",
       userContext: {
         userGoal: "請直接替我操控對方",
       },
@@ -237,7 +279,7 @@ describe("ai-temperature UI helpers", () => {
       "這次分析等得比較久，請稍後再試一次。",
     );
     expect(getAnalyzeErrorMessage("input_too_short")).toBe(
-      "再寫一點互動脈絡，ANYU 才讀得出節奏。",
+      "再補一點互動細節，暗語才不會只靠猜。",
     );
     expect(getAnalyzeErrorMessage("input_too_long")).toBe(
       "這段太長了，請保留最近幾段關鍵對話再試一次。",
@@ -245,6 +287,12 @@ describe("ai-temperature UI helpers", () => {
     expect(getAnalyzeErrorMessage("anything_else")).toBe(
       "分析暫時失敗，請晚點再試一次。",
     );
+  });
+
+  it("localizes paid likelihood labels for unlocked display", () => {
+    expect(formatPaidLikelihoodLabel("high")).toBe("高");
+    expect(formatPaidLikelihoodLabel("medium")).toBe("中");
+    expect(formatPaidLikelihoodLabel("low")).toBe("低");
   });
 
   it("maps elapsed time into wait-state stages and copy", () => {

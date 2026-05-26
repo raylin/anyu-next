@@ -5334,3 +5334,24 @@ Unresolved questions:
 - Staging real-device LIFF visual QA is still needed to verify the transition surface in LINE WebView for both themes.
 - Local Playwright may remain blocked by the known Chromium/MachPort permission issue.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Module 01 Input Quality + Pending Paid UX Polish v0
+
+Completed changes:
+- Saved the provided input-quality/pending-paid UX polish handoff under `ai-collaboration/handoffs/`.
+- Raised Module 01 analyze hard minimum to 80 visible non-space characters with recommended and rich tiers at 140 and 240.
+- Updated input guidance labels and helper copy to encourage richer input without making context chips required.
+- Replaced the short textarea placeholder with a longer concrete example that models relationship stage, interaction timeline, specific signals, and uncertainty.
+- Added a privacy-safe paid-result status endpoint and a polling pending-state UI for unlocked paid-result pages.
+- Hid the theme switch on LINE/LIFF bridge and unlocked paid surfaces while preserving carried theme styling.
+- Localized paid likelihood display to `高` / `中` / `低`.
+- Strengthened paid-generation prompt guidance to avoid unnecessary English/code-switching.
+
+Learnings:
+- The thin paid-result issue is best addressed first by improving the input floor and expectation-setting rather than changing the two-tier architecture.
+- The pending paid-result page can become self-updating with a safe status endpoint that returns only aggregate status metadata.
+- Prompt-language guidance can reduce awkward English mixing without introducing brittle runtime rejection of legitimate terms like LINE, ANYU, or user-provided English.
+
+Unresolved questions:
+- Full final validation, commit hash, and staging push status to be recorded in final completion summary.
+- Staging manual QA is still needed for live LINE/LIFF pending-to-completed behavior.
+- Local Playwright may remain blocked by the known Chromium/MachPort permission issue.

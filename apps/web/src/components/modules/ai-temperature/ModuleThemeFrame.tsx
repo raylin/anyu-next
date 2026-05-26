@@ -102,17 +102,24 @@ export function ModuleThemeBoundary({
   moduleConfig,
   surface,
   initialTheme,
+  showThemeToggle = true,
   children,
 }: {
   moduleConfig: ProductModuleConfig;
   surface: ModuleThemeFrameProps["surface"];
   initialTheme?: ModuleThemeState | null;
+  showThemeToggle?: boolean;
   children: ReactNode;
 }) {
   const { theme, switchTheme } = useModuleThemeController(moduleConfig, initialTheme);
 
   return (
-    <ModuleThemeShell surface={surface} theme={theme} onSwitchTheme={switchTheme}>
+    <ModuleThemeShell
+      surface={surface}
+      theme={theme}
+      onSwitchTheme={switchTheme}
+      showThemeToggle={showThemeToggle}
+    >
       {children}
     </ModuleThemeShell>
   );
@@ -122,6 +129,7 @@ type ModuleThemeShellProps = {
   surface: ModuleThemeFrameProps["surface"];
   theme: ModuleThemeState;
   onSwitchTheme: (variant: ModuleThemeVariant) => void;
+  showThemeToggle?: boolean;
   children: ReactNode;
 };
 
@@ -129,6 +137,7 @@ export function ModuleThemeShell({
   surface,
   theme,
   onSwitchTheme,
+  showThemeToggle = true,
   children,
 }: ModuleThemeShellProps) {
   return (
@@ -144,10 +153,12 @@ export function ModuleThemeShell({
       data-module-theme-source={theme.source}
       data-module-theme-ready={theme.hydrated ? "true" : "false"}
     >
-      <ModuleThemeToggle
-        activeVariant={theme.variant}
-        onSwitch={onSwitchTheme}
-      />
+      {showThemeToggle ? (
+        <ModuleThemeToggle
+          activeVariant={theme.variant}
+          onSwitch={onSwitchTheme}
+        />
+      ) : null}
       {children}
     </section>
   );
