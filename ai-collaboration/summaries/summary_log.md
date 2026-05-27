@@ -5765,3 +5765,21 @@ Unresolved questions:
 - Owner/legal review remains needed before real payment launch.
 - Payment provider may still require public phone/address/applicant details in a separate owner-approved task.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Legal / Provider-review Public Page QA v0
+
+Completed changes:
+- Saved the legal/provider-review public-page QA handoff under `ai-collaboration/handoffs/`.
+- Ran staging route/content checks for `/privacy`, `/terms`, `/disclaimer`, `/legal`, `/m/ambiguous-temperature`, and the demo paid-preview result route.
+- Confirmed formal 2026-05-27 public legal copy is live on staging and visible draft/non-final/legal-advice warning phrases are absent from legal pages.
+- Confirmed provider-review paid-preview copy, refund/re-delivery policy, privacy/trust boundaries, service limitation copy, conservative invoice posture, and `hello@anyu.tw` support contact are visible.
+- Confirmed payment remains disabled and no checkout/provider redirect/card collection/private owner details/business-registration claims were observed.
+- Created the required review bundle and execution report.
+
+Learnings:
+- The staging legal pages are suitable to proceed toward payment-provider application checklist work from a public-copy QA perspective.
+- Raw Module 01 HTML still includes internal serialized `v0` experiment metadata; this is not visible public legal copy but should be remembered if a provider performs source-level scans.
+
+Unresolved questions:
+- NewebPay may require public phone/address/applicant details in a separate owner-approved task.
+- Interactive staging browser QA was blocked locally by the known Chromium MachPort permission issue; route/content QA and local validation passed.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
