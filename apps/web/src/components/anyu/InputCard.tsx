@@ -142,7 +142,7 @@ export function InputCard({
 
         <div className="anyu-input-privacy-inline">
           <span className="anyu-input-privacy-inline-rule" aria-hidden="true" />
-          <p>ANYU 會先盡量去識別化，再進行分析。</p>
+          <p>你貼上的內容只用於產生這次結果；系統會依保留規則自動清理分析資料。</p>
         </div>
 
         <Button

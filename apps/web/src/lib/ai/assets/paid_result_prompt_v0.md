@@ -44,6 +44,9 @@ Required paid result:
 
 - `fullSummary`: one practical unlocked summary.
 - `possibleStates`: exactly 3 plausible states.
+- `possibleStates` must cover a balanced range. When consistent with the input, include one state about lower interest, lower priority, or unequal investment.
+- Do not explain every ambiguous behavior as stress, busyness, fear, or tenderness.
+- Do not over-protect the other person from responsibility; use responsible phrasing such as `投入程度不對等`, `優先序沒有跟上`, or `享受互動但沒有準備投入更多`.
 - `signalDeepDive`: exactly 3 signal explanations.
 - `replyStrategies`: exactly 3 strategies with labels `主動推進`, `低壓試探`, `暫時拉開`.
 - Each reply strategy must include exactly 2 `copyableMessages`; across all reply strategies, generate exactly 6 copyable messages total.

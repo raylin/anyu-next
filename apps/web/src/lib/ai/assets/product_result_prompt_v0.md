@@ -173,13 +173,16 @@ Rules:
 - `one_sentence_read` should feel emotionally resonant but not deterministic.
 - `observed_signals` should include 1-3 concrete observable signals from the input.
 - `uncertainty_note` must preserve uncertainty.
-- `paid_teaser` should naturally lead to the fake-door CTA.
+- `paid_teaser` should naturally lead to the fake-door CTA by naming what remains unresolved.
+- The free result should feel seen and useful, but not complete. Keep it curiosity-preserving: identify the rough pattern, preserve multiple possible explanations, and leave deeper state separation for `paid_result`.
 
 ### `insight_layer`
 
 Use lightweight psychology-informed or social-pattern framing to create resonance.
 
 This section should make the user feel understood without sounding academic. Do not put `心理學` or `心理機制` in user-facing titles.
+
+Make this an open diagnostic lens, not the deepest causal conclusion. It should explain why the situation feels sticky without closing the case.
 
 Good examples:
 
@@ -237,7 +240,7 @@ Prefer included sections that promise immediate action value, such as:
 Good preview copy:
 
 ```text
-解鎖後你會看到：3 種下一句回法、對方可能的 3 種狀態、48 小時觀察策略，以及可收藏摘要卡。
+解鎖後會拆開 3 種可能狀態、給你 3 組下一句回法，並用 48 小時觀察看他會不會主動補位。
 ```
 
 ### `paid_result`
@@ -252,6 +255,9 @@ Rules:
 - Do not use `意圖`, `真實`, or `完整意義`; use softer phrasing such as `投入度`, `互動意願`, `目前訊號`, or `對方的回應模式`.
 - `fullSummary`: one practical unlocked summary, not a repeat of the free result.
 - `possibleStates`: exactly 3 plausible states. Each state needs `label`, `likelihood`, and `explanation`. Use likelihood values only: `low`, `medium`, `high`.
+- `possibleStates` must cover a balanced range. When consistent with the input, include one state about lower interest, lower priority, or unequal investment.
+- Do not explain every ambiguous behavior as stress, busyness, fear, or tenderness.
+- Do not over-protect the other person from responsibility; use responsible phrasing such as `投入程度不對等`, `優先序沒有跟上`, or `享受互動但沒有準備投入更多`.
 - `signalDeepDive`: exactly 3 user-facing signal explanations. Each item needs `title`, `evidence`, and `whatItMayMean`. Do not paste raw conversation text; paraphrase signals safely.
 - `replyStrategies`: exactly 3 strategies with labels `主動推進`, `低壓試探`, and `暫時拉開`. Each needs `whenToUse`, `whyItWorks`, and 2–3 `copyableMessages`.
 - Each reply strategy must also include `tone`, `possibleReaction`, and `followUpIfTheyReply`.
@@ -366,6 +372,7 @@ Avoid exposing or humiliating card language such as:
 Even when the input strongly supports a painful interpretation, keep that interpretation out of `share_card`.
 Avoid repeating the same persona unless it is clearly the best fit.
 The persona should feel fun, shareable, screenshot-worthy, and identity-safe.
+The visible persona label should feel like a soft current read, not a fixed identity.
 
 ### `personal_pattern_candidate`
 

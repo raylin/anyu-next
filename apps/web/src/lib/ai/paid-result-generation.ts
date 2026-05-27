@@ -272,9 +272,9 @@ export function buildProviderFallbackPaidResult(input: {
         explanation: `${signalA} 這代表對方未必完全抽離，但目前投入速度可能比你期待的慢。先看他是否願意把話題接長，比只看回覆秒數更準。`,
       },
       {
-        label: "維持低成本互動",
+        label: "投入程度不對等",
         likelihood: "medium",
-        explanation: `${signalB} 對方可能享受輕鬆互動，卻還沒有準備好承接更明確的靠近。你可以用小邀請測試，而不是一次把壓力推高。`,
+        explanation: `${signalB} 對方可能享受互動，但沒有把這段互動放在同樣優先的位置。你可以用小邀請測試他會不會補上，而不是替他找理由或一次把壓力推高。`,
       },
       {
         label: "需要你暫時收回節奏",
@@ -342,6 +342,7 @@ export function buildProviderFallbackPaidResult(input: {
       "如果仍想推進，只送出一則低壓、容易回答的小邀請。",
       "送出後觀察對方是否延伸話題，而不是只看回覆速度。",
       "如果對方只短回或跳過邀約，就先停止加碼，把注意力放回自己的安排。",
+      "48 小時內觀察他是自然靠近，還是只有在你提醒時才回應。",
     ],
     avoidDoing: [
       "不要連續追問對方現在到底怎麼想。",
@@ -352,7 +353,7 @@ export function buildProviderFallbackPaidResult(input: {
       "你不是太敏感，而是已經在替這段互動做很多解讀。下一步最好讓訊號變清楚，而不是讓自己更用力。",
     summaryCard: {
       headline: "先測接球，不急著逼答案",
-      body: "目前訊號偏向節奏不一致。用低壓小邀請測一次，比連續追問更能保留你的餘裕。",
+      body: "目前訊號偏向節奏不一致。用低壓小邀請測一次，看他是主動補位，還是只在你退後時才回頭。",
       nextMove: "選一則低壓訊息送出，然後觀察對方有沒有主動延伸。",
     },
   };

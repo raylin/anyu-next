@@ -43,7 +43,7 @@ export function PaidPreviewCard({
 
   const lockedPreviewBodies = [
     "「看你在跟朋友打球，那就先好好玩——哪天你比較有空，再把時間給我。」",
-    "「這幾天如果你真的忙，我先把節奏收回來；等你想聊的時候再來找我。」",
+    "48 小時內，看他是自然靠近，還是只有在你提醒時才回應。",
   ] as const;
 
   return (

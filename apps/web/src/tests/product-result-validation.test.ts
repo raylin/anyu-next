@@ -33,6 +33,19 @@ describe("product result schema validation", () => {
 
     expect(prompt).toContain("Target about 1,200–1,800 Traditional Chinese characters");
     expect(prompt).toContain("exactly 6 copyable messages");
+    expect(prompt).toContain("The free result should feel seen and useful, but not complete");
+    expect(prompt).toContain("Do not explain every ambiguous behavior as stress");
+  });
+
+  it("keeps free-only prompt value bounded against paid-level conclusions", () => {
+    const prompt = readFileSync(
+      resolve(process.cwd(), "src/lib/ai/assets/product_result_prompt_free_v0.md"),
+      "utf8",
+    );
+
+    expect(prompt).toContain("curiosity-preserving");
+    expect(prompt).toContain("Do not make the free result sound complete");
+    expect(prompt).toContain("full analysis separates possible states");
   });
 
   it("keeps deferred paid result semantic depth compatible with compact provider output", () => {
@@ -49,6 +62,7 @@ describe("product result schema validation", () => {
     expect(prompt).toContain("genuinely");
     expect(prompt).toContain("vibe");
     expect(prompt).toContain("Prefer Chinese equivalents");
+    expect(prompt).toContain("lower interest, lower priority, or unequal investment");
   });
 
   it("keeps deferred paid result output budget large enough for complete JSON", () => {
@@ -80,6 +94,10 @@ describe("product result schema validation", () => {
       paid_result: paidResult,
     });
     expect(paidResult.replyStrategies.flatMap((strategy) => strategy.copyableMessages)).toHaveLength(6);
+    expect(paidResult.possibleStates.map((state) => state.label)).toContain("投入程度不對等");
+    expect(paidResult.possibleStates.map((state) => state.explanation).join(" ")).toContain(
+      "沒有把這段互動放在同樣優先的位置",
+    );
   });
 
   it("accepts provider output that wraps the paid result under paid_result", async () => {

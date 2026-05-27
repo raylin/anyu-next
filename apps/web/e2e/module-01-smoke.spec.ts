@@ -31,7 +31,7 @@ test.describe("module 01 local ui smoke", () => {
     await expect(page.getByRole("button", { name: "再寫一點…" })).toBeDisabled();
     await expect(page.getByText("0 / 80")).toBeVisible();
     await expect(
-      page.getByText("請不要貼姓名、電話、地址或其他能識別身份的資訊。分析僅供關係觀察與自我理解參考。"),
+      page.getByText("你不需要留下姓名或聯絡資料就能分析；請不要貼姓名、電話、地址等能識別身份的資訊。"),
     ).toBeVisible();
 
     await expect(page.getByText("情境 · 可選")).toHaveCount(0);
@@ -50,9 +50,9 @@ test.describe("module 01 local ui smoke", () => {
       "我們上週末見面時聊得很自然，他也說下次可以再約。但這幾天訊息變慢，常常隔半天才回，雖然還是會看我的限動、偶爾傳生活小事。我不知道他是真的忙，還是其實已經沒那麼想靠近了。",
     );
 
-    await expect(page.getByText("可以分析")).toBeVisible();
+    await expect(page.getByText("可以分析", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "分析我的曖昧溫度" })).toBeEnabled();
-    await expect(page.getByText("ANYU 會先盡量去識別化，再進行分析。")).toBeVisible();
+    await expect(page.getByText("你貼上的內容只用於產生這次結果；系統會依保留規則自動清理分析資料。")).toBeVisible();
   });
 
   test("demo result keeps result, share, and paid-preview contracts visible", async ({ page }) => {
@@ -69,6 +69,7 @@ test.describe("module 01 local ui smoke", () => {
     await expect(page.getByText("一次性查看 · 無訂閱")).toBeVisible();
     await expect(page.getByText("一次性 · no subscription")).toBeVisible();
     await expect(page.getByText("⋯ 尚未解鎖")).toHaveCount(2);
+    await expect(page.getByText("48 小時內，看他是自然靠近，還是只有在你提醒時才回應。")).toBeVisible();
     await expect(page.getByText("「現在最不該做的，是把壓力全部丟到自己身上。」")).toBeVisible();
   });
 

@@ -66,8 +66,9 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("module");
     expect(html).toContain("曖昧溫度計");
     expect(html).toContain("他是真的忙，還是其實在冷掉？");
-    expect(html).toContain("my persona · 微訊號觀察家");
+    expect(html).toContain("你現在的卡點 · 微訊號觀察家");
     expect(html).toContain("⋯ 尚未解鎖");
+    expect(html).toContain("48 小時內，看他是自然靠近，還是只有在你提醒時才回應。");
     expect(html).toContain("一次性查看 · 無訂閱");
     expect(html).toContain("一次性 · no subscription");
     expect(html).toContain('class="anyu-reply-lock-mark"');

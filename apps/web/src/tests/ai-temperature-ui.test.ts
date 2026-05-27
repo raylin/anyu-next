@@ -133,6 +133,14 @@ describe("ai-temperature UI helpers", () => {
     expect(source).not.toContain("我昨天約他週末見面，他已讀後沒回，但晚上還在發限動。");
   });
 
+  it("keeps input privacy copy concrete and trust-building", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/components/anyu/InputCard.tsx"), "utf8");
+
+    expect(source).toContain("你貼上的內容只用於產生這次結果");
+    expect(source).toContain("系統會依保留規則自動清理分析資料");
+    expect(source).not.toContain("ANYU 會先盡量去識別化");
+  });
+
   it("keeps paid waiting UX explicit and polling-based", () => {
     const component = readFileSync(
       resolve(process.cwd(), "src/components/modules/ai-temperature/PaidResultPendingPoller.tsx"),

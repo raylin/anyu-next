@@ -52,7 +52,7 @@ export function ShareCardPreview({
           <span className="anyu-kicker t-label-dim">module</span>
           <strong className="anyu-share-persona">{moduleTitle}</strong>
           <p className="anyu-share-quote t-kai-quote">{moduleSubtitle}</p>
-          <span className="anyu-kicker t-label-dim">my persona · {persona}</span>
+          <span className="anyu-kicker t-label-dim">你現在的卡點 · {persona}</span>
           <p className="anyu-subtle-note">「{quote}」</p>
         </div>
 

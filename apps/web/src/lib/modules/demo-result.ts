@@ -11,12 +11,13 @@ export const aiTemperatureDemoProductResult: ProductResult = {
       "短句偏多，主動提問偏少。",
     ],
     uncertainty_note: "目前訊號偏向不穩，但不能只靠一段互動下定論。",
-    paid_teaser: "如果你現在最卡的是下一句怎麼回，付費版會更實用。",
+    paid_teaser:
+      "完整分析會把幾種可能拆開看：他只是忙、他在保留，或他沒有把這段互動放在同樣優先的位置。",
   },
   insight_layer: {
-    title: "你卡住的，不只是回覆慢。",
+    title: "真正要看的，不只是一則訊息。",
     explanation:
-      "讓你卡住的不是他沒回訊息，而是他明明有在活動，卻暫時沒有接你的邀約。",
+      "這段互動裡，比較值得看的不是單一回覆，而是他在你靠近時，有沒有也往前一步。",
     principle: "關係不確定感",
     user_facing: true,
   },
@@ -30,21 +31,21 @@ export const aiTemperatureDemoProductResult: ProductResult = {
       "可收藏摘要卡",
     ],
     preview_copy:
-      "解鎖後你會看到：3 種下一句回法、對方可能的 3 種狀態、48 小時觀察策略，以及可收藏摘要卡。",
+      "解鎖後會拆開 3 種可能狀態、給你 3 組下一句回法，並用 48 小時觀察看他會不會主動補位。",
   },
   paid_result: {
     fullSummary:
       "他不是完全抽離，而是把互動維持在一個不需要立刻承諾的低成本區間。現在最有價值的不是逼出答案，而是用低壓方式確認對方是否願意重新接球。你可以把接下來兩天當成一次小型觀察：少一點補訊息，多看對方是否會主動延伸、提出時間，或至少把話題接回來。這樣你不用靠猜，也不用把所有壓力放在自己身上。",
     possibleStates: [
       {
-        label: "投入度下降但未完全退出",
+        label: "仍有興趣但節奏變慢",
         likelihood: "medium",
-        explanation: "對方仍有社群活動，但暫時沒有承接邀約，代表互動意願可能變低或變保守。這不是要你立刻放棄，而是提醒你下一步要看行動，不只看他有沒有出現在社群上。",
+        explanation: "對方仍有社群活動，但暫時沒有承接邀約，代表互動意願可能還在，只是速度和穩定度沒有跟上。這不是要你立刻放棄，而是提醒你下一步要看行動，不只看他有沒有出現在社群上。",
       },
       {
-        label: "節奏不一致",
+        label: "投入程度不對等",
         likelihood: "medium",
-        explanation: "他可能還願意互動，只是目前回覆節奏與你期待的靠近速度不同。如果你用很重的方式追問，容易讓節奏更僵；用小邀請或輕話題反而比較能看出他是否願意接球。",
+        explanation: "他可能享受互動，但沒有把這段互動放在同樣優先的位置。你不需要替他補理由；用小邀請或輕話題，反而比較能看出他是否願意補上具體行動。",
       },
       {
         label: "需要更明確的小邀請",
@@ -115,7 +116,7 @@ export const aiTemperatureDemoProductResult: ProductResult = {
       "如果仍想推進，只丟一個低壓、容易回答的小邀請。",
       "送出後觀察對方是否延伸話題，而不是只看回覆速度。",
       "如果對方只短回或跳過邀約，就先停止加碼，把注意力放回自己的安排。",
-      "48 小時後再回頭看：他有沒有主動補位、提出時間，或把話題接回來。",
+      "48 小時內觀察他是自然靠近，還是只有在你提醒時才回應。",
     ],
     avoidDoing: [
       "不要連續追問『你到底怎麼想』。",
@@ -125,7 +126,7 @@ export const aiTemperatureDemoProductResult: ProductResult = {
       "你不是太敏感，而是已經在替這段互動做很多解讀。下一步最好讓訊號變清楚，而不是讓自己更用力。",
     summaryCard: {
       headline: "先測接球，不急著逼答案",
-      body: "目前訊號偏向節奏不一致。用低壓小邀請測一次，比連續追問更能保留你的餘裕。",
+      body: "目前訊號偏向節奏不一致。用低壓小邀請測一次，看他是主動補位，還是只在你退後時才回頭。",
       nextMove: "選一則低壓訊息送出，然後觀察對方有沒有主動延伸。",
     },
   },
@@ -139,7 +140,7 @@ export const aiTemperatureDemoProductResult: ProductResult = {
     pattern: "容易放大模糊訊號",
     confidence: "medium",
     evidence: "面對忽冷忽熱時，你會特別留意細節變化，想靠更多線索換到確定感。",
-    should_store: true,
+    should_store: false,
     user_facing_summary: "你對細節很敏感，這讓你很會看訊號，也更容易被模糊感卡住。",
   },
   metadata: {
