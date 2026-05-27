@@ -5638,3 +5638,22 @@ Learnings:
 Unresolved questions:
 - Relationship-session retention and entitlement design still require human approval before implementation.
 - Validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Evidence Anchoring Schema + Prompt Plan v0
+
+Completed changes:
+- Saved the evidence anchoring schema/prompt planning handoff under `ai-collaboration/handoffs/`.
+- Created a planning report for paid-only Module 01 evidence anchoring.
+- Recommended future schema v3 field `paid_result.evidence_summary` with a title and 3-4 structured `{ label, summary, reason }` cards.
+- Recommended model-generated evidence summaries rather than raw quotes.
+- Recommended rendering evidence cards only on unlocked paid result surfaces after the paid summary and before possible states.
+- Documented prompt requirements, privacy/retention boundaries, validation rules, legacy/fallback compatibility, cost/latency impact, and future follow-up-session relationship.
+
+Learnings:
+- Evidence anchoring can improve trust without replaying private text if it remains summary-based and paid-only.
+- Evidence summaries should follow `analysis_paid_results` retention cleanup by living inside `paid_result_json`.
+- Fallback and legacy results should omit the section unless safe high-quality evidence can be produced.
+
+Unresolved questions:
+- Human approval is required before schema v3 or prompt implementation.
+- Privacy copy should be reviewed before production exposure of evidence summaries.
+- Full required validation passed; commit hash and staging push status are recorded in the final completion summary.
