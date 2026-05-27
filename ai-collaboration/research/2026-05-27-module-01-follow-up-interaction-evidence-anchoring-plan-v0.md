@@ -8,7 +8,7 @@ Module 01 should stay as a one-time full-analysis beta while low-key production 
 
 Recommended direction:
 
-- Now: keep NT$49 one-time full analysis for low-key beta and finish production smoke/monitoring.
+- Now: keep NT$49 one-time full analysis for low-key beta and continue production monitoring.
 - Next: plan and implement paid `evidence_summary` cards as model-generated summaries, not raw quotes.
 - Then: fake-door or beta-test a 3-use relationship pack before building payment/credits.
 - Later: evolve the pack into a LINE-based follow-up mode or 7-day observation pass if repeat-use evidence is strong.
@@ -28,7 +28,7 @@ Current production context:
 - Pending paid UX polls and auto-refreshes.
 - LINE / LIFF / short-code fulfillment exists.
 - The current input floor is 80 visible characters.
-- Production low-key activation is still in progress, with operator-owned LINE/LIFF smoke remaining important.
+- Production low-key activation is active/monitor, with production short-code and LIFF operator smoke now recorded as passed.
 
 ## 3. Short-input Analyze Speed / Perceived Wait
 
@@ -229,9 +229,9 @@ Session retention direction:
 
 ## 11. MVP Phasing
 
-Phase 0: finish current production safety.
+Phase 0: current production safety.
 
-- Complete latest production refresh/smoke after pending fixes are staged.
+- Completed latest production refresh/smoke for short-code and LIFF at the operator-smoke level.
 - Monitor analyze latency, paid generation completion, provider/fallback source, LINE fulfillment completion, and support issues.
 
 Phase 1: evidence anchoring.
@@ -277,8 +277,8 @@ Do not build yet:
 - Module 02.
 - Ads or broad launch.
 
-These should wait until current production monitoring and operator smoke are complete.
+These should wait until low-key production monitoring has enough cleaner signal to justify product expansion.
 
 ## 13. Recommended Next Step
 
-Finish production refresh/smoke and low-key monitoring first. Then run an Evidence Anchoring Schema + Prompt Plan v0 focused only on paid `evidence_summary` summaries, privacy boundaries, and rendering on unlocked paid results.
+Continue low-key monitoring, but the next concrete planning task can now be Evidence Anchoring Schema + Prompt Plan v0 focused only on paid `evidence_summary` summaries, privacy boundaries, and rendering on unlocked paid results.

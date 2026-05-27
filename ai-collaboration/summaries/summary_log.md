@@ -5624,3 +5624,17 @@ Learnings:
 Unresolved questions:
 - Conversion interpretation still needs cleaner, higher-volume traffic.
 - Validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Module 01 Follow-up Interaction + Evidence Anchoring Plan v0 Refresh
+
+Completed changes:
+- Re-read the duplicate follow-up/evidence anchoring handoff and confirmed it matches the saved repo handoff.
+- Refreshed the existing planning report to reflect the current low-key production state: production short-code and LIFF operator smoke are now recorded as passed.
+- Kept the plan docs-only with no code, prompt, schema, DB, LINE, payment, ads, legal, or production behavior changes.
+
+Learnings:
+- The product direction remains: keep one-time NT$49 full analysis during low-key beta, plan paid evidence-summary cards next, then test a 3-use relationship pack/follow-up experience after cleaner monitoring signal.
+- Evidence anchoring should still use model-generated summaries rather than raw quotes.
+
+Unresolved questions:
+- Relationship-session retention and entitlement design still require human approval before implementation.
+- Validation results, commit hash, and staging push status are recorded in the final completion summary.

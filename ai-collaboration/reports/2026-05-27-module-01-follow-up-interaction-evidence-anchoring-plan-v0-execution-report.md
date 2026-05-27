@@ -2,7 +2,7 @@
 
 ## Summary
 
-Created a planning-only product/architecture roadmap for Module 01 follow-up interactions, evidence anchoring, short-input perceived wait, pricing/packaging, LINE implications, data model implications, and privacy boundaries. No code, prompt, schema, DB, LINE behavior, payment, ads, legal copy, or production behavior was changed.
+Created and refreshed a planning-only product/architecture roadmap for Module 01 follow-up interactions, evidence anchoring, short-input perceived wait, pricing/packaging, LINE implications, data model implications, and privacy boundaries. No code, prompt, schema, DB, LINE behavior, payment, ads, legal copy, or production behavior was changed.
 
 ## Files Created
 
@@ -47,13 +47,13 @@ The 3-use pack is the best next packaging test because it matches “today / tom
 - `python3 -m compileall tools/topic-ingestion`: passed.
 - `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'`: passed, 25 tests.
 - `cd apps/web && corepack pnpm lint`: passed.
-- `cd apps/web && corepack pnpm test`: passed, 29 files / 177 tests.
+- `cd apps/web && corepack pnpm test`: passed, current result recorded in final completion summary.
 - `cd apps/web && corepack pnpm build`: passed.
 - Playwright was not run because this task was docs/planning-only and no app code changed.
 
 ## Known Technical Debt
 
-- Existing production work still needs latest-staging refresh/smoke after the unlocked paid-link pending-state fix.
+- Low-key production remains active/monitor, with short-code and LIFF operator smoke now recorded as passed.
 - Durable paid-generation/background delivery remains deferred.
 - Runtime still lacks an explicit build marker for deployment/smoke correlation.
 
@@ -80,8 +80,8 @@ The 3-use pack is the best next packaging test because it matches “today / tom
 
 ### Recommended Follow-up
 
-- Complete latest production refresh/smoke after staging verification.
-- Then run Evidence Anchoring Schema + Prompt Plan v0.
+- Run Evidence Anchoring Schema + Prompt Plan v0.
+- Continue low-key monitoring before broadening traffic or ads.
 
 ## Deviations From Handoff
 
@@ -89,11 +89,11 @@ The 3-use pack is the best next packaging test because it matches “today / tom
 
 ## Git Commit
 
-- Pending at report creation.
+- Pending for this rerun at report refresh.
 
 ## Staging Push
 
-- Pending at report creation.
+- Pending for this rerun at report refresh.
 
 ## Remaining Uncertainties
 
@@ -103,4 +103,4 @@ The 3-use pack is the best next packaging test because it matches “today / tom
 
 ## Recommended Next Step
 
-Finish production refresh/smoke and low-key monitoring, then plan paid evidence-summary schema/prompt/rendering as the next implementation candidate.
+Continue low-key monitoring and run paid evidence-summary schema/prompt/rendering planning as the next implementation candidate.
