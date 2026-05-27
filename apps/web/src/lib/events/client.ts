@@ -6,7 +6,7 @@ import type { ProductModuleConfig } from "@/lib/modules/types";
 type SafeClientEventInput = {
   eventName: EventName;
   moduleConfig: ProductModuleConfig;
-  anonymousSessionId: string;
+  anonymousSessionId?: string | null;
   situationType?: string | null;
   scoreBucket?: string | null;
   metadata?: Record<string, unknown>;
@@ -25,7 +25,7 @@ export function buildClientEventPayload(
     schemaVersion: input.moduleConfig.schemaVersion,
     situationType: input.situationType ?? null,
     scoreBucket: input.scoreBucket ?? null,
-    anonymousSessionId: input.anonymousSessionId,
+    anonymousSessionId: input.anonymousSessionId ?? null,
     metadata: input.metadata ?? {},
   };
 }

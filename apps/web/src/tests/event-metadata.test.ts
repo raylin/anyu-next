@@ -58,6 +58,7 @@ describe("event metadata guard", () => {
     expect(EVENT_NAMES).toContain("fulfillment_liff_bound");
     expect(EVENT_NAMES).toContain("fulfillment_code_matched");
     expect(EVENT_NAMES).toContain("line_webhook_received");
+    expect(EVENT_NAMES).toContain("unlocked_result_view");
   });
 
   it("keeps the inline result CTA source on the existing paid unlock event", () => {

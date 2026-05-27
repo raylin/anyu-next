@@ -220,6 +220,8 @@ export function mapEventToCanonicalSteps(event) {
       return ["paid_generation_requested"];
     case "paid_generation_completed":
       return ["paid_generation_completed"];
+    case "unlocked_result_view":
+      return ["unlocked_result_view"];
     default:
       return [];
   }
@@ -277,7 +279,49 @@ function buildDerivedMetrics(counts, paidSourceCounts, lineCounts) {
   };
 }
 
-function buildStatus(derivedMetrics) {
+function buildDataQualityNotes(counts, includeOperator) {
+  const notes = [
+    includeOperator
+      ? "operatorTest traffic included by explicit flag."
+      : "operatorTest traffic excluded by default.",
+    "This report is event-count based, not unique-sessionized; do not treat rates as user-level conversion.",
+  ];
+  const warnings = [];
+  const landingCount = counts.landing_view ?? 0;
+  let previousStep = null;
+
+  for (const step of FUNNEL_STEPS) {
+    const count = counts[step.key] ?? 0;
+
+    if (previousStep && count > previousStep.count) {
+      warnings.push(`${step.key} exceeds previous funnel step ${previousStep.key}.`);
+    }
+
+    if (step.key !== "landing_view" && count > landingCount) {
+      warnings.push(`${step.key} exceeds landing_view.`);
+    }
+
+    previousStep = { key: step.key, count };
+  }
+
+  if (warnings.length > 0) {
+    notes.push("Downstream events exceed upstream events; report appears smoke/API-heavy or non-sessionized.");
+    notes.push(...warnings);
+  }
+
+  if (landingCount < 30) {
+    const lowTrafficWarning = "Traffic is too low for conversion conclusions because landing_view is below 30.";
+    notes.push(lowTrafficWarning);
+    warnings.push(lowTrafficWarning);
+  }
+
+  return {
+    notes,
+    warnings,
+  };
+}
+
+function buildStatus(derivedMetrics, dataQualityWarnings = []) {
   const warnings = [];
   const watches = [];
 
@@ -309,6 +353,10 @@ function buildStatus(derivedMetrics) {
 
   if (derivedMetrics.landing_to_analyze_rate !== null && derivedMetrics.landing_to_analyze_rate < 0.15) {
     watches.push("landing_to_analyze_rate below 15%");
+  }
+
+  if (dataQualityWarnings.length > 0) {
+    watches.push("event counts appear smoke/API-heavy or non-sessionized");
   }
 
   return {
@@ -453,6 +501,7 @@ export function buildFunnelMetricsReport(events, options) {
   }
 
   const derivedMetrics = buildDerivedMetrics(counts, paidSourceCounts, lineCounts);
+  const dataQuality = buildDataQualityNotes(counts, options.includeOperator === true);
 
   return {
     generatedAt: new Date().toISOString(),
@@ -469,7 +518,9 @@ export function buildFunnelMetricsReport(events, options) {
     funnelRows: buildFunnelRows(counts),
     counts,
     derivedMetrics,
-    status: buildStatus(derivedMetrics),
+    status: buildStatus(derivedMetrics, dataQuality.warnings),
+    dataQualityNotes: dataQuality.notes,
+    dataQualityWarnings: dataQuality.warnings,
     themeSplits: themeCounts,
     manualOverrideCounts,
     themeSwitchClickedCount,
@@ -479,7 +530,7 @@ export function buildFunnelMetricsReport(events, options) {
     lineFailureCategories,
     lineCounts,
     eventMappingGaps: [
-      "unlocked_result_view requires a page_view event with pageType=unlock_completed or unlocked_result; current app may not emit it.",
+      "unlocked_result_view is a paid-content page-view count, not a unique-user count.",
       "webhook_invalid_signature is not emitted as a DB event because invalid signatures are rejected before event persistence.",
       "liff_bind_started is only available if fulfillment_liff_opened events are emitted.",
     ],
@@ -572,6 +623,10 @@ ${formatFunnelTable(report.funnelRows)}
 ## Derived Metrics
 
 ${formatDerivedMetrics(report.derivedMetrics)}
+
+## Data Quality Notes
+
+${report.dataQualityNotes.map((note) => `- ${note}`).join("\n")}
 
 ## Threshold Notes
 

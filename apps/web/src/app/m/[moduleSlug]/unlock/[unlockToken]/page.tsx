@@ -6,6 +6,10 @@ import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { PaidResultPendingPoller } from "@/components/modules/ai-temperature/PaidResultPendingPoller";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
+import {
+  UnlockedResultViewTracker,
+  type UnlockedPaidResultSource,
+} from "@/components/modules/ai-temperature/UnlockedResultViewTracker";
 import { isDbConfigured } from "@/lib/db/client";
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
 import { getPaidResultForAnalysisResult } from "@/lib/db/paid-results";
@@ -19,7 +23,11 @@ import {
 import { getModuleBySlug } from "@/lib/modules/registry";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import { hasPaidResult, normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
-import { PAID_RESULT_PROMPT_VERSION, PAID_RESULT_SCHEMA_VERSION } from "@/lib/ai/paid-result-generation";
+import {
+  PAID_RESULT_PROMPT_VERSION,
+  PAID_RESULT_PROVIDER_FALLBACK_MODEL,
+  PAID_RESULT_SCHEMA_VERSION,
+} from "@/lib/ai/paid-result-generation";
 
 type UnlockPageProps = {
   params: Promise<{
@@ -109,6 +117,16 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         showThemeToggle={false}
       >
         <section className="anyu-result-stack">
+          <UnlockedResultViewTracker
+            moduleConfig={moduleConfig}
+            anonymousSessionId={record.unlockIntent.anonymousSessionId}
+            scoreBucket={record.result.scoreBucket}
+            themeVariant={initialTheme?.variant ?? "unknown"}
+            themeSource={initialTheme?.source ?? "unknown"}
+            themeCarryoverSource={initialTheme ? "unlock_intent" : null}
+            paidResultSource={getUnlockedPaidResultSource({ storedPaidResult, result })}
+            resultAgeBucket={getResultAgeBucket(record.result.createdAt)}
+          />
           <div className="anyu-result-topbar">
             <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
               ← 回到測驗
@@ -265,6 +283,61 @@ export type UnlockPaidRouteState =
   | "not_requested"
   | "failed"
   | "expired";
+
+export type ResultAgeBucket = "lt_1h" | "1_24h" | "1_7d" | "gt_7d" | "unknown";
+
+export function getResultAgeBucket(createdAt?: Date | string | null, now = new Date()): ResultAgeBucket {
+  if (!createdAt) {
+    return "unknown";
+  }
+
+  const parsed = createdAt instanceof Date ? createdAt : new Date(createdAt);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "unknown";
+  }
+
+  const ageMs = Math.max(0, now.getTime() - parsed.getTime());
+  const hourMs = 60 * 60 * 1000;
+  const dayMs = 24 * hourMs;
+
+  if (ageMs < hourMs) {
+    return "lt_1h";
+  }
+
+  if (ageMs < dayMs) {
+    return "1_24h";
+  }
+
+  if (ageMs < 7 * dayMs) {
+    return "1_7d";
+  }
+
+  return "gt_7d";
+}
+
+export function getUnlockedPaidResultSource(input: {
+  storedPaidResult?: {
+    status?: string | null;
+    model?: string | null;
+    paidResultJson?: unknown;
+  } | null;
+  result: unknown;
+}): UnlockedPaidResultSource {
+  if (input.storedPaidResult?.status === "completed" && input.storedPaidResult.paidResultJson) {
+    if (input.storedPaidResult.model === PAID_RESULT_PROVIDER_FALLBACK_MODEL) {
+      return "fallback";
+    }
+
+    return input.storedPaidResult.model ? "provider" : "unknown";
+  }
+
+  if (hasPaidResult(input.result)) {
+    return "legacy";
+  }
+
+  return "unknown";
+}
 
 export function resolveUnlockPaidRouteState(input: {
   result: unknown;

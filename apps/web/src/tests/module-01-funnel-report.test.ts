@@ -53,6 +53,9 @@ describe("module 01 funnel metrics report", () => {
     expect(mapEventToCanonicalSteps(event({ eventName: "paid_generation_completed" }))).toEqual([
       "paid_generation_completed",
     ]);
+    expect(mapEventToCanonicalSteps(event({ eventName: "unlocked_result_view" }))).toEqual([
+      "unlocked_result_view",
+    ]);
   });
 
   it("aggregates funnel counts and conversion rates", () => {
@@ -67,6 +70,7 @@ describe("module 01 funnel metrics report", () => {
       event({ eventName: "fulfillment_liff_bound" }),
       event({ eventName: "paid_generation_started" }),
       event({ eventName: "paid_generation_completed", metadataJson: { source: "provider" } }),
+      event({ eventName: "unlocked_result_view", metadataJson: { paidResultSource: "provider" } }),
     ]);
 
     expect(metrics.counts).toMatchObject({
@@ -79,11 +83,13 @@ describe("module 01 funnel metrics report", () => {
       liff_bind_success: 1,
       paid_generation_requested: 1,
       paid_generation_completed: 1,
+      unlocked_result_view: 1,
     });
     expect(metrics.derivedMetrics.landing_to_analyze_rate).toBe(0.5);
     expect(metrics.derivedMetrics.analyze_completion_rate).toBe(1);
     expect(metrics.derivedMetrics.paid_generation_completion_rate).toBe(1);
     expect(metrics.derivedMetrics.provider_success_rate).toBe(1);
+    expect(metrics.derivedMetrics.unlocked_view_rate).toBe(1);
   });
 
   it("handles division by zero as n/a in markdown", () => {
@@ -91,6 +97,30 @@ describe("module 01 funnel metrics report", () => {
 
     expect(markdown).toContain("| landing_view | 0 | n/a | n/a |");
     expect(markdown).toContain("- landing_to_analyze_rate: n/a");
+    expect(markdown).toContain("## Data Quality Notes");
+  });
+
+  it("warns when downstream event counts exceed upstream counts or landing volume is too low", () => {
+    const metrics = report([
+      event({ eventName: "page_view", metadataJson: { pageType: "landing" } }),
+      event({ eventName: "analysis_completed" }),
+      event({ eventName: "analysis_completed" }),
+      event({ eventName: "paid_generation_completed", metadataJson: { source: "provider" } }),
+      event({ eventName: "paid_generation_completed", metadataJson: { source: "provider" } }),
+      event({ eventName: "unlocked_result_view" }),
+      event({ eventName: "unlocked_result_view" }),
+    ]);
+    const markdown = formatMarkdownReport(metrics);
+
+    expect(metrics.status.status).toBe("WATCH");
+    expect(metrics.dataQualityNotes).toContain(
+      "Downstream events exceed upstream events; report appears smoke/API-heavy or non-sessionized.",
+    );
+    expect(metrics.dataQualityNotes).toContain(
+      "Traffic is too low for conversion conclusions because landing_view is below 30.",
+    );
+    expect(markdown).toContain("## Data Quality Notes");
+    expect(markdown).toContain("unlocked_result_view exceeds landing_view");
   });
 
   it("excludes operator test traffic by default and includes it only with an explicit flag", () => {

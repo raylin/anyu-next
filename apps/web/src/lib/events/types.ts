@@ -10,6 +10,7 @@ export const EVENT_NAMES = [
   "paid_generation_started",
   "paid_generation_completed",
   "paid_generation_failed",
+  "unlocked_result_view",
   "line_add_clicked",
   "fulfillment_liff_opened",
   "fulfillment_liff_bound",

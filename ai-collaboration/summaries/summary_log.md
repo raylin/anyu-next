@@ -5567,3 +5567,23 @@ Unresolved questions:
 - Production mobile LIFF operator smoke still needs a sanitized pass/fail record.
 - `unlocked_result_view` remains unavailable until a safe unlocked page-view event exists.
 - Full validation passed; commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Module 01 Unlocked Result View Metrics Fix v0
+
+Completed changes:
+- Saved the unlocked result view metrics handoff under `ai-collaboration/handoffs/`.
+- Added the `unlocked_result_view` event to the safe event registry.
+- Added a client-side once-per-mount tracker that emits only when completed unlocked paid content renders.
+- Added safe metadata for module/theme/source/status/result-age bucket without passing paid content, tokens, LINE identifiers, raw input, URLs, or secrets.
+- Updated the Module 01 funnel metrics report to map the final unlocked-result step and add data quality warnings for smoke/API-heavy or non-sessionized counts.
+- Added tests for event registration, metadata safety, paid-result source mapping, age bucketing, and metrics warning output.
+
+Learnings:
+- The final funnel step is best tracked at the completed paid-content render surface rather than inferred from paid generation completion.
+- Current funnel reports remain event-count based, so downstream counts can exceed upstream counts during route/API smoke and operator verification.
+- Low landing volume should be called out directly to avoid over-reading conversion rates.
+
+Unresolved questions:
+- Whether to build sessionized funnel reporting remains a separate analytics decision.
+- Operator-test status is supported by tracker metadata but is not automatically inferable from existing unlock intent records.
+- Full non-E2E validation passed; Playwright was attempted but blocked by the known local Chromium MachPort permission failure.
+- Commit hash and staging push status are recorded in the final completion summary.
