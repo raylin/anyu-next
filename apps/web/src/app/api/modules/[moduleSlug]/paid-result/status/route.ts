@@ -71,6 +71,20 @@ export async function POST(request: Request, { params }: RouteProps) {
   });
 
   if (!paidStatus) {
+    const legacyCompletedStatus = await getPaidResultStatusForAnalysisResult({
+      analysisResultId: record.result.id,
+      status: "completed",
+    });
+
+    if (legacyCompletedStatus) {
+      return NextResponse.json({
+        ok: true,
+        status: "completed",
+        retryable: false,
+        errorCategory: null,
+      });
+    }
+
     const isFulfillmentClaimed =
       record.unlockIntent.fulfillmentStatus === "bound" ||
       record.unlockIntent.fulfillmentStatus === "delivered";

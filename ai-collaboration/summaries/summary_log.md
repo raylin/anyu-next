@@ -5657,3 +5657,24 @@ Unresolved questions:
 - Human approval is required before schema v3 or prompt implementation.
 - Privacy copy should be reviewed before production exposure of evidence summaries.
 - Full required validation passed; commit hash and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Evidence Anchoring Schema v3 Implementation v0
+
+Completed changes:
+- Saved the implementation handoff under `ai-collaboration/handoffs/`.
+- Added paid-result schema v3 requiring a paid-only `evidenceSummary` section with 3-4 `{ label, summary, reason }` cards.
+- Updated the paid prompt to request safe evidence summaries without raw message logs, identifiers, long quotes, or final judgments.
+- Bumped deferred paid generation to `paid_result_prompt_v0.2` and `paid_result_schema_v3`.
+- Added runtime evidence semantic validation for item count, length, identifier-like text, and long quote-like text.
+- Rendered evidence cards only on unlocked paid result pages when v3 evidence exists.
+- Preserved legacy completed paid rows and fallback paid results that do not include evidence.
+- Added tests for provider schema enforcement, evidence privacy boundaries, unlocked rendering, LINE reply exclusion, and legacy completed status compatibility.
+
+Learnings:
+- The app’s paid-result JSON contract is camelCase, so the planned `paid_result.evidence_summary` is implemented as `paid_result.evidenceSummary`.
+- Evidence anchoring can be added without DB migration because paid-result JSON already lives in `analysis_paid_results.paid_result_json`.
+- Legacy status fallback is needed during schema version rollover so old completed links do not appear pending.
+
+Unresolved questions:
+- Live staging provider adherence to the new evidence prompt remains pending until the commit is deployed to staging.
+- Evidence quality should be reviewed with one synthetic paid-generation run before production exposure.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

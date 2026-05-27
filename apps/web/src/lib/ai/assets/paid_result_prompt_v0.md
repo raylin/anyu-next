@@ -1,10 +1,10 @@
-# Paid Result Prompt v0.1 — 曖昧溫度計
+# Paid Result Prompt v0.2 — 曖昧溫度計
 
 Generate only the unlocked paid result for an existing free `曖昧溫度計` analysis.
 
 Return valid JSON only. Do not include markdown, commentary, code fences, or a `paid_result` wrapper.
 
-The JSON must conform to `paid_result_schema_v1`.
+The JSON must conform to `paid_result_schema_v3`.
 
 You will receive:
 
@@ -13,6 +13,20 @@ You will receive:
 - optional allowlisted user context
 
 Do not paste raw conversation text. Paraphrase signals safely.
+
+Evidence anchoring:
+
+- Generate `evidenceSummary` from the user's provided situation.
+- Summarize observed clues rather than quoting raw text.
+- Do not reproduce private identifiers.
+- Do not invent details not present in the input.
+- Generate 3-4 evidence items.
+- Each item connects a user-provided clue to why it matters for interpretation.
+- Do not include raw message logs.
+- Do not quote long sections.
+- Do not include names, phone numbers, addresses, social handles, LINE IDs, links, or other identifiers.
+- Do not make final judgments inside `evidenceSummary`.
+- Do not write evidence as a transcript.
 
 Tone:
 
@@ -43,6 +57,7 @@ Forbidden final-output substrings:
 Required paid result:
 
 - `fullSummary`: one practical unlocked summary.
+- `evidenceSummary`: one paid-only evidence anchor section with title `這份分析主要參考了這些線索` and 3-4 clue cards.
 - `possibleStates`: exactly 3 plausible states.
 - `possibleStates` must cover a balanced range. When consistent with the input, include one state about lower interest, lower priority, or unequal investment.
 - Do not explain every ambiguous behavior as stress, busyness, fear, or tenderness.
@@ -60,6 +75,26 @@ Required top-level JSON shape:
 ```json
 {
   "fullSummary": "string",
+  "evidenceSummary": {
+    "title": "這份分析主要參考了這些線索",
+    "items": [
+      {
+        "label": "string",
+        "summary": "string",
+        "reason": "string"
+      },
+      {
+        "label": "string",
+        "summary": "string",
+        "reason": "string"
+      },
+      {
+        "label": "string",
+        "summary": "string",
+        "reason": "string"
+      }
+    ]
+  },
   "possibleStates": [
     { "label": "string", "likelihood": "low|medium|high", "explanation": "string" },
     { "label": "string", "likelihood": "low|medium|high", "explanation": "string" },
@@ -111,6 +146,16 @@ Required top-level JSON shape:
 ```
 
 Do not add any other top-level keys.
+
+`evidenceSummary` constraints:
+
+- `label`: 2-8 Chinese characters, no identifiers.
+- `summary`: summarize one clue from the user-provided situation in 20-60 Chinese characters; not a raw quote.
+- `reason`: explain why that clue matters in 24-80 Chinese characters; not a final judgment.
+- Use `你提到` or `你描述` sparingly and gently.
+- Do not include exact names, handles, phone numbers, email addresses, URLs, LINE IDs, timestamps, or other identifiers.
+- Do not include explicit private sexual content; summarize safely if needed.
+- Keep evidence grounded in the input and separate from final interpretation.
 
 Length target:
 

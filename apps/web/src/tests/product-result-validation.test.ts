@@ -6,16 +6,47 @@ import {
   buildProviderFallbackPaidResult,
   getPaidResultValidationDiagnostics,
   PAID_RESULT_MAX_OUTPUT_TOKENS,
+  PAID_RESULT_PROMPT_VERSION,
+  PAID_RESULT_SCHEMA_VERSION,
   validatePaidResultText,
 } from "@/lib/ai/paid-result-generation";
-import { PAID_RESULT_MIN_TEXT_LENGTH } from "@/lib/ai/paid-result-semantic-validation";
-import type { ProductResult } from "@/lib/ai/product-result-schema";
+import {
+  PAID_RESULT_MIN_TEXT_LENGTH,
+  validatePaidEvidenceSummarySemantics,
+} from "@/lib/ai/paid-result-semantic-validation";
+import type { ProductResult, RichPaidResult } from "@/lib/ai/product-result-schema";
 import { normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
 import { validateProductResultObject } from "@/lib/ai/validate-product-result";
 import { extractFreeResult } from "@/lib/modules/result-adapters";
 
 function cloneDemoResult(): ProductResult {
   return structuredClone(aiTemperatureDemoProductResult);
+}
+
+function withEvidenceSummary(paidResult: RichPaidResult): RichPaidResult {
+  return {
+    ...structuredClone(paidResult),
+    evidenceSummary: {
+      title: "這份分析主要參考了這些線索",
+      items: [
+        {
+          label: "回覆節奏",
+          summary: "對方仍有回應，但速度和延伸度都不穩定。",
+          reason: "這能支持「仍有互動，但投入節奏未必一致」的判讀。",
+        },
+        {
+          label: "互動延伸",
+          summary: "生活小事仍會出現，代表連結沒有完全中斷。",
+          reason: "這讓分析保留多種可能，而不是直接判定冷掉。",
+        },
+        {
+          label: "你的目標",
+          summary: "你想知道下一句怎麼回，而不是立刻逼出關係答案。",
+          reason: "這會讓建議偏向低壓測試與保留界線。",
+        },
+      ],
+    },
+  };
 }
 
 describe("product result schema validation", () => {
@@ -58,11 +89,15 @@ describe("product result schema validation", () => {
       "utf8",
     );
 
+    expect(PAID_RESULT_PROMPT_VERSION).toBe("paid_result_prompt_v0.2");
+    expect(PAID_RESULT_SCHEMA_VERSION).toBe("paid_result_schema_v3");
     expect(prompt).toContain("Avoid unnecessary English words or code-switching");
     expect(prompt).toContain("genuinely");
     expect(prompt).toContain("vibe");
     expect(prompt).toContain("Prefer Chinese equivalents");
     expect(prompt).toContain("lower interest, lower priority, or unequal investment");
+    expect(prompt).toContain("evidenceSummary");
+    expect(prompt).toContain("Do not include raw message logs");
   });
 
   it("keeps deferred paid result output budget large enough for complete JSON", () => {
@@ -98,16 +133,66 @@ describe("product result schema validation", () => {
     expect(paidResult.possibleStates.map((state) => state.explanation).join(" ")).toContain(
       "沒有把這段互動放在同樣優先的位置",
     );
+    expect(paidResult.evidenceSummary).toBeUndefined();
   });
 
   it("accepts provider output that wraps the paid result under paid_result", async () => {
     const freeResult = extractFreeResult(aiTemperatureDemoProductResult);
+    const paidResultWithEvidence = withEvidenceSummary(aiTemperatureDemoProductResult.paid_result!);
     const paidResult = await validatePaidResultText(
-      JSON.stringify({ paid_result: aiTemperatureDemoProductResult.paid_result }),
+      JSON.stringify({ paid_result: paidResultWithEvidence }),
       freeResult,
     );
 
-    expect(paidResult).toEqual(aiTemperatureDemoProductResult.paid_result);
+    expect(paidResult).toEqual(paidResultWithEvidence);
+  });
+
+  it("requires evidence summary for provider-generated paid result schema v3", async () => {
+    const freeResult = extractFreeResult(aiTemperatureDemoProductResult);
+
+    await expect(
+      validatePaidResultText(JSON.stringify(aiTemperatureDemoProductResult.paid_result), freeResult),
+    ).rejects.toSatisfy((error) => {
+      const diagnostics = getPaidResultValidationDiagnostics(error);
+
+      expect(diagnostics?.parse).toBe("success");
+      expect(diagnostics?.missingFields).toContain("evidenceSummary");
+      return true;
+    });
+  });
+
+  it("rejects unsafe evidence summary details without exposing source content", async () => {
+    const freeResult = extractFreeResult(aiTemperatureDemoProductResult);
+    const paidResultWithEvidence = withEvidenceSummary(aiTemperatureDemoProductResult.paid_result!);
+    paidResultWithEvidence.evidenceSummary!.items[0].summary =
+      "對方仍有回應，但夾帶 test@example.com 這類不該保留的識別資訊。";
+
+    await expect(
+      validatePaidResultText(JSON.stringify(paidResultWithEvidence), freeResult),
+    ).rejects.toSatisfy((error) => {
+      const diagnostics = getPaidResultValidationDiagnostics(error);
+
+      expect(diagnostics?.semanticCategory).toContain("unsafe identifier-like text");
+      expect(JSON.stringify(diagnostics)).not.toContain("test@example.com");
+      return true;
+    });
+  });
+
+  it("keeps evidence semantic validation bounded to summaries, not raw quotes", () => {
+    expect(() =>
+      validatePaidEvidenceSummarySemantics({
+        title: "這份分析主要參考了這些線索",
+        items: [
+          {
+            label: "原句",
+            summary: "「這是一段很長很長的逐字引用內容，超過二十四個字，不應該被保留下來」",
+            reason: "這會讓證據區像逐字稿，而不是摘要。",
+          },
+          { label: "節奏", summary: "回覆仍在，但互動延伸不穩。", reason: "支撐多重可能判讀。" },
+          { label: "目標", summary: "使用者想知道下一句怎麼回。", reason: "支撐低壓回覆策略。" },
+        ],
+      }),
+    ).toThrow(/long quote-like text/);
   });
 
   it("returns sanitized diagnostics for schema validation failures", async () => {

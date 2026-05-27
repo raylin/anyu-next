@@ -20,8 +20,20 @@ export type PaidResultReplyStrategy = {
   copyableMessages: string[];
 };
 
+export type PaidResultEvidenceSummaryItem = {
+  label: string;
+  summary: string;
+  reason: string;
+};
+
+export type PaidResultEvidenceSummary = {
+  title: string;
+  items: PaidResultEvidenceSummaryItem[];
+};
+
 export type RichPaidResult = {
   fullSummary: string;
+  evidenceSummary?: PaidResultEvidenceSummary;
   possibleStates: PaidResultPossibleState[];
   signalDeepDive: PaidResultSignalDeepDive[];
   replyStrategies: PaidResultReplyStrategy[];

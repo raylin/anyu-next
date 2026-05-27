@@ -100,6 +100,7 @@ export async function getPaidResultForAnalysisResult(input: {
 
 export async function getPaidResultStatusForAnalysisResult(input: {
   analysisResultId: string;
+  status?: PaidResultStatus;
   promptVersion?: string;
   schemaVersion?: string;
 }) {
@@ -118,6 +119,7 @@ export async function getPaidResultStatusForAnalysisResult(input: {
     .where(
       and(
         eq(analysisPaidResults.analysisResultId, input.analysisResultId),
+        input.status ? eq(analysisPaidResults.status, input.status) : undefined,
         input.promptVersion ? eq(analysisPaidResults.promptVersion, input.promptVersion) : undefined,
         input.schemaVersion ? eq(analysisPaidResults.schemaVersion, input.schemaVersion) : undefined,
       ),

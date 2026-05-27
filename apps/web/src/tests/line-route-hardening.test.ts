@@ -448,6 +448,9 @@ describe("LINE route hardening", () => {
         text: expect.stringContaining("/m/ambiguous-temperature/unlock/"),
       }),
     );
+    const replyText = mockReplyLineText.mock.calls.map((call) => call[0]?.text).join("\n");
+    expect(replyText).not.toContain("這份分析主要參考了這些線索");
+    expect(replyText).not.toContain("evidenceSummary");
     expect(mockInsertEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         metadata: expect.not.objectContaining({

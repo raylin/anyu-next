@@ -43,6 +43,7 @@ describe("app-local AI asset paths", () => {
 
   it("resolves paid-result prompt and schema assets", () => {
     expect(fs.existsSync(getPaidResultPromptPath())).toBe(true);
+    expect(getPaidResultSchemaPath()).toContain("paid_result_schema_v3.json");
     expect(fs.existsSync(getPaidResultSchemaPath())).toBe(true);
   });
 });

@@ -10,8 +10,8 @@ import { getPaidResultPromptPath, getPaidResultSchemaPath } from "@/lib/ai/repo-
 import type { ProductResult, RichPaidResult } from "@/lib/ai/product-result-schema";
 import type { AiTemperatureUserContext } from "@/lib/modules/ai-temperature-context";
 
-export const PAID_RESULT_PROMPT_VERSION = "paid_result_prompt_v0.1";
-export const PAID_RESULT_SCHEMA_VERSION = "paid_result_schema_v1";
+export const PAID_RESULT_PROMPT_VERSION = "paid_result_prompt_v0.2";
+export const PAID_RESULT_SCHEMA_VERSION = "paid_result_schema_v3";
 export const PAID_RESULT_MAX_OUTPUT_TOKENS = 3_600;
 export const PAID_RESULT_PROVIDER_FALLBACK_MODEL = "paid_template_fallback_v0";
 
@@ -104,7 +104,14 @@ function getArrayCount(value: unknown, path: string): number | null {
 function buildArrayCounts(value: unknown) {
   const counts: Record<string, number> = {};
 
-  for (const path of ["possibleStates", "signalDeepDive", "replyStrategies", "next48HourPlan", "avoidDoing"]) {
+  for (const path of [
+    "evidenceSummary.items",
+    "possibleStates",
+    "signalDeepDive",
+    "replyStrategies",
+    "next48HourPlan",
+    "avoidDoing",
+  ]) {
     const count = getArrayCount(value, path);
     if (count !== null) {
       counts[path] = count;

@@ -178,6 +178,54 @@ describe("paid result generation request route", () => {
     });
   });
 
+  it("treats legacy completed paid rows as completed while current schema rolls forward", async () => {
+    mockGetUnlockIntentByTokenHash.mockResolvedValue({
+      unlockIntent: {
+        themeSlug: "ambiguous-temperature",
+        unlockTokenExpiresAt: new Date(Date.now() + 60_000),
+      },
+      result: {
+        id: "result-1",
+      },
+    });
+    mockGetPaidResultStatusForAnalysisResult
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        status: "completed",
+        errorCode: null,
+      });
+
+    const response = await statusPost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockToken: "unlock-token-1.r" }),
+      }),
+      { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      status: "completed",
+      retryable: false,
+      errorCategory: null,
+    });
+    expect(mockGetPaidResultStatusForAnalysisResult).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        promptVersion: "paid_result_prompt_v0.2",
+        schemaVersion: "paid_result_schema_v3",
+      }),
+    );
+    expect(mockGetPaidResultStatusForAnalysisResult).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        status: "completed",
+      }),
+    );
+  });
+
   it("treats claimed fulfillment links without a paid row as pending, not generic missing", async () => {
     mockGetUnlockIntentByTokenHash.mockResolvedValue({
       unlockIntent: {

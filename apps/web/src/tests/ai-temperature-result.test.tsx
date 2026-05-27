@@ -73,6 +73,8 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("一次性 · no subscription");
     expect(html).toContain('class="anyu-reply-lock-mark"');
     expect(html).toContain("目前內測中，這次不會真的收費。點下後可加入 LINE 收到開放通知，或改用 Email。");
+    expect(html).not.toContain("這份分析主要參考了這些線索");
+    expect(html).not.toContain("evidenceSummary");
   });
 
   it("applies the editorial reading class only to long-form result surfaces", () => {

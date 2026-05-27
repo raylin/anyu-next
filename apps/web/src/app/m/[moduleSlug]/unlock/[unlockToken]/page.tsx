@@ -22,7 +22,11 @@ import {
 } from "@/lib/modules/module-theme";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import type { ProductModuleConfig } from "@/lib/modules/types";
-import { hasPaidResult, normalizePaidResultForDisplay } from "@/lib/ai/product-result-schema";
+import {
+  hasPaidResult,
+  normalizePaidResultForDisplay,
+  type PaidResultEvidenceSummary,
+} from "@/lib/ai/product-result-schema";
 import {
   PAID_RESULT_PROMPT_VERSION,
   PAID_RESULT_PROVIDER_FALLBACK_MODEL,
@@ -82,11 +86,17 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
   }
 
   const result = record.result.normalizedResultJson;
-  const storedPaidResult = await getPaidResultForAnalysisResult({
+  const currentPaidResult = await getPaidResultForAnalysisResult({
     analysisResultId: record.result.id,
     promptVersion: PAID_RESULT_PROMPT_VERSION,
     schemaVersion: PAID_RESULT_SCHEMA_VERSION,
   });
+  const storedPaidResult =
+    currentPaidResult ??
+    (await getPaidResultForAnalysisResult({
+      analysisResultId: record.result.id,
+      status: "completed",
+    }));
   const routeState = resolveUnlockPaidRouteState({
     result,
     storedPaidResult,
@@ -159,6 +169,8 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
             ))}
           </div>
         </Card>
+
+        <EvidenceSummarySection evidenceSummary={paidResult.evidenceSummary} />
 
         <Card>
           <p className="anyu-kicker t-label-dim">possible states</p>
@@ -234,6 +246,32 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         </section>
       </ModuleThemeBoundary>
     </main>
+  );
+}
+
+export function EvidenceSummarySection({
+  evidenceSummary,
+}: {
+  evidenceSummary?: PaidResultEvidenceSummary | null;
+}) {
+  if (!evidenceSummary || evidenceSummary.items.length === 0) {
+    return null;
+  }
+
+  return (
+    <Card className="anyu-evidence-card">
+      <p className="anyu-kicker t-label-accent">evidence</p>
+      <h2 className="anyu-section-title">{evidenceSummary.title || "這份分析主要參考了這些線索"}</h2>
+      <div className="anyu-signal-list">
+        {evidenceSummary.items.map((item) => (
+          <article key={`${item.label}-${item.summary}`} className="anyu-signal-item">
+            <strong>{item.label}</strong>
+            <p className="anyu-copy t-reading">{item.summary}</p>
+            <p className="anyu-subtle-note">{item.reason}</p>
+          </article>
+        ))}
+      </div>
+    </Card>
   );
 }
 

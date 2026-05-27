@@ -35,5 +35,5 @@ export function getPaidResultPromptPath(): string {
 }
 
 export function getPaidResultSchemaPath(): string {
-  return path.join(process.cwd(), "src/lib/ai/assets/paid_result_schema_v1.json");
+  return path.join(process.cwd(), "src/lib/ai/assets/paid_result_schema_v3.json");
 }

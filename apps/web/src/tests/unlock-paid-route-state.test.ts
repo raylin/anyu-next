@@ -1,8 +1,11 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import { PAID_RESULT_PROVIDER_FALLBACK_MODEL } from "@/lib/ai/paid-result-generation";
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
 import { extractFreeResult } from "@/lib/modules/result-adapters";
 import {
+  EvidenceSummarySection,
   getResultAgeBucket,
   getUnlockedPaidResultSource,
   resolveUnlockPaidRouteState,
@@ -104,5 +107,37 @@ describe("unlock paid route state", () => {
     expect(getResultAgeBucket("2026-05-25T12:00:00.000Z", now)).toBe("1_7d");
     expect(getResultAgeBucket("2026-05-01T12:00:00.000Z", now)).toBe("gt_7d");
     expect(getResultAgeBucket("not-a-date", now)).toBe("unknown");
+  });
+
+  it("renders paid evidence summaries only when v3 evidence is available", () => {
+    const html = renderToStaticMarkup(
+      createElement(EvidenceSummarySection, {
+        evidenceSummary: {
+          title: "這份分析主要參考了這些線索",
+          items: [
+            {
+              label: "回覆節奏",
+              summary: "對方仍有回應，但速度與延伸度不穩。",
+              reason: "支撐仍有互動但投入節奏不一致的判讀。",
+            },
+            {
+              label: "生活小事",
+              summary: "生活近況仍會出現，連結沒有完全中斷。",
+              reason: "讓分析保留多種可能，而非直接判定冷掉。",
+            },
+            {
+              label: "回覆目標",
+              summary: "使用者想知道下一句怎麼回。",
+              reason: "支撐低壓、保留界線的回覆策略。",
+            },
+          ],
+        },
+      }),
+    );
+
+    expect(html).toContain("evidence");
+    expect(html).toContain("這份分析主要參考了這些線索");
+    expect(html).toContain("回覆節奏");
+    expect(renderToStaticMarkup(createElement(EvidenceSummarySection, { evidenceSummary: null }))).toBe("");
   });
 });
