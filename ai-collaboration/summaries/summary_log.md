@@ -5804,3 +5804,25 @@ Unresolved questions:
 - Owner visual review is still recommended before production refresh.
 - Production refresh/smoke remains a separate explicit approval task.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-28 - Evidence Anchoring v3 Production Refresh + Smoke v0
+
+Completed changes:
+- Saved the production refresh/smoke handoff under `ai-collaboration/handoffs/`.
+- Confirmed approved production candidate `9b58ab0` includes implementation commit `0d9ec2e` and the staging provider review.
+- Ran required validation before production refresh.
+- Deployed production from the repository root and aliased deployment `dpl_EyjzwnraEgbyGEByqjNL1wWWdNtv` / `https://anyu-next-l42vsudp2-studioanyu-1488s-projects.vercel.app` to `https://anyu.tw`.
+- Ran a synthetic production route/API smoke covering health, landing, fresh analyze, result route, unlock intent, deferred paid generation, paid status, and unlocked route.
+- Confirmed production generated `paid_result_schema_v3` from provider source with 4 evidence items and required `label`, `summary`, `reason` fields.
+- Confirmed sanitized evidence safety checks passed and evidence rendered on unlocked paid result only.
+- Confirmed event/privacy aggregate checks did not show forbidden raw-content/key patterns.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Evidence Anchoring v3 is now active in production and passed one synthetic provider-path smoke.
+- The linked Vercel project expects deploys from the repository root; running deploy from `apps/web` builds an invalid nested path.
+- Local aggregate metrics remain blocked without a configured `DATABASE_URL`, which should be handled through a secure operator path.
+
+Unresolved questions:
+- One synthetic production sample is not enough to evaluate provider-output quality under varied traffic.
+- Ads and broader traffic remain blocked pending additional low-key monitoring.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
