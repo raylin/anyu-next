@@ -5678,3 +5678,22 @@ Unresolved questions:
 - Live staging provider adherence to the new evidence prompt remains pending until the commit is deployed to staging.
 - Evidence quality should be reviewed with one synthetic paid-generation run before production exposure.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Payment Provider Application Prep + NewebPay Evaluation v0
+
+Completed changes:
+- Saved the payment-provider application handoff under `ai-collaboration/handoffs/`.
+- Created a docs-only NewebPay application readiness and ECPay backup comparison note.
+- Recommended applying to NewebPay first and keeping ECPay as backup.
+- Drafted provider-facing ANYU product description, storefront copy, refund policy direction, privacy/trust copy requirements, first payment method recommendation, and future payment integration flow.
+- Identified missing owner actions: applicant type, documents, bank account, tax/invoice posture, provider-facing support/contact details, and approval of storefront/refund copy.
+- No payment integration, checkout, production behavior, LINE behavior, prompt/schema/cache/DB, or legal runtime copy was changed.
+
+Learnings:
+- NewebPay appears suitable for a first one-time digital content/service unlock using a hosted/redirect payment flow.
+- ECPay’s official preparation checklist is useful as a general readiness benchmark even if it remains the backup provider.
+- Current ANYU public pages are directionally ready but need a provider-review-specific storefront/refund copy pass before application submission.
+
+Unresolved questions:
+- Owner must choose applicant type and confirm business/tax/invoice posture.
+- NewebPay official review-time SLA was not found in reviewed official pages.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
