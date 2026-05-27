@@ -5411,3 +5411,25 @@ Unresolved questions:
 - Human approval is still required before any production activation task.
 - Human should decide whether prior real staging LIFF/short-code smoke is sufficient or whether to run one final manual staging check first.
 - Required docs-only validation passed; commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Module 01 Low-key Production Activation + Smoke v0
+
+Completed changes:
+- Saved the low-key production activation handoff under `ai-collaboration/handoffs/`.
+- Ran required local validation before production work.
+- Verified production env presence without printing values.
+- Verified production DB schema objects/columns with metadata-only Neon queries.
+- Deployed candidate commit `7c891c9` to Vercel production and aliased it to `https://anyu.tw`.
+- Ran sanitized production route/API smoke for health, landing, input threshold, analyze, result, unlock intent, LIFF URL shape, global bridge, deferred paid generation, paid status, unlocked paid route, theme carryover, hidden downstream switch, and empty-events webhook verification.
+- Created the required production smoke review bundle and execution report.
+
+Learnings:
+- Production route/API activation passed for low-key beta exposure.
+- Fresh production analyze completed in about 21.6 seconds and fresh paid generation completed in about 42.8 seconds.
+- Production LIFF URL shape is fixed: `https://liff.line.me/:liffId?<context>` with no route path after the LIFF ID.
+- Recent production paid-generation event aggregate showed provider source for the smoke window.
+
+Unresolved questions:
+- Real mobile production LIFF operator smoke remains pending.
+- Real production OA short-code operator smoke remains pending.
+- A possible English-mix page-payload scan needs manual visual review to distinguish visible paid content from non-visible payload/bundled text.
+- Commit hash and staging push status to be recorded in final completion summary.
