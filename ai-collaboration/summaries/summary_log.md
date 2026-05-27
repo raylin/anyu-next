@@ -5510,3 +5510,24 @@ Unresolved questions:
 - A short-lived mobile operator link may be useful later but needs separate approval.
 - Full validation passed, including local Playwright E2E.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Module 01 Funnel Metrics Report v0
+
+Completed changes:
+- Saved the funnel metrics report handoff under `ai-collaboration/handoffs/`.
+- Added a read-only Module 01 funnel metrics CLI at `apps/web/scripts/module-01-funnel-report.mjs`.
+- Added `corepack pnpm module01:metrics` with date range, last-window, operator inclusion, markdown, JSON, and output path options.
+- Implemented aggregate funnel counts, conversion rates, threshold hints, theme splits, manual override counts, provider/fallback split, LINE fulfillment summaries, and safe error category summaries.
+- Excluded `operatorTest` events by default and marked include-operator reports clearly.
+- Added synthetic fixture tests for aggregation, rates, operator filtering, theme/provider splits, privacy guardrails, markdown output, and CLI parsing.
+- Added operations documentation for running and interpreting the report.
+
+Learnings:
+- Current event coverage supports most funnel steps, but unlocked-result page-view and webhook-invalid-signature metrics are documented gaps.
+- The app does not currently include a TypeScript script runner, so a `.mjs` CLI is the lowest-risk implementation path.
+- Low-key traffic reports should be interpreted as directional monitoring, not statistically strong A/B evidence.
+
+Unresolved questions:
+- Whether to add a safe unlocked-result page-view event is a separate analytics semantics decision.
+- Production data was not queried in this task.
+- Full validation passed; Playwright was not required because no UI code changed.
+- Commit hash and staging push status to be recorded in final completion summary.

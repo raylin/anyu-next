@@ -396,6 +396,7 @@ First post-launch checks:
 - model latency and failure rate
 - LINE CTA live behavior
 - abuse/cost caps not being hit unexpectedly
+- privacy-safe Module 01 funnel report if aggregate event review is needed; see `docs/operations/module-01-metrics-report.md`
 
 Recommended early cadence:
 
