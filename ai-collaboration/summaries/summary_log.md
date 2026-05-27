@@ -5531,3 +5531,20 @@ Unresolved questions:
 - Production data was not queried in this task.
 - Full validation passed; Playwright was not required because no UI code changed.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Module 01 Production Refresh + Short-code Smoke Record v1
+
+Completed changes:
+- Saved the production refresh v1 handoff under `ai-collaboration/handoffs/`.
+- Recorded production refresh to candidate `092ba20` / deployment `dpl_4mukHzrtG27bix8UNcrfoLoTynuE`.
+- Recorded sanitized route/API smoke status from the production refresh.
+- Recorded the production short-code OA smoke as passed after the operator corrected a production/staging LINE secret/token mismatch.
+- Added an operations note that silent production OA no-reply can be caused by production/staging LINE channel secret or access token mismatch.
+- Updated the production LIFF endpoint checklist to the global `/line/fulfill` bridge.
+
+Learnings:
+- A healthy webhook route and valid empty-events verification do not prove the production OA is using the matching production channel credentials.
+- For silent OA no-reply, first check LINE Console linked bot, webhook enabled state, and production-scoped secret/token pairing before assuming app webhook logic failed.
+
+Unresolved questions:
+- Production mobile LIFF operator smoke remains unrecorded in this v1 report.
+- Full validation passed; commit hash and staging push status to be recorded in final completion summary.

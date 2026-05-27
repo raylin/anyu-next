@@ -298,7 +298,7 @@ Before production:
 - `LINE_CHANNEL_ACCESS_TOKEN` is configured as a server-only production env var
 - `LINE_LOGIN_CHANNEL_ID` is configured if the production LINE Login channel ID cannot be derived from the LIFF ID prefix
 - production LINE webhook URL is `https://anyu.tw/api/line/webhook`
-- production LIFF endpoint URL is `https://anyu.tw/m/ambiguous-temperature/line/fulfill`
+- production LIFF endpoint URL is `https://anyu.tw/line/fulfill`
 - production DB has `0004_line_webhook_hardening.sql` applied after explicit approval
 - LIFF primary path has been verified with an operator-owned LINE account
 - short-code fallback path has been verified with an operator-owned LINE account
@@ -307,6 +307,10 @@ Before production:
 - welcome-message and OA profile basics are set in LINE backend
 - product copy promises complete-analysis link only after fulfillment is verified
 - no raw input, LINE message text, email, or token values appear in events/logs
+
+Operational note:
+
+- If production short-code smoke receives no bot reply while `/api/line/webhook` health checks pass, verify that production `LINE_CHANNEL_SECRET` and `LINE_CHANNEL_ACCESS_TOKEN` match the production Messaging API channel. A production/staging LINE secret or token mismatch can cause silent OA reply failure even when the app deployment is healthy.
 
 Reference record:
 
