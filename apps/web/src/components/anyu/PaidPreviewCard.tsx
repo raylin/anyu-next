@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
+import { LEGAL_CONTACT_EMAIL, uiNotices } from "@/content/legal";
 
 type PaidPreviewCardProps = {
   headline: string;
@@ -56,8 +57,9 @@ export function PaidPreviewCard({
             {headline} — {price}
           </h2>
           <p className="anyu-copy">
-            給你下一句回法、3 種可能狀態、48 小時觀察策略與可收藏摘要卡。
+            正式開放後，完整分析預計為一次性查看 {price}；目前內測期間不會真的收費。
           </p>
+          <p className="anyu-subtle-note">{uiNotices.paidProductDescription}</p>
         </div>
         <div className="anyu-paid-price-block">
           <span className="anyu-paid-price">{price}</span>
@@ -110,10 +112,33 @@ export function PaidPreviewCard({
         </article>
       </div>
 
+      <div className="anyu-signal-list" aria-label="完整分析包含">
+        {[
+          "你們目前的關係溫度與訊號整理",
+          "3 種可能狀態",
+          "可直接使用的回覆句與回覆策略",
+          "48 小時觀察建議",
+          "這份分析主要參考的線索摘要",
+          "可回看的完整結果頁",
+        ].map((item) => (
+          <p key={item} className="anyu-subtle-note">
+            {item}
+          </p>
+        ))}
+      </div>
+
       <p className="anyu-small-note">
         {revealed
-          ? "目前內測中，這次不會真的收費。開放後可查看完整分析。"
-          : "目前內測中，這次不會真的收費。點下後可加入 LINE 收到開放通知，或改用 Email。"}
+          ? "目前內測中，這次不會真的收費。你可以透過 LINE 或 Email 接收完整分析連結。"
+          : "目前內測中，這次不會真的收費。點下後可加入 LINE 接收完整分析連結，或改用 Email。"}
+      </p>
+
+      <p className="anyu-subtle-note">
+        {uiNotices.paidTrustNote}
+      </p>
+      <p className="anyu-subtle-note">
+        若未來正式付款後發生系統未產生完整分析、連結無法開啟或重複付款，請來信{" "}
+        {LEGAL_CONTACT_EMAIL}。客服只需要付款時間、必要的訂單資訊或錯誤狀況說明，不需要原始對話內容。
       </p>
 
       <Button type="button" className="anyu-button-block" onClick={handleReveal} disabled={isLoading}>

@@ -5713,3 +5713,21 @@ Unresolved questions:
 - Owner must decide applicant type, tax/invoice posture, public contact/business disclosure, and whether `hello@anyu.tw` is formal support.
 - Provider review may require public phone/address/company details; this should not be invented by Codex.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Provider-review Public Copy Implementation v0
+
+Completed changes:
+- Saved the public copy implementation handoff under `ai-collaboration/handoffs/`.
+- Updated Module 01 paid preview runtime copy with planned future `NT$49` one-time full-analysis pricing, current no-charge beta wording, digital web/LINE delivery, included content, privacy/trust note, and refund/re-delivery support copy.
+- Updated unlocked full-analysis header copy with current no-charge and service-limitation wording.
+- Updated shared legal content with future-payment digital delivery, refund/re-delivery, support, payment-provider privacy, and individual small-scale/no-unified-invoice posture copy.
+- Added targeted tests for payment-disabled copy, support email, privacy boundaries, no checkout/provider claims, and no company/studio/business-registration claims.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Provider-review public copy can be implemented without changing payment behavior if every paid reference is framed as future/planned and paired with current no-charge beta language.
+- Copy safety tests are useful guardrails against accidentally implying checkout availability or business-registration status.
+
+Unresolved questions:
+- NewebPay may still require public phone/address/applicant details.
+- Invoice/tax wording should be reviewed before real payment launch.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

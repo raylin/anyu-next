@@ -6,6 +6,7 @@ import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { PaidResultPendingPoller } from "@/components/modules/ai-temperature/PaidResultPendingPoller";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
+import { uiNotices } from "@/content/legal";
 import {
   UnlockedResultViewTracker,
   type UnlockedPaidResultSource,
@@ -147,7 +148,12 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         <Card className="anyu-quote-card">
           <p className="anyu-kicker">完整分析</p>
           <h1 className="anyu-section-title">{result.paid_preview.headline}</h1>
-          <p className="anyu-copy">這是依照剛剛結果整理出的完整回覆建議。這次內測不會真的收費。</p>
+          <p className="anyu-copy">
+            這是依照剛剛結果整理出的完整回覆建議。{uiNotices.paidUnlockNote}
+          </p>
+          <p className="anyu-subtle-note">
+            本結果是文字情境整理與溝通建議，不是心理治療、諮商、命理判斷，也不保證任何關係結果。
+          </p>
         </Card>
 
         <TemperatureCard

@@ -72,9 +72,16 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("一次性查看 · 無訂閱");
     expect(html).toContain("一次性 · no subscription");
     expect(html).toContain('class="anyu-reply-lock-mark"');
-    expect(html).toContain("目前內測中，這次不會真的收費。點下後可加入 LINE 收到開放通知，或改用 Email。");
+    expect(html).toContain("正式開放後，完整分析預計為一次性查看 NT$49；目前內測期間不會真的收費。");
+    expect(html).toContain("發生系統未產生完整分析、連結無法開啟或重複付款");
+    expect(html).toContain("hello@anyu.tw");
+    expect(html).toContain("不需要原始對話內容");
+    expect(html).toContain("你提供的文字只會用於產生本次分析與必要的服務交付");
     expect(html).not.toContain("這份分析主要參考了這些線索");
     expect(html).not.toContain("evidenceSummary");
+    expect(html).not.toContain("checkout");
+    expect(html).not.toContain("NewebPay");
+    expect(html).not.toContain("藍新");
   });
 
   it("applies the editorial reading class only to long-form result surfaces", () => {
