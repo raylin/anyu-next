@@ -5748,3 +5748,20 @@ Learnings:
 Unresolved questions:
 - Staging visual QA may still request minor spacing/height tuning.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Public Legal Draft Disclaimer Removal v0
+
+Completed changes:
+- Saved the public legal draft-disclaimer removal handoff under `ai-collaboration/handoffs/`.
+- Removed public-facing draft/non-final/legal-advice warning language from privacy, terms, disclaimer, metadata descriptions, and legal index copy.
+- Replaced legal page intros with formal service-ready copy while preserving conservative privacy, refund/re-delivery, support, invoice, and service-limitation boundaries.
+- Added tests that public legal copy does not contain draft/legal-advice warning phrases and still avoids checkout/provider/business-registration/private-contact claims.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Public legal readiness required removing not only the explicit draft disclaimer, but also visible `v0` labels from legal headings, metadata, and the legal index.
+- Payment-provider-facing copy can remain conservative without saying the documents are draft or awaiting professional review.
+
+Unresolved questions:
+- Owner/legal review remains needed before real payment launch.
+- Payment provider may still require public phone/address/applicant details in a separate owner-approved task.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

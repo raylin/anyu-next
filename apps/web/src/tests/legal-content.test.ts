@@ -9,6 +9,13 @@ import {
 } from "@/content/legal";
 
 describe("legal content", () => {
+  const publicLegalCopy = JSON.stringify({
+    privacyPageContent,
+    termsPageContent,
+    disclaimerPageContent,
+    uiNotices,
+  });
+
   it("uses the public contact email consistently", () => {
     expect(LEGAL_CONTACT_EMAIL).toBe("hello@anyu.tw");
     expect(JSON.stringify(privacyPageContent)).toContain(LEGAL_CONTACT_EMAIL);
@@ -35,6 +42,32 @@ describe("legal content", () => {
     expect(uiNotices.paidUnlockNote).toContain("目前內測期間不會真的收費");
     expect(uiNotices.paidProductDescription).toContain("一次性數位內容");
     expect(uiNotices.paidProductDescription).toContain("網頁或 LINE 連結");
+  });
+
+  it("publishes formal service-ready legal intros without draft warnings", () => {
+    const blockedDraftPhrases = [
+      "v0",
+      "內測草稿",
+      "基礎草稿",
+      "不是最終法律版本",
+      "不是法律意見",
+      "正式公開前",
+      "合格專業人士",
+    ];
+
+    expect(privacyPageContent.heading).toBe("暗語 ANYU 隱私權政策");
+    expect(privacyPageContent.intro).toContain("本政策說明暗語 ANYU 如何處理");
+    expect(privacyPageContent.intro).toContain("網站公告版本為準");
+    expect(termsPageContent.heading).toBe("暗語 ANYU 使用條款");
+    expect(termsPageContent.intro).toContain("本條款說明使用暗語 ANYU 服務時的基本規則");
+    expect(termsPageContent.intro).toContain("網站公告版本為準");
+    expect(disclaimerPageContent.heading).toBe("暗語 ANYU 免責聲明");
+    expect(disclaimerPageContent.intro).toContain("本聲明說明暗語 ANYU 的服務適用範圍與限制");
+    expect(disclaimerPageContent.intro).toContain("不是心理治療、諮商、醫療診斷、法律建議或命理服務");
+
+    for (const phrase of blockedDraftPhrases) {
+      expect(publicLegalCopy).not.toContain(phrase);
+    }
   });
 
   it("keeps privacy copy concrete without deletion or anonymity overpromises", () => {
@@ -65,18 +98,11 @@ describe("legal content", () => {
   });
 
   it("does not publish private applicant or business-registration claims", () => {
-    const publicCopy = JSON.stringify({
-      privacyPageContent,
-      termsPageContent,
-      disclaimerPageContent,
-      uiNotices,
-    });
-
-    expect(publicCopy).not.toContain("工作室");
-    expect(publicCopy).not.toContain("商號");
-    expect(publicCopy).not.toContain("公司統一編號");
-    expect(publicCopy).not.toContain("個人信箱");
-    expect(publicCopy).not.toContain("個人銀行");
-    expect(publicCopy).not.toContain("owner");
+    expect(publicLegalCopy).not.toContain("工作室");
+    expect(publicLegalCopy).not.toContain("商號");
+    expect(publicLegalCopy).not.toContain("公司統一編號");
+    expect(publicLegalCopy).not.toContain("個人信箱");
+    expect(publicLegalCopy).not.toContain("個人銀行");
+    expect(publicLegalCopy).not.toContain("owner");
   });
 });

@@ -23,11 +23,11 @@ export default function LegalIndexPage() {
             <p className="anyu-kicker">legal</p>
             <h1 className="anyu-title">法律與說明</h1>
             <p className="anyu-copy">
-              這裡整理 ANYU v0 目前對外公開的隱私、使用規則與免責說明。
+              這裡整理 ANYU 目前對外公開的隱私、使用規則與免責說明。
             </p>
             <div className="anyu-legal-meta">
-              <span>版本 v0</span>
-              <span>更新日期 2026-05-20</span>
+              <span>版本 2026-05-27</span>
+              <span>更新日期 2026-05-27</span>
               <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
             </div>
           </div>
