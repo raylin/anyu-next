@@ -2,7 +2,7 @@
 
 ## Summary
 
-Recorded the low-key production monitoring state after production refresh and corrected production short-code smoke. Ran aggregate-only production metrics against the confirmed Neon production branch and documented health findings.
+Recorded the low-key production monitoring state after production refresh and corrected production short-code smoke. Updated the report with the latest aggregate-only production metrics rerun after the completed paid-content view tracker reached production.
 
 ## Files Created
 
@@ -18,9 +18,9 @@ Recorded the low-key production monitoring state after production refresh and co
 ## Production Status
 
 - Production alias: `https://anyu.tw`
-- Deployment ID: `dpl_4mukHzrtG27bix8UNcrfoLoTynuE`
+- Deployment ID: `dpl_Ffzzri9CYMk6PMEmw4c8BGRXQqJh`
 - Deployment status: Ready
-- Candidate commit: `092ba20`
+- Candidate commit: `4c2487a`
 - Low-key production: active / monitor
 - Ads: blocked
 - Broader traffic: blocked
@@ -54,9 +54,9 @@ Metrics report:
 
 ## Funnel Health
 
-Last-24-hour aggregate:
+Latest last-24-hour aggregate rerun:
 
-- Included events: 61
+- Included events: 75
 - Excluded operator events: 0
 - landing_view: 3
 - analyze_clicked: 1
@@ -65,15 +65,15 @@ Last-24-hour aggregate:
 - unlock_clicked: 9
 - liff_bind_success: 4
 - short_code_success: 1
-- paid_generation_requested: 4
-- paid_generation_completed: 4
-- provider completions: 4
-- fallback completions: 0
+- paid_generation_requested: 5
+- paid_generation_completed: 5
+- unlocked_result_view: 1
 - recorded fulfillment failures: 0
 
 Interpretation:
 
-- WATCH because traffic is too low and smoke/operator-heavy.
+- WARN because traffic is still smoke-heavy / non-sessionized and downstream counts exceed upstream counts.
+- `unlocked_result_view = 1` confirms the completed paid-content view tracker is working in production.
 - Use metrics for health only, not conversion conclusions.
 
 ## Event / Privacy Status
@@ -95,14 +95,14 @@ No raw input, redacted input, full result JSON, paid result JSON, provider outpu
 - `python3 -m compileall tools/topic-ingestion` passed.
 - `PYTHONPATH=tools/topic-ingestion python3 -m unittest discover -s tools/topic-ingestion/tests -p 'test_*.py'` passed, 25 tests.
 - `cd apps/web && corepack pnpm lint` passed.
-- `cd apps/web && corepack pnpm test` passed, 30 files / 193 tests.
+- `cd apps/web && corepack pnpm test` passed, 31 files / 197 tests.
 - `cd apps/web && corepack pnpm build` passed.
 - Playwright was not required because no app code changed.
 
 ## Known Technical Debt
 
 - Production mobile LIFF operator smoke remains unrecorded.
-- Unlocked-result page-view metric remains unavailable because that event is not currently emitted.
+- Current funnel metrics remain event-count based and not sessionized.
 
 ## Tech Debt Review
 
@@ -112,7 +112,7 @@ No raw input, redacted input, full result JSON, paid result JSON, provider outpu
 
 ### Existing Technical Debt Observed
 
-- Current metrics are low-volume and smoke-heavy.
+- Current metrics are low-volume, smoke-heavy, and non-sessionized.
 - Some server events do not carry theme metadata, producing `unknown:unknown` split rows.
 
 ### Opportunistic Cleanup Completed
@@ -127,6 +127,7 @@ No raw input, redacted input, full result JSON, paid result JSON, provider outpu
 ### Recommended Follow-up
 
 - Continue low-key monitoring and run another aggregate metrics report after the next monitoring window.
+- Keep ads and broader traffic blocked until metrics come from a cleaner, higher-volume traffic window.
 
 ## Deviations From Handoff
 
@@ -143,8 +144,8 @@ Pending at report creation time.
 ## Remaining Uncertainties
 
 - Production LIFF operator smoke status remains pending/unknown.
-- Traffic is too low for statistical conclusions.
+- Traffic is too low and smoke-heavy for statistical or conversion conclusions.
 
 ## Recommended Next Step
 
-Record production mobile LIFF operator smoke if pending, then continue low-key production monitoring with aggregate metrics only.
+Record production mobile LIFF operator smoke if pending, keep ads / broader traffic blocked, then continue low-key production monitoring with aggregate metrics only.

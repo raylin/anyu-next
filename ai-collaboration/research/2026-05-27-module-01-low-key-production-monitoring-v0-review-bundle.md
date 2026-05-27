@@ -4,17 +4,19 @@ Date: 2026-05-27
 
 ## 1. Summary
 
-Production remains refreshed to candidate `092ba20` and deployment `dpl_4mukHzrtG27bix8UNcrfoLoTynuE`. Route/API smoke passed in the previous refresh record. Production short-code smoke is now recorded as passed after correcting a production/staging LINE secret/token mismatch.
+Production is now refreshed to candidate `4c2487a` and deployment `dpl_Ffzzri9CYMk6PMEmw4c8BGRXQqJh`. Route/API smoke passed in the previous refresh record. Production short-code smoke is now recorded as passed after correcting a production/staging LINE secret/token mismatch.
+
+The latest production metrics rerun confirms the new completed paid-content view tracker is active in production: `unlocked_result_view` is now 1.
 
 Low-key production remains active for monitoring only. Ads, broad traffic, payment, email delivery, rich menu, broadcast, portal/account system, and Module 02 remain blocked.
 
 ## 2. Production Deployment / Alias Status
 
 - Production alias: `https://anyu.tw`
-- Deployment ID: `dpl_4mukHzrtG27bix8UNcrfoLoTynuE`
-- Deployment URL: `https://anyu-next-1zonzd0b2-studioanyu-1488s-projects.vercel.app`
+- Deployment ID: `dpl_Ffzzri9CYMk6PMEmw4c8BGRXQqJh`
+- Deployment URL: `https://anyu-next-gzhj7fghe-studioanyu-1488s-projects.vercel.app`
 - Deployment status: Ready
-- Candidate commit: `092ba20`
+- Candidate commit: `4c2487a`
 
 ## 3. Production Operator Smoke Status
 
@@ -57,9 +59,9 @@ Operator events were excluded by default.
 
 ## 6. Funnel Health Summary
 
-Last-24-hour aggregate counts:
+Latest last-24-hour aggregate counts:
 
-- Included events: 61
+- Included events: 75, increased from 61
 - Excluded operator events: 0
 - landing_view: 3
 - analyze_clicked: 1
@@ -68,15 +70,17 @@ Last-24-hour aggregate counts:
 - unlock_clicked: 9
 - liff_bind_success: 4
 - short_code_success: 1
-- paid_generation_requested: 4
-- paid_generation_completed: 4
+- paid_generation_requested: 5
+- paid_generation_completed: 5
+- unlocked_result_view: 1
 
 Health interpretation:
 
-- Paid generation completion rate: 100% aggregate in this small window.
-- Fallback rate: 0%.
+- Paid generation completed 5/5 in this small aggregate window.
+- Completed paid-content view tracker is working in production.
 - Recorded fulfillment failures: 0.
-- Traffic is too low and smoke/operator-heavy for conversion conclusions.
+- Report remains WARN because traffic is still smoke-heavy / non-sessionized and downstream counts exceed upstream counts.
+- Do not draw conversion conclusions yet.
 
 ## 7. Theme / Provider Split
 
@@ -90,8 +94,7 @@ Theme split:
 
 Provider split:
 
-- provider: 4
-- fallback: 0
+- Provider/fallback source counts were not expanded in this sanitized rerun note.
 
 ## 8. Event / Privacy Verification
 
@@ -103,7 +106,7 @@ No raw input, redacted input text, full result JSON, paid result JSON, provider 
 
 - Production mobile LIFF operator smoke remains unconfirmed in this task.
 - Traffic is too low for conversion conclusions.
-- Unlocked-result page-view metric is unavailable because that event is not currently emitted.
+- Funnel counts remain smoke-heavy / non-sessionized, with downstream counts exceeding upstream counts.
 
 ## 10. Monitoring Recommendation
 
@@ -118,4 +121,4 @@ Continue low-key production monitoring. Treat current metrics as health checks o
 
 ## 12. Recommended Next Step
 
-Record production mobile LIFF operator smoke if it has not already passed, then run another aggregate metrics check after the next production monitoring window.
+Keep ads and broader traffic blocked. Record production mobile LIFF operator smoke if it has not already passed, then run another aggregate metrics check after the next production monitoring window.

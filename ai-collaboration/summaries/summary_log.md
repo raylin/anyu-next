@@ -5587,3 +5587,22 @@ Unresolved questions:
 - Operator-test status is supported by tracker metadata but is not automatically inferable from existing unlock intent records.
 - Full non-E2E validation passed; Playwright was attempted but blocked by the known local Chromium MachPort permission failure.
 - Commit hash and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Module 01 Low-key Production Monitoring Metrics Rerun v0
+
+Completed changes:
+- Saved the metrics-rerun handoff under `ai-collaboration/handoffs/`.
+- Updated the low-key production monitoring execution report and review bundle with the latest sanitized production metrics rerun.
+- Recorded that production is now on candidate `4c2487a` / deployment `dpl_Ffzzri9CYMk6PMEmw4c8BGRXQqJh`.
+- Recorded included events increasing from 61 to 75.
+- Recorded `unlocked_result_view = 1`, confirming the completed paid-content view tracker is working in production.
+- Recorded `paid_generation_requested = 5` and `paid_generation_completed = 5`.
+- Kept ads and broader traffic blocked because the report remains WARN due to smoke-heavy / non-sessionized traffic and downstream counts exceeding upstream counts.
+
+Learnings:
+- The new unlocked paid-content view tracker is now visible in production aggregate metrics.
+- The latest metrics are useful as a health check, but still not valid for conversion conclusions.
+
+Unresolved questions:
+- Production mobile LIFF operator smoke remains pending unless separately confirmed.
+- Conversion interpretation should wait for cleaner, higher-volume traffic.
+- Validation results, commit hash, and staging push status are recorded in the final completion summary.
