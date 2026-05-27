@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
-import { LEGAL_CONTACT_EMAIL, uiNotices } from "@/content/legal";
+import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 
 type PaidPreviewCardProps = {
   headline: string;
@@ -46,20 +46,32 @@ export function PaidPreviewCard({
     "「看你在跟朋友打球，那就先好好玩——哪天你比較有空，再把時間給我。」",
     "48 小時內，看他是自然靠近，還是只有在你提醒時才回應。",
   ] as const;
+  const includedItems = [
+    "3 種可能狀態",
+    "可直接使用的回覆句與回覆策略",
+    "48 小時觀察建議",
+    "分析依據線索摘要",
+    "可回看的完整結果頁",
+  ] as const;
+  const policyItems = [
+    "不需要留下姓名，也請不要貼姓名、電話、地址或帳號等可識別身份資訊。",
+    "你提供的文字只用於本次分析與必要服務交付，不會公開展示或提供第三方行銷使用。",
+    `正式付款後若系統未成功產生結果、連結無法開啟或重複付款，可協助補發或退款；聯絡 ${LEGAL_CONTACT_EMAIL} 時不需要提供原始對話內容。`,
+  ] as const;
 
   return (
     <Card className="anyu-paid-card">
       <p className="anyu-kicker t-label-dim">一次性查看 · 無訂閱</p>
 
       <div className="anyu-paid-head">
-        <div>
+        <div className="anyu-paid-value-summary">
           <h2 className="anyu-section-title">
             {headline} — {price}
           </h2>
           <p className="anyu-copy">
-            正式開放後，完整分析預計為一次性查看 {price}；目前內測期間不會真的收費。
+            正式開放後，一次性查看；目前內測不會真的收費。
           </p>
-          <p className="anyu-subtle-note">{uiNotices.paidProductDescription}</p>
+          <p className="anyu-subtle-note">完整分析會透過網頁或 LINE 連結交付。</p>
         </div>
         <div className="anyu-paid-price-block">
           <span className="anyu-paid-price">{price}</span>
@@ -112,19 +124,15 @@ export function PaidPreviewCard({
         </article>
       </div>
 
-      <div className="anyu-signal-list" aria-label="完整分析包含">
-        {[
-          "你們目前的關係溫度與訊號整理",
-          "3 種可能狀態",
-          "可直接使用的回覆句與回覆策略",
-          "48 小時觀察建議",
-          "這份分析主要參考的線索摘要",
-          "可回看的完整結果頁",
-        ].map((item) => (
-          <p key={item} className="anyu-subtle-note">
-            {item}
-          </p>
-        ))}
+      <div className="anyu-paid-included-panel" aria-label="完整分析包含">
+        <p className="anyu-kicker t-label-dim">完整分析包含</p>
+        <div className="anyu-paid-included-grid">
+          {includedItems.map((item) => (
+            <span key={item} className="anyu-paid-included-item">
+              {item}
+            </span>
+          ))}
+        </div>
       </div>
 
       <p className="anyu-small-note">
@@ -133,12 +141,17 @@ export function PaidPreviewCard({
           : "目前內測中，這次不會真的收費。點下後可加入 LINE 接收完整分析連結，或改用 Email。"}
       </p>
 
-      <p className="anyu-subtle-note">
-        {uiNotices.paidTrustNote}
-      </p>
-      <p className="anyu-subtle-note">
-        若未來正式付款後發生系統未產生完整分析、連結無法開啟或重複付款，請來信{" "}
-        {LEGAL_CONTACT_EMAIL}。客服只需要付款時間、必要的訂單資訊或錯誤狀況說明，不需要原始對話內容。
+      <div className="anyu-paid-policy-panel">
+        <p className="anyu-kicker t-label-dim">交付與隱私</p>
+        <ul className="anyu-paid-policy-list">
+          {policyItems.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+
+      <p className="anyu-paid-limitation-note">
+        暗語 ANYU 是文字情境整理與溝通建議，不是心理治療、諮商、命理或關係結果保證。
       </p>
 
       <Button type="button" className="anyu-button-block" onClick={handleReveal} disabled={isLoading}>

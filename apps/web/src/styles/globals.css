@@ -856,6 +856,11 @@ textarea {
   align-items: flex-start;
 }
 
+.anyu-paid-value-summary {
+  display: grid;
+  gap: 0.45rem;
+}
+
 .anyu-paid-price {
   color: var(--anyu-accent);
   font-family: var(--anyu-font-latin);
@@ -872,6 +877,71 @@ textarea {
   display: grid;
   justify-items: end;
   gap: 0.1rem;
+}
+
+.anyu-paid-included-panel,
+.anyu-paid-policy-panel {
+  display: grid;
+  gap: var(--anyu-space-2);
+  padding: 0.9rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: var(--anyu-radius-lg);
+  background: color-mix(in srgb, var(--anyu-card) 72%, var(--anyu-bg));
+}
+
+.anyu-paid-included-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.anyu-paid-included-item {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.42rem 0.65rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--anyu-ink);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
+}
+
+.anyu-paid-policy-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anyu-paid-policy-list li {
+  position: relative;
+  padding-left: 1rem;
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
+}
+
+.anyu-paid-policy-list li::before {
+  content: "";
+  position: absolute;
+  top: 0.58em;
+  left: 0;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: var(--anyu-accent2);
+}
+
+.anyu-paid-limitation-note {
+  margin: 0;
+  padding-top: var(--anyu-space-2);
+  border-top: 1px solid var(--anyu-line);
+  color: var(--anyu-faint);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
 }
 
 .anyu-reply-card {
@@ -1902,6 +1972,29 @@ textarea {
 
 .anyu-v2 .anyu-paid-card {
   box-shadow: var(--anyu-shadow-acc);
+}
+
+.anyu-v2 .anyu-paid-included-panel,
+.anyu-v2 .anyu-paid-policy-panel {
+  border: var(--anyu-border-base) solid var(--anyu-line);
+  border-radius: var(--anyu-radius-sm);
+  background: var(--anyu-card);
+  box-shadow: var(--anyu-shadow-sm);
+}
+
+.anyu-v2 .anyu-paid-included-item {
+  border: var(--anyu-border-base) solid var(--anyu-line);
+  border-radius: var(--anyu-radius-sm);
+  background: var(--anyu-surface);
+  box-shadow: 2px 2px 0 var(--anyu-line);
+  font-family: var(--anyu-font-mono);
+  letter-spacing: var(--anyu-track-mono);
+}
+
+.anyu-v2 .anyu-paid-policy-list li::before {
+  border-radius: var(--anyu-radius-sm);
+  background: var(--anyu-accent2);
+  box-shadow: 1px 1px 0 var(--anyu-line);
 }
 
 .anyu-v2 .anyu-paid-price {

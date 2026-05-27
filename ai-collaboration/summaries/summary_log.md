@@ -5731,3 +5731,20 @@ Unresolved questions:
 - NewebPay may still require public phone/address/applicant details.
 - Invoice/tax wording should be reviewed before real payment launch.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Provider-review Copy Visual Grouping Polish v0
+
+Completed changes:
+- Saved the visual grouping handoff under `ai-collaboration/handoffs/`.
+- Reworked Module 01 paid-preview provider-review copy into product/value, delivery/beta, included-content, trust/policy, and service-limitation sections.
+- Added compact included-content chips and a grouped `交付與隱私` panel.
+- Added Theme A/Theme B-compatible styling for the grouped panels.
+- Updated tests for grouped paid-preview copy and both theme wrappers.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Provider-review copy can remain complete without overwhelming the conversion card when policy details are grouped into a compact panel.
+- Theme B needs sharper bordered panels for the same information hierarchy, while Theme A works better with soft chip/card treatment.
+
+Unresolved questions:
+- Staging visual QA may still request minor spacing/height tuning.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

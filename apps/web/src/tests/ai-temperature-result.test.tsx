@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { PaidPreviewCard } from "@/components/anyu/PaidPreviewCard";
 import { AiTemperatureResult } from "@/components/modules/ai-temperature/AiTemperatureResult";
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
 import type { AiTemperatureResultViewModel } from "@/lib/modules/ai-temperature-ui";
@@ -72,16 +73,50 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("一次性查看 · 無訂閱");
     expect(html).toContain("一次性 · no subscription");
     expect(html).toContain('class="anyu-reply-lock-mark"');
-    expect(html).toContain("正式開放後，完整分析預計為一次性查看 NT$49；目前內測期間不會真的收費。");
-    expect(html).toContain("發生系統未產生完整分析、連結無法開啟或重複付款");
+    expect(html).toContain("正式開放後，一次性查看；目前內測不會真的收費。");
+    expect(html).toContain("完整分析會透過網頁或 LINE 連結交付。");
+    expect(html).toContain('class="anyu-paid-included-panel"');
+    expect(html).toContain('class="anyu-paid-policy-panel"');
+    expect(html).toContain("3 種可能狀態");
+    expect(html).toContain("可直接使用的回覆句與回覆策略");
+    expect(html).toContain("48 小時觀察建議");
+    expect(html).toContain("分析依據線索摘要");
+    expect(html).toContain("可回看的完整結果頁");
+    expect(html).toContain("系統未成功產生結果、連結無法開啟或重複付款");
     expect(html).toContain("hello@anyu.tw");
-    expect(html).toContain("不需要原始對話內容");
-    expect(html).toContain("你提供的文字只會用於產生本次分析與必要的服務交付");
+    expect(html).toContain("不需要提供原始對話內容");
+    expect(html).toContain("你提供的文字只用於本次分析與必要服務交付");
+    expect(html).toContain("暗語 ANYU 是文字情境整理與溝通建議，不是心理治療、諮商、命理或關係結果保證。");
     expect(html).not.toContain("這份分析主要參考了這些線索");
     expect(html).not.toContain("evidenceSummary");
     expect(html).not.toContain("checkout");
     expect(html).not.toContain("NewebPay");
     expect(html).not.toContain("藍新");
+  });
+
+  it("renders grouped provider-review copy under both theme wrappers", () => {
+    const card = (
+      <PaidPreviewCard
+        headline={resultFixture.paidHeadline}
+        price={resultFixture.paidPrice}
+        includedSections={resultFixture.paidIncludedSections}
+        previewCopy={resultFixture.paidPreviewCopy}
+      />
+    );
+
+    const classicHtml = renderToStaticMarkup(<div className="anyu-module-theme">{card}</div>);
+    const risoHtml = renderToStaticMarkup(<div className="anyu-module-theme anyu-v2">{card}</div>);
+
+    for (const html of [classicHtml, risoHtml]) {
+      expect(html).toContain('class="anyu-paid-included-panel"');
+      expect(html).toContain('class="anyu-paid-policy-panel"');
+      expect(html).toContain('class="anyu-paid-limitation-note"');
+      expect(html).toContain("正式開放後，一次性查看；目前內測不會真的收費。");
+      expect(html).toContain("正式付款後若系統未成功產生結果、連結無法開啟或重複付款");
+      expect(html).not.toContain("checkout");
+      expect(html).not.toContain("NewebPay");
+      expect(html).not.toContain("藍新");
+    }
   });
 
   it("applies the editorial reading class only to long-form result surfaces", () => {
