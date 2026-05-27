@@ -40,6 +40,8 @@ describe("event metadata guard", () => {
         themeVariant: "riso",
         themeSource: "manual_override",
         themeCarryoverSource: "unlock_intent",
+        operatorTest: true,
+        testModeSource: "header",
       }),
     ).toBe(false);
   });

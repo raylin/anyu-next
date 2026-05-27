@@ -8,7 +8,9 @@ const {
   mockUpdateAnalysisRequestState,
   mockGenerateModuleResult,
   mockIsOutputValidationError,
+  mockCheckIpHourlyLimit,
   mockCheckPersistedAnalyzeLimits,
+  mockGetOperatorTestMode,
   mockResolveRuntimeStrategy,
   mockCreateCompletedPaidResultShadowRecord,
 } = vi.hoisted(() => ({
@@ -19,7 +21,9 @@ const {
   mockUpdateAnalysisRequestState: vi.fn(),
   mockGenerateModuleResult: vi.fn(),
   mockIsOutputValidationError: vi.fn(),
+  mockCheckIpHourlyLimit: vi.fn(),
   mockCheckPersistedAnalyzeLimits: vi.fn(),
+  mockGetOperatorTestMode: vi.fn(),
   mockResolveRuntimeStrategy: vi.fn(),
   mockCreateCompletedPaidResultShadowRecord: vi.fn(),
 }));
@@ -56,10 +60,13 @@ vi.mock("@/lib/db/client", () => ({
 }));
 
 vi.mock("@/lib/runtime/abuse-guard", () => ({
-  checkIpHourlyLimit: () => ({ ok: true }),
+  checkIpHourlyLimit: mockCheckIpHourlyLimit,
   checkPersistedAnalyzeLimits: mockCheckPersistedAnalyzeLimits,
   getAnalysisGuardConfig: () => ({ ipHourlyLimit: 10 }),
   getClientIpAddress: () => null,
+  getOperatorTestEventMetadata: (mode: { enabled: boolean; source?: string }) =>
+    mode.enabled ? { operatorTest: true, testModeSource: mode.source } : {},
+  getOperatorTestMode: mockGetOperatorTestMode,
   looksLikePromptInjection: () => false,
   looksLikeUnsupportedRelationshipContent: () => false,
 }));
@@ -89,7 +96,9 @@ describe("module analyze cache route behavior", () => {
       retryOnInvalid: false,
       fallbackModel: null,
     });
+    mockCheckIpHourlyLimit.mockReturnValue({ ok: true });
     mockCheckPersistedAnalyzeLimits.mockResolvedValue({ ok: true });
+    mockGetOperatorTestMode.mockReturnValue({ enabled: false });
     mockUpdateAnalysisRequestState.mockResolvedValue({ id: "request-2" });
     mockIsOutputValidationError.mockReturnValue(false);
   });
@@ -201,6 +210,11 @@ describe("module analyze cache route behavior", () => {
       cacheHit: false,
     });
     expect(mockCheckPersistedAnalyzeLimits).toHaveBeenCalledTimes(1);
+    expect(mockCheckPersistedAnalyzeLimits).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skipSessionLimit: false,
+      }),
+    );
     expect(mockCreateAnalysisRequestRecord).toHaveBeenCalledWith(
       expect.objectContaining({
         cacheKeyVersion: "v2",
@@ -266,6 +280,126 @@ describe("module analyze cache route behavior", () => {
         }),
       }),
     );
+  });
+
+  it("skips IP and session limits for valid operator test requests", async () => {
+    mockGetOperatorTestMode.mockReturnValue({ enabled: true, source: "header" });
+    mockGetCachedAnalysisResult.mockResolvedValue(null);
+    mockCreateAnalysisRequestRecord.mockResolvedValue({ id: "request-operator" });
+    mockGenerateModuleResult.mockResolvedValue({
+      result: extractFreeResult(aiTemperatureDemoProductResult),
+      provider: "anthropic",
+      providerModel: "claude-sonnet-4-20250514",
+      providerRawJson: { id: "provider-response" },
+      redactedText: "redacted",
+      privacyFlags: [],
+      scoreBucket: "warm",
+      runtimeModel: {
+        modelStrategy: "sonnet_default",
+        primaryModel: "claude-sonnet-4-20250514",
+        finalModel: "claude-sonnet-4-20250514",
+        retryCount: 0,
+        fallbackUsed: false,
+        schemaValidationPassed: true,
+      },
+    });
+    mockCreateAnalysisResultRecord.mockResolvedValue({ id: "result-operator" });
+
+    const response = await analyzePost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-operator-test-secret": "configured-secret",
+        },
+        body: JSON.stringify(validBody),
+      }),
+      {
+        params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockCheckIpHourlyLimit).not.toHaveBeenCalled();
+    expect(mockCheckPersistedAnalyzeLimits).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skipSessionLimit: true,
+      }),
+    );
+    expect(mockInsertEvent).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        eventName: "input_submitted",
+        metadata: expect.objectContaining({
+          operatorTest: true,
+          testModeSource: "header",
+        }),
+      }),
+    );
+    expect(mockInsertEvent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        eventName: "analysis_completed",
+        metadata: expect.objectContaining({
+          operatorTest: true,
+          testModeSource: "header",
+        }),
+      }),
+    );
+  });
+
+  it("treats missing or invalid operator credentials like normal public traffic", async () => {
+    mockGetCachedAnalysisResult.mockResolvedValue(null);
+    mockCheckIpHourlyLimit.mockReturnValue({
+      ok: false,
+      error: "rate_limited_ip",
+      message: "limited",
+    });
+
+    const response = await analyzePost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(validBody),
+      }),
+      {
+        params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      },
+    );
+
+    expect(response.status).toBe(429);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: "rate_limited_ip",
+    });
+    expect(mockCheckPersistedAnalyzeLimits).not.toHaveBeenCalled();
+    expect(mockGenerateModuleResult).not.toHaveBeenCalled();
+  });
+
+  it("still enforces input validation in operator test mode", async () => {
+    mockGetOperatorTestMode.mockReturnValue({ enabled: true, source: "header" });
+
+    const response = await analyzePost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-operator-test-secret": "configured-secret",
+        },
+        body: JSON.stringify({
+          ...validBody,
+          text: "太短",
+        }),
+      }),
+      {
+        params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      },
+    );
+
+    expect(response.status).toBe(400);
+    expect(mockCheckIpHourlyLimit).not.toHaveBeenCalled();
+    expect(mockCheckPersistedAnalyzeLimits).not.toHaveBeenCalled();
+    expect(mockGenerateModuleResult).not.toHaveBeenCalled();
   });
 
   it("marks a persisted request failed when provider generation fails", async () => {

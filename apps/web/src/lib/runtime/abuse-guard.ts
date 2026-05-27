@@ -5,6 +5,7 @@ import { analysisRequests } from "@/lib/db/schema";
 export const DEFAULT_ANALYSIS_SESSION_DAILY_LIMIT = 3;
 export const DEFAULT_ANALYSIS_IP_HOURLY_LIMIT = 10;
 export const DEFAULT_ANALYSIS_GLOBAL_DAILY_LIMIT = 200;
+export const OPERATOR_TEST_SECRET_HEADER = "x-operator-test-secret";
 
 export type AnalyzeGuardError =
   | "rate_limited_session"
@@ -14,6 +15,10 @@ export type AnalyzeGuardError =
 export type AnalyzeGuardResult =
   | { ok: true }
   | { ok: false; error: AnalyzeGuardError; message: string };
+
+export type OperatorTestMode =
+  | { enabled: false }
+  | { enabled: true; source: "header" };
 
 type InMemoryWindow = {
   windowStartedAt: number;
@@ -35,6 +40,24 @@ function getPositiveEnvInt(name: string, fallback: number): number {
   return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : fallback;
 }
 
+function getConfiguredOperatorTestSecret(): string {
+  return process.env.OPERATOR_TEST_SECRET?.trim() ?? "";
+}
+
+function safeCompareStrings(providedValue: string, expectedValue: string): boolean {
+  if (providedValue.length !== expectedValue.length) {
+    return false;
+  }
+
+  let mismatch = 0;
+
+  for (let index = 0; index < expectedValue.length; index += 1) {
+    mismatch |= providedValue.charCodeAt(index) ^ expectedValue.charCodeAt(index);
+  }
+
+  return mismatch === 0;
+}
+
 export function getAnalysisGuardConfig() {
   return {
     sessionDailyLimit: getPositiveEnvInt(
@@ -49,6 +72,37 @@ export function getAnalysisGuardConfig() {
       "ANALYSIS_GLOBAL_DAILY_LIMIT",
       DEFAULT_ANALYSIS_GLOBAL_DAILY_LIMIT,
     ),
+  };
+}
+
+export function getOperatorTestMode(headers: Headers): OperatorTestMode {
+  const configuredSecret = getConfiguredOperatorTestSecret();
+
+  if (!configuredSecret) {
+    return { enabled: false };
+  }
+
+  const providedSecret = headers.get(OPERATOR_TEST_SECRET_HEADER)?.trim() ?? "";
+
+  if (!providedSecret) {
+    return { enabled: false };
+  }
+
+  if (!safeCompareStrings(providedSecret, configuredSecret)) {
+    return { enabled: false };
+  }
+
+  return { enabled: true, source: "header" };
+}
+
+export function getOperatorTestEventMetadata(mode: OperatorTestMode) {
+  if (!mode.enabled) {
+    return {};
+  }
+
+  return {
+    operatorTest: true,
+    testModeSource: mode.source,
   };
 }
 
@@ -188,12 +242,13 @@ export async function checkPersistedAnalyzeLimits(input: {
   moduleId: string;
   themeSlug: string;
   anonymousSessionId?: string | null;
+  skipSessionLimit?: boolean;
 }): Promise<AnalyzeGuardResult> {
   const db = requireDb();
   const config = getAnalysisGuardConfig();
   const dayAgo = new Date(Date.now() - ONE_DAY_MS);
 
-  if (input.anonymousSessionId) {
+  if (!input.skipSessionLimit && input.anonymousSessionId) {
     const [sessionCountRow] = await db
       .select({ count: count() })
       .from(analysisRequests)
@@ -238,4 +293,3 @@ export async function checkPersistedAnalyzeLimits(input: {
 
   return { ok: true };
 }
-

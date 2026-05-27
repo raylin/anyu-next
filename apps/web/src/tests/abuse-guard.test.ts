@@ -3,6 +3,9 @@ import {
   checkIpHourlyLimit,
   getAnalysisGuardConfig,
   getClientIpAddress,
+  getOperatorTestEventMetadata,
+  getOperatorTestMode,
+  OPERATOR_TEST_SECRET_HEADER,
   looksLikePromptInjection,
   looksLikeUnsupportedRelationshipContent,
 } from "@/lib/runtime/abuse-guard";
@@ -87,5 +90,47 @@ describe("analyze abuse guards", () => {
     } else {
       process.env.ANALYSIS_GLOBAL_DAILY_LIMIT = originalGlobal;
     }
+  });
+
+  it("disables operator test mode when no secret is configured", () => {
+    const originalSecret = process.env.OPERATOR_TEST_SECRET;
+    delete process.env.OPERATOR_TEST_SECRET;
+
+    expect(
+      getOperatorTestMode(new Headers({ [OPERATOR_TEST_SECRET_HEADER]: "provided" })),
+    ).toEqual({ enabled: false });
+
+    if (originalSecret === undefined) {
+      delete process.env.OPERATOR_TEST_SECRET;
+    } else {
+      process.env.OPERATOR_TEST_SECRET = originalSecret;
+    }
+  });
+
+  it("requires the configured operator test secret header", () => {
+    const originalSecret = process.env.OPERATOR_TEST_SECRET;
+    process.env.OPERATOR_TEST_SECRET = "configured-secret";
+
+    expect(getOperatorTestMode(new Headers())).toEqual({ enabled: false });
+    expect(
+      getOperatorTestMode(new Headers({ [OPERATOR_TEST_SECRET_HEADER]: "wrong-secret" })),
+    ).toEqual({ enabled: false });
+    expect(
+      getOperatorTestMode(new Headers({ [OPERATOR_TEST_SECRET_HEADER]: "configured-secret" })),
+    ).toEqual({ enabled: true, source: "header" });
+
+    if (originalSecret === undefined) {
+      delete process.env.OPERATOR_TEST_SECRET;
+    } else {
+      process.env.OPERATOR_TEST_SECRET = originalSecret;
+    }
+  });
+
+  it("creates only safe operator test event metadata", () => {
+    expect(getOperatorTestEventMetadata({ enabled: false })).toEqual({});
+    expect(getOperatorTestEventMetadata({ enabled: true, source: "header" })).toEqual({
+      operatorTest: true,
+      testModeSource: "header",
+    });
   });
 });

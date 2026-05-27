@@ -98,11 +98,13 @@ FULFILLMENT_TOKEN_SECRET=<strong random secret>
 ANALYSIS_SESSION_DAILY_LIMIT=3
 ANALYSIS_IP_HOURLY_LIMIT=10
 ANALYSIS_GLOBAL_DAILY_LIMIT=200
+OPERATOR_TEST_SECRET=<strong random secret, optional, only if operator QA bypass is explicitly approved>
 ```
 
 Important rule:
 
 - do not set production `MODEL_STRATEGY` to `haiku_retry_sonnet_fallback` unless a separate production approval explicitly approves that model strategy
+- do not set production `OPERATOR_TEST_SECRET` unless operator test mode is explicitly approved for controlled QA; absence disables the mode
 
 ## 7. Neon Production Database Checklist
 
@@ -196,7 +198,43 @@ Important operational rule:
 
 This rule applies to staging and production.
 
-## 12. Module 01 Smoke Test
+## 12. Operator Test Mode
+
+Operator test mode is for controlled Module 01 QA only. It must not be used as a public product affordance.
+
+Activation:
+
+- configure `OPERATOR_TEST_SECRET` only in the target environment that should allow operator QA
+- send analyze API requests with the `x-operator-test-secret` request header
+- if `OPERATOR_TEST_SECRET` is unset, missing, or mismatched, traffic behaves as normal public traffic
+
+Allowed relaxation:
+
+- valid operator test requests skip the in-memory per-IP analyze limit
+- valid operator test requests skip the persisted per-session analyze limit
+- the global daily analyze cap remains enforced
+
+Protections that remain enforced:
+
+- input validation
+- relationship-content and prompt-injection guards
+- provider/model hard limits and provider errors
+- LINE webhook signature verification
+- LIFF ID token verification
+- secret and token redaction rules
+
+Analytics/event behavior:
+
+- operator requests are marked with safe metadata: `operatorTest: true` and `testModeSource: "header"`
+- do not log, store, or paste the operator secret
+- operator-marked events should be excluded from product analytics review when measuring public conversion
+
+Current v0 limitation:
+
+- mobile manual testing does not receive a public test-mode UI or query-only bypass
+- use an API client or controlled QA tooling that can send the header; a signed short-lived mobile operator link would require a separate approved follow-up
+
+## 13. Module 01 Smoke Test
 
 Minimum production smoke test:
 
@@ -235,7 +273,7 @@ Minimal happy-path production smoke evidence should include:
 - synthetic Email fallback success if tested
 - privacy-safe event verification with no raw input or contact leakage
 
-## 13. Legal / Trust Checklist
+## 14. Legal / Trust Checklist
 
 Before production:
 
@@ -249,7 +287,7 @@ Before production:
   - LINE automation if not true
   - automatic deletion guarantees that are not yet implemented
 
-## 14. LINE Funnel / Fulfillment Checklist
+## 15. LINE Funnel / Fulfillment Checklist
 
 Before production:
 
@@ -277,7 +315,7 @@ Reference record:
 - `ai-collaboration/research/line/line-fulfillment-env-matrix.md`
 - profile image asset: `docs/design-system/brand/exports/line-profile-1024.png`
 
-## 15. Abuse Guard / Cost Cap Checklist
+## 16. Abuse Guard / Cost Cap Checklist
 
 Before production:
 
@@ -289,7 +327,7 @@ Before production:
 - abuse guard behavior has been verified recently on staging
 - provider key presence alone is not enough; production smoke should still verify an actual provider call after DB readiness is real
 
-## 16. Retention Cleanup SOP
+## 17. Retention Cleanup SOP
 
 Until stronger automation exists, production needs an explicit retention cleanup SOP:
 
@@ -334,7 +372,7 @@ Pre-launch rule:
 - scheduled deletion is still a known risk if not implemented
 - manual cleanup is still required only for the non-target tables above unless a later retention-policy decision expands scope
 
-## 17. Rollback Plan
+## 18. Rollback Plan
 
 If production deployment misbehaves:
 
@@ -346,7 +384,7 @@ If production deployment misbehaves:
 
 Rollback must not rely on guessing. Use a known-good staging-approved or previously healthy production deployment.
 
-## 18. Post-Launch Monitoring
+## 19. Post-Launch Monitoring
 
 First post-launch checks:
 
@@ -365,7 +403,7 @@ Recommended early cadence:
 - another check within the first hour
 - daily checks during the first low-key launch window
 
-## 19. Known Launch Risks
+## 20. Known Launch Risks
 
 Known production-launch risks:
 
@@ -377,7 +415,7 @@ Known production-launch risks:
 - current model remains provider-dominant in latency, which affects perceived responsiveness
 - protected staging verification does not fully replace production real-user conditions
 
-## 20. What Must Not Happen Automatically
+## 21. What Must Not Happen Automatically
 
 The following must not happen automatically:
 
@@ -387,7 +425,7 @@ The following must not happen automatically:
 - production env change without rebuild/redeploy verification
 - production model-strategy switch without separate approval
 
-## 21. Production Launch Decision Record
+## 22. Production Launch Decision Record
 
 Use the canonical decision template:
 
@@ -403,6 +441,6 @@ That record should capture:
 - known risks accepted
 - rollback contact/owner
 
-## 22. Recommended Next Step
+## 23. Recommended Next Step
 
 `Production Launch Decision Draft v0`

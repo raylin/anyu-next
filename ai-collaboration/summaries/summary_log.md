@@ -5490,3 +5490,23 @@ Unresolved questions:
 - Relationship session retention and entitlement model require human approval before implementation.
 - Required docs-task validation passed.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Module 01 Operator Test Mode v0
+
+Completed changes:
+- Saved the operator test mode handoff under `ai-collaboration/handoffs/`.
+- Added a secret-gated `x-operator-test-secret` / `OPERATOR_TEST_SECRET` operator mode for Module 01 analyze requests.
+- Relaxed only the per-IP and per-session analyze limits for valid operator requests while preserving input validation, content guards, provider behavior, and the global daily cap.
+- Marked operator analyze events with safe metadata: `operatorTest: true` and `testModeSource: "header"`.
+- Added tests for valid operator mode, invalid/missing credentials, input validation in operator mode, and metadata safety.
+- Documented operator mode activation and constraints in the production deployment runbook.
+
+Learnings:
+- A header-secret v0 keeps the bypass server/API-tool oriented and avoids exposing a public query-only control.
+- Keeping the global daily cap active preserves a cost-safety boundary while removing common QA false negatives.
+- Mobile-friendly operator testing would need a separate signed-link design rather than extending this v0 silently.
+
+Unresolved questions:
+- Whether production should configure `OPERATOR_TEST_SECRET` remains an explicit operator decision.
+- A short-lived mobile operator link may be useful later but needs separate approval.
+- Full validation passed, including local Playwright E2E.
+- Commit hash and staging push status to be recorded in final completion summary.

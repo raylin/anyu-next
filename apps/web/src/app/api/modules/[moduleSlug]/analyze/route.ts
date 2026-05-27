@@ -24,6 +24,8 @@ import {
   checkPersistedAnalyzeLimits,
   getAnalysisGuardConfig,
   getClientIpAddress,
+  getOperatorTestEventMetadata,
+  getOperatorTestMode,
   looksLikePromptInjection,
   looksLikeUnsupportedRelationshipContent,
 } from "@/lib/runtime/abuse-guard";
@@ -114,6 +116,8 @@ export async function POST(
   }
 
   timing.mark("input_validated");
+  const operatorTestMode = getOperatorTestMode(request.headers);
+  const operatorTestMetadata = getOperatorTestEventMetadata(operatorTestMode);
 
   if (looksLikePromptInjection(validatedInput.text)) {
     return errorResponse(
@@ -131,10 +135,12 @@ export async function POST(
     );
   }
 
-  const ipLimitResult = checkIpHourlyLimit(
-    getClientIpAddress(request.headers),
-    getAnalysisGuardConfig().ipHourlyLimit,
-  );
+  const ipLimitResult = operatorTestMode.enabled
+    ? { ok: true as const }
+    : checkIpHourlyLimit(
+        getClientIpAddress(request.headers),
+        getAnalysisGuardConfig().ipHourlyLimit,
+      );
 
   if (!ipLimitResult.ok) {
     return errorResponse(429, ipLimitResult.error, ipLimitResult.message);
@@ -186,6 +192,7 @@ export async function POST(
             userContextProvided: validatedInput.userContextProvided,
             userContextFieldCount: validatedInput.userContextFieldCount,
             cacheHit: true,
+            ...operatorTestMetadata,
           },
         });
 
@@ -220,6 +227,7 @@ export async function POST(
             cacheHit: true,
             cacheKeyVersion: cacheKey.cacheKeyVersion,
             timingMs: getEventTimingMetrics(timing.summarize()),
+            ...operatorTestMetadata,
           },
         });
 
@@ -237,6 +245,7 @@ export async function POST(
       moduleId: moduleConfig.moduleId,
       themeSlug: moduleConfig.slug,
       anonymousSessionId: validatedInput.anonymousSessionId,
+      skipSessionLimit: operatorTestMode.enabled,
     });
 
     if (!persistedLimitResult.ok) {
@@ -286,6 +295,7 @@ export async function POST(
         userContextProvided: validatedInput.userContextProvided,
         userContextFieldCount: validatedInput.userContextFieldCount,
         cacheHit: false,
+        ...operatorTestMetadata,
       },
     });
 
@@ -381,6 +391,7 @@ export async function POST(
         cacheHit: false,
         cacheKeyVersion: cacheKey?.cacheKeyVersion ?? null,
         timingMs: getEventTimingMetrics(timing.summarize()),
+        ...operatorTestMetadata,
       },
     });
 
