@@ -5472,3 +5472,21 @@ Unresolved questions:
 - Real mobile LINE behavior still needs staging/operator verification after deployment.
 - Production refresh/smoke remains needed after this fix is promoted.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Module 01 Follow-up Interaction + Evidence Anchoring Plan v0
+
+Completed changes:
+- Saved the follow-up interaction/evidence anchoring planning handoff under `ai-collaboration/handoffs/`.
+- Created a planning report for short-input perceived wait, evidence anchoring, raw quote risks, follow-up interaction models, pricing/packaging, LINE UX, data model implications, privacy/retention, and MVP phasing.
+- Recommended keeping one-time NT$49 full analysis for low-key beta while planning a future 3-use relationship pack.
+- Recommended paid evidence anchors as model-generated summaries, not raw quotes.
+
+Learnings:
+- The strongest tester signal is repeat use over time, not just deeper one-time analysis.
+- Evidence anchoring can improve trust without retaining or displaying raw source quotes.
+- Short-input latency should be monitored before adding model/schema branching.
+
+Unresolved questions:
+- Production monitoring is needed before prioritizing actual short-input latency work.
+- Relationship session retention and entitlement model require human approval before implementation.
+- Required docs-task validation passed.
+- Commit hash and staging push status to be recorded in final completion summary.
