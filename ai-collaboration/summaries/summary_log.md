@@ -5393,3 +5393,21 @@ Unresolved questions:
 - Exact deployed commit is still not exposed by the runtime.
 - Real mobile LIFF and real staging/test OA short-code flows were not re-run in this task; prior manual smoke records remain the basis for those checks.
 - Required no-code-change validation passed; commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Two-tier + Dual Theme Production Activation Decision v0
+
+Completed changes:
+- Saved the production activation decision handoff under `ai-collaboration/handoffs/`.
+- Reviewed the latest Module 01 readiness reports covering pre-production staging QA, real staging LIFF and short-code smoke, two-tier paid generation, dual-theme carryover, input quality, pending paid UX, LIFF bridge fixes, production migration smoke, and retention cleanup.
+- Created a production activation decision record with rollout scope, GO/NO-GO decision, accepted risks, no-go conditions, production smoke checklist, rollback plan, monitoring plan, and ads/broader-traffic blockers.
+- Created the required execution report.
+- Did not change code, deploy production, run production smoke, apply migrations, or change env/LINE Console configuration.
+
+Learnings:
+- Decision is GO for low-key production activation only, and NO-GO for ads/broader traffic.
+- The main accepted low-key beta risk is webhook-triggered paid generation using Next `after` rather than durable queueing.
+- Broader traffic should wait for durable delivery or stronger monitoring, provider/fallback metrics, and stable production LINE observations.
+
+Unresolved questions:
+- Human approval is still required before any production activation task.
+- Human should decide whether prior real staging LIFF/short-code smoke is sufficient or whether to run one final manual staging check first.
+- Required docs-only validation passed; commit hash and staging push status to be recorded in final completion summary.
