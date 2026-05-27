@@ -6,7 +6,7 @@ Date: 2026-05-27
 
 Production is now refreshed to candidate `4c2487a` and deployment `dpl_Ffzzri9CYMk6PMEmw4c8BGRXQqJh`. Route/API smoke passed in the previous refresh record. Production short-code smoke is now recorded as passed after correcting a production/staging LINE secret/token mismatch.
 
-The latest production metrics rerun confirms the new completed paid-content view tracker is active in production: `unlocked_result_view` is now 1.
+The latest production metrics rerun confirms the new completed paid-content view tracker is active in production: `unlocked_result_view` is now 1. Final production LIFF operator smoke is now recorded as passed.
 
 Low-key production remains active for monitoring only. Ads, broad traffic, payment, email delivery, rich menu, broadcast, portal/account system, and Module 02 remain blocked.
 
@@ -30,10 +30,12 @@ Production short-code:
 
 Production LIFF:
 
-- Status: pending / not confirmed in this task
-- Paid content completed: unknown
-- Theme carried through: unknown
-- 404/homepage/processing stuck/error: unknown
+- Status: pass
+- Paid content completed/rendered: yes
+- Theme carried through: yes
+- 404: no
+- Homepage drop: no
+- Processing stuck/error: no
 
 ## 4. LINE Secret / Token Ops Note
 
@@ -104,7 +106,7 @@ No raw input, redacted input text, full result JSON, paid result JSON, provider 
 
 ## 9. Issues Found
 
-- Production mobile LIFF operator smoke remains unconfirmed in this task.
+- Production mobile LIFF operator smoke passed.
 - Traffic is too low for conversion conclusions.
 - Funnel counts remain smoke-heavy / non-sessionized, with downstream counts exceeding upstream counts.
 
@@ -121,4 +123,4 @@ Continue low-key production monitoring. Treat current metrics as health checks o
 
 ## 12. Recommended Next Step
 
-Keep ads and broader traffic blocked. Record production mobile LIFF operator smoke if it has not already passed, then run another aggregate metrics check after the next production monitoring window.
+Keep ads and broader traffic blocked, then run another aggregate metrics check after the next production monitoring window.

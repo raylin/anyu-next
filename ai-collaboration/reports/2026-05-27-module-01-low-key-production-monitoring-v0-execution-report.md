@@ -2,7 +2,7 @@
 
 ## Summary
 
-Recorded the low-key production monitoring state after production refresh and corrected production short-code smoke. Updated the report with the latest aggregate-only production metrics rerun after the completed paid-content view tracker reached production.
+Recorded the low-key production monitoring state after production refresh, corrected production short-code smoke, and final production LIFF operator smoke. Updated the report with the latest aggregate-only production metrics rerun after the completed paid-content view tracker reached production.
 
 ## Files Created
 
@@ -38,7 +38,12 @@ Production short-code smoke:
 
 Production LIFF smoke:
 
-- Status: pending / not confirmed in this task
+- Status: pass
+- Paid content completed/rendered: yes
+- Theme carried through correctly: yes
+- 404: no
+- Homepage drop: no
+- Processing stuck/error: no
 
 ## Metrics Result
 
@@ -101,7 +106,7 @@ No raw input, redacted input, full result JSON, paid result JSON, provider outpu
 
 ## Known Technical Debt
 
-- Production mobile LIFF operator smoke remains unrecorded.
+- Production mobile LIFF operator smoke is recorded as passed.
 - Current funnel metrics remain event-count based and not sessionized.
 
 ## Tech Debt Review
@@ -122,7 +127,7 @@ No raw input, redacted input, full result JSON, paid result JSON, provider outpu
 ### Deferred Cleanup Candidates
 
 - Add a safe unlocked-result page-view event if `unlocked_result_view` becomes important.
-- Add a production LIFF operator-smoke record once confirmed.
+- None for production operator smoke; short-code and LIFF are both recorded as passed.
 
 ### Recommended Follow-up
 
@@ -143,9 +148,9 @@ Pending at report creation time.
 
 ## Remaining Uncertainties
 
-- Production LIFF operator smoke status remains pending/unknown.
+- Production LIFF operator smoke status is passed.
 - Traffic is too low and smoke-heavy for statistical or conversion conclusions.
 
 ## Recommended Next Step
 
-Record production mobile LIFF operator smoke if pending, keep ads / broader traffic blocked, then continue low-key production monitoring with aggregate metrics only.
+Continue low-key production monitoring with aggregate metrics only. Keep ads and broader traffic blocked.
