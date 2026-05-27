@@ -5454,3 +5454,21 @@ Unresolved questions:
 - No staging visual QA was run in this implementation pass.
 - Full local validation passed, including Playwright E2E.
 - Commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Unlocked Paid Link Pending State Flicker Fix v0
+
+Completed changes:
+- Saved the unlocked paid-link pending-state flicker handoff under `ai-collaboration/handoffs/`.
+- Added explicit unlocked route state selection for completed, processing, requested, claimed-missing, not-requested, failed, and expired states.
+- Treated fulfilled LINE/short-code links with no paid row as pending instead of generic missing.
+- Updated the LIFF bridge to navigate immediately in non-debug success flow before rendering a transient success CTA.
+- Added route-state, paid-status, and LIFF bridge regression tests.
+
+Learnings:
+- The production-observed flicker was consistent with a fulfilled link being briefly treated like an idle/claim state before pending polling was established.
+- Fulfillment status is the right server-known signal for distinguishing claimed-missing from truly not-requested.
+- Debug LIFF mode can keep the success diagnostic state; normal LIFF mode should navigate before rendering it.
+
+Unresolved questions:
+- Real mobile LINE behavior still needs staging/operator verification after deployment.
+- Production refresh/smoke remains needed after this fix is promoted.
+- Commit hash and staging push status to be recorded in final completion summary.

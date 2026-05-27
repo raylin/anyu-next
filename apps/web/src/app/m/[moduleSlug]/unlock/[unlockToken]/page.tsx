@@ -79,36 +79,19 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
     promptVersion: PAID_RESULT_PROMPT_VERSION,
     schemaVersion: PAID_RESULT_SCHEMA_VERSION,
   });
+  const routeState = resolveUnlockPaidRouteState({
+    result,
+    storedPaidResult,
+    fulfillmentStatus: record.unlockIntent.fulfillmentStatus,
+  });
 
-  if (!hasPaidResult(result) && !storedPaidResult?.paidResultJson) {
-    if (storedPaidResult?.status === "processing") {
-      return (
-        <UnlockPending
-          moduleConfig={moduleConfig}
-          initialTheme={initialTheme}
-          unlockToken={unlockToken}
-          initialStatus="processing"
-        />
-      );
-    }
-
-    if (storedPaidResult?.status === "failed") {
-      return (
-        <UnlockPending
-          moduleConfig={moduleConfig}
-          initialTheme={initialTheme}
-          unlockToken={unlockToken}
-          initialStatus="failed"
-        />
-      );
-    }
-
+  if (routeState !== "completed") {
     return (
       <UnlockPending
         moduleConfig={moduleConfig}
         initialTheme={initialTheme}
         unlockToken={unlockToken}
-        initialStatus={getPendingPaidStatus(storedPaidResult?.status)}
+        initialStatus={getInitialPendingStatus(routeState)}
       />
     );
   }
@@ -274,15 +257,73 @@ function UnlockPending({
   );
 }
 
-function getPendingPaidStatus(
-  status?: string | null,
+export type UnlockPaidRouteState =
+  | "completed"
+  | "processing"
+  | "requested"
+  | "claimed_missing"
+  | "not_requested"
+  | "failed"
+  | "expired";
+
+export function resolveUnlockPaidRouteState(input: {
+  result: unknown;
+  storedPaidResult?: {
+    status?: string | null;
+    paidResultJson?: unknown;
+  } | null;
+  fulfillmentStatus?: string | null;
+}): UnlockPaidRouteState {
+  const storedStatus = input.storedPaidResult?.status;
+
+  if (storedStatus === "failed") {
+    return "failed";
+  }
+
+  if (storedStatus === "expired") {
+    return "expired";
+  }
+
+  if (storedStatus === "processing") {
+    return "processing";
+  }
+
+  if (storedStatus === "pending") {
+    return "requested";
+  }
+
+  if (storedStatus === "completed" && (input.storedPaidResult?.paidResultJson || hasPaidResult(input.result))) {
+    return "completed";
+  }
+
+  if (input.storedPaidResult?.paidResultJson || hasPaidResult(input.result)) {
+    return "completed";
+  }
+
+  if (isFulfillmentClaimed(input.fulfillmentStatus)) {
+    return "claimed_missing";
+  }
+
+  return "not_requested";
+}
+
+function isFulfillmentClaimed(status?: string | null) {
+  return status === "bound" || status === "delivered";
+}
+
+function getInitialPendingStatus(
+  state: Exclude<UnlockPaidRouteState, "completed">,
 ): "missing" | "pending" | "processing" | "failed" {
-  switch (status) {
-    case "pending":
+  switch (state) {
     case "processing":
+      return "processing";
     case "failed":
-      return status;
-    default:
+    case "expired":
+      return "failed";
+    case "requested":
+    case "claimed_missing":
+      return "pending";
+    case "not_requested":
       return "missing";
   }
 }

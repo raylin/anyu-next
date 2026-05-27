@@ -71,9 +71,13 @@ export async function POST(request: Request, { params }: RouteProps) {
   });
 
   if (!paidStatus) {
+    const isFulfillmentClaimed =
+      record.unlockIntent.fulfillmentStatus === "bound" ||
+      record.unlockIntent.fulfillmentStatus === "delivered";
+
     return NextResponse.json({
       ok: true,
-      status: "missing",
+      status: isFulfillmentClaimed ? "pending" : "missing",
       retryable: true,
       errorCategory: null,
     });

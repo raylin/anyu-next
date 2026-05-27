@@ -1,4 +1,6 @@
 import { createHmac } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -314,6 +316,19 @@ describe("LINE fulfillment helpers", () => {
     } finally {
       vi.stubGlobal("window", originalWindow);
     }
+  });
+
+  it("navigates immediately after successful non-debug LIFF bind without rendering a transient success CTA", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "src/components/line/LineFulfillBridge.tsx"),
+      "utf8",
+    );
+    const assignIndex = source.indexOf("window.location.assign(redirectTarget);");
+    const successStateIndex = source.indexOf('setState("success");');
+
+    expect(assignIndex).toBeGreaterThan(0);
+    expect(successStateIndex).toBeGreaterThan(assignIndex);
+    expect(source).toContain("if (!isDebugEnabled) {\n          window.location.assign(redirectTarget);\n          return;\n        }");
   });
 
   it("formats LIFF diagnostics without token values or full URLs", () => {

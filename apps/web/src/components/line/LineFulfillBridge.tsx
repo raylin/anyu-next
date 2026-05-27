@@ -162,11 +162,13 @@ export function LineFulfillBridge({
           bindResponseTarget: redirectTarget,
           navigationMethod: "window.location.assign",
         });
-        setUnlockedPath(redirectTarget);
-        setState("success");
         if (!isDebugEnabled) {
           window.location.assign(redirectTarget);
+          return;
         }
+
+        setUnlockedPath(redirectTarget);
+        setState("success");
       } catch {
         if (!cancelled) {
           updateDiagnostic({

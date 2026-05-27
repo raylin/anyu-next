@@ -177,4 +177,35 @@ describe("paid result generation request route", () => {
       errorCategory: null,
     });
   });
+
+  it("treats claimed fulfillment links without a paid row as pending, not generic missing", async () => {
+    mockGetUnlockIntentByTokenHash.mockResolvedValue({
+      unlockIntent: {
+        themeSlug: "ambiguous-temperature",
+        fulfillmentStatus: "delivered",
+        unlockTokenExpiresAt: new Date(Date.now() + 60_000),
+      },
+      result: {
+        id: "result-1",
+      },
+    });
+    mockGetPaidResultStatusForAnalysisResult.mockResolvedValue(null);
+
+    const response = await statusPost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockToken: "unlock-token-1.r" }),
+      }),
+      { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      status: "pending",
+      retryable: true,
+      errorCategory: null,
+    });
+  });
 });
