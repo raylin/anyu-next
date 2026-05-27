@@ -5548,3 +5548,22 @@ Learnings:
 Unresolved questions:
 - Production mobile LIFF operator smoke remains unrecorded in this v1 report.
 - Full validation passed; commit hash and staging push status to be recorded in final completion summary.
+## 2026-05-27 - Module 01 Low-key Production Monitoring v0
+
+Completed changes:
+- Saved the low-key production monitoring handoff under `ai-collaboration/handoffs/`.
+- Confirmed production alias still points to deployment `dpl_4mukHzrtG27bix8UNcrfoLoTynuE` for candidate `092ba20`.
+- Recorded production short-code smoke as passed after LINE production/staging secret/token mismatch was corrected.
+- Recorded production LIFF operator smoke as pending / unconfirmed.
+- Ran aggregate-only production metrics on the confirmed Neon `anyu-next` production branch with operator traffic excluded.
+- Created a sanitized low-key production metrics report under `ai-collaboration/reports/metrics/`.
+
+Learnings:
+- Last-24-hour production event volume is too low and smoke/operator-heavy for conversion conclusions.
+- Aggregate health looks acceptable in the small window: paid generation completed 4/4 with provider source and no fallback; recorded fulfillment failures were 0.
+- Some server-side events do not carry theme metadata, so theme split includes `unknown:unknown`.
+
+Unresolved questions:
+- Production mobile LIFF operator smoke still needs a sanitized pass/fail record.
+- `unlocked_result_view` remains unavailable until a safe unlocked page-view event exists.
+- Full validation passed; commit hash and staging push status to be recorded in final completion summary.
