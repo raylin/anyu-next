@@ -5697,3 +5697,19 @@ Unresolved questions:
 - Owner must choose applicant type and confirm business/tax/invoice posture.
 - NewebPay official review-time SLA was not found in reviewed official pages.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-27 - Provider-review Storefront + Legal Copy Pass v0
+
+Completed changes:
+- Saved the provider-review storefront/legal copy handoff under `ai-collaboration/handoffs/`.
+- Created a docs-only review bundle with provider-facing product description, storefront copy, refund/re-delivery policy draft, privacy/trust copy, service limitation copy, support copy, placement recommendations, owner decisions, and application checklist.
+- Created an execution report documenting current gaps and next steps.
+- Kept payment disabled and did not change runtime public pages, payment code, checkout, DB schema, LINE behavior, paid generation, prompt/schema/cache, ads, or production behavior.
+
+Learnings:
+- Current public pages are sufficient for low-key production but still need provider-review-specific product/refund/support copy before payment application submission.
+- The safest next step is owner copy approval followed by a narrow app-copy pass, not payment integration.
+
+Unresolved questions:
+- Owner must decide applicant type, tax/invoice posture, public contact/business disclosure, and whether `hello@anyu.tw` is formal support.
+- Provider review may require public phone/address/company details; this should not be invented by Codex.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
