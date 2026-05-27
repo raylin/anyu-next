@@ -5783,3 +5783,24 @@ Unresolved questions:
 - NewebPay may require public phone/address/applicant details in a separate owner-approved task.
 - Interactive staging browser QA was blocked locally by the known Chromium MachPort permission issue; route/content QA and local validation passed.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-28 - Evidence Anchoring v3 Staging Provider Review v0
+
+Completed changes:
+- Saved the evidence anchoring v3 staging provider review handoff under `ai-collaboration/handoffs/`.
+- Ran one staging-only synthetic fresh analyze, unlock intent, deferred paid-generation request, paid-status poll, and unlocked route check.
+- Confirmed staging generated a completed `paid_result_schema_v3` paid result from the provider path without fallback.
+- Confirmed `evidenceSummary` exists as an object with 3 items and every item has `label`, `summary`, and `reason`.
+- Confirmed field-level evidence safety checks passed without recording raw input, raw provider output, full paid JSON, tokens, LINE IDs, or secrets.
+- Confirmed evidence cards rendered on the unlocked paid result route and did not appear on fetched free/landing surfaces or LINE reply helpers.
+- Created the required review bundle and execution report.
+
+Learnings:
+- The v3 evidence prompt/schema path works on a live staging provider sample.
+- Evidence summaries were concise and appeared as model-generated summaries rather than raw quote blocks.
+- Staging freshness still has to be proven behaviorally because runtime does not expose an exact commit marker.
+
+Unresolved questions:
+- One synthetic sample is not enough to judge long-term provider-output quality.
+- Owner visual review is still recommended before production refresh.
+- Production refresh/smoke remains a separate explicit approval task.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
