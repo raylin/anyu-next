@@ -5959,6 +5959,28 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
 
+## 2026-05-29 - Paid Generation Job Foundation Phase 3C Cron Wrapper v0
+
+Completed changes:
+- Saved the Phase 3C cron wrapper handoff under `ai-collaboration/handoffs/`.
+- Added `GET /api/cron/paid-generation` as a Vercel-Cron-friendly wrapper.
+- Added `CRON_SECRET`-only bearer auth for the cron wrapper.
+- Kept `INTERNAL_JOB_SECRET` reserved for the manual/operator processor endpoint; the cron wrapper does not accept it.
+- Delegated wrapper execution to the existing paid-generation processor with `paid_analysis`, `limit=1`, safe cron lock label, and optional `dryRun=1`.
+- Preserved `ENABLE_PAID_GENERATION_PROCESSOR` as the execution gate.
+- Added route/auth tests for missing/invalid auth, no query-string secret, disabled flag, safe delegation, aggregate-only response, and dry-run behavior.
+- Updated the production deployment runbook with cron wrapper usage and safety rules.
+- Created the required review bundle and execution report.
+
+Learnings:
+- A dedicated cron auth helper keeps Vercel Cron authorization distinct from manual internal processor authorization.
+- The cron wrapper can remain safe without a schedule because it requires both `CRON_SECRET` bearer auth and the processor feature flag.
+
+Unresolved questions:
+- Future cron schedule enablement still requires explicit approval.
+- Phase 3A temporary Vercel project cleanup remains an operator console task.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
 ## 2026-05-29 - Paid Generation Job Foundation Phase 3B Cron Trigger Plan v0
 
 Completed changes:

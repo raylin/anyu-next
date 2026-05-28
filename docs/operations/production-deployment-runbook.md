@@ -140,6 +140,21 @@ Paid generation job feature gate:
 - code may be deployed with the flag disabled; production runtime must not read or write `generation_jobs` while the flag is false
 - enable the flag only after a separate approved production migration and staging flag-on verification
 
+Paid generation processor / cron gate:
+
+- internal manual processor path: `POST /api/internal/jobs/process`
+- Vercel-Cron-friendly wrapper path: `GET /api/cron/paid-generation`
+- the cron wrapper requires `Authorization: Bearer $CRON_SECRET`
+- do not use query-string secrets for the cron wrapper
+- the cron wrapper hard-codes `paid_analysis` with `limit=1`
+- `dryRun=1` is allowed for aggregate-only no-op/manual verification
+- production cron schedule is not configured yet
+- keep `ENABLE_PAID_GENERATION_PROCESSOR=false` or absent in production until explicit approval
+- future production cadence recommendation: every 5 minutes with `limit=1`, after approval and no-op verification
+- test missing/invalid auth before any enabled smoke; both should return `401`
+- run an authorized no-op only from an approved secure environment that can access `CRON_SECRET`
+- never paste `CRON_SECRET`, job IDs, dedupe keys, raw input, provider output, paid result JSON, tokens, or LINE IDs into reports
+
 Expected command shape:
 
 ```bash
