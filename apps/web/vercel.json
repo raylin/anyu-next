@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/retention-cleanup",
       "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/paid-generation",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

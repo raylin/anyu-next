@@ -148,11 +148,13 @@ Paid generation processor / cron gate:
 - do not use query-string secrets for the cron wrapper
 - the cron wrapper hard-codes `paid_analysis` with `limit=1`
 - `dryRun=1` is allowed for aggregate-only no-op/manual verification
-- production cron schedule is not configured yet
+- production cron schedule is configured in `apps/web/vercel.json` for `/api/cron/paid-generation`
+- paid-generation cron cadence: every 5 minutes
 - keep `ENABLE_PAID_GENERATION_PROCESSOR=false` or absent in production until explicit approval
-- future production cadence recommendation: every 5 minutes with `limit=1`, after approval and no-op verification
+- with the processor flag disabled, scheduled calls should fail safe with `processor_disabled` and must not process jobs
 - test missing/invalid auth before any enabled smoke; both should return `401`
 - run an authorized no-op only from an approved secure environment that can access `CRON_SECRET`
+- before enabling production processor, verify due `paid_analysis` job count is `0` or intentionally expected
 - never paste `CRON_SECRET`, job IDs, dedupe keys, raw input, provider output, paid result JSON, tokens, or LINE IDs into reports
 
 Expected command shape:

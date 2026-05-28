@@ -5959,6 +5959,28 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
 
+## 2026-05-29 - Paid Generation Job Foundation Phase 3D Cron Schedule Gate v0
+
+Completed changes:
+- Saved the Phase 3D cron schedule gate handoff under `ai-collaboration/handoffs/`.
+- Added `/api/cron/paid-generation` to `apps/web/vercel.json` with cadence `*/5 * * * *`.
+- Preserved the existing retention cleanup cron schedule.
+- Added a config test to lock the paid-generation cron path and cadence.
+- Updated the production deployment runbook with the configured schedule and processor-disabled safety posture.
+- Confirmed production `CRON_SECRET` is configured and production `ENABLE_PAID_GENERATION_PROCESSOR` is absent.
+- Confirmed production `generation_jobs` aggregate counts are zero for total, due paid-analysis, processing, and failed-final jobs.
+- Verified staging wrapper safety: missing auth returns `401`; valid dry-run returns aggregate zero-work output.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Mode A is the safest schedule gate posture: commit the schedule while production processor remains disabled until explicit approval.
+- The schedule config alone does not change production until an approved production deployment applies it.
+
+Unresolved questions:
+- Production scheduled-run verification remains pending a separate approved production deploy.
+- Phase 3A temporary Vercel project cleanup remains an owner/operator console task.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
 ## 2026-05-29 - Paid Generation Job Foundation Phase 3C Cron Wrapper v0
 
 Completed changes:
