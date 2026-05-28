@@ -5920,3 +5920,23 @@ Unresolved questions:
 - Staging and production migrations are not applied by this task.
 - Job retention duration and future entitlement refs remain deferred decisions.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-28 - Paid Generation Job Foundation Phase 1 Staging Migration Verification v0
+
+Completed changes:
+- Saved the staging migration verification handoff under `ai-collaboration/handoffs/`.
+- Confirmed `https://staging.anyu.tw/api/health` is serving preview commit `ccf2d906a97c` from branch `staging`.
+- Applied only `apps/web/drizzle/0006_generation_jobs.sql` to the Neon `preview` branch database.
+- Verified `generation_jobs` columns, defaults, unique dedupe index, processor indexes, and existing prerequisite tables.
+- Ran a synthetic repository smoke with fixed fake UUIDs and cleaned up the synthetic row.
+- Ran staging route/API regressions for landing, input validation, fresh analyze, result, unlock intent, paid request/status, unlocked route, LIFF bridge, invalid LIFF bind, invalid webhook signature, and empty-events webhook verification.
+- Verified `generation_jobs` row count remained `0` after normal runtime checks.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Phase 1 migration is live on staging and remains behavior-neutral.
+- Normal Module 01 staging flows do not write to `generation_jobs`, as intended.
+
+Unresolved questions:
+- Production migration remains pending and should wait for separate approval or imminent Phase 2 work.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
