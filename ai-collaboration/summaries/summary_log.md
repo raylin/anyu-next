@@ -6001,3 +6001,25 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` and production flag enablement remain pending separate approval.
 - Owner should choose between a production migration gate next or a Phase 3 processor/cron plan.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Paid Generation Job Foundation Phase 2 Production Migration Gate v0
+
+Completed changes:
+- Saved the production migration gate handoff under `ai-collaboration/handoffs/`.
+- Confirmed production `ENABLE_PAID_GENERATION_JOBS` was absent before migration.
+- Confirmed production `generation_jobs` table was absent before migration.
+- Applied only `apps/web/drizzle/0006_generation_jobs.sql` to the Neon production branch.
+- Verified production `generation_jobs` columns, defaults, primary key, unique dedupe index, and required query indexes.
+- Ran flag-disabled production route/API smoke for health, landing, analyze, result, unlock intent, paid generation, status, unlocked route, LIFF bridge, invalid LIFF bind, invalid webhook signature, and empty-events webhook.
+- Confirmed production `generation_jobs` row count remained `0` after normal runtime smoke.
+- Confirmed production `ENABLE_PAID_GENERATION_JOBS` remained absent after migration/smoke.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Production schema is now ready for paid generation job mirroring, but runtime behavior remains unchanged while the flag is absent.
+- Additive production migration did not affect current direct paid generation behavior.
+
+Unresolved questions:
+- Owner approval is still required before any production flag-on smoke.
+- Phase 3 processor/cron design remains pending.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
