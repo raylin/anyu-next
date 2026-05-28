@@ -5826,3 +5826,22 @@ Unresolved questions:
 - One synthetic production sample is not enough to evaluate provider-output quality under varied traffic.
 - Ads and broader traffic remain blocked pending additional low-key monitoring.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+## 2026-05-28 - ANYU Codebase Stabilization + Tech Debt Audit v0
+
+Completed changes:
+- Saved the stabilization audit handoff under `ai-collaboration/handoffs/`.
+- Inspected Module 01 routes/components, AI prompt/schema/paid-generation code, LINE/LIFF fulfillment, events/metrics/operator mode, styles/themes, legal/provider-review copy, and docs/artifacts.
+- Found no P0 issues.
+- Classified current debt into P1, P2, and deferred/do-not-touch categories.
+- Completed one low-risk docs cleanup in `docs/operations/repo-maintenance.md` to reflect current active stabilization targets and do-not-touch boundaries.
+- Created the required review bundle and execution report.
+
+Learnings:
+- The most important pre-traffic-expansion debts are operational rather than immediate runtime bugs: missing build marker, non-durable paid generation, non-sessionized metrics, secure metrics access, and owner-dependent provider contact details.
+- Code maintainability debt is concentrated in Module 01 UI/route file size, global CSS accumulation, LIFF compatibility/diagnostic paths, and schema/prompt version naming complexity.
+- No broad refactor should happen opportunistically while Module 01 is live and low-key production is active.
+
+Unresolved questions:
+- Owner should decide whether `docs/design/` should be committed, moved, or ignored.
+- Durable paid generation and sessionized metrics require separate architecture approval.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
