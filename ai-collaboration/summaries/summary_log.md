@@ -5959,6 +5959,26 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
 
+## 2026-05-29 - Paid Generation Job Foundation Phase 3B Cron Trigger Plan v0
+
+Completed changes:
+- Saved the Phase 3B cron trigger plan handoff under `ai-collaboration/handoffs/`.
+- Reviewed the current Phase 3A processor state and existing retention-cleanup cron auth pattern.
+- Verified the repo currently uses `apps/web/vercel.json` for `/api/cron/retention-cleanup` and bearer-secret auth in the cron route.
+- Checked current Vercel Cron documentation and confirmed `CRON_SECRET` is sent as an `Authorization: Bearer` header for cron invocations.
+- Created a research plan recommending manual/operator trigger for now, then a future dedicated `GET /api/cron/paid-generation` wrapper with `CRON_SECRET`, `ENABLE_PAID_GENERATION_PROCESSOR`, `paid_analysis`, `limit=1`, and aggregate-only response.
+- Documented cadence, max jobs, staging verification, production rollout, rollback, metrics, cost guardrails, and temporary Vercel deployment cleanup recommendation.
+- Created the required execution report.
+
+Learnings:
+- The existing `POST /api/internal/jobs/process` is appropriate for manual/operator calls, but a future Vercel Cron integration should probably use a dedicated `GET` cron wrapper route to match the current repo pattern and Vercel examples.
+- A 5-minute production cadence with `limit=1` is safer than 1-minute cron until real queued jobs require faster delivery.
+
+Unresolved questions:
+- Owner approval is required before adding cron config or enabling any production processor behavior.
+- The unintended temporary Vercel project from Phase 3A should be removed or confirmed harmless in the Vercel console.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
 ## 2026-05-29 - Paid Generation Job Foundation Phase 3A Processor Endpoint v0
 
 Completed changes:
