@@ -5959,6 +5959,26 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
 
+## 2026-05-29 - Payment / Entitlement Schema Plan v0
+
+Completed changes:
+- Saved the payment/entitlement schema plan handoff under `ai-collaboration/handoffs/`.
+- Inspected current DB schema for `analysis_requests`, `analysis_results`, `analysis_paid_results`, `unlock_intents`, and `generation_jobs`.
+- Created a planning report recommending future `payment_intents` for payment/order truth and future `entitlements` for product access truth.
+- Recommended a neutral hashed `paid_access_token` on `entitlements` for v0 web-paid access.
+- Recommended keeping the existing `/m/{moduleSlug}/unlock/{token}` route externally while adding a future dual resolver for entitlement tokens and legacy unlock-intent tokens.
+- Confirmed no migration or app code was changed.
+
+Learnings:
+- `generation_jobs.entitlement_ref_id` already anticipates a future entitlement link.
+- `unlock_intents` currently carries LINE/short-code delivery state and should not be overloaded as payment truth.
+- Refund/re-delivery requires payment and entitlement lifecycle state that does not exist yet.
+
+Unresolved questions:
+- Owner must approve whether NT$49 results are retention-limited or longer-lived.
+- Owner must approve the v0 token strategy before schema migration work.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
 ## 2026-05-29 - Payment Launch Flow + Queue Trigger Architecture v0
 
 Completed changes:
