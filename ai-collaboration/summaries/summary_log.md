@@ -5883,3 +5883,21 @@ Learnings:
 Unresolved questions:
 - Secure DB credential distribution remains outside this task and should stay operator-controlled.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-28 - Paid Generation Job Foundation Plan v0
+
+Completed changes:
+- Saved the paid generation job foundation handoff under `ai-collaboration/handoffs/`.
+- Inspected the current paid generation lifecycle, `analysis_paid_results`, paid-result request/status routes, LIFF bind, LINE short-code webhook, unlocked polling, and metrics/events.
+- Created a planning report recommending a future separate `generation_jobs` table scoped narrowly to `paid_analysis` v1.
+- Defined job shape, state machine, trigger sources, processor/cron architecture, idempotency/locking, retry/backoff/fallback, pending status API contract, observability, retention/privacy, external queue upgrade points, and implementation phases.
+- Created the required execution report.
+
+Learnings:
+- Current paid generation durability debt is concentrated in best-effort LINE short-code generation, synchronous LIFF bind generation, and `analysis_paid_results` carrying transient job lifecycle state.
+- A narrow DB-backed job foundation gives future payment and web-only unlock a clean enqueue/polling path without overbuilding a general AI queue platform.
+
+Unresolved questions:
+- Future entitlement/payment table shape should wait for NewebPay implementation approval.
+- Fallback-after-payment policy needs product/support approval before real charge flows.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
