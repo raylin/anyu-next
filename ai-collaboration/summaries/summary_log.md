@@ -5901,3 +5901,22 @@ Unresolved questions:
 - Future entitlement/payment table shape should wait for NewebPay implementation approval.
 - Fallback-after-payment policy needs product/support approval before real charge flows.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-28 - Paid Generation Job Foundation Phase 1 Schema + Repository Seams v0
+
+Completed changes:
+- Saved the Phase 1 schema/repo handoff under `ai-collaboration/handoffs/`.
+- Added additive `generation_jobs` migration and Drizzle schema definition.
+- Added TypeScript constants and repository helpers for future `paid_analysis` job lifecycle.
+- Added a stable dedupe key builder using module slug, analysis result ID, prompt version, and schema version.
+- Added synthetic repository tests for create/reuse, transitions, due-job listing, allowed values, and privacy-safe serialized fixtures.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Phase 1 can introduce the durable job seam without changing current paid generation, LIFF, LINE, or payment behavior.
+- `attempt_count` is clearest when incremented at processor claim/processing start.
+
+Unresolved questions:
+- Staging and production migrations are not applied by this task.
+- Job retention duration and future entitlement refs remain deferred decisions.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

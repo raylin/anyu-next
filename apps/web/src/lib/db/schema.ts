@@ -243,6 +243,56 @@ export const analysisPaidResults = pgTable(
   }),
 );
 
+export const generationJobs = pgTable(
+  "generation_jobs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    jobType: text("job_type").notNull(),
+    status: text("status").default("queued").notNull(),
+    priority: integer("priority").default(50).notNull(),
+    moduleSlug: text("module_slug").notNull(),
+    inputRefType: text("input_ref_type").notNull(),
+    inputRefId: uuid("input_ref_id").notNull(),
+    outputRefType: text("output_ref_type"),
+    outputRefId: uuid("output_ref_id"),
+    triggerSource: text("trigger_source").notNull(),
+    dedupeKey: text("dedupe_key").notNull(),
+    entitlementRefId: uuid("entitlement_ref_id"),
+    attemptCount: integer("attempt_count").default(0).notNull(),
+    maxAttempts: integer("max_attempts").default(3).notNull(),
+    nextRunAt: timestamp("next_run_at", { withTimezone: true }).defaultNow().notNull(),
+    lockedAt: timestamp("locked_at", { withTimezone: true }),
+    lockedBy: text("locked_by"),
+    lastErrorCategory: text("last_error_category"),
+    lastErrorCode: text("last_error_code"),
+    lastErrorAt: timestamp("last_error_at", { withTimezone: true }),
+    modelProvider: text("model_provider"),
+    modelName: text("model_name"),
+    promptVersion: text("prompt_version"),
+    schemaVersion: text("schema_version"),
+    source: text("source"),
+    operatorTest: boolean("operator_test").default(false).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    dedupeKeyIdx: uniqueIndex("generation_jobs_dedupe_key_idx").on(table.dedupeKey),
+    statusNextRunIdx: index("generation_jobs_status_next_run_idx").on(table.status, table.nextRunAt),
+    typeStatusNextRunIdx: index("generation_jobs_type_status_next_run_idx").on(
+      table.jobType,
+      table.status,
+      table.nextRunAt,
+    ),
+    inputRefIdx: index("generation_jobs_input_ref_idx").on(table.inputRefType, table.inputRefId),
+    outputRefIdx: index("generation_jobs_output_ref_idx").on(table.outputRefType, table.outputRefId),
+    moduleCreatedIdx: index("generation_jobs_module_created_idx").on(table.moduleSlug, table.createdAt),
+    triggerCreatedIdx: index("generation_jobs_trigger_created_idx").on(
+      table.triggerSource,
+      table.createdAt,
+    ),
+  }),
+);
+
 export const contactSubmissions = pgTable(
   "contact_submissions",
   {

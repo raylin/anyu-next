@@ -43,6 +43,13 @@
       "when": 1779379200000,
       "tag": "0005_two_tier_phase_1",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779382800000,
+      "tag": "0006_generation_jobs",
+      "breakpoints": true
     }
   ]
 }
