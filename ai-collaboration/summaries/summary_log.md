@@ -6023,3 +6023,21 @@ Unresolved questions:
 - Owner approval is still required before any production flag-on smoke.
 - Phase 3 processor/cron design remains pending.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Paid Generation Job Foundation Phase 3 Processor / Cron Plan v0
+
+Completed changes:
+- Saved the Phase 3 processor/cron plan handoff under `ai-collaboration/handoffs/`.
+- Inspected the current `generation_jobs` repository helpers, paid generation service, status route, pending poller, provider error categories, and existing cron authorization pattern.
+- Created a planning report recommending Phase 3A: a narrow `paid_analysis` processor in isolation before any request-route enqueue-only switch.
+- Defined processor endpoint security, aggregate-only response contract, atomic claim/lock design, stale lock recovery, paid analysis processing flow, retry/backoff/fallback policy, status route contract, cron/operator trigger strategy, metrics, feature flags, production safety, and deferred scope.
+- Created the required execution report.
+
+Learnings:
+- Existing `listDueGenerationJobs` is useful for inspection but should not be reused as a concurrent processor claim primitive.
+- Processor implementation should extract shared paid-generation execution logic from `requestDeferredPaidGeneration` to avoid drift.
+
+Unresolved questions:
+- Owner must approve fallback/support policy before real-payment paid job processing.
+- Implementation should decide between dedicated `INTERNAL_JOB_SECRET` and shared `CRON_SECRET`.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
