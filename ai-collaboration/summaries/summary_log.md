@@ -5959,6 +5959,27 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
 
+## 2026-05-29 - Queue / Worker Strategy Evaluation v0
+
+Completed changes:
+- Saved the queue/worker strategy handoff under `ai-collaboration/handoffs/`.
+- Verified current vendor/platform facts from official sources for Vercel Cron, Upstash QStash, Inngest, Trigger.dev, Google Cloud Tasks, Railway, Fly, and Render.
+- Created a research evaluation comparing request kick/manual recovery, Vercel Pro Cron, QStash/webhook queue, Inngest, Trigger.dev, dedicated workers, and Cloud Tasks/Cloud Run.
+- Recommended keeping the current `generation_jobs` + processor/manual recovery setup before real payment.
+- Recommended QStash-like webhook queue as the payment-launch candidate if a staging proof validates signed delivery, retries, and safe payloads.
+- Recommended revisiting Inngest/Trigger.dev later only if follow-up sessions or multi-step workflows become real.
+- Created the required execution report.
+
+Learnings:
+- Vercel Hobby daily cron is useful only for recovery/readiness, not interactive paid generation.
+- The existing `generation_jobs` table and processor endpoint remain useful regardless of trigger provider.
+- Queue payloads must stay reference-only; processor should fetch sensitive context server-side from DB.
+
+Unresolved questions:
+- NewebPay approval timing remains the main trigger for queue implementation.
+- Owner must choose between accepting a new vendor such as QStash or paying for Vercel Pro Cron if payment launch requires near-realtime generation.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
 ## 2026-05-29 - Paid Generation Job Foundation Phase 3D Cron Schedule Gate v0
 
 Completed changes:
