@@ -37,6 +37,8 @@ Added the paid-generation cron schedule gate to `apps/web/vercel.json`. The requ
 - Staging health route reachable.
 - Staging cron wrapper missing auth returned `401`.
 - Staging cron wrapper valid dry-run returned aggregate zero-work response.
+- Final staging deployment: `dpl_AicSKvuvxFCXNZ7KHcT5iJF8SAoo`.
+- Final staging health marker: `gitCommit=51420e2c18a4`, branch `staging`.
 
 ## Production Safety
 
@@ -89,11 +91,13 @@ After the next approved production deployment, verify the scheduled route remain
 
 ## Git Commit
 
-Pending at report creation.
+- Schedule gate commit: `d567ee6`.
+- Hobby-safe cadence fix commit: `51420e2`.
+- Final verification docs commit: pending at report update.
 
 ## Staging Push
 
-Pending at report creation.
+Schedule gate and Hobby-safe cadence commits pushed to `origin/staging`; final verification docs push pending at report update.
 
 ## Remaining Uncertainties
 

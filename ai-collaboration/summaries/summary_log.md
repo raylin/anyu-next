@@ -5970,6 +5970,7 @@ Completed changes:
 - Confirmed production `CRON_SECRET` is configured and production `ENABLE_PAID_GENERATION_PROCESSOR` is absent.
 - Confirmed production `generation_jobs` aggregate counts are zero for total, due paid-analysis, processing, and failed-final jobs.
 - Verified staging wrapper safety: missing auth returns `401`; valid dry-run returns aggregate zero-work output.
+- Deployed the Hobby-safe schedule config to staging and confirmed the build marker reports commit `51420e2c18a4`.
 - Created the required review bundle and execution report.
 
 Learnings:
