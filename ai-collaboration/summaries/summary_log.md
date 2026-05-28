@@ -5958,3 +5958,23 @@ Unresolved questions:
 - Phase 2 implementation should decide exact fail-open/fail-closed behavior for job mirroring failures.
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-28 - Paid Generation Job Foundation Phase 2 Enqueue / Status Integration v0
+
+Completed changes:
+- Saved the Phase 2 enqueue/status integration handoff under `ai-collaboration/handoffs/`.
+- Added private `ENABLE_PAID_GENERATION_JOBS` feature flag support, disabled by default.
+- Wired `requestDeferredPaidGeneration` to optionally create/reuse `paid_analysis` jobs and mirror processing/completed/failed-final lifecycle while preserving direct provider/fallback generation.
+- Updated paid-result status polling to optionally read `generation_jobs` as a secondary signal without exposing job internals.
+- Passed safe trigger sources for web unlock, LIFF bind, and short-code paths without changing user-facing LINE/LIFF behavior.
+- Added tests for flag behavior, service mirroring, fail-open behavior, fallback completion, status mapping, and privacy-safe responses.
+- Updated the production deployment runbook with the `0006_generation_jobs.sql` and `ENABLE_PAID_GENERATION_JOBS=false` production gate.
+
+Learnings:
+- Phase 2 can be implemented as a fail-open mirror, keeping `analysis_paid_results` as the delivery source until a future processor exists.
+- Status polling should treat completed paid result rows as authoritative; completed jobs without paid result rows remain pending because the job table is not the delivery truth yet.
+
+Unresolved questions:
+- Live staging flag-on verification remains pending after deployment.
+- Production `0006_generation_jobs.sql` remains pending and the production flag must stay disabled until migration verification.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

@@ -128,10 +128,17 @@ Production migration checklist:
 - request-state / polling UX requires `apps/web/drizzle/0002_analyze_request_state.sql`
 - LINE fulfillment requires `apps/web/drizzle/0003_line_fulfillment.sql`
 - LINE webhook idempotency/rate guard requires `apps/web/drizzle/0004_line_webhook_hardening.sql`
+- paid generation job foundation requires `apps/web/drizzle/0006_generation_jobs.sql`
 - run migration against production only after explicit approval
 - record migration command and result in the launch record or launch report
 - verify required tables exist after migration
 - never paste `DATABASE_URL` into reports or logs
+
+Paid generation job feature gate:
+
+- keep `ENABLE_PAID_GENERATION_JOBS=false` in production until `0006_generation_jobs.sql` is applied and verified on production
+- code may be deployed with the flag disabled; production runtime must not read or write `generation_jobs` while the flag is false
+- enable the flag only after a separate approved production migration and staging flag-on verification
 
 Expected command shape:
 

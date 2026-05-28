@@ -215,6 +215,7 @@ export async function POST(request: Request) {
           moduleConfig,
           resultId: record.unlockIntent.resultId,
           unlockIntentId: record.unlockIntent.id,
+          triggerSource: "short_code",
         });
       });
     }

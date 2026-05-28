@@ -48,6 +48,7 @@ export async function POST(request: Request, { params }: RouteProps) {
     moduleConfig,
     resultId: body.resultId,
     unlockIntentId: body.unlockIntentId,
+    triggerSource: "web_unlock",
   });
 
   if (!result.ok) {

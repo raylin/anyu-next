@@ -13,6 +13,10 @@ const {
   mockMarkPaidResultCompleted,
   mockMarkPaidResultFailed,
   mockMarkPaidResultProcessing,
+  mockCreateOrReusePaidAnalysisJob,
+  mockMarkGenerationJobCompleted,
+  mockMarkGenerationJobFailedFinal,
+  mockMarkGenerationJobProcessing,
   mockResolveRuntimeStrategy,
 } = vi.hoisted(() => ({
   mockBuildProviderFallbackPaidResult: vi.fn(),
@@ -27,6 +31,10 @@ const {
   mockMarkPaidResultCompleted: vi.fn(),
   mockMarkPaidResultFailed: vi.fn(),
   mockMarkPaidResultProcessing: vi.fn(),
+  mockCreateOrReusePaidAnalysisJob: vi.fn(),
+  mockMarkGenerationJobCompleted: vi.fn(),
+  mockMarkGenerationJobFailedFinal: vi.fn(),
+  mockMarkGenerationJobProcessing: vi.fn(),
   mockResolveRuntimeStrategy: vi.fn(),
 }));
 
@@ -61,6 +69,13 @@ vi.mock("@/lib/db/paid-results", () => ({
   markPaidResultCompleted: mockMarkPaidResultCompleted,
   markPaidResultFailed: mockMarkPaidResultFailed,
   markPaidResultProcessing: mockMarkPaidResultProcessing,
+}));
+
+vi.mock("@/lib/db/generation-jobs", () => ({
+  createOrReusePaidAnalysisJob: mockCreateOrReusePaidAnalysisJob,
+  markGenerationJobCompleted: mockMarkGenerationJobCompleted,
+  markGenerationJobFailedFinal: mockMarkGenerationJobFailedFinal,
+  markGenerationJobProcessing: mockMarkGenerationJobProcessing,
 }));
 
 vi.mock("@/lib/db/runtime", () => ({
@@ -113,10 +128,18 @@ function mockBaseRecords() {
 describe("deferred paid generation service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    delete process.env.ENABLE_PAID_GENERATION_JOBS;
     mockBaseRecords();
     mockIsOutputValidationError.mockReturnValue(false);
     mockBuildProviderFallbackPaidResult.mockReturnValue(paidResult);
     mockGetPaidResultValidationDiagnostics.mockReturnValue(null);
+    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
+      job: {
+        id: "job-1",
+        status: "queued",
+      },
+      created: true,
+    });
   });
 
   it("stores provider-generated paid results and records provider source metadata", async () => {
@@ -165,6 +188,7 @@ describe("deferred paid generation service", () => {
         }),
       }),
     );
+    expect(mockCreateOrReusePaidAnalysisJob).not.toHaveBeenCalled();
   });
 
   it("retries output validation once before falling back", async () => {
@@ -243,5 +267,170 @@ describe("deferred paid generation service", () => {
         }),
       }),
     );
+  });
+
+  it("mirrors direct paid generation into a paid_analysis job when the feature flag is enabled", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockGeneratePaidResult.mockResolvedValue({
+      paidResult,
+      model: "claude-haiku-4-5-20251001",
+      source: "provider",
+    });
+
+    const result = await requestDeferredPaidGeneration({
+      moduleConfig: aiTemperatureModule,
+      resultId: "result-1",
+      unlockIntentId: "unlock-1",
+      triggerSource: "line_bind",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "completed",
+      paidResultId: "paid-1",
+      source: "provider",
+    });
+    expect(mockCreateOrReusePaidAnalysisJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        moduleSlug: "ambiguous-temperature",
+        analysisResultId: "result-1",
+        triggerSource: "line_bind",
+        promptVersion: "paid_result_prompt_v0.2",
+        schemaVersion: "paid_result_schema_v3",
+        modelProvider: "anthropic",
+        modelName: "claude-sonnet-4-20250514",
+      }),
+    );
+    expect(mockMarkGenerationJobProcessing).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jobId: "job-1",
+        lockedBy: "direct_paid_generation",
+      }),
+    );
+    expect(mockMarkGenerationJobCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jobId: "job-1",
+        outputRefId: "paid-1",
+        source: "provider",
+        modelProvider: "anthropic",
+        modelName: "claude-haiku-4-5-20251001",
+      }),
+    );
+    expect(mockMarkGenerationJobFailedFinal).not.toHaveBeenCalled();
+  });
+
+  it("marks fallback success as completed job output instead of failing the mirror", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockIsOutputValidationError.mockReturnValue(true);
+    mockGeneratePaidResult
+      .mockRejectedValueOnce(new Error("Model output was not valid JSON: truncated"))
+      .mockRejectedValueOnce(new Error("Model output was still invalid"));
+
+    const result = await requestDeferredPaidGeneration({
+      moduleConfig: aiTemperatureModule,
+      resultId: "result-1",
+      unlockIntentId: "unlock-1",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "completed",
+      source: "fallback",
+    });
+    expect(mockMarkGenerationJobCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jobId: "job-1",
+        outputRefId: "paid-1",
+        source: "fallback",
+        modelName: "paid_template_fallback_v0",
+      }),
+    );
+  });
+
+  it("fails open when paid_analysis job mirroring is unavailable", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockCreateOrReusePaidAnalysisJob.mockRejectedValue(new Error("generation_jobs unavailable"));
+    mockGeneratePaidResult.mockResolvedValue({
+      paidResult,
+      model: "claude-haiku-4-5-20251001",
+      source: "provider",
+    });
+
+    const result = await requestDeferredPaidGeneration({
+      moduleConfig: aiTemperatureModule,
+      resultId: "result-1",
+      unlockIntentId: "unlock-1",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "completed",
+      paidResultId: "paid-1",
+    });
+    expect(mockMarkPaidResultCompleted).toHaveBeenCalled();
+    expect(mockMarkGenerationJobProcessing).not.toHaveBeenCalled();
+    expect(mockMarkGenerationJobCompleted).not.toHaveBeenCalled();
+  });
+
+  it("reconciles an existing completed paid result with a completed job mirror when enabled", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockGetPaidResultForAnalysisResult.mockReset();
+    mockGetPaidResultForAnalysisResult.mockResolvedValueOnce({
+      id: "paid-existing",
+      model: "claude-haiku-4-5-20251001",
+    });
+
+    const result = await requestDeferredPaidGeneration({
+      moduleConfig: aiTemperatureModule,
+      resultId: "result-1",
+      unlockIntentId: "unlock-1",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "completed",
+      paidResultId: "paid-existing",
+      source: "provider",
+      reused: true,
+    });
+    expect(mockGeneratePaidResult).not.toHaveBeenCalled();
+    expect(mockMarkGenerationJobCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jobId: "job-1",
+        outputRefId: "paid-existing",
+        source: "provider",
+      }),
+    );
+  });
+
+  it("marks job failed_final only when direct paid generation ultimately fails", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockGeneratePaidResult.mockResolvedValue({
+      paidResult,
+      model: "claude-haiku-4-5-20251001",
+      source: "provider",
+    });
+    mockMarkPaidResultCompleted.mockRejectedValue(new Error("write failed"));
+
+    const result = await requestDeferredPaidGeneration({
+      moduleConfig: aiTemperatureModule,
+      resultId: "result-1",
+      unlockIntentId: "unlock-1",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "failed",
+      paidResultId: "paid-1",
+      errorCategory: "provider",
+    });
+    expect(mockMarkPaidResultFailed).toHaveBeenCalledWith({
+      paidResultId: "paid-1",
+      errorCode: "provider",
+    });
+    expect(mockMarkGenerationJobFailedFinal).toHaveBeenCalledWith({
+      jobId: "job-1",
+      errorCategory: "provider",
+    });
   });
 });

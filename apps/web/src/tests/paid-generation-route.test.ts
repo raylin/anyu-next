@@ -3,10 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   mockGetPaidResultStatusForAnalysisResult,
   mockGetUnlockIntentByTokenHash,
+  mockGetGenerationJobByDedupeKey,
   mockRequestDeferredPaidGeneration,
 } = vi.hoisted(() => ({
   mockGetPaidResultStatusForAnalysisResult: vi.fn(),
   mockGetUnlockIntentByTokenHash: vi.fn(),
+  mockGetGenerationJobByDedupeKey: vi.fn(),
   mockRequestDeferredPaidGeneration: vi.fn(),
 }));
 
@@ -26,12 +28,22 @@ vi.mock("@/lib/db/paid-results", () => ({
   getPaidResultStatusForAnalysisResult: mockGetPaidResultStatusForAnalysisResult,
 }));
 
+vi.mock("@/lib/db/generation-jobs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/db/generation-jobs")>();
+
+  return {
+    ...actual,
+    getGenerationJobByDedupeKey: mockGetGenerationJobByDedupeKey,
+  };
+});
+
 import { POST } from "@/app/api/modules/[moduleSlug]/paid-result/request/route";
 import { POST as statusPost } from "@/app/api/modules/[moduleSlug]/paid-result/status/route";
 
 describe("paid result generation request route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    delete process.env.ENABLE_PAID_GENERATION_JOBS;
   });
 
   it("requests deferred paid generation for a result and unlock intent", async () => {
@@ -65,6 +77,7 @@ describe("paid result generation request route", () => {
       expect.objectContaining({
         resultId: "result-1",
         unlockIntentId: "unlock-intent-1",
+        triggerSource: "web_unlock",
       }),
     );
   });
@@ -238,6 +251,201 @@ describe("paid result generation request route", () => {
       },
     });
     mockGetPaidResultStatusForAnalysisResult.mockResolvedValue(null);
+
+    const response = await statusPost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockToken: "unlock-token-1.r" }),
+      }),
+      { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      status: "pending",
+      retryable: true,
+      errorCategory: null,
+    });
+    expect(mockGetGenerationJobByDedupeKey).not.toHaveBeenCalled();
+  });
+
+  it("maps a processing generation job to a privacy-safe processing status when enabled", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockGetUnlockIntentByTokenHash.mockResolvedValue({
+      unlockIntent: {
+        themeSlug: "ambiguous-temperature",
+        fulfillmentStatus: "bound",
+        unlockTokenExpiresAt: new Date(Date.now() + 60_000),
+      },
+      result: {
+        id: "result-1",
+      },
+    });
+    mockGetPaidResultStatusForAnalysisResult.mockResolvedValue(null);
+    mockGetGenerationJobByDedupeKey.mockResolvedValue({
+      status: "processing",
+      id: "job-1",
+      dedupeKey: "paid_analysis:ambiguous-temperature:result-1:paid_result_prompt_v0.2:paid_result_schema_v3",
+      attemptCount: 1,
+      lockedBy: "direct_paid_generation",
+    });
+
+    const response = await statusPost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockToken: "unlock-token-1.r" }),
+      }),
+      { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toEqual({
+      ok: true,
+      status: "processing",
+      retryable: true,
+      errorCategory: null,
+    });
+    expect(JSON.stringify(data)).not.toContain("job-1");
+    expect(JSON.stringify(data)).not.toContain("dedupe");
+    expect(JSON.stringify(data)).not.toContain("unlock-token");
+  });
+
+  it("maps queued and retry-scheduled generation jobs to pending without exposing internals", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockGetUnlockIntentByTokenHash.mockResolvedValue({
+      unlockIntent: {
+        themeSlug: "ambiguous-temperature",
+        fulfillmentStatus: "bound",
+        unlockTokenExpiresAt: new Date(Date.now() + 60_000),
+      },
+      result: {
+        id: "result-1",
+      },
+    });
+    mockGetPaidResultStatusForAnalysisResult.mockResolvedValue(null);
+    mockGetGenerationJobByDedupeKey.mockResolvedValue({
+      status: "retry_scheduled",
+      id: "job-1",
+      attemptCount: 1,
+      lastErrorCategory: "provider",
+    });
+
+    const response = await statusPost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockToken: "unlock-token-1.r" }),
+      }),
+      { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      status: "pending",
+      retryable: true,
+      errorCategory: null,
+    });
+  });
+
+  it("maps failed-final generation jobs to failed without exposing internal error details", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockGetUnlockIntentByTokenHash.mockResolvedValue({
+      unlockIntent: {
+        themeSlug: "ambiguous-temperature",
+        fulfillmentStatus: "bound",
+        unlockTokenExpiresAt: new Date(Date.now() + 60_000),
+      },
+      result: {
+        id: "result-1",
+      },
+    });
+    mockGetPaidResultStatusForAnalysisResult.mockResolvedValue(null);
+    mockGetGenerationJobByDedupeKey.mockResolvedValue({
+      status: "failed_final",
+      id: "job-1",
+      lastErrorCategory: "provider",
+      lastErrorCode: "anthropic_timeout",
+    });
+
+    const response = await statusPost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockToken: "unlock-token-1.r" }),
+      }),
+      { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toEqual({
+      ok: true,
+      status: "failed",
+      retryable: false,
+      errorCategory: "paid_generation_failed",
+    });
+    expect(JSON.stringify(data)).not.toContain("anthropic_timeout");
+    expect(JSON.stringify(data)).not.toContain("job-1");
+  });
+
+  it("keeps completed paid results ahead of generation job state", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockGetUnlockIntentByTokenHash.mockResolvedValue({
+      unlockIntent: {
+        themeSlug: "ambiguous-temperature",
+        fulfillmentStatus: "bound",
+        unlockTokenExpiresAt: new Date(Date.now() + 60_000),
+      },
+      result: {
+        id: "result-1",
+      },
+    });
+    mockGetPaidResultStatusForAnalysisResult.mockResolvedValue({
+      status: "completed",
+      errorCode: null,
+    });
+    mockGetGenerationJobByDedupeKey.mockResolvedValue({
+      status: "processing",
+    });
+
+    const response = await statusPost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockToken: "unlock-token-1.r" }),
+      }),
+      { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      status: "completed",
+      retryable: false,
+      errorCategory: null,
+    });
+    expect(mockGetGenerationJobByDedupeKey).not.toHaveBeenCalled();
+  });
+
+  it("fails open to claimed pending behavior if generation job lookup fails", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockGetUnlockIntentByTokenHash.mockResolvedValue({
+      unlockIntent: {
+        themeSlug: "ambiguous-temperature",
+        fulfillmentStatus: "delivered",
+        unlockTokenExpiresAt: new Date(Date.now() + 60_000),
+      },
+      result: {
+        id: "result-1",
+      },
+    });
+    mockGetPaidResultStatusForAnalysisResult.mockResolvedValue(null);
+    mockGetGenerationJobByDedupeKey.mockRejectedValue(new Error("generation_jobs unavailable"));
 
     const response = await statusPost(
       new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {

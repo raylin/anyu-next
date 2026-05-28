@@ -16,15 +16,28 @@ import {
   markPaidResultProcessing,
 } from "@/lib/db/paid-results";
 import {
+  createOrReusePaidAnalysisJob,
+  markGenerationJobCompleted,
+  markGenerationJobFailedFinal,
+  markGenerationJobProcessing,
+  type GenerationJob,
+  type GenerationJobTriggerSource,
+} from "@/lib/db/generation-jobs";
+import {
   getActiveProviderInfo,
   getProviderRuntimeErrorCode,
   isProviderConfigError,
 } from "@/lib/ai/provider";
 import { getAnalysisResultWithRequestById, getUnlockIntentById, insertEvent } from "@/lib/db/runtime";
 import type { ProductModuleConfig } from "@/lib/modules/types";
+import { isPaidGenerationJobsEnabled } from "@/lib/runtime/feature-flags";
 
 export type PaidGenerationStatus = "processing" | "completed" | "failed" | "expired";
 type PaidGenerationSource = "provider" | "fallback";
+type PaidGenerationJobMirror = {
+  job: GenerationJob;
+  created: boolean;
+};
 
 function getPaidGenerationSourceFromModel(model?: string | null): PaidGenerationSource {
   return model === PAID_RESULT_PROVIDER_FALLBACK_MODEL ? "fallback" : "provider";
@@ -42,11 +55,104 @@ function getSafeErrorCode(error: unknown) {
   return getProviderRuntimeErrorCode(error) ?? "provider";
 }
 
+async function createPaidGenerationJobMirror(input: {
+  moduleSlug: string;
+  analysisResultId: string;
+  triggerSource: GenerationJobTriggerSource;
+  modelProvider?: string | null;
+  modelName?: string | null;
+}): Promise<PaidGenerationJobMirror | null> {
+  if (!isPaidGenerationJobsEnabled()) {
+    return null;
+  }
+
+  try {
+    return await createOrReusePaidAnalysisJob({
+      moduleSlug: input.moduleSlug,
+      analysisResultId: input.analysisResultId,
+      triggerSource: input.triggerSource,
+      promptVersion: PAID_RESULT_PROMPT_VERSION,
+      schemaVersion: PAID_RESULT_SCHEMA_VERSION,
+      modelProvider: input.modelProvider,
+      modelName: input.modelName,
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function markPaidGenerationJobProcessing(jobMirror: PaidGenerationJobMirror | null) {
+  if (!jobMirror) {
+    return;
+  }
+
+  if (!jobMirror.created && jobMirror.job.status === "processing") {
+    return;
+  }
+
+  if (jobMirror.job.status === "completed") {
+    return;
+  }
+
+  try {
+    await markGenerationJobProcessing({
+      jobId: jobMirror.job.id,
+      lockedBy: "direct_paid_generation",
+    });
+  } catch {
+    // Phase 2 job mirroring is intentionally fail-open.
+  }
+}
+
+async function markPaidGenerationJobCompleted(input: {
+  jobMirror: PaidGenerationJobMirror | null;
+  paidResultId: string;
+  source?: PaidGenerationSource | null;
+  modelProvider?: string | null;
+  modelName?: string | null;
+}) {
+  if (!input.jobMirror) {
+    return;
+  }
+
+  try {
+    await markGenerationJobCompleted({
+      jobId: input.jobMirror.job.id,
+      outputRefId: input.paidResultId,
+      source: input.source,
+      modelProvider: input.modelProvider,
+      modelName: input.modelName,
+    });
+  } catch {
+    // Phase 2 job mirroring is intentionally fail-open.
+  }
+}
+
+async function markPaidGenerationJobFailedFinal(input: {
+  jobMirror: PaidGenerationJobMirror | null;
+  errorCategory: string;
+}) {
+  if (!input.jobMirror) {
+    return;
+  }
+
+  try {
+    await markGenerationJobFailedFinal({
+      jobId: input.jobMirror.job.id,
+      errorCategory: input.errorCategory,
+    });
+  } catch {
+    // Phase 2 job mirroring is intentionally fail-open.
+  }
+}
+
 export async function requestDeferredPaidGeneration(input: {
   moduleConfig: ProductModuleConfig;
   resultId: string;
   unlockIntentId: string;
+  triggerSource?: GenerationJobTriggerSource;
 }) {
+  const triggerSource = input.triggerSource ?? "web_unlock";
   const record = await getAnalysisResultWithRequestById(
     input.resultId,
     input.moduleConfig.moduleId,
@@ -76,6 +182,19 @@ export async function requestDeferredPaidGeneration(input: {
   });
 
   if (completed) {
+    const completedJobMirror = await createPaidGenerationJobMirror({
+      moduleSlug: input.moduleConfig.slug,
+      analysisResultId: input.resultId,
+      triggerSource,
+      modelName: completed.model,
+    });
+    await markPaidGenerationJobCompleted({
+      jobMirror: completedJobMirror,
+      paidResultId: completed.id,
+      source: getPaidGenerationSourceFromModel(completed.model),
+      modelName: completed.model,
+    });
+
     return {
       ok: true as const,
       status: "completed" as PaidGenerationStatus,
@@ -92,6 +211,14 @@ export async function requestDeferredPaidGeneration(input: {
   });
 
   if (current?.status === "processing") {
+    const processingJobMirror = await createPaidGenerationJobMirror({
+      moduleSlug: input.moduleConfig.slug,
+      analysisResultId: input.resultId,
+      triggerSource,
+      modelName: current.model,
+    });
+    await markPaidGenerationJobProcessing(processingJobMirror);
+
     return {
       ok: true as const,
       status: "processing" as PaidGenerationStatus,
@@ -101,6 +228,17 @@ export async function requestDeferredPaidGeneration(input: {
   }
 
   if (current?.status === "failed" && current.retryCount >= 2) {
+    const failedJobMirror = await createPaidGenerationJobMirror({
+      moduleSlug: input.moduleConfig.slug,
+      analysisResultId: input.resultId,
+      triggerSource,
+      modelName: current.model,
+    });
+    await markPaidGenerationJobFailedFinal({
+      jobMirror: failedJobMirror,
+      errorCategory: current.errorCode ?? "provider",
+    });
+
     return {
       ok: true as const,
       status: "failed" as PaidGenerationStatus,
@@ -114,6 +252,14 @@ export async function requestDeferredPaidGeneration(input: {
     return { ok: false as const, status: 409, error: "source_unavailable" };
   }
 
+  const providerInfo = getActiveProviderInfo();
+  const jobMirror = await createPaidGenerationJobMirror({
+    moduleSlug: input.moduleConfig.slug,
+    analysisResultId: input.resultId,
+    triggerSource,
+    modelProvider: providerInfo.provider,
+    modelName: providerInfo.model,
+  });
   const now = new Date();
   const paidRecord =
     current?.status === "failed" && current.retryCount < 2
@@ -138,10 +284,15 @@ export async function requestDeferredPaidGeneration(input: {
         });
 
   if (!paidRecord) {
+    await markPaidGenerationJobFailedFinal({
+      jobMirror,
+      errorCategory: "paid_record_unavailable",
+    });
     return { ok: false as const, status: 500, error: "paid_record_unavailable" };
   }
 
-  const providerInfo = getActiveProviderInfo();
+  await markPaidGenerationJobProcessing(jobMirror);
+
   const runtimeStrategy = resolveRuntimeStrategy(providerInfo);
   const startedAt = Date.now();
 
@@ -226,6 +377,15 @@ export async function requestDeferredPaidGeneration(input: {
       paidResultJson: generated.paidResult,
       model: generated.model,
     });
+    const completedPaidResultId = completedRecord?.id ?? paidRecord.id;
+
+    await markPaidGenerationJobCompleted({
+      jobMirror,
+      paidResultId: completedPaidResultId,
+      source: generated.source,
+      modelProvider: providerInfo.provider,
+      modelName: generated.model,
+    });
 
     await insertEvent({
       eventName: "paid_generation_completed",
@@ -252,12 +412,16 @@ export async function requestDeferredPaidGeneration(input: {
     return {
       ok: true as const,
       status: "completed" as PaidGenerationStatus,
-      paidResultId: completedRecord?.id ?? paidRecord.id,
+      paidResultId: completedPaidResultId,
       source: generated.source,
       reused: false,
     };
   } catch (error) {
     const errorCode = getSafeErrorCode(error);
+    await markPaidGenerationJobFailedFinal({
+      jobMirror,
+      errorCategory: errorCode,
+    });
     await markPaidResultFailed({
       paidResultId: paidRecord.id,
       errorCode,
