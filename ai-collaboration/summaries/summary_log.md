@@ -5978,3 +5978,26 @@ Unresolved questions:
 - Live staging flag-on verification remains pending after deployment.
 - Production `0006_generation_jobs.sql` remains pending and the production flag must stay disabled until migration verification.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-28 - Paid Generation Job Foundation Phase 2 Staging Flag Verification v0
+
+Completed changes:
+- Saved the staging flag verification handoff under `ai-collaboration/handoffs/`.
+- Confirmed staging served commit `21c1907f61f6` from branch `staging`.
+- Ran flag-off staging smoke and confirmed `generation_jobs` stayed at `0`.
+- Enabled `ENABLE_PAID_GENERATION_JOBS=true` for Vercel Preview/Staging branch `staging` only.
+- Redeployed staging and repointed `staging.anyu.tw` to the fresh preview deployment.
+- Ran flag-on synthetic paid-generation smoke and confirmed one `paid_analysis` job reached `completed`.
+- Confirmed repeat paid request reused the existing paid result/job path and did not create a duplicate job.
+- Confirmed status route returned external `completed` without job internals.
+- Confirmed production env listing did not include `ENABLE_PAID_GENERATION_JOBS`.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Phase 2 mirror behavior works on staging with delivery truth still in `analysis_paid_results`.
+- Flag-off behavior is safe for deployments where production migration is pending.
+
+Unresolved questions:
+- Production `0006_generation_jobs.sql` and production flag enablement remain pending separate approval.
+- Owner should choose between a production migration gate next or a Phase 3 processor/cron plan.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
