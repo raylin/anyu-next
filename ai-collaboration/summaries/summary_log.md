@@ -5940,3 +5940,21 @@ Learnings:
 Unresolved questions:
 - Production migration remains pending and should wait for separate approval or imminent Phase 2 work.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-28 - Paid Generation Job Foundation Phase 2 Enqueue / Status Plan v0
+
+Completed changes:
+- Saved the Phase 2 enqueue/status plan handoff under `ai-collaboration/handoffs/`.
+- Inspected the current paid-result request route, status route, pending poller, LIFF bind trigger, short-code webhook trigger, and `generation_jobs` repository seam.
+- Created a Phase 2 plan recommending Option B: feature-flagged enqueue/direct-generation compatibility.
+- Defined request route integration, status route mapping, pending UI contract, LINE/LIFF/short-code treatment, idempotency, production migration gate, rollback flag, metrics/events, and future implementation tests.
+- Created the required execution report.
+
+Learnings:
+- Phase 2 should mirror job lifecycle around the existing direct generation path, not switch to enqueue-only before a processor exists.
+- Centralizing job mirroring in `requestDeferredPaidGeneration` is the least duplicative path because paid-result request, LIFF bind, and short-code webhook already call that service.
+
+Unresolved questions:
+- Phase 2 implementation should decide exact fail-open/fail-closed behavior for job mirroring failures.
+- Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
