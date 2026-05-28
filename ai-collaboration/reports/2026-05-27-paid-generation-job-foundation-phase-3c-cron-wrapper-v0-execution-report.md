@@ -44,7 +44,8 @@ The wrapper does not duplicate paid-generation logic. It delegates claim, stale 
 ## Staging Verification
 
 - Deployed the current wrapper candidate to Vercel Preview and aliased it to `staging.anyu.tw`.
-- Staging deployment: `dpl_4VVPNDP2ysFR6MfVP7NomoAnd4sP`.
+- Final committed staging deployment: `dpl_9HGK2XYm3N1PxLLipv6wVmGCF34Q`.
+- Staging health marker after final deploy: `gitCommit=74c237e475c3`, branch `staging`.
 - Rotated Preview/Staging `CRON_SECRET` to a new secure value for authorized wrapper verification; the value was not printed or committed.
 - Confirmed missing auth returned `401`.
 - Confirmed invalid bearer auth returned `401`.
@@ -94,11 +95,12 @@ None.
 
 ## Git Commit
 
-Pending at report creation.
+- Implementation commit: `74c237e`.
+- Final verification docs commit: pending at report update.
 
 ## Staging Push
 
-Pending at report creation.
+Implementation commit pushed to `origin/staging`; final verification docs push pending at report update.
 
 ## Remaining Uncertainties
 

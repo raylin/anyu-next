@@ -5970,6 +5970,7 @@ Completed changes:
 - Preserved `ENABLE_PAID_GENERATION_PROCESSOR` as the execution gate.
 - Added route/auth tests for missing/invalid auth, no query-string secret, disabled flag, safe delegation, aggregate-only response, and dry-run behavior.
 - Updated the production deployment runbook with cron wrapper usage and safety rules.
+- Deployed the committed wrapper to staging and verified missing auth returns `401` and valid `CRON_SECRET` dry-run returns aggregate zero-work output.
 - Created the required review bundle and execution report.
 
 Learnings:
