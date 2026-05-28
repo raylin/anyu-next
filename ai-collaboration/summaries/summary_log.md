@@ -5959,6 +5959,26 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
 
+## 2026-05-29 - Payment Launch Flow + Queue Trigger Architecture v0
+
+Completed changes:
+- Saved the payment launch flow + queue trigger handoff under `ai-collaboration/handoffs/`.
+- Inspected current unlock, paid-result, `generation_jobs`, processor, cron wrapper, LIFF bind, webhook, and paid-result status assets.
+- Created a planning architecture connecting future NewebPay payment success, payment intent/order state, entitlement, `generation_jobs`, queue trigger, web polling, optional LINE delivery, and short-code fallback.
+- Recommended future `payment_intents` as payment/order truth and future `entitlements` as product access truth.
+- Recommended keeping `unlock_intents` as LINE/LIFF and short-code fulfillment/link infrastructure rather than payment truth.
+- Recommended QStash-like signed webhook queue as the payment-launch trigger candidate after a staging POC.
+
+Learnings:
+- The current foundation already has a useful `payment_success_future` generation job trigger source.
+- The unlocked route and paid-result status route can remain the v0 user-facing polling surface if payment entitlement becomes the authorization source.
+- Short-code should stay as fallback/recovery once web payment exists.
+
+Unresolved questions:
+- NewebPay approval timing remains unknown.
+- Owner must approve whether v0 reuses the current unlock token pattern or introduces a neutral paid-access token model.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
 ## 2026-05-29 - Queue / Worker Strategy Evaluation v0
 
 Completed changes:
