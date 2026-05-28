@@ -37,18 +37,33 @@ const THEME_SOURCES = [
   "unknown",
 ];
 
+const TARGETS = ["local", "staging", "production"];
+const HEALTH_MARKER_FIELDS = [
+  "app",
+  "environment",
+  "gitCommit",
+  "gitBranch",
+  "buildTime",
+  "deploymentProvider",
+  "versionSource",
+];
 const FORBIDDEN_REPORT_PATTERNS = [
   /raw_input/iu,
   /raw_input_redacted/iu,
   /paid_result_json/iu,
   /provider_output/iu,
   /line_user_id/iu,
+  /lineUserId/iu,
+  /idToken/iu,
+  /unlockToken/iu,
+  /fulfillmentCode/iu,
   /database_url/iu,
   /anthropic_api_key/iu,
   /line_channel_secret/iu,
   /line_channel_access_token/iu,
   /retention_cleanup_secret/iu,
   /analysis_cache_hash_secret/iu,
+  /operator_test_secret/iu,
 ];
 
 function getDefaultDateRange(now = new Date()) {
@@ -93,6 +108,11 @@ export function parseReportArgs(argv, now = new Date()) {
     includeOperator: false,
     format: DEFAULT_REPORT_FORMAT,
     output: null,
+    target: "local",
+    targetExplicit: false,
+    confirmProduction: false,
+    baseUrl: null,
+    dryRun: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -123,6 +143,23 @@ export function parseReportArgs(argv, now = new Date()) {
     } else if (arg === "--output") {
       options.output = argv[index + 1];
       index += 1;
+    } else if (arg === "--target") {
+      const target = argv[index + 1];
+
+      if (!TARGETS.includes(target)) {
+        throw new Error(`Invalid --target value: ${target}. Use local, staging, or production.`);
+      }
+
+      options.target = target;
+      options.targetExplicit = true;
+      index += 1;
+    } else if (arg === "--confirm-production") {
+      options.confirmProduction = true;
+    } else if (arg === "--base-url") {
+      options.baseUrl = normalizeBaseUrl(argv[index + 1]);
+      index += 1;
+    } else if (arg === "--dry-run") {
+      options.dryRun = true;
     } else if (arg === "--help" || arg === "-h") {
       options.help = true;
     } else {
@@ -134,7 +171,31 @@ export function parseReportArgs(argv, now = new Date()) {
     throw new Error("--from must be before --to.");
   }
 
+  validateTargetOptions(options);
   return options;
+}
+
+function normalizeBaseUrl(value) {
+  if (!value) {
+    throw new Error("--base-url requires a URL value.");
+  }
+
+  const parsedUrl = new URL(value);
+
+  if (parsedUrl.protocol !== "https:" && parsedUrl.hostname !== "localhost") {
+    throw new Error("--base-url must use https, except localhost.");
+  }
+
+  parsedUrl.pathname = "";
+  parsedUrl.search = "";
+  parsedUrl.hash = "";
+  return parsedUrl.toString().replace(/\/$/u, "");
+}
+
+function validateTargetOptions(options) {
+  if (options.target === "production" && options.confirmProduction !== true) {
+    throw new Error("--target production requires --confirm-production.");
+  }
 }
 
 function emptyCounts() {
@@ -507,6 +568,10 @@ export function buildFunnelMetricsReport(events, options) {
     generatedAt: new Date().toISOString(),
     moduleId: MODULE_01_ID,
     moduleSlug: MODULE_01_SLUG,
+    target: options.target ?? "local",
+    targetExplicit: options.targetExplicit === true,
+    baseUrl: options.baseUrl ?? null,
+    healthMarker: normalizeHealthMarker(options.healthMarker),
     range: {
       from: from.toISOString(),
       to: to.toISOString(),
@@ -535,6 +600,36 @@ export function buildFunnelMetricsReport(events, options) {
       "liff_bind_started is only available if fulfillment_liff_opened events are emitted.",
     ],
   };
+}
+
+function normalizeHealthMarker(marker) {
+  if (!marker || typeof marker !== "object" || Array.isArray(marker)) {
+    return {
+      available: false,
+      errorCategory: "not_requested",
+    };
+  }
+
+  if (marker.available === false) {
+    return {
+      available: false,
+      errorCategory: getSafeCategory(marker.errorCategory),
+    };
+  }
+
+  const safeMarker = {
+    available: true,
+  };
+
+  for (const field of HEALTH_MARKER_FIELDS) {
+    const value = marker[field];
+    safeMarker[field] =
+      typeof value === "string" && /^[A-Za-z0-9._:/-]{1,160}$/u.test(value)
+        ? value
+        : "unknown";
+  }
+
+  return safeMarker;
 }
 
 function formatCountMap(map) {
@@ -608,6 +703,10 @@ Generated: ${report.generatedAt}
 
 Module: ${report.moduleSlug}
 
+Target: ${report.target}
+
+Target confirmation: ${report.targetExplicit ? "explicit" : "default-local"}
+
 Range: ${report.range.from} to ${report.range.to}
 ${operatorBanner}
 Status: ${report.status.status}
@@ -615,6 +714,10 @@ Status: ${report.status.status}
 Included events: ${report.includedEvents}
 
 Excluded operator events: ${report.excludedOperatorEvents}
+
+## Build Marker
+
+${formatHealthMarker(report.healthMarker)}
 
 ## Funnel
 
@@ -671,12 +774,67 @@ This report contains only aggregate event counts, conversion rates, safe theme l
   return markdown;
 }
 
+function formatHealthMarker(marker) {
+  if (!marker?.available) {
+    return `- health marker: unavailable (${marker?.errorCategory ?? "not_requested"})`;
+  }
+
+  return HEALTH_MARKER_FIELDS.map((field) => `- ${field}: ${marker[field] ?? "unknown"}`).join("\n");
+}
+
 export function assertReportIsSafe(output) {
   const lowerOutput = output.toLowerCase();
   const forbiddenPattern = FORBIDDEN_REPORT_PATTERNS.find((pattern) => pattern.test(lowerOutput));
 
   if (forbiddenPattern) {
     throw new Error(`Report output failed privacy guard: ${forbiddenPattern.source}`);
+  }
+}
+
+export function formatReportOutput(report, format = DEFAULT_REPORT_FORMAT) {
+  const output = format === "json"
+    ? JSON.stringify(report, null, 2)
+    : formatMarkdownReport(report);
+
+  assertReportIsSafe(output);
+  return output;
+}
+
+export async function fetchHealthMarker(baseUrl, fetchImpl = globalThis.fetch) {
+  if (!baseUrl) {
+    return {
+      available: false,
+      errorCategory: "not_requested",
+    };
+  }
+
+  if (typeof fetchImpl !== "function") {
+    return {
+      available: false,
+      errorCategory: "fetch_unavailable",
+    };
+  }
+
+  try {
+    const response = await fetchImpl(`${baseUrl}/api/health`, {
+      headers: {
+        accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      return {
+        available: false,
+        errorCategory: `http_${response.status}`,
+      };
+    }
+
+    return normalizeHealthMarker(await response.json());
+  } catch {
+    return {
+      available: false,
+      errorCategory: "fetch_failed",
+    };
   }
 }
 
@@ -711,6 +869,14 @@ async function fetchEvents({ from, to }) {
 
 function printConsoleSummary(report) {
   console.log(`Module 01 funnel metrics (${report.range.from} to ${report.range.to})`);
+  console.log(`Target: ${report.target}${report.targetExplicit ? "" : " (default local)"}`);
+  if (report.healthMarker?.available) {
+    console.log(
+      `Build marker: ${report.healthMarker.environment} ${report.healthMarker.gitCommit} ${report.healthMarker.gitBranch}`,
+    );
+  } else {
+    console.log(`Build marker: unavailable (${report.healthMarker?.errorCategory ?? "not_requested"})`);
+  }
   console.log(`Status: ${report.status.status}`);
   console.log(`Included events: ${report.includedEvents}`);
   console.log(`Excluded operator events: ${report.excludedOperatorEvents}`);
@@ -728,6 +894,9 @@ function printUsage() {
   console.log(`Usage:
   pnpm module01:metrics --from 2026-05-27 --to 2026-05-28
   pnpm module01:metrics --last 24h
+  pnpm module01:metrics --target staging --last 24h --base-url https://staging.anyu.tw
+  pnpm module01:metrics --target production --confirm-production --last 24h --base-url https://anyu.tw
+  pnpm module01:metrics --target production --confirm-production --dry-run
   pnpm module01:metrics --include-operator
   pnpm module01:metrics --format markdown
   pnpm module01:metrics --format json
@@ -743,11 +912,25 @@ async function main() {
     return;
   }
 
+  const healthMarker = await fetchHealthMarker(options.baseUrl);
+  const reportOptions = { ...options, healthMarker };
+
+  if (options.dryRun) {
+    console.log(`Dry run: target=${options.target}${options.targetExplicit ? "" : " (default local)"}`);
+    console.log(`Dry run: range=${options.from.toISOString()} to ${options.to.toISOString()}`);
+    console.log(`Dry run: includeOperator=${options.includeOperator}`);
+    console.log(`Dry run: database query skipped.`);
+    if (healthMarker.available) {
+      console.log(`Dry run: health marker=${healthMarker.environment} ${healthMarker.gitCommit} ${healthMarker.gitBranch}`);
+    } else {
+      console.log(`Dry run: health marker unavailable (${healthMarker.errorCategory}).`);
+    }
+    return;
+  }
+
   const events = await fetchEvents(options);
-  const report = buildFunnelMetricsReport(events, options);
-  const output = options.format === "json"
-    ? JSON.stringify(report, null, 2)
-    : formatMarkdownReport(report);
+  const report = buildFunnelMetricsReport(events, reportOptions);
+  const output = formatReportOutput(report, options.format);
   const outputPath = resolve(process.cwd(), options.output ?? defaultOutputPath());
 
   await mkdir(dirname(outputPath), { recursive: true });

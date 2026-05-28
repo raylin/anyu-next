@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  assertReportIsSafe,
   buildFunnelMetricsReport,
+  fetchHealthMarker,
   formatMarkdownReport,
+  formatReportOutput,
   mapEventToCanonicalSteps,
   parseReportArgs,
 } from "../../scripts/module-01-funnel-report.mjs";
@@ -33,6 +36,8 @@ function report(events: ReturnType<typeof event>[], includeOperator = false) {
     from: new Date("2026-05-27T00:00:00.000Z"),
     to: new Date("2026-05-28T00:00:00.000Z"),
     includeOperator,
+    target: "local",
+    targetExplicit: false,
   });
 }
 
@@ -95,6 +100,7 @@ describe("module 01 funnel metrics report", () => {
   it("handles division by zero as n/a in markdown", () => {
     const markdown = formatMarkdownReport(report([]));
 
+    expect(markdown).toContain("Target: local");
     expect(markdown).toContain("| landing_view | 0 | n/a | n/a |");
     expect(markdown).toContain("- landing_to_analyze_rate: n/a");
     expect(markdown).toContain("## Data Quality Notes");
@@ -237,18 +243,126 @@ describe("module 01 funnel metrics report", () => {
     expect(metrics.paidFailureCategories).toEqual({ unknown: 1 });
   });
 
-  it("parses CLI date range, last-window, and operator flags", () => {
+  it("parses CLI date range, last-window, target, health marker, and operator flags", () => {
     expect(
-      parseReportArgs(["--from", "2026-05-27", "--to", "2026-05-28", "--include-operator"], BASE_TIME),
+      parseReportArgs(
+        [
+          "--from",
+          "2026-05-27",
+          "--to",
+          "2026-05-28",
+          "--include-operator",
+          "--target",
+          "staging",
+          "--base-url",
+          "https://staging.anyu.tw",
+        ],
+        BASE_TIME,
+      ),
     ).toMatchObject({
       from: new Date("2026-05-27T00:00:00.000Z"),
       to: new Date("2026-05-28T00:00:00.000Z"),
       includeOperator: true,
+      target: "staging",
+      targetExplicit: true,
+      baseUrl: "https://staging.anyu.tw",
     });
 
     expect(parseReportArgs(["--last", "24h"], BASE_TIME)).toMatchObject({
       from: new Date("2026-05-26T12:00:00.000Z"),
       to: BASE_TIME,
+      target: "local",
+      targetExplicit: false,
     });
+  });
+
+  it("requires explicit production confirmation", () => {
+    expect(() => parseReportArgs(["--target", "production"], BASE_TIME)).toThrow(
+      "--target production requires --confirm-production.",
+    );
+
+    expect(parseReportArgs(["--target", "production", "--confirm-production"], BASE_TIME)).toMatchObject({
+      target: "production",
+      confirmProduction: true,
+    });
+  });
+
+  it("includes target metadata and health marker in markdown and json reports", () => {
+    const metrics = buildFunnelMetricsReport([], {
+      from: new Date("2026-05-27T00:00:00.000Z"),
+      to: new Date("2026-05-28T00:00:00.000Z"),
+      includeOperator: false,
+      target: "production",
+      targetExplicit: true,
+      baseUrl: "https://anyu.tw",
+      healthMarker: {
+        available: true,
+        app: "anyu-web",
+        environment: "production",
+        gitCommit: "2fff33edf7f0",
+        gitBranch: "staging",
+        buildTime: "unknown",
+        deploymentProvider: "vercel",
+        versionSource: "env",
+      },
+    });
+    const markdown = formatReportOutput(metrics, "markdown");
+    const json = JSON.parse(formatReportOutput(metrics, "json"));
+
+    expect(markdown).toContain("Target: production");
+    expect(markdown).toContain("- environment: production");
+    expect(markdown).toContain("- gitCommit: 2fff33edf7f0");
+    expect(json.target).toBe("production");
+    expect(json.healthMarker).toMatchObject({
+      available: true,
+      environment: "production",
+      deploymentProvider: "vercel",
+    });
+  });
+
+  it("fetches health marker safely without requiring network in tests", async () => {
+    const marker = await fetchHealthMarker("https://anyu.tw", async (url: string) => {
+      expect(url).toBe("https://anyu.tw/api/health");
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          app: "anyu-web",
+          environment: "production",
+          gitCommit: "2fff33edf7f0",
+          gitBranch: "staging",
+          buildTime: "unknown",
+          deploymentProvider: "vercel",
+          versionSource: "env",
+          DATABASE_URL: "postgres://should-not-appear",
+        }),
+      };
+    });
+
+    expect(marker).toMatchObject({
+      available: true,
+      app: "anyu-web",
+      environment: "production",
+      gitCommit: "2fff33edf7f0",
+    });
+    expect(JSON.stringify(marker)).not.toContain("DATABASE_URL");
+    expect(JSON.stringify(marker)).not.toContain("should-not-appear");
+  });
+
+  it("handles health marker failure safely", async () => {
+    await expect(fetchHealthMarker(null)).resolves.toEqual({
+      available: false,
+      errorCategory: "not_requested",
+    });
+    await expect(fetchHealthMarker("https://anyu.tw", async () => ({ ok: false, status: 503 }))).resolves.toEqual({
+      available: false,
+      errorCategory: "http_503",
+    });
+  });
+
+  it("rejects forbidden report output keys in markdown and json safety checks", () => {
+    expect(() => assertReportIsSafe("paid_result_json")).toThrow("Report output failed privacy guard");
+    expect(() => assertReportIsSafe("DATABASE_URL=postgres://example")).toThrow("Report output failed privacy guard");
+    expect(() => assertReportIsSafe("lineUserId")).toThrow("Report output failed privacy guard");
   });
 });

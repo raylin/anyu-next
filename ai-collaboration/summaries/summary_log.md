@@ -5863,3 +5863,23 @@ Learnings:
 Unresolved questions:
 - Whether to inject `ANYU_BUILD_TIME` during Vercel builds should be decided in a future ops-hardening task if timestamp freshness becomes important.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-28 - Secure Metrics Operator Path v0
+
+Completed changes:
+- Saved the secure metrics operator path handoff under `ai-collaboration/handoffs/`.
+- Enhanced `module01:metrics` with explicit `--target local|staging|production`, production confirmation, `--base-url` health marker integration, and `--dry-run`.
+- Kept metrics aggregate-only and operator-test aware; operator traffic remains excluded by default.
+- Added target and safe health marker metadata to markdown and JSON reports.
+- Extended the report privacy guard to JSON output and added forbidden operational key checks.
+- Updated Module 01 metrics and production deployment runbooks with safe staging/production command shapes.
+- Created the required review bundle and execution report.
+
+Learnings:
+- The safest v0 path is CLI hardening, not a new metrics endpoint.
+- Production target safety can be improved substantially without changing event semantics or product runtime behavior.
+- Production `/api/health` may still return unknown marker fields until the build-marker commit is deployed.
+
+Unresolved questions:
+- Secure DB credential distribution remains outside this task and should stay operator-controlled.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

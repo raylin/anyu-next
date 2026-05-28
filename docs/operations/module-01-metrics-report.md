@@ -13,10 +13,12 @@ It is not an admin console and does not expose a public route.
 Run from `apps/web`:
 
 ```bash
-corepack pnpm module01:metrics --last 24h
-corepack pnpm module01:metrics --from 2026-05-27 --to 2026-05-28
-corepack pnpm module01:metrics --include-operator
-corepack pnpm module01:metrics --format json --output ../../ai-collaboration/reports/metrics/module-01-funnel.json
+corepack pnpm module01:metrics --target local --last 24h
+corepack pnpm module01:metrics --target staging --last 24h --base-url https://staging.anyu.tw
+corepack pnpm module01:metrics --target production --confirm-production --last 24h --base-url https://anyu.tw
+corepack pnpm module01:metrics --target production --confirm-production --dry-run
+corepack pnpm module01:metrics --target staging --include-operator
+corepack pnpm module01:metrics --target staging --format json --output ../../ai-collaboration/reports/metrics/module-01-funnel.json
 ```
 
 Default behavior:
@@ -25,12 +27,38 @@ Default behavior:
 - operator traffic: excluded
 - output: markdown report plus console table
 - default file: `ai-collaboration/reports/metrics/YYYY-MM-DD-module-01-funnel.md`
+- target: `local` when omitted, with report metadata marked as default-local
+- production target: refused unless `--confirm-production` is also present
+- dry run: validates target/range/health-marker settings and skips the database query
 
 The command requires `DATABASE_URL` for the environment being reviewed. Do not print or paste the connection string into reports.
 
+## Safe Operator Workflow
+
+Use explicit target labels for every non-local report:
+
+```bash
+cd apps/web
+corepack pnpm module01:metrics --target staging --last 24h --base-url https://staging.anyu.tw --format markdown
+corepack pnpm module01:metrics --target production --confirm-production --last 24h --base-url https://anyu.tw --format markdown
+```
+
+Before running production metrics:
+
+- confirm the secure operator environment has the intended production `DATABASE_URL` without printing it
+- run `--dry-run` first to verify target, time range, operator inclusion, and health marker behavior
+- use `--target production --confirm-production` together; production runs without confirmation are intentionally blocked
+- record only the target label and safe `/api/health` marker fields in reports
+
+For staging:
+
+- use `--target staging`
+- include `--base-url https://staging.anyu.tw` when freshness context matters
+- do not use staging reports as production conversion evidence
+
 ## Deployment Freshness Context
 
-When metrics are used for a production or staging readiness decision, also request the target environment health marker:
+When metrics are used for a production or staging readiness decision, include the target environment health marker through `--base-url` or request it manually:
 
 ```bash
 curl -sS https://anyu.tw/api/health
@@ -118,3 +146,5 @@ Reports include only:
 - operator event counts
 
 Reports must not include raw input, redacted input text, full result JSON, paid result JSON, provider output, LINE identifiers, tokenized URLs, emails, database URLs, provider keys, LINE secrets, retention secrets, or cache secrets.
+
+The CLI also rejects generated report output when forbidden operational keys appear in markdown or JSON output. If this guard fails, stop and inspect the report generator with synthetic data only; do not paste the failed output into ChatGPT or external docs.

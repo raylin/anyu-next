@@ -411,6 +411,15 @@ First post-launch checks:
 - abuse/cost caps not being hit unexpectedly
 - privacy-safe Module 01 funnel report if aggregate event review is needed; see `docs/operations/module-01-metrics-report.md`
 
+Production metrics command shape:
+
+```bash
+cd apps/web
+corepack pnpm module01:metrics --target production --confirm-production --last 24h --base-url https://anyu.tw --format markdown
+```
+
+Run `--dry-run` first when setting up a new operator shell. Never print `DATABASE_URL`; record only target label, aggregate counts, data quality notes, and safe `/api/health` build marker fields.
+
 Recommended early cadence:
 
 - immediate check after deployment
