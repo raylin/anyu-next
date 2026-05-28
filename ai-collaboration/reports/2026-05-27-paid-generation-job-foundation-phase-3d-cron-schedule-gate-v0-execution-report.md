@@ -2,7 +2,7 @@
 
 ## Summary
 
-Added the paid-generation cron schedule gate to `apps/web/vercel.json` with a 5-minute cadence. No production deploy was performed, production processor remains disabled, and no user-facing behavior changed.
+Added the paid-generation cron schedule gate to `apps/web/vercel.json`. The requested 5-minute cadence was rejected by the current Vercel Hobby account, so the committed schedule is daily at `17:30 UTC`. No production deploy was performed, production processor remains disabled, and no user-facing behavior changed.
 
 ## Files Created
 
@@ -20,7 +20,7 @@ Added the paid-generation cron schedule gate to `apps/web/vercel.json` with a 5-
 ## Cron Schedule Status
 
 - Added `/api/cron/paid-generation`.
-- Schedule: `*/5 * * * *`.
+- Schedule: `30 17 * * *`.
 - Existing retention cleanup cron preserved.
 - No production deploy was performed, so this task did not activate a production schedule.
 
@@ -84,6 +84,7 @@ After the next approved production deployment, verify the scheduled route remain
 ## Deviations From Handoff
 
 - Used Mode A: schedule config added while production processor remains disabled.
+- Adjusted schedule from requested `*/5 * * * *` to `30 17 * * *` because Vercel rejected sub-daily cron on the current Hobby account.
 - Did not run a production scheduled invocation because production was not deployed in this task.
 
 ## Git Commit
@@ -98,6 +99,7 @@ Pending at report creation.
 
 - Whether the owner has removed the Phase 3A temporary Vercel project from the console.
 - Exact production scheduled-run observation requires a future approved production deploy.
+- Sub-daily paid-generation cron requires Vercel plan/support approval.
 
 ## Recommended Next Step
 

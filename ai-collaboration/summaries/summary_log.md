@@ -5963,7 +5963,7 @@ Unresolved questions:
 
 Completed changes:
 - Saved the Phase 3D cron schedule gate handoff under `ai-collaboration/handoffs/`.
-- Added `/api/cron/paid-generation` to `apps/web/vercel.json` with cadence `*/5 * * * *`.
+- Added `/api/cron/paid-generation` to `apps/web/vercel.json`; the requested 5-minute cadence was rejected by Vercel Hobby limits, so the committed cadence is daily `30 17 * * *`.
 - Preserved the existing retention cleanup cron schedule.
 - Added a config test to lock the paid-generation cron path and cadence.
 - Updated the production deployment runbook with the configured schedule and processor-disabled safety posture.
@@ -5975,6 +5975,7 @@ Completed changes:
 Learnings:
 - Mode A is the safest schedule gate posture: commit the schedule while production processor remains disabled until explicit approval.
 - The schedule config alone does not change production until an approved production deployment applies it.
+- Sub-daily paid-generation cron requires Vercel plan/support approval.
 
 Unresolved questions:
 - Production scheduled-run verification remains pending a separate approved production deploy.

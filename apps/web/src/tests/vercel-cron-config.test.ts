@@ -10,7 +10,7 @@ type VercelConfig = {
 };
 
 describe("vercel cron config", () => {
-  it("keeps paid generation cron on the approved route and cadence", () => {
+  it("keeps paid generation cron on the approved route and Vercel Hobby-safe cadence", () => {
     const config = JSON.parse(
       readFileSync(join(process.cwd(), "vercel.json"), "utf8"),
     ) as VercelConfig;
@@ -19,7 +19,7 @@ describe("vercel cron config", () => {
       expect.arrayContaining([
         {
           path: "/api/cron/paid-generation",
-          schedule: "*/5 * * * *",
+          schedule: "30 17 * * *",
         },
       ]),
     );

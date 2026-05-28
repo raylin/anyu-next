@@ -8,7 +8,7 @@ Added the paid-generation cron schedule gate to the Vercel config:
 
 ```text
 GET /api/cron/paid-generation
-*/5 * * * *
+30 17 * * *
 ```
 
 The schedule points at the Phase 3C wrapper, which is `CRON_SECRET`-gated, `ENABLE_PAID_GENERATION_PROCESSOR`-gated, `paid_analysis` only, and `limit=1`.
@@ -17,7 +17,7 @@ No production deployment was performed and production processor remains disabled
 
 ## 2. Cron Schedule Decision
 
-Decision: add the 5-minute schedule in repo config, but keep production processing disabled until explicit approval.
+Decision: add a daily schedule in repo config, but keep production processing disabled until explicit approval.
 
 Rationale:
 
@@ -25,7 +25,7 @@ Rationale:
 - Production `CRON_SECRET` is configured.
 - Production `ENABLE_PAID_GENERATION_PROCESSOR` is absent.
 - Production `generation_jobs` aggregate count is zero.
-- A 5-minute cadence is low-risk while no normal production flow depends on queued paid-generation jobs.
+- Vercel Hobby rejected the requested 5-minute cadence during preview deploy, so this gate uses a once-daily schedule that the current account tier supports.
 
 ## 3. Config Changes
 
@@ -40,7 +40,7 @@ Added:
 ```json
 {
   "path": "/api/cron/paid-generation",
-  "schedule": "*/5 * * * *"
+  "schedule": "30 17 * * *"
 }
 ```
 
@@ -137,6 +137,8 @@ The Phase 3A temporary Vercel project cleanup remains an owner/operator console 
 
 ## 11. Issues Found
 
+- Vercel rejected `*/5 * * * *` for the current Hobby account: sub-daily cron requires a higher plan.
+- The schedule gate was adjusted to daily `30 17 * * *`.
 - Local Playwright remains blocked by the known Chromium/MachPort permission issue.
 - The active workspace still cannot write `.git/index.lock`, so commit/push was performed from a clean temporary clone.
 

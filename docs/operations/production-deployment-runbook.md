@@ -149,7 +149,8 @@ Paid generation processor / cron gate:
 - the cron wrapper hard-codes `paid_analysis` with `limit=1`
 - `dryRun=1` is allowed for aggregate-only no-op/manual verification
 - production cron schedule is configured in `apps/web/vercel.json` for `/api/cron/paid-generation`
-- paid-generation cron cadence: every 5 minutes
+- paid-generation cron cadence: daily at `17:30 UTC`
+- Vercel Hobby currently rejects sub-daily cron cadence; move to `*/5 * * * *` only after plan/support approval
 - keep `ENABLE_PAID_GENERATION_PROCESSOR=false` or absent in production until explicit approval
 - with the processor flag disabled, scheduled calls should fail safe with `processor_disabled` and must not process jobs
 - test missing/invalid auth before any enabled smoke; both should return `401`
