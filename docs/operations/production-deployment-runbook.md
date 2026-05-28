@@ -171,6 +171,15 @@ Recommended v0 approach:
 
 Do not auto-push `main`.
 
+Runtime build marker check:
+
+- before production smoke, request `GET https://anyu.tw/api/health`
+- record only safe marker fields: `app`, `environment`, `gitCommit`, `gitBranch`, `buildTime`, `deploymentProvider`, and `versionSource`
+- confirm `environment` is `production` and `deploymentProvider` is `vercel` when Vercel env metadata is available
+- compare `gitCommit` / `gitBranch` with the approved deployment candidate when those fields are available
+- if marker fields are `unknown`, document that freshness could not be confirmed from runtime metadata and use Vercel deployment ID plus behavioral smoke as fallback evidence
+- never record full environment dumps, secret names with values, database URLs, provider keys, LINE credentials, retention secrets, cache secrets, tokenized URLs, or raw user/provider content
+
 ## 10. Domain / DNS Checklist
 
 Production domain checklist:

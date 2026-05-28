@@ -28,6 +28,26 @@ Default behavior:
 
 The command requires `DATABASE_URL` for the environment being reviewed. Do not print or paste the connection string into reports.
 
+## Deployment Freshness Context
+
+When metrics are used for a production or staging readiness decision, also request the target environment health marker:
+
+```bash
+curl -sS https://anyu.tw/api/health
+```
+
+Record only these safe fields alongside the metrics interpretation:
+
+- `app`
+- `environment`
+- `gitCommit`
+- `gitBranch`
+- `buildTime`
+- `deploymentProvider`
+- `versionSource`
+
+If commit or build-time fields are `unknown`, state that deployment freshness could not be confirmed from runtime metadata and rely on the approved Vercel deployment ID plus smoke results. Do not paste full env output, `DATABASE_URL`, provider keys, LINE credentials, retention secrets, cache secrets, tokenized URLs, or raw content into metrics reports.
+
 ## Operator Traffic
 
 Operator test traffic is excluded by default when event metadata contains:

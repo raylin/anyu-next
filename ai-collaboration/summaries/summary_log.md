@@ -5845,3 +5845,21 @@ Unresolved questions:
 - Owner should decide whether `docs/design/` should be committed, moved, or ignored.
 - Durable paid generation and sessionized metrics require separate architecture approval.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-28 - Build Marker Ops Readiness v0
+
+Completed changes:
+- Saved the build marker ops readiness handoff under `ai-collaboration/handoffs/`.
+- Added safe runtime build metadata to `GET /api/health` while preserving the existing health response compatibility field.
+- Added an allowlisted build marker helper that sanitizes Vercel env metadata and falls back to `unknown` when metadata is missing or invalid.
+- Added tests for marker shape, Vercel env mapping, missing env fallback, and forbidden secret-like key exclusion.
+- Updated production deployment and Module 01 metrics docs to use `/api/health` as deployment freshness context.
+- Created the required review bundle and execution report.
+
+Learnings:
+- The app can now expose a small runtime freshness marker without enumerating env vars or exposing secrets.
+- `gitCommit` and `gitBranch` are the primary reliable hosted freshness fields; `buildTime` remains `unknown` unless `ANYU_BUILD_TIME` is configured.
+
+Unresolved questions:
+- Whether to inject `ANYU_BUILD_TIME` during Vercel builds should be decided in a future ops-hardening task if timestamp freshness becomes important.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
