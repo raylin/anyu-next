@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { isPaidGenerationJobsEnabled } from "@/lib/runtime/feature-flags";
+import {
+  isPaidGenerationJobsEnabled,
+  isPaidGenerationProcessorEnabled,
+} from "@/lib/runtime/feature-flags";
 
 describe("runtime feature flags", () => {
   it("keeps paid generation jobs disabled by default", () => {
@@ -16,5 +19,15 @@ describe("runtime feature flags", () => {
     expect(isPaidGenerationJobsEnabled({ ENABLE_PAID_GENERATION_JOBS: "false" } as NodeJS.ProcessEnv)).toBe(
       false,
     );
+  });
+
+  it("keeps the paid generation processor disabled unless explicitly enabled", () => {
+    expect(isPaidGenerationProcessorEnabled({} as NodeJS.ProcessEnv)).toBe(false);
+    expect(
+      isPaidGenerationProcessorEnabled({ ENABLE_PAID_GENERATION_PROCESSOR: "true" } as NodeJS.ProcessEnv),
+    ).toBe(true);
+    expect(
+      isPaidGenerationProcessorEnabled({ ENABLE_PAID_GENERATION_PROCESSOR: "0" } as NodeJS.ProcessEnv),
+    ).toBe(false);
   });
 });

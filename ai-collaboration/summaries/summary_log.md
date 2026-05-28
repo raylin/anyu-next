@@ -5959,6 +5959,32 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
 
+## 2026-05-29 - Paid Generation Job Foundation Phase 3A Processor Endpoint v0
+
+Completed changes:
+- Saved the Phase 3A processor endpoint handoff under `ai-collaboration/handoffs/`.
+- Added secret-gated `POST /api/internal/jobs/process` for aggregate-only `paid_analysis` job processing.
+- Added `ENABLE_PAID_GENERATION_PROCESSOR`, disabled by default.
+- Added internal job bearer auth using `INTERNAL_JOB_SECRET` with `CRON_SECRET` fallback.
+- Added atomic due-job claiming with `FOR UPDATE SKIP LOCKED`.
+- Added stale processing-lock recovery into retry-scheduled or failed-final states.
+- Added a paid-analysis processor service that reuses paid-generation provider/fallback payload generation, persists completed paid results, and marks jobs completed/retry/final by safe category.
+- Added tests for feature flags, internal auth, claim/stale recovery helpers, processor service flows, endpoint security, and privacy-safe response shape.
+- Deployed the current candidate to staging, enabled the processor only on staging, processed one synthetic queued job to completed provider output, and verified the unlocked page rendered completed paid content.
+- Confirmed production processor flag/secret names were absent.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Phase 3A can process queued paid-analysis jobs without changing current request-route behavior.
+- `analysis_paid_results` remains the delivery truth; completed jobs are only useful when the paid-result row is present.
+- Processor responses should remain aggregate-only to avoid leaking job refs, dedupe keys, tokens, or paid-result details.
+
+Unresolved questions:
+- Production processor activation remains pending explicit approval.
+- Vercel Cron scheduling and cadence remain Phase 3B scope.
+- Direct paid-generation request orchestration should be consolidated further with the shared generation helper in a later cleanup.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
 ## 2026-05-28 - Paid Generation Job Foundation Phase 2 Enqueue / Status Integration v0
 
 Completed changes:

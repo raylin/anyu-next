@@ -38,12 +38,13 @@ type PaidGenerationJobMirror = {
   job: GenerationJob;
   created: boolean;
 };
+type PaidGenerationRecord = NonNullable<Awaited<ReturnType<typeof getAnalysisResultWithRequestById>>>;
 
 function getPaidGenerationSourceFromModel(model?: string | null): PaidGenerationSource {
   return model === PAID_RESULT_PROVIDER_FALLBACK_MODEL ? "fallback" : "provider";
 }
 
-function getSafeErrorCode(error: unknown) {
+export function getSafePaidGenerationErrorCode(error: unknown) {
   if (isProviderConfigError(error)) {
     return "configuration";
   }
@@ -53,6 +54,83 @@ function getSafeErrorCode(error: unknown) {
   }
 
   return getProviderRuntimeErrorCode(error) ?? "provider";
+}
+
+export async function generateDeferredPaidResultPayload(input: {
+  record: PaidGenerationRecord;
+  providerInfo?: ReturnType<typeof getActiveProviderInfo>;
+}) {
+  if (!input.record.request.rawInputRedacted) {
+    throw new Error("source_unavailable");
+  }
+
+  const redactedInput = input.record.request.rawInputRedacted;
+  const providerInfo = input.providerInfo ?? getActiveProviderInfo();
+  const runtimeStrategy = resolveRuntimeStrategy(providerInfo);
+
+  try {
+    return {
+      ...(await generatePaidResult({
+        redactedInput,
+        freeResult: input.record.result.normalizedResultJson,
+        userContext: input.record.request.userContextJson,
+        providerModel: runtimeStrategy.primaryModel,
+      })),
+      source: "provider" as PaidGenerationSource,
+      fallbackReason: undefined,
+      validationDiagnostics: undefined,
+      providerInfo,
+    };
+  } catch (error) {
+    if (isProviderConfigError(error)) {
+      throw error;
+    }
+
+    if (isOutputValidationError(error)) {
+      try {
+        return {
+          ...(await generatePaidResult({
+            redactedInput,
+            freeResult: input.record.result.normalizedResultJson,
+            userContext: input.record.request.userContextJson,
+            providerModel: runtimeStrategy.primaryModel,
+          })),
+          source: "provider" as PaidGenerationSource,
+          fallbackReason: undefined,
+          validationDiagnostics: undefined,
+          providerInfo,
+        };
+      } catch (retryError) {
+        if (isProviderConfigError(retryError)) {
+          throw retryError;
+        }
+
+        return {
+          paidResult: buildProviderFallbackPaidResult({
+            freeResult: input.record.result.normalizedResultJson,
+            userContext: input.record.request.userContextJson,
+          }),
+          model: PAID_RESULT_PROVIDER_FALLBACK_MODEL,
+          source: "fallback" as PaidGenerationSource,
+          fallbackReason: getSafePaidGenerationErrorCode(retryError),
+          validationDiagnostics: getPaidResultValidationDiagnostics(retryError),
+          providerInfo,
+        };
+      }
+    }
+
+    return {
+      paidResult: buildProviderFallbackPaidResult({
+        freeResult: input.record.result.normalizedResultJson,
+        userContext: input.record.request.userContextJson,
+      }),
+      model: PAID_RESULT_PROVIDER_FALLBACK_MODEL,
+      source: "fallback" as PaidGenerationSource,
+      fallbackReason: getSafePaidGenerationErrorCode(error),
+      validationDiagnostics: getPaidResultValidationDiagnostics(error),
+      providerInfo,
+    };
+  }
 }
 
 async function createPaidGenerationJobMirror(input: {
@@ -354,7 +432,7 @@ export async function requestDeferredPaidGeneration(input: {
             }),
             model: PAID_RESULT_PROVIDER_FALLBACK_MODEL,
             source: "fallback",
-            fallbackReason: getSafeErrorCode(retryError),
+            fallbackReason: getSafePaidGenerationErrorCode(retryError),
             validationDiagnostics: getPaidResultValidationDiagnostics(retryError),
           };
         }
@@ -366,7 +444,7 @@ export async function requestDeferredPaidGeneration(input: {
           }),
           model: PAID_RESULT_PROVIDER_FALLBACK_MODEL,
           source: "fallback",
-          fallbackReason: getSafeErrorCode(error),
+          fallbackReason: getSafePaidGenerationErrorCode(error),
           validationDiagnostics: getPaidResultValidationDiagnostics(error),
         };
       }
@@ -417,7 +495,7 @@ export async function requestDeferredPaidGeneration(input: {
       reused: false,
     };
   } catch (error) {
-    const errorCode = getSafeErrorCode(error);
+    const errorCode = getSafePaidGenerationErrorCode(error);
     await markPaidGenerationJobFailedFinal({
       jobMirror,
       errorCategory: errorCode,

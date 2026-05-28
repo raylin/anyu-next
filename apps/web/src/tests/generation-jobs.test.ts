@@ -10,6 +10,7 @@ vi.mock("@/lib/db/client", () => ({
 
 import {
   buildPaidAnalysisJobDedupeKey,
+  claimDuePaidAnalysisJobs,
   createOrReusePaidAnalysisJob,
   GENERATION_JOB_INPUT_REF_TYPES,
   GENERATION_JOB_OUTPUT_REF_TYPES,
@@ -23,6 +24,7 @@ import {
   markGenerationJobFailedFinal,
   markGenerationJobProcessing,
   markGenerationJobRetryScheduled,
+  recoverStalePaidAnalysisJobs,
 } from "@/lib/db/generation-jobs";
 
 const JOB_ID = "11111111-1111-4111-8111-111111111111";
@@ -83,6 +85,16 @@ function createUpdateDb(returningRows: unknown[] = []) {
     capture,
     db: {
       update: vi.fn(() => chain),
+    },
+  };
+}
+
+function createExecuteDb(returningRows: unknown[] = []) {
+  return {
+    db: {
+      execute: vi.fn(async () => ({
+        rows: returningRows,
+      })),
     },
   };
 }
@@ -310,6 +322,79 @@ describe("generation job repository seams", () => {
 
     await expect(listDueGenerationJobs({ now: NOW, limit: 5, jobType: "paid_analysis" })).resolves.toEqual(dueJobs);
     expect(selected.chain.orderBy).toHaveBeenCalled();
+  });
+
+  it("atomically claims due paid-analysis jobs with safe worker metadata", async () => {
+    const { db } = createExecuteDb([
+      {
+        id: JOB_ID,
+        job_type: "paid_analysis",
+        status: "processing",
+        priority: 50,
+        module_slug: "ambiguous-temperature",
+        input_ref_type: "analysis_result",
+        input_ref_id: RESULT_ID,
+        output_ref_type: "analysis_paid_result",
+        output_ref_id: null,
+        trigger_source: "web_unlock",
+        dedupe_key: "redacted-dedupe-key",
+        entitlement_ref_id: null,
+        attempt_count: 1,
+        max_attempts: 3,
+        next_run_at: NOW,
+        locked_at: NOW,
+        locked_by: "worker-1",
+        last_error_category: null,
+        last_error_code: null,
+        last_error_at: null,
+        model_provider: null,
+        model_name: null,
+        prompt_version: "paid_result_prompt_v0.2",
+        schema_version: "paid_result_schema_v3",
+        source: null,
+        operator_test: false,
+        created_at: NOW,
+        updated_at: NOW,
+      },
+    ]);
+    mockRequireDb.mockReturnValue(db);
+
+    const claimed = await claimDuePaidAnalysisJobs({
+      limit: 1,
+      lockedBy: "worker-1",
+      now: NOW,
+    });
+
+    expect(claimed).toHaveLength(1);
+    expect(claimed[0]).toMatchObject({
+      id: JOB_ID,
+      status: "processing",
+      attemptCount: 1,
+      lockedBy: "worker-1",
+    });
+    expect(db.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("recovers stale processing jobs into retry or final aggregate counts", async () => {
+    const db = {
+      execute: vi
+        .fn()
+        .mockResolvedValueOnce({ rows: [{ id: JOB_ID }] })
+        .mockResolvedValueOnce({ rows: [{ id: "final-job" }] }),
+    };
+    mockRequireDb.mockReturnValue(db);
+
+    await expect(
+      recoverStalePaidAnalysisJobs({
+        now: NOW,
+        staleBefore: new Date("2026-05-27T11:50:00.000Z"),
+      }),
+    ).resolves.toEqual({
+      retryScheduled: 1,
+      failedFinal: 1,
+      staleRecovered: 2,
+    });
+    expect(db.execute).toHaveBeenCalledTimes(2);
   });
 
   it("keeps serialized job fixtures free of forbidden private fields", () => {

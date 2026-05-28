@@ -26,12 +26,75 @@ export type GenerationJobTriggerSource = (typeof GENERATION_JOB_TRIGGER_SOURCES)
 export type GenerationJobInputRefType = (typeof GENERATION_JOB_INPUT_REF_TYPES)[number];
 export type GenerationJobOutputRefType = (typeof GENERATION_JOB_OUTPUT_REF_TYPES)[number];
 export type GenerationJob = typeof generationJobs.$inferSelect;
+type GenerationJobSqlRow = {
+  id: string;
+  job_type: GenerationJobType;
+  status: GenerationJobStatus;
+  priority: number;
+  module_slug: string;
+  input_ref_type: GenerationJobInputRefType;
+  input_ref_id: string;
+  output_ref_type: GenerationJobOutputRefType | null;
+  output_ref_id: string | null;
+  trigger_source: GenerationJobTriggerSource;
+  dedupe_key: string;
+  entitlement_ref_id: string | null;
+  attempt_count: number;
+  max_attempts: number;
+  next_run_at: Date;
+  locked_at: Date | null;
+  locked_by: string | null;
+  last_error_category: string | null;
+  last_error_code: string | null;
+  last_error_at: Date | null;
+  model_provider: string | null;
+  model_name: string | null;
+  prompt_version: string | null;
+  schema_version: string | null;
+  source: string | null;
+  operator_test: boolean;
+  created_at: Date;
+  updated_at: Date;
+};
 
 const PAID_ANALYSIS_JOB_TYPE: GenerationJobType = "paid_analysis";
 const PAID_ANALYSIS_INPUT_REF_TYPE: GenerationJobInputRefType = "analysis_result";
 const PAID_ANALYSIS_OUTPUT_REF_TYPE: GenerationJobOutputRefType = "analysis_paid_result";
 const DEFAULT_PRIORITY = 50;
 const DEFAULT_MAX_ATTEMPTS = 3;
+
+function mapGenerationJobSqlRow(row: GenerationJobSqlRow): GenerationJob {
+  return {
+    id: row.id,
+    jobType: row.job_type,
+    status: row.status,
+    priority: row.priority,
+    moduleSlug: row.module_slug,
+    inputRefType: row.input_ref_type,
+    inputRefId: row.input_ref_id,
+    outputRefType: row.output_ref_type,
+    outputRefId: row.output_ref_id,
+    triggerSource: row.trigger_source,
+    dedupeKey: row.dedupe_key,
+    entitlementRefId: row.entitlement_ref_id,
+    attemptCount: row.attempt_count,
+    maxAttempts: row.max_attempts,
+    nextRunAt: row.next_run_at,
+    lockedAt: row.locked_at,
+    lockedBy: row.locked_by,
+    lastErrorCategory: row.last_error_category,
+    lastErrorCode: row.last_error_code,
+    lastErrorAt: row.last_error_at,
+    modelProvider: row.model_provider,
+    modelName: row.model_name,
+    promptVersion: row.prompt_version,
+    schemaVersion: row.schema_version,
+    source: row.source,
+    operatorTest: row.operator_test,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 function assertAllowed<T extends string>(
   value: string,
@@ -270,6 +333,118 @@ export async function markGenerationJobFailedFinal(input: {
     .returning();
 
   return record ?? null;
+}
+
+export async function claimDuePaidAnalysisJobs(input: {
+  limit: number;
+  lockedBy: string;
+  now?: Date;
+}) {
+  const db = requireDb();
+  const now = input.now ?? new Date();
+  const limit = Math.max(1, Math.min(Math.trunc(input.limit), 10));
+
+  const result = await db.execute(sql`
+    WITH due AS (
+      SELECT id
+      FROM generation_jobs
+      WHERE job_type = ${PAID_ANALYSIS_JOB_TYPE}
+        AND status IN ('queued', 'retry_scheduled')
+        AND next_run_at <= ${now}
+        AND attempt_count < max_attempts
+      ORDER BY priority DESC, next_run_at ASC, created_at ASC
+      LIMIT ${limit}
+      FOR UPDATE SKIP LOCKED
+    )
+    UPDATE generation_jobs
+    SET
+      status = 'processing',
+      attempt_count = attempt_count + 1,
+      locked_at = ${now},
+      locked_by = ${input.lockedBy},
+      updated_at = ${now}
+    WHERE id IN (SELECT id FROM due)
+    RETURNING
+      id,
+      job_type,
+      status,
+      priority,
+      module_slug,
+      input_ref_type,
+      input_ref_id,
+      output_ref_type,
+      output_ref_id,
+      trigger_source,
+      dedupe_key,
+      entitlement_ref_id,
+      attempt_count,
+      max_attempts,
+      next_run_at,
+      locked_at,
+      locked_by,
+      last_error_category,
+      last_error_code,
+      last_error_at,
+      model_provider,
+      model_name,
+      prompt_version,
+      schema_version,
+      source,
+      operator_test,
+      created_at,
+      updated_at
+  `);
+
+  return (result.rows as GenerationJobSqlRow[]).map(mapGenerationJobSqlRow);
+}
+
+export async function recoverStalePaidAnalysisJobs(input: {
+  now?: Date;
+  staleBefore: Date;
+}) {
+  const db = requireDb();
+  const now = input.now ?? new Date();
+
+  const retryable = await db.execute(sql`
+    UPDATE generation_jobs
+    SET
+      status = 'retry_scheduled',
+      next_run_at = ${now},
+      locked_at = NULL,
+      locked_by = NULL,
+      last_error_category = 'stale_lock_recovered',
+      last_error_code = NULL,
+      last_error_at = ${now},
+      updated_at = ${now}
+    WHERE job_type = ${PAID_ANALYSIS_JOB_TYPE}
+      AND status = 'processing'
+      AND locked_at < ${input.staleBefore}
+      AND attempt_count < max_attempts
+    RETURNING id
+  `);
+
+  const final = await db.execute(sql`
+    UPDATE generation_jobs
+    SET
+      status = 'failed_final',
+      locked_at = NULL,
+      locked_by = NULL,
+      last_error_category = 'stale_lock_failed_final',
+      last_error_code = NULL,
+      last_error_at = ${now},
+      updated_at = ${now}
+    WHERE job_type = ${PAID_ANALYSIS_JOB_TYPE}
+      AND status = 'processing'
+      AND locked_at < ${input.staleBefore}
+      AND attempt_count >= max_attempts
+    RETURNING id
+  `);
+
+  return {
+    retryScheduled: retryable.rows.length,
+    failedFinal: final.rows.length,
+    staleRecovered: retryable.rows.length + final.rows.length,
+  };
 }
 
 export async function listDueGenerationJobs(input: {
