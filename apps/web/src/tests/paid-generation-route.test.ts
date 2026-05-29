@@ -5,11 +5,13 @@ const {
   mockGetUnlockIntentByTokenHash,
   mockGetGenerationJobByDedupeKey,
   mockRequestDeferredPaidGeneration,
+  mockResolvePaidAccessToken,
 } = vi.hoisted(() => ({
   mockGetPaidResultStatusForAnalysisResult: vi.fn(),
   mockGetUnlockIntentByTokenHash: vi.fn(),
   mockGetGenerationJobByDedupeKey: vi.fn(),
   mockRequestDeferredPaidGeneration: vi.fn(),
+  mockResolvePaidAccessToken: vi.fn(),
 }));
 
 vi.mock("@/lib/db/client", () => ({
@@ -36,6 +38,10 @@ vi.mock("@/lib/db/generation-jobs", async (importOriginal) => {
     getGenerationJobByDedupeKey: mockGetGenerationJobByDedupeKey,
   };
 });
+
+vi.mock("@/lib/payments/paid-access-resolver", () => ({
+  resolvePaidAccessToken: mockResolvePaidAccessToken,
+}));
 
 import { POST } from "@/app/api/modules/[moduleSlug]/paid-result/request/route";
 import { POST as statusPost } from "@/app/api/modules/[moduleSlug]/paid-result/status/route";
@@ -189,6 +195,68 @@ describe("paid result generation request route", () => {
       retryable: false,
       errorCategory: null,
     });
+  });
+
+  it("resolves pa_ paid access tokens without falling back to legacy unlock lookup", async () => {
+    const paidAccessToken = `pa_${"a".repeat(43)}`;
+    mockResolvePaidAccessToken.mockResolvedValue({
+      ok: true,
+      state: "ready",
+    });
+
+    const response = await statusPost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockToken: paidAccessToken }),
+      }),
+      { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toEqual({
+      ok: true,
+      status: "completed",
+      retryable: false,
+      errorCategory: null,
+    });
+    expect(mockResolvePaidAccessToken).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      rawToken: paidAccessToken,
+    });
+    expect(mockGetUnlockIntentByTokenHash).not.toHaveBeenCalled();
+    expect(JSON.stringify(data)).not.toContain(paidAccessToken);
+  });
+
+  it("does not fall back to legacy unlock lookup for invalid pa_ tokens", async () => {
+    mockResolvePaidAccessToken.mockResolvedValue({
+      ok: false,
+      state: "not_found",
+      errorCategory: "invalid_token",
+    });
+
+    const response = await statusPost(
+      new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlockToken: "pa_short" }),
+      }),
+      { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      status: "expired",
+      retryable: false,
+      errorCategory: "invalid_paid_access",
+    });
+    expect(mockResolvePaidAccessToken).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      rawToken: "pa_short",
+    });
+    expect(mockGetUnlockIntentByTokenHash).not.toHaveBeenCalled();
   });
 
   it("treats legacy completed paid rows as completed while current schema rolls forward", async () => {

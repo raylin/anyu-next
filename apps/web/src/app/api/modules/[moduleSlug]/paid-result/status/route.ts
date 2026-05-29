@@ -10,6 +10,11 @@ import { getPaidResultStatusForAnalysisResult } from "@/lib/db/paid-results";
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import {
+  resolvePaidAccessToken,
+  type PaidAccessResolutionState,
+} from "@/lib/payments/paid-access-resolver";
+import { hasPaidAccessTokenPrefix } from "@/lib/payments/paid-access-token";
 import { isPaidGenerationJobsEnabled } from "@/lib/runtime/feature-flags";
 
 type RouteProps = {
@@ -80,6 +85,61 @@ function mapPaidGenerationJobStatus(job: GenerationJob | null) {
   return null;
 }
 
+function mapPaidAccessStatus(state: Exclude<PaidAccessResolutionState, "not_found">) {
+  if (state === "ready") {
+    return {
+      status: "completed",
+      retryable: false,
+      errorCategory: null,
+    };
+  }
+
+  if (state === "processing") {
+    return {
+      status: "processing",
+      retryable: true,
+      errorCategory: null,
+    };
+  }
+
+  if (
+    state === "pending" ||
+    state === "missing_generation_job" ||
+    state === "recovery_required"
+  ) {
+    return {
+      status: "pending",
+      retryable: true,
+      errorCategory:
+        state === "missing_generation_job" || state === "recovery_required"
+          ? "recovery_required"
+          : null,
+    };
+  }
+
+  if (state === "expired") {
+    return {
+      status: "expired",
+      retryable: false,
+      errorCategory: "paid_access_expired",
+    };
+  }
+
+  if (state === "revoked" || state === "refunded") {
+    return {
+      status: "failed",
+      retryable: false,
+      errorCategory: state === "revoked" ? "paid_access_revoked" : "paid_access_refunded",
+    };
+  }
+
+  return {
+    status: "failed",
+    retryable: false,
+    errorCategory: "paid_generation_failed",
+  };
+}
+
 export async function POST(request: Request, { params }: RouteProps) {
   const { moduleSlug } = await params;
   const moduleConfig = getModuleBySlug(moduleSlug);
@@ -102,6 +162,27 @@ export async function POST(request: Request, { params }: RouteProps) {
 
   if (!body.unlockToken || typeof body.unlockToken !== "string") {
     return errorResponse(400, "invalid_input", "缺少完整分析連結資料。");
+  }
+
+  if (hasPaidAccessTokenPrefix(body.unlockToken)) {
+    const paidAccess = await resolvePaidAccessToken({
+      moduleSlug,
+      rawToken: body.unlockToken,
+    });
+
+    if (!paidAccess.ok) {
+      return NextResponse.json({
+        ok: true,
+        status: "expired",
+        retryable: false,
+        errorCategory: "invalid_paid_access",
+      });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      ...mapPaidAccessStatus(paidAccess.state),
+    });
   }
 
   const record = await getUnlockIntentByTokenHash(hashFulfillmentSecret(body.unlockToken));

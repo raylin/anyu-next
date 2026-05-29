@@ -6320,3 +6320,23 @@ Unresolved questions:
 - Exact NewebPay provider payload/hash fields remain pending provider approval.
 - Missing generation-job recovery can start read-only in resolver v0 or become an idempotent helper during operator fake-paid implementation.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Paid Access Token Resolver Implementation v0
+
+Completed changes:
+- Implemented a minimal read-path `pa_` paid access token resolver.
+- Added `hasPaidAccessTokenPrefix` and routed `pa_` tokens before legacy unlock-intent lookup.
+- Added normalized resolver states: `ready`, `pending`, `processing`, `failed`, `revoked`, `refunded`, `not_found`, `expired`, `missing_generation_job`, and `recovery_required`.
+- Updated the unlocked route to render valid `pa_` paid access links through the same completed/pending surfaces used by legacy unlock links.
+- Updated the paid-result status route to support `pa_` tokens with privacy-safe external statuses.
+- Added targeted resolver/status/static-order tests.
+- Confirmed no checkout, NewebPay notify/return, payment provider verification, fake paid success, queue trigger, LINE delivery, migration, production flag, prompt/result, legal copy, or production behavior change was made.
+
+Learnings:
+- The safest unlock route integration is prefix-first: any `pa_` token stays in paid-access handling and never falls back to legacy unlock lookup.
+- A read-only resolver can represent missing generation jobs safely, but the next QA phase needs operator fake paid success to exercise the complete post-payment path.
+
+Unresolved questions:
+- Missing generation-job recovery should remain read-only or become an idempotent helper during operator fake-paid implementation.
+- `entitlements.payment_intent_id` uniqueness and paid access lookup rate limiting remain deferred.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

@@ -27,12 +27,18 @@ import {
   hasPaidResult,
   normalizePaidResultForDisplay,
   type PaidResultEvidenceSummary,
+  type ProductResult,
 } from "@/lib/ai/product-result-schema";
 import {
   PAID_RESULT_PROMPT_VERSION,
   PAID_RESULT_PROVIDER_FALLBACK_MODEL,
   PAID_RESULT_SCHEMA_VERSION,
 } from "@/lib/ai/paid-result-generation";
+import {
+  resolvePaidAccessToken,
+  type PaidAccessResolution,
+} from "@/lib/payments/paid-access-resolver";
+import { hasPaidAccessTokenPrefix } from "@/lib/payments/paid-access-token";
 
 type UnlockPageProps = {
   params: Promise<{
@@ -41,6 +47,8 @@ type UnlockPageProps = {
   }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+type PaidAccessResolved = Extract<PaidAccessResolution, { ok: true }>;
 
 export default async function UnlockPage({ params, searchParams }: UnlockPageProps) {
   const { moduleSlug, unlockToken } = await params;
@@ -60,6 +68,60 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         moduleConfig={moduleConfig}
         initialTheme={initialTheme}
         message="完整分析服務尚未設定完成，請稍後再試。"
+      />
+    );
+  }
+
+  if (hasPaidAccessTokenPrefix(unlockToken)) {
+    const paidAccess = await resolvePaidAccessToken({
+      moduleSlug,
+      rawToken: unlockToken,
+    });
+
+    if (!paidAccess.ok) {
+      return (
+        <UnlockError
+          moduleConfig={moduleConfig}
+          initialTheme={initialTheme}
+          message="這組完整分析連結無效，請確認你開啟的是最新的付款完成連結。"
+        />
+      );
+    }
+
+    const terminalMessage = getPaidAccessTerminalMessage(paidAccess.state);
+
+    if (terminalMessage) {
+      return (
+        <UnlockError
+          moduleConfig={moduleConfig}
+          initialTheme={initialTheme}
+          message={terminalMessage}
+        />
+      );
+    }
+
+    if (paidAccess.state !== "ready") {
+      return (
+        <UnlockPending
+          moduleConfig={moduleConfig}
+          initialTheme={initialTheme}
+          unlockToken={unlockToken}
+          initialStatus={getPaidAccessInitialPendingStatus(paidAccess.state)}
+        />
+      );
+    }
+
+    return (
+      <UnlockCompleted
+        moduleConfig={moduleConfig}
+        moduleSlug={moduleSlug}
+        initialTheme={initialTheme}
+        result={paidAccess.record.result.normalizedResultJson}
+        storedPaidResult={paidAccess.storedPaidResult}
+        anonymousSessionId={paidAccess.record.request.anonymousSessionId}
+        scoreBucket={paidAccess.record.result.scoreBucket}
+        resultCreatedAt={paidAccess.record.result.createdAt}
+        themeCarryoverSource="paid_access_token"
       />
     );
   }
@@ -115,6 +177,46 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
     );
   }
 
+  return (
+    <UnlockCompleted
+      moduleConfig={moduleConfig}
+      moduleSlug={moduleSlug}
+      initialTheme={initialTheme}
+      result={result}
+      storedPaidResult={storedPaidResult}
+      anonymousSessionId={record.unlockIntent.anonymousSessionId}
+      scoreBucket={record.result.scoreBucket}
+      resultCreatedAt={record.result.createdAt}
+      themeCarryoverSource={initialTheme ? "unlock_intent" : null}
+    />
+  );
+}
+
+function UnlockCompleted({
+  moduleConfig,
+  moduleSlug,
+  initialTheme,
+  result,
+  storedPaidResult,
+  anonymousSessionId,
+  scoreBucket,
+  resultCreatedAt,
+  themeCarryoverSource,
+}: {
+  moduleConfig: ProductModuleConfig;
+  moduleSlug: string;
+  initialTheme?: ModuleThemeState | null;
+  result: ProductResult;
+  storedPaidResult?: {
+    status?: string | null;
+    model?: string | null;
+    paidResultJson?: unknown;
+  } | null;
+  anonymousSessionId?: string | null;
+  scoreBucket?: string | null;
+  resultCreatedAt?: Date | string | null;
+  themeCarryoverSource?: string | null;
+}) {
   const paidResult = normalizePaidResultForDisplay(
     storedPaidResult?.paidResultJson ?? result.paid_result,
   );
@@ -130,13 +232,13 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         <section className="anyu-result-stack">
           <UnlockedResultViewTracker
             moduleConfig={moduleConfig}
-            anonymousSessionId={record.unlockIntent.anonymousSessionId}
-            scoreBucket={record.result.scoreBucket}
+            anonymousSessionId={anonymousSessionId}
+            scoreBucket={scoreBucket}
             themeVariant={initialTheme?.variant ?? "unknown"}
             themeSource={initialTheme?.source ?? "unknown"}
-            themeCarryoverSource={initialTheme ? "unlock_intent" : null}
+            themeCarryoverSource={themeCarryoverSource}
             paidResultSource={getUnlockedPaidResultSource({ storedPaidResult, result })}
-            resultAgeBucket={getResultAgeBucket(record.result.createdAt)}
+            resultAgeBucket={getResultAgeBucket(resultCreatedAt)}
           />
           <div className="anyu-result-topbar">
             <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
@@ -145,108 +247,108 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
             <Wordmark showMark />
           </div>
 
-        <Card className="anyu-quote-card">
-          <p className="anyu-kicker">完整分析</p>
-          <h1 className="anyu-section-title">{result.paid_preview.headline}</h1>
-          <p className="anyu-copy">
-            這是依照剛剛結果整理出的完整回覆建議。{uiNotices.paidUnlockNote}
-          </p>
-          <p className="anyu-subtle-note">
-            本結果是文字情境整理與溝通建議，不是心理治療、諮商、命理判斷，也不保證任何關係結果。
-          </p>
-        </Card>
+          <Card className="anyu-quote-card">
+            <p className="anyu-kicker">完整分析</p>
+            <h1 className="anyu-section-title">{result.paid_preview.headline}</h1>
+            <p className="anyu-copy">
+              這是依照剛剛結果整理出的完整回覆建議。{uiNotices.paidUnlockNote}
+            </p>
+            <p className="anyu-subtle-note">
+              本結果是文字情境整理與溝通建議，不是心理治療、諮商、命理判斷，也不保證任何關係結果。
+            </p>
+          </Card>
 
-        <TemperatureCard
-          score={result.free_result.temperature_score}
-          stateLabel={result.free_result.state_label}
-        />
+          <TemperatureCard
+            score={result.free_result.temperature_score}
+            stateLabel={result.free_result.state_label}
+          />
 
-        <Card className="anyu-insight-card">
-          <p className="anyu-kicker t-label-dim">deeper signal</p>
-          <h2 className="anyu-section-title">更深一層的訊號</h2>
-          <p className="anyu-copy t-reading">{paidResult.fullSummary}</p>
-          <div className="anyu-signal-list">
-            {paidResult.signalDeepDive.map((item) => (
-              <article key={item.title} className="anyu-signal-item">
-                <strong>{item.title}</strong>
-                <p className="anyu-subtle-note">{item.evidence}</p>
-                <p className="anyu-subtle-note">{item.whatItMayMean}</p>
-              </article>
-            ))}
-          </div>
-        </Card>
+          <Card className="anyu-insight-card">
+            <p className="anyu-kicker t-label-dim">deeper signal</p>
+            <h2 className="anyu-section-title">更深一層的訊號</h2>
+            <p className="anyu-copy t-reading">{paidResult.fullSummary}</p>
+            <div className="anyu-signal-list">
+              {paidResult.signalDeepDive.map((item) => (
+                <article key={item.title} className="anyu-signal-item">
+                  <strong>{item.title}</strong>
+                  <p className="anyu-subtle-note">{item.evidence}</p>
+                  <p className="anyu-subtle-note">{item.whatItMayMean}</p>
+                </article>
+              ))}
+            </div>
+          </Card>
 
-        <EvidenceSummarySection evidenceSummary={paidResult.evidenceSummary} />
+          <EvidenceSummarySection evidenceSummary={paidResult.evidenceSummary} />
 
-        <Card>
-          <p className="anyu-kicker t-label-dim">possible states</p>
-          <h2 className="anyu-section-title">三種可能狀態</h2>
-          <div className="anyu-signal-list">
-            {paidResult.possibleStates.map((state) => (
-              <article key={state.label} className="anyu-signal-item">
-                <strong>{state.label}</strong>
-                <p className="anyu-subtle-note">可能性：{formatPaidLikelihoodLabel(state.likelihood)}</p>
-                <p className="anyu-subtle-note">{state.explanation}</p>
-              </article>
-            ))}
-          </div>
-        </Card>
+          <Card>
+            <p className="anyu-kicker t-label-dim">possible states</p>
+            <h2 className="anyu-section-title">三種可能狀態</h2>
+            <div className="anyu-signal-list">
+              {paidResult.possibleStates.map((state) => (
+                <article key={state.label} className="anyu-signal-item">
+                  <strong>{state.label}</strong>
+                  <p className="anyu-subtle-note">可能性：{formatPaidLikelihoodLabel(state.likelihood)}</p>
+                  <p className="anyu-subtle-note">{state.explanation}</p>
+                </article>
+              ))}
+            </div>
+          </Card>
 
-        <Card>
-          <p className="anyu-kicker t-label-dim">reply strategy</p>
-          <h2 className="anyu-section-title">三種不失控的回法</h2>
-          <div className="anyu-signal-list">
-            {paidResult.replyStrategies.map((strategy) => (
-              <article key={strategy.label} className="anyu-signal-item">
-                <strong>{strategy.label}</strong>
-                {strategy.tone ? (
-                  <p className="anyu-subtle-note">語氣：{strategy.tone}</p>
-                ) : null}
-                <p className="anyu-subtle-note">{strategy.whenToUse}</p>
-                <p className="anyu-subtle-note">{strategy.whyItWorks}</p>
-                {strategy.possibleReaction ? (
-                  <p className="anyu-subtle-note">可能反應：{strategy.possibleReaction}</p>
-                ) : null}
-                <ul className="anyu-plain-list">
-                  {strategy.copyableMessages.map((message) => (
-                    <li key={message}>{message}</li>
-                  ))}
-                </ul>
-                {strategy.followUpIfTheyReply ? (
-                  <p className="anyu-subtle-note">如果他回了：{strategy.followUpIfTheyReply}</p>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        </Card>
+          <Card>
+            <p className="anyu-kicker t-label-dim">reply strategy</p>
+            <h2 className="anyu-section-title">三種不失控的回法</h2>
+            <div className="anyu-signal-list">
+              {paidResult.replyStrategies.map((strategy) => (
+                <article key={strategy.label} className="anyu-signal-item">
+                  <strong>{strategy.label}</strong>
+                  {strategy.tone ? (
+                    <p className="anyu-subtle-note">語氣：{strategy.tone}</p>
+                  ) : null}
+                  <p className="anyu-subtle-note">{strategy.whenToUse}</p>
+                  <p className="anyu-subtle-note">{strategy.whyItWorks}</p>
+                  {strategy.possibleReaction ? (
+                    <p className="anyu-subtle-note">可能反應：{strategy.possibleReaction}</p>
+                  ) : null}
+                  <ul className="anyu-plain-list">
+                    {strategy.copyableMessages.map((message) => (
+                      <li key={message}>{message}</li>
+                    ))}
+                  </ul>
+                  {strategy.followUpIfTheyReply ? (
+                    <p className="anyu-subtle-note">如果他回了：{strategy.followUpIfTheyReply}</p>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </Card>
 
-        <Card>
-          <p className="anyu-kicker t-label-dim">risk guardrail</p>
-          <h2 className="anyu-section-title">先不要做的事</h2>
-          <p className="anyu-copy t-reading">{paidResult.softInsight}</p>
-          <ul className="anyu-plain-list">
-            {paidResult.avoidDoing.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </Card>
+          <Card>
+            <p className="anyu-kicker t-label-dim">risk guardrail</p>
+            <h2 className="anyu-section-title">先不要做的事</h2>
+            <p className="anyu-copy t-reading">{paidResult.softInsight}</p>
+            <ul className="anyu-plain-list">
+              {paidResult.avoidDoing.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </Card>
 
-        <Card>
-          <p className="anyu-kicker t-label-dim">next 48 hours</p>
-          <h2 className="anyu-section-title">接下來 48 小時</h2>
-          <ul className="anyu-plain-list">
-            {paidResult.next48HourPlan.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </Card>
+          <Card>
+            <p className="anyu-kicker t-label-dim">next 48 hours</p>
+            <h2 className="anyu-section-title">接下來 48 小時</h2>
+            <ul className="anyu-plain-list">
+              {paidResult.next48HourPlan.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </Card>
 
-        <Card className="anyu-quote-card">
-          <p className="anyu-kicker t-label-dim">summary card</p>
-          <h2 className="anyu-section-title">{paidResult.summaryCard.headline}</h2>
-          <p className="anyu-copy t-reading">{paidResult.summaryCard.body}</p>
-          <p className="anyu-copy t-reading">{paidResult.summaryCard.nextMove}</p>
-        </Card>
+          <Card className="anyu-quote-card">
+            <p className="anyu-kicker t-label-dim">summary card</p>
+            <h2 className="anyu-section-title">{paidResult.summaryCard.headline}</h2>
+            <p className="anyu-copy t-reading">{paidResult.summaryCard.body}</p>
+            <p className="anyu-copy t-reading">{paidResult.summaryCard.nextMove}</p>
+          </Card>
 
           <LegalFooter />
         </section>
@@ -442,6 +544,37 @@ function getInitialPendingStatus(
       return "pending";
     case "not_requested":
       return "missing";
+  }
+}
+
+function getPaidAccessInitialPendingStatus(
+  state: Exclude<PaidAccessResolved["state"], "ready">,
+): "missing" | "pending" | "processing" | "failed" {
+  switch (state) {
+    case "processing":
+      return "processing";
+    case "failed":
+    case "expired":
+    case "revoked":
+    case "refunded":
+      return "failed";
+    case "pending":
+    case "missing_generation_job":
+    case "recovery_required":
+      return "pending";
+  }
+}
+
+function getPaidAccessTerminalMessage(state: PaidAccessResolved["state"]) {
+  switch (state) {
+    case "expired":
+      return "這組完整分析連結已過期。若你已完成付款，請聯絡客服協助補發。";
+    case "revoked":
+      return "這組完整分析連結目前已停止使用。若你認為這是錯誤，請聯絡客服。";
+    case "refunded":
+      return "這組完整分析連結已因退款而停止使用。若你需要協助，請聯絡客服。";
+    default:
+      return null;
   }
 }
 

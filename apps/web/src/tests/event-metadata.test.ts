@@ -74,4 +74,16 @@ describe("event metadata guard", () => {
     expect(resultSource).toContain('revealContact("inline_result_cta")');
     expect(unlockRoute).toContain('body.source === "inline_result_cta" ? "inline_result_cta" : "paid_preview"');
   });
+
+  it("keeps paid access token routing ahead of legacy unlock lookup", () => {
+    const unlockPage = readFileSync(
+      resolve(process.cwd(), "src/app/m/[moduleSlug]/unlock/[unlockToken]/page.tsx"),
+      "utf8",
+    );
+
+    expect(unlockPage.indexOf("hasPaidAccessTokenPrefix(unlockToken)")).toBeGreaterThan(-1);
+    expect(unlockPage.indexOf("hasPaidAccessTokenPrefix(unlockToken)")).toBeLessThan(
+      unlockPage.indexOf("getUnlockIntentByTokenHash(hashFulfillmentSecret(unlockToken))"),
+    );
+  });
 });

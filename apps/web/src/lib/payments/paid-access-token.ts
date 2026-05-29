@@ -1,6 +1,6 @@
 import { createHmac, randomBytes } from "node:crypto";
 
-const PAID_ACCESS_TOKEN_PREFIX = "pa_";
+export const PAID_ACCESS_TOKEN_PREFIX = "pa_";
 const PAID_ACCESS_TOKEN_RANDOM_BYTES = 32;
 const PAID_ACCESS_TOKEN_PATTERN = /^pa_[A-Za-z0-9_-]{43}$/u;
 
@@ -10,6 +10,10 @@ export function generatePaidAccessToken() {
 
 export function isPaidAccessToken(value: string) {
   return PAID_ACCESS_TOKEN_PATTERN.test(value);
+}
+
+export function hasPaidAccessTokenPrefix(value: string) {
+  return value.startsWith(PAID_ACCESS_TOKEN_PREFIX);
 }
 
 export function getPaidAccessTokenHashSecret(env: NodeJS.ProcessEnv = process.env) {
