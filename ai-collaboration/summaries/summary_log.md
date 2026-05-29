@@ -6382,3 +6382,23 @@ Unresolved questions:
 - Whether to enable `ENABLE_OPERATOR_FAKE_PAID_SUCCESS=true` on staging for the next QA rerun.
 - Whether the next rerun should also provide the internal processor secret so the same pass can process the created paid generation job.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Staging Fake Paid Delivery QA Rerun with Authorized Operator Gate v0
+
+Completed changes:
+- Created a rerun handoff and execution report for authorized staging fake paid delivery QA.
+- Confirmed staging is deployed at `93cf4d9` on the `staging` branch.
+- Confirmed `/api/operator/fake-paid-success` still returns the feature-disabled `404` response on staging for missing and invalid operator secret requests.
+- Confirmed local `OPERATOR_TEST_SECRET`, `INTERNAL_JOB_SECRET`, and `CRON_SECRET` were not available in this session.
+- Confirmed Vercel CLI access was not authenticated in this sandbox, so staging env values were not changed.
+- Reran non-secret staging checks: normal Module 01 analyze/result, legacy unlock, invalid synthetic `pa_` status, invalid synthetic `pa_` unlock page, processor missing-auth, and cron missing-auth checks.
+- Confirmed no raw `pa_` token, tokenized URL, operator secret, provider credential, raw user input, provider output, `paid_result_json`, LINE ID, or private value was recorded.
+
+Learnings:
+- The authorized fake-paid chain remains blocked by staging env configuration, not by the deployed code path.
+- Missing/invalid fake-paid requests should return `401` only after `ENABLE_OPERATOR_FAKE_PAID_SUCCESS=true` is active; current `404` means the flag is still disabled.
+
+Unresolved questions:
+- Who will enable `ENABLE_OPERATOR_FAKE_PAID_SUCCESS=true` for staging/preview only.
+- How the approved operator and processor secrets should be made available to the QA shell without exposing them in chat or committed docs.
+- Final commit hash and staging push status are recorded in the final completion summary.
