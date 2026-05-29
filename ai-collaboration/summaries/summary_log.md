@@ -6654,3 +6654,24 @@ Learnings:
 Unresolved questions:
 - Whether the owner/operator can authenticate Vercel CLI for this Codex shell or prefers to run the env alignment manually.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - Force Align Vercel Preview Staging QA Secrets and Rerun Fake-Paid QA v0
+
+Completed changes:
+- Verified Vercel CLI auth through `VERCEL_TOKEN` for account `studioanyu-1488` and project `anyu-next`.
+- Identified branch-scoped Preview(staging) env precedence as the practical cause of the persistent processor `secret_mismatch`.
+- Generated fresh staging-only QA secrets inside one shell process and force-overrode `OPERATOR_TEST_SECRET`, `INTERNAL_JOB_SECRET`, and `PAID_ACCESS_TOKEN_HASH_SECRET` for Preview(staging).
+- Exported the same generated operator/internal secrets in the same shell and pushed a handoff commit to trigger fresh staging Preview deployment.
+- Confirmed `staging.anyu.tw` health marker reached commit `4c234930ccd2` with `routeBundleVersion: payment-foundation-2026-05-29`.
+- Reran `corepack pnpm run qa:fake-paid`; full fake-paid QA passed, including processor completion, paid status ready, and completed `pa_` unlock page rendering.
+- Recorded no secret values, raw `pa_` tokens, tokenized URLs, raw input, provider output, LINE IDs, or private values.
+
+Learnings:
+- Updating general Preview env is insufficient when staging uses branch-scoped Preview(staging) env vars; branch-scoped values must be aligned for `staging.anyu.tw`.
+- The processor 401 was caused by secret mismatch, not route/header format, processor flag, or app code.
+- Direct `vercel` CLI with `--token` worked; `corepack pnpm dlx vercel` was blocked by sandbox cache permissions.
+
+Unresolved questions:
+- Whether stale duplicate general Preview QA secrets should be removed later to reduce operator confusion.
+- Whether to remove the temporary processor auth diagnostic mode after payment QA stabilizes.
+- Final commit hash and staging push status are recorded in the final completion summary.
