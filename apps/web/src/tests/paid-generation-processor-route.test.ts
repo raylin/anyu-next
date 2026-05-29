@@ -21,6 +21,7 @@ describe("paid generation processor route", () => {
     process.env.INTERNAL_JOB_SECRET = "processor-secret";
     delete process.env.CRON_SECRET;
     delete process.env.ENABLE_PAID_GENERATION_PROCESSOR;
+    delete process.env.VERCEL_ENV;
     mockIsDbConfigured.mockReturnValue(true);
     mockProcessPaidAnalysisJobs.mockResolvedValue({
       ok: true,
@@ -51,6 +52,89 @@ describe("paid generation processor route", () => {
 
     expect(missing.status).toBe(401);
     expect(invalid.status).toBe(401);
+    expect(mockProcessPaidAnalysisJobs).not.toHaveBeenCalled();
+  });
+
+  it("returns secret-safe diagnostics for unauthorized non-production requests", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/internal/jobs/process", {
+        method: "POST",
+        headers: {
+          authorization: "Bearer wrong-secret",
+          "x-processor-auth-diagnostic": "1",
+        },
+        body: JSON.stringify({ jobType: "paid_analysis" }),
+      }),
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(data).toEqual({
+      ok: false,
+      error: "unauthorized",
+      message: "Unauthorized processor request.",
+      authDiagnostic: {
+        authHeaderPresent: true,
+        authHeaderScheme: "bearer",
+        internalJobSecretConfigured: true,
+        internalJobSecretConfiguredSource: "INTERNAL_JOB_SECRET",
+        bearerTokenPresent: true,
+        authMatched: false,
+        additionalGateConfigured: false,
+        rejectionReason: "secret_mismatch",
+      },
+    });
+    expect(JSON.stringify(data)).not.toContain("processor-secret");
+    expect(JSON.stringify(data)).not.toContain("wrong-secret");
+    expect(JSON.stringify(data)).not.toContain(String("processor-secret".length));
+    expect(mockProcessPaidAnalysisJobs).not.toHaveBeenCalled();
+  });
+
+  it("does not expose diagnostics in production mode", async () => {
+    process.env.VERCEL_ENV = "production";
+
+    const response = await POST(
+      new Request("http://localhost/api/internal/jobs/process", {
+        method: "POST",
+        headers: {
+          authorization: "Bearer wrong-secret",
+          "x-processor-auth-diagnostic": "1",
+        },
+        body: JSON.stringify({ jobType: "paid_analysis" }),
+      }),
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(data).toEqual({
+      ok: false,
+      error: "unauthorized",
+      message: "Unauthorized processor request.",
+    });
+  });
+
+  it("returns safe config error when no internal job secret is configured", async () => {
+    delete process.env.INTERNAL_JOB_SECRET;
+
+    const response = await POST(
+      new Request("http://localhost/api/internal/jobs/process", {
+        method: "POST",
+        headers: {
+          authorization: "Bearer anything",
+          "x-processor-auth-diagnostic": "1",
+        },
+        body: JSON.stringify({ jobType: "paid_analysis" }),
+      }),
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(data).toEqual({
+      ok: false,
+      error: "config_error",
+      message: "Processor is not configured.",
+    });
+    expect(JSON.stringify(data)).not.toContain("anything");
     expect(mockProcessPaidAnalysisJobs).not.toHaveBeenCalled();
   });
 

@@ -272,6 +272,7 @@ async function processPaidGenerationJob() {
     headers: {
       "content-type": "application/json",
       authorization: `Bearer ${internalJobSecret}`,
+      "x-processor-auth-diagnostic": "1",
     },
     body: JSON.stringify({
       jobType: "paid_analysis",
@@ -286,6 +287,7 @@ async function processPaidGenerationJob() {
     processorEndpointPath,
     processorAuthHeaderUsed: Boolean(internalJobSecret),
     processorAuthMode: "authorization_bearer_internal_job_secret",
+    authDiagnostic: body.authDiagnostic ?? null,
     processed: body.processed ?? null,
     completed: body.completed ?? null,
     failed: body.failed ?? null,

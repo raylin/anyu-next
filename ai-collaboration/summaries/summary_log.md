@@ -6599,3 +6599,22 @@ Unresolved questions:
 - Whether Vercel Preview/Staging `INTERNAL_JOB_SECRET` matches the owner/operator local shell value.
 - Whether staging was redeployed after the latest `INTERNAL_JOB_SECRET` update.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - Deep Debug Processor Auth 401 with Secret-Safe Diagnostics v0
+
+Completed changes:
+- Inspected the processor route, internal job auth helper, feature flags, runner, and route/auth tests.
+- Confirmed the processor auth contract is `POST /api/internal/jobs/process` with `Authorization: Bearer <INTERNAL_JOB_SECRET>`.
+- Confirmed the route reads `INTERNAL_JOB_SECRET` first and falls back to `CRON_SECRET`; `ENABLE_PAID_GENERATION_PROCESSOR` is checked only after auth succeeds.
+- Added secret-safe auth diagnostics for unauthorized non-production processor requests when `x-processor-auth-diagnostic: 1` is present.
+- Updated the fake-paid QA runner to request and record the safe processor auth diagnostic on 401.
+- Added tests proving diagnostics expose only booleans/categories and are suppressed in production mode.
+- Confirmed no payment runtime, NewebPay, queue trigger, LINE delivery, production flag, prompt/result, public legal copy, raw `pa_` token, tokenized URL, or secret behavior changed.
+
+Learnings:
+- A persistent processor `401` after this commit should now identify whether the header is missing/stripped, malformed, using fallback `CRON_SECRET`, missing runtime secret config, or simply mismatched.
+- If auth succeeds but the processor flag is off, the expected next blocker is `403 processor_disabled`, not `401`.
+
+Unresolved questions:
+- What sanitized `authDiagnostic` will show in the owner/operator environment if processor 401 persists after staging deploy.
+- Final commit hash and staging push status are recorded in the final completion summary.
