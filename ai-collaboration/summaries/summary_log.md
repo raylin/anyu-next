@@ -6636,3 +6636,21 @@ Learnings:
 Unresolved questions:
 - Whether the owner/operator wants to install/authenticate Vercel CLI for Codex or perform the env alignment manually from their own shell.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - Align Preview INTERNAL_JOB_SECRET via corepack pnpm dlx vercel and Rerun Fake-Paid QA v0
+
+Completed changes:
+- Ran safe repo/branch preflight and confirmed local `staging` matched `origin/staging` at `b813358`.
+- Confirmed `corepack pnpm dlx vercel --version` works and reports Vercel CLI `54.5.1`.
+- Confirmed Vercel CLI auth is invalid in this shell: `vercel whoami` and `vercel env ls preview` fail with invalid token.
+- Confirmed `OPERATOR_TEST_SECRET`, `INTERNAL_JOB_SECRET`, and `PAID_ACCESS_TOKEN_HASH_SECRET` are not visible to this Codex process.
+- Stopped before generating a new internal job secret, mutating Vercel env, redeploying Preview/Staging, or running authorized fake-paid QA.
+- Recorded no secrets, raw `pa_` tokens, tokenized URLs, raw input, provider credentials, or private values.
+
+Learnings:
+- `pnpm dlx vercel` solves CLI availability but not authentication; the active Vercel token in this environment is invalid.
+- Direct env alignment requires Vercel CLI auth and `OPERATOR_TEST_SECRET` in the same shell before proceeding.
+
+Unresolved questions:
+- Whether the owner/operator can authenticate Vercel CLI for this Codex shell or prefers to run the env alignment manually.
+- Final commit hash and staging push status are recorded in the final completion summary.
