@@ -144,11 +144,15 @@ Run a separate production migration gate only when the owner wants production sc
 
 ## Git Commit
 
-Pending at report creation.
+Initial verification docs commit: `03b208b`.
+
+Final report-status update commit: recorded in the final Codex completion summary.
 
 ## Staging Push
 
-Pending at report creation.
+Initial verification docs commit pushed to `origin/staging`.
+
+Final report-status update push recorded in the final Codex completion summary.
 
 ## Remaining Uncertainties
 
