@@ -5959,6 +5959,28 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
 
+## 2026-05-29 - Payment / Entitlement Schema Implementation v0
+
+Completed changes:
+- Saved the payment/entitlement schema implementation handoff under `ai-collaboration/handoffs/`.
+- Added additive migration `apps/web/drizzle/0007_payment_entitlements.sql`.
+- Added Drizzle schema definitions and relations for `payment_intents` and `entitlements`.
+- Added payment intent repository seams and entitlement repository seams.
+- Added `pa_` paid access token generation/hash helper using a dedicated `PAID_ACCESS_TOKEN_HASH_SECRET`.
+- Added MerchantOrderNo generation/validation helper.
+- Added unit tests for constants, MerchantOrderNo, paid access token hashing, payment transitions, and entitlement token storage/rotation.
+- Confirmed no payment runtime, checkout, NewebPay route, LINE behavior, unlock route behavior, or production behavior was changed.
+
+Learnings:
+- The additive schema can be introduced without touching existing runtime routes.
+- Raw paid access tokens are only returned by create/rotate helpers and are not stored by repository helpers.
+- `generation_jobs.entitlement_ref_id` remains available for future linkage, but it still has no FK in the existing generation jobs table.
+
+Unresolved questions:
+- `0007_payment_entitlements.sql` still needs staging migration verification.
+- Final NewebPay MerchantOrderNo constraints must be confirmed during provider integration.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
 ## 2026-05-29 - Payment / Entitlement Schema Migration Plan v0
 
 Completed changes:

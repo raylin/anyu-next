@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -293,6 +293,113 @@ export const generationJobs = pgTable(
   }),
 );
 
+export const paymentIntents = pgTable(
+  "payment_intents",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    provider: text("provider").notNull(),
+    providerEnvironment: text("provider_environment").default("unknown").notNull(),
+    merchantOrderNo: text("merchant_order_no").notNull(),
+    moduleSlug: text("module_slug").notNull(),
+    analysisRequestId: uuid("analysis_request_id")
+      .notNull()
+      .references(() => analysisRequests.id),
+    analysisResultId: uuid("analysis_result_id")
+      .notNull()
+      .references(() => analysisResults.id),
+    unlockIntentId: uuid("unlock_intent_id").references(() => unlockIntents.id),
+    amountMinor: integer("amount_minor").notNull(),
+    currency: text("currency").default("TWD").notNull(),
+    status: text("status").default("created").notNull(),
+    providerStatus: text("provider_status"),
+    providerTradeNo: text("provider_trade_no"),
+    providerPaymentType: text("provider_payment_type"),
+    providerResponseCode: text("provider_response_code"),
+    providerMessageCategory: text("provider_message_category"),
+    checkoutStartedAt: timestamp("checkout_started_at", { withTimezone: true }),
+    notifyReceivedAt: timestamp("notify_received_at", { withTimezone: true }),
+    returnReceivedAt: timestamp("return_received_at", { withTimezone: true }),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    failedAt: timestamp("failed_at", { withTimezone: true }),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    expiredAt: timestamp("expired_at", { withTimezone: true }),
+    refundRequestedAt: timestamp("refund_requested_at", { withTimezone: true }),
+    refundedAt: timestamp("refunded_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    merchantOrderNoIdx: uniqueIndex("payment_intents_merchant_order_no_idx").on(
+      table.merchantOrderNo,
+    ),
+    providerTradeIdx: index("payment_intents_provider_trade_idx").on(
+      table.provider,
+      table.providerTradeNo,
+    ),
+    resultIdx: index("payment_intents_result_idx").on(table.analysisResultId),
+    statusCreatedIdx: index("payment_intents_status_created_idx").on(
+      table.status,
+      table.createdAt,
+    ),
+    moduleCreatedIdx: index("payment_intents_module_created_idx").on(
+      table.moduleSlug,
+      table.createdAt,
+    ),
+  }),
+);
+
+export const entitlements = pgTable(
+  "entitlements",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    entitlementType: text("entitlement_type").notNull(),
+    source: text("source").notNull(),
+    status: text("status").default("active").notNull(),
+    moduleSlug: text("module_slug").notNull(),
+    analysisRequestId: uuid("analysis_request_id")
+      .notNull()
+      .references(() => analysisRequests.id),
+    analysisResultId: uuid("analysis_result_id")
+      .notNull()
+      .references(() => analysisResults.id),
+    paymentIntentId: uuid("payment_intent_id").references(() => paymentIntents.id),
+    unlockIntentId: uuid("unlock_intent_id").references(() => unlockIntents.id),
+    generationJobId: uuid("generation_job_id").references(() => generationJobs.id),
+    lineUserRef: text("line_user_ref"),
+    paidAccessTokenHash: text("paid_access_token_hash"),
+    paidAccessTokenExpiresAt: timestamp("paid_access_token_expires_at", {
+      withTimezone: true,
+    }),
+    paidAccessTokenLastUsedAt: timestamp("paid_access_token_last_used_at", {
+      withTimezone: true,
+    }),
+    paidAccessTokenLastRotatedAt: timestamp("paid_access_token_last_rotated_at", {
+      withTimezone: true,
+    }),
+    remainingUses: integer("remaining_uses"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    activatedAt: timestamp("activated_at", { withTimezone: true }),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    refundedAt: timestamp("refunded_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    paidAccessTokenHashIdx: uniqueIndex("entitlements_paid_access_token_hash_idx")
+      .on(table.paidAccessTokenHash)
+      .where(sql`${table.paidAccessTokenHash} IS NOT NULL`),
+    paymentIntentIdx: index("entitlements_payment_intent_idx").on(table.paymentIntentId),
+    resultIdx: index("entitlements_result_idx").on(table.analysisResultId),
+    moduleStatusIdx: index("entitlements_module_status_idx").on(
+      table.moduleSlug,
+      table.status,
+    ),
+    expiresAtIdx: index("entitlements_expires_at_idx").on(table.expiresAt),
+  }),
+);
+
 export const contactSubmissions = pgTable(
   "contact_submissions",
   {
@@ -327,6 +434,8 @@ export const analysisResultRelations = relations(analysisResults, ({ one, many }
   }),
   paidResults: many(analysisPaidResults),
   unlockIntents: many(unlockIntents),
+  paymentIntents: many(paymentIntents),
+  entitlements: many(entitlements),
   contactSubmissions: many(contactSubmissions),
 }));
 
@@ -336,6 +445,8 @@ export const unlockIntentRelations = relations(unlockIntents, ({ one, many }) =>
     references: [analysisResults.id],
   }),
   paidResults: many(analysisPaidResults),
+  paymentIntents: many(paymentIntents),
+  entitlements: many(entitlements),
   contactSubmissions: many(contactSubmissions),
 }));
 
@@ -347,6 +458,45 @@ export const analysisPaidResultRelations = relations(analysisPaidResults, ({ one
   requestedByUnlockIntent: one(unlockIntents, {
     fields: [analysisPaidResults.requestedByUnlockIntentId],
     references: [unlockIntents.id],
+  }),
+}));
+
+export const paymentIntentRelations = relations(paymentIntents, ({ one, many }) => ({
+  request: one(analysisRequests, {
+    fields: [paymentIntents.analysisRequestId],
+    references: [analysisRequests.id],
+  }),
+  result: one(analysisResults, {
+    fields: [paymentIntents.analysisResultId],
+    references: [analysisResults.id],
+  }),
+  unlockIntent: one(unlockIntents, {
+    fields: [paymentIntents.unlockIntentId],
+    references: [unlockIntents.id],
+  }),
+  entitlements: many(entitlements),
+}));
+
+export const entitlementRelations = relations(entitlements, ({ one }) => ({
+  request: one(analysisRequests, {
+    fields: [entitlements.analysisRequestId],
+    references: [analysisRequests.id],
+  }),
+  result: one(analysisResults, {
+    fields: [entitlements.analysisResultId],
+    references: [analysisResults.id],
+  }),
+  paymentIntent: one(paymentIntents, {
+    fields: [entitlements.paymentIntentId],
+    references: [paymentIntents.id],
+  }),
+  unlockIntent: one(unlockIntents, {
+    fields: [entitlements.unlockIntentId],
+    references: [unlockIntents.id],
+  }),
+  generationJob: one(generationJobs, {
+    fields: [entitlements.generationJobId],
+    references: [generationJobs.id],
   }),
 }));
 
