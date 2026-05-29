@@ -6542,3 +6542,22 @@ Learnings:
 Unresolved questions:
 - Staging must be configured with `PAID_ACCESS_TOKEN_HASH_SECRET`, redeployed with this fix, and rerun with operator/processor secrets before full fake-paid QA can be claimed passed.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Rerun Authorized Staging Fake Paid Delivery QA after PAID_ACCESS_TOKEN_HASH_SECRET v0
+
+Completed changes:
+- Created a handoff and QA result report for the attempted authorized staging fake-paid rerun after `PAID_ACCESS_TOKEN_HASH_SECRET` was reportedly configured.
+- Ran the secret-safe QA runner from `apps/web` and recorded only sanitized output.
+- Confirmed the authorized fake-paid business path was not reached.
+- Confirmed this Codex shell did not have `OPERATOR_TEST_SECRET`, `INTERNAL_JOB_SECRET`, or `PAID_ACCESS_TOKEN_HASH_SECRET` available.
+- Observed staging route-bundle freshness failure: `/api/health` marker fields were missing, fake-paid route returned generic HTML 404, and invalid synthetic `pa_` behavior returned legacy `invalid_unlock`.
+- Recorded no secrets, raw `pa_` tokens, tokenized URLs, raw input, provider output, LINE IDs, or private values.
+
+Learnings:
+- The current blocker is preflight/deployment freshness plus missing secrets in the Codex shell, not a verified fake-paid business-path failure.
+- Staging must again prove it is serving the payment-foundation route bundle before authorized QA is meaningful.
+
+Unresolved questions:
+- Which deployment or alias is currently serving `staging.anyu.tw`.
+- Whether the owner/operator shell, outside Codex, has the required secrets available for the next rerun.
+- Final commit hash and staging push status are recorded in the final completion summary.
