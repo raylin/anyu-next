@@ -6465,3 +6465,22 @@ Unresolved questions:
 - Which Vercel deployment/alias is currently serving `staging.anyu.tw`.
 - Whether the Vercel project assigned to `staging.anyu.tw` is building from the expected `apps/web` root and `origin/staging` branch.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Staging Route Bundle Freshness Preflight v0
+
+Completed changes:
+- Ran a lightweight staging route-bundle freshness preflight after deployment of `0877011`.
+- Confirmed `/api/health` exposes `routeBundleVersion: payment-foundation-2026-05-29` and safe marker fields for commit `0877011925ba` on branch `staging`.
+- Confirmed `/api/operator/fake-paid-success` exists on staging and returns route-controlled JSON `401 unauthorized` for missing and invalid operator secrets, not generic HTML 404.
+- Confirmed invalid synthetic `pa_` status returns `invalid_paid_access`, showing paid-access resolver status behavior is present.
+- Confirmed normal analyze/result and legacy unlock still work.
+- Confirmed production fake-paid route is not publicly usable from a missing-secret request.
+- Recorded only sanitized statuses/booleans; no secrets, raw `pa_` token, tokenized URL, raw input, provider output, or private value was recorded.
+
+Learnings:
+- Staging route freshness is now verified for the payment-foundation route bundle.
+- The environment is ready for the next authorized fake-paid QA pass once `OPERATOR_TEST_SECRET` and optional `INTERNAL_JOB_SECRET` are available securely to the QA shell.
+
+Unresolved questions:
+- Whether the next authorized QA run should include processor completion through `INTERNAL_JOB_SECRET` or stop at fake-paid/idempotency/status pre-processor states.
+- Final commit hash and staging push status are recorded in the final completion summary.
