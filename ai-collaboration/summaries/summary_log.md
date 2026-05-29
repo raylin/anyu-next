@@ -6618,3 +6618,21 @@ Learnings:
 Unresolved questions:
 - What sanitized `authDiagnostic` will show in the owner/operator environment if processor 401 persists after staging deploy.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - Directly Align Vercel Preview INTERNAL_JOB_SECRET and Rerun Fake-Paid QA v0
+
+Completed changes:
+- Ran preflight checks before any Vercel env mutation.
+- Confirmed local `staging` matched `origin/staging` at `6c3d45e` and the worktree was clean before documentation was created.
+- Confirmed the Codex shell did not have `vercel` CLI available.
+- Confirmed `OPERATOR_TEST_SECRET`, `INTERNAL_JOB_SECRET`, and `PAID_ACCESS_TOKEN_HASH_SECRET` were not visible to this Codex process.
+- Stopped before generating/updating any Vercel env var, redeploying staging, or running authorized fake-paid QA.
+- Recorded no secrets, raw `pa_` tokens, tokenized URLs, raw input, provider credentials, or private values.
+
+Learnings:
+- Direct Vercel env alignment cannot be done from this shell until Vercel CLI is installed/authenticated and required secrets are available to the process.
+- The blocker is operational/tooling access, not application code.
+
+Unresolved questions:
+- Whether the owner/operator wants to install/authenticate Vercel CLI for Codex or perform the env alignment manually from their own shell.
+- Final commit hash and staging push status are recorded in the final completion summary.
