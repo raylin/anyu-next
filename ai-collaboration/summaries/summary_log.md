@@ -6237,3 +6237,26 @@ Unresolved questions:
 - Owner must approve fallback/support policy before real-payment paid job processing.
 - Implementation should decide between dedicated `INTERNAL_JOB_SECRET` and shared `CRON_SECRET`.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Payment / Entitlement Schema Staging Migration Verification v0
+
+Completed changes:
+- Saved the staging migration verification handoff under `ai-collaboration/handoffs/`.
+- Confirmed staging served commit `87ac2f4c3120` from branch `staging`.
+- Applied only `apps/web/drizzle/0007_payment_entitlements.sql` to the staging database.
+- Verified `payment_intents` table existence, expected columns, key defaults, indexes, unique constraint, and foreign keys.
+- Verified `entitlements` table existence, expected columns, key defaults, indexes, partial unique token-hash constraint, and foreign keys.
+- Ran synthetic staging-safe payment/entitlement SQL smoke and cleaned up all synthetic rows.
+- Verified token safety with aggregate checks only: raw token shape was not stored, old token hash no longer resolved after rotation, and new token hash resolved during the controlled smoke.
+- Ran staging route/API regression checks for health, landing, LIFF bridge, webhook guards, analyze, result, unlock intent, paid generation request, paid status, and unlocked route.
+- Confirmed normal runtime routes did not write to `payment_intents` or `entitlements`; both final row counts were `0`.
+- Created the required review bundle and execution report.
+
+Learnings:
+- The additive payment entitlement schema is staging-ready and does not affect current runtime routes while payment remains disabled.
+- Existing route guards remained intact after the staging migration.
+
+Unresolved questions:
+- Production `0007_payment_entitlements.sql` remains pending by design.
+- Owner should decide whether to run a production migration gate now for schema readiness or defer until payment runtime integration is closer.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
