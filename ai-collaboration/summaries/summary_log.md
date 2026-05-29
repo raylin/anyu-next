@@ -6484,3 +6484,23 @@ Learnings:
 Unresolved questions:
 - Whether the next authorized QA run should include processor completion through `INTERNAL_JOB_SECRET` or stop at fake-paid/idempotency/status pre-processor states.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Authorized Staging Fake Paid Delivery QA v1
+
+Completed changes:
+- Created an authorized staging fake paid delivery QA v1 handoff and execution report.
+- Confirmed staging health marker is present at commit `34a838c4d282`, branch `staging`, with `routeBundleVersion: payment-foundation-2026-05-29`.
+- Confirmed `/api/operator/fake-paid-success` returns route-controlled JSON `401 unauthorized` for missing and invalid operator secrets.
+- Confirmed normal Module 01 analyze/result and legacy unlock still pass.
+- Confirmed invalid synthetic `pa_` status returns `invalid_paid_access` and invalid `pa_` unlock page returns a safe page.
+- Confirmed production fake-paid route is not publicly usable from a missing-secret request.
+- Confirmed authorized fake-paid success, idempotency, valid `pa_` status polling, processor completion, and completed `pa_` unlock rendering could not run because the QA shell did not have `OPERATOR_TEST_SECRET` or `INTERNAL_JOB_SECRET`.
+- Confirmed no raw `pa_` token, tokenized URL, operator secret, processor secret, provider credential, raw input, provider output, `paid_result_json`, LINE ID, or private value was recorded.
+
+Learnings:
+- Staging route freshness is fixed; the remaining blocker is secure local secret availability.
+- The route now correctly distinguishes missing/invalid secret with JSON `401`, so the authorized chain should be able to run once `OPERATOR_TEST_SECRET` is injected into the shell.
+
+Unresolved questions:
+- How the approved operator and processor secrets should be provided to the QA shell without exposing them in chat, command output, or committed docs.
+- Final commit hash and staging push status are recorded in the final completion summary.
