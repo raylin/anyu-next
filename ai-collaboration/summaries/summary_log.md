@@ -6561,3 +6561,23 @@ Unresolved questions:
 - Which deployment or alias is currently serving `staging.anyu.tw`.
 - Whether the owner/operator shell, outside Codex, has the required secrets available for the next rerun.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Vercel Staging Deployment Alias Stability Audit v0
+
+Completed changes:
+- Audited local/source state and confirmed local `staging` matches `origin/staging` at `ab55a7c`.
+- Confirmed source contains `ROUTE_BUNDLE_VERSION = payment-foundation-2026-05-29` and the fake-paid route file.
+- Ran `cd apps/web && corepack pnpm build`; build passed and included `/api/health`, `/api/operator/fake-paid-success`, and paid-result status routes.
+- Ran non-secret live staging checks and confirmed `staging.anyu.tw` currently serves the expected route bundle at commit `ab55a7c`.
+- Confirmed fake-paid missing/invalid secret responses are route-controlled JSON `401`, and invalid synthetic `pa_` returns `invalid_paid_access`.
+- Confirmed Vercel CLI is unavailable in this workspace, so project/domain/alias internals require owner/operator Vercel UI inspection.
+- Recorded no secrets, raw `pa_` tokens, tokenized URLs, raw input, provider credentials, LINE IDs, or private values.
+
+Learnings:
+- The previous staging regression was not reproducible during this audit; live staging had recovered to the expected payment-foundation route bundle.
+- The earlier symptoms remain consistent with an old/mismatched deployment or alias target, but exact root cause cannot be proven without Vercel deployment/alias access.
+- A non-secret staging freshness gate should be run immediately before any secret-dependent fake-paid QA.
+
+Unresolved questions:
+- Whether `staging.anyu.tw` was temporarily aliased to an older deployment, built from a wrong branch/root, or redeployed from an older commit after env changes.
+- Final commit hash and staging push status are recorded in the final completion summary.
