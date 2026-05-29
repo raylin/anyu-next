@@ -6301,3 +6301,22 @@ Unresolved questions:
 - Exact NewebPay payload/hash fields should be confirmed after provider approval.
 - Refund/re-delivery SOP should be finalized before production payment launch.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Paid Access Token Resolver Plan v0
+
+Completed changes:
+- Saved the paid access token resolver plan handoff under `ai-collaboration/handoffs/`.
+- Created a planning document defining the `pa_` token model, resolver contract, access states, security/privacy requirements, idempotency/recovery behavior, web polling contract, DB constraint recommendations, and NewebPay integration boundaries.
+- Recommended implementing a minimal `pa_` resolver before NewebPay checkout/provider runtime.
+- Recommended an operator-only fake paid success flow after resolver implementation and before provider runtime.
+- Confirmed no code, schema, migration, payment runtime, checkout, NewebPay endpoint, LINE behavior, prompt/result behavior, legal copy, feature flag, or production behavior was changed.
+
+Learnings:
+- `pa_` should remain opaque random and hash-at-rest; signed/derived tokens add unnecessary exposure risk for v0.
+- The unlocked route should become a dual resolver: `pa_` entitlement token first, legacy unlock-intent token second.
+- DB-level uniqueness for `entitlements.payment_intent_id` should be considered before payment launch, but not as part of this planning task.
+
+Unresolved questions:
+- Exact NewebPay provider payload/hash fields remain pending provider approval.
+- Missing generation-job recovery can start read-only in resolver v0 or become an idempotent helper during operator fake-paid implementation.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
