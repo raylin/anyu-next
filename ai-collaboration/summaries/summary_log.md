@@ -6362,3 +6362,23 @@ Unresolved questions:
 - Decide after staging QA whether to keep this endpoint as long-term operator tooling or remove it after provider smoke.
 - `entitlements.payment_intent_id` uniqueness and paid access lookup rate limiting remain deferred.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Staging Fake Paid Delivery QA v0
+
+Completed changes:
+- Created a QA handoff and execution report for the staging fake paid delivery chain smoke.
+- Confirmed staging is deployed at `6ecacea`, the operator fake paid success implementation commit.
+- Confirmed staging normal Module 01 analyze, result page load, legacy unlock intent creation, and legacy unlock page load pass.
+- Confirmed invalid synthetic `pa_` paid access returns a safe invalid/expired response and does not fall back to legacy unlock behavior.
+- Confirmed staging processor and paid-generation cron endpoints reject missing authorization.
+- Confirmed the fake-paid QA chain could not run because staging returns the feature-disabled `404` response for `/api/operator/fake-paid-success`.
+- Confirmed no raw `pa_` token, tokenized URL, operator secret, provider credential, raw input, provider output, `paid_result_json`, LINE ID, or private access value was recorded.
+
+Learnings:
+- The deployed code is fresh, but staging needs `ENABLE_OPERATOR_FAKE_PAID_SUCCESS=true` before the operator fake-paid endpoint reaches the secret check.
+- The valid `pa_` delivery chain cannot be verified without both the staging gate and approved operator secret.
+
+Unresolved questions:
+- Whether to enable `ENABLE_OPERATOR_FAKE_PAID_SUCCESS=true` on staging for the next QA rerun.
+- Whether the next rerun should also provide the internal processor secret so the same pass can process the created paid generation job.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
