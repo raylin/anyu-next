@@ -6421,3 +6421,26 @@ Unresolved questions:
 - Who will perform the authenticated Vercel staging env setup.
 - Whether the next authorized QA run should include the manual processor path with `INTERNAL_JOB_SECRET`.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Authorized Staging Fake Paid Delivery QA v0
+
+Completed changes:
+- Created an authorized staging fake paid delivery QA handoff and execution report.
+- Confirmed local repo and `origin/staging` are at `859b801`.
+- Confirmed local `OPERATOR_TEST_SECRET`, `INTERNAL_JOB_SECRET`, and `CRON_SECRET` were not available in this shell.
+- Confirmed staging health returns HTTP 200 but no build marker fields.
+- Confirmed `/api/operator/fake-paid-success` on staging returns a generic Next.js HTML 404 rather than the implemented JSON route response.
+- Reran safe staging checks: normal Module 01 analyze/result and legacy unlock pass.
+- Confirmed invalid synthetic `pa_` access remains safe, but staging returned the legacy invalid-unlock category rather than the expected paid-access category.
+- Confirmed no raw `pa_` token, tokenized URL, operator secret, processor secret, provider credential, raw input, provider output, `paid_result_json`, LINE ID, or private value was recorded.
+
+Learnings:
+- Authorized fake-paid QA is now blocked by staging deployment/route freshness, not just by the feature flag.
+- The current staging runtime appears to be missing at least `/api/operator/fake-paid-success` and may be missing paid-access resolver status behavior.
+- Health marker absence makes staging freshness harder to verify operationally.
+
+Unresolved questions:
+- Which Vercel deployment/alias is currently serving `staging.anyu.tw`.
+- Whether the staging deployment is using the expected `apps/web` project root and latest `origin/staging` build.
+- How approved operator and processor secrets should be made available to the QA shell without exposing them.
+- Final commit hash and staging push status are recorded in the final completion summary.
