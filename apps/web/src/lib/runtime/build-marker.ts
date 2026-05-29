@@ -2,6 +2,8 @@ export type RuntimeEnvironment = "production" | "preview" | "development" | "unk
 export type DeploymentProvider = "vercel" | "unknown";
 export type VersionSource = "env" | "unknown";
 
+export const ROUTE_BUNDLE_VERSION = "payment-foundation-2026-05-29";
+
 export type BuildMarker = {
   app: "anyu-web";
   environment: RuntimeEnvironment;
@@ -10,6 +12,7 @@ export type BuildMarker = {
   buildTime: string;
   deploymentProvider: DeploymentProvider;
   versionSource: VersionSource;
+  routeBundleVersion: typeof ROUTE_BUNDLE_VERSION;
 };
 
 type BuildMarkerEnv = Record<string, string | undefined>;
@@ -91,5 +94,6 @@ export function getBuildMarker(env: BuildMarkerEnv = process.env): BuildMarker {
     buildTime,
     deploymentProvider,
     versionSource,
+    routeBundleVersion: ROUTE_BUNDLE_VERSION,
   };
 }

@@ -6444,3 +6444,24 @@ Unresolved questions:
 - Whether the staging deployment is using the expected `apps/web` project root and latest `origin/staging` build.
 - How approved operator and processor secrets should be made available to the QA shell without exposing them.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Staging Deployment Freshness + Build Marker Recovery v0
+
+Completed changes:
+- Investigated the `/api/health` build marker implementation and staging route-bundle mismatch.
+- Confirmed current source already returns safe marker fields with `unknown` fallbacks when env is missing.
+- Confirmed current local build output includes `/api/operator/fake-paid-success` and paid-result status routes.
+- Added a static safe `routeBundleVersion: payment-foundation-2026-05-29` marker to `/api/health` so future staging checks can confirm the expected payment-foundation route bundle is deployed.
+- Updated health route tests for the route bundle marker.
+- Documented expected route-controlled fake-paid responses vs generic Next 404 route-missing behavior.
+- Documented owner/operator Vercel checks required because CLI access was not authenticated in this session.
+- Confirmed no payment runtime, NewebPay, checkout, queue, LINE delivery, prompt/result, legal copy, production flag, secret, or private value change was made.
+
+Learnings:
+- If `/api/health` lacks `app` and marker fields entirely, staging is serving an older or mismatched route bundle; missing Vercel git env alone would still produce marker fields with `unknown` values.
+- Current local `next build` includes `/api/operator/fake-paid-success`, so staging generic 404 is a deployment/alias freshness issue rather than missing source code.
+
+Unresolved questions:
+- Which Vercel deployment/alias is currently serving `staging.anyu.tw`.
+- Whether the Vercel project assigned to `staging.anyu.tw` is building from the expected `apps/web` root and `origin/staging` branch.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

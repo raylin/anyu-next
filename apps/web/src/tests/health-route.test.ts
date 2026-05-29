@@ -22,6 +22,7 @@ describe("health route", () => {
       ok: true,
       service: "anyu-next-web",
       app: "anyu-web",
+      routeBundleVersion: "payment-foundation-2026-05-29",
     });
     expect(["production", "preview", "development", "unknown"]).toContain(payload.environment);
     expect(["vercel", "unknown"]).toContain(payload.deploymentProvider);
@@ -49,6 +50,7 @@ describe("health route", () => {
       buildTime: "2026-05-27T12:34:56.000Z",
       deploymentProvider: "vercel",
       versionSource: "env",
+      routeBundleVersion: "payment-foundation-2026-05-29",
     });
   });
 
@@ -63,6 +65,7 @@ describe("health route", () => {
       buildTime: "unknown",
       deploymentProvider: "unknown",
       versionSource: "unknown",
+      routeBundleVersion: "payment-foundation-2026-05-29",
     });
   });
 
