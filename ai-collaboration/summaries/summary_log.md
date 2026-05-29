@@ -6260,3 +6260,26 @@ Unresolved questions:
 - Production `0007_payment_entitlements.sql` remains pending by design.
 - Owner should decide whether to run a production migration gate now for schema readiness or defer until payment runtime integration is closer.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Payment / Entitlement Schema Production Migration Gate v0
+
+Completed changes:
+- Saved the production migration gate handoff under `ai-collaboration/handoffs/`.
+- Confirmed production health returned HTTP 200 before migration.
+- Confirmed production did not have `payment_intents` or `entitlements` before migration.
+- Confirmed required referenced tables existed before migration.
+- Applied only `apps/web/drizzle/0007_payment_entitlements.sql` to the production database after explicit operator confirmation.
+- Verified `payment_intents` table existence, expected columns, key defaults, indexes, unique constraint, and foreign keys.
+- Verified `entitlements` table existence, expected columns, key defaults, indexes, partial unique token-hash constraint, and foreign keys.
+- Ran safe production route/API regression checks for health, landing, LIFF bridge, webhook guards, analyze, result, unlock intent, paid generation request, paid status, and unlocked route.
+- Confirmed normal production routes did not write to `payment_intents` or `entitlements`; both final row counts were `0`.
+- Created the required review bundle and execution report.
+
+Learnings:
+- Production schema is now ready for future payment entitlement work while runtime payment behavior remains disabled.
+- Production health currently exposes service health but not a git commit marker, which is a useful ops visibility gap to close later.
+
+Unresolved questions:
+- NewebPay/payment runtime integration remains pending and should not be implemented until provider path is approved.
+- Paid access token resolver behavior remains unimplemented by design.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
