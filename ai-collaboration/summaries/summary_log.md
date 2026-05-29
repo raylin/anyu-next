@@ -6283,3 +6283,21 @@ Unresolved questions:
 - NewebPay/payment runtime integration remains pending and should not be implemented until provider path is approved.
 - Paid access token resolver behavior remains unimplemented by design.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - NewebPay Runtime Integration Plan v0
+
+Completed changes:
+- Saved the NewebPay runtime integration handoff under `ai-collaboration/handoffs/`.
+- Inspected current Module 01 unlock/paid preview behavior, payment intent helpers, entitlement helpers, paid access token helper, generation job repository, processor endpoint, cron wrapper, and feature flags.
+- Created a planning report for future NewebPay checkout, return, notify, payment intent transitions, entitlement creation, paid access token issuance, generation job creation, queue trigger strategy, web polling, LINE optional delivery, failure handling, flags, staging strategy, and tests.
+- Confirmed no app code, DB schema, payment behavior, LINE behavior, prompt/schema behavior, or production behavior was changed.
+
+Learnings:
+- The most important next implementation seam is the `pa_` paid access token resolver; checkout should not be added before web paid access can resolve independently of LINE.
+- Notify should be the payment truth; return should be treated as UX/pending unless independently verified.
+- Queue trigger should initially be trigger-only and let the processor claim due jobs rather than placing sensitive refs in payloads.
+
+Unresolved questions:
+- Exact NewebPay payload/hash fields should be confirmed after provider approval.
+- Refund/re-delivery SOP should be finalized before production payment launch.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
