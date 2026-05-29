@@ -112,4 +112,23 @@ describe("operator fake paid success route", () => {
       idempotencyKey: undefined,
     });
   });
+
+  it("returns safe error categories from the operator service", async () => {
+    mockCreateOperatorFakePaidSuccess.mockResolvedValue({
+      ok: false,
+      status: 503,
+      error: "paid_access_token_config_missing",
+    });
+
+    const response = await POST(request({ secret: "operator-secret" }));
+    const data = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(data).toEqual({
+      ok: false,
+      error: "paid_access_token_config_missing",
+      message: "Operator fake paid success failed.",
+    });
+    expect(JSON.stringify(data)).not.toContain("operator-secret");
+  });
 });

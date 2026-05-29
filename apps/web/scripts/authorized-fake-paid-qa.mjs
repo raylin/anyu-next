@@ -358,6 +358,15 @@ async function main() {
   record("fake_paid_authorized_first", firstSummary.ok ? "pass" : "fail", firstSummary);
 
   const paidAccessToken = first.json?.paidAccessToken ?? null;
+  if (!firstSummary.ok) {
+    record("final_summary", "blocked", {
+      reason: firstSummary.error ?? "fake_paid_authorized_failed",
+      fullQaPassed: false,
+    });
+    process.exitCode = 4;
+    return;
+  }
+
   assertTokenAvailable(paidAccessToken);
 
   const second = await fakePaidSuccess(resultId, idempotencyKey);

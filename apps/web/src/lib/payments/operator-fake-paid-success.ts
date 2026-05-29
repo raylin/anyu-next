@@ -19,6 +19,7 @@ import {
 } from "@/lib/db/payment-intents";
 import { getAnalysisResultWithRequestById } from "@/lib/db/runtime";
 import { resolvePaidAccessToken, type PaidAccessResolutionState } from "@/lib/payments/paid-access-resolver";
+import { getPaidAccessTokenHashSecret } from "@/lib/payments/paid-access-token";
 import { getModuleBySlug } from "@/lib/modules/registry";
 
 const OPERATOR_FAKE_MERCHANT_ORDER_PREFIX = "ANYUFAKE";
@@ -42,8 +43,18 @@ export type OperatorFakePaidSuccessResult =
     }
   | {
       ok: false;
-      status: 404 | 409 | 500;
-      error: "module_not_found" | "result_not_found" | "entitlement_unavailable";
+      status: 404 | 409 | 500 | 503;
+      error:
+        | "module_not_found"
+        | "result_not_found"
+        | "payment_intent_create_failed"
+        | "payment_intent_transition_failed"
+        | "paid_access_token_config_missing"
+        | "paid_access_token_create_failed"
+        | "entitlement_create_failed"
+        | "entitlement_unavailable"
+        | "generation_job_create_failed"
+        | "unexpected_error";
     };
 
 function buildOperatorFakeMerchantOrderNo(input: {
@@ -87,48 +98,75 @@ export async function createOperatorFakePaidSuccess(input: {
     idempotencyKey: input.idempotencyKey,
   });
   const existingPaymentIntent = await getPaymentIntentByMerchantOrderNo(merchantOrderNo);
-  let paymentIntentCreated = false;
-  let paymentIntent =
-    existingPaymentIntent ??
-    (await createPaymentIntent({
-      provider: "operator_fake",
-      providerEnvironment: "unknown",
-      merchantOrderNo,
-      moduleSlug: moduleConfig.slug,
-      analysisRequestId: record.request.id,
-      analysisResultId: record.result.id,
-      amountMinor: OPERATOR_FAKE_AMOUNT_MINOR,
-      currency: "TWD",
-      status: "created",
-    }));
+  const existingEntitlement = existingPaymentIntent
+    ? await getEntitlementByPaymentIntentId(existingPaymentIntent.id)
+    : null;
 
-  if (!existingPaymentIntent) {
+  if (!existingEntitlement && !getPaidAccessTokenHashSecret()) {
+    return { ok: false, status: 503, error: "paid_access_token_config_missing" };
+  }
+
+  let paymentIntentCreated = false;
+  let paymentIntent = existingPaymentIntent;
+
+  if (!paymentIntent) {
+    try {
+      paymentIntent = await createPaymentIntent({
+        provider: "operator_fake",
+        providerEnvironment: "unknown",
+        merchantOrderNo,
+        moduleSlug: moduleConfig.slug,
+        analysisRequestId: record.request.id,
+        analysisResultId: record.result.id,
+        amountMinor: OPERATOR_FAKE_AMOUNT_MINOR,
+        currency: "TWD",
+        status: "created",
+      });
+    } catch {
+      return { ok: false, status: 500, error: "payment_intent_create_failed" };
+    }
     paymentIntentCreated = true;
   }
 
   if (paymentIntent.status !== "paid") {
-    paymentIntent =
-      (await markPaymentPaid({
-        paymentIntentId: paymentIntent.id,
-        providerStatus: "operator_fake_paid",
-        providerMessageCategory: "operator_fake_success",
-      })) ?? paymentIntent;
+    try {
+      paymentIntent =
+        (await markPaymentPaid({
+          paymentIntentId: paymentIntent.id,
+          providerStatus: "operator_fake_paid",
+          providerMessageCategory: "operator_fake_success",
+        })) ?? paymentIntent;
+    } catch {
+      return { ok: false, status: 500, error: "payment_intent_transition_failed" };
+    }
   }
 
-  const existingEntitlement = await getEntitlementByPaymentIntentId(paymentIntent.id);
   let entitlementCreated = false;
   let paidAccessToken: string | null = null;
   let entitlement = existingEntitlement;
 
   if (!entitlement) {
-    const created = await createPaymentSingleEntitlement({
-      moduleSlug: moduleConfig.slug,
-      analysisRequestId: record.request.id,
-      analysisResultId: record.result.id,
-      paymentIntentId: paymentIntent.id,
-      source: "operator_test",
-      activatedAt: new Date(),
-    });
+    let created: Awaited<ReturnType<typeof createPaymentSingleEntitlement>>;
+
+    try {
+      created = await createPaymentSingleEntitlement({
+        moduleSlug: moduleConfig.slug,
+        analysisRequestId: record.request.id,
+        analysisResultId: record.result.id,
+        paymentIntentId: paymentIntent.id,
+        source: "operator_test",
+        activatedAt: new Date(),
+      });
+    } catch (error) {
+      return {
+        ok: false,
+        status: 500,
+        error:
+          error instanceof Error && error.message === "paid_access_token_hash_secret_missing"
+            ? "paid_access_token_create_failed"
+            : "entitlement_create_failed",
+      };
+    }
     entitlement = created.entitlement;
     paidAccessToken = created.paidAccessToken;
     entitlementCreated = true;
@@ -138,15 +176,21 @@ export async function createOperatorFakePaidSuccess(input: {
     return { ok: false, status: 500, error: "entitlement_unavailable" };
   }
 
-  const generationJobResult = await createOrReusePaidAnalysisJob({
-    moduleSlug: moduleConfig.slug,
-    analysisResultId: record.result.id,
-    triggerSource: "operator",
-    entitlementRefId: entitlement.id,
-    promptVersion: PAID_RESULT_PROMPT_VERSION,
-    schemaVersion: PAID_RESULT_SCHEMA_VERSION,
-    operatorTest: true,
-  });
+  let generationJobResult: Awaited<ReturnType<typeof createOrReusePaidAnalysisJob>>;
+
+  try {
+    generationJobResult = await createOrReusePaidAnalysisJob({
+      moduleSlug: moduleConfig.slug,
+      analysisResultId: record.result.id,
+      triggerSource: "operator",
+      entitlementRefId: entitlement.id,
+      promptVersion: PAID_RESULT_PROMPT_VERSION,
+      schemaVersion: PAID_RESULT_SCHEMA_VERSION,
+      operatorTest: true,
+    });
+  } catch {
+    return { ok: false, status: 500, error: "generation_job_create_failed" };
+  }
   let accessState: Exclude<PaidAccessResolutionState, "not_found"> = "pending";
 
   if (paidAccessToken) {

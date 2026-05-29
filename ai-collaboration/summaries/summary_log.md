@@ -6523,3 +6523,22 @@ Learnings:
 Unresolved questions:
 - Whether the first real runner execution will reveal any fake-paid/processor behavior issue that needs a small implementation fix.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Debug Authorized Fake-Paid 500 on Staging v0
+
+Completed changes:
+- Root-caused the authorized fake-paid 500 to missing paid access token hash configuration during first-time `operator_test` entitlement creation.
+- Added a pre-write guard that returns safe `503 paid_access_token_config_missing` when no entitlement exists and `PAID_ACCESS_TOKEN_HASH_SECRET` is unavailable.
+- Added safe fake-paid error categories for payment intent creation/transition, entitlement/token creation, and generation job creation failures.
+- Updated the secret-safe fake-paid QA runner to stop with a sanitized blocked summary on categorized fake-paid failure instead of throwing a secondary `paid_access_token_missing` error.
+- Added targeted service and route tests for missing token config, token creation failure, and safe route error categories.
+- Confirmed no payment runtime, production flag, NewebPay, checkout, queue trigger, LINE delivery, prompt/result, legal copy, secret, raw `pa_` token, or tokenized URL change was made.
+
+Learnings:
+- The staging route bundle and operator gate are healthy; the authorized business path needs `PAID_ACCESS_TOKEN_HASH_SECRET` in addition to `OPERATOR_TEST_SECRET` and processor secret for full QA.
+- Failing before token-hash config is present prevents new partial fake-paid rows and gives the operator a concrete safe blocker category.
+- The local no-secret QA runner remains safe to execute and reports route/gate preflight without exposing secrets.
+
+Unresolved questions:
+- Staging must be configured with `PAID_ACCESS_TOKEN_HASH_SECRET`, redeployed with this fix, and rerun with operator/processor secrets before full fake-paid QA can be claimed passed.
+- Final commit hash and staging push status are recorded in the final completion summary.

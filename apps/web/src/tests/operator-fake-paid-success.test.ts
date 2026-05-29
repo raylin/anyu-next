@@ -85,6 +85,7 @@ const job = {
 describe("operator fake paid success service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.PAID_ACCESS_TOKEN_HASH_SECRET = "test-only-paid-access-secret";
     mockGetModuleBySlug.mockReturnValue(moduleConfig);
     mockGetAnalysisResultWithRequestById.mockResolvedValue(record);
     mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue(null);
@@ -201,5 +202,42 @@ describe("operator fake paid success service", () => {
         entitlementRefId: "entitlement-1",
       }),
     );
+  });
+
+  it("fails safely before payment creation when paid access token hash secret is missing", async () => {
+    delete process.env.PAID_ACCESS_TOKEN_HASH_SECRET;
+
+    const result = await createOperatorFakePaidSuccess({
+      moduleSlug: "ambiguous-temperature",
+      resultId: "result-1",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      status: 503,
+      error: "paid_access_token_config_missing",
+    });
+    expect(mockGetPaymentIntentByMerchantOrderNo).toHaveBeenCalled();
+    expect(mockCreatePaymentIntent).not.toHaveBeenCalled();
+    expect(mockCreatePaymentSingleEntitlement).not.toHaveBeenCalled();
+    expect(mockCreateOrReusePaidAnalysisJob).not.toHaveBeenCalled();
+  });
+
+  it("returns a safe token creation category if entitlement hashing fails", async () => {
+    mockCreatePaymentSingleEntitlement.mockRejectedValue(
+      new Error("paid_access_token_hash_secret_missing"),
+    );
+
+    const result = await createOperatorFakePaidSuccess({
+      moduleSlug: "ambiguous-temperature",
+      resultId: "result-1",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      status: 500,
+      error: "paid_access_token_create_failed",
+    });
+    expect(mockCreateOrReusePaidAnalysisJob).not.toHaveBeenCalled();
   });
 });
