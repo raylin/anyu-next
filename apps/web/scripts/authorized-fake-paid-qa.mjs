@@ -266,7 +266,8 @@ async function pollPaidStatus(token, stepName) {
 }
 
 async function processPaidGenerationJob() {
-  const result = await requestJson(`${STAGING_BASE_URL}/api/internal/jobs/process`, {
+  const processorEndpointPath = "/api/internal/jobs/process";
+  const result = await requestJson(`${STAGING_BASE_URL}${processorEndpointPath}`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -282,6 +283,9 @@ async function processPaidGenerationJob() {
 
   record("processor_manual_completion", pass ? "pass" : "fail", {
     httpStatus: result.status,
+    processorEndpointPath,
+    processorAuthHeaderUsed: Boolean(internalJobSecret),
+    processorAuthMode: "authorization_bearer_internal_job_secret",
     processed: body.processed ?? null,
     completed: body.completed ?? null,
     failed: body.failed ?? null,

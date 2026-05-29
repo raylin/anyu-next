@@ -6581,3 +6581,21 @@ Learnings:
 Unresolved questions:
 - Whether `staging.anyu.tw` was temporarily aliased to an older deployment, built from a wrong branch/root, or redeployed from an older commit after env changes.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Debug Staging Processor Manual Completion 401 in Fake-Paid QA v0
+
+Completed changes:
+- Inspected the processor endpoint, internal job auth helper, route tests, and secret-safe QA runner.
+- Confirmed the runner and endpoint agree on the auth contract: `POST /api/internal/jobs/process` with `Authorization: Bearer <INTERNAL_JOB_SECRET>`.
+- Determined the owner-reported HTTP `401 unauthorized` most likely means local `INTERNAL_JOB_SECRET` does not match the active Vercel Preview/Staging secret, or staging was not redeployed after a secret change.
+- Added safe runner diagnostics for processor endpoint path, auth-header presence, and auth mode label without exposing secret values or derived values.
+- Confirmed no NewebPay, payment runtime, production flag, queue trigger, LINE delivery, prompt/result, legal copy, raw `pa_` token, tokenized URL, or private-data behavior changed.
+
+Learnings:
+- A processor `401` is distinct from `503 config_error` and `403 processor_disabled`; it indicates the route was reached but bearer auth did not match the configured secret.
+- The fake-paid creation, entitlement, idempotency, and paid-access polling path passed in the owner run; only processor auth remains blocked.
+
+Unresolved questions:
+- Whether Vercel Preview/Staging `INTERNAL_JOB_SECRET` matches the owner/operator local shell value.
+- Whether staging was redeployed after the latest `INTERNAL_JOB_SECRET` update.
+- Final commit hash and staging push status are recorded in the final completion summary.
