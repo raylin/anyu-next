@@ -5959,6 +5959,26 @@ Unresolved questions:
 - Production `0006_generation_jobs.sql` remains pending and should be applied only before production job flag enablement.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
 
+## 2026-05-29 - Payment / Entitlement Schema Migration Plan v0
+
+Completed changes:
+- Saved the payment/entitlement schema migration plan handoff under `ai-collaboration/handoffs/`.
+- Inspected current migration numbering, `0006_generation_jobs.sql`, DB schema conventions, fulfillment token hashing, and retention cleanup entry point.
+- Created an exact future `0007_payment_entitlements.sql` plan for `payment_intents` and `entitlements`.
+- Recommended `amount_minor + currency`, text statuses with app constants, `pa_` paid-access tokens, and a dedicated `PAID_ACCESS_TOKEN_HASH_SECRET`.
+- Defined future token resolver, repository helpers, indexes, constraints, retention interaction, refund/re-delivery handling, tests, and rollout phases.
+- Confirmed no migration files, app code, payment integration, LINE behavior, or production behavior changed.
+
+Learnings:
+- Existing migrations use plain SQL and text status columns, so the first payment migration should stay consistent and enforce status values in app constants/tests.
+- `generation_jobs.entitlement_ref_id` can link payment-created jobs without changing the existing job table.
+- Paid access should remain retention-limited until account/history infrastructure exists.
+
+Unresolved questions:
+- Final NewebPay MerchantOrderNo constraints must be confirmed during provider implementation.
+- Owner should approve whether support audit needs `paid_access_token_last_rotated_at` in the first migration.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
 ## 2026-05-29 - Payment / Entitlement Schema Plan v0
 
 Completed changes:
