@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { requireDb } from "@/lib/db/client";
 import { paymentIntents } from "@/lib/db/schema";
 
-export const PAYMENT_PROVIDERS = ["newebpay"] as const;
+export const PAYMENT_PROVIDERS = ["newebpay", "operator_fake"] as const;
 export const PAYMENT_PROVIDER_ENVIRONMENTS = [
   "production",
   "staging",

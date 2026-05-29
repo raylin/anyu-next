@@ -108,7 +108,7 @@ describe("payment and entitlement foundation", () => {
   });
 
   it("defines the approved payment and entitlement constants", () => {
-    expect(PAYMENT_PROVIDERS).toEqual(["newebpay"]);
+    expect(PAYMENT_PROVIDERS).toEqual(["newebpay", "operator_fake"]);
     expect(PAYMENT_PROVIDER_ENVIRONMENTS).toEqual([
       "production",
       "staging",

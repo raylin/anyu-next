@@ -6340,3 +6340,25 @@ Unresolved questions:
 - Missing generation-job recovery should remain read-only or become an idempotent helper during operator fake-paid implementation.
 - `entitlements.payment_intent_id` uniqueness and paid access lookup rate limiting remain deferred.
 - Final validation results, commit hash, and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Operator-only Fake Paid Success v0
+
+Completed changes:
+- Added `POST /api/operator/fake-paid-success` for staging QA.
+- Gated the route behind both `ENABLE_OPERATOR_FAKE_PAID_SUCCESS=true` and valid `x-operator-test-secret` / `OPERATOR_TEST_SECRET`.
+- Implemented deterministic fake payment intent creation/reuse with `provider = operator_fake`.
+- Marked fake payment intents paid with safe operator metadata.
+- Created operator-test entitlements when missing and returned raw `pa_` token only on first entitlement creation.
+- Created/reused paid generation jobs with `triggerSource = operator` and `entitlementRefId`.
+- Left processor execution manual/signed; no queue trigger or provider generation was launched by the route.
+- Added service and route tests for gating, idempotency, token handling, and missing-job recovery.
+- Confirmed no NewebPay checkout/notify/return, real payment runtime, public checkout UI, queue trigger integration, LINE delivery, refund tooling, prompt/result change, legal copy change, or production flag change was made.
+
+Learnings:
+- The operator fake path can safely exercise the internal paid access chain while keeping provider/runtime payment disabled.
+- Raw `pa_` token handling must remain first-response-only because existing storage is hash-only.
+
+Unresolved questions:
+- Decide after staging QA whether to keep this endpoint as long-term operator tooling or remove it after provider smoke.
+- `entitlements.payment_intent_id` uniqueness and paid access lookup rate limiting remain deferred.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.

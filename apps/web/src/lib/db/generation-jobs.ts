@@ -136,6 +136,7 @@ export async function createOrReusePaidAnalysisJob(input: {
   moduleSlug: string;
   analysisResultId: string;
   triggerSource: GenerationJobTriggerSource;
+  entitlementRefId?: string | null;
   priority?: number;
   promptVersion: string;
   schemaVersion: string;
@@ -168,6 +169,7 @@ export async function createOrReusePaidAnalysisJob(input: {
       outputRefType: PAID_ANALYSIS_OUTPUT_REF_TYPE,
       triggerSource: input.triggerSource,
       dedupeKey,
+      entitlementRefId: input.entitlementRefId ?? null,
       maxAttempts: input.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
       nextRunAt: input.nextRunAt ?? now,
       modelProvider: input.modelProvider ?? null,

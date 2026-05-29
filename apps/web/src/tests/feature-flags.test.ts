@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  isOperatorFakePaidSuccessEnabled,
   isPaidGenerationJobsEnabled,
   isPaidGenerationProcessorEnabled,
 } from "@/lib/runtime/feature-flags";
@@ -28,6 +29,16 @@ describe("runtime feature flags", () => {
     ).toBe(true);
     expect(
       isPaidGenerationProcessorEnabled({ ENABLE_PAID_GENERATION_PROCESSOR: "0" } as NodeJS.ProcessEnv),
+    ).toBe(false);
+  });
+
+  it("keeps operator fake paid success disabled unless explicitly enabled", () => {
+    expect(isOperatorFakePaidSuccessEnabled({} as NodeJS.ProcessEnv)).toBe(false);
+    expect(
+      isOperatorFakePaidSuccessEnabled({ ENABLE_OPERATOR_FAKE_PAID_SUCCESS: "true" } as NodeJS.ProcessEnv),
+    ).toBe(true);
+    expect(
+      isOperatorFakePaidSuccessEnabled({ ENABLE_OPERATOR_FAKE_PAID_SUCCESS: "0" } as NodeJS.ProcessEnv),
     ).toBe(false);
   });
 });

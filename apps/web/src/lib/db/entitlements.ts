@@ -46,6 +46,7 @@ export async function createPaymentSingleEntitlement(input: {
   analysisRequestId: string;
   analysisResultId: string;
   paymentIntentId: string;
+  source?: EntitlementSource;
   unlockIntentId?: string | null;
   generationJobId?: string | null;
   lineUserRef?: string | null;
@@ -54,6 +55,8 @@ export async function createPaymentSingleEntitlement(input: {
   activatedAt?: Date | null;
   env?: NodeJS.ProcessEnv;
 }) {
+  assertAllowed(input.source ?? "payment_single", ENTITLEMENT_SOURCES, "entitlement source");
+
   const paidAccessToken = generatePaidAccessToken();
   const paidAccessTokenHash = hashPaidAccessToken(paidAccessToken, input.env);
   const db = requireDb();
@@ -62,7 +65,7 @@ export async function createPaymentSingleEntitlement(input: {
     .insert(entitlements)
     .values({
       entitlementType: "single_paid_analysis",
-      source: "payment_single",
+      source: input.source ?? "payment_single",
       status: "active",
       moduleSlug: input.moduleSlug,
       analysisRequestId: input.analysisRequestId,
@@ -90,6 +93,17 @@ export async function getEntitlementById(id: string) {
     .select()
     .from(entitlements)
     .where(eq(entitlements.id, id))
+    .limit(1);
+
+  return record ?? null;
+}
+
+export async function getEntitlementByPaymentIntentId(paymentIntentId: string) {
+  const db = requireDb();
+  const [record] = await db
+    .select()
+    .from(entitlements)
+    .where(eq(entitlements.paymentIntentId, paymentIntentId))
     .limit(1);
 
   return record ?? null;

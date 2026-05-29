@@ -13,3 +13,7 @@ export function isPaidGenerationJobsEnabled(env: NodeJS.ProcessEnv = process.env
 export function isPaidGenerationProcessorEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return getBooleanEnvFlag("ENABLE_PAID_GENERATION_PROCESSOR", env);
 }
+
+export function isOperatorFakePaidSuccessEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return getBooleanEnvFlag("ENABLE_OPERATOR_FAKE_PAID_SUCCESS", env);
+}
