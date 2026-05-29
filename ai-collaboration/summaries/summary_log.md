@@ -6504,3 +6504,22 @@ Learnings:
 Unresolved questions:
 - How the approved operator and processor secrets should be provided to the QA shell without exposing them in chat, command output, or committed docs.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Secret-Safe Authorized Fake-Paid QA Runner v0
+
+Completed changes:
+- Added `apps/web/scripts/authorized-fake-paid-qa.mjs`, a local-only staging QA runner for the authorized fake-paid delivery chain.
+- Added `corepack pnpm qa:fake-paid` to `apps/web/package.json`.
+- Documented how the owner/operator should inject `OPERATOR_TEST_SECRET` and `INTERNAL_JOB_SECRET` through local environment variables without printing them.
+- Ensured the runner emits sanitized newline-delimited JSON and never prints raw secrets, raw `pa_` tokens, tokenized URLs, raw input, provider output, `paid_result_json`, LINE IDs, or private values.
+- The runner keeps the raw `pa_` token in memory only for status polling and unlock-page checks.
+- The runner reports id/status presence booleans and redacted route shapes instead of raw ids or bearer links.
+- No payment runtime, production flag, NewebPay, checkout, queue, LINE delivery, prompt/result, legal copy, or public behavior change was made.
+
+Learnings:
+- A local runner is the safest path for authorized QA because it avoids placing secrets in chat or committed docs while still producing paste-safe output.
+- The runner can distinguish full pass, partial pass without processor secret, and blocked preflight/secret states.
+
+Unresolved questions:
+- Whether the first real runner execution will reveal any fake-paid/processor behavior issue that needs a small implementation fix.
+- Final validation results, commit hash, and staging push status are recorded in the final completion summary.
