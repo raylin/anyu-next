@@ -6402,3 +6402,22 @@ Unresolved questions:
 - Who will enable `ENABLE_OPERATOR_FAKE_PAID_SUCCESS=true` for staging/preview only.
 - How the approved operator and processor secrets should be made available to the QA shell without exposing them in chat or committed docs.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-29 - Staging Operator Fake-Paid Env Setup Runbook + Preflight v0
+
+Completed changes:
+- Created a staging-only fake-paid environment setup runbook and preflight checklist.
+- Documented required Preview/Staging env vars: `ENABLE_OPERATOR_FAKE_PAID_SUCCESS`, `OPERATOR_TEST_SECRET`, optional `INTERNAL_JOB_SECRET`, and optional `CRON_SECRET`.
+- Documented that production fake-paid and payment runtime must remain disabled.
+- Added safe missing/invalid/valid-secret preflight criteria without including real secrets.
+- Added redaction rules for raw `pa_` tokens, tokenized URLs, secrets, provider credentials, raw input, provider output, and private values.
+- Added the exact next QA trigger: rerun Staging Fake Paid Delivery QA with authorized operator gate after manual env setup and staging redeploy.
+
+Learnings:
+- The current `404` vs `401` route behavior is sufficient to identify whether the fake-paid flag is disabled or the operator secret check is active.
+- A future aggregate-only preflight endpoint could reduce repeated blocked QA attempts, but it is not required before the next manual env setup.
+
+Unresolved questions:
+- Who will perform the authenticated Vercel staging env setup.
+- Whether the next authorized QA run should include the manual processor path with `INTERNAL_JOB_SECRET`.
+- Final commit hash and staging push status are recorded in the final completion summary.
