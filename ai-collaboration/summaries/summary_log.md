@@ -6803,3 +6803,21 @@ Unresolved questions:
 - Owner should confirm a concrete refund handling time window before final submission if NewebPay expects one.
 - Owner should confirm whether support remains email-only or should include LINE OA.
 - Owner must still prepare external proof documents outside the repo.
+
+## 2026-05-30 - NewebPay Supplement Email Draft and Attachment Checklist v0
+
+Completed changes:
+- Created a documentation-only NewebPay supplement package draft for owner review.
+- Summarized the completed public website updates: storefront homepage, synthetic product preview, NT$49 price, one-time/non-subscription model, web delivery, refund page, and legal/footer links.
+- Created an external attachment checklist with placeholders for homepage screenshot, refund screenshot, domain proof, Vercel hosting proof, AI/API proof, self-developed system statement, order/payment flow explanation, and optional merchant identity documents.
+- Drafted a self-developed system statement for cases where no external system vendor invoice exists.
+- Drafted a Traditional Chinese NewebPay supplement email that uses the客服信箱 `hello@anyu.tw` and states that payment integration is still under review.
+
+Learnings:
+- Current public site/legal copy already uses `hello@anyu.tw` as the support email, so no website copy change was needed for the客服信箱 request.
+- The supplement package should list private attachments by filename only; actual proof documents must stay outside the repo and be sent directly to NewebPay.
+
+Unresolved questions:
+- Owner must confirm whether screenshots should use production or staging URLs.
+- Owner must confirm whether to state a concrete refund handling time window.
+- Owner must gather and redact external proof documents before sending.
