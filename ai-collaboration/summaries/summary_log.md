@@ -7510,3 +7510,20 @@ Learnings:
 Unresolved questions:
 - Whether NewebPay approval/formal production credentials are available yet.
 - Whether main should be reconciled with staging docs again before production launch gate work.
+
+## 2026-05-31 - Post-Sandbox E2E Sync-Up / Next Sprint Recommendation v0
+
+Completed changes:
+- Created a post-sandbox E2E sync-up report with current state confirmation, safe work categories, ranked candidate tasks, product opportunities, engineering cleanup opportunities, guardrails, and recommended next tasks.
+- Inspected source surfaces for homepage, Module 01 landing/result/payment pages, paid preview CTA, refund/legal pages, and known tech debt references.
+- Confirmed dashboard is already current after sandbox E2E pass and did not require another update.
+
+Learnings:
+- The public homepage is merchant-review aligned, but the in-product paid preview still uses internal-test / no-charge / LINE-or-Email copy.
+- Since sandbox provider flow is now proven, the highest-value low-risk next sprint is launch UX alignment, not more provider engineering.
+- The best next Codex tasks are: Module 01 Payment Launch UX Alignment Plan v0, Secret-Safe NewebPay Sandbox E2E Helper v0, and Production Payment Config Dry-Run Plan / Preflight Script v0.
+
+Unresolved questions:
+- Whether owner wants the result-page paid CTA to keep internal-test copy until approval or prepare launch-ready copy behind a state/flag.
+- Whether NewebPay approval/formal production credentials are available yet.
+- Whether owner wants the sandbox helper implemented now or kept as a runbook until another provider smoke is needed.
