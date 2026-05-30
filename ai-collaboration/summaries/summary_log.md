@@ -6991,3 +6991,21 @@ Learnings:
 Unresolved questions:
 - Whether future docs-only `main` pushes should be allowed to auto-deploy, or whether production deployment should require an explicit promotion gate.
 - Whether owner wants the old Vercel `anyu` project archived after confirming no active domain ownership.
+
+## 2026-05-30 - Queue Provider Selection / Phase 4B Plan v0
+
+Completed changes:
+- Reviewed the Phase 4A queue trigger abstraction, flags, payload, integration points, and tests.
+- Compared Vercel Queues, Upstash QStash, direct internal trigger, manual fallback, Vercel Cron, Vercel Workflow, and external worker options.
+- Recommended Vercel Queues as the primary Phase 4B provider if available in the ANYU Vercel account, with Upstash QStash as fallback.
+- Planned adapter categories, env names, queue consumer/auth strategy, idempotency, failure behavior, tests, staging QA, and implementation phases.
+
+Learnings:
+- Vercel Queues is a better first fit than public webhook delivery if account access is available because its consumer functions are not publicly accessible.
+- QStash remains a strong fallback, but it requires public endpoint signature verification and more external-provider operations.
+- The current trigger-only payload with DB references already fits either provider without exposing raw input, tokens, provider payloads, or decrypted data.
+
+Unresolved questions:
+- Whether Vercel Queues is available for the `studioanyu-1488` / `anyu-next` project.
+- Whether owner prefers Vercel-native beta infrastructure or mature external QStash for Phase 4B.
+- Whether provider-level dedupe is enough initially or whether a queue audit table should be added later.
