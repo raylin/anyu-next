@@ -6839,3 +6839,22 @@ Unresolved questions:
 - Whether to refresh production before NewebPay screenshots.
 - Whether to use production or staging URLs for the supplement package.
 - Whether refund handling time should be stated explicitly before submission.
+
+## 2026-05-30 - Refresh Production Public Merchant Review Content v0
+
+Completed changes:
+- Deployed latest public merchant-review storefront/refund content to production using direct Vercel production deployment on project `anyu-next`.
+- Verified `https://anyu.tw/` now shows the Module 01 storefront, product preview, NT$49 price, one-time/non-subscription charging model, web delivery, refund/support summary, and `hello@anyu.tw`.
+- Verified `https://anyu.tw/refund` now returns 200 and shows refund/reissue policy content.
+- Verified `https://anyu.tw/legal` returns 200 and shows refund/privacy/terms/disclaimer links.
+- Verified checkout and operator fake-paid routes remain disabled for public production traffic with route-controlled JSON `404 not_found`.
+
+Learnings:
+- Production was successfully refreshed without changing production env values or enabling payment runtime.
+- Production health now reports `environment: production`, `gitCommit: 3de74ca20c74`, and route bundle marker `payment-foundation-2026-05-29`.
+- Vercel domain inspection still lists `anyu.tw` under both `anyu-next` and older `anyu`, but current alias resolution serves the fresh `anyu-next` deployment.
+
+Unresolved questions:
+- Owner still needs to capture production screenshots and prepare external proof documents for NewebPay.
+- Local `git fetch` remains blocked by `.git/FETCH_HEAD` permission, leaving the local remote-tracking ref stale.
+- Owner should eventually clean older Vercel project/domain association if safe.
