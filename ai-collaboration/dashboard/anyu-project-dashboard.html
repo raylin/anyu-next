@@ -329,10 +329,10 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed after the TradeInfo padding fix; NewebPay merchant review remains the external gate.</p>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed after the TradeInfo padding fix; NewebPay merchant review remains the external gate. While review is pending, the next low-risk sprint is Module 01 launch UX lock-down plus lightweight multi-module direction planning.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-05-31 01:35 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Sandbox E2E passed; waiting launch gate</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-05-31 01:49 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Sandbox E2E passed; review-wait sprint planning</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Merchant approval / formal production credentials</span></div>
       </div>
@@ -350,6 +350,7 @@
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. hello@anyu.tw is public support channel.</p></article>
         <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers remain NewebPay approval/formal credentials, production dry-run, and controlled smoke.</p></article>
+        <article class="card"><span class="badge progress">Planning</span><h3>Multi-module direction</h3><p>Recommended review-wait path: keep Module 01 stable, plan Module 02 concept/spec, and add only lightweight homepage cross-linking when approved.</p></article>
         <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: sandbox helper, queue audit persistence, domain/project ambiguity, and optional provider fields.</p></article>
       </div>
     </section>
@@ -399,6 +400,7 @@
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
           <li><span class="time">Current</span><span>Sandbox v5 passed after NewebPay-style manual 32-byte AES padding fix: real sandbox payment reached <code>paid_ready</code> and completed access rendered.</span></li>
+          <li><span class="time">Review wait</span><span>Recommended low-risk sprint: Module 01 launch UX lock-down, Module 02 concept/spec, and lightweight homepage cross-link planning.</span></li>
         </ol>
       </div>
     </section>
@@ -422,7 +424,16 @@
         <h2>NewebPay Status</h2>
         <p>Merchant review supplement submitted. Production public pages are ready. Sandbox shop is created and operating.</p>
         <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
-        <p>Next action: keep production disabled while waiting for merchant approval, then run Production Payment Config Dry-Run v0.</p>
+        <p>Next action: keep production disabled while waiting for merchant approval. Use the review window for Module 01 launch UX alignment and Module 02 / homepage cross-link planning. If approval arrives, run Production Payment Config Dry-Run v0.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Multi-Module Direction</h2>
+      <div class="panel">
+        <p><strong>Direction:</strong> ANYU should remain warm, premium, emotionally resonant, and insight-native, not a SaaS-like test directory. Module 01 stays the launch anchor while future mini-tests become cross-linked experiences.</p>
+        <p><strong>Low-risk next move:</strong> plan Module 02 first, then add a small homepage “更多暗語測驗 / 即將推出” section only after the concept is selected. Do not hide Module 01 price/refund/support evidence during merchant review.</p>
+        <p><strong>Candidate directions:</strong> 社群微訊號讀心卡, 心動慣性圖譜, 關係紅旗雷達, 價值觀落差雷達, 邊界感翻譯器.</p>
       </div>
     </section>
 
@@ -494,10 +505,9 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> If NewebPay merchant review approval/formal credentials are available, run Production Payment Config Dry-Run v0.</p>
+        <p><strong>Current recommendation while approval is pending:</strong> run Module 01 Launch UX Lock + Multi-State Paid CTA Plan v0, then Module 02 Concept Spec + Homepage Cross-Link Plan v0.</p>
         <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production runtime should remain disabled until the launch gate sequence is explicitly approved.</p>
-        <p>If approval is still pending, keep launch materials ready and avoid additional payment runtime changes.</p>
-        <p>If approval is received, the next gate is production config dry-run with runtime still disabled; do not jump directly to public checkout.</p>
+        <p>If NewebPay merchant review approval/formal credentials are available, switch back to Production Payment Config Dry-Run v0 with runtime still disabled; do not jump directly to public checkout.</p>
       </div>
     </section>
 
@@ -522,6 +532,7 @@
           <li><a href="../reports/2026-05-30-newebpay-supplement-email-draft-attachment-checklist-v0.md">Supplement Email Draft / Attachment Checklist v0</a></li>
           <li><a href="../reports/2026-05-30-anyu-current-state-snapshot-chatgpt-review-v0.md">ANYU Current State Snapshot v0</a></li>
           <li><a href="../reports/2026-05-30-anyu-engineering-sync-up-quality-scan-v0.md">ANYU Engineering Sync-Up / Quality Scan v0</a></li>
+          <li><a href="../reports/2026-05-31-post-sandbox-next-sprint-scan-multi-module-direction-v0.md">Post-Sandbox Next Sprint Scan with Multi-Module Direction v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

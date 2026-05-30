@@ -7527,3 +7527,21 @@ Unresolved questions:
 - Whether owner wants the result-page paid CTA to keep internal-test copy until approval or prepare launch-ready copy behind a state/flag.
 - Whether NewebPay approval/formal production credentials are available yet.
 - Whether owner wants the sandbox helper implemented now or kept as a runbook until another provider smoke is needed.
+
+## 2026-05-31 - Post-Sandbox Next Sprint Scan with Multi-Module Direction v0
+
+Completed changes:
+- Created a post-sandbox next sprint report that incorporates the owner’s multi-module direction while keeping production payment disabled.
+- Confirmed the best review-wait sprint is Module 01 launch UX lock-down, Module 02 concept/spec exploration, and secret-safe QA/tooling cleanup rather than full Module 02 implementation or new payment runtime work.
+- Inspected current module routing/config and confirmed routing is slug-based, but landing/result/access rendering remains mostly Module 01-specific.
+- Updated the project dashboard to show review-wait sprint planning, multi-module direction, and the recommended pending-approval task sequence.
+
+Learnings:
+- The homepage should not be converted into a broad portal before NewebPay review completes; Module 01 product/price/refund evidence must remain visible.
+- A small “更多暗語測驗 / 即將推出” section is the lowest-risk bridge toward multi-module positioning, but only after a Module 02 concept is selected.
+- Module 02 should start as spec/research; full paid implementation should wait until Module 01 launch UX and production launch gates are stable.
+
+Unresolved questions:
+- Which Module 02 direction owner prefers: low-risk/shareable `社群微訊號讀心卡` or deeper Personal Insight Graph seed `心動慣性圖譜`.
+- Whether NewebPay approval/formal production credentials arrive before the next product sprint starts.
+- Whether the Module 01 paid CTA should remain internal-test copy until approval or be prepared as launch-ready multi-state copy first.
