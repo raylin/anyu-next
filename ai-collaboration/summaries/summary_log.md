@@ -6858,3 +6858,22 @@ Unresolved questions:
 - Owner still needs to capture production screenshots and prepare external proof documents for NewebPay.
 - Local `git fetch` remains blocked by `.git/FETCH_HEAD` permission, leaving the local remote-tracking ref stale.
 - Owner should eventually clean older Vercel project/domain association if safe.
+
+## 2026-05-30 - Queue Trigger Integration / Paid Delivery Orchestration Phase 4 Plan v0
+
+Completed changes:
+- Created a planning-only Phase 4 architecture report for paid generation queue triggering.
+- Documented current `generation_jobs`, internal processor, cron fallback, fake-paid QA, NewebPay NotifyURL, and `pcs_` handoff behavior.
+- Compared QStash-like webhook queue, direct server trigger, manual-only fallback, Vercel Cron, external worker, and Vercel Workflow options.
+- Recommended a trigger-only queue layer with DB-backed processor source of truth, manual recovery preserved, and duplicate-safe delivery.
+- Defined trigger payload rules, integration points, failure behavior, gates/env names, observability, tests, staging QA, and Phase 4A-4D implementation breakdown.
+
+Learnings:
+- Current processor already has DB-based due job claiming, retries, stale lock recovery, and safe manual invocation, so Phase 4 should not duplicate job state inside the queue.
+- Vercel Hobby Cron is useful only as a safety net because it is daily-only for this project context.
+- A targeted `jobId` trigger payload is preferable for auditability but requires a small targeted processor enhancement; a limit-based trigger is simpler but less precise.
+
+Unresolved questions:
+- Whether Phase 4A should add targeted `jobId` processing immediately or start with the existing limit-based processor route.
+- Whether to retain or remove temporary processor auth diagnostics after queue QA stabilizes.
+- Which queue provider/account should be used for staging once implementation begins.
