@@ -7289,3 +7289,20 @@ Learnings:
 Unresolved questions:
 - Owner should verify the NewebPay sandbox shop NotifyURL setting and sandbox transaction callback status.
 - If backend NotifyURL is correct, a follow-up safe NotifyURL debug task is needed to determine whether NewebPay is not sending the callback or the route is rejecting before visible logs.
+
+## 2026-05-30 - NewebPay Sandbox NotifyURL Debug v0
+
+Completed changes:
+- Inspected NewebPay checkout payload builder, checkout service, NotifyURL route/service/verifier, and related tests.
+- Confirmed implementation includes `NotifyURL` inside encrypted `TradeInfo` and actual fresh checkout form shape contained the correct staging NotifyURL without printing encrypted or decrypted values.
+- Verified staging NotifyURL route reachability with malformed non-secret requests: route exists, POST returns provider-compatible `0|ERROR` with safe categories, and no operator auth is required.
+- Reviewed NewebPay MPG manual assumptions: NotifyURL/ReturnURL can be set per transaction or in merchant backend; API parameter should take priority when both exist.
+- Checked recent Vercel logs: ReturnURL/status traffic and deliberate malformed test callbacks appeared, but no provider-originated NotifyURL request was visible for the payment smoke.
+
+Learnings:
+- The failure is unlikely to be caused by missing API `NotifyURL` or route 404/auth protection.
+- The most likely root cause is sandbox/backend callback delivery: transaction not considered paid, backend notification not attempted, sandbox NotifyURL setting issue, or provider-side callback failure not reaching Vercel.
+
+Unresolved questions:
+- Owner needs to inspect NewebPay sandbox backend transaction status, callback attempt/status/response, and shop API URL / NotifyURL settings.
+- If backend shows callback attempted but failed, add category-only route diagnostics; if no callback attempted, fix provider/backend settings before code changes.
