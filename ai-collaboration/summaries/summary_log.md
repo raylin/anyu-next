@@ -6980,12 +6980,14 @@ Completed changes:
 - Confirmed pre-reconciliation divergence was `0 76`, with no `main` commits ahead of `staging`.
 - Documented a fast-forward-only reconciliation method that keeps the task report in both `staging` and `main`.
 - Re-established the intended workflow: `staging` for integration, `main` for production release/source-of-truth.
+- Fast-forwarded `origin/main` to match `origin/staging`; Vercel then auto-deployed Production from `main`.
+- Confirmed production health reports `gitBranch: main`, and production homepage/refund/legal plus disabled checkout/fake-paid safety checks passed.
 
 Learnings:
 - A direct `git push origin HEAD:main` from the final staging task commit is a safe fast-forward promotion when ancestry is verified first.
-- No production deploy command is needed for repository source-of-truth reconciliation.
+- No manual production deploy command was needed; Vercel auto-deployed after the `main` push.
 - The old Vercel `anyu` project/domain ambiguity remains an owner UI cleanup item, separate from git branch reconciliation.
 
 Unresolved questions:
-- Whether Vercel auto-deploys every `main` push for `anyu-next` or production remains manual.
+- Whether future docs-only `main` pushes should be allowed to auto-deploy, or whether production deployment should require an explicit promotion gate.
 - Whether owner wants the old Vercel `anyu` project archived after confirming no active domain ownership.

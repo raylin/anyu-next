@@ -56,10 +56,13 @@ Why this method:
 - It avoids merge commits and preserves the strict fast-forward relationship.
 - It does not rewrite history.
 
-Expected after-state:
+Observed after-state after the first reconciliation push:
 
-- `origin/main` and `origin/staging` point to the same final reconciliation commit for this task.
+- `origin/main` and `origin/staging` both pointed to `2d9aa7fe3942f9afe86debad9f3efeeac69e8d09`.
+- `git rev-list --left-right --count origin/main...origin/staging` returned `0 0`.
 - Future production release source-of-truth can be `main` again.
+
+This report update is docs-only. If it is pushed to both `staging` and `main`, it should preserve the same zero-divergence state with the final docs commit recorded in the Codex completion summary.
 
 ## Production Deployment Policy
 
@@ -77,18 +80,32 @@ Recommended workflow going forward:
 
 ## Production Deployment / Safety Status
 
-No production deploy was intentionally triggered by this task before the report was written.
+No manual production deploy command was run.
 
-If Vercel automatically deploys from the `main` push, run safe checks after deployment:
+Vercel automatically started a Production deployment after the `main` fast-forward push:
 
-- `https://anyu.tw/`
-- `https://anyu.tw/refund`
-- `https://anyu.tw/legal`
-- `https://anyu.tw/api/health`
-- checkout route disabled behavior
-- fake-paid route disabled behavior
+- Deployment: `anyu-next-3hxivsqf0-studioanyu-1488s-projects.vercel.app`
+- Target: Production
+- Status: Ready
+- Aliases: `https://anyu.tw`, `https://www.anyu.tw`, and Vercel project aliases
+- Health after deploy reported:
+  - `environment: production`
+  - `gitBranch: main`
+  - `gitCommit: 2d9aa7fe3942`
+  - `routeBundleVersion: payment-foundation-2026-05-29`
 
-Expected safety posture remains:
+Safe production checks after deployment:
+
+| Check | Result |
+| --- | --- |
+| `https://anyu.tw/` | `200`, merchant-review homepage content visible. |
+| `https://anyu.tw/refund` | `200`, refund content visible. |
+| `https://anyu.tw/legal` | `200`, legal/support content visible. |
+| `https://anyu.tw/api/health` | `200`, production health reports `main`. |
+| Checkout route disabled behavior | JSON `404 not_found`, route-controlled. |
+| Operator fake-paid disabled behavior | JSON `404 not_found`, route-controlled. |
+
+Safety posture:
 
 - merchant-review public content visible
 - payment runtime disabled
