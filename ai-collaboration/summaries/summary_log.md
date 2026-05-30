@@ -7358,3 +7358,22 @@ Learnings:
 Unresolved questions:
 - The real NewebPay sandbox callback failure category remains unknown until this diagnostic build is deployed to Preview(`staging`) and a fresh callback is observed.
 - Paid transition, delivery artifacts, queue completion, and paid access rendering remain unverified for real sandbox provider flow.
+
+## 2026-05-31 - Fresh NewebPay Sandbox E2E Payment Smoke v3
+
+Completed changes:
+- Ran a fresh Preview(`staging`) NewebPay sandbox checkout after safe NotifyURL category diagnostics were deployed.
+- Created fresh checkout run `20260530161320`: source analyze HTTP 200, checkout HTTP 200, sandbox `ccore`, MPG `Version=2.0`, NT$49, and `pcs_` handoff present.
+- Owner submitted sandbox credit-card one-time payment and browser returned to staging.
+- Polled session-bound payment status for 72 attempts over about 6 minutes; final status remained `waiting_for_payment`, with no access path.
+- Inspected safe Vercel logs and captured `newebpay_notify_failed.category=trade_info_decrypt_failed`.
+- Confirmed Production remained disabled: production health stayed `production/main/1990fc034d74`; checkout and fake-paid returned JSON 404 `not_found`.
+
+Learnings:
+- NotifyURL transport and safe diagnostics work for real sandbox callbacks.
+- The remaining blocker is now specifically decrypting NewebPay callback `TradeInfo`, before payment intent lookup, amount check, paid transition, delivery artifacts, queue trigger, or paid access handoff.
+- The most likely next area is Preview(`staging`) NewebPay credential/config alignment: `NEWEBPAY_MERCHANT_ID`, `NEWEBPAY_HASH_KEY`, and `NEWEBPAY_HASH_IV` must match the exact sandbox shop that processed the payment.
+
+Unresolved questions:
+- Whether Preview(`staging`) currently uses a HashKey/HashIV pair from a different sandbox shop, old sandbox config, production config, or otherwise mismatched NewebPay backend setting.
+- Paid transition, delivery artifacts, queue completion, and paid access rendering remain unverified for real sandbox provider flow.
