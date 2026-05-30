@@ -98,14 +98,16 @@ Note: the targeted test command completed successfully but Vitest argument handl
 
 ## Staging Verification
 
-Staging malformed form POST verification is required after the commit deploys to Preview(`staging`):
+Preview(`staging`) deployed commit `65feb244674c`.
 
-- POST `application/x-www-form-urlencoded` with missing/invalid `TradeInfo` / `TradeSha`.
-- Expected HTTP `200`.
-- Expected body `0|ERROR`.
-- Expected safe category header such as `malformed_payload` or `merchant_mismatch`.
+Safe malformed form POST checks were run against `https://staging.anyu.tw/api/payments/newebpay/notify`. No real `TradeInfo`, `TradeSha`, card data, or provider payload was used.
 
-No real `TradeInfo`, `TradeSha`, card data, or provider payload should be used for this verification.
+| Case | HTTP status | Body | Category |
+|---|---:|---|---|
+| Missing fields | `200` | `0|ERROR` | `malformed_payload` |
+| Invalid placeholder TradeSha / merchant mismatch | `200` | `0|ERROR` | `merchant_mismatch` |
+
+Staging malformed callback behavior now matches the provider-compatible transport requirement.
 
 ## Production Safety
 

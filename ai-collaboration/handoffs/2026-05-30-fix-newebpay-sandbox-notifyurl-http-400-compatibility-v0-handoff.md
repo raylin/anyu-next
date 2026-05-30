@@ -45,3 +45,4 @@ Out of scope:
 - Verified success still returns HTTP 200 with `1|OK`.
 - Added route tests proving `application/x-www-form-urlencoded` payload parsing, missing-field failure as HTTP 200 + `0|ERROR`, invalid signature as HTTP 200 + `0|ERROR`, and no `TradeInfo` / `TradeSha` response exposure.
 - Validation passed: lint, full Vitest suite, and build.
+- Preview(`staging`) deployed commit `65feb244674c`; malformed non-secret form POST checks returned HTTP 200 + `0|ERROR` with safe categories.
