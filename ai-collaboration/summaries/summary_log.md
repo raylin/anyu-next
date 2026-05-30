@@ -7188,3 +7188,17 @@ Learnings:
 Unresolved questions:
 - Owner needs to confirm refund/support handling window, daily support inbox monitoring, NewebPay merchant backend access, and whether support notes need a private tracker.
 - NewebPay review approval and sandbox/production credential readiness remain pending.
+
+## 2026-05-30 - NewebPay Sandbox E2E Smoke Plan v0
+
+Completed changes:
+- Added an ANYU-specific NewebPay sandbox end-to-end smoke plan for checkout -> NotifyURL -> paid delivery -> Vercel Queues -> session-bound paid access.
+- Mapped sandbox credential/env names, ANYU routes, Preview(`staging`) setup, E2E sequence, expected states, safety checks, failure categories, observability checklist, and sanitized report shape.
+
+Learnings:
+- Current implementation routes and env names are sufficient to define a manual sandbox smoke without code changes: checkout route, NotifyURL, ReturnURL/status/access, Vercel queue consumer, and manual processor fallback are all mapped.
+- Sandbox smoke must keep NotifyURL as payment truth, ReturnURL non-mutating, raw `pa_` unexposed, and `pcs_` as browser handoff.
+
+Unresolved questions:
+- NewebPay sandbox credential availability remains unknown.
+- No dedicated sandbox E2E runner exists yet; the first smoke is expected to be manual/operator-driven unless a follow-up automates it.
