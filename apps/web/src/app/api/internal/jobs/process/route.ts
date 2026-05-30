@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import { isDbConfigured } from "@/lib/db/client";
 import { processPaidAnalysisJobs } from "@/lib/modules/paid-generation-processor";
 import { isPaidGenerationProcessorEnabled } from "@/lib/runtime/feature-flags";
-import {
-  diagnoseInternalJobAuthorization,
-  getInternalJobSecret,
-  isInternalJobAuthorized,
-} from "@/lib/runtime/internal-job-auth";
+import { getInternalJobSecret, isInternalJobAuthorized } from "@/lib/runtime/internal-job-auth";
 
 export const maxDuration = 90;
 
@@ -20,35 +16,15 @@ function errorResponse(status: number, error: string, message: string) {
   return NextResponse.json({ ok: false, error, message }, { status });
 }
 
-function shouldIncludeAuthDiagnostic(request: Request) {
-  return (
-    process.env.VERCEL_ENV !== "production" &&
-    request.headers.get("x-processor-auth-diagnostic") === "1"
+function unauthorizedResponse() {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "unauthorized",
+      message: "Unauthorized processor request.",
+    },
+    { status: 401 },
   );
-}
-
-function unauthorizedResponse(request: Request) {
-  const body: {
-    ok: false;
-    error: "unauthorized";
-    message: string;
-    authDiagnostic?: ReturnType<typeof diagnoseInternalJobAuthorization> & {
-      additionalGateConfigured: boolean;
-    };
-  } = {
-    ok: false,
-    error: "unauthorized",
-    message: "Unauthorized processor request.",
-  };
-
-  if (shouldIncludeAuthDiagnostic(request)) {
-    body.authDiagnostic = {
-      ...diagnoseInternalJobAuthorization(request.headers.get("authorization")),
-      additionalGateConfigured: isPaidGenerationProcessorEnabled(),
-    };
-  }
-
-  return NextResponse.json(body, { status: 401 });
 }
 
 function parseProcessorPayload(body: unknown): ProcessorPayload {
@@ -75,7 +51,7 @@ export async function POST(request: Request) {
   }
 
   if (!isInternalJobAuthorized(request.headers.get("authorization"))) {
-    return unauthorizedResponse(request);
+    return unauthorizedResponse();
   }
 
   if (!isPaidGenerationProcessorEnabled()) {

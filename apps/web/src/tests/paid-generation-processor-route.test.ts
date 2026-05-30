@@ -55,7 +55,7 @@ describe("paid generation processor route", () => {
     expect(mockProcessPaidAnalysisJobs).not.toHaveBeenCalled();
   });
 
-  it("returns secret-safe diagnostics for unauthorized non-production requests", async () => {
+  it("does not expose auth diagnostics for unauthorized requests", async () => {
     const response = await POST(
       new Request("http://localhost/api/internal/jobs/process", {
         method: "POST",
@@ -73,16 +73,6 @@ describe("paid generation processor route", () => {
       ok: false,
       error: "unauthorized",
       message: "Unauthorized processor request.",
-      authDiagnostic: {
-        authHeaderPresent: true,
-        authHeaderScheme: "bearer",
-        internalJobSecretConfigured: true,
-        internalJobSecretConfiguredSource: "INTERNAL_JOB_SECRET",
-        bearerTokenPresent: true,
-        authMatched: false,
-        additionalGateConfigured: false,
-        rejectionReason: "secret_mismatch",
-      },
     });
     expect(JSON.stringify(data)).not.toContain("processor-secret");
     expect(JSON.stringify(data)).not.toContain("wrong-secret");

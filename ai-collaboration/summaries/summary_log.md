@@ -6897,3 +6897,20 @@ Unresolved questions:
 - Whether to repair diagnostics/deployment/env-matrix items before Phase 4A or run them in parallel.
 - Whether owner wants `main` reconciled with `staging` as the production source of truth.
 - Whether NewebPay sandbox credentials are available for an E2E smoke before queue provider wiring.
+
+## 2026-05-30 - Remove or Gate Processor Auth Diagnostics for Launch Readiness v0
+
+Completed changes:
+- Removed temporary detailed auth diagnostics from the internal paid generation processor route.
+- Removed `diagnoseInternalJobAuthorization`, auth diagnostic types, and secret-source diagnostic helper from `internal-job-auth`.
+- Stopped the secret-safe fake-paid QA runner from sending `x-processor-auth-diagnostic` or recording `authDiagnostic`.
+- Updated processor/auth tests so missing or invalid auth always returns the same safe `401 unauthorized` response without diagnostics.
+
+Learnings:
+- The runner does not depend on diagnostics to classify normal pass/fail; without secrets it still completes non-secret preflights and exits safely blocked.
+- The processor route still has clear safe categories for config error, disabled processor, invalid JSON, unsupported job type, and aggregate success.
+- Removing diagnostics before queue-provider wiring reduces launch surface without changing payment or processor behavior for authorized requests.
+
+Unresolved questions:
+- Whether to clean production deployment source-of-truth or env/flag matrix before Phase 4A.
+- Whether future queue webhook auth should use a dedicated diagnostic-free readiness endpoint for operator checks.
