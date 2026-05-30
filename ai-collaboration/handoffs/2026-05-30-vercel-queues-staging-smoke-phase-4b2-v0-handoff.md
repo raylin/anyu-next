@@ -37,3 +37,11 @@ Out of scope:
 
 - If code changes: `cd apps/web && corepack pnpm lint && corepack pnpm test && corepack pnpm build`.
 - If docs only: staging smoke checks, docs presence check, secret/private scan, `git diff --check`.
+
+## Completion Notes
+
+- Added queue-mode fake-paid QA support and sanitized queue trigger response metadata in commit `fbf9508`.
+- Configured Preview(`staging`) queue env names and regenerated Preview(`staging`) `OPERATOR_TEST_SECRET` for the same-shell smoke.
+- Redeployed Preview/staging without touching Production.
+- Queue-mode fake-paid QA passed without manual processor invocation.
+- Manual fallback was not tested because `INTERNAL_JOB_SECRET` was not locally available.

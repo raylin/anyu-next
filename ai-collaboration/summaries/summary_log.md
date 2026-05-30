@@ -7067,3 +7067,23 @@ Learnings:
 Unresolved questions:
 - Whether live Vercel Queues staging smoke will need more queue-handler observability around terminal categories.
 - Whether queue enqueue attempts should be persisted after the provider smoke proves reliable.
+
+## 2026-05-30 - Vercel Queues Staging Smoke / Phase 4B.2 v0
+
+Completed changes:
+- Added queue-mode support to the secret-safe fake-paid QA runner so it skips manual processor invocation and waits for queue completion.
+- Added sanitized `queueTrigger` metadata to the operator fake-paid route response.
+- Added branch-scoped Preview(`staging`) queue env names for `ENABLE_PAID_JOB_QUEUE_TRIGGER`, `PAID_JOB_QUEUE_PROVIDER`, and `PAID_JOB_QUEUE_TOPIC`.
+- Regenerated Preview(`staging`) `OPERATOR_TEST_SECRET` for the same shell that ran the smoke, without printing or committing the value.
+- Redeployed Preview/staging and verified `staging.anyu.tw` served commit `fbf9508`.
+- Ran queue-mode fake-paid QA successfully: queue trigger enqueued via `vercel_queue`, paid status reached completed without manual processor invocation, and completed paid unlock rendering passed.
+
+Learnings:
+- Vercel Queues processed the paid generation path end-to-end on staging with the targeted `generationJobId` processor path.
+- `vercel env pull --environment=preview --git-branch staging` listed sensitive branch-scoped names but wrote empty values locally, so it is not sufficient for local secret injection.
+- App-level smoke evidence is enough to prove queue-triggered completion, but dashboard observation was not captured.
+
+Unresolved questions:
+- Whether to add a dedicated `qa:fake-paid:queue` script for repeated queue smoke.
+- Whether manual processor fallback should be rerun after every queue-provider change.
+- Whether to add queue attempt/audit persistence before production payment launch.
