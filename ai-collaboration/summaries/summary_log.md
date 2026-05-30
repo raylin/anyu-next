@@ -7108,3 +7108,21 @@ Unresolved questions:
 - Whether NewebPay sandbox/provider credentials will be available before merchant review approval.
 - Whether owner wants Manual Fallback Retest + Queue Dashboard Observation before launch gate planning.
 - Whether queue enqueue audit persistence is needed before production launch or can wait until usage proves need.
+
+## 2026-05-30 - Manual Fallback Retest + Queue Dashboard Observation v0
+
+Completed changes:
+- Added a handoff and execution report for the Phase 4C manual fallback/dashboard observation retest.
+- Verified staging freshness: `staging.anyu.tw` served Preview(`staging`) commit `0f9b7b8e0dc4` with `payment-foundation-2026-05-29`.
+- Verified production disabled posture: production health stayed `main/1990fc034d74`, public merchant-review pages returned HTTP 200, and production fake-paid/checkout routes returned JSON `404 not_found`.
+- Confirmed queue-mode and manual-mode QA runners remain secret-safe and block before authorized paths when required secrets are absent.
+
+Learnings:
+- This Codex shell has `VERCEL_TOKEN` but does not have `OPERATOR_TEST_SECRET` or `INTERNAL_JOB_SECRET`, so authorized queue/manual fallback QA cannot run here yet.
+- Vercel CLI can verify project/deployment/env-name context, but queue dashboard metrics still require Vercel dashboard UI observation under Observability -> Queues.
+- Preview(`staging`) queue env names remain branch-scoped and visible by name only.
+
+Unresolved questions:
+- Owner/operator still needs to run queue-mode and manual-mode `qa:fake-paid` with secrets exported.
+- Owner/operator still needs to observe `paid-generation-jobs` in Vercel dashboard and record safe aggregate queue metrics.
+- Local `.git/FETCH_HEAD` permission issue still blocks `git fetch origin --prune`.
