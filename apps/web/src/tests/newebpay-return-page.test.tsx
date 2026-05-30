@@ -39,6 +39,25 @@ describe("NewebPay ReturnURL pending page", () => {
     expect(html).not.toContain("paidAccessToken");
     expect(html).not.toContain("TradeInfo");
     expect(html).not.toContain("TradeSha");
+    expect(mockGetPaymentIntentByMerchantOrderNo).toHaveBeenCalledWith("ANYUNP-1");
+  });
+
+  it("can display paid status but does not perform paid delivery", async () => {
+    mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue({
+      moduleSlug: "ambiguous-temperature",
+      status: "paid",
+    });
+
+    const page = await NewebPayReturnPage({
+      params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      searchParams: Promise.resolve({ merchantOrderNo: "ANYUNP-1" }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("目前狀態：paid");
+    expect(html).toContain("不會直接解鎖完整分析");
+    expect(html).not.toContain("paidAccessToken");
+    expect(html).not.toContain("generationJob");
   });
 
   it("handles unknown payment intents safely", async () => {

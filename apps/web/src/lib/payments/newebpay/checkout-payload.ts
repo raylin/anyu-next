@@ -37,7 +37,10 @@ function encryptTradeInfo(payload: string, config: Extract<NewebPayConfig, { ok:
   return encrypted.toString("hex");
 }
 
-function createTradeSha(tradeInfo: string, config: Extract<NewebPayConfig, { ok: true }>) {
+export function createNewebPayTradeSha(
+  tradeInfo: string,
+  config: Extract<NewebPayConfig, { ok: true }>,
+) {
   return crypto
     .createHash("sha256")
     .update(`HashKey=${config.hashKey}&${tradeInfo}&HashIV=${config.hashIv}`)
@@ -67,7 +70,7 @@ export function buildNewebPayCheckoutContract(
     fields: {
       MerchantID: input.config.merchantId,
       TradeInfo: tradeInfo,
-      TradeSha: createTradeSha(tradeInfo, input.config),
+      TradeSha: createNewebPayTradeSha(tradeInfo, input.config),
       Version: NEWEBPAY_MPG_VERSION,
     },
     merchantOrderNo: input.merchantOrderNo,

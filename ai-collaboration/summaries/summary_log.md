@@ -6697,3 +6697,25 @@ Unresolved questions:
 - Exact NewebPay provider env values still need to be configured securely for staging before route-level checkout smoke.
 - Whether Phase 2 should mark payment paid only, or also remain short of entitlement/job creation until a later phase.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - NewebPay NotifyURL Verification Phase 2
+
+Completed changes:
+- Implemented `POST /api/payments/newebpay/notify` for NewebPay server callbacks.
+- Added provider verification helpers for `MerchantID`, `TradeInfo`, `TradeSha`, `Version`, AES-256-CBC decrypt, and safe callback normalization.
+- Added a NotifyURL service that matches verified callbacks to existing `newebpay` payment intents by merchant order number.
+- Added idempotent transition from `created` / `checkout_started` to `paid` only for verified successful callbacks.
+- Treated already-paid duplicate notifications as safe `duplicate_notify` without additional mutation.
+- Kept ReturnURL read-only; it may display `paid` status but does not mark paid or create delivery artifacts.
+- Added targeted notify service, notify route, and ReturnURL tests.
+- Confirmed no entitlement, `pa_` token, generation job, queue trigger, LINE delivery, prompt/result, public legal copy, or production runtime behavior was changed.
+
+Learnings:
+- Existing `payment_intents` provider metadata columns are enough for Phase 2; no schema change was required.
+- Checkout and notify signature logic should share the same `TradeSha` helper.
+- NewebPay callback assumptions should be verified against final merchant/provider configuration before production runtime is broadened.
+
+Unresolved questions:
+- Exact NewebPay production callback field variants may need adjustment after provider review or sandbox callback testing.
+- Whether `1|OK` / `0|ERROR` is sufficient for every configured NewebPay product path.
+- Final commit hash and staging push status are recorded in the final completion summary.
