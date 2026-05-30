@@ -4,6 +4,7 @@ import {
   disclaimerPageContent,
   legalLinks,
   privacyPageContent,
+  refundPageContent,
   termsPageContent,
   uiNotices,
 } from "@/content/legal";
@@ -11,6 +12,7 @@ import {
 describe("legal content", () => {
   const publicLegalCopy = JSON.stringify({
     privacyPageContent,
+    refundPageContent,
     termsPageContent,
     disclaimerPageContent,
     uiNotices,
@@ -19,12 +21,14 @@ describe("legal content", () => {
   it("uses the public contact email consistently", () => {
     expect(LEGAL_CONTACT_EMAIL).toBe("hello@anyu.tw");
     expect(JSON.stringify(privacyPageContent)).toContain(LEGAL_CONTACT_EMAIL);
+    expect(JSON.stringify(refundPageContent)).toContain(LEGAL_CONTACT_EMAIL);
     expect(JSON.stringify(termsPageContent)).toContain(LEGAL_CONTACT_EMAIL);
     expect(JSON.stringify(disclaimerPageContent)).toContain(LEGAL_CONTACT_EMAIL);
   });
 
   it("defines the expected public legal routes", () => {
     expect(legalLinks).toEqual([
+      { href: "/refund", label: "退款政策" },
       { href: "/privacy", label: "隱私權政策" },
       { href: "/terms", label: "使用條款" },
       { href: "/disclaimer", label: "免責聲明" },
@@ -84,6 +88,7 @@ describe("legal content", () => {
 
   it("publishes provider-review payment copy without enabling checkout claims", () => {
     const termsCopy = JSON.stringify(termsPageContent);
+    const refundCopy = JSON.stringify(refundPageContent);
 
     expect(termsCopy).toContain("曖昧溫度計完整分析預計為一次性數位內容");
     expect(termsCopy).toContain("建議售價 NT$49");
@@ -92,9 +97,18 @@ describe("legal content", () => {
     expect(termsCopy).toContain("重複付款");
     expect(termsCopy).toContain("客服僅需付款時間、必要的訂單資訊或錯誤狀況說明");
     expect(termsCopy).toContain("本服務目前以個人小規模測試方式提供，暫未開立統一發票");
+    expect(refundCopy).toContain("單次完整報告解鎖價格為 NT$49");
+    expect(refundCopy).toContain("一次性數位內容服務");
+    expect(refundCopy).toContain("非訂閱制");
+    expect(refundCopy).toContain("重複付款");
+    expect(refundCopy).toContain("付費結果連結因系統問題無法開啟");
+    expect(refundCopy).toContain("不因主觀喜好");
     expect(termsCopy).not.toContain("checkout");
+    expect(refundCopy).not.toContain("checkout");
     expect(termsCopy).not.toContain("NewebPay");
+    expect(refundCopy).not.toContain("NewebPay");
     expect(termsCopy).not.toContain("藍新");
+    expect(refundCopy).not.toContain("藍新");
   });
 
   it("does not publish private applicant or business-registration claims", () => {

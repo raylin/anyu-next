@@ -5,9 +5,14 @@ export function LegalFooter() {
   return (
     <footer className="anyu-legal-footer" aria-label="legal links">
       <nav className="anyu-legal-footer-nav">
-        {legalLinks.map((link, index) => (
+        <span className="anyu-legal-footer-item">
+          <Link href="/" className="anyu-legal-footer-link">
+            服務介紹
+          </Link>
+        </span>
+        {legalLinks.map((link) => (
           <span key={link.href} className="anyu-legal-footer-item">
-            {index > 0 ? <span className="anyu-legal-footer-separator">｜</span> : null}
+            <span className="anyu-legal-footer-separator">｜</span>
             <Link href={link.href} className="anyu-legal-footer-link">
               {link.label}
             </Link>
@@ -17,4 +22,3 @@ export function LegalFooter() {
     </footer>
   );
 }
-

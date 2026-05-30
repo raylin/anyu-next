@@ -5,7 +5,7 @@ import { LEGAL_CONTACT_EMAIL, legalLinks } from "@/content/legal";
 
 export const metadata: Metadata = {
   title: "法律與說明 | 暗語 ANYU",
-  description: "暗語 ANYU 隱私權政策、使用條款與免責聲明。",
+  description: "暗語 ANYU 退款政策、隱私權政策、使用條款與免責聲明。",
 };
 
 export default function LegalIndexPage() {
@@ -23,7 +23,7 @@ export default function LegalIndexPage() {
             <p className="anyu-kicker">legal</p>
             <h1 className="anyu-title">法律與說明</h1>
             <p className="anyu-copy">
-              這裡整理 ANYU 目前對外公開的隱私、使用規則與免責說明。
+              這裡整理 ANYU 目前對外公開的退款補發、隱私、使用規則與免責說明。
             </p>
             <div className="anyu-legal-meta">
               <span>版本 2026-05-27</span>

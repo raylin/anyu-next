@@ -6784,3 +6784,22 @@ Unresolved questions:
 - Owner must confirm final refund request window, support channel scope, invoice/receipt wording, and any public applicant/contact details.
 - Owner must gather external proof documents and decide what can be sent to NewebPay.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - NewebPay Merchant Review Public Content Implementation v0
+
+Completed changes:
+- Replaced root homepage internal foundation copy with a provider-review-ready Module 01 storefront.
+- Added product/service introduction, screenshot-like product preview, NT$49 price, one-time/non-subscription charging model, web delivery copy, support contact, and service limitation copy.
+- Added a dedicated `/refund` policy page and surfaced refund policy through legal navigation/footer.
+- Updated legal index/footer discoverability for service, refund, privacy, terms, and disclaimer pages.
+- Added tests for homepage provider-review content and refund/legal copy.
+
+Learnings:
+- Existing legal and paid-preview copy already covered many review requirements, but it was not visible enough from the public root page.
+- A mock product preview is safer than committing screenshots because it avoids private user input, tokens, provider data, or personal account details.
+- The public review copy can satisfy price/charging/refund visibility without enabling payment runtime.
+
+Unresolved questions:
+- Owner should confirm a concrete refund handling time window before final submission if NewebPay expects one.
+- Owner should confirm whether support remains email-only or should include LINE OA.
+- Owner must still prepare external proof documents outside the repo.

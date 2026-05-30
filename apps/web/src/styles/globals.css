@@ -58,15 +58,144 @@ textarea {
     calc(var(--anyu-space-14) + env(safe-area-inset-bottom));
 }
 
+.anyu-storefront-shell {
+  width: min(100%, 68rem);
+}
+
 .anyu-module-page,
 .anyu-result-stack,
 .anyu-hero,
 .anyu-module-stack,
 .anyu-legal-page,
 .anyu-legal-article,
-.anyu-legal-section {
+.anyu-legal-section,
+.anyu-storefront,
+.anyu-storefront-copy,
+.anyu-product-preview-body {
   display: grid;
   gap: var(--anyu-space-5);
+}
+
+.anyu-storefront {
+  gap: var(--anyu-space-6);
+}
+
+.anyu-storefront-topbar,
+.anyu-storefront-actions,
+.anyu-product-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--anyu-space-3);
+}
+
+.anyu-storefront-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(20rem, 0.95fr);
+  gap: var(--anyu-space-5);
+  align-items: stretch;
+}
+
+.anyu-storefront-copy {
+  align-content: center;
+}
+
+.anyu-storefront-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.anyu-storefront-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--anyu-space-4);
+}
+
+.anyu-storefront-link {
+  color: var(--anyu-accent);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
+}
+
+.anyu-storefront-link:hover {
+  color: var(--anyu-ink);
+}
+
+.anyu-storefront-note a {
+  color: var(--anyu-accent);
+}
+
+.anyu-product-preview-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top right, var(--anyu-accent2-15), transparent 42%),
+    linear-gradient(180deg, var(--anyu-card), var(--anyu-surface));
+}
+
+.anyu-product-preview-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid color-mix(in srgb, var(--anyu-accent) 24%, transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.anyu-product-preview-price {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--anyu-accent-45);
+  border-radius: var(--anyu-radius-pill);
+  color: var(--anyu-ink);
+  font-family: var(--anyu-font-mono);
+  font-size: var(--anyu-type-label-size);
+  letter-spacing: var(--anyu-track-mono);
+}
+
+.anyu-product-preview-meter {
+  position: relative;
+  height: 0.75rem;
+  overflow: hidden;
+  border-radius: var(--anyu-radius-pill);
+  background: color-mix(in srgb, var(--anyu-line) 72%, transparent);
+}
+
+.anyu-product-preview-meter span {
+  display: block;
+  width: 68%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--anyu-accent), var(--anyu-accent2));
+}
+
+.anyu-product-preview-label {
+  margin: 0;
+  color: var(--anyu-dim);
+  font-family: var(--anyu-font-mono);
+  font-size: var(--anyu-type-label-size);
+  letter-spacing: var(--anyu-track-mono);
+  text-transform: uppercase;
+}
+
+.anyu-product-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--anyu-space-2);
+}
+
+.anyu-product-preview-grid span {
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: var(--anyu-radius-xl);
+  background: color-mix(in srgb, var(--anyu-card) 76%, transparent);
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
 }
 
 .anyu-topbar,
@@ -268,7 +397,7 @@ textarea {
 }
 
 .anyu-legal-nav {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .anyu-legal-nav-link {
@@ -1435,6 +1564,10 @@ textarea {
     width: min(100%, 38rem);
   }
 
+  .anyu-storefront-shell {
+    width: min(100%, 68rem);
+  }
+
   .anyu-paid-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1476,6 +1609,19 @@ textarea {
   }
 
   .anyu-legal-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .anyu-storefront-topbar,
+  .anyu-storefront-actions,
+  .anyu-product-preview-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .anyu-storefront-hero,
+  .anyu-storefront-grid,
+  .anyu-product-preview-grid {
     grid-template-columns: 1fr;
   }
 }
