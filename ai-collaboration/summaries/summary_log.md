@@ -7562,3 +7562,21 @@ Learnings:
 Unresolved questions:
 - Whether future smoke runs need automated safe Vercel log category retrieval, or whether manual dashboard/log inspection remains sufficient.
 - Whether a separate production controlled-smoke helper is worth building after merchant approval; it should remain a distinct launch-gate task.
+
+## 2026-05-31 - Module 01 Launch UX Lock + Multi-State Paid CTA Plan v0
+
+Completed changes:
+- Created a Module 01 launch UX lock plan covering homepage/storefront, analyze flow, free result, paid preview CTA, checkout creation, ReturnURL, payment status, access page, legacy paid unlock, and legal/refund/support surfaces.
+- Documented a paid CTA/access state map for runtime disabled, review pending, checkout enabled, waiting for NotifyURL, paid processing, paid ready, failed/retryable, invalid/expired sessions, idempotent access, and production fail-closed.
+- Identified the main launch mismatch: storefront/refund copy is payment-review aligned, but the in-result paid CTA/contact flow still uses internal-test, no-charge, LINE/Email delivery language.
+- Recommended follow-up implementation tasks for multi-state paid CTA, copy alignment, checkout CTA wiring, ReturnURL/access fallback polish, and refund response-window confirmation.
+
+Learnings:
+- Homepage price and checkout amount are aligned at NT$49.
+- ReturnURL correctly avoids implying payment success before NotifyURL truth.
+- The biggest user-facing launch risk is not provider flow; it is state/copy mismatch between production storefront and result-page paid CTA.
+
+Unresolved questions:
+- Whether owner wants review-pending copy to keep contact capture or show a disabled paid CTA with optional notification.
+- Whether LINE delivery references should be removed, hidden, or retained only in legacy/internal-test states before production launch.
+- What exact refund/support response window owner wants public copy to state before formal launch.
