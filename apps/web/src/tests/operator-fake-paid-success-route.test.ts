@@ -61,6 +61,11 @@ describe("operator fake paid success route", () => {
       paidAccessToken: "pa_test-token",
       paidAccessTokenReturned: true,
       unlockPath: "/m/ambiguous-temperature/unlock/pa_test-token",
+      queueTrigger: {
+        ok: true,
+        category: "enqueued",
+        provider: "vercel_queue",
+      },
     });
   });
 
@@ -104,6 +109,11 @@ describe("operator fake paid success route", () => {
       paidAccessToken: "pa_test-token",
       paidAccessTokenReturned: true,
       unlockPath: "/m/ambiguous-temperature/unlock/pa_test-token",
+      queueTrigger: {
+        ok: true,
+        category: "enqueued",
+        provider: "vercel_queue",
+      },
     });
     expect(JSON.stringify(data)).not.toContain("operator-secret");
     expect(mockCreateOperatorFakePaidSuccess).toHaveBeenCalledWith({

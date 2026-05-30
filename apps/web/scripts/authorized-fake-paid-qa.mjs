@@ -10,6 +10,8 @@ const SYNTHETIC_INPUT =
 
 const operatorSecret = process.env.OPERATOR_TEST_SECRET?.trim() ?? "";
 const internalJobSecret = process.env.INTERNAL_JOB_SECRET?.trim() ?? "";
+const processorMode = process.env.QA_FAKE_PAID_PROCESSOR_MODE?.trim().toLowerCase() ?? "manual";
+const queueMode = processorMode === "queue";
 
 function record(step, status, details = {}) {
   console.log(JSON.stringify({ step, outcome: status, ...details }));
@@ -68,6 +70,9 @@ function summarizeFakePaidResponse(result) {
     paidAccessTokenPresent: Boolean(body.paidAccessToken),
     unlockPathPresent: Boolean(body.unlockPath),
     unlockPathShape: redactRouteShape(body.unlockPath),
+    queueTriggerOk: body.queueTrigger?.ok ?? null,
+    queueTriggerCategory: body.queueTrigger?.category ?? null,
+    queueTriggerProvider: body.queueTrigger?.provider ?? null,
     error: body.error ?? null,
   };
 }
@@ -311,9 +316,9 @@ async function verifyPaidUnlockPage(token, expectedReady = false) {
   return pass;
 }
 
-async function waitForReady(token) {
-  for (let attempt = 1; attempt <= 8; attempt += 1) {
-    const status = await pollPaidStatus(token, `paid_status_after_processor_attempt_${attempt}`);
+async function waitForReady(token, labelPrefix = "paid_status_after_processor_attempt", attempts = 8) {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const status = await pollPaidStatus(token, `${labelPrefix}_${attempt}`);
 
     if (status === "completed") {
       return true;
@@ -329,6 +334,7 @@ async function main() {
   record("secret_preflight", operatorSecret ? "pass" : "blocked", {
     OPERATOR_TEST_SECRET: operatorSecret ? "present" : "missing",
     INTERNAL_JOB_SECRET: internalJobSecret ? "present" : "missing",
+    processorMode: queueMode ? "queue" : "manual",
   });
 
   const healthOk = await healthPreflight();
@@ -381,6 +387,11 @@ async function main() {
     first.json?.generationJobId === second.json?.generationJobId;
   const secondTokenReturned = Boolean(second.json?.paidAccessToken);
   const idempotencyPass = secondSummary.ok && idsReused && !secondTokenReturned;
+  const queueTriggerPass = queueMode
+    ? firstSummary.queueTriggerOk === true &&
+      firstSummary.queueTriggerCategory === "enqueued" &&
+      firstSummary.queueTriggerProvider === "vercel_queue"
+    : true;
 
   record("fake_paid_idempotency", idempotencyPass ? "pass" : "fail", {
     ...secondSummary,
@@ -390,6 +401,42 @@ async function main() {
 
   await pollPaidStatus(paidAccessToken, "paid_status_before_processor");
   await verifyPaidUnlockPage(paidAccessToken, false);
+
+  if (queueMode) {
+    record("queue_trigger_result", queueTriggerPass ? "pass" : "fail", {
+      queueTriggerOk: firstSummary.queueTriggerOk,
+      queueTriggerCategory: firstSummary.queueTriggerCategory,
+      queueTriggerProvider: firstSummary.queueTriggerProvider,
+      generationJobIdPresent: firstSummary.generationJobIdPresent,
+    });
+
+    const ready = queueTriggerPass
+      ? await waitForReady(paidAccessToken, "paid_status_after_queue_attempt", 20)
+      : false;
+    const completedPageOk = ready ? await verifyPaidUnlockPage(paidAccessToken, true) : false;
+    const fullQaPassed = Boolean(
+      firstSummary.ok &&
+        idempotencyPass &&
+        legacyOk &&
+        queueTriggerPass &&
+        ready &&
+        completedPageOk,
+    );
+
+    record("final_summary", fullQaPassed ? "pass" : "fail", {
+      fullQaPassed,
+      idempotencyPassed: idempotencyPass,
+      queueTriggerPassed: queueTriggerPass,
+      processorMode: "queue",
+      paidStatusReady: ready,
+      exactJobProcessed: ready,
+      paUnlockCompletedRenderingPassed: completedPageOk,
+      legacyRegressionPassed: legacyOk,
+    });
+
+    process.exitCode = fullQaPassed ? 0 : 4;
+    return;
+  }
 
   if (!internalJobSecret) {
     record("final_summary", "partial", {

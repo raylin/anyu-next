@@ -93,5 +93,10 @@ export async function POST(request: Request) {
     paidAccessToken: result.paidAccessToken,
     paidAccessTokenReturned: result.paidAccessTokenReturned,
     unlockPath: result.unlockPath,
+    queueTrigger: {
+      ok: result.queueTrigger.ok,
+      category: result.queueTrigger.category,
+      provider: result.queueTrigger.provider,
+    },
   });
 }
