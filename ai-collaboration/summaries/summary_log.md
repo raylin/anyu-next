@@ -6763,3 +6763,24 @@ Unresolved questions:
 - Whether the session-bound access page should be permanent or later replaced by a short-lived exchange-to-`pa_` redirect.
 - Whether NewebPay preserves custom ReturnURL query parameters exactly across all sandbox/production modes.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - NewebPay Merchant Review Remediation Plan v0
+
+Completed changes:
+- Created a planning-only remediation report for NewebPay merchant review supplementary materials.
+- Audited current public pages, Module 01 public page, legal routes, paid preview copy, and prior provider-review notes.
+- Identified root homepage internal-foundation copy as a likely reason for “website has no product content.”
+- Mapped NewebPay review comments to required website changes, copy, screenshots, owner-provided documents, Codex implementation actions, and risks.
+- Drafted provider-review-safe product/service content direction and refund/re-delivery policy direction.
+- Created owner supporting-documents checklist and NewebPay customer service email outline.
+- Recommended implementation order: public storefront/product update, refund visibility, screenshot/attachment prep, supplement email draft.
+
+Learnings:
+- Module 01 and legal pages already contain much of the needed product/refund/privacy copy, but it is not presented as an obvious public storefront from the root page.
+- NewebPay’s supplement request requires both website changes and owner-only external proof documents.
+- Billing/domain/API/hosting proof should not be committed to the repo.
+
+Unresolved questions:
+- Owner must confirm final refund request window, support channel scope, invoice/receipt wording, and any public applicant/contact details.
+- Owner must gather external proof documents and decide what can be sent to NewebPay.
+- Final commit hash and staging push status are recorded in the final completion summary.
