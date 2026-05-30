@@ -7471,3 +7471,23 @@ Learnings:
 Unresolved questions:
 - Fresh NewebPay Sandbox E2E Payment Smoke v5 is required to prove real sandbox provider callbacks now decrypt and transition the payment intent to paid.
 - If v5 still fails, the safe diagnostic category should determine whether the next issue is signature, merchant, amount, payment-intent matching, or another provider status mismatch.
+
+## 2026-05-31 - Fresh NewebPay Sandbox E2E Payment Smoke v5
+
+Completed changes:
+- Updated branch-scoped Preview(`staging`) `OPERATOR_TEST_SECRET` from local secure config because staging rejected the local operator header.
+- Triggered a fresh Preview(`staging`) deployment by pushing the v5 handoff commit to `origin/staging`.
+- Created fresh sandbox checkout run `20260530173208`: source analyze HTTP 200, checkout HTTP 200, sandbox `ccore`, MPG `Version=2.0`, NT$49, and `pcs_` handoff present.
+- Owner submitted sandbox credit-card one-time payment and browser returned to staging.
+- Session-bound payment status reached `paid_ready` on the first poll after owner confirmation.
+- Session-bound paid access page rendered completed content; duplicate reload/status stayed stable.
+- Confirmed Production remained disabled: production health stayed `production/main/1990fc034d74`; production checkout and fake-paid returned JSON 404 `not_found`; public pages returned 200.
+
+Learnings:
+- The TradeInfo 32-byte padding compatibility fix resolved the previous real sandbox `trade_info_decrypt_failed` blocker.
+- Real NewebPay sandbox flow now proves checkout → NotifyURL/decrypt/verification → paid readiness → delivery/queue/access path at app level.
+- Manual processor fallback was not used in v5; queue/provider path completed before first post-payment poll.
+
+Unresolved questions:
+- Production payment runtime is still disabled and should remain so until merchant approval/formal credentials and production launch gate approval.
+- A dedicated secret-safe sandbox E2E helper remains useful to reduce manual form-generation friction.

@@ -45,3 +45,14 @@ If code changes unexpectedly:
 - `cd apps/web && corepack pnpm lint`
 - `cd apps/web && corepack pnpm test`
 - `cd apps/web && corepack pnpm build`
+
+## Execution Notes
+
+- Initial checkout creation was blocked because the local shell did not have a usable `OPERATOR_TEST_SECRET`.
+- Owner added `OPERATOR_TEST_SECRET` to `apps/web/.env.local`; staging still rejected the header, so branch-scoped Preview(`staging`) `OPERATOR_TEST_SECRET` was updated from the local value without printing it.
+- A fresh Preview(`staging`) deployment was triggered by pushing this handoff commit to `origin/staging`.
+- Fresh checkout run `20260530173208` succeeded and generated a temporary local form outside the repo.
+- Owner submitted sandbox credit-card one-time payment and returned to staging.
+- Payment status reached `paid_ready` on the first poll after owner confirmation.
+- Session-bound paid access page rendered completed content; duplicate status reload remained `paid_ready`.
+- Production remained disabled and fail-closed.

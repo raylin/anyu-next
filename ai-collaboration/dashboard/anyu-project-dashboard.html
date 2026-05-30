@@ -329,12 +329,12 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging payment/queue flow mostly validated; NewebPay sandbox TradeInfo padding compatibility fix is ready for fresh verification.</p>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed after the TradeInfo padding fix; NewebPay merchant review remains the external gate.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-05-31 01:10 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Sandbox payment diagnosis before launch gate</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-05-31 01:35 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Sandbox E2E passed; waiting launch gate</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Sandbox v5 verification needed</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Merchant approval / production launch gate</span></div>
       </div>
     </header>
 
@@ -345,7 +345,7 @@
         <article class="card"><span class="badge done">Done</span><h3>Production public site</h3><p>anyu.tw storefront, product preview, NT$49 price, /refund, and /legal are live for merchant review.</p></article>
         <article class="card"><span class="badge waiting">Waiting external</span><h3>NewebPay merchant review</h3><p>Supplement package has been submitted externally. Current state is waiting for review outcome.</p></article>
         <article class="card"><span class="badge disabled">Disabled by design</span><h3>Payment runtime</h3><p>Broad production payment runtime remains off. Production checkout and fake-paid routes fail closed.</p></article>
-        <article class="card"><span class="badge progress">Ready for next gate</span><h3>NewebPay sandbox E2E</h3><p>Checkout and callback transport work. A TradeInfo 32-byte padding compatibility fix is implemented and needs fresh sandbox v5 verification.</p></article>
+        <article class="card"><span class="badge done">Done</span><h3>NewebPay sandbox E2E</h3><p>Fresh sandbox v5 passed: checkout, browser payment, NotifyURL/decrypt, paid readiness, queue, and session-bound access.</p></article>
         <article class="card"><span class="badge progress">Ready for next gate</span><h3>Paid delivery pipeline</h3><p>Verified paid path creates entitlement, paid access token hash, and generation job in tested non-provider paths.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. hello@anyu.tw is public support channel.</p></article>
@@ -376,7 +376,7 @@
         <div class="progressbar"><span style="width: 90%"></span></div>
         <p><strong>Production launch readiness</strong></p>
         <div class="progressbar"><span style="width: 54%"></span></div>
-        <p>The launch gap is not queue architecture. The active blocker is proving the NewebPay TradeInfo padding compatibility fix with a fresh sandbox payment plus external merchant approval.</p>
+        <p>The launch gap is not queue architecture or sandbox payment flow. The active blockers are external merchant approval, formal production credential readiness, production config dry-run, and controlled production smoke.</p>
       </div>
     </section>
 
@@ -398,7 +398,7 @@
           <li><span class="time">Sandbox preflight</span><span>Sandbox checkout preflight passed with ccore gateway, MPG 2.0, NT$49, and pcs_ handoff.</span></li>
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
-          <li><span class="time">Current</span><span>Code-level compatibility investigation found NewebPay-style manual 32-byte AES padding mismatch; fix is implemented and awaiting fresh sandbox v5 smoke.</span></li>
+          <li><span class="time">Current</span><span>Sandbox v5 passed after NewebPay-style manual 32-byte AES padding fix: real sandbox payment reached <code>paid_ready</code> and completed access rendered.</span></li>
         </ol>
       </div>
     </section>
@@ -421,8 +421,8 @@
       <div class="panel">
         <h2>NewebPay Status</h2>
         <p>Merchant review supplement submitted. Production public pages are ready. Sandbox shop is created and operating.</p>
-        <p>Sandbox checkout and browser return work. NotifyURL transport HTTP 200 works. A code-side padding mismatch was found: public NewebPay MPG samples use manual 32-byte AES padding, while ANYU previously used Node default padding.</p>
-        <p>Next action: deploy/push the compatibility fix, then run Fresh NewebPay Sandbox E2E Payment Smoke v5.</p>
+        <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
+        <p>Next action: keep production disabled while waiting for merchant approval, then run Production Payment Config Dry-Run v0.</p>
       </div>
     </section>
 
@@ -463,7 +463,7 @@
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
           <tr><td>P0</td><td>NewebPay approval / credential readiness</td><td>Owner / NewebPay</td><td>Wait for review outcome and confirm formal credential availability.</td></tr>
-          <tr><td>P0</td><td>Sandbox paid transition verification</td><td>Ops / owner</td><td>Run Fresh NewebPay Sandbox E2E Payment Smoke v5 after TradeInfo padding compatibility fix is deployed.</td></tr>
+          <tr><td>P0</td><td>Production config dry-run</td><td>Ops</td><td>After merchant approval/formal credentials, configure production env with runtime still disabled.</td></tr>
           <tr><td>P0</td><td>Production config dry-run</td><td>Ops</td><td>After sandbox pass and approval, configure production env with runtime still disabled.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke</td><td>Owner / ops</td><td>Run one small controlled payment only after launch gate approval.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
@@ -483,7 +483,7 @@
       <table>
         <thead><tr><th>Item</th><th>Priority</th><th>Owner</th><th>Risk if deferred</th><th>Suggested follow-up task</th></tr></thead>
         <tbody>
-          <tr><td>TradeInfo padding compatibility</td><td>P0</td><td>Code</td><td>Real provider E2E remains blocked until v5 confirms decrypt success.</td><td>Fresh NewebPay Sandbox E2E Payment Smoke v5</td></tr>
+          <tr><td>Dedicated sandbox checkout/E2E helper</td><td>P2</td><td>Code</td><td>Manual smoke remains slow and error-prone.</td><td>Secret-Safe NewebPay Sandbox E2E Helper v0</td></tr>
           <tr><td>Dedicated sandbox checkout/E2E helper</td><td>P2</td><td>Code</td><td>Manual smoke remains slow and error-prone.</td><td>Secret-Safe NewebPay Sandbox E2E Helper v0</td></tr>
           <tr><td>Queue audit persistence</td><td>P2</td><td>Code</td><td>Harder post-incident queue diagnosis after launch.</td><td>Paid Queue Audit Event Design v0</td></tr>
           <tr><td>Old Vercel domain/project ambiguity</td><td>P1</td><td>Owner UI</td><td>Future deployment ownership confusion.</td><td>Vercel Domain Ownership Cleanup v0</td></tr>
@@ -496,9 +496,9 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> Run Fresh NewebPay Sandbox E2E Payment Smoke v5 after the TradeInfo padding compatibility fix is on Preview(staging).</p>
-        <p>The code-level investigation found the likely cause of <code>trade_info_decrypt_failed</code>: public NewebPay MPG sample encryption uses manual 32-byte AES padding and zero auto-padding.</p>
-        <p>If v5 passes, continue to paid delivery / queue / access verification. If v5 fails, use the safe NotifyURL category to choose the next minimal fix.</p>
+        <p><strong>Current recommendation:</strong> If NewebPay merchant review approval/formal credentials are available, run Production Payment Config Dry-Run v0.</p>
+        <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production runtime should remain disabled until the launch gate sequence is explicitly approved.</p>
+        <p>If approval is still pending, keep launch materials ready and avoid additional payment runtime changes.</p>
         <p>If NewebPay approval arrives before sandbox is fixed, do not launch production payment yet; complete sandbox/provider verification or a controlled equivalent first.</p>
       </div>
     </section>
@@ -512,6 +512,7 @@
           <li><a href="../reports/2026-05-30-queue-launch-readiness-phase-4c-checklist-v0.md">Queue Launch Readiness / Phase 4C Checklist v0</a></li>
           <li><a href="../reports/2026-05-30-safe-notifyurl-category-diagnostics-v0.md">Safe NotifyURL Category Diagnostics v0</a></li>
           <li><a href="../reports/2026-05-31-newebpay-tradeinfo-decrypt-compatibility-investigation-v0.md">NewebPay TradeInfo Decrypt Compatibility Investigation v0</a></li>
+          <li><a href="../reports/2026-05-31-fresh-newebpay-sandbox-e2e-payment-smoke-v5.md">Fresh NewebPay Sandbox E2E Payment Smoke v5</a></li>
           <li><a href="../reports/2026-05-31-newebpay-sandbox-backend-credential-verification-v0.md">NewebPay Sandbox Backend Credential Verification v0</a></li>
           <li><a href="../reports/2026-05-31-fresh-newebpay-sandbox-e2e-payment-smoke-v4.md">Fresh NewebPay Sandbox E2E Payment Smoke v4</a></li>
           <li><a href="../reports/2026-05-31-fresh-newebpay-sandbox-e2e-payment-smoke-v3.md">Fresh NewebPay Sandbox E2E Payment Smoke v3</a></li>
