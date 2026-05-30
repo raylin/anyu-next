@@ -7235,3 +7235,22 @@ Learnings:
 Unresolved questions:
 - If NewebPay requires `ClientBackURL` or explicit payment-method restriction fields, implementation follow-up is needed.
 - Actual sandbox payment, NotifyURL delivery, queue completion, and session-bound access are not yet validated with NewebPay sandbox.
+
+## 2026-05-30 - NewebPay Sandbox E2E Payment Smoke v0
+
+Completed changes:
+- Started the controlled NewebPay sandbox E2E payment smoke on Preview(`staging`) without changing Production.
+- Verified staging health at `environment=preview`, `gitBranch=staging`, route bundle `payment-foundation-2026-05-29`, commit `462d11daa353`.
+- Confirmed required Preview(`staging`) env names are present without values, including NewebPay sandbox checkout config, checkout session secret, paid access hash secret, queue trigger config, operator secret, and internal job secret.
+- Created a fresh Module 01 source result and a NewebPay sandbox checkout contract with `paymentIntentStatus=checkout_started`, sandbox `ccore` gateway, MPG `Version=2.0`, and `pcs_` handoff present.
+- Generated a temporary local checkout form outside the repo at `/private/tmp/anyu-newebpay-smoke/newebpay-sandbox-submit.html`.
+- Confirmed Production remained disabled: production health stayed `main/1990fc034d74`, and production checkout/fake-paid routes returned JSON `404 not_found`.
+
+Learnings:
+- The staging checkout side is ready for provider-hosted sandbox payment submission.
+- Codex could not complete provider payment UI from this environment because no usable GUI browser was available; generic `open` failed and explicit Chrome/Safari lookup failed.
+- Payment status remains `waiting_for_payment` until the temporary form is opened and submitted in a real browser.
+
+Unresolved questions:
+- Actual NewebPay sandbox payment, ReturnURL, NotifyURL verification, paid transition, delivery artifacts, queue completion, and session-bound paid access remain unverified.
+- If NewebPay requires `ClientBackURL` or explicit payment-method restriction fields, implementation follow-up is needed.
