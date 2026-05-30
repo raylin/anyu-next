@@ -7393,3 +7393,22 @@ Learnings:
 Unresolved questions:
 - Dashboard can drift if future handoffs do not update it after major state changes.
 - Main/staging documentation promotion policy should be followed if main is used as production source-of-truth.
+
+## 2026-05-31 - NewebPay Sandbox TradeInfo Decrypt Config Alignment v0
+
+Completed changes:
+- Inspected NewebPay checkout and NotifyURL config loading.
+- Confirmed both checkout creation and NotifyURL verification use the same `getNewebPayConfig(...)` helper and the same env names.
+- Owner approved using `apps/web/.env.local` as secure local credential source because `NEWEBPAY_MERCHANT_ID`, `NEWEBPAY_HASH_KEY`, and `NEWEBPAY_HASH_IV` were not present in the shell.
+- Force-aligned branch-scoped Preview(`staging`) NewebPay sandbox env names only: MerchantID, HashKey, HashIV, checkout URL, NotifyURL, environment, app URL, and checkout enable flag.
+- Redeployed Preview(`staging`) and verified staging health at `environment=preview`, `gitBranch=staging`, commit `ebfc83b71c84`, route bundle `payment-foundation-2026-05-29`.
+- Confirmed Production remained disabled and fail-closed: production health stayed `production/main/1990fc034d74`; production checkout and fake-paid returned JSON 404 `not_found`.
+
+Learnings:
+- `NEWEBPAY_ENVIRONMENT` is categorization only and does not affect crypto behavior.
+- `NEWEBPAY_CHECKOUT_URL` controls gateway target only and does not affect NotifyURL decryption.
+- There are no alternate/fallback NewebPay credential env names in source.
+
+Unresolved questions:
+- Fresh sandbox E2E v4 is required to prove whether the newly aligned Preview(`staging`) credentials resolve `trade_info_decrypt_failed`.
+- If v4 still fails with `trade_info_decrypt_failed`, the likely remaining issue is NewebPay backend/shop credential mismatch outside code.
