@@ -7321,3 +7321,22 @@ Learnings:
 
 Unresolved questions:
 - Fresh sandbox payment smoke v2 is needed to confirm NewebPay accepts the callback and paid delivery proceeds.
+
+## 2026-05-30 - Fresh NewebPay Sandbox E2E Payment Smoke v2
+
+Completed changes:
+- Created fresh sandbox checkout run `20260530-234243` after the NotifyURL HTTP 400 compatibility fix.
+- Verified staging at `environment=preview`, `gitBranch=staging`, route bundle `payment-foundation-2026-05-29`, commit `8d63503a9eab`.
+- Source analyze and checkout creation passed: HTTP 200, `checkout_started`, sandbox `ccore`, MPG `Version=2.0`, NT$49, and `pcs_` handoff present.
+- Owner confirmed sandbox credit-card one-time payment was submitted and browser returned to staging.
+- Vercel route logs showed `POST /api/payments/newebpay/notify` with HTTP 200 after payment, proving the prior HTTP 400 transport issue is fixed.
+- Session-bound payment status remained `waiting_for_payment` for 72 polls over about 6 minutes; no access path appeared.
+- Production remained disabled and public pages live: production health stayed `main/1990fc034d74`; homepage, `/refund`, and `/legal` returned 200; production checkout/fake-paid returned JSON `404 not_found`.
+
+Learnings:
+- NotifyURL now reaches staging and gets HTTP 200 transport response.
+- Remaining blocker shifted from transport failure to verification/business failure inside NotifyURL processing; exact safe category is not currently observable in logs.
+
+Unresolved questions:
+- Need safe category-only NotifyURL diagnostics to identify whether the real provider callback fails due to signature, merchant, payment intent, amount, status, or another category.
+- Paid transition, delivery artifacts, queue completion, and paid access rendering remain unverified for real sandbox provider flow.
