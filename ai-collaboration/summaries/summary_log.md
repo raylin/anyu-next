@@ -7146,3 +7146,15 @@ Unresolved questions:
 - Vercel dashboard queue observation remains an owner UI action.
 - NewebPay review/sandbox provider credential status remains pending.
 - Local `.git/FETCH_HEAD` permission issue remains unresolved.
+
+## 2026-05-30 - Record Vercel Queues Dashboard Observation v0
+
+Completed changes:
+- Added a sanitized follow-up report recording owner-provided Vercel Queues dashboard observation for `anyu-next` / `paid-generation-jobs` in Preview.
+- Recorded aggregate metrics only: last 12 hours received 2, deleted 2, max message age 0ms, throughput spikes visible, no unexpected backlog, and no retry storm/failure loop.
+
+Learnings:
+- Phase 4C dashboard-observation gap is now closed at aggregate evidence level; app-level QA remains the source of exact functional verification.
+
+Unresolved questions:
+- NewebPay review/sandbox E2E and production payment launch gate remain the next business/runtime readiness items.
