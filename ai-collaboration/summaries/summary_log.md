@@ -7173,3 +7173,18 @@ Learnings:
 Unresolved questions:
 - NewebPay review approval and sandbox/production credential readiness remain pending.
 - Owner still needs to confirm final launch price, refund response window, support inbox readiness, and whether recent docs-only staging commits should be promoted to main before runtime launch.
+
+## 2026-05-30 - Support / Refund SOP Finalization v0
+
+Completed changes:
+- Added an owner/operator support and refund SOP for ANYU Module 01 before production payment launch.
+- Reviewed current `/refund` and `/legal` source copy in `apps/web/src/content/legal.ts` and documented policy alignment.
+- Documented support inbox handling for `hello@anyu.tw`, case playbooks, internal operator checklist, manual recovery SOP, refund decision matrix, Traditional Chinese customer templates, and stop-loss support rules.
+
+Learnings:
+- Public refund/legal copy already covers duplicate payment, paid-but-no-result, inaccessible paid result links, subjective-preference limits after delivered digital content, and support email `hello@anyu.tw`.
+- Public copy intentionally does not commit to a fixed handling-time window yet; owner should confirm before publishing a 3-7 business day or other response/refund window.
+
+Unresolved questions:
+- Owner needs to confirm refund/support handling window, daily support inbox monitoring, NewebPay merchant backend access, and whether support notes need a private tracker.
+- NewebPay review approval and sandbox/production credential readiness remain pending.
