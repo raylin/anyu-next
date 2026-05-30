@@ -73,8 +73,11 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("一次性查看 · 無訂閱");
     expect(html).toContain("一次性 · no subscription");
     expect(html).toContain('class="anyu-reply-lock-mark"');
-    expect(html).toContain("正式開放後，一次性查看；目前內測不會真的收費。");
-    expect(html).toContain("完整分析會透過網頁或 LINE 連結交付。");
+    expect(html).toContain("完整報告即將開放");
+    expect(html).toContain("完整報告解鎖功能準備中");
+    expect(html).toContain("完整報告將於網頁中提供查看。");
+    expect(html).not.toContain("用 LINE 領取完整分析");
+    expect(html).not.toContain("留下 Email");
     expect(html).toContain('class="anyu-paid-included-panel"');
     expect(html).toContain('class="anyu-paid-policy-panel"');
     expect(html).toContain("3 種可能狀態");
@@ -84,9 +87,13 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).toContain("可回看的完整結果頁");
     expect(html).toContain("系統未成功產生結果、連結無法開啟或重複付款");
     expect(html).toContain("hello@anyu.tw");
+    expect(html).toContain("3–7 個工作天內回覆處理結果");
     expect(html).toContain("不需要提供原始對話內容");
     expect(html).toContain("你提供的文字只用於本次分析與必要服務交付");
     expect(html).toContain("暗語 ANYU 是文字情境整理與溝通建議，不是心理治療、諮商、命理或關係結果保證。");
+    expect(html).not.toContain("目前內測");
+    expect(html).not.toContain("不會真的收費");
+    expect(html).not.toContain("網頁或 LINE 連結交付");
     expect(html).not.toContain("這份分析主要參考了這些線索");
     expect(html).not.toContain("evidenceSummary");
     expect(html).not.toContain("checkout");
@@ -111,12 +118,38 @@ describe("ai-temperature result conversion polish", () => {
       expect(html).toContain('class="anyu-paid-included-panel"');
       expect(html).toContain('class="anyu-paid-policy-panel"');
       expect(html).toContain('class="anyu-paid-limitation-note"');
-      expect(html).toContain("正式開放後，一次性查看；目前內測不會真的收費。");
+      expect(html).toContain("完整報告即將開放");
+      expect(html).toContain("完整報告解鎖功能準備中");
       expect(html).toContain("正式付款後若系統未成功產生結果、連結無法開啟或重複付款");
+      expect(html).toContain("3–7 個工作天內回覆處理結果");
+      expect(html).not.toContain("目前內測");
+      expect(html).not.toContain("不會真的收費");
+      expect(html).not.toContain("LINE 連結交付");
       expect(html).not.toContain("checkout");
       expect(html).not.toContain("NewebPay");
       expect(html).not.toContain("藍新");
     }
+  });
+
+  it("renders checkout-available paid CTA copy without LINE or no-charge language", () => {
+    const html = renderToStaticMarkup(
+      <PaidPreviewCard
+        headline={resultFixture.paidHeadline}
+        price={resultFixture.paidPrice}
+        includedSections={resultFixture.paidIncludedSections}
+        previewCopy={resultFixture.paidPreviewCopy}
+        availability="checkout_available"
+      />,
+    );
+
+    expect(html).toContain("解鎖完整報告｜NT$49");
+    expect(html).toContain("一次性付款，非訂閱制");
+    expect(html).toContain("付款確認後，完整報告將於網頁中提供查看");
+    expect(html).toContain("查看退款政策");
+    expect(html).toContain("hello@anyu.tw");
+    expect(html).not.toContain("目前內測");
+    expect(html).not.toContain("不會真的收費");
+    expect(html).not.toContain("LINE 連結交付");
   });
 
   it("applies the editorial reading class only to long-form result surfaces", () => {

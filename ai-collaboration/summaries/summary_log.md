@@ -7580,3 +7580,21 @@ Unresolved questions:
 - Whether owner wants review-pending copy to keep contact capture or show a disabled paid CTA with optional notification.
 - Whether LINE delivery references should be removed, hidden, or retained only in legacy/internal-test states before production launch.
 - What exact refund/support response window owner wants public copy to state before formal launch.
+
+## 2026-05-31 - Module 01 Multi-State Paid CTA Implementation v0
+
+Completed changes:
+- Added a small paid CTA view model for Module 01 states including review pending, payment unavailable, checkout available, pending/processing, ready, failed, invalid/expired, and already unlocked.
+- Updated the Module 01 result paid preview to show a disabled review-pending CTA and launch-facing checkout-available copy instead of internal-test/no-charge/LINE-or-Email delivery language.
+- Removed the result-page contact capture from the main paid CTA flow while leaving legacy LINE/contact infrastructure in the repo.
+- Updated ReturnURL, payment access fallback, paid pending failure copy, and refund copy to include support/refund framing and the owner-approved 3-7 business day response window.
+- Added/updated tests for paid CTA copy, ReturnURL truth wording, access fallback support copy, legal/refund copy, and event metadata expectations.
+
+Learnings:
+- The safest current production state is a disabled paid CTA with clear NT$49 future one-time unlock copy and support/policy links.
+- ReturnURL copy remains non-mutating and now explicitly avoids treating browser return as payment truth.
+- Broader terms/privacy still include some internal-test/LINE-era references outside the result-page paid CTA surface; those should be handled separately if owner wants full public legal copy alignment.
+
+Unresolved questions:
+- When NewebPay approval arrives, result-page checkout form submission still needs a dedicated wiring task before public production checkout.
+- Whether to run a separate public legal copy alignment task to remove remaining internal-test/LINE-era references from terms/privacy.

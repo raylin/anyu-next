@@ -43,9 +43,9 @@ describe("legal content", () => {
     expect(uiNotices.resultDisclaimer).toContain("不是判決");
     expect(uiNotices.contactCapture).toContain("完整分析");
     expect(uiNotices.paidUnlockNote).toContain("NT$49");
-    expect(uiNotices.paidUnlockNote).toContain("目前內測期間不會真的收費");
+    expect(uiNotices.paidUnlockNote).toContain("付款確認後會於網頁提供結果");
     expect(uiNotices.paidProductDescription).toContain("一次性數位內容");
-    expect(uiNotices.paidProductDescription).toContain("網頁或 LINE 連結");
+    expect(uiNotices.paidProductDescription).toContain("網頁交付完整結果");
   });
 
   it("publishes formal service-ready legal intros without draft warnings", () => {
@@ -103,6 +103,7 @@ describe("legal content", () => {
     expect(refundCopy).toContain("重複付款");
     expect(refundCopy).toContain("付費結果連結因系統問題無法開啟");
     expect(refundCopy).toContain("不因主觀喜好");
+    expect(refundCopy).toContain("3–7 個工作天內回覆處理結果");
     expect(termsCopy).not.toContain("checkout");
     expect(refundCopy).not.toContain("checkout");
     expect(termsCopy).not.toContain("NewebPay");

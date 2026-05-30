@@ -61,7 +61,7 @@ describe("event metadata guard", () => {
     expect(EVENT_NAMES).toContain("unlocked_result_view");
   });
 
-  it("keeps the inline result CTA source on the existing paid unlock event", () => {
+  it("keeps the result CTA off legacy contact capture while route remains backward-compatible", () => {
     const resultSource = readFileSync(
       resolve(process.cwd(), "src/components/modules/ai-temperature/AiTemperatureResult.tsx"),
       "utf8",
@@ -71,7 +71,8 @@ describe("event metadata guard", () => {
       "utf8",
     );
 
-    expect(resultSource).toContain('revealContact("inline_result_cta")');
+    expect(resultSource).not.toContain('revealContact("inline_result_cta")');
+    expect(resultSource).not.toContain("<ContactCapture");
     expect(unlockRoute).toContain('body.source === "inline_result_cta" ? "inline_result_cta" : "paid_preview"');
   });
 

@@ -36,9 +36,10 @@ describe("NewebPay ReturnURL pending page", () => {
     });
     const html = renderToStaticMarkup(page);
 
-    expect(html).toContain("正在確認付款狀態");
+    expect(html).toContain("付款確認中");
     expect(html).toContain("目前狀態：waiting_for_payment");
-    expect(html).toContain("不會直接解鎖完整分析");
+    expect(html).toContain("不會直接判定付款成功或解鎖完整分析");
+    expect(html).toContain("3–7 個工作天內回覆處理結果");
     expect(html).not.toContain("paidAccessToken");
     expect(html).not.toContain("TradeInfo");
     expect(html).not.toContain("TradeSha");
@@ -84,7 +85,7 @@ describe("NewebPay ReturnURL pending page", () => {
     });
     const html = renderToStaticMarkup(page);
 
-    expect(html).toContain("正在確認付款狀態");
-    expect(html).toContain("保留付款資訊聯繫客服協助確認");
+    expect(html).toContain("付款確認中");
+    expect(html).toContain("保留付款時間與訂單資訊聯繫客服協助確認");
   });
 });

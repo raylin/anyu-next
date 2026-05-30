@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnyuMark } from "@/components/anyu/AnyuMark";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
+import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 
 type PaidResultPendingPollerProps = {
   moduleSlug: string;
@@ -152,6 +153,12 @@ export function PaidResultPendingPoller({
       </ol>
 
       {safeError ? <p className="anyu-status-message anyu-status-message-error">{safeError}</p> : null}
+      {status === "failed" || status === "expired" ? (
+        <p className="anyu-subtle-note">
+          若付款已完成但報告無法查看，請來信{" "}
+          <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>，我們可以協助補發或退款，並會在 3–7 個工作天內回覆處理結果。
+        </p>
+      ) : null}
       {status === "failed" || status === "expired" ? (
         <Button type="button" className="anyu-button-block" onClick={() => router.refresh()}>
           重新檢查完整分析

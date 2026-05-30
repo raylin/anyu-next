@@ -1,6 +1,7 @@
 import { Card } from "@/components/anyu/Card";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
+import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 import { isDbConfigured } from "@/lib/db/client";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { resolvePaymentAccessHandoff } from "@/lib/payments/payment-access-handoff";
@@ -41,7 +42,11 @@ function PaymentAccessFallback({
             <h1 className="anyu-section-title">完整分析尚未可用</h1>
             {state ? <p className="anyu-copy">目前狀態：{state}</p> : null}
             <p className="anyu-copy">
-              若你剛完成付款，請回到付款確認頁稍後重新整理，或保留付款資訊聯繫客服協助確認。
+              若你剛完成付款，請回到付款確認頁稍後重新整理，或保留付款時間與訂單資訊聯繫客服協助確認。
+            </p>
+            <p className="anyu-subtle-note">
+              若付款、連結或報告產生異常，請來信{" "}
+              <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>，我們會在 3–7 個工作天內回覆處理結果。
             </p>
           </Card>
           <LegalFooter />
@@ -90,4 +95,3 @@ export default async function PaymentAccessPage({
     />
   );
 }
-

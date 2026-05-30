@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
-import { ContactCapture } from "@/components/anyu/ContactCapture";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { PaidPreviewCard } from "@/components/anyu/PaidPreviewCard";
 import { ShareCardPreview } from "@/components/anyu/ShareCardPreview";
@@ -12,30 +11,23 @@ import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { ModuleThemeShell, useModuleThemeController } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { uiNotices } from "@/content/legal";
-import { trackClientEvent, trackClientEventBeacon } from "@/lib/events/client";
+import { trackClientEvent } from "@/lib/events/client";
 import { getModuleThemeEventMetadata } from "@/lib/modules/module-theme";
 import {
   buildShareText,
   getClientAnonymousSessionId,
-  getLineAddUrl,
   scoreToBucket,
 } from "@/lib/modules/ai-temperature-ui";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import type { AiTemperatureResultViewModel } from "@/lib/modules/ai-temperature-ui";
+import type { PaidCtaAvailability } from "@/lib/modules/paid-cta-view-model";
 
 type AiTemperatureResultProps = {
   moduleConfig: ProductModuleConfig;
   result: AiTemperatureResultViewModel;
   mode: "demo" | "runtime";
   resultId: string;
-};
-
-type UnlockFulfillmentState = {
-  fulfillmentCode: string | null;
-  fulfillmentExpiresAt: string | null;
-  unlockToken: string | null;
-  liffUrl: string | null;
-  lineAddUrl: string | null;
+  paidCtaAvailability?: PaidCtaAvailability;
 };
 
 export function AiTemperatureResult({
@@ -43,16 +35,10 @@ export function AiTemperatureResult({
   result,
   mode,
   resultId,
+  paidCtaAvailability = "review_pending",
 }: AiTemperatureResultProps) {
-  const [showContact, setShowContact] = useState(false);
-  const [unlockIntentId, setUnlockIntentId] = useState<string | null>(null);
-  const [unlockFulfillment, setUnlockFulfillment] =
-    useState<UnlockFulfillmentState | null>(null);
-  const [unlockIntentFailed, setUnlockIntentFailed] = useState(false);
   const hasTrackedPageView = useRef(false);
   const paidPreviewRef = useRef<HTMLDivElement | null>(null);
-  const contactPanelRef = useRef<HTMLDivElement | null>(null);
-  const lineAddUrl = getLineAddUrl();
   const { theme, switchTheme } = useModuleThemeController(moduleConfig);
   const themeMetadata = useMemo(() => getModuleThemeEventMetadata(theme), [theme]);
 
@@ -76,148 +62,19 @@ export function AiTemperatureResult({
   }, [mode, moduleConfig, result.score, resultId, theme.hydrated, themeMetadata]);
 
   function scrollToNextStep() {
-    const target = contactPanelRef.current ?? paidPreviewRef.current;
-
-    target?.scrollIntoView({
+    paidPreviewRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
   }
 
-  async function revealContact(source = "paid_preview") {
-    if (mode === "demo") {
-      setShowContact(true);
-      return { ok: true };
-    }
-
-    try {
-      const response = await fetch("/api/unlock-intent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resultId,
-          moduleId: moduleConfig.moduleId,
-          themeSlug: moduleConfig.slug,
-          anonymousSessionId: getClientAnonymousSessionId(),
-          source,
-          debug:
-            typeof window !== "undefined" &&
-            new URLSearchParams(window.location.search).get("debug") === "1",
-          themeVariant: theme.variant,
-          themeSource: theme.source,
-        }),
-      });
-
-      const data = (await response.json()) as {
-        ok: boolean;
-        unlockIntentId?: string;
-        fulfillmentCode?: string;
-        fulfillmentExpiresAt?: string;
-        unlockToken?: string;
-        liffUrl?: string | null;
-        lineAddUrl?: string | null;
-        message?: string;
-      };
-
-      if (!response.ok || !data.ok || !data.unlockIntentId) {
-        setUnlockIntentId(null);
-        setUnlockFulfillment(null);
-        setUnlockIntentFailed(true);
-        setShowContact(true);
-        return {
-          ok: true,
-        };
-      }
-
-      setUnlockIntentId(data.unlockIntentId);
-      setUnlockFulfillment({
-        fulfillmentCode: data.fulfillmentCode ?? null,
-        fulfillmentExpiresAt: data.fulfillmentExpiresAt ?? null,
-        unlockToken: data.unlockToken ?? null,
-        liffUrl: data.liffUrl ?? null,
-        lineAddUrl: data.lineAddUrl ?? null,
-      });
-      void fetch(`/api/modules/${moduleConfig.slug}/paid-result/request`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resultId,
-          unlockIntentId: data.unlockIntentId,
-        }),
-      });
-      setUnlockIntentFailed(false);
-      setShowContact(true);
-      return { ok: true };
-    } catch {
-      setUnlockIntentId(null);
-      setUnlockFulfillment(null);
-      setUnlockIntentFailed(true);
-      setShowContact(true);
-      return {
-        ok: true,
-      };
-    }
-  }
-
-  async function handleInlineResultCta() {
+  function handleInlineResultCta() {
     scrollToNextStep();
-    await revealContact("inline_result_cta");
 
     if (typeof window !== "undefined") {
       window.setTimeout(() => {
         scrollToNextStep();
       }, 80);
-    }
-  }
-
-  async function submitContact(payload: {
-    email?: string;
-    lineId?: string;
-    consent: boolean;
-  }) {
-    if (mode === "demo") {
-      return {
-        ok: true,
-        message: "這是 demo 路線，目前不會真的送出，但正式流程已預留位置。",
-      };
-    }
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resultId,
-          unlockIntentId,
-          moduleId: moduleConfig.moduleId,
-          themeSlug: moduleConfig.slug,
-          anonymousSessionId: getClientAnonymousSessionId(),
-          email: payload.email,
-          lineId: payload.lineId,
-          consent: payload.consent,
-        }),
-      });
-
-      const data = (await response.json()) as { ok: boolean; message: string };
-
-      return {
-        ok: response.ok && data.ok,
-        message:
-          response.ok && data.ok
-            ? "已收到，我們會在完整分析開放時通知你。"
-            : "目前內測表單暫時無法送出，請稍後再試。",
-      };
-    } catch {
-      return {
-        ok: false,
-        message: "目前內測表單暫時無法送出，請稍後再試。",
-      };
     }
   }
 
@@ -229,36 +86,6 @@ export function AiTemperatureResult({
       scoreBucket: scoreToBucket(result.score),
       metadata: {
         resultId,
-        ...themeMetadata,
-      },
-    });
-  }
-
-  function handleEmailFallbackOpen() {
-    void trackClientEvent({
-      eventName: "email_fallback_opened",
-      moduleConfig,
-      anonymousSessionId: getClientAnonymousSessionId(),
-      scoreBucket: scoreToBucket(result.score),
-      metadata: {
-        resultId,
-        unlockIntentId,
-        source: "contact_capture",
-        ...themeMetadata,
-      },
-    });
-  }
-
-  function handleLineAddClick() {
-    trackClientEventBeacon({
-      eventName: "line_add_clicked",
-      moduleConfig,
-      anonymousSessionId: getClientAnonymousSessionId(),
-      scoreBucket: scoreToBucket(result.score),
-      metadata: {
-        resultId,
-        unlockIntentId,
-        source: "contact_capture",
         ...themeMetadata,
       },
     });
@@ -373,9 +200,7 @@ export function AiTemperatureResult({
         <Button
           type="button"
           className="anyu-button-block anyu-button-secondary"
-          onClick={() => {
-            void handleInlineResultCta();
-          }}
+          onClick={handleInlineResultCta}
         >
           看下一句怎麼回
         </Button>
@@ -400,25 +225,7 @@ export function AiTemperatureResult({
           price={result.paidPrice || moduleConfig.price}
           includedSections={result.paidIncludedSections}
           previewCopy={result.paidPreviewCopy}
-          onRevealContact={revealContact}
-        />
-      </div>
-
-      <div ref={contactPanelRef}>
-        <ContactCapture
-          visible={showContact}
-          lineAddUrl={unlockFulfillment?.lineAddUrl ?? lineAddUrl}
-          liffUrl={unlockFulfillment?.liffUrl}
-          fulfillmentCode={unlockFulfillment?.fulfillmentCode}
-          fulfillmentExpiresAt={unlockFulfillment?.fulfillmentExpiresAt}
-          noticeMessage={
-            unlockIntentFailed
-              ? "內測記錄暫時無法建立，但你仍可留下聯絡方式。"
-              : undefined
-          }
-          onLineAddClick={handleLineAddClick}
-          onEmailFallbackOpen={handleEmailFallbackOpen}
-          onSubmit={submitContact}
+          availability={paidCtaAvailability}
         />
       </div>
 

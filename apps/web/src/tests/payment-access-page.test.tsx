@@ -52,6 +52,8 @@ describe("payment access page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("完整分析尚未可用");
+    expect(html).toContain("hello@anyu.tw");
+    expect(html).toContain("3–7 個工作天內回覆處理結果");
     expect(html).not.toContain("MOCK_UNLOCK_COMPLETED");
   });
 
@@ -86,4 +88,3 @@ describe("payment access page", () => {
     });
   });
 });
-

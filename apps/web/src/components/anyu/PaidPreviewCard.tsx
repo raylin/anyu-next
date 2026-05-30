@@ -1,15 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
+import {
+  buildPaidCtaViewModel,
+  type PaidCtaAvailability,
+} from "@/lib/modules/paid-cta-view-model";
 
 type PaidPreviewCardProps = {
   headline: string;
   price: string;
   includedSections: string[];
   previewCopy: string;
+  availability?: PaidCtaAvailability;
   onRevealContact?: () => Promise<{ ok: boolean; message?: string }>;
 };
 
@@ -18,6 +24,7 @@ export function PaidPreviewCard({
   price,
   includedSections,
   previewCopy,
+  availability = "review_pending",
   onRevealContact,
 }: PaidPreviewCardProps) {
   const [revealed, setRevealed] = useState(false);
@@ -25,6 +32,10 @@ export function PaidPreviewCard({
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleReveal() {
+    if (!primaryActionEnabled) {
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage("");
 
@@ -57,26 +68,29 @@ export function PaidPreviewCard({
     "不需要留下姓名，也請不要貼姓名、電話、地址或帳號等可識別身份資訊。",
     "你提供的文字只用於本次分析與必要服務交付，不會公開展示或提供第三方行銷使用。",
     `正式付款後若系統未成功產生結果、連結無法開啟或重複付款，可協助補發或退款；聯絡 ${LEGAL_CONTACT_EMAIL} 時不需要提供原始對話內容。`,
+    `客服會在 3–7 個工作天內回覆處理結果。`,
   ] as const;
+  const viewModel = buildPaidCtaViewModel({ availability, price });
+  const primaryActionEnabled = viewModel.primaryEnabled && Boolean(onRevealContact);
 
   return (
     <Card className="anyu-paid-card">
-      <p className="anyu-kicker t-label-dim">一次性查看 · 無訂閱</p>
+      <p className="anyu-kicker t-label-dim">{viewModel.kicker}</p>
 
       <div className="anyu-paid-head">
         <div className="anyu-paid-value-summary">
           <h2 className="anyu-section-title">
-            {headline} — {price}
+            {headline} — {viewModel.headlineSuffix}
           </h2>
-          <p className="anyu-copy">
-            正式開放後，一次性查看；目前內測不會真的收費。
-          </p>
-          <p className="anyu-subtle-note">完整分析會透過網頁或 LINE 連結交付。</p>
+          <p className="anyu-copy">{viewModel.microcopy}</p>
+          <p className="anyu-subtle-note">完整報告將於網頁中提供查看。</p>
         </div>
-        <div className="anyu-paid-price-block">
-          <span className="anyu-paid-price">{price}</span>
-          <span className="anyu-paid-price-note">一次性 · no subscription</span>
-        </div>
+        {viewModel.showPrice ? (
+          <div className="anyu-paid-price-block">
+            <span className="anyu-paid-price">{price}</span>
+            <span className="anyu-paid-price-note">一次性 · no subscription</span>
+          </div>
+        ) : null}
       </div>
 
       <div className="anyu-paid-grid">
@@ -137,8 +151,10 @@ export function PaidPreviewCard({
 
       <p className="anyu-small-note">
         {revealed
-          ? "目前內測中，這次不會真的收費。你可以透過 LINE 或 Email 接收完整分析連結。"
-          : "目前內測中，這次不會真的收費。點下後可加入 LINE 接收完整分析連結，或改用 Email。"}
+          ? "完整報告狀態已更新。若你已完成付款，請依付款返回頁或安全連結查看。"
+          : viewModel.showPollingCopy
+            ? "AI 生成需要一點時間，完成後此頁會更新。"
+            : "正式開放後，完整報告會在付款確認後於網頁提供查看。"}
       </p>
 
       <div className="anyu-paid-policy-panel">
@@ -154,8 +170,30 @@ export function PaidPreviewCard({
         暗語 ANYU 是文字情境整理與溝通建議，不是心理治療、諮商、命理或關係結果保證。
       </p>
 
-      <Button type="button" className="anyu-button-block" onClick={handleReveal} disabled={isLoading}>
-        {isLoading ? "開啟中..." : `${headline} — ${price}`}
+      <div className="anyu-paid-policy-actions">
+        {viewModel.showRefundLink ? (
+          <Link href="/refund" className="anyu-storefront-link">
+            {viewModel.secondaryLabel}
+          </Link>
+        ) : null}
+        {viewModel.showSupportLink ? (
+          <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="anyu-storefront-link">
+            聯絡 {LEGAL_CONTACT_EMAIL}
+          </a>
+        ) : null}
+      </div>
+
+      <p className="anyu-small-note">{viewModel.supportCopy}</p>
+
+      <Button
+        type="button"
+        className="anyu-button-block"
+        onClick={handleReveal}
+        disabled={isLoading || !primaryActionEnabled}
+        aria-disabled={!primaryActionEnabled}
+        aria-label={!primaryActionEnabled ? `${viewModel.primaryLabel}（尚未開放）` : undefined}
+      >
+        {isLoading ? "開啟中..." : viewModel.primaryLabel}
       </Button>
 
       {errorMessage ? (

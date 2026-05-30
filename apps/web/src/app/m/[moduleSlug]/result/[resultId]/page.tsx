@@ -10,6 +10,10 @@ import {
   mapProductResultToViewModel,
 } from "@/lib/modules/ai-temperature-ui";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import {
+  isNewebPayCheckoutEnabled,
+  isPaymentRuntimeEnabled,
+} from "@/lib/runtime/feature-flags";
 
 type ResultPageProps = {
   params: Promise<{
@@ -34,6 +38,7 @@ export default async function ResultPage({ params }: ResultPageProps) {
           result={getAiTemperatureDemoResult()}
           mode="demo"
           resultId="demo"
+          paidCtaAvailability="review_pending"
         />
       </main>
     );
@@ -76,6 +81,10 @@ export default async function ResultPage({ params }: ResultPageProps) {
   }
 
   const normalizedResult = normalizeProductResultForDisplay(record.normalizedResultJson);
+  const paidCtaAvailability =
+    isPaymentRuntimeEnabled() && isNewebPayCheckoutEnabled()
+      ? "checkout_available"
+      : "review_pending";
 
   return (
     <main className="anyu-shell">
@@ -84,6 +93,7 @@ export default async function ResultPage({ params }: ResultPageProps) {
         result={mapProductResultToViewModel(normalizedResult)}
         mode="runtime"
         resultId={record.id}
+        paidCtaAvailability={paidCtaAvailability}
       />
     </main>
   );
