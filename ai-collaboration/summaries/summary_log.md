@@ -7270,3 +7270,22 @@ Learnings:
 Unresolved questions:
 - Owner/operator needs to complete a fresh sandbox credit-card one-time payment in a real browser and confirm completion before NotifyURL/delivery/queue/access verification can pass.
 - If NewebPay requires `ClientBackURL` or explicit payment-method restriction fields, implementation follow-up may be needed.
+
+## 2026-05-30 - Manual Browser Sandbox Payment Completion v1 Fresh Checkout
+
+Completed changes:
+- Created a fresh Preview(`staging`) NewebPay sandbox checkout for run `20260530-230023`.
+- Verified staging health at `environment=preview`, `gitBranch=staging`, route bundle `payment-foundation-2026-05-29`, commit `4c43ab562363`.
+- Fresh source analyze and checkout creation passed: HTTP 200, `paymentIntentStatus=checkout_started`, sandbox `ccore` gateway, MPG `Version=2.0`, expected NT$49 amount, and `pcs_` handoff present.
+- Owner confirmed manual browser payment was submitted using sandbox credit-card one-time payment and returned to staging.
+- Polling session-bound status for 72 attempts over about 6 minutes stayed `waiting_for_payment`; no access path appeared.
+- Recent Vercel logs showed ReturnURL/status route activity but no visible `POST /api/payments/newebpay/notify` in the checked window.
+- Confirmed Production remained disabled and public pages live: production health stayed `main/1990fc034d74`; homepage, `/refund`, and `/legal` returned 200; production checkout/fake-paid routes returned JSON `404 not_found`.
+
+Learnings:
+- Checkout/form/ReturnURL browser path works enough to return to staging, but server-to-server NotifyURL was not observed.
+- The first failure is now more precise than prior attempts: `notify_not_received` after confirmed browser payment submission and staging return.
+
+Unresolved questions:
+- Owner should verify the NewebPay sandbox shop NotifyURL setting and sandbox transaction callback status.
+- If backend NotifyURL is correct, a follow-up safe NotifyURL debug task is needed to determine whether NewebPay is not sending the callback or the route is rejecting before visible logs.
