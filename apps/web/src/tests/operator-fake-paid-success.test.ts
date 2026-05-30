@@ -7,9 +7,7 @@ const {
   mockCreatePaymentIntent,
   mockMarkPaymentPaid,
   mockGetEntitlementByPaymentIntentId,
-  mockCreatePaymentSingleEntitlement,
-  mockCreateOrReusePaidAnalysisJob,
-  mockResolvePaidAccessToken,
+  mockCreatePaidDeliveryArtifactsForPaymentIntent,
 } = vi.hoisted(() => ({
   mockGetModuleBySlug: vi.fn(),
   mockGetAnalysisResultWithRequestById: vi.fn(),
@@ -17,9 +15,7 @@ const {
   mockCreatePaymentIntent: vi.fn(),
   mockMarkPaymentPaid: vi.fn(),
   mockGetEntitlementByPaymentIntentId: vi.fn(),
-  mockCreatePaymentSingleEntitlement: vi.fn(),
-  mockCreateOrReusePaidAnalysisJob: vi.fn(),
-  mockResolvePaidAccessToken: vi.fn(),
+  mockCreatePaidDeliveryArtifactsForPaymentIntent: vi.fn(),
 }));
 
 vi.mock("@/lib/modules/registry", () => ({
@@ -38,15 +34,10 @@ vi.mock("@/lib/db/payment-intents", () => ({
 
 vi.mock("@/lib/db/entitlements", () => ({
   getEntitlementByPaymentIntentId: mockGetEntitlementByPaymentIntentId,
-  createPaymentSingleEntitlement: mockCreatePaymentSingleEntitlement,
 }));
 
-vi.mock("@/lib/db/generation-jobs", () => ({
-  createOrReusePaidAnalysisJob: mockCreateOrReusePaidAnalysisJob,
-}));
-
-vi.mock("@/lib/payments/paid-access-resolver", () => ({
-  resolvePaidAccessToken: mockResolvePaidAccessToken,
+vi.mock("@/lib/payments/paid-delivery-artifacts", () => ({
+  createPaidDeliveryArtifactsForPaymentIntent: mockCreatePaidDeliveryArtifactsForPaymentIntent,
 }));
 
 import { createOperatorFakePaidSuccess } from "@/lib/payments/operator-fake-paid-success";
@@ -92,17 +83,16 @@ describe("operator fake paid success service", () => {
     mockCreatePaymentIntent.mockResolvedValue(createdPaymentIntent);
     mockMarkPaymentPaid.mockResolvedValue(paidPaymentIntent);
     mockGetEntitlementByPaymentIntentId.mockResolvedValue(null);
-    mockCreatePaymentSingleEntitlement.mockResolvedValue({
-      entitlement,
-      paidAccessToken: "pa_test-token",
-    });
-    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
-      job,
-      created: true,
-    });
-    mockResolvePaidAccessToken.mockResolvedValue({
+    mockCreatePaidDeliveryArtifactsForPaymentIntent.mockResolvedValue({
       ok: true,
-      state: "pending",
+      entitlement,
+      entitlementCreated: true,
+      generationJob: job,
+      generationJobCreated: true,
+      accessState: "pending",
+      paidAccessToken: "pa_test-token",
+      paidAccessTokenReturned: true,
+      unlockPath: "/m/ambiguous-temperature/unlock/pa_test-token",
     });
   });
 
@@ -136,17 +126,13 @@ describe("operator fake paid success service", () => {
         providerStatus: "operator_fake_paid",
       }),
     );
-    expect(mockCreatePaymentSingleEntitlement).toHaveBeenCalledWith(
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).toHaveBeenCalledWith(
       expect.objectContaining({
-        source: "operator_test",
-        paymentIntentId: "payment-1",
-      }),
-    );
-    expect(mockCreateOrReusePaidAnalysisJob).toHaveBeenCalledWith(
-      expect.objectContaining({
-        triggerSource: "operator",
-        entitlementRefId: "entitlement-1",
+        paymentIntent: paidPaymentIntent,
+        entitlementSource: "operator_test",
+        generationJobTriggerSource: "operator",
         operatorTest: true,
+        exposeRawPaidAccessToken: true,
       }),
     );
   });
@@ -154,9 +140,16 @@ describe("operator fake paid success service", () => {
   it("is idempotent for existing fake payment and entitlement and does not return raw token again", async () => {
     mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue(paidPaymentIntent);
     mockGetEntitlementByPaymentIntentId.mockResolvedValue(entitlement);
-    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
-      job,
-      created: false,
+    mockCreatePaidDeliveryArtifactsForPaymentIntent.mockResolvedValue({
+      ok: true,
+      entitlement,
+      entitlementCreated: false,
+      generationJob: job,
+      generationJobCreated: false,
+      accessState: "pending",
+      paidAccessToken: null,
+      paidAccessTokenReturned: false,
+      unlockPath: null,
     });
 
     const result = await createOperatorFakePaidSuccess({
@@ -175,16 +168,22 @@ describe("operator fake paid success service", () => {
     });
     expect(mockCreatePaymentIntent).not.toHaveBeenCalled();
     expect(mockMarkPaymentPaid).not.toHaveBeenCalled();
-    expect(mockCreatePaymentSingleEntitlement).not.toHaveBeenCalled();
-    expect(mockResolvePaidAccessToken).not.toHaveBeenCalled();
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).toHaveBeenCalledTimes(1);
   });
 
   it("recovers a missing generation job through the operator path", async () => {
     mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue(paidPaymentIntent);
     mockGetEntitlementByPaymentIntentId.mockResolvedValue(entitlement);
-    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
-      job,
-      created: true,
+    mockCreatePaidDeliveryArtifactsForPaymentIntent.mockResolvedValue({
+      ok: true,
+      entitlement,
+      entitlementCreated: false,
+      generationJob: job,
+      generationJobCreated: true,
+      accessState: "pending",
+      paidAccessToken: null,
+      paidAccessTokenReturned: false,
+      unlockPath: null,
     });
 
     const result = await createOperatorFakePaidSuccess({
@@ -197,9 +196,9 @@ describe("operator fake paid success service", () => {
       entitlementCreated: false,
       generationJobCreated: true,
     });
-    expect(mockCreateOrReusePaidAnalysisJob).toHaveBeenCalledWith(
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).toHaveBeenCalledWith(
       expect.objectContaining({
-        entitlementRefId: "entitlement-1",
+        paymentIntent: paidPaymentIntent,
       }),
     );
   });
@@ -219,14 +218,15 @@ describe("operator fake paid success service", () => {
     });
     expect(mockGetPaymentIntentByMerchantOrderNo).toHaveBeenCalled();
     expect(mockCreatePaymentIntent).not.toHaveBeenCalled();
-    expect(mockCreatePaymentSingleEntitlement).not.toHaveBeenCalled();
-    expect(mockCreateOrReusePaidAnalysisJob).not.toHaveBeenCalled();
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).not.toHaveBeenCalled();
   });
 
   it("returns a safe token creation category if entitlement hashing fails", async () => {
-    mockCreatePaymentSingleEntitlement.mockRejectedValue(
-      new Error("paid_access_token_hash_secret_missing"),
-    );
+    mockCreatePaidDeliveryArtifactsForPaymentIntent.mockResolvedValue({
+      ok: false,
+      status: 500,
+      error: "paid_access_token_create_failed",
+    });
 
     const result = await createOperatorFakePaidSuccess({
       moduleSlug: "ambiguous-temperature",
@@ -238,6 +238,5 @@ describe("operator fake paid success service", () => {
       status: 500,
       error: "paid_access_token_create_failed",
     });
-    expect(mockCreateOrReusePaidAnalysisJob).not.toHaveBeenCalled();
   });
 });

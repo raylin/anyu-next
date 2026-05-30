@@ -1,0 +1,164 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const {
+  mockGetEntitlementByPaymentIntentId,
+  mockCreatePaymentSingleEntitlement,
+  mockCreateOrReusePaidAnalysisJob,
+  mockResolvePaidAccessToken,
+} = vi.hoisted(() => ({
+  mockGetEntitlementByPaymentIntentId: vi.fn(),
+  mockCreatePaymentSingleEntitlement: vi.fn(),
+  mockCreateOrReusePaidAnalysisJob: vi.fn(),
+  mockResolvePaidAccessToken: vi.fn(),
+}));
+
+vi.mock("@/lib/db/entitlements", () => ({
+  getEntitlementByPaymentIntentId: mockGetEntitlementByPaymentIntentId,
+  createPaymentSingleEntitlement: mockCreatePaymentSingleEntitlement,
+}));
+
+vi.mock("@/lib/db/generation-jobs", () => ({
+  createOrReusePaidAnalysisJob: mockCreateOrReusePaidAnalysisJob,
+}));
+
+vi.mock("@/lib/payments/paid-access-resolver", () => ({
+  resolvePaidAccessToken: mockResolvePaidAccessToken,
+}));
+
+import { createPaidDeliveryArtifactsForPaymentIntent } from "@/lib/payments/paid-delivery-artifacts";
+
+const paymentIntent = {
+  id: "payment-1",
+  moduleSlug: "ambiguous-temperature",
+  analysisRequestId: "request-1",
+  analysisResultId: "result-1",
+  unlockIntentId: null,
+};
+const entitlement = {
+  id: "entitlement-1",
+  paymentIntentId: "payment-1",
+  status: "active",
+};
+const generationJob = {
+  id: "job-1",
+  status: "queued",
+};
+
+describe("paid delivery artifacts service", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.PAID_ACCESS_TOKEN_HASH_SECRET = "test-only-paid-access-secret";
+    mockGetEntitlementByPaymentIntentId.mockResolvedValue(null);
+    mockCreatePaymentSingleEntitlement.mockResolvedValue({
+      entitlement,
+      paidAccessToken: "synthetic-paid-access-token",
+    });
+    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
+      job: generationJob,
+      created: true,
+    });
+    mockResolvePaidAccessToken.mockResolvedValue({
+      ok: true,
+      state: "pending",
+    });
+  });
+
+  it("creates entitlement, hash-at-rest paid token, and generation job for provider payments without exposing raw token", async () => {
+    const result = await createPaidDeliveryArtifactsForPaymentIntent({
+      paymentIntent,
+      entitlementSource: "payment_single",
+      generationJobTriggerSource: "payment_success_future",
+      exposeRawPaidAccessToken: false,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      entitlementCreated: true,
+      generationJobCreated: true,
+      accessState: "pending",
+      paidAccessToken: null,
+      paidAccessTokenReturned: false,
+      unlockPath: null,
+    });
+    expect(mockCreatePaymentSingleEntitlement).toHaveBeenCalledWith(
+      expect.objectContaining({
+        moduleSlug: "ambiguous-temperature",
+        analysisRequestId: "request-1",
+        analysisResultId: "result-1",
+        paymentIntentId: "payment-1",
+        source: "payment_single",
+      }),
+    );
+    expect(mockCreateOrReusePaidAnalysisJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        moduleSlug: "ambiguous-temperature",
+        analysisResultId: "result-1",
+        triggerSource: "payment_success_future",
+        entitlementRefId: "entitlement-1",
+        operatorTest: false,
+      }),
+    );
+    expect(mockResolvePaidAccessToken).not.toHaveBeenCalled();
+  });
+
+  it("can expose the raw token only for explicit operator-controlled paths", async () => {
+    const result = await createPaidDeliveryArtifactsForPaymentIntent({
+      paymentIntent,
+      entitlementSource: "operator_test",
+      generationJobTriggerSource: "operator",
+      operatorTest: true,
+      exposeRawPaidAccessToken: true,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      paidAccessToken: "synthetic-paid-access-token",
+      paidAccessTokenReturned: true,
+      unlockPath: "/m/ambiguous-temperature/unlock/synthetic-paid-access-token",
+    });
+    expect(mockResolvePaidAccessToken).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      rawToken: "synthetic-paid-access-token",
+    });
+  });
+
+  it("reuses existing entitlement and generation job idempotently", async () => {
+    mockGetEntitlementByPaymentIntentId.mockResolvedValue(entitlement);
+    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
+      job: generationJob,
+      created: false,
+    });
+
+    const result = await createPaidDeliveryArtifactsForPaymentIntent({
+      paymentIntent,
+      entitlementSource: "payment_single",
+      generationJobTriggerSource: "payment_success_future",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      entitlementCreated: false,
+      generationJobCreated: false,
+      paidAccessTokenReturned: false,
+    });
+    expect(mockCreatePaymentSingleEntitlement).not.toHaveBeenCalled();
+  });
+
+  it("fails before creating artifacts when paid access token hash config is missing", async () => {
+    delete process.env.PAID_ACCESS_TOKEN_HASH_SECRET;
+
+    const result = await createPaidDeliveryArtifactsForPaymentIntent({
+      paymentIntent,
+      entitlementSource: "payment_single",
+      generationJobTriggerSource: "payment_success_future",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      status: 503,
+      error: "paid_access_token_config_missing",
+    });
+    expect(mockCreatePaymentSingleEntitlement).not.toHaveBeenCalled();
+    expect(mockCreateOrReusePaidAnalysisJob).not.toHaveBeenCalled();
+  });
+});

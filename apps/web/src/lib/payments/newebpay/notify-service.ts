@@ -8,6 +8,11 @@ import {
   verifyNewebPayNotifyPayload,
   type VerifiedNewebPayNotify,
 } from "@/lib/payments/newebpay/notify-verification";
+import {
+  createPaidDeliveryArtifactsForPaymentIntent,
+  type PaidDeliveryArtifactError,
+  type PaidDeliveryArtifactsResult,
+} from "@/lib/payments/paid-delivery-artifacts";
 
 export type NewebPayNotifyCategory =
   | "provider_config_missing"
@@ -21,6 +26,7 @@ export type NewebPayNotifyCategory =
   | "payment_intent_not_found"
   | "payment_not_success"
   | "duplicate_notify"
+  | PaidDeliveryArtifactError
   | "unexpected_error";
 
 export type ProcessNewebPayNotifyResult =
@@ -29,6 +35,7 @@ export type ProcessNewebPayNotifyResult =
       category: "payment_marked_paid" | "duplicate_notify";
       paymentIntent: PaymentIntent;
       paymentIntentStatus: string;
+      delivery: Extract<PaidDeliveryArtifactsResult, { ok: true }>;
     }
   | {
       ok: false;
@@ -41,6 +48,26 @@ const PAID_INTENT_INPUT_STATUSES = new Set(["created", "checkout_started"]);
 
 function isProviderSuccess(event: VerifiedNewebPayNotify) {
   return event.status === "SUCCESS" && (!event.responseCode || event.responseCode === "00");
+}
+
+async function createNewebPayDelivery(paymentIntent: PaymentIntent) {
+  return createPaidDeliveryArtifactsForPaymentIntent({
+    paymentIntent,
+    entitlementSource: "payment_single",
+    generationJobTriggerSource: "payment_success_future",
+    operatorTest: false,
+    exposeRawPaidAccessToken: false,
+  });
+}
+
+function deliveryFailure(
+  delivery: Extract<PaidDeliveryArtifactsResult, { ok: false }>,
+): Extract<ProcessNewebPayNotifyResult, { ok: false }> {
+  return {
+    ok: false,
+    status: delivery.status,
+    category: delivery.error,
+  };
 }
 
 export async function processNewebPayNotify(
@@ -84,11 +111,18 @@ export async function processNewebPayNotify(
   }
 
   if (paymentIntent.status === "paid") {
+    const delivery = await createNewebPayDelivery(paymentIntent);
+
+    if (!delivery.ok) {
+      return deliveryFailure(delivery);
+    }
+
     return {
       ok: true,
       category: "duplicate_notify",
       paymentIntent,
       paymentIntentStatus: paymentIntent.status,
+      delivery,
     };
   }
 
@@ -112,14 +146,20 @@ export async function processNewebPayNotify(
       return { ok: false, status: 404, category: "payment_intent_not_found" };
     }
 
+    const delivery = await createNewebPayDelivery(paidIntent);
+
+    if (!delivery.ok) {
+      return deliveryFailure(delivery);
+    }
+
     return {
       ok: true,
       category: "payment_marked_paid",
       paymentIntent: paidIntent,
       paymentIntentStatus: paidIntent.status,
+      delivery,
     };
   } catch {
     return { ok: false, status: 500, category: "unexpected_error" };
   }
 }
-

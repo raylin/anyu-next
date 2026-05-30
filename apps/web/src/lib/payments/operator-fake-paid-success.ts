@@ -1,16 +1,5 @@
-import {
-  PAID_RESULT_PROMPT_VERSION,
-  PAID_RESULT_SCHEMA_VERSION,
-} from "@/lib/ai/paid-result-generation";
-import {
-  createOrReusePaidAnalysisJob,
-  type GenerationJob,
-} from "@/lib/db/generation-jobs";
-import {
-  createPaymentSingleEntitlement,
-  getEntitlementByPaymentIntentId,
-  type Entitlement,
-} from "@/lib/db/entitlements";
+import type { GenerationJob } from "@/lib/db/generation-jobs";
+import { getEntitlementByPaymentIntentId, type Entitlement } from "@/lib/db/entitlements";
 import {
   createPaymentIntent,
   getPaymentIntentByMerchantOrderNo,
@@ -18,9 +7,10 @@ import {
   type PaymentIntent,
 } from "@/lib/db/payment-intents";
 import { getAnalysisResultWithRequestById } from "@/lib/db/runtime";
-import { resolvePaidAccessToken, type PaidAccessResolutionState } from "@/lib/payments/paid-access-resolver";
+import { type PaidAccessResolutionState } from "@/lib/payments/paid-access-resolver";
 import { getPaidAccessTokenHashSecret } from "@/lib/payments/paid-access-token";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import { createPaidDeliveryArtifactsForPaymentIntent } from "@/lib/payments/paid-delivery-artifacts";
 
 const OPERATOR_FAKE_MERCHANT_ORDER_PREFIX = "ANYUFAKE";
 const OPERATOR_FAKE_AMOUNT_MINOR = 49;
@@ -141,71 +131,16 @@ export async function createOperatorFakePaidSuccess(input: {
     }
   }
 
-  let entitlementCreated = false;
-  let paidAccessToken: string | null = null;
-  let entitlement = existingEntitlement;
+  const delivery = await createPaidDeliveryArtifactsForPaymentIntent({
+    paymentIntent,
+    entitlementSource: "operator_test",
+    generationJobTriggerSource: "operator",
+    operatorTest: true,
+    exposeRawPaidAccessToken: true,
+  });
 
-  if (!entitlement) {
-    let created: Awaited<ReturnType<typeof createPaymentSingleEntitlement>>;
-
-    try {
-      created = await createPaymentSingleEntitlement({
-        moduleSlug: moduleConfig.slug,
-        analysisRequestId: record.request.id,
-        analysisResultId: record.result.id,
-        paymentIntentId: paymentIntent.id,
-        source: "operator_test",
-        activatedAt: new Date(),
-      });
-    } catch (error) {
-      return {
-        ok: false,
-        status: 500,
-        error:
-          error instanceof Error && error.message === "paid_access_token_hash_secret_missing"
-            ? "paid_access_token_create_failed"
-            : "entitlement_create_failed",
-      };
-    }
-    entitlement = created.entitlement;
-    paidAccessToken = created.paidAccessToken;
-    entitlementCreated = true;
-  }
-
-  if (!entitlement) {
-    return { ok: false, status: 500, error: "entitlement_unavailable" };
-  }
-
-  let generationJobResult: Awaited<ReturnType<typeof createOrReusePaidAnalysisJob>>;
-
-  try {
-    generationJobResult = await createOrReusePaidAnalysisJob({
-      moduleSlug: moduleConfig.slug,
-      analysisResultId: record.result.id,
-      triggerSource: "operator",
-      entitlementRefId: entitlement.id,
-      promptVersion: PAID_RESULT_PROMPT_VERSION,
-      schemaVersion: PAID_RESULT_SCHEMA_VERSION,
-      operatorTest: true,
-    });
-  } catch {
-    return { ok: false, status: 500, error: "generation_job_create_failed" };
-  }
-  let accessState: Exclude<PaidAccessResolutionState, "not_found"> = "pending";
-
-  if (paidAccessToken) {
-    const resolution = await resolvePaidAccessToken({
-      moduleSlug: moduleConfig.slug,
-      rawToken: paidAccessToken,
-    });
-
-    if (resolution.ok) {
-      accessState = resolution.state;
-    }
-  } else if (generationJobResult.job.status === "processing") {
-    accessState = "processing";
-  } else if (generationJobResult.job.status === "failed_final") {
-    accessState = "failed";
+  if (!delivery.ok) {
+    return delivery;
   }
 
   return {
@@ -214,15 +149,13 @@ export async function createOperatorFakePaidSuccess(input: {
     resultId: record.result.id,
     paymentIntent,
     paymentIntentCreated,
-    entitlement,
-    entitlementCreated,
-    generationJob: generationJobResult.job,
-    generationJobCreated: generationJobResult.created,
-    accessState,
-    paidAccessToken,
-    paidAccessTokenReturned: Boolean(paidAccessToken),
-    unlockPath: paidAccessToken
-      ? `/m/${moduleConfig.slug}/unlock/${encodeURIComponent(paidAccessToken)}`
-      : null,
+    entitlement: delivery.entitlement,
+    entitlementCreated: delivery.entitlementCreated,
+    generationJob: delivery.generationJob,
+    generationJobCreated: delivery.generationJobCreated,
+    accessState: delivery.accessState,
+    paidAccessToken: delivery.paidAccessToken,
+    paidAccessTokenReturned: delivery.paidAccessTokenReturned,
+    unlockPath: delivery.unlockPath,
   };
 }

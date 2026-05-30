@@ -6,14 +6,20 @@ import { processNewebPayNotify } from "@/lib/payments/newebpay/notify-service";
 const {
   mockGetPaymentIntentByMerchantOrderNo,
   mockMarkPaymentPaid,
+  mockCreatePaidDeliveryArtifactsForPaymentIntent,
 } = vi.hoisted(() => ({
   mockGetPaymentIntentByMerchantOrderNo: vi.fn(),
   mockMarkPaymentPaid: vi.fn(),
+  mockCreatePaidDeliveryArtifactsForPaymentIntent: vi.fn(),
 }));
 
 vi.mock("@/lib/db/payment-intents", () => ({
   getPaymentIntentByMerchantOrderNo: mockGetPaymentIntentByMerchantOrderNo,
   markPaymentPaid: mockMarkPaymentPaid,
+}));
+
+vi.mock("@/lib/payments/paid-delivery-artifacts", () => ({
+  createPaidDeliveryArtifactsForPaymentIntent: mockCreatePaidDeliveryArtifactsForPaymentIntent,
 }));
 
 const env = {
@@ -94,6 +100,17 @@ describe("NewebPay NotifyURL service", () => {
       status: "paid",
       providerStatus: "SUCCESS",
     });
+    mockCreatePaidDeliveryArtifactsForPaymentIntent.mockResolvedValue({
+      ok: true,
+      entitlement: { id: "entitlement-1" },
+      entitlementCreated: true,
+      generationJob: { id: "job-1", status: "queued" },
+      generationJobCreated: true,
+      accessState: "pending",
+      paidAccessToken: null,
+      paidAccessTokenReturned: false,
+      unlockPath: null,
+    });
   });
 
   it("returns a safe config error without mutating when provider config is missing", async () => {
@@ -138,6 +155,11 @@ describe("NewebPay NotifyURL service", () => {
       ok: true,
       category: "payment_marked_paid",
       paymentIntentStatus: "paid",
+      delivery: {
+        entitlementCreated: true,
+        generationJobCreated: true,
+        paidAccessTokenReturned: false,
+      },
     });
     expect(mockGetPaymentIntentByMerchantOrderNo).toHaveBeenCalledWith(
       paymentIntent.merchantOrderNo,
@@ -152,9 +174,29 @@ describe("NewebPay NotifyURL service", () => {
         providerMessageCategory: "付款成功",
       }),
     );
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        paymentIntent: expect.objectContaining({ id: "payment-1", status: "paid" }),
+        entitlementSource: "payment_single",
+        generationJobTriggerSource: "payment_success_future",
+        operatorTest: false,
+        exposeRawPaidAccessToken: false,
+      }),
+    );
   });
 
-  it("treats duplicate paid NotifyURL as idempotent without another paid transition", async () => {
+  it("treats duplicate paid NotifyURL as idempotent without another paid transition or duplicate artifacts", async () => {
+    mockCreatePaidDeliveryArtifactsForPaymentIntent.mockResolvedValue({
+      ok: true,
+      entitlement: { id: "entitlement-1" },
+      entitlementCreated: false,
+      generationJob: { id: "job-1", status: "queued" },
+      generationJobCreated: false,
+      accessState: "pending",
+      paidAccessToken: null,
+      paidAccessTokenReturned: false,
+      unlockPath: null,
+    });
     mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue({
       ...paymentIntent,
       status: "paid",
@@ -166,8 +208,13 @@ describe("NewebPay NotifyURL service", () => {
       ok: true,
       category: "duplicate_notify",
       paymentIntentStatus: "paid",
+      delivery: {
+        entitlementCreated: false,
+        generationJobCreated: false,
+      },
     });
     expect(mockMarkPaymentPaid).not.toHaveBeenCalled();
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).toHaveBeenCalledTimes(1);
   });
 
   it("does not mark paid when amount mismatches", async () => {
@@ -182,6 +229,7 @@ describe("NewebPay NotifyURL service", () => {
       category: "amount_mismatch",
     });
     expect(mockMarkPaymentPaid).not.toHaveBeenCalled();
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).not.toHaveBeenCalled();
   });
 
   it("does not mark paid when provider status is not successful", async () => {
@@ -196,14 +244,16 @@ describe("NewebPay NotifyURL service", () => {
       category: "payment_not_success",
     });
     expect(mockMarkPaymentPaid).not.toHaveBeenCalled();
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).not.toHaveBeenCalled();
   });
 
-  it("does not create delivery artifact fields in the result", async () => {
+  it("does not expose raw paid access tokens in the NotifyURL result", async () => {
     const result = await processNewebPayNotify(notifyPayload(), env);
     const serialized = JSON.stringify(result);
 
-    expect(serialized).not.toContain("paidAccessToken");
-    expect(serialized).not.toContain("entitlement");
-    expect(serialized).not.toContain("generationJob");
+    expect(serialized).toContain("entitlement");
+    expect(serialized).toContain("generationJob");
+    expect(serialized).not.toContain("pa_test-token");
+    expect(serialized).not.toContain("/unlock/");
   });
 });

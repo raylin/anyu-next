@@ -6719,3 +6719,25 @@ Unresolved questions:
 - Exact NewebPay production callback field variants may need adjustment after provider review or sandbox callback testing.
 - Whether `1|OK` / `0|ERROR` is sufficient for every configured NewebPay product path.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - NewebPay Paid Delivery Integration Phase 3
+
+Completed changes:
+- Added a shared paid delivery artifact service for payment-intent-backed delivery.
+- Refactored operator fake-paid success to use the shared delivery service.
+- Wired verified successful NewebPay NotifyURL results to create/reuse entitlement, hash-at-rest `pa_` token, and paid generation job.
+- Kept NotifyURL from exposing raw `pa_` tokens or unlock paths to provider/public responses.
+- Kept duplicate paid NotifyURL idempotent without duplicate entitlement or generation job creation.
+- Kept ReturnURL read-only and non-mutating.
+- Added targeted tests for shared delivery, NotifyURL delivery creation, duplicate idempotency, invalid callback no-op, and fake-paid compatibility.
+- Confirmed no queue trigger, LINE delivery, production flag, prompt/result, public legal copy, or broad runtime enablement change was made.
+
+Learnings:
+- The fake-paid and provider-paid flows can share the same delivery artifact service without duplicating entitlement/job logic.
+- `payment_success_future` is sufficient as the existing provider-payment job trigger source for Phase 3, avoiding a schema/migration change.
+- Raw `pa_` token delivery remains the central product/architecture gap for real NewebPay users because NotifyURL must not expose it.
+
+Unresolved questions:
+- Which safe Phase 3B/4 mechanism should deliver the real paid access route to users after NewebPay payment.
+- Whether a real NewebPay sandbox callback reveals additional payload variants.
+- Final commit hash and staging push status are recorded in the final completion summary.
