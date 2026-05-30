@@ -334,7 +334,7 @@
         <div><span class="label">Last updated</span><span class="value">2026-05-31 01:35 CST</span></div>
         <div><span class="label">Current phase</span><span class="value">Sandbox E2E passed; waiting launch gate</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Merchant approval / production launch gate</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Merchant approval / formal production credentials</span></div>
       </div>
     </header>
 
@@ -346,10 +346,10 @@
         <article class="card"><span class="badge waiting">Waiting external</span><h3>NewebPay merchant review</h3><p>Supplement package has been submitted externally. Current state is waiting for review outcome.</p></article>
         <article class="card"><span class="badge disabled">Disabled by design</span><h3>Payment runtime</h3><p>Broad production payment runtime remains off. Production checkout and fake-paid routes fail closed.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>NewebPay sandbox E2E</h3><p>Fresh sandbox v5 passed: checkout, browser payment, NotifyURL/decrypt, paid readiness, queue, and session-bound access.</p></article>
-        <article class="card"><span class="badge progress">Ready for next gate</span><h3>Paid delivery pipeline</h3><p>Verified paid path creates entitlement, paid access token hash, and generation job in tested non-provider paths.</p></article>
+        <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. hello@anyu.tw is public support channel.</p></article>
-        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers remain NewebPay approval, sandbox fix/pass, production dry-run, and controlled smoke.</p></article>
+        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers remain NewebPay approval/formal credentials, production dry-run, and controlled smoke.</p></article>
         <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: sandbox helper, queue audit persistence, domain/project ambiguity, and optional provider fields.</p></article>
       </div>
     </section>
@@ -464,7 +464,6 @@
         <tbody>
           <tr><td>P0</td><td>NewebPay approval / credential readiness</td><td>Owner / NewebPay</td><td>Wait for review outcome and confirm formal credential availability.</td></tr>
           <tr><td>P0</td><td>Production config dry-run</td><td>Ops</td><td>After merchant approval/formal credentials, configure production env with runtime still disabled.</td></tr>
-          <tr><td>P0</td><td>Production config dry-run</td><td>Ops</td><td>After sandbox pass and approval, configure production env with runtime still disabled.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke</td><td>Owner / ops</td><td>Run one small controlled payment only after launch gate approval.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -484,7 +483,6 @@
         <thead><tr><th>Item</th><th>Priority</th><th>Owner</th><th>Risk if deferred</th><th>Suggested follow-up task</th></tr></thead>
         <tbody>
           <tr><td>Dedicated sandbox checkout/E2E helper</td><td>P2</td><td>Code</td><td>Manual smoke remains slow and error-prone.</td><td>Secret-Safe NewebPay Sandbox E2E Helper v0</td></tr>
-          <tr><td>Dedicated sandbox checkout/E2E helper</td><td>P2</td><td>Code</td><td>Manual smoke remains slow and error-prone.</td><td>Secret-Safe NewebPay Sandbox E2E Helper v0</td></tr>
           <tr><td>Queue audit persistence</td><td>P2</td><td>Code</td><td>Harder post-incident queue diagnosis after launch.</td><td>Paid Queue Audit Event Design v0</td></tr>
           <tr><td>Old Vercel domain/project ambiguity</td><td>P1</td><td>Owner UI</td><td>Future deployment ownership confusion.</td><td>Vercel Domain Ownership Cleanup v0</td></tr>
           <tr><td>Main/staging drift after docs commits</td><td>P1</td><td>Ops</td><td>Production release branch may lag operational docs.</td><td>Release Branch Documentation Sync v0</td></tr>
@@ -499,7 +497,7 @@
         <p><strong>Current recommendation:</strong> If NewebPay merchant review approval/formal credentials are available, run Production Payment Config Dry-Run v0.</p>
         <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production runtime should remain disabled until the launch gate sequence is explicitly approved.</p>
         <p>If approval is still pending, keep launch materials ready and avoid additional payment runtime changes.</p>
-        <p>If NewebPay approval arrives before sandbox is fixed, do not launch production payment yet; complete sandbox/provider verification or a controlled equivalent first.</p>
+        <p>If approval is received, the next gate is production config dry-run with runtime still disabled; do not jump directly to public checkout.</p>
       </div>
     </section>
 

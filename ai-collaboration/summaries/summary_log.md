@@ -7491,3 +7491,22 @@ Learnings:
 Unresolved questions:
 - Production payment runtime is still disabled and should remain so until merchant approval/formal credentials and production launch gate approval.
 - A dedicated secret-safe sandbox E2E helper remains useful to reduce manual form-generation friction.
+
+## 2026-05-31 - ANYU Project Dashboard Update after Sandbox E2E Pass v0
+
+Completed changes:
+- Updated `ai-collaboration/dashboard/anyu-project-dashboard.html` after Fresh NewebPay Sandbox E2E Payment Smoke v5 passed.
+- Marked NewebPay sandbox E2E as passed.
+- Marked the TradeInfo 32-byte padding issue as resolved by v5 evidence.
+- Marked the paid delivery pipeline as sandbox-validated.
+- Updated the active blocker to NewebPay merchant approval / formal production credentials.
+- Kept production payment runtime explicitly disabled in dashboard copy.
+- Clarified next step: wait/maintain launch readiness if approval is pending; run Production Payment Config Dry-Run v0 if approval/formal credentials are available.
+
+Learnings:
+- Dashboard had a few stale transition rows from before v5; those were cleaned up to reduce owner confusion.
+- Current owner-facing status is now: sandbox E2E passed, production payment disabled, launch blocked by external approval/formal credential readiness.
+
+Unresolved questions:
+- Whether NewebPay approval/formal production credentials are available yet.
+- Whether main should be reconciled with staging docs again before production launch gate work.
