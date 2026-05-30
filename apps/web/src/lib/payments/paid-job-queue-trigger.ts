@@ -2,11 +2,17 @@ import type { GenerationJob } from "@/lib/db/generation-jobs";
 import type { PaymentIntent } from "@/lib/db/payment-intents";
 import { isPaidJobQueueTriggerEnabled } from "@/lib/runtime/feature-flags";
 
-export type PaidJobQueueProvider = "none" | "noop" | "test";
+export type PaidJobQueueProvider = "none" | "noop" | "test" | "vercel_queue";
 
 export type PaidJobQueueTriggerSource = "newebpay_notify" | "operator_fake_paid";
 
-export type PaidJobQueueTriggerCategory = "disabled" | "noop" | "enqueued" | "failed";
+export type PaidJobQueueTriggerSuccessCategory = "disabled" | "noop" | "enqueued";
+
+export type PaidJobQueueTriggerFailureCategory =
+  | "provider_config_missing"
+  | "provider_error"
+  | "unsupported_provider"
+  | "unexpected_error";
 
 export type PaidJobQueueTriggerPayload = {
   version: 1;
@@ -20,24 +26,34 @@ export type PaidJobQueueTriggerPayload = {
 export type PaidJobQueueTriggerResult =
   | {
       ok: true;
-      category: Exclude<PaidJobQueueTriggerCategory, "failed">;
+      category: PaidJobQueueTriggerSuccessCategory;
       provider: PaidJobQueueProvider;
       payload?: PaidJobQueueTriggerPayload;
     }
   | {
       ok: false;
-      category: "failed";
+      category: PaidJobQueueTriggerFailureCategory;
       provider: PaidJobQueueProvider;
     };
 
 export function getPaidJobQueueProvider(env: NodeJS.ProcessEnv = process.env): PaidJobQueueProvider {
   const provider = env.PAID_JOB_QUEUE_PROVIDER?.trim().toLowerCase();
 
-  if (provider === "noop" || provider === "test") {
+  if (provider === "noop" || provider === "test" || provider === "vercel_queue") {
     return provider;
   }
 
   return "none";
+}
+
+function hasUnsupportedPaidJobQueueProvider(env: NodeJS.ProcessEnv) {
+  const provider = env.PAID_JOB_QUEUE_PROVIDER?.trim().toLowerCase();
+
+  return Boolean(provider && provider !== "none" && getPaidJobQueueProvider(env) === "none");
+}
+
+function getPaidJobQueueTopic(env: NodeJS.ProcessEnv) {
+  return env.PAID_JOB_QUEUE_TOPIC?.trim() || null;
 }
 
 export function buildPaidJobQueueTriggerPayload(input: {
@@ -55,6 +71,44 @@ export function buildPaidJobQueueTriggerPayload(input: {
   };
 }
 
+async function triggerVercelQueue(input: {
+  payload: PaidJobQueueTriggerPayload;
+  env: NodeJS.ProcessEnv;
+}): Promise<PaidJobQueueTriggerResult> {
+  const topic = getPaidJobQueueTopic(input.env);
+
+  if (!topic) {
+    return { ok: false, category: "provider_config_missing", provider: "vercel_queue" };
+  }
+
+  try {
+    const { send } = await import("@vercel/queue");
+
+    await send(topic, input.payload, {
+      idempotencyKey: `paid-job:${input.payload.generationJobId}`,
+      retentionSeconds: 24 * 60 * 60,
+    });
+
+    return {
+      ok: true,
+      category: "enqueued",
+      provider: "vercel_queue",
+      payload: input.payload,
+    };
+  } catch (error) {
+    if (error instanceof Error && error.name === "DuplicateMessageError") {
+      return {
+        ok: true,
+        category: "enqueued",
+        provider: "vercel_queue",
+        payload: input.payload,
+      };
+    }
+
+    return { ok: false, category: "provider_error", provider: "vercel_queue" };
+  }
+}
+
 export async function triggerPaidJobProcessing(input: {
   paymentIntent: Pick<PaymentIntent, "id" | "moduleSlug">;
   generationJob: Pick<GenerationJob, "id">;
@@ -67,6 +121,10 @@ export async function triggerPaidJobProcessing(input: {
     return { ok: true, category: "disabled", provider: "none" };
   }
 
+  if (hasUnsupportedPaidJobQueueProvider(env)) {
+    return { ok: false, category: "unsupported_provider", provider: "none" };
+  }
+
   const provider = getPaidJobQueueProvider(env);
 
   if (provider === "none") {
@@ -77,6 +135,10 @@ export async function triggerPaidJobProcessing(input: {
 
   if (provider === "noop") {
     return { ok: true, category: "noop", provider, payload };
+  }
+
+  if (provider === "vercel_queue") {
+    return triggerVercelQueue({ payload, env });
   }
 
   return { ok: true, category: "enqueued", provider, payload };

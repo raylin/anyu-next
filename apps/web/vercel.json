@@ -1,4 +1,15 @@
 {
+  "functions": {
+    "src/app/api/internal/queues/paid-generation/route.ts": {
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "paid-generation-jobs",
+          "retryAfterSeconds": 60
+        }
+      ]
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/retention-cleanup",

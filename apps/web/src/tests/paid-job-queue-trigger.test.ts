@@ -1,9 +1,22 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildPaidJobQueueTriggerPayload,
   getPaidJobQueueProvider,
   triggerPaidJobProcessing,
 } from "@/lib/payments/paid-job-queue-trigger";
+
+const { mockSend } = vi.hoisted(() => ({
+  mockSend: vi.fn(),
+}));
+
+vi.mock("@vercel/queue", async () => {
+  const actual = await vi.importActual<typeof import("@vercel/queue")>("@vercel/queue");
+
+  return {
+    ...actual,
+    send: mockSend,
+  };
+});
 
 const paymentIntent = {
   id: "payment-1",
@@ -15,6 +28,11 @@ const generationJob = {
 };
 
 describe("paid job queue trigger", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSend.mockResolvedValue({ messageId: "queue-message-1" });
+  });
+
   it("is disabled by default", async () => {
     await expect(
       triggerPaidJobProcessing({
@@ -46,8 +64,8 @@ describe("paid job queue trigger", () => {
         } as NodeJS.ProcessEnv,
       }),
     ).resolves.toEqual({
-      ok: true,
-      category: "disabled",
+      ok: false,
+      category: "unsupported_provider",
       provider: "none",
     });
   });
@@ -108,6 +126,111 @@ describe("paid job queue trigger", () => {
         generationJobId: "job-1",
         triggerSource: "operator_fake_paid",
       },
+    });
+  });
+
+  it("does not enqueue to Vercel Queues when the trigger flag is off", async () => {
+    await expect(
+      triggerPaidJobProcessing({
+        paymentIntent,
+        generationJob,
+        triggerSource: "newebpay_notify",
+        env: {
+          PAID_JOB_QUEUE_PROVIDER: "vercel_queue",
+          PAID_JOB_QUEUE_TOPIC: "paid-generation-jobs",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).resolves.toEqual({
+      ok: true,
+      category: "disabled",
+      provider: "none",
+    });
+    expect(mockSend).not.toHaveBeenCalled();
+  });
+
+  it("returns provider_config_missing when Vercel Queue topic config is absent", async () => {
+    await expect(
+      triggerPaidJobProcessing({
+        paymentIntent,
+        generationJob,
+        triggerSource: "newebpay_notify",
+        env: {
+          ENABLE_PAID_JOB_QUEUE_TRIGGER: "true",
+          PAID_JOB_QUEUE_PROVIDER: "vercel_queue",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      category: "provider_config_missing",
+      provider: "vercel_queue",
+    });
+    expect(mockSend).not.toHaveBeenCalled();
+  });
+
+  it("enqueues a safe Vercel Queue payload with an idempotency key", async () => {
+    const result = await triggerPaidJobProcessing({
+      paymentIntent,
+      generationJob,
+      triggerSource: "newebpay_notify",
+      env: {
+        ENABLE_PAID_JOB_QUEUE_TRIGGER: "true",
+        PAID_JOB_QUEUE_PROVIDER: "vercel_queue",
+        PAID_JOB_QUEUE_TOPIC: "paid-generation-jobs",
+      } as NodeJS.ProcessEnv,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      category: "enqueued",
+      provider: "vercel_queue",
+      payload: {
+        paymentIntentId: "payment-1",
+        generationJobId: "job-1",
+        moduleSlug: "ambiguous-temperature",
+        triggerSource: "newebpay_notify",
+      },
+    });
+    expect(mockSend).toHaveBeenCalledWith(
+      "paid-generation-jobs",
+      expect.objectContaining({
+        paymentIntentId: "payment-1",
+        generationJobId: "job-1",
+      }),
+      expect.objectContaining({
+        idempotencyKey: "paid-job:job-1",
+        retentionSeconds: 86400,
+      }),
+    );
+
+    const serialized = JSON.stringify(mockSend.mock.calls[0]);
+
+    expect(serialized).not.toContain("pa_");
+    expect(serialized).not.toContain("pcs_");
+    expect(serialized).not.toContain("/unlock/");
+    expect(serialized).not.toContain("TradeInfo");
+    expect(serialized).not.toContain("TradeSha");
+    expect(serialized).not.toContain("rawInput");
+    expect(serialized).not.toContain("providerPayload");
+  });
+
+  it("returns provider_error when Vercel Queue enqueue fails", async () => {
+    mockSend.mockRejectedValueOnce(new Error("queue unavailable"));
+
+    await expect(
+      triggerPaidJobProcessing({
+        paymentIntent,
+        generationJob,
+        triggerSource: "operator_fake_paid",
+        env: {
+          ENABLE_PAID_JOB_QUEUE_TRIGGER: "true",
+          PAID_JOB_QUEUE_PROVIDER: "vercel_queue",
+          PAID_JOB_QUEUE_TOPIC: "paid-generation-jobs",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      category: "provider_error",
+      provider: "vercel_queue",
     });
   });
 

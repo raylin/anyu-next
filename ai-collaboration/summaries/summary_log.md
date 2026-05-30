@@ -7030,3 +7030,22 @@ Unresolved questions:
 - Whether the `anyu-next` dashboard exposes Queues setup/observability for the owner account before code lands.
 - Whether to keep `main` in sync with staging for this planning-only commit before implementation.
 - Whether the TTL discrepancy between base docs and April changelog needs confirmation during implementation.
+
+## 2026-05-30 - Queue Trigger Integration Phase 4B.1: Vercel Queues Adapter v0
+
+Completed changes:
+- Added `@vercel/queue` and `PAID_JOB_QUEUE_PROVIDER=vercel_queue` support behind the existing disabled-by-default paid job queue trigger abstraction.
+- Added Vercel Queues `queue/v2beta` config for topic `paid-generation-jobs`.
+- Added internal queue consumer route `/api/internal/queues/paid-generation`.
+- Added consumer service that validates DB-reference-only payloads and delegates to `processPaidAnalysisJobs({ limit: 1, lockedBy: "paid_generation_queue" })`.
+- Added tests for Vercel queue config missing, enqueue success/failure, payload safety, consumer validation, disabled behavior, processor-disabled behavior, and DB config failure.
+
+Learnings:
+- `@vercel/queue` top-level default client emits a local build warning when region is not detected, so the consumer route uses `new QueueClient({ region: process.env.VERCEL_REGION || "iad1" })`.
+- The current generic processor can safely process a due paid job from DB as source of truth, but it does not yet target the exact queued `generationJobId`.
+- Vercel Queues idempotency keys allow Phase 4B.1 to use `paid-job:<generationJobId>` without adding a queue audit table yet.
+
+Unresolved questions:
+- Whether the owner dashboard confirms Vercel Queues setup/observability for `anyu-next`.
+- Whether staging queue smoke will prove queue-triggered processor completion without manual invocation.
+- Whether Phase 4B.2 should add targeted generation-job processing or defer it until queue smoke exposes a concrete need.
