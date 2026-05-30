@@ -7202,3 +7202,19 @@ Learnings:
 Unresolved questions:
 - NewebPay sandbox credential availability remains unknown.
 - No dedicated sandbox E2E runner exists yet; the first smoke is expected to be manual/operator-driven unless a follow-up automates it.
+
+## 2026-05-30 - NewebPay Sandbox Staging Env Setup + Checkout Preflight v0
+
+Completed changes:
+- Inspected current NewebPay checkout route/service/config/payload implementation and documented exact env/route contracts.
+- Verified implementation uses `NEWEBPAY_CHECKOUT_URL`, `NEWEBPAY_ENVIRONMENT`, `NEXT_PUBLIC_APP_URL`, `NEWEBPAY_NOTIFY_URL`, and hard-coded MPG `Version=2.0`.
+- Confirmed Production remains disabled: production health stayed `main/1990fc034d74`, and production fake-paid/checkout routes returned JSON `404 not_found`.
+- Documented that env setup and checkout preflight were blocked because provider credentials were not available in the Codex shell.
+
+Learnings:
+- Owner-provided env naming notes differ from implementation: use `NEWEBPAY_CHECKOUT_URL` not `NEWEBPAY_GATEWAY_URL`, and `NEWEBPAY_ENVIRONMENT` not `NEWEBPAY_ENV`.
+- Current checkout payload does not include `ClientBackURL` or payment method restriction fields; first sandbox smoke should manually choose credit-card one-time payment unless a follow-up adds provider method fields.
+
+Unresolved questions:
+- Owner must provide MerchantID / HashKey / HashIV securely to shell or configure them directly in branch-scoped Preview(`staging`).
+- If NewebPay requires `ClientBackURL` or method restriction fields, a follow-up code task is needed before payment smoke.
