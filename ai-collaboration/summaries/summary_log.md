@@ -6675,3 +6675,25 @@ Unresolved questions:
 - Whether stale duplicate general Preview QA secrets should be removed later to reduce operator confusion.
 - Whether to remove the temporary processor auth diagnostic mode after payment QA stabilizes.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - NewebPay Checkout Creation Phase 1
+
+Completed changes:
+- Implemented gated NewebPay checkout creation Phase 1 for Module 01.
+- Added `ENABLE_NEWEBPAY_CHECKOUT` and `ENABLE_PAYMENT_RUNTIME` feature flags; checkout is off by default and requires operator secret while payment runtime is off.
+- Added NewebPay config and checkout contract helpers under `apps/web/src/lib/payments/newebpay/`.
+- Added a checkout service that creates/reuses `newebpay` `payment_intents` and moves them only to `checkout_started`.
+- Added `POST /api/modules/[moduleSlug]/checkout/newebpay` for operator/staging-gated checkout contract creation.
+- Added `GET /m/[moduleSlug]/payment/return` pending UX that never marks payment paid or creates delivery artifacts.
+- Added targeted checkout route/service/ReturnURL tests and confirmed fake-paid tests still pass.
+- Confirmed no NotifyURL verification, paid transition, entitlement creation, `pa_` token creation, generation job, queue trigger, LINE delivery, production runtime, prompt/result, or legal copy change was made.
+
+Learnings:
+- Existing payment intent foundation was sufficient for Phase 1; no schema changes were needed.
+- Provider-specific NewebPay logic can remain isolated from route/page code.
+- ReturnURL can safely remain UX-only until NotifyURL verification is implemented.
+
+Unresolved questions:
+- Exact NewebPay provider env values still need to be configured securely for staging before route-level checkout smoke.
+- Whether Phase 2 should mark payment paid only, or also remain short of entitlement/job creation until a later phase.
+- Final commit hash and staging push status are recorded in the final completion summary.

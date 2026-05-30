@@ -17,3 +17,11 @@ export function isPaidGenerationProcessorEnabled(env: NodeJS.ProcessEnv = proces
 export function isOperatorFakePaidSuccessEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return getBooleanEnvFlag("ENABLE_OPERATOR_FAKE_PAID_SUCCESS", env);
 }
+
+export function isPaymentRuntimeEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return getBooleanEnvFlag("ENABLE_PAYMENT_RUNTIME", env);
+}
+
+export function isNewebPayCheckoutEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return getBooleanEnvFlag("ENABLE_NEWEBPAY_CHECKOUT", env);
+}
