@@ -6821,3 +6821,21 @@ Unresolved questions:
 - Owner must confirm whether screenshots should use production or staging URLs.
 - Owner must confirm whether to state a concrete refund handling time window.
 - Owner must gather and redact external proof documents before sending.
+
+## 2026-05-30 - ANYU Current State Snapshot for ChatGPT Review v0
+
+Completed changes:
+- Created a documentation-only current-state evidence pack for ChatGPT review.
+- Captured git/remote state, including remote `origin/staging` at `b40a5d2` and stale local tracking ref behavior.
+- Verified staging is serving the latest storefront/refund content and health marker, while production still serves older homepage content and `/refund` returns 404.
+- Summarized public merchant-review surfaces, refund policy content, payment routes, flags/env names, implementation boundaries, QA evidence, and supplement package readiness.
+
+Learnings:
+- Staging is current at `b40a5d2`; production has not been refreshed with the merchant-review storefront/refund page.
+- Payment implementation now has checkout, NotifyURL verification, delivery artifact creation, and session-bound handoff, but broad runtime remains gated and queue trigger/LINE/refund tooling are not implemented.
+- The supplement package is ready as documentation, but external proof documents remain owner-only and outside repo.
+
+Unresolved questions:
+- Whether to refresh production before NewebPay screenshots.
+- Whether to use production or staging URLs for the supplement package.
+- Whether refund handling time should be stated explicitly before submission.
