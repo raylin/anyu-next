@@ -192,7 +192,7 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
   );
 }
 
-function UnlockCompleted({
+export function UnlockCompleted({
   moduleConfig,
   moduleSlug,
   initialTheme,

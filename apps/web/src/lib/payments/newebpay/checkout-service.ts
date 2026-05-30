@@ -9,6 +9,7 @@ import { getAnalysisResultWithRequestById } from "@/lib/db/runtime";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import { buildNewebPayCheckoutContract } from "@/lib/payments/newebpay/checkout-payload";
 import { getNewebPayConfig } from "@/lib/payments/newebpay/config";
+import { createPaymentCheckoutSessionToken } from "@/lib/payments/payment-checkout-session";
 
 const MODULE_01_PRICE_MINOR = 49;
 
@@ -26,6 +27,7 @@ export type CreateNewebPayCheckoutResult =
         | "source_result_not_found"
         | "missing_newebpay_config"
         | "invalid_newebpay_config"
+        | "payment_checkout_session_config_missing"
         | "payment_intent_create_failed"
         | "payment_intent_update_failed";
       missingConfig?: string[];
@@ -79,6 +81,20 @@ export async function createNewebPayCheckout(input: {
     resultId: input.resultId,
     idempotencyKey: input.idempotencyKey,
   });
+  const checkoutSession = createPaymentCheckoutSessionToken({
+    moduleSlug: input.moduleConfig.slug,
+    merchantOrderNo,
+    env: input.env,
+  });
+
+  if (!checkoutSession.ok) {
+    return {
+      ok: false,
+      status: 503,
+      error: "payment_checkout_session_config_missing",
+    };
+  }
+
   let paymentIntent = await getPaymentIntentByMerchantOrderNo(merchantOrderNo);
   let paymentIntentCreated = false;
 
@@ -113,6 +129,8 @@ export async function createNewebPayCheckout(input: {
 
   const returnUrl = `${config.returnUrlBase}/m/${input.moduleConfig.slug}/payment/return?merchantOrderNo=${encodeURIComponent(
     merchantOrderNo,
+  )}&checkoutToken=${encodeURIComponent(
+    checkoutSession.token,
   )}`;
 
   return {

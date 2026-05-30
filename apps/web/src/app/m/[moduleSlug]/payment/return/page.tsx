@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Card } from "@/components/anyu/Card";
 import { isDbConfigured } from "@/lib/db/client";
-import { getPaymentIntentByMerchantOrderNo } from "@/lib/db/payment-intents";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import { resolvePaymentAccessHandoff } from "@/lib/payments/payment-access-handoff";
 
 type ReturnPageProps = {
   params: Promise<{
@@ -10,28 +10,42 @@ type ReturnPageProps = {
   }>;
   searchParams: Promise<{
     merchantOrderNo?: string;
+    checkoutToken?: string;
   }>;
 };
 
 function PendingMessage({
   moduleSlug,
-  status,
+  state,
+  accessPath,
 }: {
   moduleSlug: string;
-  status?: string | null;
+  state?: string | null;
+  accessPath?: string | null;
 }) {
+  const isReady = state === "paid_ready" && accessPath;
+
   return (
     <main className="anyu-shell">
       <Card>
         <p className="anyu-kicker">Payment pending</p>
-        <h1 className="anyu-section-title">正在確認付款狀態</h1>
+        <h1 className="anyu-section-title">
+          {isReady ? "付款已確認" : "正在確認付款狀態"}
+        </h1>
         <p className="anyu-copy">
-          我們正在等待金流確認。這個頁面只顯示等待狀態，不會直接解鎖完整分析。
+          {isReady
+            ? "完整分析已準備好，請使用下方安全連結繼續查看。"
+            : "我們正在等待金流確認。這個頁面只顯示等待狀態，不會直接解鎖完整分析。"}
         </p>
-        {status ? <p className="anyu-copy">目前狀態：{status}</p> : null}
+        {state ? <p className="anyu-copy">目前狀態：{state}</p> : null}
         <p className="anyu-copy">
           若付款已完成但結果尚未出現，請稍後重新整理，或保留付款資訊聯繫客服協助確認。
         </p>
+        {isReady ? (
+          <Link href={accessPath} className="anyu-button">
+            查看完整分析
+          </Link>
+        ) : null}
         <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
           回到曖昧溫度計
         </Link>
@@ -42,22 +56,31 @@ function PendingMessage({
 
 export default async function NewebPayReturnPage({ params, searchParams }: ReturnPageProps) {
   const { moduleSlug } = await params;
-  const { merchantOrderNo } = await searchParams;
+  const { checkoutToken } = await searchParams;
   const moduleConfig = getModuleBySlug(moduleSlug);
 
   if (!moduleConfig) {
     return <PendingMessage moduleSlug="ambiguous-temperature" />;
   }
 
-  if (!merchantOrderNo || !isDbConfigured()) {
+  if (!checkoutToken || !isDbConfigured()) {
     return <PendingMessage moduleSlug={moduleConfig.slug} />;
   }
 
-  const paymentIntent = await getPaymentIntentByMerchantOrderNo(merchantOrderNo);
+  const handoff = await resolvePaymentAccessHandoff({
+    moduleSlug: moduleConfig.slug,
+    checkoutToken,
+  });
 
-  if (!paymentIntent || paymentIntent.moduleSlug !== moduleConfig.slug) {
-    return <PendingMessage moduleSlug={moduleConfig.slug} />;
+  if (!handoff.ok) {
+    return <PendingMessage moduleSlug={moduleConfig.slug} state={handoff.state} />;
   }
 
-  return <PendingMessage moduleSlug={moduleConfig.slug} status={paymentIntent.status} />;
+  return (
+    <PendingMessage
+      moduleSlug={moduleConfig.slug}
+      state={handoff.state}
+      accessPath={handoff.accessPath}
+    />
+  );
 }

@@ -90,6 +90,8 @@ export async function POST(request: Request, { params }: RouteProps) {
       result.error,
       result.error === "source_result_not_found"
         ? "找不到這份分析結果。"
+        : result.error === "payment_checkout_session_config_missing"
+          ? "目前付款返回連結暫時無法建立。"
         : "目前付款連結暫時無法建立。",
       result.error === "missing_newebpay_config" || result.error === "invalid_newebpay_config"
         ? { missingConfig: result.missingConfig ?? [] }
@@ -107,8 +109,7 @@ export async function POST(request: Request, { params }: RouteProps) {
     paymentIntentCreated: result.paymentIntentCreated,
     merchantOrderNo: result.checkoutContract.merchantOrderNo,
     checkout: result.checkoutContract,
-    pendingReturnPath: `/m/${moduleConfig.slug}/payment/return?merchantOrderNo=${encodeURIComponent(
-      result.checkoutContract.merchantOrderNo,
-    )}`,
+    pendingReturnPath: new URL(result.checkoutContract.returnUrl).pathname +
+      new URL(result.checkoutContract.returnUrl).search,
   });
 }

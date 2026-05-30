@@ -56,6 +56,7 @@ const env = {
   NEWEBPAY_NOTIFY_URL: "https://staging.anyu.tw/api/payments/newebpay/notify",
   NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw",
   NEWEBPAY_ENVIRONMENT: "sandbox",
+  PAYMENT_CHECKOUT_SESSION_SECRET: "test-only-checkout-session-secret",
 } as NodeJS.ProcessEnv;
 
 function expectedMerchantOrderNo(moduleSlug: string, idempotencyPart: string) {
@@ -92,12 +93,15 @@ describe("NewebPay checkout service", () => {
       actionUrl: env.NEWEBPAY_CHECKOUT_URL,
       method: "POST",
       merchantOrderNo,
-      returnUrl: `https://staging.anyu.tw/m/ambiguous-temperature/payment/return?merchantOrderNo=${merchantOrderNo}`,
       fields: {
         MerchantID: env.NEWEBPAY_MERCHANT_ID,
         Version: "2.0",
       },
     });
+    expect(result.checkoutContract.returnUrl).toContain(
+      `https://staging.anyu.tw/m/ambiguous-temperature/payment/return?merchantOrderNo=${merchantOrderNo}`,
+    );
+    expect(result.checkoutContract.returnUrl).toContain("checkoutToken=pcs_");
     expect(result.checkoutContract.fields.TradeInfo).toMatch(/^[a-f0-9]+$/u);
     expect(result.checkoutContract.fields.TradeSha).toMatch(/^[A-F0-9]{64}$/u);
     expect(result.checkoutContract.merchantOrderNo).toHaveLength(30);
@@ -144,6 +148,25 @@ describe("NewebPay checkout service", () => {
       ok: false,
       status: 503,
       error: "missing_newebpay_config",
+    });
+    expect(mockCreatePaymentIntent).not.toHaveBeenCalled();
+    expect(mockMarkPaymentCheckoutStarted).not.toHaveBeenCalled();
+  });
+
+  it("fails safely before payment writes when checkout session config is missing", async () => {
+    const envWithoutSessionSecret = { ...env };
+    delete envWithoutSessionSecret.PAYMENT_CHECKOUT_SESSION_SECRET;
+
+    const result = await createNewebPayCheckout({
+      moduleConfig,
+      resultId: "result-1",
+      env: envWithoutSessionSecret as NodeJS.ProcessEnv,
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 503,
+      error: "payment_checkout_session_config_missing",
     });
     expect(mockCreatePaymentIntent).not.toHaveBeenCalled();
     expect(mockMarkPaymentCheckoutStarted).not.toHaveBeenCalled();

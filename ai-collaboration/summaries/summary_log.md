@@ -6741,3 +6741,25 @@ Unresolved questions:
 - Which safe Phase 3B/4 mechanism should deliver the real paid access route to users after NewebPay payment.
 - Whether a real NewebPay sandbox callback reveals additional payload variants.
 - Final commit hash and staging push status are recorded in the final completion summary.
+
+## 2026-05-30 - NewebPay Paid Access Handoff Phase 3B
+
+Completed changes:
+- Added signed, non-persisted `pcs_` checkout session token creation and validation.
+- Updated NewebPay checkout creation to include `checkoutToken` in ReturnURL and fail safely before payment writes if signing config is missing.
+- Added session-bound payment access handoff resolver.
+- Added `POST /api/modules/[moduleSlug]/payment/status` returning sanitized payment handoff states.
+- Updated ReturnURL to use the checkout session handoff while remaining non-mutating.
+- Added `/m/[moduleSlug]/payment/access` to render completed paid result only after valid session-bound ready state.
+- Kept raw `pa_` tokens hash-at-rest and did not expose them through NotifyURL, ReturnURL, status, or payment access page.
+- Added tests for token signing, invalid/expired sessions, unpaid no-access behavior, processing/ready states, status route, access page, and checkout session config.
+
+Learnings:
+- A signed non-persisted checkout session token can bridge ReturnURL access without schema changes and without reconstructing raw `pa_`.
+- Payment truth remains NotifyURL + paid payment intent; the checkout session token is only a browser handoff credential.
+- Exporting `UnlockCompleted` avoided duplicating paid result rendering for the session-bound access page.
+
+Unresolved questions:
+- Whether the session-bound access page should be permanent or later replaced by a short-lived exchange-to-`pa_` redirect.
+- Whether NewebPay preserves custom ReturnURL query parameters exactly across all sandbox/production modes.
+- Final commit hash and staging push status are recorded in the final completion summary.
