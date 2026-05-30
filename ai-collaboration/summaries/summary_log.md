@@ -7087,3 +7087,24 @@ Unresolved questions:
 - Whether to add a dedicated `qa:fake-paid:queue` script for repeated queue smoke.
 - Whether manual processor fallback should be rerun after every queue-provider change.
 - Whether to add queue attempt/audit persistence before production payment launch.
+
+## 2026-05-30 - Queue Launch Readiness / Phase 4C Checklist v0
+
+Completed changes:
+- Created a documentation-only queue launch readiness checklist after successful Phase 4B.2 staging queue smoke.
+- Summarized what Phase 4A, 4B.1, targeted processor, and 4B.2 prove and what remains unproven.
+- Defined final queue QA requirements before launch, including queue-mode fake-paid, manual fallback, disabled/config-missing behavior, duplicate/idempotency checks, production disabled checks, and provider E2E smoke.
+- Documented Vercel Queues dashboard observation SOP and app-level evidence fallback.
+- Documented manual recovery SOP using `INTERNAL_JOB_SECRET` without exposing secret values.
+- Listed env/flag names only and reiterated branch-scoped Preview(`staging`) precedence.
+- Ranked launch blockers and provided next-step decision tree.
+
+Learnings:
+- Queue path is staging-proven, but production launch readiness still depends on business/provider approval and operational SOPs.
+- Manual fallback and dashboard observation are the main remaining queue-confidence gaps.
+- Production payment launch should be treated as a separate decision, not a consequence of queue smoke passing.
+
+Unresolved questions:
+- Whether NewebPay sandbox/provider credentials will be available before merchant review approval.
+- Whether owner wants Manual Fallback Retest + Queue Dashboard Observation before launch gate planning.
+- Whether queue enqueue audit persistence is needed before production launch or can wait until usage proves need.
