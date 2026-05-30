@@ -7432,3 +7432,24 @@ Learnings:
 Unresolved questions:
 - Whether the sandbox backend shop that processed the transaction has different HashKey/HashIV from `.env.local` / Preview(`staging)`.
 - Whether copied credential values contain hidden whitespace, quotes, old sandbox values, production values, or a different shop's values.
+
+## 2026-05-31 - NewebPay Sandbox Backend Credential Verification v0
+
+Completed changes:
+- Re-inspected NewebPay checkout and NotifyURL source config paths.
+- Confirmed both checkout and NotifyURL use `getNewebPayConfig(...)` and the same NewebPay env names.
+- Verified local `apps/web/.env.local` has the three sensitive NewebPay credential names present, without printing values.
+- Verified Vercel Preview(`staging`) has the expected branch-scoped NewebPay env names, without printing values.
+- Verified Production does not have NewebPay credential/config env names listed and remains out of scope for sandbox credentials.
+- Created an owner-facing backend checklist for exact sandbox shop MerchantID / HashKey / HashIV / gateway / NotifyURL verification.
+- Updated the project dashboard to point to owner-side backend credential verification as the current blocker.
+
+Learnings:
+- App source consistency is not the current blocker: both provider callback and checkout creation read the same helper and same env names.
+- Preview(`staging`) branch-scoped env presence is correct at the metadata level, but value equality with NewebPay backend cannot be proven without owner-side manual verification.
+- Production does not appear to have NewebPay credential/config env names configured, which is consistent with disabled production runtime.
+
+Unresolved questions:
+- Whether the successful sandbox transaction belongs to the exact same sandbox shop as the configured MerchantID / HashKey / HashIV.
+- Whether copied backend credentials include hidden formatting issues or are stale/regenerated.
+- If owner confirms credentials match exactly, a code-level TradeInfo decrypt compatibility investigation is the next step.
