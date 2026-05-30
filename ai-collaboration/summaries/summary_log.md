@@ -7158,3 +7158,18 @@ Learnings:
 
 Unresolved questions:
 - NewebPay review/sandbox E2E and production payment launch gate remain the next business/runtime readiness items.
+
+## 2026-05-30 - Production Payment Launch Gate Plan v0
+
+Completed changes:
+- Added a production payment launch gate plan for enabling NewebPay only after merchant review approval and required smoke tests.
+- Documented current readiness across fake-paid delivery, NotifyURL verification, paid delivery artifacts, `pcs_` handoff, Vercel Queues, manual fallback, production fail-closed posture, and merchant-review content.
+- Defined hard launch blockers, phased launch sequence L0-L5, env/flag matrix, staging/production smoke checklist, rollback/disable plan, stop-loss rules, monitoring targets, and customer support/refund SOP.
+
+Learnings:
+- Engineering readiness is strong at staging/fake-paid/queue/manual-fallback level, but production payment runtime must still wait for NewebPay approval and provider E2E.
+- The launch plan should treat provider credentials, production env configuration, controlled smoke, and public availability as separate gates.
+
+Unresolved questions:
+- NewebPay review approval and sandbox/production credential readiness remain pending.
+- Owner still needs to confirm final launch price, refund response window, support inbox readiness, and whether recent docs-only staging commits should be promoted to main before runtime launch.
