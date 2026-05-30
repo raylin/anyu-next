@@ -11,6 +11,7 @@ const SYNTHETIC_INPUT =
 const operatorSecret = process.env.OPERATOR_TEST_SECRET?.trim() ?? "";
 const internalJobSecret = process.env.INTERNAL_JOB_SECRET?.trim() ?? "";
 const processorMode = process.env.QA_FAKE_PAID_PROCESSOR_MODE?.trim().toLowerCase() ?? "manual";
+const inputSuffix = process.env.QA_FAKE_PAID_INPUT_SUFFIX?.trim() ?? "";
 const queueMode = processorMode === "queue";
 
 function record(step, status, details = {}) {
@@ -159,7 +160,7 @@ async function createSourceResult() {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      text: SYNTHETIC_INPUT,
+      text: inputSuffix ? `${SYNTHETIC_INPUT}\n\n${inputSuffix}` : SYNTHETIC_INPUT,
       situation: "ambiguous_temperature",
       anonymousSessionId: `secret-safe-fake-paid-${crypto.randomUUID()}`,
       userContext: {

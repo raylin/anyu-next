@@ -7126,3 +7126,23 @@ Unresolved questions:
 - Owner/operator still needs to run queue-mode and manual-mode `qa:fake-paid` with secrets exported.
 - Owner/operator still needs to observe `paid-generation-jobs` in Vercel dashboard and record safe aggregate queue metrics.
 - Local `.git/FETCH_HEAD` permission issue still blocks `git fetch origin --prune`.
+
+## 2026-05-30 - Force Align Preview(staging) QA Secrets and Run Queue + Manual Fallback QA v0
+
+Completed changes:
+- Regenerated and aligned branch-scoped Preview(`staging`) `OPERATOR_TEST_SECRET` and `INTERNAL_JOB_SECRET` through Vercel CLI without printing values.
+- Redeployed Preview(`staging`) with explicit Vercel team scope and verified staging health on commit `b9069bdaaea2`.
+- Queue-mode fake-paid QA passed with `vercel_queue` enqueue and completed paid unlock rendering.
+- Added QA-only `QA_FAKE_PAID_INPUT_SUFFIX` support to force a fresh source result for manual fallback testing.
+- Temporarily disabled Preview(`staging`) queue trigger, redeployed, ran manual fallback QA on a fresh source, confirmed `processed=1` and `completed=1`, then restored queue trigger to `true` and redeployed.
+- Verified Production remains disabled: production health stayed `main/1990fc034d74`, production fake-paid/checkout routes returned JSON `404 not_found`, and Production env listing did not include queue flags.
+
+Learnings:
+- Vercel redeploy should use explicit `--scope studioanyu-1488s-projects`; an unscoped redeploy hit a team mismatch.
+- Manual fallback must use a fresh source result when queue/idempotency has already completed the standard cached QA source.
+- Preview(`staging`) queue restoration was verified after the temporary manual fallback disable pass.
+
+Unresolved questions:
+- Vercel dashboard queue observation remains an owner UI action.
+- NewebPay review/sandbox provider credential status remains pending.
+- Local `.git/FETCH_HEAD` permission issue remains unresolved.
