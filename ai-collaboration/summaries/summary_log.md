@@ -7377,3 +7377,19 @@ Learnings:
 Unresolved questions:
 - Whether Preview(`staging`) currently uses a HashKey/HashIV pair from a different sandbox shop, old sandbox config, production config, or otherwise mismatched NewebPay backend setting.
 - Paid transition, delivery artifacts, queue completion, and paid access rendering remain unverified for real sandbox provider flow.
+
+## 2026-05-31 - ANYU Project Dashboard HTML v0
+
+Completed changes:
+- Created a static owner-facing project dashboard at `ai-collaboration/dashboard/anyu-project-dashboard.html`.
+- Added `ai-collaboration/dashboard/README.md` with local-open instructions, safety warning, and update cadence.
+- Dashboard summarizes current project snapshot, status cards, timeline, architecture flows, engineering status, deployment posture, NewebPay status, queue readiness, merchant review, support/refund readiness, blockers, tech debt, next task, and report references.
+- Captured the latest actual sandbox state: v3 ran and exposed safe NotifyURL category `trade_info_decrypt_failed`.
+
+Learnings:
+- The owner now has a coarse but useful single-file dashboard for project state without reading every handoff/report.
+- The dashboard should be treated as maintained documentation and updated after meaningful launch gate or blocker changes.
+
+Unresolved questions:
+- Dashboard can drift if future handoffs do not update it after major state changes.
+- Main/staging documentation promotion policy should be followed if main is used as production source-of-truth.

@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ANYU Project Dashboard</title>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --panel: #fffdf8;
+      --ink: #28231f;
+      --muted: #6f665c;
+      --line: #e5ddd1;
+      --green: #2f7a55;
+      --green-bg: #e5f3eb;
+      --yellow: #8a6500;
+      --yellow-bg: #fff3c4;
+      --red: #a23b32;
+      --red-bg: #ffe3df;
+      --gray: #66645f;
+      --gray-bg: #ece9e3;
+      --blue: #2f5f8f;
+      --blue-bg: #e3eef8;
+      --shadow: 0 14px 45px rgba(47, 38, 25, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(229, 183, 92, 0.18), transparent 30rem),
+        radial-gradient(circle at 88% 4%, rgba(47, 95, 143, 0.13), transparent 28rem),
+        linear-gradient(180deg, #fbf6ed 0%, var(--bg) 44%, #f1ece3 100%);
+      font-family: ui-serif, Georgia, "Noto Serif TC", "Songti TC", serif;
+      line-height: 1.55;
+    }
+
+    a {
+      color: #784a18;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .wrap {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 44px 22px 72px;
+    }
+
+    header {
+      padding: 34px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: rgba(255, 253, 248, 0.86);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font: 700 0.78rem/1.2 ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.1rem, 4vw, 4.4rem);
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: clamp(1.35rem, 2vw, 2rem);
+      letter-spacing: -0.025em;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font: 750 1rem/1.25 ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .lead {
+      max-width: 900px;
+      margin: 18px 0 0;
+      color: #4b4037;
+      font-size: 1.08rem;
+    }
+
+    .snapshot {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .snapshot div,
+    .card,
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(47, 38, 25, 0.045);
+    }
+
+    .snapshot div {
+      padding: 15px 16px;
+    }
+
+    .label {
+      display: block;
+      color: var(--muted);
+      font: 700 0.72rem/1.2 ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .value {
+      display: block;
+      margin-top: 6px;
+      font: 750 1rem/1.25 ui-sans-serif, system-ui, sans-serif;
+    }
+
+    section {
+      margin-top: 34px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      padding: 18px;
+      min-height: 150px;
+    }
+
+    .card p,
+    .panel p,
+    .panel li,
+    td {
+      color: #4c443d;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font: 800 0.7rem/1 ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .done { color: var(--green); background: var(--green-bg); }
+    .progress { color: var(--blue); background: var(--blue-bg); }
+    .blocked { color: var(--red); background: var(--red-bg); }
+    .waiting { color: var(--yellow); background: var(--yellow-bg); }
+    .disabled { color: var(--gray); background: var(--gray-bg); }
+
+    .panel {
+      padding: 24px;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+    }
+
+    .three {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .node {
+      padding: 10px 12px;
+      border: 1px solid #ded3c4;
+      border-radius: 14px;
+      background: #fff9ee;
+      font: 750 0.88rem/1.25 ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .arrow {
+      color: var(--muted);
+      font: 900 1.1rem/1 ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .timeline {
+      position: relative;
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .timeline li {
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 18px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .time {
+      color: var(--muted);
+      font: 800 0.78rem/1.4 ui-sans-serif, system-ui, sans-serif;
+      text-transform: uppercase;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fffdfa;
+    }
+
+    th,
+    td {
+      padding: 12px 13px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #3d342d;
+      background: #f3eadf;
+      font: 800 0.78rem/1.3 ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .progressbar {
+      height: 9px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #e6ded2;
+    }
+
+    .progressbar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #2f7a55, #d39b34);
+    }
+
+    .refs {
+      columns: 2;
+      column-gap: 28px;
+      padding-left: 18px;
+    }
+
+    .refs li {
+      break-inside: avoid;
+      margin: 0 0 8px;
+    }
+
+    footer {
+      margin-top: 34px;
+      color: var(--muted);
+      font: 700 0.82rem/1.4 ui-sans-serif, system-ui, sans-serif;
+    }
+
+    @media (max-width: 980px) {
+      .snapshot,
+      .grid,
+      .two,
+      .three {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap {
+        padding: 22px 14px 48px;
+      }
+
+      header,
+      .panel {
+        padding: 20px;
+        border-radius: 22px;
+      }
+
+      .snapshot,
+      .grid,
+      .two,
+      .three {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline li {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+
+      .refs {
+        columns: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <p class="eyebrow">Owner Dashboard · Static HTML</p>
+      <h1>暗語 ANYU / anyu-next</h1>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging payment/queue flow mostly validated; NewebPay sandbox NotifyURL business verification is under diagnosis.</p>
+      <div class="snapshot" aria-label="Project snapshot">
+        <div><span class="label">Last updated</span><span class="value">2026-05-31 00:27 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Sandbox payment diagnosis before launch gate</span></div>
+        <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Sandbox TradeInfo decrypt failure</span></div>
+      </div>
+    </header>
+
+    <section>
+      <h2>Status Cards</h2>
+      <div class="grid">
+        <article class="card"><span class="badge done">Done</span><h3>Product / Module 01</h3><p>Free analysis and paid-report product structure are implemented. Module 01 remains low-key active and monitored.</p></article>
+        <article class="card"><span class="badge done">Done</span><h3>Production public site</h3><p>anyu.tw storefront, product preview, NT$49 price, /refund, and /legal are live for merchant review.</p></article>
+        <article class="card"><span class="badge waiting">Waiting external</span><h3>NewebPay merchant review</h3><p>Supplement package has been submitted externally. Current state is waiting for review outcome.</p></article>
+        <article class="card"><span class="badge disabled">Disabled by design</span><h3>Payment runtime</h3><p>Broad production payment runtime remains off. Production checkout and fake-paid routes fail closed.</p></article>
+        <article class="card"><span class="badge blocked">Blocked</span><h3>NewebPay sandbox E2E</h3><p>Checkout and callback transport work; v3 failed at safe category <code>trade_info_decrypt_failed</code>.</p></article>
+        <article class="card"><span class="badge progress">Ready for next gate</span><h3>Paid delivery pipeline</h3><p>Verified paid path creates entitlement, paid access token hash, and generation job in tested non-provider paths.</p></article>
+        <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
+        <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. hello@anyu.tw is public support channel.</p></article>
+        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers remain NewebPay approval, sandbox fix/pass, production dry-run, and controlled smoke.</p></article>
+        <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: sandbox helper, queue audit persistence, domain/project ambiguity, and optional provider fields.</p></article>
+      </div>
+    </section>
+
+    <section class="two">
+      <div class="panel">
+        <h2>Architecture Flow Overview</h2>
+        <h3>A. User/product flow</h3>
+        <div class="flow"><span class="node">free analysis</span><span class="arrow">→</span><span class="node">paid unlock</span><span class="arrow">→</span><span class="node">full AI report</span></div>
+        <h3>B. Payment flow</h3>
+        <div class="flow"><span class="node">checkout</span><span class="arrow">→</span><span class="node">NewebPay</span><span class="arrow">→</span><span class="node">NotifyURL truth</span><span class="arrow">→</span><span class="node">payment_intent paid</span><span class="arrow">→</span><span class="node">delivery artifacts</span><span class="arrow">→</span><span class="node">queue</span><span class="arrow">→</span><span class="node">paid result</span></div>
+        <h3>C. Access handoff</h3>
+        <div class="flow"><span class="node">pcs_ ReturnURL session</span><span class="arrow">→</span><span class="node">payment status</span><span class="arrow">→</span><span class="node">session-bound access page</span><span class="arrow">→</span><span class="node">completed paid result</span></div>
+        <h3>D. Queue flow</h3>
+        <div class="flow"><span class="node">generation_job</span><span class="arrow">→</span><span class="node">Vercel Queue</span><span class="arrow">→</span><span class="node">targeted processor</span><span class="arrow">→</span><span class="node">completed result</span></div>
+      </div>
+      <div class="panel">
+        <h2>Launch Progress</h2>
+        <p><strong>Product readiness</strong></p>
+        <div class="progressbar"><span style="width: 92%"></span></div>
+        <p><strong>Payment implementation</strong></p>
+        <div class="progressbar"><span style="width: 78%"></span></div>
+        <p><strong>Queue readiness</strong></p>
+        <div class="progressbar"><span style="width: 90%"></span></div>
+        <p><strong>Production launch readiness</strong></p>
+        <div class="progressbar"><span style="width: 54%"></span></div>
+        <p>The launch gap is not queue architecture. The active blocker is real NewebPay sandbox callback decrypt/config alignment plus external merchant approval.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Timeline / Milestones</h2>
+      <div class="panel">
+        <ol class="timeline">
+          <li><span class="time">Module 01</span><span>「曖昧溫度計」low-key production active / monitor.</span></li>
+          <li><span class="time">Evidence Anchoring v3</span><span>Production result quality foundation shipped.</span></li>
+          <li><span class="time">Payment foundation</span><span>Payment/entitlement schema, generation_jobs schema, paid access resolver, and operator fake-paid path added.</span></li>
+          <li><span class="time">Fake-paid QA</span><span>Authorized fake-paid delivery QA fully passed on staging.</span></li>
+          <li><span class="time">NewebPay Phase 1</span><span>Checkout creation implemented: pending payment_intent, checkout contract, pending-only ReturnURL.</span></li>
+          <li><span class="time">NewebPay Phase 2</span><span>NotifyURL verification implemented: TradeInfo decrypt, TradeSha verify, idempotent paid transition.</span></li>
+          <li><span class="time">Phase 3</span><span>Paid delivery artifacts integrated: entitlement, paid token hash, generation_job.</span></li>
+          <li><span class="time">Phase 3B</span><span>Session-bound paid access handoff added with pcs_ checkout sessions and paid status endpoint.</span></li>
+          <li><span class="time">Queue Phase 4</span><span>Phase 4A no-op/test adapter, 4B.1 Vercel Queues adapter, targeted processor, and 4B.2 staging smoke completed.</span></li>
+          <li><span class="time">Merchant review</span><span>Public content refreshed, /refund and /legal live, supplement email/checklist prepared and submitted.</span></li>
+          <li><span class="time">Operations</span><span>Support/refund SOP and production payment launch gate plan completed.</span></li>
+          <li><span class="time">Sandbox preflight</span><span>Sandbox checkout preflight passed with ccore gateway, MPG 2.0, NT$49, and pcs_ handoff.</span></li>
+          <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
+          <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
+          <li><span class="time">Current</span><span>Sandbox v3 identified <code>trade_info_decrypt_failed</code>; next action is sandbox credential/config alignment.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="three">
+      <div class="panel">
+        <h2>Current Engineering Status</h2>
+        <p><strong>Implemented:</strong> Checkout Phase 1, NotifyURL Phase 2, Paid Delivery Phase 3, Access Handoff Phase 3B, Queue Phase 4A/4B.1/4B.2, targeted queue processor, manual fallback.</p>
+        <p><strong>Disabled:</strong> production runtime, public production checkout, production fake-paid, production queue trigger.</p>
+        <p><strong>Not implemented:</strong> LINE delivery and refund tooling.</p>
+        <p><strong>Not launched:</strong> real provider production payment.</p>
+      </div>
+      <div class="panel">
+        <h2>Environment / Deployment</h2>
+        <p><strong>Production:</strong> anyu.tw public content live; payment routes fail closed.</p>
+        <p><strong>Staging:</strong> staging.anyu.tw, Vercel Preview for branch <code>staging</code>, sandbox/test environment.</p>
+        <p><strong>Source-of-truth:</strong> main/staging were reconciled previously; recent docs commits are on staging and should be promoted if main is used as release source.</p>
+        <p><strong>Operational rule:</strong> Preview(staging) branch-scoped env overrides general Preview env.</p>
+      </div>
+      <div class="panel">
+        <h2>NewebPay Status</h2>
+        <p>Merchant review supplement submitted. Production public pages are ready. Sandbox shop is created and operating.</p>
+        <p>Sandbox checkout and browser return work. NotifyURL transport HTTP 200 works. Paid transition is still blocked by <code>trade_info_decrypt_failed</code>.</p>
+        <p>Next action: align sandbox MerchantID / HashKey / HashIV / shop config, then rerun sandbox E2E.</p>
+      </div>
+    </section>
+
+    <section class="two">
+      <div class="panel">
+        <h2>Queue Status</h2>
+        <table>
+          <thead><tr><th>Area</th><th>Status</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>Vercel Queues adapter</td><td><span class="badge done">Done</span></td><td>Provider enum and adapter are implemented behind flags.</td></tr>
+            <tr><td>Targeted processor</td><td><span class="badge done">Done</span></td><td>Consumer processes exact generationJobId.</td></tr>
+            <tr><td>Queue-mode fake-paid QA</td><td><span class="badge done">Passed</span></td><td>Queue completed paid generation without manual processor.</td></tr>
+            <tr><td>Dashboard observation</td><td><span class="badge done">Observed</span></td><td>paid-generation-jobs received/deleted 2/2; no backlog or retry storm.</td></tr>
+            <tr><td>Manual fallback</td><td><span class="badge done">Passed</span></td><td>Manual processor recovery remains available.</td></tr>
+            <tr><td>Production queue flags</td><td><span class="badge disabled">Disabled</span></td><td>No production queue trigger until launch gate.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Merchant Review / Business Ops</h2>
+        <p>Public storefront is live with product/service explanation, synthetic preview, NT$49 one-time/non-subscription pricing, web delivery, refund/support summary, and limitation copy.</p>
+        <p><code>/refund</code> and <code>/legal</code> are live. Supplement email/checklist were prepared; external proof documents stay outside the repo. Current status: waiting for NewebPay review.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Support / Refund Readiness</h2>
+      <div class="panel">
+        <p>SOP is created for owner/operator use. Public support channel: <a href="mailto:hello@anyu.tw">hello@anyu.tw</a>.</p>
+        <p>Playbooks cover duplicate payment, paid but no result, result stuck processing, ReturnURL/access issue, generation failure, refund after delivered report, and suspicious/abusive request.</p>
+        <p><strong>Owner confirmations still needed:</strong> refund response window and daily support monitoring cadence during launch week.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Open Blockers / Next Actions</h2>
+      <table>
+        <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
+        <tbody>
+          <tr><td>P0</td><td>NewebPay approval / credential readiness</td><td>Owner / NewebPay</td><td>Wait for review outcome and confirm formal credential availability.</td></tr>
+          <tr><td>P0</td><td>Sandbox v3 paid transition diagnosis</td><td>Ops / code if needed</td><td>Fix based on <code>trade_info_decrypt_failed</code>: align sandbox shop credentials/config.</td></tr>
+          <tr><td>P0</td><td>Production config dry-run</td><td>Ops</td><td>After sandbox pass and approval, configure production env with runtime still disabled.</td></tr>
+          <tr><td>P0</td><td>Controlled production payment smoke</td><td>Owner / ops</td><td>Run one small controlled payment only after launch gate approval.</td></tr>
+          <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
+          <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
+          <tr><td>P1</td><td>Old Vercel project/domain ambiguity</td><td>Owner UI action</td><td>Verify anyu.tw belongs only to anyu-next project if old project is unused.</td></tr>
+          <tr><td>P1</td><td>Local git lock/FETCH_HEAD issue</td><td>Ops</td><td>Monitor; clean stale locks only when clearly safe.</td></tr>
+          <tr><td>P2</td><td>Queue audit persistence</td><td>Code</td><td>Consider queue_events/audit table after launch need is clearer.</td></tr>
+          <tr><td>P2</td><td>Dedicated sandbox E2E helper</td><td>Code</td><td>Create safe operator helper to reduce repeated ad hoc scripts.</td></tr>
+          <tr><td>P2</td><td>ClientBackURL / payment method restriction</td><td>Code if evidenced</td><td>Add only if NewebPay evidence requires it.</td></tr>
+          <tr><td>P2</td><td>Refund handling-window public copy</td><td>Owner / copy</td><td>Update public copy only after owner confirms policy.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Tech Debt / Cleanup Table</h2>
+      <table>
+        <thead><tr><th>Item</th><th>Priority</th><th>Owner</th><th>Risk if deferred</th><th>Suggested follow-up task</th></tr></thead>
+        <tbody>
+          <tr><td>Sandbox credential/config alignment</td><td>P0</td><td>Ops</td><td>Real provider E2E remains blocked.</td><td>NewebPay Sandbox TradeInfo Decrypt Config Alignment v0</td></tr>
+          <tr><td>Dedicated sandbox checkout/E2E helper</td><td>P2</td><td>Code</td><td>Manual smoke remains slow and error-prone.</td><td>Secret-Safe NewebPay Sandbox E2E Helper v0</td></tr>
+          <tr><td>Queue audit persistence</td><td>P2</td><td>Code</td><td>Harder post-incident queue diagnosis after launch.</td><td>Paid Queue Audit Event Design v0</td></tr>
+          <tr><td>Old Vercel domain/project ambiguity</td><td>P1</td><td>Owner UI</td><td>Future deployment ownership confusion.</td><td>Vercel Domain Ownership Cleanup v0</td></tr>
+          <tr><td>Main/staging drift after docs commits</td><td>P1</td><td>Ops</td><td>Production release branch may lag operational docs.</td><td>Release Branch Documentation Sync v0</td></tr>
+          <tr><td>ClientBackURL / payment method restriction</td><td>P2</td><td>Code</td><td>Provider UX may remain broader than first smoke scope.</td><td>NewebPay Optional Checkout Fields Evaluation v0</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Next Recommended Task</h2>
+      <div class="panel">
+        <p><strong>Current recommendation:</strong> NewebPay Sandbox TradeInfo Decrypt Config Alignment v0.</p>
+        <p>If sandbox v3 had not been run, run Fresh NewebPay Sandbox E2E Payment Smoke v3. It has now run and failed with `trade_info_decrypt_failed`.</p>
+        <p>If sandbox config alignment fixes v3/v4 and paid transition passes, proceed to Production Payment Config Dry-Run v0.</p>
+        <p>If NewebPay approval arrives before sandbox is fixed, do not launch production payment yet; complete sandbox/provider verification or a controlled equivalent first.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Source Links / Report References</h2>
+      <div class="panel">
+        <ul class="refs">
+          <li><a href="../reports/2026-05-30-production-payment-launch-gate-plan-v0.md">Production Payment Launch Gate Plan v0</a></li>
+          <li><a href="../reports/2026-05-30-support-refund-sop-finalization-v0.md">Support / Refund SOP Finalization v0</a></li>
+          <li><a href="../reports/2026-05-30-queue-launch-readiness-phase-4c-checklist-v0.md">Queue Launch Readiness / Phase 4C Checklist v0</a></li>
+          <li><a href="../reports/2026-05-30-safe-notifyurl-category-diagnostics-v0.md">Safe NotifyURL Category Diagnostics v0</a></li>
+          <li><a href="../reports/2026-05-31-fresh-newebpay-sandbox-e2e-payment-smoke-v3.md">Fresh NewebPay Sandbox E2E Payment Smoke v3</a></li>
+          <li><a href="../reports/2026-05-30-fresh-newebpay-sandbox-e2e-payment-smoke-v2.md">Fresh NewebPay Sandbox E2E Payment Smoke v2</a></li>
+          <li><a href="../reports/2026-05-30-fix-newebpay-sandbox-notifyurl-http-400-compatibility-v0.md">Fix NewebPay Sandbox NotifyURL HTTP 400 Compatibility v0</a></li>
+          <li><a href="../reports/2026-05-30-newebpay-sandbox-staging-checkout-preflight-run-v1.md">NewebPay Sandbox Staging Checkout Preflight Run v1</a></li>
+          <li><a href="../reports/2026-05-30-newebpay-merchant-review-public-content-implementation-v0.md">Merchant Review Public Content Implementation v0</a></li>
+          <li><a href="../reports/2026-05-30-newebpay-supplement-email-draft-attachment-checklist-v0.md">Supplement Email Draft / Attachment Checklist v0</a></li>
+          <li><a href="../reports/2026-05-30-anyu-current-state-snapshot-chatgpt-review-v0.md">ANYU Current State Snapshot v0</a></li>
+          <li><a href="../reports/2026-05-30-anyu-engineering-sync-up-quality-scan-v0.md">ANYU Engineering Sync-Up / Quality Scan v0</a></li>
+          <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
+          <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
+          <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>
+          <li><a href="../reports/2026-05-30-record-vercel-queues-dashboard-observation-v0.md">Vercel Queues Dashboard Observation</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      Static dashboard. No external dependencies. Update after every 3-5 major handoffs, after launch gate changes, and before/after production payment enablement.
+    </footer>
+  </main>
+</body>
+</html>
