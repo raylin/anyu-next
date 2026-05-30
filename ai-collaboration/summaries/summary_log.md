@@ -6972,3 +6972,20 @@ Unresolved questions:
 - Whether owner wants a fast-forward `main` sync or PR-based review from `staging` to `main`.
 - Whether the old Vercel `anyu` project should be archived or have stale domain/alias settings removed.
 - Whether to complete source-of-truth reconciliation before Queue Provider Selection / Phase 4B Plan v0.
+
+## 2026-05-30 - Production Source-of-Truth Reconciliation v0
+
+Completed changes:
+- Confirmed `origin/main` is a strict ancestor of `origin/staging`.
+- Confirmed pre-reconciliation divergence was `0 76`, with no `main` commits ahead of `staging`.
+- Documented a fast-forward-only reconciliation method that keeps the task report in both `staging` and `main`.
+- Re-established the intended workflow: `staging` for integration, `main` for production release/source-of-truth.
+
+Learnings:
+- A direct `git push origin HEAD:main` from the final staging task commit is a safe fast-forward promotion when ancestry is verified first.
+- No production deploy command is needed for repository source-of-truth reconciliation.
+- The old Vercel `anyu` project/domain ambiguity remains an owner UI cleanup item, separate from git branch reconciliation.
+
+Unresolved questions:
+- Whether Vercel auto-deploys every `main` push for `anyu-next` or production remains manual.
+- Whether owner wants the old Vercel `anyu` project archived after confirming no active domain ownership.
