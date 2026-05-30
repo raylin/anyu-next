@@ -43,4 +43,4 @@ Out of scope:
 - Diagnostics log only category, transport outcome, content-type category, payload-shape booleans, and safe mismatch booleans.
 - Provider response body remains `1|OK` or `0|ERROR`.
 - Tests were updated to prove raw provider field values are not returned or logged in diagnostic metadata.
-- Staging malformed callback verification remains the post-deploy check.
+- Staging malformed callback verification passed after deploy: non-secret malformed form callbacks returned HTTP 200 + `0|ERROR`, and Vercel logs showed safe `malformed_payload` / `merchant_mismatch` category diagnostics only.

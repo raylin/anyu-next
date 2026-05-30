@@ -116,14 +116,26 @@ Added/updated tests to prove:
 
 ## Staging Verification
 
-Pending deployment of this commit to Preview(`staging`).
+Completed after deploying commit `21a873d` to Preview(`staging`).
 
-Planned safe verification:
+Staging health marker:
 
-- send malformed non-secret form callbacks to `https://staging.anyu.tw/api/payments/newebpay/notify`
-- expect HTTP 200 + `0|ERROR`
-- inspect Vercel logs for `newebpay_notify_failed`
-- confirm logs contain only safe category/shape metadata and no raw submitted values
+- environment: `preview`
+- branch: `staging`
+- git commit: `21a873d51ad0`
+- route bundle: `payment-foundation-2026-05-29`
+
+Safe malformed callback checks:
+
+- Missing-field form POST returned HTTP 200 + `0|ERROR`, category `malformed_payload`.
+- Invalid non-secret form POST returned HTTP 200 + `0|ERROR`, category `merchant_mismatch`.
+
+Safe log check:
+
+- Vercel logs showed `newebpay_notify_failed` diagnostics for both malformed test requests.
+- Logged categories were `malformed_payload` and `merchant_mismatch`.
+- Logged metadata included only safe fields: event, category, environment, HTTP transport status, provider response, content-type category, payload-shape booleans, and safe mismatch booleans.
+- No raw submitted form values, provider payloads, decrypted data, tokens, or credentials were observed in the diagnostic log records.
 
 ## Tech Debt Review
 
