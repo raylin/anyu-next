@@ -58,10 +58,12 @@ const record = {
 const createdPaymentIntent = {
   id: "payment-1",
   status: "created",
+  moduleSlug: "ambiguous-temperature",
 };
 const paidPaymentIntent = {
   id: "payment-1",
   status: "paid",
+  moduleSlug: "ambiguous-temperature",
 };
 const entitlement = {
   id: "entitlement-1",
@@ -77,6 +79,8 @@ describe("operator fake paid success service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.PAID_ACCESS_TOKEN_HASH_SECRET = "test-only-paid-access-secret";
+    delete process.env.ENABLE_PAID_JOB_QUEUE_TRIGGER;
+    delete process.env.PAID_JOB_QUEUE_PROVIDER;
     mockGetModuleBySlug.mockReturnValue(moduleConfig);
     mockGetAnalysisResultWithRequestById.mockResolvedValue(record);
     mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue(null);
@@ -90,9 +94,13 @@ describe("operator fake paid success service", () => {
       generationJob: job,
       generationJobCreated: true,
       accessState: "pending",
-      paidAccessToken: "pa_test-token",
+      paidAccessToken: "paid-access-test-token",
       paidAccessTokenReturned: true,
-      unlockPath: "/m/ambiguous-temperature/unlock/pa_test-token",
+      unlockPath: "/m/ambiguous-temperature/unlock/paid-access-test-token",
+      queueTrigger: {
+        category: "disabled",
+        provider: "none",
+      },
     });
   });
 
@@ -109,7 +117,7 @@ describe("operator fake paid success service", () => {
       generationJobCreated: true,
       accessState: "pending",
       paidAccessTokenReturned: true,
-      unlockPath: "/m/ambiguous-temperature/unlock/pa_test-token",
+      unlockPath: "/m/ambiguous-temperature/unlock/paid-access-test-token",
     });
     expect(mockCreatePaymentIntent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -201,6 +209,31 @@ describe("operator fake paid success service", () => {
         paymentIntent: paidPaymentIntent,
       }),
     );
+  });
+
+  it("returns a safe no-op queue trigger result when explicitly enabled", async () => {
+    process.env.ENABLE_PAID_JOB_QUEUE_TRIGGER = "true";
+    process.env.PAID_JOB_QUEUE_PROVIDER = "noop";
+
+    const result = await createOperatorFakePaidSuccess({
+      moduleSlug: "ambiguous-temperature",
+      resultId: "result-1",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      queueTrigger: {
+        ok: true,
+        category: "noop",
+        provider: "noop",
+        payload: {
+          paymentIntentId: "payment-1",
+          generationJobId: "job-1",
+          moduleSlug: "ambiguous-temperature",
+          triggerSource: "operator_fake_paid",
+        },
+      },
+    });
   });
 
   it("fails safely before payment creation when paid access token hash secret is missing", async () => {

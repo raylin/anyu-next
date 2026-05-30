@@ -11,6 +11,10 @@ import { type PaidAccessResolutionState } from "@/lib/payments/paid-access-resol
 import { getPaidAccessTokenHashSecret } from "@/lib/payments/paid-access-token";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { createPaidDeliveryArtifactsForPaymentIntent } from "@/lib/payments/paid-delivery-artifacts";
+import {
+  triggerPaidJobProcessing,
+  type PaidJobQueueTriggerResult,
+} from "@/lib/payments/paid-job-queue-trigger";
 
 const OPERATOR_FAKE_MERCHANT_ORDER_PREFIX = "ANYUFAKE";
 const OPERATOR_FAKE_AMOUNT_MINOR = 49;
@@ -30,6 +34,7 @@ export type OperatorFakePaidSuccessResult =
       paidAccessToken: string | null;
       paidAccessTokenReturned: boolean;
       unlockPath: string | null;
+      queueTrigger: PaidJobQueueTriggerResult;
     }
   | {
       ok: false;
@@ -143,6 +148,12 @@ export async function createOperatorFakePaidSuccess(input: {
     return delivery;
   }
 
+  const queueTrigger = await triggerPaidJobProcessing({
+    paymentIntent,
+    generationJob: delivery.generationJob,
+    triggerSource: "operator_fake_paid",
+  });
+
   return {
     ok: true,
     moduleSlug: moduleConfig.slug,
@@ -157,5 +168,6 @@ export async function createOperatorFakePaidSuccess(input: {
     paidAccessToken: delivery.paidAccessToken,
     paidAccessTokenReturned: delivery.paidAccessTokenReturned,
     unlockPath: delivery.unlockPath,
+    queueTrigger,
   };
 }

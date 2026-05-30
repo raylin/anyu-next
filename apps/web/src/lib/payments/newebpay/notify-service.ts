@@ -13,6 +13,10 @@ import {
   type PaidDeliveryArtifactError,
   type PaidDeliveryArtifactsResult,
 } from "@/lib/payments/paid-delivery-artifacts";
+import {
+  triggerPaidJobProcessing,
+  type PaidJobQueueTriggerResult,
+} from "@/lib/payments/paid-job-queue-trigger";
 
 export type NewebPayNotifyCategory =
   | "provider_config_missing"
@@ -36,6 +40,7 @@ export type ProcessNewebPayNotifyResult =
       paymentIntent: PaymentIntent;
       paymentIntentStatus: string;
       delivery: Extract<PaidDeliveryArtifactsResult, { ok: true }>;
+      queueTrigger: PaidJobQueueTriggerResult;
     }
   | {
       ok: false;
@@ -117,12 +122,20 @@ export async function processNewebPayNotify(
       return deliveryFailure(delivery);
     }
 
+    const queueTrigger = await triggerPaidJobProcessing({
+      paymentIntent,
+      generationJob: delivery.generationJob,
+      triggerSource: "newebpay_notify",
+      env,
+    });
+
     return {
       ok: true,
       category: "duplicate_notify",
       paymentIntent,
       paymentIntentStatus: paymentIntent.status,
       delivery,
+      queueTrigger,
     };
   }
 
@@ -152,12 +165,20 @@ export async function processNewebPayNotify(
       return deliveryFailure(delivery);
     }
 
+    const queueTrigger = await triggerPaidJobProcessing({
+      paymentIntent: paidIntent,
+      generationJob: delivery.generationJob,
+      triggerSource: "newebpay_notify",
+      env,
+    });
+
     return {
       ok: true,
       category: "payment_marked_paid",
       paymentIntent: paidIntent,
       paymentIntentStatus: paidIntent.status,
       delivery,
+      queueTrigger,
     };
   } catch {
     return { ok: false, status: 500, category: "unexpected_error" };

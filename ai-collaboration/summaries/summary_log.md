@@ -6934,3 +6934,21 @@ Unresolved questions:
 - Whether to build a secret-safe env preflight script before Phase 4B.
 - Whether to separate `PAYMENT_CHECKOUT_SESSION_SECRET` from `PAID_ACCESS_TOKEN_HASH_SECRET` before sandbox E2E or only before production launch.
 - Whether to rename `payment_success_future` before queue reporting expands.
+
+## 2026-05-30 - Queue Trigger Integration Phase 4A: No-op/Test Adapter v0
+
+Completed changes:
+- Added `ENABLE_PAID_JOB_QUEUE_TRIGGER` and `PAID_JOB_QUEUE_PROVIDER` support in source, disabled by default.
+- Added a paid job queue trigger abstraction with `none`, `noop`, and `test` modes only.
+- Wired safe queue trigger result creation after verified NewebPay NotifyURL delivery artifacts and operator fake-paid delivery artifacts.
+- Added targeted tests for trigger defaults, provider selection, payload safety, NotifyURL integration, and operator fake-paid integration.
+
+Learnings:
+- Phase 4A can hook after shared delivery artifact creation without changing ReturnURL/status/access/unlock or processor behavior.
+- A trigger-only payload with DB references is sufficient for no-op/test adapter verification.
+- Unknown providers can fail closed as `none`, keeping Preview/Production safe if env is incomplete or mistyped.
+
+Unresolved questions:
+- Which real queue provider should Phase 4B use.
+- Whether provider-level enqueue idempotency should be tracked in DB or delegated to the queue provider.
+- Whether `payment_success_future` should be renamed or supplemented before queue observability becomes user-facing.

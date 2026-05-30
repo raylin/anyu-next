@@ -25,3 +25,7 @@ export function isPaymentRuntimeEnabled(env: NodeJS.ProcessEnv = process.env): b
 export function isNewebPayCheckoutEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return getBooleanEnvFlag("ENABLE_NEWEBPAY_CHECKOUT", env);
 }
+
+export function isPaidJobQueueTriggerEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return getBooleanEnvFlag("ENABLE_PAID_JOB_QUEUE_TRIGGER", env);
+}

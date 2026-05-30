@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isOperatorFakePaidSuccessEnabled,
+  isPaidJobQueueTriggerEnabled,
   isPaidGenerationJobsEnabled,
   isPaidGenerationProcessorEnabled,
 } from "@/lib/runtime/feature-flags";
@@ -39,6 +40,19 @@ describe("runtime feature flags", () => {
     ).toBe(true);
     expect(
       isOperatorFakePaidSuccessEnabled({ ENABLE_OPERATOR_FAKE_PAID_SUCCESS: "0" } as NodeJS.ProcessEnv),
+    ).toBe(false);
+  });
+
+  it("keeps paid job queue trigger disabled unless explicitly enabled", () => {
+    expect(isPaidJobQueueTriggerEnabled({} as NodeJS.ProcessEnv)).toBe(false);
+    expect(
+      isPaidJobQueueTriggerEnabled({ ENABLE_PAID_JOB_QUEUE_TRIGGER: "true" } as NodeJS.ProcessEnv),
+    ).toBe(true);
+    expect(
+      isPaidJobQueueTriggerEnabled({ ENABLE_PAID_JOB_QUEUE_TRIGGER: "yes" } as NodeJS.ProcessEnv),
+    ).toBe(true);
+    expect(
+      isPaidJobQueueTriggerEnabled({ ENABLE_PAID_JOB_QUEUE_TRIGGER: "false" } as NodeJS.ProcessEnv),
     ).toBe(false);
   });
 });

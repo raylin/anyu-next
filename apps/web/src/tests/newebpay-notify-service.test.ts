@@ -39,6 +39,7 @@ const paymentIntent = {
   amountMinor: 49,
   currency: "TWD",
   merchantOrderNo: "ANYUNP123456789012345678901234",
+  moduleSlug: "ambiguous-temperature",
 };
 
 function encryptTradeInfo(payload: Record<string, unknown>) {
@@ -160,6 +161,10 @@ describe("NewebPay NotifyURL service", () => {
         generationJobCreated: true,
         paidAccessTokenReturned: false,
       },
+      queueTrigger: {
+        category: "disabled",
+        provider: "none",
+      },
     });
     expect(mockGetPaymentIntentByMerchantOrderNo).toHaveBeenCalledWith(
       paymentIntent.merchantOrderNo,
@@ -212,6 +217,10 @@ describe("NewebPay NotifyURL service", () => {
         entitlementCreated: false,
         generationJobCreated: false,
       },
+      queueTrigger: {
+        category: "disabled",
+        provider: "none",
+      },
     });
     expect(mockMarkPaymentPaid).not.toHaveBeenCalled();
     expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).toHaveBeenCalledTimes(1);
@@ -255,5 +264,29 @@ describe("NewebPay NotifyURL service", () => {
     expect(serialized).toContain("generationJob");
     expect(serialized).not.toContain("pa_test-token");
     expect(serialized).not.toContain("/unlock/");
+  });
+
+  it("returns a safe no-op queue trigger result when enabled for Phase 4A", async () => {
+    const result = await processNewebPayNotify(notifyPayload(), {
+      ...env,
+      ENABLE_PAID_JOB_QUEUE_TRIGGER: "true",
+      PAID_JOB_QUEUE_PROVIDER: "noop",
+    } as NodeJS.ProcessEnv);
+
+    expect(result).toMatchObject({
+      ok: true,
+      category: "payment_marked_paid",
+      queueTrigger: {
+        ok: true,
+        category: "noop",
+        provider: "noop",
+        payload: {
+          paymentIntentId: "payment-1",
+          generationJobId: "job-1",
+          moduleSlug: "ambiguous-temperature",
+          triggerSource: "newebpay_notify",
+        },
+      },
+    });
   });
 });
