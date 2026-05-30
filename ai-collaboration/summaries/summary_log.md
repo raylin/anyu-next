@@ -6914,3 +6914,23 @@ Learnings:
 Unresolved questions:
 - Whether to clean production deployment source-of-truth or env/flag matrix before Phase 4A.
 - Whether future queue webhook auth should use a dedicated diagnostic-free readiness endpoint for operator checks.
+
+## 2026-05-30 - Payment Runtime Env / Feature Flag Matrix v0
+
+Completed changes:
+- Created a documentation-only payment runtime env and feature flag matrix.
+- Inventoried payment, NewebPay, paid access, checkout session, operator QA, processor, cron, planned queue, LINE-adjacent, build marker, DB, AI, and abuse-guard env names from source.
+- Mapped key payment routes to flags/auth/config, expected production behavior, expected staging QA behavior, and fail-closed modes.
+- Documented local, Preview general, Preview(staging), and Production expectations without reading or printing env values.
+- Ranked risks and recommendations before Phase 4 queue wiring and production payment launch.
+
+Learnings:
+- No queue env vars are implemented yet; `ENABLE_PAID_JOB_QUEUE_TRIGGER`, `PAID_JOB_QUEUE_PROVIDER`, and QStash names remain planned placeholders only.
+- `ENABLE_NEWEBPAY_CHECKOUT` gates checkout creation, but NotifyURL route exists independently and fails closed through provider config/signature/payment-intent checks.
+- Fallback behavior exists for `INTERNAL_JOB_SECRET` to `CRON_SECRET`, `RETENTION_CLEANUP_SECRET` to `CRON_SECRET`, and `PAYMENT_CHECKOUT_SESSION_SECRET` to `PAID_ACCESS_TOKEN_HASH_SECRET`.
+- `origin/main` is now 73 commits behind `origin/staging`; production source-of-truth cleanup remains important.
+
+Unresolved questions:
+- Whether to build a secret-safe env preflight script before Phase 4B.
+- Whether to separate `PAYMENT_CHECKOUT_SESSION_SECRET` from `PAID_ACCESS_TOKEN_HASH_SECRET` before sandbox E2E or only before production launch.
+- Whether to rename `payment_success_future` before queue reporting expands.
