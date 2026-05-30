@@ -7218,3 +7218,20 @@ Learnings:
 Unresolved questions:
 - Owner must provide MerchantID / HashKey / HashIV securely to shell or configure them directly in branch-scoped Preview(`staging`).
 - If NewebPay requires `ClientBackURL` or method restriction fields, a follow-up code task is needed before payment smoke.
+
+## 2026-05-30 - NewebPay Sandbox Staging Checkout Preflight Run v1
+
+Completed changes:
+- Configured branch-scoped Preview(`staging`) NewebPay sandbox checkout env using local secure `apps/web/.env.local` credentials without printing values.
+- Redeployed Preview(`staging`) and verified health at `environment=preview`, `gitBranch=staging`, route bundle `payment-foundation-2026-05-29`, commit `e8373433a596`.
+- Ran a sanitized checkout preflight: fresh source analyze succeeded, NewebPay checkout returned HTTP 200, `paymentIntentStatus=checkout_started`, sandbox `ccore` gateway, `Version=2.0`, and `pcs_` ReturnURL handoff present.
+- Verified no paid transition, entitlement, `pa_` token, `generation_job`, queue trigger, or production runtime change occurred.
+- Confirmed Production remained disabled: production health stayed `main/1990fc034d74`, and production checkout/fake-paid routes returned JSON `404 not_found`.
+
+Learnings:
+- Sandbox credentials in `.env.local` are sufficient for configuring Preview(`staging`) through Vercel CLI when scoped explicitly to `studioanyu-1488s-projects`.
+- The checkout preflight is ready for the next manual NewebPay sandbox payment smoke; first smoke should manually choose credit-card one-time payment.
+
+Unresolved questions:
+- If NewebPay requires `ClientBackURL` or explicit payment-method restriction fields, implementation follow-up is needed.
+- Actual sandbox payment, NotifyURL delivery, queue completion, and session-bound access are not yet validated with NewebPay sandbox.
