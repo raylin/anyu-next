@@ -6877,3 +6877,23 @@ Unresolved questions:
 - Whether Phase 4A should add targeted `jobId` processing immediately or start with the existing limit-based processor route.
 - Whether to retain or remove temporary processor auth diagnostics after queue QA stabilizes.
 - Which queue provider/account should be used for staging once implementation begins.
+
+## 2026-05-30 - ANYU Engineering Sync-Up / Quality Scan v0
+
+Completed changes:
+- Performed a documentation-only engineering sync-up across git state, live health/content checks, payment route boundaries, env names, security/privacy posture, temporary code, test coverage, merchant-review content, Phase 4 readiness, and operational risks.
+- Confirmed local/staging HEAD is `a8a8bb5` and live staging serves that route bundle.
+- Confirmed production public merchant-review content is live, while production health still reports a direct deployment from `staging` at `3de74ca`.
+- Confirmed payment phase boundaries are mostly consistent: checkout remains pending-only, NotifyURL is payment truth, delivery artifacts are created after verified paid, and ReturnURL/status/access remain non-mutating.
+- Ranked cleanup recommendations before queue provider wiring.
+
+Learnings:
+- `git fetch origin --prune` still fails locally on `.git/FETCH_HEAD` permissions, despite local and remote staging refs matching.
+- `origin/main` is 71 commits behind `origin/staging`, making production source-of-truth cleanup a real ops priority.
+- Temporary processor auth diagnostics are production-suppressed and secret-safe but should be removed or deliberately retained before launch.
+- Entitlements still have a DB index, not a unique constraint, on `payment_intent_id`.
+
+Unresolved questions:
+- Whether to repair diagnostics/deployment/env-matrix items before Phase 4A or run them in parallel.
+- Whether owner wants `main` reconciled with `staging` as the production source of truth.
+- Whether NewebPay sandbox credentials are available for an E2E smoke before queue provider wiring.
