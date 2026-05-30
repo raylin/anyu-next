@@ -7009,3 +7009,24 @@ Unresolved questions:
 - Whether Vercel Queues is available for the `studioanyu-1488` / `anyu-next` project.
 - Whether owner prefers Vercel-native beta infrastructure or mature external QStash for Phase 4B.
 - Whether provider-level dedupe is enough initially or whether a queue audit table should be added later.
+
+## 2026-05-30 - Vercel Queues Availability / Account Fit Preflight v0
+
+Completed changes:
+- Verified local source state and Vercel CLI account/project context without printing token or env values.
+- Confirmed CLI account `studioanyu-1488`, linked project `anyu-next`, root directory `apps/web`, and Node.js `24.x`.
+- Confirmed Vercel CLI `54.5.1` has no dedicated `vercel queues` command.
+- Reviewed official Vercel Queues docs, quickstart, API, SDK, pricing/limits, observability, and TTL changelog.
+- Confirmed `@vercel/queue` is available via package metadata lookup.
+- Recommended proceeding with Vercel Queues adapter implementation behind flags, with dashboard/staging smoke as the remaining availability proof.
+
+Learnings:
+- Vercel Queues uses `@vercel/queue`, `send`, `handleCallback`, and `vercel.json` `queue/v2beta` triggers rather than a dedicated CLI command.
+- Consumer functions configured through queue triggers have no public URL and are invoked only by Vercel queue infrastructure.
+- Deployed Vercel environments authenticate queue SDK use automatically; local real queue use requires project linking and `vercel env pull`.
+- Queue pricing is operation-based and docs currently list the first 1,000,000 regional Queue API operations included on Hobby.
+
+Unresolved questions:
+- Whether the `anyu-next` dashboard exposes Queues setup/observability for the owner account before code lands.
+- Whether to keep `main` in sync with staging for this planning-only commit before implementation.
+- Whether the TTL discrepancy between base docs and April changelog needs confirmation during implementation.
