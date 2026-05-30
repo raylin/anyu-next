@@ -2,6 +2,8 @@ import crypto from "node:crypto";
 import { NEWEBPAY_MPG_VERSION, createNewebPayTradeSha } from "@/lib/payments/newebpay/checkout-payload";
 import type { NewebPayConfig } from "@/lib/payments/newebpay/config";
 
+const NEWEBPAY_AES_PADDING_BLOCK_SIZE = 32;
+
 export type NewebPayNotifyError =
   | "malformed_payload"
   | "signature_missing"
@@ -28,14 +30,34 @@ function readString(value: FormDataEntryValue | string | undefined | null) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function stripNewebPayPadding(buffer: Buffer) {
+  const paddingLength = buffer.at(-1);
+
+  if (
+    !paddingLength ||
+    paddingLength > NEWEBPAY_AES_PADDING_BLOCK_SIZE ||
+    paddingLength > buffer.length
+  ) {
+    throw new Error("Invalid NewebPay TradeInfo padding");
+  }
+
+  const padding = buffer.subarray(buffer.length - paddingLength);
+  if (!padding.every((byte) => byte === paddingLength)) {
+    throw new Error("Invalid NewebPay TradeInfo padding bytes");
+  }
+
+  return buffer.subarray(0, buffer.length - paddingLength);
+}
+
 function decryptTradeInfo(tradeInfo: string, config: Extract<NewebPayConfig, { ok: true }>) {
   const decipher = crypto.createDecipheriv("aes-256-cbc", config.hashKey, config.hashIv);
+  decipher.setAutoPadding(false);
   const decrypted = Buffer.concat([
     decipher.update(Buffer.from(tradeInfo, "hex")),
     decipher.final(),
   ]);
 
-  return decrypted.toString("utf8");
+  return stripNewebPayPadding(decrypted).toString("utf8");
 }
 
 function parseTradeInfoJson(decrypted: string) {
@@ -137,4 +159,3 @@ export function verifyNewebPayNotifyPayload(
     },
   };
 }
-

@@ -7453,3 +7453,21 @@ Unresolved questions:
 - Whether the successful sandbox transaction belongs to the exact same sandbox shop as the configured MerchantID / HashKey / HashIV.
 - Whether copied backend credentials include hidden formatting issues or are stale/regenerated.
 - If owner confirms credentials match exactly, a code-level TradeInfo decrypt compatibility investigation is the next step.
+
+## 2026-05-31 - NewebPay TradeInfo Decrypt Compatibility Investigation v0
+
+Completed changes:
+- Compared ANYU NewebPay crypto helpers with a public NewebPay MPG sample.
+- Found the likely root cause for sandbox `trade_info_decrypt_failed`: ANYU used Node default AES padding, while the public NewebPay sample uses AES-256-CBC with manual 32-byte padding and zero auto-padding.
+- Updated checkout TradeInfo encryption and NotifyURL TradeInfo decryption to use the NewebPay-compatible 32-byte padding contract.
+- Added a public sample vector regression test and changed NotifyURL service test fixtures to use the production encryption helper.
+- Updated the project dashboard to show the blocker has moved from credential mismatch suspicion to a padding compatibility fix that needs fresh sandbox v5 verification.
+
+Learnings:
+- Route transport, form shape, and safe diagnostic logging were already working; the failure category was specific to decrypt compatibility.
+- `TradeSha` format/order remains aligned: `HashKey=<HashKey>&<TradeInfo>&HashIV=<HashIV>`, SHA256 uppercase.
+- No real provider payload or decrypted payload was needed to identify this code-side mismatch.
+
+Unresolved questions:
+- Fresh NewebPay Sandbox E2E Payment Smoke v5 is required to prove real sandbox provider callbacks now decrypt and transition the payment intent to paid.
+- If v5 still fails, the safe diagnostic category should determine whether the next issue is signature, merchant, amount, payment-intent matching, or another provider status mismatch.

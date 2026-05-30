@@ -1,6 +1,9 @@
-import crypto from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createNewebPayTradeSha, NEWEBPAY_MPG_VERSION } from "@/lib/payments/newebpay/checkout-payload";
+import {
+  createNewebPayTradeSha,
+  encryptNewebPayTradeInfo,
+  NEWEBPAY_MPG_VERSION,
+} from "@/lib/payments/newebpay/checkout-payload";
 import { processNewebPayNotify } from "@/lib/payments/newebpay/notify-service";
 
 const {
@@ -42,25 +45,22 @@ const paymentIntent = {
   moduleSlug: "ambiguous-temperature",
 };
 
-function encryptTradeInfo(payload: Record<string, unknown>) {
-  const cipher = crypto.createCipheriv(
-    "aes-256-cbc",
-    env.NEWEBPAY_HASH_KEY,
-    env.NEWEBPAY_HASH_IV,
-  );
-  const encrypted = Buffer.concat([
-    cipher.update(JSON.stringify(payload), "utf8"),
-    cipher.final(),
-  ]).toString("hex");
-
-  return encrypted;
-}
+const config = {
+  ok: true,
+  merchantId: env.NEWEBPAY_MERCHANT_ID,
+  hashKey: env.NEWEBPAY_HASH_KEY,
+  hashIv: env.NEWEBPAY_HASH_IV,
+  checkoutUrl: env.NEWEBPAY_CHECKOUT_URL,
+  returnUrlBase: env.NEXT_PUBLIC_APP_URL,
+  notifyUrl: env.NEWEBPAY_NOTIFY_URL,
+  providerEnvironment: "sandbox",
+} as const;
 
 function notifyPayload(overrides: Record<string, unknown> = {}) {
   const resultOverrides = (overrides.Result as Record<string, unknown> | undefined) ?? {};
   const topLevelOverrides = { ...overrides };
   delete topLevelOverrides.Result;
-  const tradeInfo = encryptTradeInfo({
+  const tradeInfo = encryptNewebPayTradeInfo(JSON.stringify({
     Status: "SUCCESS",
     Message: "付款成功",
     Result: {
@@ -73,21 +73,12 @@ function notifyPayload(overrides: Record<string, unknown> = {}) {
       ...resultOverrides,
     },
     ...topLevelOverrides,
-  });
+  }), config);
 
   return {
     MerchantID: env.NEWEBPAY_MERCHANT_ID,
     TradeInfo: tradeInfo,
-    TradeSha: createNewebPayTradeSha(tradeInfo, {
-      ok: true,
-      merchantId: env.NEWEBPAY_MERCHANT_ID,
-      hashKey: env.NEWEBPAY_HASH_KEY,
-      hashIv: env.NEWEBPAY_HASH_IV,
-      checkoutUrl: env.NEWEBPAY_CHECKOUT_URL,
-      returnUrlBase: env.NEXT_PUBLIC_APP_URL,
-      notifyUrl: env.NEWEBPAY_NOTIFY_URL,
-      providerEnvironment: "sandbox",
-    }),
+    TradeSha: createNewebPayTradeSha(tradeInfo, config),
     Version: NEWEBPAY_MPG_VERSION,
   };
 }

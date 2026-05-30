@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import type { NewebPayConfig } from "@/lib/payments/newebpay/config";
 
 export const NEWEBPAY_MPG_VERSION = "2.0";
+const NEWEBPAY_AES_PADDING_BLOCK_SIZE = 32;
 
 export type NewebPayCheckoutContract = {
   actionUrl: string;
@@ -30,9 +31,24 @@ function encodePayload(payload: Record<string, string | number>) {
   ).toString();
 }
 
-function encryptTradeInfo(payload: string, config: Extract<NewebPayConfig, { ok: true }>) {
+function addNewebPayPadding(payload: string) {
+  const buffer = Buffer.from(payload, "utf8");
+  const remainder = buffer.length % NEWEBPAY_AES_PADDING_BLOCK_SIZE;
+  const paddingLength =
+    remainder === 0
+      ? NEWEBPAY_AES_PADDING_BLOCK_SIZE
+      : NEWEBPAY_AES_PADDING_BLOCK_SIZE - remainder;
+
+  return Buffer.concat([buffer, Buffer.alloc(paddingLength, paddingLength)]);
+}
+
+export function encryptNewebPayTradeInfo(
+  payload: string,
+  config: Extract<NewebPayConfig, { ok: true }>,
+) {
   const cipher = crypto.createCipheriv("aes-256-cbc", config.hashKey, config.hashIv);
-  const encrypted = Buffer.concat([cipher.update(payload, "utf8"), cipher.final()]);
+  cipher.setAutoPadding(false);
+  const encrypted = Buffer.concat([cipher.update(addNewebPayPadding(payload)), cipher.final()]);
 
   return encrypted.toString("hex");
 }
@@ -62,7 +78,7 @@ export function buildNewebPayCheckoutContract(
     ReturnURL: input.returnUrl,
     NotifyURL: input.config.notifyUrl,
   });
-  const tradeInfo = encryptTradeInfo(payload, input.config);
+  const tradeInfo = encryptNewebPayTradeInfo(payload, input.config);
 
   return {
     actionUrl: input.config.checkoutUrl,
