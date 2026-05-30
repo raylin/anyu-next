@@ -7254,3 +7254,19 @@ Learnings:
 Unresolved questions:
 - Actual NewebPay sandbox payment, ReturnURL, NotifyURL verification, paid transition, delivery artifacts, queue completion, and session-bound paid access remain unverified.
 - If NewebPay requires `ClientBackURL` or explicit payment-method restriction fields, implementation follow-up is needed.
+
+## 2026-05-30 - Manual Browser Sandbox Payment Completion Verification v0
+
+Completed changes:
+- Attempted sanitized verification against the existing NewebPay sandbox checkout state from `/private/tmp/anyu-newebpay-smoke/smoke-state.json`.
+- Verified staging health at `environment=preview`, `gitBranch=staging`, route bundle `payment-foundation-2026-05-29`, commit `ccae82f7c182`.
+- Polled the session-bound payment status endpoint for 24 attempts; status remained `waiting_for_payment`, retryable true, with no access path.
+- Confirmed Production remained disabled and public pages live: production health stayed `main/1990fc034d74`; homepage, `/refund`, and `/legal` returned 200; production checkout/fake-paid routes returned JSON `404 not_found`.
+
+Learnings:
+- The existing checkout token remains valid enough for safe status polling, but payment was not submitted or not recognized by NotifyURL.
+- Without owner confirmation and a provider-side payment completion event, the E2E chain cannot proceed beyond `waiting_for_payment`.
+
+Unresolved questions:
+- Owner/operator needs to complete a fresh sandbox credit-card one-time payment in a real browser and confirm completion before NotifyURL/delivery/queue/access verification can pass.
+- If NewebPay requires `ClientBackURL` or explicit payment-method restriction fields, implementation follow-up may be needed.
