@@ -7049,3 +7049,21 @@ Unresolved questions:
 - Whether the owner dashboard confirms Vercel Queues setup/observability for `anyu-next`.
 - Whether staging queue smoke will prove queue-triggered processor completion without manual invocation.
 - Whether Phase 4B.2 should add targeted generation-job processing or defer it until queue smoke exposes a concrete need.
+
+## 2026-05-30 - Targeted Paid Generation Processor Path for Queue Consumer v0
+
+Completed changes:
+- Added `claimDuePaidAnalysisJobById(...)` to atomically claim only the requested due paid-analysis job.
+- Added `processPaidAnalysisJobById(...)` to process a specific queue target without using generic due-job selection.
+- Updated the Vercel Queues consumer service to call the targeted processor with the queue payload `generationJobId`.
+- Added queue consumer categories for targeted outcomes: `already_completed`, `already_processing`, `not_found`, `invalid_job`, `failed`, and `retryable_error`.
+- Added tests for exact job targeting, completed idempotency, missing/invalid/processing target jobs, and manual processor compatibility.
+
+Learnings:
+- The Phase 4B.1 consumer could have processed a different due paid job when multiple jobs were queued; this is now fixed before live queue smoke.
+- The existing paid generation implementation was reusable after adding a targeted DB claim helper.
+- Manual recovery stays separate and unchanged through `processPaidAnalysisJobs(...)`.
+
+Unresolved questions:
+- Whether live Vercel Queues staging smoke will need more queue-handler observability around terminal categories.
+- Whether queue enqueue attempts should be persisted after the provider smoke proves reliable.

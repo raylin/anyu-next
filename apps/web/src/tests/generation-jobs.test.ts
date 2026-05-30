@@ -10,6 +10,7 @@ vi.mock("@/lib/db/client", () => ({
 
 import {
   buildPaidAnalysisJobDedupeKey,
+  claimDuePaidAnalysisJobById,
   claimDuePaidAnalysisJobs,
   createOrReusePaidAnalysisJob,
   GENERATION_JOB_INPUT_REF_TYPES,
@@ -371,6 +372,56 @@ describe("generation job repository seams", () => {
       status: "processing",
       attemptCount: 1,
       lockedBy: "worker-1",
+    });
+    expect(db.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("atomically claims only the requested due paid-analysis job by id", async () => {
+    const { db } = createExecuteDb([
+      {
+        id: JOB_ID,
+        job_type: "paid_analysis",
+        status: "processing",
+        priority: 50,
+        module_slug: "ambiguous-temperature",
+        input_ref_type: "analysis_result",
+        input_ref_id: RESULT_ID,
+        output_ref_type: "analysis_paid_result",
+        output_ref_id: null,
+        trigger_source: "web_unlock",
+        dedupe_key: "redacted-dedupe-key",
+        entitlement_ref_id: null,
+        attempt_count: 1,
+        max_attempts: 3,
+        next_run_at: NOW,
+        locked_at: NOW,
+        locked_by: "queue-worker",
+        last_error_category: null,
+        last_error_code: null,
+        last_error_at: null,
+        model_provider: null,
+        model_name: null,
+        prompt_version: "paid_result_prompt_v0.2",
+        schema_version: "paid_result_schema_v3",
+        source: null,
+        operator_test: false,
+        created_at: NOW,
+        updated_at: NOW,
+      },
+    ]);
+    mockRequireDb.mockReturnValue(db);
+
+    const claimed = await claimDuePaidAnalysisJobById({
+      jobId: JOB_ID,
+      lockedBy: "queue-worker",
+      now: NOW,
+    });
+
+    expect(claimed).toMatchObject({
+      id: JOB_ID,
+      status: "processing",
+      attemptCount: 1,
+      lockedBy: "queue-worker",
     });
     expect(db.execute).toHaveBeenCalledTimes(1);
   });

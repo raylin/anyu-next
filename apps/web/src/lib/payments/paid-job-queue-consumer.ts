@@ -1,7 +1,7 @@
 import { isDbConfigured } from "@/lib/db/client";
 import {
-  processPaidAnalysisJobs,
-  type PaidGenerationProcessorResult,
+  processPaidAnalysisJobById,
+  type TargetedPaidGenerationProcessorResult,
 } from "@/lib/modules/paid-generation-processor";
 import type { PaidJobQueueTriggerPayload } from "@/lib/payments/paid-job-queue-trigger";
 import {
@@ -11,6 +11,12 @@ import {
 
 export type PaidJobQueueConsumerCategory =
   | "processed"
+  | "already_completed"
+  | "already_processing"
+  | "not_found"
+  | "invalid_job"
+  | "failed"
+  | "retryable_error"
   | "disabled"
   | "processor_disabled"
   | "invalid_payload"
@@ -20,12 +26,13 @@ export type PaidJobQueueConsumerCategory =
 export type PaidJobQueueConsumerResult =
   | {
       ok: true;
-      category: Exclude<PaidJobQueueConsumerCategory, "invalid_payload" | "database_config_missing" | "unexpected_error">;
-      processor?: PaidGenerationProcessorResult;
+      category: Exclude<PaidJobQueueConsumerCategory, "invalid_payload" | "database_config_missing" | "retryable_error" | "unexpected_error">;
+      processor?: TargetedPaidGenerationProcessorResult;
     }
   | {
       ok: false;
-      category: "invalid_payload" | "database_config_missing" | "unexpected_error";
+      category: "invalid_payload" | "database_config_missing" | "retryable_error" | "unexpected_error";
+      processor?: TargetedPaidGenerationProcessorResult;
     };
 
 function isNonEmptyString(value: unknown): value is string {
@@ -84,12 +91,20 @@ export async function processPaidJobQueueMessage(input: {
   }
 
   try {
-    const processor = await processPaidAnalysisJobs({
-      limit: 1,
+    const processor = await processPaidAnalysisJobById({
+      generationJobId: payload.generationJobId,
       lockedBy: "paid_generation_queue",
     });
 
-    return { ok: true, category: "processed", processor };
+    if (processor.ok) {
+      return { ok: true, category: processor.category, processor };
+    }
+
+    if (processor.category === "retryable_error" || processor.category === "unexpected_error") {
+      return { ok: false, category: processor.category, processor };
+    }
+
+    return { ok: true, category: processor.category, processor };
   } catch {
     return { ok: false, category: "unexpected_error" };
   }

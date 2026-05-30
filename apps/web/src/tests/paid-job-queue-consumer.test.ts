@@ -4,12 +4,12 @@ import {
   processPaidJobQueueMessage,
 } from "@/lib/payments/paid-job-queue-consumer";
 
-const { mockProcessPaidAnalysisJobs } = vi.hoisted(() => ({
-  mockProcessPaidAnalysisJobs: vi.fn(),
+const { mockProcessPaidAnalysisJobById } = vi.hoisted(() => ({
+  mockProcessPaidAnalysisJobById: vi.fn(),
 }));
 
 vi.mock("@/lib/modules/paid-generation-processor", () => ({
-  processPaidAnalysisJobs: mockProcessPaidAnalysisJobs,
+  processPaidAnalysisJobById: mockProcessPaidAnalysisJobById,
 }));
 
 const payload = {
@@ -27,15 +27,11 @@ describe("paid job queue consumer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.DATABASE_URL = "postgres://example.invalid/db";
-    mockProcessPaidAnalysisJobs.mockResolvedValue({
+    mockProcessPaidAnalysisJobById.mockResolvedValue({
       ok: true,
-      dryRun: false,
-      processed: 1,
-      completed: 1,
-      retryScheduled: 0,
-      failedFinal: 0,
-      staleRecovered: 0,
-      skipped: 0,
+      category: "processed",
+      jobId: "job-1",
+      jobResult: "completed",
     });
   });
 
@@ -60,7 +56,7 @@ describe("paid job queue consumer", () => {
         } as NodeJS.ProcessEnv,
       }),
     ).resolves.toEqual({ ok: false, category: "invalid_payload" });
-    expect(mockProcessPaidAnalysisJobs).not.toHaveBeenCalled();
+    expect(mockProcessPaidAnalysisJobById).not.toHaveBeenCalled();
   });
 
   it("does not process messages when the queue trigger flag is disabled", async () => {
@@ -72,7 +68,7 @@ describe("paid job queue consumer", () => {
         } as NodeJS.ProcessEnv,
       }),
     ).resolves.toEqual({ ok: true, category: "disabled" });
-    expect(mockProcessPaidAnalysisJobs).not.toHaveBeenCalled();
+    expect(mockProcessPaidAnalysisJobById).not.toHaveBeenCalled();
   });
 
   it("does not process messages when the processor flag is disabled", async () => {
@@ -84,7 +80,7 @@ describe("paid job queue consumer", () => {
         } as NodeJS.ProcessEnv,
       }),
     ).resolves.toEqual({ ok: true, category: "processor_disabled" });
-    expect(mockProcessPaidAnalysisJobs).not.toHaveBeenCalled();
+    expect(mockProcessPaidAnalysisJobById).not.toHaveBeenCalled();
   });
 
   it("fails safely when database configuration is missing", async () => {
@@ -99,10 +95,10 @@ describe("paid job queue consumer", () => {
         } as NodeJS.ProcessEnv,
       }),
     ).resolves.toEqual({ ok: false, category: "database_config_missing" });
-    expect(mockProcessPaidAnalysisJobs).not.toHaveBeenCalled();
+    expect(mockProcessPaidAnalysisJobById).not.toHaveBeenCalled();
   });
 
-  it("delegates processing to the idempotent paid generation processor", async () => {
+  it("processes the exact queued generation job id", async () => {
     const result = await processPaidJobQueueMessage({
       message: payload,
       env: {
@@ -115,13 +111,116 @@ describe("paid job queue consumer", () => {
       ok: true,
       category: "processed",
       processor: {
-        processed: 1,
-        completed: 1,
+        jobId: "job-1",
+        jobResult: "completed",
       },
     });
-    expect(mockProcessPaidAnalysisJobs).toHaveBeenCalledWith({
-      limit: 1,
+    expect(mockProcessPaidAnalysisJobById).toHaveBeenCalledWith({
+      generationJobId: "job-1",
       lockedBy: "paid_generation_queue",
+    });
+  });
+
+  it("does not process a different due job when multiple jobs exist", async () => {
+    await processPaidJobQueueMessage({
+      message: {
+        ...payload,
+        generationJobId: "job-target",
+      },
+      env: {
+        ENABLE_PAID_JOB_QUEUE_TRIGGER: "true",
+        ENABLE_PAID_GENERATION_PROCESSOR: "true",
+      } as NodeJS.ProcessEnv,
+    });
+
+    expect(mockProcessPaidAnalysisJobById).toHaveBeenCalledWith({
+      generationJobId: "job-target",
+      lockedBy: "paid_generation_queue",
+    });
+  });
+
+  it("returns safe idempotent categories for completed target jobs", async () => {
+    mockProcessPaidAnalysisJobById.mockResolvedValueOnce({
+      ok: true,
+      category: "already_completed",
+      jobId: "job-1",
+    });
+
+    await expect(
+      processPaidJobQueueMessage({
+        message: payload,
+        env: {
+          ENABLE_PAID_JOB_QUEUE_TRIGGER: "true",
+          ENABLE_PAID_GENERATION_PROCESSOR: "true",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).resolves.toMatchObject({
+      ok: true,
+      category: "already_completed",
+      processor: {
+        jobId: "job-1",
+      },
+    });
+  });
+
+  it("returns safe terminal categories for missing and invalid target jobs", async () => {
+    mockProcessPaidAnalysisJobById.mockResolvedValueOnce({
+      ok: false,
+      category: "not_found",
+      jobId: "job-1",
+    });
+
+    await expect(
+      processPaidJobQueueMessage({
+        message: payload,
+        env: {
+          ENABLE_PAID_JOB_QUEUE_TRIGGER: "true",
+          ENABLE_PAID_GENERATION_PROCESSOR: "true",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).resolves.toMatchObject({
+      ok: true,
+      category: "not_found",
+    });
+
+    mockProcessPaidAnalysisJobById.mockResolvedValueOnce({
+      ok: false,
+      category: "invalid_job",
+      jobId: "job-1",
+    });
+
+    await expect(
+      processPaidJobQueueMessage({
+        message: payload,
+        env: {
+          ENABLE_PAID_JOB_QUEUE_TRIGGER: "true",
+          ENABLE_PAID_GENERATION_PROCESSOR: "true",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).resolves.toMatchObject({
+      ok: true,
+      category: "invalid_job",
+    });
+  });
+
+  it("returns retryable errors as queue retry failures", async () => {
+    mockProcessPaidAnalysisJobById.mockResolvedValueOnce({
+      ok: false,
+      category: "retryable_error",
+      jobId: "job-1",
+    });
+
+    await expect(
+      processPaidJobQueueMessage({
+        message: payload,
+        env: {
+          ENABLE_PAID_JOB_QUEUE_TRIGGER: "true",
+          ENABLE_PAID_GENERATION_PROCESSOR: "true",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).resolves.toMatchObject({
+      ok: false,
+      category: "retryable_error",
     });
   });
 

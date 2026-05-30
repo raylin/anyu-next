@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
+  mockClaimDuePaidAnalysisJobById,
   mockClaimDuePaidAnalysisJobs,
   mockCreatePaidResultRecord,
   mockGenerateDeferredPaidResultPayload,
+  mockGetGenerationJobById,
   mockGetAnalysisResultWithRequestById,
   mockGetPaidResultForAnalysisResult,
   mockGetSafePaidGenerationErrorCode,
@@ -16,9 +18,11 @@ const {
   mockMarkPaidResultProcessing,
   mockRecoverStalePaidAnalysisJobs,
 } = vi.hoisted(() => ({
+  mockClaimDuePaidAnalysisJobById: vi.fn(),
   mockClaimDuePaidAnalysisJobs: vi.fn(),
   mockCreatePaidResultRecord: vi.fn(),
   mockGenerateDeferredPaidResultPayload: vi.fn(),
+  mockGetGenerationJobById: vi.fn(),
   mockGetAnalysisResultWithRequestById: vi.fn(),
   mockGetPaidResultForAnalysisResult: vi.fn(),
   mockGetSafePaidGenerationErrorCode: vi.fn(),
@@ -33,7 +37,9 @@ const {
 }));
 
 vi.mock("@/lib/db/generation-jobs", () => ({
+  claimDuePaidAnalysisJobById: mockClaimDuePaidAnalysisJobById,
   claimDuePaidAnalysisJobs: mockClaimDuePaidAnalysisJobs,
+  getGenerationJobById: mockGetGenerationJobById,
   listDueGenerationJobs: mockListDueGenerationJobs,
   markGenerationJobCompleted: mockMarkGenerationJobCompleted,
   markGenerationJobFailedFinal: mockMarkGenerationJobFailedFinal,
@@ -59,7 +65,10 @@ vi.mock("@/lib/modules/paid-generation-service", () => ({
 }));
 
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
-import { processPaidAnalysisJobs } from "@/lib/modules/paid-generation-processor";
+import {
+  processPaidAnalysisJobById,
+  processPaidAnalysisJobs,
+} from "@/lib/modules/paid-generation-processor";
 import { extractFreeResult } from "@/lib/modules/result-adapters";
 
 const NOW = new Date("2026-05-27T12:00:00.000Z");
@@ -116,7 +125,9 @@ describe("paid generation processor", () => {
       failedFinal: 0,
       staleRecovered: 0,
     });
+    mockClaimDuePaidAnalysisJobById.mockResolvedValue(JOB);
     mockClaimDuePaidAnalysisJobs.mockResolvedValue([JOB]);
+    mockGetGenerationJobById.mockResolvedValue(JOB);
     mockGetPaidResultForAnalysisResult.mockResolvedValue(null);
     mockCreatePaidResultRecord.mockResolvedValue({ id: "paid-1" });
     mockMarkPaidResultCompleted.mockResolvedValue({ id: "paid-1" });
@@ -194,6 +205,103 @@ describe("paid generation processor", () => {
         source: "provider",
       }),
     );
+  });
+
+  it("processes a targeted paid generation job by id", async () => {
+    const result = await processPaidAnalysisJobById({
+      generationJobId: "job-1",
+      lockedBy: "queue-worker",
+      now: NOW,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      category: "processed",
+      jobId: "job-1",
+      jobResult: "completed",
+    });
+    expect(mockClaimDuePaidAnalysisJobById).toHaveBeenCalledWith({
+      jobId: "job-1",
+      lockedBy: "queue-worker",
+      now: NOW,
+    });
+    expect(mockClaimDuePaidAnalysisJobs).not.toHaveBeenCalled();
+    expect(mockMarkGenerationJobCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jobId: "job-1",
+        outputRefId: "paid-1",
+      }),
+    );
+  });
+
+  it("classifies completed targeted jobs as idempotent without processing another job", async () => {
+    mockClaimDuePaidAnalysisJobById.mockResolvedValueOnce(null);
+    mockGetGenerationJobById.mockResolvedValueOnce({
+      ...JOB,
+      status: "completed",
+      outputRefId: "paid-1",
+    });
+
+    await expect(
+      processPaidAnalysisJobById({
+        generationJobId: "job-1",
+        now: NOW,
+      }),
+    ).resolves.toEqual({
+      ok: true,
+      category: "already_completed",
+      jobId: "job-1",
+    });
+    expect(mockClaimDuePaidAnalysisJobs).not.toHaveBeenCalled();
+    expect(mockGenerateDeferredPaidResultPayload).not.toHaveBeenCalled();
+  });
+
+  it("classifies missing, invalid, and processing targeted jobs safely", async () => {
+    mockClaimDuePaidAnalysisJobById.mockResolvedValue(null);
+    mockGetGenerationJobById.mockResolvedValueOnce(null);
+
+    await expect(
+      processPaidAnalysisJobById({
+        generationJobId: "missing-job",
+        now: NOW,
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      category: "not_found",
+      jobId: "missing-job",
+    });
+
+    mockGetGenerationJobById.mockResolvedValueOnce({
+      ...JOB,
+      jobType: "other_job",
+    });
+
+    await expect(
+      processPaidAnalysisJobById({
+        generationJobId: "invalid-job",
+        now: NOW,
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      category: "invalid_job",
+      jobId: "invalid-job",
+    });
+
+    mockGetGenerationJobById.mockResolvedValueOnce({
+      ...JOB,
+      status: "processing",
+    });
+
+    await expect(
+      processPaidAnalysisJobById({
+        generationJobId: "processing-job",
+        now: NOW,
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      category: "already_processing",
+      jobId: "processing-job",
+    });
   });
 
   it("marks fallback completions as completed with fallback source", async () => {

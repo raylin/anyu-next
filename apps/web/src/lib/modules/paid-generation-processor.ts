@@ -3,7 +3,9 @@ import {
   PAID_RESULT_SCHEMA_VERSION,
 } from "@/lib/ai/paid-result-generation";
 import {
+  claimDuePaidAnalysisJobById,
   claimDuePaidAnalysisJobs,
+  getGenerationJobById,
   listDueGenerationJobs,
   markGenerationJobCompleted,
   markGenerationJobFailedFinal,
@@ -35,6 +37,29 @@ export type PaidGenerationProcessorResult = {
   staleRecovered: number;
   skipped: number;
 };
+
+export type TargetedPaidGenerationProcessorCategory =
+  | "processed"
+  | "already_completed"
+  | "already_processing"
+  | "not_found"
+  | "invalid_job"
+  | "failed"
+  | "retryable_error"
+  | "unexpected_error";
+
+export type TargetedPaidGenerationProcessorResult =
+  | {
+      ok: true;
+      category: "processed" | "already_completed";
+      jobId: string;
+      jobResult?: "completed" | "retry_scheduled" | "failed_final";
+    }
+  | {
+      ok: false;
+      category: Exclude<TargetedPaidGenerationProcessorCategory, "processed" | "already_completed">;
+      jobId: string;
+    };
 
 const DEFAULT_PROCESSOR_LIMIT = 1;
 const MAX_PROCESSOR_LIMIT = 3;
@@ -226,6 +251,74 @@ async function processPaidAnalysisJob(job: GenerationJob, now: Date) {
       errorCategory: getSafePaidGenerationErrorCode(error),
       now,
     });
+  }
+}
+
+function classifyUnclaimedTargetJob(
+  job: GenerationJob | null,
+): Exclude<TargetedPaidGenerationProcessorCategory, "processed"> {
+  if (!job) {
+    return "not_found";
+  }
+
+  if (job.jobType !== "paid_analysis" || job.inputRefType !== "analysis_result") {
+    return "invalid_job";
+  }
+
+  if (job.status === "completed") {
+    return "already_completed";
+  }
+
+  if (job.status === "processing") {
+    return "already_processing";
+  }
+
+  if (job.status === "failed_final" || job.attemptCount >= job.maxAttempts) {
+    return "failed";
+  }
+
+  return "retryable_error";
+}
+
+export async function processPaidAnalysisJobById(input: {
+  generationJobId: string;
+  lockedBy?: string;
+  now?: Date;
+}): Promise<TargetedPaidGenerationProcessorResult> {
+  const now = input.now ?? new Date();
+  const jobId = input.generationJobId;
+
+  try {
+    const claimedJob = await claimDuePaidAnalysisJobById({
+      jobId,
+      lockedBy: input.lockedBy ?? "paid_generation_queue",
+      now,
+    });
+
+    if (!claimedJob) {
+      const currentJob = await getGenerationJobById(jobId);
+      const category = classifyUnclaimedTargetJob(currentJob);
+
+      if (category === "already_completed") {
+        return { ok: true, category, jobId };
+      }
+
+      return { ok: false, category, jobId };
+    }
+
+    const jobResult = await processPaidAnalysisJob(claimedJob, now);
+
+    if (jobResult === "completed") {
+      return { ok: true, category: "processed", jobId, jobResult };
+    }
+
+    if (jobResult === "retry_scheduled") {
+      return { ok: false, category: "retryable_error", jobId };
+    }
+
+    return { ok: false, category: "failed", jobId };
+  } catch {
+    return { ok: false, category: "unexpected_error", jobId };
   }
 }
 

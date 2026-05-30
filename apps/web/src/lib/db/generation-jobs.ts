@@ -400,6 +400,67 @@ export async function claimDuePaidAnalysisJobs(input: {
   return (result.rows as GenerationJobSqlRow[]).map(mapGenerationJobSqlRow);
 }
 
+export async function claimDuePaidAnalysisJobById(input: {
+  jobId: string;
+  lockedBy: string;
+  now?: Date;
+}) {
+  const db = requireDb();
+  const now = input.now ?? new Date();
+
+  const result = await db.execute(sql`
+    WITH due AS (
+      SELECT id
+      FROM generation_jobs
+      WHERE id = ${input.jobId}
+        AND job_type = ${PAID_ANALYSIS_JOB_TYPE}
+        AND status IN ('queued', 'retry_scheduled')
+        AND next_run_at <= ${now}
+        AND attempt_count < max_attempts
+      FOR UPDATE SKIP LOCKED
+    )
+    UPDATE generation_jobs
+    SET
+      status = 'processing',
+      attempt_count = attempt_count + 1,
+      locked_at = ${now},
+      locked_by = ${input.lockedBy},
+      updated_at = ${now}
+    WHERE id IN (SELECT id FROM due)
+    RETURNING
+      id,
+      job_type,
+      status,
+      priority,
+      module_slug,
+      input_ref_type,
+      input_ref_id,
+      output_ref_type,
+      output_ref_id,
+      trigger_source,
+      dedupe_key,
+      entitlement_ref_id,
+      attempt_count,
+      max_attempts,
+      next_run_at,
+      locked_at,
+      locked_by,
+      last_error_category,
+      last_error_code,
+      last_error_at,
+      model_provider,
+      model_name,
+      prompt_version,
+      schema_version,
+      source,
+      operator_test,
+      created_at,
+      updated_at
+  `);
+
+  return (result.rows as GenerationJobSqlRow[]).map(mapGenerationJobSqlRow)[0] ?? null;
+}
+
 export async function recoverStalePaidAnalysisJobs(input: {
   now?: Date;
   staleBefore: Date;
