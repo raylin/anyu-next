@@ -331,7 +331,7 @@
       <h1>暗語 ANYU / anyu-next</h1>
       <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging payment/queue flow mostly validated; NewebPay sandbox NotifyURL business verification is under diagnosis.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-05-31 00:27 CST</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-05-31 00:58 CST</span></div>
         <div><span class="label">Current phase</span><span class="value">Sandbox payment diagnosis before launch gate</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Sandbox TradeInfo decrypt failure</span></div>
@@ -376,7 +376,7 @@
         <div class="progressbar"><span style="width: 90%"></span></div>
         <p><strong>Production launch readiness</strong></p>
         <div class="progressbar"><span style="width: 54%"></span></div>
-        <p>The launch gap is not queue architecture. The active blocker is real NewebPay sandbox callback decrypt/config alignment plus external merchant approval.</p>
+        <p>The launch gap is not queue architecture. The active blocker is real NewebPay sandbox backend credential/shop verification plus external merchant approval.</p>
       </div>
     </section>
 
@@ -398,7 +398,7 @@
           <li><span class="time">Sandbox preflight</span><span>Sandbox checkout preflight passed with ccore gateway, MPG 2.0, NT$49, and pcs_ handoff.</span></li>
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
-          <li><span class="time">Current</span><span>Sandbox v3 identified <code>trade_info_decrypt_failed</code>; next action is sandbox credential/config alignment.</span></li>
+          <li><span class="time">Current</span><span>Sandbox v4 confirmed <code>trade_info_decrypt_failed</code> persists after Preview(staging) env alignment; next action is NewebPay backend credential verification.</span></li>
         </ol>
       </div>
     </section>
@@ -421,8 +421,8 @@
       <div class="panel">
         <h2>NewebPay Status</h2>
         <p>Merchant review supplement submitted. Production public pages are ready. Sandbox shop is created and operating.</p>
-        <p>Sandbox checkout and browser return work. NotifyURL transport HTTP 200 works. Paid transition is still blocked by <code>trade_info_decrypt_failed</code>.</p>
-        <p>Next action: align sandbox MerchantID / HashKey / HashIV / shop config, then rerun sandbox E2E.</p>
+        <p>Sandbox checkout and browser return work. NotifyURL transport HTTP 200 works. Paid transition is still blocked by <code>trade_info_decrypt_failed</code>, even after Preview(staging) env alignment.</p>
+        <p>Next action: verify NewebPay sandbox backend shop MerchantID / HashKey / HashIV exactly match the configured values, then rerun sandbox E2E.</p>
       </div>
     </section>
 
@@ -463,7 +463,7 @@
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
           <tr><td>P0</td><td>NewebPay approval / credential readiness</td><td>Owner / NewebPay</td><td>Wait for review outcome and confirm formal credential availability.</td></tr>
-          <tr><td>P0</td><td>Sandbox v3 paid transition diagnosis</td><td>Ops / code if needed</td><td>Fix based on <code>trade_info_decrypt_failed</code>: align sandbox shop credentials/config.</td></tr>
+          <tr><td>P0</td><td>Sandbox v3 paid transition diagnosis</td><td>Ops / code if needed</td><td>Fix based on persistent <code>trade_info_decrypt_failed</code>: verify backend shop credentials and copied value formatting.</td></tr>
           <tr><td>P0</td><td>Production config dry-run</td><td>Ops</td><td>After sandbox pass and approval, configure production env with runtime still disabled.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke</td><td>Owner / ops</td><td>Run one small controlled payment only after launch gate approval.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
@@ -496,9 +496,9 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> NewebPay Sandbox TradeInfo Decrypt Config Alignment v0.</p>
-        <p>If sandbox v3 had not been run, run Fresh NewebPay Sandbox E2E Payment Smoke v3. It has now run and failed with `trade_info_decrypt_failed`.</p>
-        <p>If sandbox config alignment fixes v3/v4 and paid transition passes, proceed to Production Payment Config Dry-Run v0.</p>
+        <p><strong>Current recommendation:</strong> NewebPay Sandbox Backend Credential Verification v0.</p>
+        <p>Fresh sandbox E2E v4 has run after Preview(staging) env alignment and still failed with <code>trade_info_decrypt_failed</code>.</p>
+        <p>If backend credential verification fixes v4/v5 and paid transition passes, proceed to Production Payment Config Dry-Run v0.</p>
         <p>If NewebPay approval arrives before sandbox is fixed, do not launch production payment yet; complete sandbox/provider verification or a controlled equivalent first.</p>
       </div>
     </section>
@@ -511,7 +511,9 @@
           <li><a href="../reports/2026-05-30-support-refund-sop-finalization-v0.md">Support / Refund SOP Finalization v0</a></li>
           <li><a href="../reports/2026-05-30-queue-launch-readiness-phase-4c-checklist-v0.md">Queue Launch Readiness / Phase 4C Checklist v0</a></li>
           <li><a href="../reports/2026-05-30-safe-notifyurl-category-diagnostics-v0.md">Safe NotifyURL Category Diagnostics v0</a></li>
+          <li><a href="../reports/2026-05-31-fresh-newebpay-sandbox-e2e-payment-smoke-v4.md">Fresh NewebPay Sandbox E2E Payment Smoke v4</a></li>
           <li><a href="../reports/2026-05-31-fresh-newebpay-sandbox-e2e-payment-smoke-v3.md">Fresh NewebPay Sandbox E2E Payment Smoke v3</a></li>
+          <li><a href="../reports/2026-05-31-newebpay-sandbox-tradeinfo-decrypt-config-alignment-v0.md">NewebPay Sandbox TradeInfo Decrypt Config Alignment v0</a></li>
           <li><a href="../reports/2026-05-30-fresh-newebpay-sandbox-e2e-payment-smoke-v2.md">Fresh NewebPay Sandbox E2E Payment Smoke v2</a></li>
           <li><a href="../reports/2026-05-30-fix-newebpay-sandbox-notifyurl-http-400-compatibility-v0.md">Fix NewebPay Sandbox NotifyURL HTTP 400 Compatibility v0</a></li>
           <li><a href="../reports/2026-05-30-newebpay-sandbox-staging-checkout-preflight-run-v1.md">NewebPay Sandbox Staging Checkout Preflight Run v1</a></li>

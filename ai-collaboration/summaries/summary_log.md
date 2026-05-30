@@ -7412,3 +7412,23 @@ Learnings:
 Unresolved questions:
 - Fresh sandbox E2E v4 is required to prove whether the newly aligned Preview(`staging`) credentials resolve `trade_info_decrypt_failed`.
 - If v4 still fails with `trade_info_decrypt_failed`, the likely remaining issue is NewebPay backend/shop credential mismatch outside code.
+
+## 2026-05-31 - Fresh NewebPay Sandbox E2E Payment Smoke v4
+
+Completed changes:
+- Ran a fresh Preview(`staging`) NewebPay sandbox checkout after branch-scoped sandbox config alignment.
+- Created fresh checkout run `20260530164832`: source analyze HTTP 200, checkout HTTP 200, sandbox `ccore`, MPG `Version=2.0`, NT$49, and `pcs_` handoff present.
+- Owner submitted sandbox credit-card one-time payment and browser returned to staging.
+- Polled session-bound payment status for 72 attempts over about 6 minutes; final status remained `waiting_for_payment`, with no access path.
+- Inspected safe Vercel logs and captured `newebpay_notify_failed.category=trade_info_decrypt_failed` again.
+- Confirmed Production remained disabled: production health stayed `production/main/1990fc034d74`; production checkout and fake-paid returned JSON 404 `not_found`; public pages returned 200.
+- Updated the project dashboard to reflect that v4 ran and the decrypt failure persists.
+
+Learnings:
+- Preview(`staging`) env force-alignment from `.env.local` did not resolve real provider callback decryption.
+- The callback still has the expected form shape and HTTP 200 transport, so the failure remains before payload parsing, payment intent lookup, amount matching, paid transition, delivery artifacts, queue trigger, or paid access handoff.
+- The next useful evidence must come from NewebPay sandbox backend/shop credential verification, not payment flow code changes.
+
+Unresolved questions:
+- Whether the sandbox backend shop that processed the transaction has different HashKey/HashIV from `.env.local` / Preview(`staging)`.
+- Whether copied credential values contain hidden whitespace, quotes, old sandbox values, production values, or a different shop's values.
