@@ -7340,3 +7340,19 @@ Learnings:
 Unresolved questions:
 - Need safe category-only NotifyURL diagnostics to identify whether the real provider callback fails due to signature, merchant, payment intent, amount, status, or another category.
 - Paid transition, delivery artifacts, queue completion, and paid access rendering remain unverified for real sandbox provider flow.
+
+## 2026-05-30 - Safe NotifyURL Category Diagnostics v0
+
+Completed changes:
+- Added category-only `console.info` diagnostics for `POST /api/payments/newebpay/notify` success and failure outcomes.
+- Diagnostics include event name, category, provider environment category, HTTP transport status, provider response category, content-type category, payload-shape booleans, and safe mismatch booleans for merchant, amount, and payment intent lookup failures.
+- Preserved provider response behavior: verified success returns HTTP 200 + `1|OK`; parsed provider callback failures return HTTP 200 + `0|ERROR`.
+- Updated NotifyURL route tests to prove invalid signature, malformed payload, merchant mismatch, amount mismatch, and payment intent not found diagnostics do not include raw provider field values.
+
+Learnings:
+- The route can expose enough safe state to distinguish transport success from business verification failure without logging raw `TradeInfo`, `TradeSha`, decrypted provider payloads, tokens, or credentials.
+- The next sandbox callback should identify whether the blocker is signature, merchant, amount, payment intent lookup, payment status, or another existing NotifyURL category.
+
+Unresolved questions:
+- The real NewebPay sandbox callback failure category remains unknown until this diagnostic build is deployed to Preview(`staging`) and a fresh callback is observed.
+- Paid transition, delivery artifacts, queue completion, and paid access rendering remain unverified for real sandbox provider flow.

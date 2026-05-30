@@ -15,6 +15,8 @@ vi.mock("@/lib/payments/newebpay/notify-service", () => ({
 
 import { POST } from "@/app/api/payments/newebpay/notify/route";
 
+const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => undefined);
+
 function formRequest(body: Record<string, string>) {
   return new Request("http://localhost/api/payments/newebpay/notify", {
     method: "POST",
@@ -31,6 +33,16 @@ function rawFormRequest(body: string) {
   });
 }
 
+function lastDiagnostic() {
+  const message = consoleInfoSpy.mock.calls.at(-1)?.[0];
+
+  if (typeof message !== "string") {
+    throw new Error("expected diagnostic log");
+  }
+
+  return JSON.parse(message) as Record<string, unknown>;
+}
+
 describe("NewebPay NotifyURL route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -39,7 +51,8 @@ describe("NewebPay NotifyURL route", () => {
       ok: true,
       category: "payment_marked_paid",
       paymentIntentStatus: "paid",
-      paymentIntent: { id: "payment-1" },
+      paymentIntent: { id: "payment-1", moduleSlug: "ambiguous-temperature" },
+      queueTrigger: { category: "disabled" },
     });
   });
 
@@ -60,6 +73,19 @@ describe("NewebPay NotifyURL route", () => {
     expect(body).not.toContain("payment-1");
     expect(body).not.toContain("TradeInfo");
     expect(body).not.toContain("TradeSha");
+    expect(lastDiagnostic()).toMatchObject({
+      event: "newebpay_notify_processed",
+      ok: true,
+      category: "payment_marked_paid",
+      httpTransportStatus: 200,
+      providerResponse: "1|OK",
+      payloadShape: {
+        merchantIdPresent: true,
+        tradeInfoPresent: true,
+        tradeShaPresent: true,
+        versionPresent: true,
+      },
+    });
   });
 
   it("returns provider-compatible error with safe category for invalid callbacks", async () => {
@@ -79,8 +105,31 @@ describe("NewebPay NotifyURL route", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(await response.text()).toBe("0|ERROR");
+    const body = await response.text();
+
+    expect(body).toBe("0|ERROR");
     expect(response.headers.get("x-anyu-payment-category")).toBe("signature_invalid");
+    expect(body).not.toContain("TradeInfo");
+    expect(body).not.toContain("TradeSha");
+
+    const diagnostic = lastDiagnostic();
+
+    expect(diagnostic).toMatchObject({
+      event: "newebpay_notify_failed",
+      ok: false,
+      category: "signature_invalid",
+      httpTransportStatus: 200,
+      providerResponse: "0|ERROR",
+      contentTypeCategory: "form_urlencoded",
+      payloadShape: {
+        merchantIdPresent: true,
+        tradeInfoPresent: true,
+        tradeShaPresent: true,
+        versionPresent: true,
+      },
+    });
+    expect(JSON.stringify(diagnostic)).not.toContain("encrypted");
+    expect(JSON.stringify(diagnostic)).not.toContain("bad");
   });
 
   it("parses x-www-form-urlencoded provider callbacks", async () => {
@@ -112,6 +161,80 @@ describe("NewebPay NotifyURL route", () => {
     expect(body).toBe("0|ERROR");
     expect(response.headers.get("x-anyu-payment-category")).toBe("malformed_payload");
     expect(body).not.toContain("MerchantID");
+    expect(lastDiagnostic()).toMatchObject({
+      event: "newebpay_notify_failed",
+      category: "malformed_payload",
+      payloadShape: {
+        merchantIdPresent: true,
+        tradeInfoPresent: false,
+        tradeShaPresent: false,
+        versionPresent: false,
+      },
+    });
+  });
+
+  it("logs safe category booleans for merchant mismatch without raw payload values", async () => {
+    mockProcessNewebPayNotify.mockResolvedValue({
+      ok: false,
+      status: 400,
+      category: "merchant_mismatch",
+    });
+
+    await POST(
+      rawFormRequest("MerchantID=MS123456789&TradeInfo=encrypted&TradeSha=sha&Version=2.0"),
+    );
+
+    const diagnostic = lastDiagnostic();
+    const serialized = JSON.stringify(diagnostic);
+
+    expect(diagnostic).toMatchObject({
+      event: "newebpay_notify_failed",
+      category: "merchant_mismatch",
+      merchantMatch: false,
+      payloadShape: {
+        merchantIdPresent: true,
+        tradeInfoPresent: true,
+        tradeShaPresent: true,
+        versionPresent: true,
+      },
+    });
+    expect(serialized).not.toContain("MS123456789");
+    expect(serialized).not.toContain("encrypted");
+    expect(serialized).not.toContain("sha");
+  });
+
+  it("logs safe category booleans for amount mismatch and missing payment intent", async () => {
+    mockProcessNewebPayNotify.mockResolvedValueOnce({
+      ok: false,
+      status: 409,
+      category: "amount_mismatch",
+    });
+
+    await POST(
+      rawFormRequest("MerchantID=MS123456789&TradeInfo=encrypted&TradeSha=sha&Version=2.0"),
+    );
+
+    expect(lastDiagnostic()).toMatchObject({
+      event: "newebpay_notify_failed",
+      category: "amount_mismatch",
+      amountMatch: false,
+    });
+
+    mockProcessNewebPayNotify.mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      category: "payment_intent_not_found",
+    });
+
+    await POST(
+      rawFormRequest("MerchantID=MS123456789&TradeInfo=encrypted&TradeSha=sha&Version=2.0"),
+    );
+
+    expect(lastDiagnostic()).toMatchObject({
+      event: "newebpay_notify_failed",
+      category: "payment_intent_not_found",
+      paymentIntentFound: false,
+    });
   });
 
   it("fails safely when database/runtime config is missing", async () => {
