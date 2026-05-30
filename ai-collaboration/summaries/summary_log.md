@@ -7306,3 +7306,18 @@ Learnings:
 Unresolved questions:
 - Owner needs to inspect NewebPay sandbox backend transaction status, callback attempt/status/response, and shop API URL / NotifyURL settings.
 - If backend shows callback attempted but failed, add category-only route diagnostics; if no callback attempted, fix provider/backend settings before code changes.
+
+## 2026-05-30 - Fix NewebPay Sandbox NotifyURL HTTP 400 Compatibility v0
+
+Completed changes:
+- Fixed `POST /api/payments/newebpay/notify` so parsed provider callback validation failures return HTTP 200 with body `0|ERROR` and safe `x-anyu-payment-category`, instead of propagating internal 400/404/409 statuses.
+- Preserved verified success response as HTTP 200 with `1|OK`.
+- Added route tests for `application/x-www-form-urlencoded` parsing, missing-field provider-compatible failure, invalid signature provider-compatible failure, and no `TradeInfo` / `TradeSha` exposure.
+
+Learnings:
+- The real sandbox callback failure was not a parser gap; the route already supported form POSTs. The issue was transport-level HTTP 400 for provider validation failures.
+- NewebPay treats HTTP 400 as callback delivery failure, so ANYU needs HTTP 200 transport acknowledgement with category in body/header for normal provider callback failures.
+
+Unresolved questions:
+- Staging malformed POST verification still needs to run after Preview(`staging`) deploys this commit.
+- Fresh sandbox payment smoke v2 is needed to confirm NewebPay accepts the callback and paid delivery proceeds.

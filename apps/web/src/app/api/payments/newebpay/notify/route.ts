@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { isDbConfigured } from "@/lib/db/client";
 import { processNewebPayNotify } from "@/lib/payments/newebpay/notify-service";
 
-function providerResponse(ok: boolean, category: string, status = ok ? 200 : 400) {
+function providerResponse(ok: boolean, category: string, status = 200) {
   return new NextResponse(ok ? "1|OK" : "0|ERROR", {
     status,
     headers: {
@@ -38,15 +38,14 @@ export async function POST(request: Request) {
   try {
     payload = await readNotifyPayload(request);
   } catch {
-    return providerResponse(false, "malformed_payload", 400);
+    return providerResponse(false, "malformed_payload");
   }
 
   const result = await processNewebPayNotify(payload);
 
   if (!result.ok) {
-    return providerResponse(false, result.category, result.status);
+    return providerResponse(false, result.category);
   }
 
   return providerResponse(true, result.category);
 }
-

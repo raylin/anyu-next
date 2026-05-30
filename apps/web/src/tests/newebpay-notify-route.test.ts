@@ -23,6 +23,14 @@ function formRequest(body: Record<string, string>) {
   });
 }
 
+function rawFormRequest(body: string) {
+  return new Request("http://localhost/api/payments/newebpay/notify", {
+    method: "POST",
+    body,
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+  });
+}
+
 describe("NewebPay NotifyURL route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -70,9 +78,40 @@ describe("NewebPay NotifyURL route", () => {
       }),
     );
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(200);
     expect(await response.text()).toBe("0|ERROR");
     expect(response.headers.get("x-anyu-payment-category")).toBe("signature_invalid");
+  });
+
+  it("parses x-www-form-urlencoded provider callbacks", async () => {
+    await POST(
+      rawFormRequest("MerchantID=MS123456789&TradeInfo=encrypted&TradeSha=sha&Version=2.0"),
+    );
+
+    expect(mockProcessNewebPayNotify).toHaveBeenCalledTimes(1);
+    const payload = mockProcessNewebPayNotify.mock.calls[0]?.[0];
+
+    expect(payload).toBeInstanceOf(FormData);
+    expect(payload.get("MerchantID")).toBe("MS123456789");
+    expect(payload.get("TradeInfo")).toBe("encrypted");
+    expect(payload.get("TradeSha")).toBe("sha");
+    expect(payload.get("Version")).toBe("2.0");
+  });
+
+  it("returns HTTP 200 with provider-compatible failure for missing fields", async () => {
+    mockProcessNewebPayNotify.mockResolvedValue({
+      ok: false,
+      status: 400,
+      category: "malformed_payload",
+    });
+
+    const response = await POST(rawFormRequest("MerchantID=MS123456789"));
+    const body = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(body).toBe("0|ERROR");
+    expect(response.headers.get("x-anyu-payment-category")).toBe("malformed_payload");
+    expect(body).not.toContain("MerchantID");
   });
 
   it("fails safely when database/runtime config is missing", async () => {
@@ -85,4 +124,3 @@ describe("NewebPay NotifyURL route", () => {
     expect(mockProcessNewebPayNotify).not.toHaveBeenCalled();
   });
 });
-
