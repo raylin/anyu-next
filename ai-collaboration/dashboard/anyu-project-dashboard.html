@@ -331,7 +331,7 @@
       <h1>暗語 ANYU / anyu-next</h1>
       <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed after the TradeInfo padding fix; NewebPay merchant review remains the external gate. While review is pending, the next low-risk sprint is Module 01 launch UX lock-down plus lightweight multi-module direction planning.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-05-31 01:49 CST</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-05-31 01:56 CST</span></div>
         <div><span class="label">Current phase</span><span class="value">Sandbox E2E passed; review-wait sprint planning</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Merchant approval / formal production credentials</span></div>
@@ -351,7 +351,7 @@
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. hello@anyu.tw is public support channel.</p></article>
         <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers remain NewebPay approval/formal credentials, production dry-run, and controlled smoke.</p></article>
         <article class="card"><span class="badge progress">Planning</span><h3>Multi-module direction</h3><p>Recommended review-wait path: keep Module 01 stable, plan Module 02 concept/spec, and add only lightweight homepage cross-linking when approved.</p></article>
-        <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: sandbox helper, queue audit persistence, domain/project ambiguity, and optional provider fields.</p></article>
+        <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: queue audit persistence, domain/project ambiguity, optional provider fields, and future production smoke tooling.</p></article>
       </div>
     </section>
 
@@ -460,6 +460,15 @@
     </section>
 
     <section>
+      <h2>QA Tooling</h2>
+      <div class="panel">
+        <p><strong>Sandbox helper:</strong> <code>corepack pnpm run qa:newebpay:sandbox -- create-checkout</code> creates a fresh staging sandbox checkout and writes the provider form outside the repo under <code>/private/tmp/anyu-newebpay-smoke/</code>.</p>
+        <p><strong>Verification:</strong> <code>poll-status</code> and <code>verify-after-payment</code> read local state from the temporary directory and print only sanitized status categories and booleans.</p>
+        <p><strong>Safety:</strong> helper output must not include provider secrets, TradeInfo, TradeSha, raw pcs_/pa_ tokens, tokenized URLs, raw input, or card data.</p>
+      </div>
+    </section>
+
+    <section>
       <h2>Support / Refund Readiness</h2>
       <div class="panel">
         <p>SOP is created for owner/operator use. Public support channel: <a href="mailto:hello@anyu.tw">hello@anyu.tw</a>.</p>
@@ -481,7 +490,7 @@
           <tr><td>P1</td><td>Old Vercel project/domain ambiguity</td><td>Owner UI action</td><td>Verify anyu.tw belongs only to anyu-next project if old project is unused.</td></tr>
           <tr><td>P1</td><td>Local git lock/FETCH_HEAD issue</td><td>Ops</td><td>Monitor; clean stale locks only when clearly safe.</td></tr>
           <tr><td>P2</td><td>Queue audit persistence</td><td>Code</td><td>Consider queue_events/audit table after launch need is clearer.</td></tr>
-          <tr><td>P2</td><td>Dedicated sandbox E2E helper</td><td>Code</td><td>Create safe operator helper to reduce repeated ad hoc scripts.</td></tr>
+          <tr><td>P2</td><td>Dedicated sandbox E2E helper</td><td>Code</td><td>Added for staging sandbox flows; extend only if future smoke evidence requires more automation.</td></tr>
           <tr><td>P2</td><td>ClientBackURL / payment method restriction</td><td>Code if evidenced</td><td>Add only if NewebPay evidence requires it.</td></tr>
           <tr><td>P2</td><td>Refund handling-window public copy</td><td>Owner / copy</td><td>Update public copy only after owner confirms policy.</td></tr>
         </tbody>
@@ -493,7 +502,7 @@
       <table>
         <thead><tr><th>Item</th><th>Priority</th><th>Owner</th><th>Risk if deferred</th><th>Suggested follow-up task</th></tr></thead>
         <tbody>
-          <tr><td>Dedicated sandbox checkout/E2E helper</td><td>P2</td><td>Code</td><td>Manual smoke remains slow and error-prone.</td><td>Secret-Safe NewebPay Sandbox E2E Helper v0</td></tr>
+          <tr><td>Dedicated sandbox checkout/E2E helper</td><td>P2</td><td>Code</td><td>Initial helper exists; future risk is limited browser/manual submission friction.</td><td>Sandbox Helper Follow-up only if future smoke needs it</td></tr>
           <tr><td>Queue audit persistence</td><td>P2</td><td>Code</td><td>Harder post-incident queue diagnosis after launch.</td><td>Paid Queue Audit Event Design v0</td></tr>
           <tr><td>Old Vercel domain/project ambiguity</td><td>P1</td><td>Owner UI</td><td>Future deployment ownership confusion.</td><td>Vercel Domain Ownership Cleanup v0</td></tr>
           <tr><td>Main/staging drift after docs commits</td><td>P1</td><td>Ops</td><td>Production release branch may lag operational docs.</td><td>Release Branch Documentation Sync v0</td></tr>
@@ -533,6 +542,7 @@
           <li><a href="../reports/2026-05-30-anyu-current-state-snapshot-chatgpt-review-v0.md">ANYU Current State Snapshot v0</a></li>
           <li><a href="../reports/2026-05-30-anyu-engineering-sync-up-quality-scan-v0.md">ANYU Engineering Sync-Up / Quality Scan v0</a></li>
           <li><a href="../reports/2026-05-31-post-sandbox-next-sprint-scan-multi-module-direction-v0.md">Post-Sandbox Next Sprint Scan with Multi-Module Direction v0</a></li>
+          <li><a href="../reports/2026-05-31-secret-safe-newebpay-sandbox-e2e-helper-qa-runner-cleanup-v0.md">Secret-safe NewebPay Sandbox E2E Helper / QA Runner Cleanup v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

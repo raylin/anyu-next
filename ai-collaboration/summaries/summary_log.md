@@ -7545,3 +7545,20 @@ Unresolved questions:
 - Which Module 02 direction owner prefers: low-risk/shareable `社群微訊號讀心卡` or deeper Personal Insight Graph seed `心動慣性圖譜`.
 - Whether NewebPay approval/formal production credentials arrive before the next product sprint starts.
 - Whether the Module 01 paid CTA should remain internal-test copy until approval or be prepared as launch-ready multi-state copy first.
+
+## 2026-05-31 - Secret-safe NewebPay Sandbox E2E Helper / QA Runner Cleanup v0
+
+Completed changes:
+- Added `apps/web/scripts/newebpay-sandbox-e2e-helper.mjs` for repeatable staging NewebPay sandbox smoke preparation and verification.
+- Added package script `qa:newebpay:sandbox` with `create-checkout`, `poll-status`, and `verify-after-payment` modes.
+- The helper writes temporary payment forms and state only under `/private/tmp/anyu-newebpay-smoke/` and prints sanitized JSON only.
+- Updated the project dashboard with the new sandbox helper command and safety expectations.
+
+Learnings:
+- The existing fake-paid QA runner already has a good sanitized output pattern, but sandbox E2E needs a separate helper because it must write a real provider form for manual browser submission.
+- The helper can call staging routes and does not need local NewebPay provider credentials; it only needs `OPERATOR_TEST_SECRET` for operator-gated checkout creation.
+- Missing-secret dry run blocks safely before checkout creation.
+
+Unresolved questions:
+- Whether future smoke runs need automated safe Vercel log category retrieval, or whether manual dashboard/log inspection remains sufficient.
+- Whether a separate production controlled-smoke helper is worth building after merchant approval; it should remain a distinct launch-gate task.
