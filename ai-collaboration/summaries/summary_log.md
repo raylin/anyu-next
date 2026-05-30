@@ -6952,3 +6952,23 @@ Unresolved questions:
 - Which real queue provider should Phase 4B use.
 - Whether provider-level enqueue idempotency should be tracked in DB or delegated to the queue provider.
 - Whether `payment_success_future` should be renamed or supplemented before queue observability becomes user-facing.
+
+## 2026-05-30 - Production Deployment Source-of-Truth Cleanup v0
+
+Completed changes:
+- Audited local git state, remote refs, stale lock files, and main/staging divergence.
+- Confirmed `git fetch origin --prune` now succeeds and no `.git/*.lock` files are present.
+- Confirmed local `staging` and `origin/staging` match at `ca8275b`, while `origin/main` is 75 commits behind.
+- Audited Vercel project/domain state with read-only CLI commands.
+- Confirmed `anyu.tw` currently resolves to the `anyu-next` production deployment and public merchant-review pages are live.
+- Confirmed checkout and operator fake-paid production routes fail closed with route-controlled JSON 404 responses.
+
+Learnings:
+- Production health reports `gitBranch: staging` and `gitCommit: 3de74ca20c74`, confirming production was deployed directly from a staging commit.
+- Vercel still lists both `anyu-next` and old `anyu` projects; direct inspection resolves `anyu.tw` to `anyu-next`, but owner should verify domain ownership in the UI.
+- `main` is a strict ancestor of `staging`, so a future reconciliation can be fast-forwarded if owner approves.
+
+Unresolved questions:
+- Whether owner wants a fast-forward `main` sync or PR-based review from `staging` to `main`.
+- Whether the old Vercel `anyu` project should be archived or have stale domain/alias settings removed.
+- Whether to complete source-of-truth reconciliation before Queue Provider Selection / Phase 4B Plan v0.
