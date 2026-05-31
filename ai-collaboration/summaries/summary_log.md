@@ -7848,3 +7848,23 @@ Learnings:
 Unresolved questions:
 - Full staging browser checkout smoke through the result-page CTA still needs to run.
 - Production launch remains blocked by external NewebPay approval, production config dry-run, production DB unique-index gate, and controlled production smoke.
+
+## 2026-05-31 - Payment UX Orchestration Plan v0
+
+Completed changes:
+- Audited current result page, checkout-start page, NewebPay checkout route, ReturnURL/status/access pages, paid unlock poller, LINE/LIFF fulfillment paths, operator fake-paid path, and sandbox helper.
+- Documented current payment journey: result page → checkout-start → NewebPay → ReturnURL → status/access → completed paid result.
+- Recommended web access remain canonical paid delivery, with LINE/LIFF limited to future notification/save-for-later/support unless a dedicated paid notification path is implemented.
+- Recommended ReturnURL polling UX as a P1 launch polish item.
+- Recommended checkout-start visual bridge polish to reduce ANYU-to-NewebPay style mismatch.
+- Recommended script-driven staging checkout QA bypass instead of a visible fake-paid button on checkout-start.
+- Recommended delaying unified ReturnURL abstraction until Module 02 payment design exists.
+
+Learnings:
+- ReturnURL is currently non-mutating and server-rendered but lacks client polling; the older `pa_` unlock route already has a polished pending poller pattern.
+- LINE/LIFF current code is legacy unlock/fulfillment oriented and should not be positioned as paid report delivery.
+- The fastest safe no-card QA path should verify result-page CTA and checkout-start HTML, then call operator fake-paid server-side and poll paid access.
+
+Unresolved questions:
+- Whether owner wants LINE notification before or after production payment launch.
+- Whether ReturnURL should auto-redirect after paid readiness or only show a clear button.
