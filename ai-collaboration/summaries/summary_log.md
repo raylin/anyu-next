@@ -8007,3 +8007,24 @@ Unresolved questions:
 - Should LINE become notification-only, staffed support, or campaign channel first?
 - Should future LINE segmentation use only behavior segments initially, or include coarse trait summary categories after a separate privacy/product decision?
 - Should legacy `unlock_intents` LINE fields be retained, wrapped, or migrated after a dedicated LINE Channel Data Model Plan?
+## 2026-05-31 Paid Result Recovery Channel Plan v0
+
+### Completed Changes
+
+- saved the Paid Result Recovery Channel Plan v0 handoff and report
+- inspected current checkout-start, ReturnURL, payment status, payment access, checkout session, paid access token, legacy LINE/ContactCapture, support/refund, and no-card QA paths
+- documented the current recovery gap when a paid user loses the browser/session handoff
+- recommended a soft-gated checkout-start recovery flow with LINE, Email, or skip-with-warning
+- updated the dashboard with the paid result recovery roadmap
+
+### Learnings
+
+- Current paid access is strong while the `pcs_` checkout session remains available, but self-service recovery is not implemented after token loss or device switch.
+- Recovery contact should be transactional and separate from future marketing/new-module consent.
+- A dedicated recovery/contact model is better aligned than reusing legacy ContactCapture or storing recovery state only on payment intents.
+
+### Unresolved Questions
+
+- Should recovery implementation happen before production payment approval, or after approval during config dry-run?
+- Should Email be stored reversibly for support and sending, or hashed-only until an Email notification implementation is approved?
+- Should LINE be recovery-only first, or should Module 02 early-access opt-in be included as a separate optional checkbox?
