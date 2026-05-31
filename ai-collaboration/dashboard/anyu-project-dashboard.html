@@ -466,6 +466,7 @@
       <div class="panel">
         <p><strong>Sandbox helper:</strong> <code>corepack pnpm run qa:newebpay:sandbox -- create-checkout</code> creates a fresh staging sandbox checkout and writes the provider form outside the repo under <code>/private/tmp/anyu-newebpay-smoke/</code>.</p>
         <p><strong>Env preflight:</strong> <code>corepack pnpm run qa:env:preflight -- fake_paid_queue</code> and related modes check local QA readiness by env name presence only before running staging smoke commands.</p>
+        <p><strong>Local env autoload:</strong> QA scripts load <code>apps/web/.env.local</code> when shell env is absent. Exported shell env wins over local file values; values are never printed.</p>
         <p><strong>Verification:</strong> <code>poll-status</code> and <code>verify-after-payment</code> read local state from the temporary directory and print only sanitized status categories and booleans.</p>
         <p><strong>Safety:</strong> helper and preflight output must not include provider secrets, TradeInfo, TradeSha, raw pcs_/pa_ tokens, tokenized URLs, raw input, card data, env values, lengths, prefixes, suffixes, hashes, or checksums.</p>
       </div>

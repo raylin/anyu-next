@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
-import path from "node:path";
+import { loadLocalEnv } from "./lib/load-local-env.mjs";
 
 const MODE_ALIASES = new Map([
   ["all", "all"],
@@ -19,7 +19,8 @@ const MODE_ALIASES = new Map([
   ["vercel-env-alignment", "vercel_env_alignment"],
 ]);
 
-const ENV_LOCAL_PATH = path.resolve(process.cwd(), ".env.local");
+const localEnv = loadLocalEnv();
+const ENV_LOCAL_PATH = localEnv.envFilePath;
 
 const MODE_DEFINITIONS = {
   fake_paid: {
@@ -272,7 +273,8 @@ printJson({
   cwd: process.cwd(),
   envLocal: {
     pathPresent: envLocal.envLocalPathPresent,
-    valuesReadButNotPrinted: false,
+    valuesLoadedButNotPrinted: localEnv.loaded.length > 0,
+    exportedEnvTakesPrecedence: true,
     keyNamesOnly: true,
   },
   modes: summaries,

@@ -3,6 +3,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
+import { loadLocalEnv } from "./lib/load-local-env.mjs";
+
+loadLocalEnv();
 
 const DEFAULT_BASE_URL = "https://staging.anyu.tw";
 const PRODUCTION_BASE_URL = "https://anyu.tw";

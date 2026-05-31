@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+import { loadLocalEnv } from "./lib/load-local-env.mjs";
+
+loadLocalEnv();
+
 const STAGING_BASE_URL = "https://staging.anyu.tw";
 const MODULE_SLUG = "ambiguous-temperature";
 const ROUTE_BUNDLE_VERSION = "payment-foundation-2026-05-29";

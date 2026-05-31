@@ -7688,3 +7688,20 @@ Learnings:
 
 Unresolved questions:
 - Whether to keep legacy ContactCapture / LINE fulfillment infrastructure as fallback/internal surfaces or schedule a later deprecation/removal task.
+
+## 2026-05-31 - Local Env Autoload for QA Scripts v0
+
+Completed changes:
+- Added a script-only local env loader at `apps/web/scripts/lib/load-local-env.mjs`.
+- Updated `qa:env:preflight`, `qa:fake-paid`, and `qa:newebpay:sandbox` to load `apps/web/.env.local` when shell env is absent.
+- Added tests for env parsing, exported-env precedence, and repo-root web app directory discovery.
+- Updated `.env.example`, dashboard QA tooling notes, and the execution report.
+
+Learnings:
+- Exported shell env now has precedence over `.env.local`, preserving intentional one-off overrides.
+- `.env.local` autoload works for local scripts without changing Next.js runtime or deployed staging behavior.
+- Current local effective fake-paid preflight sees `OPERATOR_TEST_SECRET` but still lacks `INTERNAL_JOB_SECRET`, so manual fallback QA may still block unless that value is added locally.
+
+Unresolved questions:
+- Whether to add `.env.qa.local` as an additional optional local QA profile later.
+- Whether to consolidate duplicated QA HTTP/redaction helpers in a future cleanup task.
