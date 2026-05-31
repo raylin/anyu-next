@@ -7705,3 +7705,20 @@ Learnings:
 Unresolved questions:
 - Whether to add `.env.qa.local` as an additional optional local QA profile later.
 - Whether to consolidate duplicated QA HTTP/redaction helpers in a future cleanup task.
+
+## 2026-05-31 - Local Git Remote-Tracking Ref Permission Repair v0
+
+Completed changes:
+- Investigated the repeated local `origin/staging` remote-tracking ref and `FETCH_HEAD` update failures.
+- Confirmed remote `staging` is correct via `git ls-remote`, while local `origin/staging` remains stale.
+- Confirmed no stale `.lock` files were present.
+- Identified `com.apple.provenance` xattrs and sandbox write denial on `.git/FETCH_HEAD` and `.git/refs/remotes/origin`.
+- Documented a manual Terminal repair command because Codex cannot remove/write the affected `.git` paths from this sandbox.
+
+Learnings:
+- The repeated `[ahead N]` status is caused by stale local remote-tracking refs, not by failed pushes.
+- The affected `.git` files are owned by the current user with normal modes, so the blocker is macOS provenance/sandbox permission behavior rather than ordinary chmod/chown drift.
+- Repair requires running outside the Codex sandbox or with Terminal permissions that can remove the xattr.
+
+Unresolved questions:
+- Whether the owner’s normal Terminal can remove `com.apple.provenance` without `sudo` or Full Disk Access.
