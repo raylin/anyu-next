@@ -329,10 +329,10 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through both helper/operator and real result-page CTA paths; NewebPay merchant review remains the external gate. Checkout-start now has a Direction C-inspired ANYU payment bridge and ReturnURL has launch-safe polling UX while staying non-mutating. Core Engine / Module Grammar v0 defines how future modules should connect to reusable interactions, skills, traits, artifacts, and cross-links.</p>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through both helper/operator and real result-page CTA paths; NewebPay merchant review remains the external gate. Checkout-start now has a Direction C-inspired ANYU payment bridge that passed staging HTML smoke, and ReturnURL has launch-safe polling UX while staying non-mutating. Core Engine / Module Grammar v0 defines how future modules should connect to reusable interactions, skills, traits, artifacts, and cross-links.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-05-31 17:15 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Checkout-start visual bridge polished</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-05-31 21:32 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Checkout-start visual bridge staging smoke passed</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Merchant approval / Module 02 concept decision</span></div>
       </div>
@@ -401,7 +401,7 @@
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
           <li><span class="time">Current</span><span>Sandbox v5 passed after NewebPay-style manual 32-byte AES padding fix: real sandbox payment reached <code>paid_ready</code> and completed access rendered.</span></li>
-          <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned; checkout-start wiring, visual bridge polish, and ReturnURL polling implemented; result-page checkout staging sandbox QA passed end-to-end.</span></li>
+          <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned; checkout-start wiring, visual bridge polish and staging smoke, and ReturnURL polling implemented; result-page checkout staging sandbox QA passed end-to-end.</span></li>
         </ol>
       </div>
     </section>
@@ -409,7 +409,7 @@
     <section class="three">
       <div class="panel">
         <h2>Current Engineering Status</h2>
-        <p><strong>Implemented:</strong> Checkout Phase 1, NotifyURL Phase 2, Paid Delivery Phase 3, Access Handoff Phase 3B, Queue Phase 4A/4B.1/4B.2, targeted queue processor, manual fallback, Module 01 multi-state paid CTA copy, checkout-start wiring/visual bridge polish, ReturnURL polling UX, and result-page checkout staging QA.</p>
+        <p><strong>Implemented:</strong> Checkout Phase 1, NotifyURL Phase 2, Paid Delivery Phase 3, Access Handoff Phase 3B, Queue Phase 4A/4B.1/4B.2, targeted queue processor, manual fallback, Module 01 multi-state paid CTA copy, checkout-start wiring/visual bridge polish with staging smoke, ReturnURL polling UX, and result-page checkout staging QA.</p>
         <p><strong>Disabled:</strong> production runtime, public production checkout, production fake-paid, production queue trigger.</p>
         <p><strong>Not implemented:</strong> LINE paid delivery and refund tooling. Legacy LINE/contact copy is now framed as notification or short-code confirmation, not paid report delivery.</p>
         <p><strong>Not launched:</strong> real provider production payment.</p>
@@ -556,6 +556,7 @@
           <li><a href="../reports/2026-05-31-returnurl-polling-ux-polish-v0.md">ReturnURL Polling UX Polish v0</a></li>
           <li><a href="../reports/2026-05-31-result-page-checkout-staging-sandbox-qa-v0.md">Result-Page Checkout Staging Sandbox QA v0</a></li>
           <li><a href="../reports/2026-05-31-checkout-start-visual-bridge-polish-v0.md">Checkout-Start Visual Bridge Polish v0</a></li>
+          <li><a href="../reports/2026-05-31-checkout-start-visual-bridge-staging-smoke-v0.md">Checkout-Start Visual Bridge Staging Smoke v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

@@ -7929,3 +7929,22 @@ Unresolved questions:
 - Whether to run a staging visual smoke after deployment to inspect the checkout bridge in a real browser.
 - Whether the next review-wait task should be Module 02 concept spec or staging-only no-card QA bypass.
 - Shared Payment Shell + Module Accent abstraction remains deferred until Module 02/payment UX requirements are clearer.
+
+## 2026-05-31 - Checkout-Start Visual Bridge Staging Smoke v0
+
+Completed changes:
+- Ran a staging checkout-start visual/UX smoke by sanitized HTTP/HTML inspection.
+- Confirmed staging health is preview/staging with route bundle `payment-foundation-2026-05-29` and commit marker `7c5628926962`.
+- Created a fresh Module 01 staging result and confirmed the result-page paid CTA is visible, launch-aligned, and links to checkout-start.
+- Confirmed checkout-start renders ANYU wordmark/back link, Module 01 identity, payment stepper, NT$49, one-time/non-subscription copy, NewebPay trust copy, provider-notification truth copy, web delivery copy, support/refund footer, and sandbox ccore POST form.
+- Confirmed no internal-test/no-charge/LINE paid-delivery copy and no operator/provider secret names in checkout-start HTML.
+- Confirmed production checkout/fake-paid routes remain JSON 404/not_found and production public home/refund/legal pages are live.
+
+Learnings:
+- Staging health exposes a shortened git commit marker, so commit freshness should be checked by prefix rather than full SHA equality.
+- The polished checkout-start page passes launch-copy and safe-form checks without requiring another sandbox card payment.
+- Browser automation was unavailable in this session; visual verification was limited to rendered HTML/static CSS evidence.
+
+Unresolved questions:
+- Whether owner wants a screenshot-level browser smoke later.
+- Whether the next task should focus on Module 02 concept spec or a staging-only no-card checkout QA bypass.
