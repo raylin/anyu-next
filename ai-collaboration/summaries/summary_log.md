@@ -7598,3 +7598,23 @@ Learnings:
 Unresolved questions:
 - When NewebPay approval arrives, result-page checkout form submission still needs a dedicated wiring task before public production checkout.
 - Whether to run a separate public legal copy alignment task to remove remaining internal-test/LINE-era references from terms/privacy.
+
+## 2026-05-31 - ANYU Core Engine & Module Grammar v0
+
+Completed changes:
+- Created a Core Engine / Module Grammar product architecture report defining ANYU as an AI-native personal insight system rather than isolated AI tests.
+- Defined the two-layer architecture: visible module experiences and reusable internal core engine capabilities.
+- Documented the core engine layers: Module Experience, Interaction Engine, Personal Insight Graph, Knowledge Skill, Result Artifact, and Growth / Social Loop.
+- Created a reusable module grammar for future module concepts, including interaction type, knowledge skills, traits, artifacts, monetization, safety boundaries, analytics signals, complexity, and readiness.
+- Mapped Module 01「曖昧溫度計」to the grammar and recommended `職場暗流雷達` as Module 02 concept/spec only.
+- Updated the static project dashboard with the new Core Engine / Module Grammar status and next recommended concept task.
+
+Learnings:
+- Module 02 should validate a different interaction and artifact shape, not simply become another long relationship report.
+- `職場暗流雷達` is the strongest grammar-validation candidate because it keeps ANYU’s signal-reading identity while moving beyond romance and introducing scenario-card interaction.
+- Personal Insight Graph should remain a soft future direction until privacy, consent, retention, and user-facing memory rules are designed.
+
+Unresolved questions:
+- Whether owner prefers Module 02 to move outside romance immediately with `職場暗流雷達` or stay relationship-adjacent with a concept like `答案壓力計`.
+- Whether future Personal Insight Graph should be exposed as a named user-facing feature or remain invisible personalization.
+- Whether NT$49 should remain the default future paid price for Module 02 if it becomes monetized.
