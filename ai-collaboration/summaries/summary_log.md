@@ -8071,3 +8071,26 @@ Unresolved questions:
 - Staging DB apply is still pending.
 - Encryption key rotation policy is not yet defined.
 - Checkout-start recovery UX still needs a follow-up task after staging apply.
+
+## 2026-05-31 Paid Result Recovery Identity Staging Apply v0
+
+### Completed Changes
+
+- saved the Paid Result Recovery Identity Staging Apply v0 handoff and report
+- verified the staging DB target as Neon project `anyu-next`, branch `preview`, database `neondb`
+- applied `apps/web/drizzle/0009_payment_recovery_contacts.sql` to the staging preview branch only
+- verified `payment_recovery_contacts` table, columns, foreign keys, indexes, unique partial indexes, and empty starting row count
+- confirmed production routes remain fail-closed and production DB does not have the recovery table
+- updated the dashboard to mark recovery identity staging schema applied and production gated
+
+### Learnings
+
+- The recovery table can be applied cleanly to staging without inserting any customer-like test rows.
+- The current migration has service-level allow-list enforcement for `contact_type`, `source`, and `status`, but no DB CHECK constraints.
+- Neon MCP branch-specific SQL remains safer than local `DATABASE_URL` for staging DB operations because local DB targets have previously drifted.
+
+### Unresolved Questions
+
+- Production DB apply remains gated.
+- Checkout-start recovery soft gate UX is not implemented yet.
+- A future decision is needed on whether to add DB CHECK constraints for recovery contact enum-like fields.

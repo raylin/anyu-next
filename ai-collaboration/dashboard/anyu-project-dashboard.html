@@ -332,7 +332,7 @@
       <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant review remains the external gate. Checkout-start now has a Direction C-inspired ANYU payment bridge that passed staging HTML smoke, and ReturnURL has launch-safe polling UX while staying non-mutating. Core Engine / Module Grammar v0 defines future module grammar, and LINE is now planned as a consent-based owned channel rather than paid report delivery.</p>
       <div class="snapshot" aria-label="Project snapshot">
         <div><span class="label">Last updated</span><span class="value">2026-05-31 22:50 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Recovery identity schema added</span></div>
+        <div><span class="label">Current phase</span><span class="value">Recovery identity staging schema applied</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Merchant approval / Module 02 concept decision</span></div>
       </div>
@@ -353,7 +353,7 @@
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge progress">Planning</span><h3>Multi-module direction</h3><p>Recommended review-wait path: specify Module 02「職場暗流雷達」first, then add lightweight homepage cross-linking only when approved.</p></article>
-        <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: queue audit persistence, domain/project ambiguity, optional provider fields, and future production smoke tooling. New NewebPay generation jobs now use <code>newebpay_notify</code>; legacy <code>payment_success_future</code> remains accepted. Entitlement/payment-intent uniqueness is applied and verified on staging; production remains gated. Paid recovery identity schema is added in code and awaiting staging DB apply.</p></article>
+        <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: queue audit persistence, domain/project ambiguity, optional provider fields, and future production smoke tooling. New NewebPay generation jobs now use <code>newebpay_notify</code>; legacy <code>payment_success_future</code> remains accepted. Entitlement/payment-intent uniqueness is applied and verified on staging; production remains gated. Paid recovery identity schema is applied and verified on staging; production remains gated.</p></article>
       </div>
     </section>
 
@@ -498,7 +498,7 @@
         <p><strong>Gap:</strong> paid access works through session-bound web handoff, but a user who closes the browser or loses the ReturnURL may need manual support to recover access.</p>
         <p><strong>Recommended flow:</strong> add a soft-gated checkout-start recovery step offering LINE, Email, or skip with warning. Recovery consent is transactional and separate from marketing/new-module consent.</p>
         <p><strong>Access rule:</strong> recovery messages should point back to secure web access using fresh short-lived recovery links; do not send raw pcs_ or pa_ tokens through LINE or Email.</p>
-        <p><strong>Implementation order:</strong> dedicated recovery contact schema/service layer is added but not DB-applied. Next: staging apply, then checkout-start soft gate UX, then LIFF recovery binding, then paid-ready/completed save CTA, then recovery link sending.</p>
+        <p><strong>Implementation order:</strong> dedicated recovery contact schema/service layer is added and DB-applied on staging. Next: checkout-start soft gate UX, then LIFF recovery binding, then paid-ready/completed save CTA, then recovery link sending. Production DB apply remains gated.</p>
       </div>
     </section>
 
@@ -539,7 +539,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation while approval is pending:</strong> run Paid Result Recovery Identity Staging Apply v0 if launch-support risk is the priority, Module 02 Concept Spec: 職場暗流雷達 v0 if product exploration is the priority, or LINE Channel Data Model Plan v0 if owned-channel infrastructure becomes the priority.</p>
+        <p><strong>Current recommendation while approval is pending:</strong> run Checkout-Start Recovery Soft Gate UX Plan / Implementation v0 if launch-support risk is the priority, Module 02 Concept Spec: 職場暗流雷達 v0 if product exploration is the priority, or LINE Channel Data Model Plan v0 if owned-channel infrastructure becomes the priority.</p>
         <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production runtime should remain disabled until the launch gate sequence is explicitly approved.</p>
         <p>If NewebPay merchant review approval/formal credentials are available, switch back to Production Payment Config Dry-Run v0 with runtime still disabled; do not jump directly to public checkout.</p>
       </div>
@@ -584,6 +584,7 @@
           <li><a href="../reports/2026-05-31-paid-result-recovery-channel-plan-v0.md">Paid Result Recovery Channel Plan v0</a></li>
           <li><a href="../reports/2026-05-31-paid-result-recovery-channel-schema-ux-implementation-plan-v0.md">Paid Result Recovery Channel Schema / UX Implementation Plan v0</a></li>
           <li><a href="../reports/2026-05-31-paid-result-recovery-identity-schema-v0.md">Paid Result Recovery Identity Schema v0</a></li>
+          <li><a href="../reports/2026-05-31-paid-result-recovery-identity-staging-apply-v0.md">Paid Result Recovery Identity Staging Apply v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>
