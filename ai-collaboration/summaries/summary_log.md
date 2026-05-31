@@ -7987,3 +7987,23 @@ Learnings:
 Unresolved questions:
 - Whether to run ReturnURL Visual Continuity Polish v0 next.
 - Whether to move into Module 02 Concept Spec now that no-card payment QA exists.
+## 2026-05-31 LINE Channel Accumulation Strategy v0
+
+### Completed Changes
+
+- saved the LINE Channel Accumulation Strategy v0 handoff and report
+- inventoried existing LINE/LIFF/ContactCapture/short-code/webhook/fulfillment infrastructure
+- repositioned LINE as a consent-based owned channel for save-for-later, completion notification, support, new-module notification, early access, discount, and future insight loops
+- updated the static dashboard to record LINE as planned owned-channel infrastructure, not paid report delivery
+
+### Learnings
+
+- Existing LINE primitives are substantial: public add URL, ContactCapture, LIFF bridge, LIFF bind API, short-code fallback, webhook signature verification, dedupe/rate-limit tables, and safe funnel metrics already exist.
+- The current LINE infrastructure still carries legacy unlock/fulfillment assumptions and should not be expanded until a channel consent/data model is approved.
+- Module 02 concept/spec should likely precede new LINE CTAs so the channel has a concrete retention or early-access purpose.
+
+### Unresolved Questions
+
+- Should LINE become notification-only, staffed support, or campaign channel first?
+- Should future LINE segmentation use only behavior segments initially, or include coarse trait summary categories after a separate privacy/product decision?
+- Should legacy `unlock_intents` LINE fields be retained, wrapped, or migrated after a dedicated LINE Channel Data Model Plan?
