@@ -8166,3 +8166,25 @@ Unresolved questions:
 - Recovery link sending and LINE recovery binding are still future work.
 - Key rotation policy remains undefined and should be planned before any production recovery launch.
 - Local commit/push is blocked because the sandbox denied writes inside `.git` when Git attempted to create `index.lock`; task files are present in the workspace but not committed.
+
+## 2026-06-01 Paid Ready / Completed Result Save CTA Plan v0
+
+### Completed Changes
+
+- saved the Paid Ready / Completed Result Save CTA Plan v0 handoff and report
+- inspected checkout-start recovery, recovery contact helpers, ReturnURL polling, payment access handoff, paid access resolver, and completed paid result rendering
+- planned non-blocking paid-ready reminder plus completed-result save section for users who skipped recovery before payment
+- recommended a server-only post-payment recovery status summary helper before adding UI
+- updated dashboard recovery roadmap and next recommended task
+
+### Learnings
+
+- Post-payment pages do not currently fetch recovery status; checkout-start is the only surface that reads recovery contacts today.
+- Recovery helper sources already include `paid_ready` and `completed_result`, so post-payment save can reuse the existing schema without a new migration.
+- Paid access resolution has entitlement context server-side, but `UnlockCompleted` currently receives display-only data, so a sanitized status summary should be passed rather than raw recovery rows or tokens.
+
+### Unresolved Questions
+
+- Confirm whether paid transition already calls `bindRecoveryContactsToEntitlement` after entitlement creation/reuse.
+- Decide whether the first implementation should split helper methods and UI into separate tasks or combine them.
+- Recovery link sending, LINE recovery binding, production recovery DB/env apply, and key rotation policy remain future work.
