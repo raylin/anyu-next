@@ -8028,3 +8028,24 @@ Unresolved questions:
 - Should recovery implementation happen before production payment approval, or after approval during config dry-run?
 - Should Email be stored reversibly for support and sending, or hashed-only until an Email notification implementation is approved?
 - Should LINE be recovery-only first, or should Module 02 early-access opt-in be included as a separate optional checkbox?
+## 2026-05-31 Paid Result Recovery Channel Schema / UX Implementation Plan v0
+
+### Completed Changes
+
+- saved the Paid Result Recovery Channel Schema / UX Implementation Plan v0 handoff and report
+- specified a dedicated `payment_recovery_contacts`-style model linked to result/payment/entitlement lifecycle
+- recommended encrypted normalized Email plus keyed hash, hashed LINE identity, and no storage or sending of raw `pcs_` / `pa_` tokens
+- defined checkout-start soft gate states, copy, consent separation, metrics/events, implementation phases, test plan, risks, and next task
+- updated the dashboard to mark the recovery schema/UX plan ready
+
+### Learnings
+
+- Recovery identity should be built as a narrow contact/consent layer, not as full membership and not as provider payment fields.
+- Existing LIFF verification patterns are reusable, but recovery binding should use short-lived recovery state rather than legacy unlock intent state.
+- The safest first implementation task is schema/service helpers before public checkout-start UI.
+
+### Unresolved Questions
+
+- Owner must approve reversible encrypted Email storage versus hash-only storage.
+- Encryption key and rotation policy still need a dedicated implementation decision.
+- It remains open whether first UX should start Email-only or Email plus LINE.
