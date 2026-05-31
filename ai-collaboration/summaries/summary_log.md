@@ -7948,3 +7948,23 @@ Learnings:
 Unresolved questions:
 - Whether owner wants a screenshot-level browser smoke later.
 - Whether the next task should focus on Module 02 concept spec or a staging-only no-card checkout QA bypass.
+
+## 2026-05-31 - Module 01 Payment Bridge Gap Closure Plan v0
+
+Completed changes:
+- Audited the current Module 01 payment bridge surfaces: result page, paid CTA view model, checkout-start, ReturnURL poller, payment access page, NewebPay NotifyURL, sandbox helper, fake-paid QA runner, LINE/LIFF paths, and Claude Design Direction C references.
+- Reconciled the owner’s five payment UX concerns into complete / partial / planned / deferred status.
+- Recommended `Result-Page Checkout No-Card QA Bypass v0` as the highest-value next implementation task.
+- Recommended small ReturnURL visual continuity polish as the next UX improvement if launch polish remains the priority.
+- Recommended keeping LINE as future notification/save-for-later/support only, not paid delivery.
+- Recommended deferring unified multi-module ReturnURL abstraction until Module 02 payment design exists.
+
+Learnings:
+- The remaining payment bridge gaps are orchestration and QA gaps, not provider correctness gaps.
+- NotifyURL is already provider-level unified; ReturnURL can remain module-specific until a second paid module proves what should vary.
+- A script-driven no-card QA path can cover result-page CTA, checkout-start, fake-paid downstream delivery, and access render without exposing operator secrets to browser code.
+
+Unresolved questions:
+- Whether owner wants to prioritize no-card QA before Module 02 concept work.
+- Whether ReturnURL visual continuity should be polished before or after the no-card QA script.
+- Full Payment Shell + Module Accent implementation remains intentionally deferred.
