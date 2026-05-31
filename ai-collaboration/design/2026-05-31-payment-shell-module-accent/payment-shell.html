@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="zh-Hant" data-design-system="v2" data-module="ai-temperature" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>暗語 ANYU · Payment Shell + Module Accent · 探索</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..900,0..100;1,9..144,400..900,0..100&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="anyu-tokens-v2.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #e8e3da; font-family: var(--anyu-font-sans); -webkit-font-smoothing: antialiased; color: #1a1626; }
+
+  /* ---- doc chrome ---- */
+  .doc-head { max-width: 1280px; margin: 0 auto; padding: 56px 32px 22px; }
+  .doc-eyebrow { font-family: var(--anyu-font-mono); font-weight: 700; font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: #5b3aa3; }
+  .doc-title { font-family: var(--anyu-font-serif); font-weight: 500; font-size: 36px; letter-spacing: -0.6px; margin: 10px 0 8px; color: #1a1626; }
+  .doc-sub { font-size: 14.5px; color: rgba(26,22,38,.78); line-height: 1.8; max-width: 820px; }
+  .doc-sub code { font-family: var(--anyu-font-mono); font-weight: 700; font-size: 12px; background: #fff; border: 1.5px solid #1a1626; padding: 1px 6px; color: #5b3aa3; }
+  .doc-sub b { color: #1a1626; font-weight: 600; }
+
+  .legend { max-width: 1280px; margin: 18px auto 0; padding: 0 32px; display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; }
+  .legend .li { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: rgba(26,22,38,.78); }
+  .legend .sw { width: 22px; height: 14px; border: 1.5px solid #1a1626; }
+  .legend .sw.shell { background: #1a1626; }
+  .legend .sw.accent { background: transparent; box-shadow: inset 0 0 0 1.5px #5b3aa3; border-color: #5b3aa3; }
+  .legend .sw.accent::after { content:''; }
+
+  .sec-head { max-width: 1280px; margin: 0 auto; padding: 64px 32px 0; }
+  .sec-kicker { display:flex; align-items: baseline; gap: 12px; }
+  .sec-num { font-family: var(--anyu-font-latin); font-style: italic; font-weight: 700; font-size: 22px; color: #ec4e8c; }
+  .sec-name { font-family: var(--anyu-font-mono); font-weight: 700; font-size: 12px; letter-spacing: 1.6px; text-transform: uppercase; color: #5b3aa3; }
+  .sec-title { font-family: var(--anyu-font-serif); font-weight: 500; font-size: 26px; color: #1a1626; margin: 12px 0 6px; letter-spacing: -0.4px; }
+  .sec-desc { font-size: 14px; color: rgba(26,22,38,.78); line-height: 1.75; max-width: 760px; }
+  .doc-rule { border: none; height: 1.5px; background: #1a1626; max-width: 1280px; margin: 28px auto 0; }
+
+  /* ---- phone ---- */
+  .phone { width: 390px; height: 844px; background: var(--anyu-bg); color: var(--anyu-ink); position: relative; overflow: hidden; border-radius: 40px; box-shadow: 0 36px 90px -24px rgba(20,15,5,.34), 0 0 0 9px #1a1626, 0 0 0 10px rgba(255,255,255,.08); flex-shrink: 0; isolation: isolate; }
+  .phone-status { height: 44px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 14px; color: var(--anyu-ink); position: relative; z-index: 30; background: var(--anyu-bg); }
+  .phone-status::before { content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 26px; background: #1a1626; border-radius: 16px; }
+  .phone-page { height: 800px; overflow-y: auto; overflow-x: hidden; position: relative; background: var(--anyu-bg); }
+  .phone-page::-webkit-scrollbar { width: 0; height: 0; } .phone-page { scrollbar-width: none; }
+
+  /* ---- flow layout (section 1) ---- */
+  .flow-wrap { max-width: 1280px; margin: 0 auto; padding: 36px 32px 20px; display: flex; gap: 44px; align-items: flex-start; flex-wrap: wrap; }
+  .flow-left { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .rail { display: flex; flex-wrap: wrap; gap: 8px; max-width: 390px; justify-content: center; }
+  .rail button { font-family: var(--anyu-font-sans); font-size: 12px; color: #1a1626; background: #fff; border: 1.5px solid #1a1626; padding: 7px 11px; border-radius: 2px; cursor: pointer; transition: all 120ms; display:inline-flex; align-items:center; gap:6px; }
+  .rail button .n { font-family: var(--anyu-font-latin); font-style: italic; font-weight: 700; color: #5b3aa3; }
+  .rail button:hover { transform: translate(-1px,-1px); box-shadow: 2px 2px 0 #1a1626; }
+  .rail button.on { background: #1a1626; color: #f5ecdd; box-shadow: 3px 3px 0 #ec4e8c; }
+  .rail button.on .n { color: #ec4e8c; }
+  .rail button.err.on { box-shadow: 3px 3px 0 #f08c5a; }
+
+  /* annotation panel */
+  .annot { flex: 1; min-width: 320px; max-width: 460px; position: sticky; top: 24px; }
+  .annot h4 { font-family: var(--anyu-font-mono); font-weight: 700; font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; color: #5b3aa3; margin: 0 0 4px; }
+  .annot .state-name { font-family: var(--anyu-font-serif); font-weight: 500; font-size: 21px; color: #1a1626; margin: 0 0 16px; }
+  .annot .grp { margin-bottom: 20px; }
+  .annot .grp-h { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .annot .grp-h .lbl { font-family: var(--anyu-font-mono); font-weight: 700; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+  .annot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  .annot li { font-size: 13px; color: rgba(26,22,38,.82); line-height: 1.5; padding-left: 16px; position: relative; }
+  .annot li::before { content: ''; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; }
+  .annot .shell li::before { background: #1a1626; border-radius: 1px; }
+  .annot .accent li::before { background: #ec4e8c; border-radius: 50%; }
+  .annot .why { margin-top: 18px; padding: 14px 16px; background: #fff; border: 1.5px solid #1a1626; box-shadow: 3px 3px 0 #5b3aa3; }
+  .annot .why .wh { font-family: var(--anyu-font-mono); font-weight: 700; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #5b3aa3; }
+  .annot .why p { margin: 8px 0 0; font-size: 13px; color: #1a1626; line-height: 1.7; }
+
+  /* compare grid */
+  .cmp { max-width: 1320px; margin: 0 auto; padding: 36px 32px 10px; }
+  .cmp h3 { font-family: var(--anyu-font-serif); font-weight: 500; font-size: 19px; color: #1a1626; margin: 0 0 4px; }
+  .cmp .cmp-sub { font-size: 13px; color: rgba(26,22,38,.7); margin: 0 0 22px; }
+  .cmp-row { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  .cmp-col { display: flex; flex-direction: column; align-items: center; width: 390px; }
+  .cmp-tag { margin-top: 18px; text-align: center; max-width: 360px; }
+  .cmp-tag .dir { display: inline-flex; align-items: baseline; gap: 8px; font-family: var(--anyu-font-mono); font-weight: 700; font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; color: #5b3aa3; }
+  .cmp-tag .dir .idx { font-family: var(--anyu-font-latin); font-style: italic; font-size: 14px; color: #ec4e8c; }
+  .cmp-tag .verdict { margin-top: 7px; font-family: var(--anyu-font-serif); font-size: 16px; font-weight: 500; color: #1a1626; }
+  .cmp-tag .note { margin-top: 6px; font-size: 12.5px; color: rgba(26,22,38,.75); line-height: 1.6; }
+  .cmp-tag.pick .verdict { color: #5b3aa3; }
+  .cmp-tag .pin { display:inline-block; margin-top:8px; font-family: var(--anyu-font-mono); font-weight:700; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#fff; background:#5b3aa3; padding:3px 9px; }
+
+  /* module02 + notes blocks */
+  .block { max-width: 1280px; margin: 0 auto; padding: 36px 32px 10px; }
+  .m2grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: start; }
+  .m2card { background: #fff; border: 1.5px solid #1a1626; padding: 22px; }
+  .m2card .cap { font-family: var(--anyu-font-mono); font-weight: 700; font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 16px; }
+  table.tok { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  table.tok th, table.tok td { text-align: left; padding: 9px 10px; border-bottom: 1px solid rgba(26,22,38,.12); font-size: 12.5px; vertical-align: middle; }
+  table.tok th { font-family: var(--anyu-font-mono); font-weight: 700; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: rgba(26,22,38,.6); }
+  table.tok td code { font-family: var(--anyu-font-mono); font-size: 11.5px; color: #5b3aa3; }
+  .sw-cell { display:inline-flex; align-items:center; gap:8px; }
+  .sw-dot { width: 16px; height: 16px; border: 1.5px solid #1a1626; border-radius: 3px; flex:0 0 auto; }
+
+  .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .ncard { background: #fff; border: 1.5px solid #1a1626; box-shadow: 4px 4px 0 #5b3aa3; padding: 22px 24px; }
+  .ncard.acc2 { box-shadow: 4px 4px 0 #ec4e8c; }
+  .ncard .nk { font-family: var(--anyu-font-mono); font-weight: 700; font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase; color: #5b3aa3; }
+  .ncard h5 { font-family: var(--anyu-font-serif); font-weight: 500; font-size: 18px; color: #1a1626; margin: 10px 0 12px; }
+  .ncard p { font-size: 13.5px; color: rgba(26,22,38,.82); line-height: 1.75; margin: 0 0 10px; }
+  .ncard ul { margin: 0; padding-left: 18px; }
+  .ncard li { font-size: 13.5px; color: rgba(26,22,38,.82); line-height: 1.7; margin-bottom: 6px; }
+  .ncard b { color: #1a1626; }
+
+  .foot { max-width: 1280px; margin: 0 auto; padding: 40px 32px 90px; font-size: 12px; color: rgba(26,22,38,.6); line-height: 1.8; }
+
+  @media (max-width: 1100px) { .m2grid, .notes { grid-template-columns: 1fr; } .annot { position: static; } }
+  @media (max-width: 760px) { .doc-head, .sec-head, .flow-wrap, .cmp, .block, .foot { padding-left: 16px; padding-right: 16px; } }
+</style>
+</head>
+<body>
+
+<div class="doc-head">
+  <div class="doc-eyebrow">// PAYMENT SHELL + MODULE ACCENT · UX/UI 探索</div>
+  <h1 class="doc-title">一套固定的 ANYU 付款殼，外加可換的模組調性</h1>
+  <p class="doc-sub">
+    問題：Module 01 的輸入／結果頁是 <b>Riso editorial</b>，但 checkout、ReturnURL、等待、狀態頁偏淡雅 generic，體驗在付款前後斷裂。
+    解法：把付款流程拆成 <b>固定 shell</b>（版面、卡片、按鈕、進度、狀態元件、藍新信任聲明、support / 退款）＋ <b>module accent</b>（標題、hook、motif、少量顏色、狀態比喻）。
+    未來 Module 02「職場暗流雷達」只換 <code>accent token</code> 與 <code>motif</code>，不重做整套付款 UX。
+    三個方向：<code>A 保守</code> · <code>B 中間</code> · <code>C 可延展（推薦）</code>。
+  </p>
+</div>
+<div class="legend">
+  <span class="li"><span class="sw shell"></span> Shell 共用 — 跨模組固定不動</span>
+  <span class="li"><span class="sw accent"></span> Module 01 accent — 可換的調性層</span>
+  <span class="li" style="color:rgba(26,22,38,.6)">藍新（NewebPay）第三方頁面不在此次設計範圍，但前後的 ANYU 頁面要連續。</span>
+</div>
+<hr class="doc-rule"/>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ui-v2-atoms.jsx"></script>
+<script type="text/babel" src="pay-shell-atoms.jsx"></script>
+<script type="text/babel" src="pay-screens-c.jsx"></script>
+<script type="text/babel" src="pay-compare.jsx"></script>
+
+<!-- section anchors -->
+<div class="sec-head">
+  <div class="sec-kicker"><span class="sec-num">01</span><span class="sec-name">Direction C · 推薦 · 完整可點流程</span></div>
+  <div class="sec-title">付款殼的 6 個狀態 — 點手機或右側狀態列走一遍</div>
+  <p class="sec-desc">同一個殼，串起 checkout → 藍新 → 等待 → 生成 → 完成 → 進入報告，以及「付款成功但生成失敗」的補救分支。右側面板會隨當前頁更新，標出哪些是 shell 共用、哪些是 Module 01 accent。</p>
+</div>
+<div id="flow-root" class="flow-wrap"></div>
+
+<div class="sec-head">
+  <div class="sec-kicker"><span class="sec-num">02</span><span class="sec-name">關鍵頁比較 · A / B / C</span></div>
+  <div class="sec-title">在最容易斷裂的兩頁，並排三個方向</div>
+  <p class="sec-desc">checkout-start 與 ReturnURL waiting 是付款前後的接縫。A 太淡會延續斷裂感；B 編輯感夠強但每個模組都得重做一套；C 同樣編輯感，但把模組身份收斂進薄薄一層 accent。</p>
+</div>
+<div id="cmp-root"></div>
+
+<div class="sec-head">
+  <div class="sec-kicker"><span class="sec-num">03</span><span class="sec-name">Module 02 換膚 · 只標註</span></div>
+  <div class="sec-title">職場暗流雷達：換 token + motif，殼不動</div>
+  <p class="sec-desc">下面左邊是 Module 01（現況），右邊是把同一段殼包進 <code style="font-family:var(--anyu-font-mono)">&lt;ModuleAccentScope&gt;</code> 後的 Module 02 —— 只換了 accent / accent2 / rose 三個顏色與月相 → 雷達 motif，其餘版面、進度、按鈕、信任聲明完全沿用。</p>
+</div>
+<div id="m2-root" class="block"></div>
+
+<div class="sec-head">
+  <div class="sec-kicker"><span class="sec-num">04</span><span class="sec-name">說明 · 兩個你特別點名的問題</span></div>
+  <div class="sec-title">ReturnURL 怎麼不像技術頁 · 手機版 CTA 與狀態怎麼排</div>
+</div>
+<div id="notes-root" class="block"></div>
+
+<div class="foot" id="foot"></div>
+
+<div id="overlays"></div>
+
+<template id="__bundler_thumbnail" data-bg-color="#faf6ee">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#faf6ee"/>
+    <rect x="470" y="200" width="260" height="400" rx="36" fill="#ffffff" stroke="#1a1626" stroke-width="6"/>
+    <circle cx="600" cy="340" r="58" fill="#5b3aa3" stroke="#1a1626" stroke-width="6"/>
+    <rect x="512" y="448" width="176" height="20" rx="2" fill="#1a1626"/>
+    <rect x="512" y="486" width="120" height="20" rx="2" fill="#ec4e8c"/>
+    <rect x="512" y="536" width="176" height="40" rx="3" fill="#1a1626"/>
+    <rect x="520" y="544" width="176" height="40" rx="3" fill="#1a1626"/>
+  </svg>
+</template>
+
+<script type="text/babel">
+const {
+  V2_INK, V2_DIM, V2_FAINT, V2_BG, V2_CARD, V2_SURF, V2_ACC, V2_ACC2, V2_ROSE,
+  V2_SANS, V2_SERIF, V2_LATIN, V2_MONO,
+  AnyuModuleHeader, AnyuPayProgress, AnyuStatusStamp, AnyuPrimaryButton,
+  ModuleAccentScope,
+  PayCheckoutStart, PayReturnWaiting, PayProcessing, PayReady, PayFailed, PayAccess,
+  AcheckoutStart, AReturnWaiting, BcheckoutStart, BReturnWaiting,
+} = window;
+
+// ---- phone status bar ----
+function StatusBar() {
+  return (
+    <div className="phone-status">
+      <span>9:41</span>
+      <span aria-hidden="true" style={{ display:'inline-flex', gap:6, alignItems:'center' }}>
+        <svg width="17" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx=".5" fill="#1a1626"/><rect x="5" y="5" width="3" height="6" rx=".5" fill="#1a1626"/><rect x="10" y="2.5" width="3" height="8.5" rx=".5" fill="#1a1626"/><rect x="15" y="0" width="3" height="11" rx=".5" fill="#1a1626"/></svg>
+        <svg width="25" height="11" viewBox="0 0 26 11"><rect x=".5" y=".5" width="22" height="10" rx="2.4" fill="none" stroke="#1a1626"/><rect x="2" y="2" width="19" height="7" rx="1.2" fill="#1a1626"/><rect x="23" y="3.5" width="2" height="4" rx=".7" fill="#1a1626"/></svg>
+      </span>
+    </div>
+  );
+}
+function Phone({ children, pageRef }) {
+  return (
+    <div className="phone">
+      <StatusBar />
+      <div className="phone-page" ref={pageRef}>{children}</div>
+    </div>
+  );
+}
+
+// ---- refund sheet + 藍新 interstitial + toast (flow only) ----
+function RefundSheet({ open, onClose }) {
+  if (!open) return null;
+  const lines = [
+    ['一次性付款', '完整報告 NT$49，單筆一次性付款，非訂閱制，不會自動續扣。'],
+    ['付款確認', '付款結果以藍新金流通知為準；確認後才會開始生成報告。'],
+    ['網頁交付', '完整分析以網頁形式交付，無實體商品寄送，連結保留 30 天。'],
+    ['退款 / 補發', '若報告未成功交付，或自付款日 7 天內尚未開啟，可申請全額退款。'],
+    ['處理時間', '來信 hello@anyu.tw，我們在 3–7 個工作天內人工處理退款或補發。'],
+  ];
+  return (
+    <div onClick={onClose} style={{ position:'absolute', inset:0, zIndex:80, background:'rgba(26,22,38,.5)', display:'flex', alignItems:'flex-end' }}>
+      <div onClick={e=>e.stopPropagation()} style={{ width:'100%', maxHeight:'84%', overflowY:'auto', background:V2_BG, borderTop:`2px solid ${V2_INK}`, boxShadow:`0 -6px 0 ${V2_ACC}`, padding:'18px 22px 26px' }}>
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:14 }}><span style={{ width:44, height:4, borderRadius:999, background:V2_INK, opacity:.3 }}/></div>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12 }}>
+          <div>
+            <div style={{ fontFamily:V2_MONO, fontSize:10, fontWeight:700, letterSpacing:1.6, color:V2_ACC, textTransform:'uppercase' }}>// 退款政策</div>
+            <div style={{ marginTop:8, fontFamily:V2_SERIF, fontSize:21, fontWeight:500, color:V2_INK }}>一次性付款 · 7 天可退</div>
+          </div>
+          <button onClick={onClose} style={{ all:'unset', cursor:'pointer', width:30, height:30, borderRadius:'50%', border:`1.5px solid ${V2_INK}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, color:V2_INK, background:V2_CARD }}>×</button>
+        </div>
+        <div style={{ marginTop:18, display:'grid', gap:14 }}>
+          {lines.map(([k,v]) => (
+            <div key={k} style={{ borderLeft:`4px solid ${V2_ACC2}`, paddingLeft:14 }}>
+              <div style={{ fontFamily:V2_MONO, fontSize:9.5, fontWeight:700, letterSpacing:1.2, color:V2_ACC, textTransform:'uppercase' }}>{k}</div>
+              <div style={{ marginTop:5, fontSize:13.5, color:V2_DIM, fontFamily:V2_SANS, lineHeight:1.7 }}>{v}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop:20, padding:'12px 14px', border:`1.5px dashed ${V2_INK}`, fontSize:11.5, color:V2_DIM, fontFamily:V2_SANS, lineHeight:1.65, textAlign:'center' }}>
+          曖昧溫度計｜完整報告 · NT$49 · 一次性付款 · 非訂閱制 · 藍新金流
+        </div>
+      </div>
+    </div>
+  );
+}
+function Interstitial({ open }) {
+  if (!open) return null;
+  return (
+    <div style={{ position:'absolute', inset:0, zIndex:70, background:'#eceae6', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'0 40px' }}>
+      <div style={{ fontFamily:V2_MONO, fontSize:10, fontWeight:700, letterSpacing:1.4, color:'#8a8578', textTransform:'uppercase' }}>第三方頁面 · 非 ANYU</div>
+      <div style={{ marginTop:14, width:38, height:38, borderRadius:'50%', border:'2.5px solid #c7c3ba', borderTopColor:'#6d6a62', animation:'spin 0.9s linear infinite' }}/>
+      <div style={{ marginTop:20, fontFamily:'system-ui, sans-serif', fontSize:16, fontWeight:600, color:'#3a3833' }}>正在前往藍新金流安全付款…</div>
+      <div style={{ marginTop:8, fontFamily:'system-ui, sans-serif', fontSize:12.5, color:'#6d6a62', lineHeight:1.6 }}>你即將離開 ANYU，前往藍新的付款頁面。<br/>付款完成後會自動返回。</div>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+}
+function Toast({ msg }) {
+  if (!msg) return null;
+  return (
+    <div className="on-dark" style={{ position:'absolute', left:16, right:16, bottom:22, zIndex:60, background:'var(--anyu-ink-dark)', color:'var(--anyu-ink-onDark)', border:`1.5px solid ${V2_INK}`, boxShadow:`4px 4px 0 ${V2_ACC2}`, padding:'13px 16px', fontFamily:V2_SANS, fontSize:13 }}>{msg}</div>
+  );
+}
+
+// ---- per-screen shell / accent breakdown ----
+const ANNOT = {
+  checkout: { name:'1 · Checkout-start（前往藍新前的橋接頁）',
+    shell:['紙底 + grain 版面','付款進度 stepper（付款 / 生成 / 完成）','訂單摘要框（NT$49 · 一次性 · 非訂閱）','藍新信任聲明 + 內測說明','主要 CTA「前往安全付款」','退款政策 + hello@anyu.tw footer'],
+    accent:['MODULE · 01 標籤','「曖昧溫度計」標題與 hook','月相印章 motif','群青紫 / 洋紅 accent token','暖色 bleed 紋理'],
+    why:['這頁是「值不值得付」的決策點：把固定的承諾（金額、退款、藍新）放進殼，模組只負責講清楚「你買的是什麼」。'] },
+  waiting: { name:'2 · ReturnURL waiting（等待藍新通知）',
+    shell:['置中狀態場景版面','stepper 停在「付款」進行中','「接下來會發生什麼」三步結構','藍新信任聲明','support footer'],
+    accent:['月相 motif（微亮 ~28%）','accent 色','eyebrow 比喻文案「收到了」','bleed 紋理'],
+    why:['先給確定性（「收到了」），再講節奏與接下來；不出現百分比、輪詢、技術字眼。詳見第 04 區。'] },
+  processing: { name:'3 · Processing（完整報告生成中）',
+    shell:['置中狀態場景','stepper 進到「生成」','REMINDER 卡結構','support footer'],
+    accent:['月相漸亮 motif（~70%）','dot pulse 色','「把溫度 / 訊號整理成報告」比喻','accent2 offset shadow'],
+    why:['沿用結果頁「等月相亮起來」的情緒，讓等待跟產品本身是同一種語言，而不是借一個 loading spinner。'] },
+  ready: { name:'4 · Ready（完整報告已準備好）',
+    shell:['置中狀態場景','stepper 三步全完成','主要 CTA「進入完整報告」','web delivery 聲明（連結保留 30 天）','support footer'],
+    accent:['月相滿 + 完成印章 motif','accent 色','「為你保留了一份」文案'],
+    why:['完成是唯一需要明確 CTA 的等待頁；其餘等待頁刻意不放 primary 按鈕，避免讓人以為要操作。'] },
+  failed: { name:'5 · Failed / support（付款成功但報告暫時生不出來）',
+    shell:['置中狀態場景','stepper 在「生成」標紅','重試 + 補發 動作組','3–7 工作天 support 文案 + email','退款 footer'],
+    accent:['月相 + error 印 motif','rose / accent 色','安撫語氣文案（不指責、不恐慌）'],
+    why:['付款已成功，所以第一句先保證「不會重複收費、名額已保留」，把焦慮關掉，再給重試 / 補發兩條路。'] },
+  access: { name:'6 · Access wrapper（進入完整報告前後）',
+    shell:['「已解鎖」版面','報告封面框結構（zine cover）','主要 CTA「開啟完整報告」','web delivery + email','support footer'],
+    accent:['封面內容：persona / 溫度 / 金句','月相印章 + UNLOCKED 印','MODULE · 01 標籤','accent 色'],
+    why:['封面用結果頁的視覺語彙，讓「付完款 → 進報告」像翻開同一本 zine 的下一頁，而不是跳到另一個系統。'] },
+};
+
+const RAIL = [
+  ['checkout','1','前往付款'], ['waiting','2','等待確認'], ['processing','3','生成中'],
+  ['ready','4','完成'], ['access','5','進入報告'], ['failed','!','生成失敗'],
+];
+
+function FlowSection() {
+  const KEY = 'anyu-pay-c';
+  const [screen, setScreen] = React.useState(() => { try { return localStorage.getItem(KEY) || 'checkout'; } catch(e){ return 'checkout'; } });
+  const [refund, setRefund] = React.useState(false);
+  const [redirect, setRedirect] = React.useState(false);
+  const [toast, setToast] = React.useState(null);
+  const pageRef = React.useRef(null);
+
+  React.useEffect(() => { try { localStorage.setItem(KEY, screen); } catch(e){} if (pageRef.current) pageRef.current.scrollTop = 0; }, [screen]);
+  React.useEffect(() => { if (!toast) return; const t = setTimeout(()=>setToast(null), 2600); return ()=>clearTimeout(t); }, [toast]);
+
+  const go = (t) => {
+    if (t === 'refund') return setRefund(true);
+    if (t === 'redirect') { setRedirect(true); setTimeout(()=>{ setRedirect(false); setScreen('waiting'); }, 1700); return; }
+    if (t === 'result-stub') return setToast('（回到結果頁 — 不在本付款殼探索範圍內）');
+    if (t === 'opened') return setToast('報告已開啟（內測 demo — 完整報告內容另案處理）');
+    setScreen(t);
+  };
+
+  const Screen = { checkout:PayCheckoutStart, waiting:PayReturnWaiting, processing:PayProcessing, ready:PayReady, failed:PayFailed, access:PayAccess }[screen];
+  const a = ANNOT[screen];
+
+  return (
+    <React.Fragment>
+      <div className="flow-left">
+        <div className="phone">
+          <StatusBar />
+          <div className="phone-page" ref={pageRef}><Screen go={go} /></div>
+          <Interstitial open={redirect} />
+          <RefundSheet open={refund} onClose={()=>setRefund(false)} />
+          <Toast msg={toast} />
+        </div>
+        <div className="rail">
+          {RAIL.map(([k,n,lab]) => (
+            <button key={k} className={(screen===k?'on ':'') + (k==='failed'?'err':'')} onClick={()=>setScreen(k)}>
+              <span className="n">{n}</span>{lab}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="annot">
+        <h4>解剖 · 這一頁怎麼組成</h4>
+        <div className="state-name">{a.name}</div>
+        <div className="grp">
+          <div className="grp-h"><span style={{width:22,height:14,background:'#1a1626',border:'1.5px solid #1a1626'}}/><span className="lbl" style={{color:'#1a1626'}}>Shell 共用</span></div>
+          <ul className="shell">{a.shell.map((x,i)=><li key={i}>{x}</li>)}</ul>
+        </div>
+        <div className="grp">
+          <div className="grp-h"><span style={{width:22,height:14,background:'transparent',border:'1.5px solid #5b3aa3',boxShadow:'inset 0 0 0 1.5px #5b3aa3'}}/><span className="lbl" style={{color:'#5b3aa3'}}>Module 01 accent</span></div>
+          <ul className="accent">{a.accent.map((x,i)=><li key={i}>{x}</li>)}</ul>
+        </div>
+        <div className="why"><div className="wh">// 為什麼這樣排</div><p>{a.why[0]}</p></div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+// ---- comparison ----
+function CmpCol({ Comp, dir, idx, verdict, note, pick }) {
+  return (
+    <div className="cmp-col">
+      <Phone><Comp /></Phone>
+      <div className={'cmp-tag' + (pick?' pick':'')}>
+        <div className="dir">方向 {dir} <span className="idx">{idx}</span></div>
+        <div className="verdict">{verdict}</div>
+        <div className="note">{note}</div>
+        {pick && <span className="pin">推薦</span>}
+      </div>
+    </div>
+  );
+}
+function CmpSection() {
+  const noop = () => {};
+  return (
+    <div>
+      <div className="cmp">
+        <h3>Checkout-start · 前往藍新前的橋接頁</h3>
+        <p className="cmp-sub">同一個決策點，三種力道。</p>
+        <div className="cmp-row">
+          <CmpCol Comp={AcheckoutStart} dir="A" idx="保守" verdict="乾淨但偏淡" note="幾乎不動現況，少了結果頁的編輯感；安全，但前後仍略有落差。" />
+          <CmpCol Comp={BcheckoutStart} dir="B" idx="中間" verdict="編輯感最強" note="月相、ghost 數字、編號清單全上；漂亮，但模組樣式散落各處，換模組要重做。" />
+          <CmpCol Comp={() => <PayCheckoutStart go={noop} />} dir="C" idx="可延展" verdict="編輯感 + 可換膚" note="同樣的編輯質感，但模組身份只剩標題 / motif / 顏色三個槽，殼完全共用。" pick />
+        </div>
+      </div>
+      <div className="cmp">
+        <h3>ReturnURL waiting · 等待藍新通知</h3>
+        <p className="cmp-sub">最容易被做成「技術狀態頁」的一頁。</p>
+        <div className="cmp-row">
+          <CmpCol Comp={AReturnWaiting} dir="A" idx="保守" verdict="像系統提示" note="一個 dot pulse + 一行字；功能正確，但情緒空白，容易讓人焦慮。" />
+          <CmpCol Comp={BReturnWaiting} dir="B" idx="中間" verdict="儀式感足" note="大月相 + 引言；很有質感，但裝飾偏多，模組特徵又黏在版面上。" />
+          <CmpCol Comp={() => <PayReturnWaiting go={noop} />} dir="C" idx="可延展" verdict="安靜的確定感" note="先說「收到了」，再用共用的三步結構講接下來；月相只是換得掉的 motif。" pick />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- module 02 swap ----
+const M2 = { accent:'#2b5e86', accent2:'#1f8a5b', rose:'#c0863a' };
+function ShellFragment({ moduleId, title, hook, motif }) {
+  return (
+    <div>
+      <AnyuModuleHeader moduleId={moduleId} title={title} hook={hook} stamp={motif} />
+      <div style={{ marginTop:20 }}><AnyuPayProgress active={1} /></div>
+      <div style={{ marginTop:22, display:'flex', justifyContent:'center' }}>
+        <AnyuStatusStamp size={92} motif={motif} progress={0.7} state="work" />
+      </div>
+      <div style={{ marginTop:22 }}><AnyuPrimaryButton shadow="accent2" endIcon="↗">前往安全付款</AnyuPrimaryButton></div>
+    </div>
+  );
+}
+function Module2Section() {
+  return (
+    <div>
+      <div className="m2grid">
+        <div className="m2card">
+          <div className="cap" style={{ color:'#5b3aa3' }}>● Module 01 · 曖昧溫度計（現況）</div>
+          <ShellFragment moduleId="01" title="曖昧溫度計" hook="完整報告 · 下一句怎麼回" motif="moon" />
+        </div>
+        <div className="m2card">
+          <div className="cap" style={{ color:M2.accent }}>● Module 02 · 職場暗流雷達（換膚示意）</div>
+          <ModuleAccentScope tokens={M2}>
+            <ShellFragment moduleId="02" title="職場暗流雷達" hook="完整報告 · 這場會議的真正訊號" motif="radar" />
+          </ModuleAccentScope>
+        </div>
+      </div>
+
+      <div style={{ marginTop:30, background:'#fff', border:'1.5px solid #1a1626', boxShadow:'4px 4px 0 #5b3aa3', padding:'22px 24px' }}>
+        <div style={{ fontFamily:'var(--anyu-font-mono)', fontWeight:700, fontSize:10.5, letterSpacing:1.4, textTransform:'uppercase', color:'#5b3aa3', marginBottom:6 }}>// 換膚時實際會動的東西</div>
+        <table className="tok">
+          <thead><tr><th>層級</th><th>Token / 元素</th><th>Module 01（暖 · 群青）</th><th>Module 02（冷 · 鋼藍）</th></tr></thead>
+          <tbody>
+            <tr><td>主 accent</td><td><code>--anyu-accent</code></td><td><span className="sw-cell"><span className="sw-dot" style={{background:'#5b3aa3'}}></span>群青紫 #5b3aa3</span></td><td><span className="sw-cell"><span className="sw-dot" style={{background:'#2b5e86'}}></span>鋼藍 #2b5e86</span></td></tr>
+            <tr><td>次 accent</td><td><code>--anyu-accent2</code></td><td><span className="sw-cell"><span className="sw-dot" style={{background:'#ec4e8c'}}></span>螢光洋紅 #ec4e8c</span></td><td><span className="sw-cell"><span className="sw-dot" style={{background:'#1f8a5b'}}></span>訊號綠 #1f8a5b</span></td></tr>
+            <tr><td>暖 bleed / 警示</td><td><code>--anyu-rose</code></td><td><span className="sw-cell"><span className="sw-dot" style={{background:'#f08c5a'}}></span>朱橘 #f08c5a</span></td><td><span className="sw-cell"><span className="sw-dot" style={{background:'#c0863a'}}></span>訊號琥珀 #c0863a</span></td></tr>
+            <tr><td>Motif</td><td><code>&lt;AnyuStatusStamp motif&gt;</code></td><td>halftone 月相（漸亮 = 顯影）</td><td>雷達掃描（掃描線 + 訊號點收斂）</td></tr>
+            <tr><td>標題 / hook</td><td><code>&lt;AnyuModuleHeader&gt;</code></td><td>曖昧溫度計 · 下一句怎麼回</td><td>職場暗流雷達 · 這場會議的真正訊號</td></tr>
+            <tr><td>狀態比喻</td><td>等待 / 生成文案</td><td>顯影 · 溫度 · 校準</td><td>掃描 · 收斂 · 定位</td></tr>
+          </tbody>
+        </table>
+        <div style={{ marginTop:16, fontSize:13, color:'rgba(26,22,38,.78)', lineHeight:1.75 }}>
+          不動的：頁面版面、卡片 / 按鈕 / 輸入框 primitive、付款進度 stepper、訂單摘要結構、藍新信任聲明、退款 / support footer、6 個狀態的流程與邏輯。換膚 = 一個 <code style={{fontFamily:'var(--anyu-font-mono)',color:'#5b3aa3'}}>ModuleAccentScope</code> 包起來，外加一個 motif 元件。
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- answer notes ----
+function NotesSection() {
+  return (
+    <div className="notes">
+      <div className="ncard">
+        <div className="nk">// ReturnURL waiting</div>
+        <h5>怎麼不像技術狀態頁</h5>
+        <ul>
+          <li><b>先給確定性</b>：第一句是「收到了」，不是「處理中 / Loading」。人要的是「我的錢有沒有事」。</li>
+          <li><b>講節奏，不講系統</b>：用「接下來會發生什麼」三步，取代百分比、輪詢、spinner、技術錯誤碼。</li>
+          <li><b>沿用產品情緒</b>：月相微亮＝報告在顯影，跟結果頁同一種語言，不借通用 loading。</li>
+          <li><b>降低守候壓力</b>：明說「可以安心關掉，好了會自己更新、也會用 LINE / Email 通知」。</li>
+          <li><b>誠實對齊金流</b>：一行「付款確認以藍新通知為準」，把責任講清楚又不嚇人。</li>
+          <li><b>不放 primary CTA</b>：等待頁沒有主按鈕，避免讓人以為需要操作；只留 support / 退款。</li>
+        </ul>
+      </div>
+      <div className="ncard acc2">
+        <div className="nk">// Mobile</div>
+        <h5>手機版 CTA 與狀態資訊怎麼排</h5>
+        <ul>
+          <li><b>狀態在上、行動在下</b>：印章 + 一句話狀態永遠在首屏；CTA 落在拇指區。</li>
+          <li><b>只有可行動的頁才有 primary CTA</b>：checkout（前往付款）、ready（進入報告）、failed（重試 / 補發）。waiting / processing 不放。</li>
+          <li><b>固定資訊不搶戲</b>：NT$49 · 一次性 · 非訂閱收進訂單摘要框；藍新聲明、退款、email 用次級字級貼著 CTA 下方。</li>
+          <li><b>進度條極簡</b>：付款 / 生成 / 完成 三點，永遠在同一位置，讓人知道走到哪。</li>
+          <li><b>safe-area</b>：底部 CTA 與 support 區留 <code style={{fontFamily:'var(--anyu-font-mono)',color:'#5b3aa3'}}>env(safe-area-inset-bottom)</code>，鍵盤 / Home bar 不遮。</li>
+          <li><b>單欄、可關可回</b>：整個流程單欄滾動，等待頁可關閉重開、狀態自動續上。</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('flow-root')).render(<FlowSection />);
+ReactDOM.createRoot(document.getElementById('cmp-root')).render(<CmpSection />);
+ReactDOM.createRoot(document.getElementById('m2-root')).render(<Module2Section />);
+ReactDOM.createRoot(document.getElementById('notes-root')).render(<NotesSection />);
+
+document.getElementById('foot').innerHTML =
+  '保留不動的資訊：NT$49 · 一次性付款 · 非訂閱制 · 藍新金流安全付款 · 付款確認以藍新通知為準 · 網頁交付 · hello@anyu.tw · 退款 / 補發 3–7 個工作天 ｜ 第三方藍新頁面不在設計範圍。';
+</script>
+
+</body>
+</html>

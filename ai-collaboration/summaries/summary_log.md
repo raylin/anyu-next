@@ -7910,3 +7910,22 @@ Unresolved questions:
 - Vercel request logs did not surface the provider NotifyURL or queue callback paths in the queried window, even though database state confirms NotifyURL receipt and completed generation.
 - Entitlement `generation_job_id` remained unset even though the generation job completed; decide later whether this should be linked/backfilled.
 - Checkout-start visual bridge polish remains pending.
+
+## 2026-05-31 - Checkout-Start Visual Bridge Polish v0
+
+Completed changes:
+- Moved Claude Design Payment Shell + Module Accent references into `ai-collaboration/design/2026-05-31-payment-shell-module-accent/` with a reference-only README.
+- Polished the Module 01 checkout-start page with ANYU wordmark/back link, Module 01 identity, `付款 / 生成 / 完成` stepper, order summary, NewebPay trust bridge, and support/refund footer.
+- Kept checkout creation, provider form submission, ReturnURL polling, NotifyURL handling, and production fail-closed behavior unchanged.
+- Updated tests to verify NT$49, one-time/non-subscription copy, provider notification truth, no internal-test/no-charge/LINE paid delivery wording, and no operator/provider secret exposure.
+- Updated the dashboard to mark checkout-start visual bridge polish complete.
+
+Learnings:
+- The existing Module 01 theme boundary is enough to bring Riso/editorial continuity into checkout-start without introducing a full Payment Shell abstraction.
+- Direction C can be adopted safely as product logic and structure while deferring shared shell/accent framework work.
+- Checkout-start remains a server-side bridge: operator gate and provider secrets stay out of browser code while the provider form remains explicit for the user.
+
+Unresolved questions:
+- Whether to run a staging visual smoke after deployment to inspect the checkout bridge in a real browser.
+- Whether the next review-wait task should be Module 02 concept spec or staging-only no-card QA bypass.
+- Shared Payment Shell + Module Accent abstraction remains deferred until Module 02/payment UX requirements are clearer.
