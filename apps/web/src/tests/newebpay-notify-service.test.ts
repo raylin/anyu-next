@@ -174,7 +174,7 @@ describe("NewebPay NotifyURL service", () => {
       expect.objectContaining({
         paymentIntent: expect.objectContaining({ id: "payment-1", status: "paid" }),
         entitlementSource: "payment_single",
-        generationJobTriggerSource: "payment_success_future",
+        generationJobTriggerSource: "newebpay_notify",
         operatorTest: false,
         exposeRawPaidAccessToken: false,
       }),

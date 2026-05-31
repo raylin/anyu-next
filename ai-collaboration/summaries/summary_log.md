@@ -7738,3 +7738,20 @@ Learnings:
 
 Unresolved questions:
 - Whether to implement the rename before production launch or leave it as non-blocking internal metadata debt.
+
+## 2026-05-31 - Payment Trigger Source Naming Cleanup Implementation v0
+
+Completed changes:
+- Added `newebpay_notify` to persisted generation job trigger source constants.
+- Kept `payment_success_future` accepted as a legacy value.
+- Switched NewebPay NotifyURL delivery artifact creation to create new generation jobs with `generationJobTriggerSource: "newebpay_notify"`.
+- Added tests for new NewebPay metadata, legacy acceptance, and legacy processor compatibility.
+- Updated dashboard tech-debt copy.
+
+Learnings:
+- No DB migration was required because `generation_jobs.trigger_source` is plain text.
+- Processor behavior remains safe because jobs are claimed by status/type/timing or exact ID, not by trigger-source name.
+- Queue payload source already used `newebpay_notify`, so queue behavior did not need a shape change.
+
+Unresolved questions:
+- Whether future reporting should normalize legacy `payment_success_future` and current `newebpay_notify` into one provider-notify display bucket.

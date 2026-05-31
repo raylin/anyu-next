@@ -14,6 +14,7 @@ export const GENERATION_JOB_TRIGGER_SOURCES = [
   "web_unlock",
   "line_bind",
   "short_code",
+  "newebpay_notify",
   "payment_success_future",
   "operator",
 ] as const;

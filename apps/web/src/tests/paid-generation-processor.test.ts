@@ -234,6 +234,32 @@ describe("paid generation processor", () => {
     );
   });
 
+  it("processes legacy payment_success_future jobs without source-specific filtering", async () => {
+    mockClaimDuePaidAnalysisJobById.mockResolvedValueOnce({
+      ...JOB,
+      triggerSource: "payment_success_future",
+    });
+
+    await expect(
+      processPaidAnalysisJobById({
+        generationJobId: "job-1",
+        lockedBy: "queue-worker",
+        now: NOW,
+      }),
+    ).resolves.toEqual({
+      ok: true,
+      category: "processed",
+      jobId: "job-1",
+      jobResult: "completed",
+    });
+    expect(mockMarkGenerationJobCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jobId: "job-1",
+        outputRefId: "paid-1",
+      }),
+    );
+  });
+
   it("classifies completed targeted jobs as idempotent without processing another job", async () => {
     mockClaimDuePaidAnalysisJobById.mockResolvedValueOnce(null);
     mockGetGenerationJobById.mockResolvedValueOnce({

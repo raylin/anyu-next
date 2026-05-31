@@ -118,6 +118,7 @@ describe("generation job repository seams", () => {
       "web_unlock",
       "line_bind",
       "short_code",
+      "newebpay_notify",
       "payment_success_future",
       "operator",
     ]);
@@ -206,6 +207,25 @@ describe("generation job repository seams", () => {
 
     expect(result).toEqual({ job: existingJob, created: false });
     expect(select.db.select).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the legacy provider payment trigger source accepted for existing rows", async () => {
+    const createdJob = { id: JOB_ID, status: "queued" };
+    const { db, capture } = createInsertDb([createdJob]);
+    mockRequireDb.mockReturnValue(db);
+
+    const result = await createOrReusePaidAnalysisJob({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: RESULT_ID,
+      triggerSource: "payment_success_future",
+      promptVersion: "product_result_prompt_v0.5",
+      schemaVersion: "paid_result_schema_v3",
+    });
+
+    expect(result).toEqual({ job: createdJob, created: true });
+    expect(capture.values).toMatchObject({
+      triggerSource: "payment_success_future",
+    });
   });
 
   it("gets jobs by ID and dedupe key", async () => {

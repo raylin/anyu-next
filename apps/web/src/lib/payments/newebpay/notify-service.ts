@@ -59,7 +59,7 @@ async function createNewebPayDelivery(paymentIntent: PaymentIntent) {
   return createPaidDeliveryArtifactsForPaymentIntent({
     paymentIntent,
     entitlementSource: "payment_single",
-    generationJobTriggerSource: "payment_success_future",
+    generationJobTriggerSource: "newebpay_notify",
     operatorTest: false,
     exposeRawPaidAccessToken: false,
   });
