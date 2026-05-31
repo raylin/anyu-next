@@ -7722,3 +7722,19 @@ Learnings:
 
 Unresolved questions:
 - Whether the owner’s normal Terminal can remove `com.apple.provenance` without `sudo` or Full Disk Access.
+
+## 2026-05-31 - Payment Trigger Source Naming Cleanup Plan v0
+
+Completed changes:
+- Audited source, tests, schema, queue payloads, processor logic, and historical docs for `payment_success_future` and related trigger-source names.
+- Confirmed `payment_success_future` remains active runtime metadata for NewebPay-created `generation_jobs.trigger_source`.
+- Confirmed queue payloads already use `newebpay_notify` and processors do not select jobs by trigger source.
+- Documented a compatibility-first rename plan.
+
+Learnings:
+- The DB column is plain text, but TypeScript allow-list validation makes direct removal of `payment_success_future` unsafe.
+- Existing staging rows likely contain `payment_success_future` after sandbox E2E v5, so old values should remain accepted.
+- The cleanest replacement for new NewebPay-created generation jobs is `newebpay_notify`.
+
+Unresolved questions:
+- Whether to implement the rename before production launch or leave it as non-blocking internal metadata debt.
