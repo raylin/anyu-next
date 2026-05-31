@@ -7755,3 +7755,20 @@ Learnings:
 
 Unresolved questions:
 - Whether future reporting should normalize legacy `payment_success_future` and current `newebpay_notify` into one provider-notify display bucket.
+
+## 2026-05-31 - Entitlement / Payment Intent Uniqueness Migration Plan v0
+
+Completed changes:
+- Audited payment intent, entitlement, generation job, paid access token, and related schema/indexes.
+- Audited NotifyURL, fake-paid, paid delivery artifact, entitlement helper, and generation job idempotency behavior.
+- Documented data preflight SQL and a staging-first migration gate.
+- Recommended a partial unique index on `entitlements(payment_intent_id)` where `payment_intent_id IS NOT NULL`.
+
+Learnings:
+- `payment_intents.merchant_order_no`, `entitlements.paid_access_token_hash`, and `generation_jobs.dedupe_key` already have DB uniqueness protection.
+- `entitlements.payment_intent_id` is currently only non-unique indexed, so concurrent duplicate delivery creation still has a race window.
+- The right invariant is one entitlement lifecycle per non-null payment intent, including refunded/revoked states.
+
+Unresolved questions:
+- Whether Drizzle migration execution allows `CREATE INDEX CONCURRENTLY`, or whether this should be applied through a manually approved Neon SQL step.
+- Existing staging/production duplicate counts were not queried in this planning task.
