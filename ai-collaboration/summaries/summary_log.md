@@ -7790,3 +7790,23 @@ Learnings:
 Unresolved questions:
 - Whether to apply `CREATE INDEX CONCURRENTLY` through the migration runner or a manually approved Neon SQL step.
 - Staging duplicate preflight and index application remain pending.
+
+## 2026-05-31 - Entitlement Unique Index Staging Apply v0
+
+Completed changes:
+- Verified the staging DB target as Neon project `anyu-next`, non-default `preview` branch, database `neondb`.
+- Ran aggregate-only staging preflight checks and found zero duplicate non-null `payment_intent_id` entitlement groups.
+- Applied `entitlements_payment_intent_unique_idx` on staging with manual Neon SQL using `CREATE UNIQUE INDEX CONCURRENTLY`.
+- Dropped the old non-unique `entitlements_payment_intent_idx` on staging.
+- Verified the new index is unique and partial with predicate `payment_intent_id IS NOT NULL`.
+- Confirmed production checkout and fake-paid routes still fail closed and production DB migration was not applied.
+- Updated the dashboard to show staging uniqueness applied and production gated.
+
+Learnings:
+- Staging had 14 non-null payment-intent entitlements, all active, and no duplicates before the index was applied.
+- Manual Neon SQL is the safer current path for concurrent index operations because migration runner transaction behavior is not verified.
+- Local idempotency tests cover the conflict-handling behavior without creating additional staging payment/entitlement rows.
+
+Unresolved questions:
+- Whether production should use the same manual Neon SQL method or a verified non-transactional migration runner.
+- Whether to run an approved live staging duplicate-delivery smoke later that intentionally creates test rows.
