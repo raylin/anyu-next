@@ -8141,3 +8141,28 @@ Unresolved questions:
 - Should recovery secrets be branch-scoped Preview(`staging`) only, or also configured for general Preview?
 - Should checkout-start marketing opt-in remain before payment or move later to paid-ready/completed result?
 - Email-save DB assertion needs rerun after recovery env alignment.
+
+## 2026-06-01 Recovery Contact Preview(staging) Env Alignment v0
+
+### Completed Changes
+
+- saved the Recovery Contact Preview(staging) Env Alignment v0 handoff and report
+- generated strong random recovery contact hash/encryption secrets without printing or committing values
+- configured `PAYMENT_RECOVERY_CONTACT_HASH_SECRET` and `PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY` as branch-scoped Preview(`staging`) env only
+- created a fresh Preview deployment and pointed `staging.anyu.tw` to it
+- reran Email recovery save QA successfully with a fake reserved-domain contact and verified encrypted/hash fields, transactional consent, marketing opt-in, result context, and payment intent context by sanitized aggregate checks
+- removed the fake staging QA recovery row after verification
+- reran `qa:result-checkout:no-card`; checkout-start recovery signals, fake-paid, queue, paid access, and production fail-closed checks passed
+
+### Learnings
+
+- Recovery encryption key should be a 32-byte value encoded as base64url/base64/hex; base64url aligns with current tests.
+- Branch-scoped Preview(`staging`) recovery env is sufficient for `staging.anyu.tw` after redeploy/alias refresh.
+- Email-save recovery contact creation now works on staging without exposing raw contact values, encrypted values, or hashes.
+
+### Unresolved Questions
+
+- Production recovery env and DB migration remain gated.
+- Recovery link sending and LINE recovery binding are still future work.
+- Key rotation policy remains undefined and should be planned before any production recovery launch.
+- Local commit/push is blocked because the sandbox denied writes inside `.git` when Git attempted to create `index.lock`; task files are present in the workspace but not committed.
