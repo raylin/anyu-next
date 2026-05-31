@@ -37,8 +37,9 @@ describe("NewebPay ReturnURL pending page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("付款確認中");
-    expect(html).toContain("目前狀態：waiting_for_payment");
-    expect(html).toContain("不會直接判定付款成功或解鎖完整分析");
+    expect(html).toContain("我們正在等候藍新的正式付款通知");
+    expect(html).toContain("瀏覽器回到此頁不代表付款已完成");
+    expect(html).toContain("等候藍新正式付款通知");
     expect(html).toContain("3–7 個工作天內回覆處理結果");
     expect(html).not.toContain("paidAccessToken");
     expect(html).not.toContain("TradeInfo");
@@ -65,11 +66,52 @@ describe("NewebPay ReturnURL pending page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("付款已確認");
-    expect(html).toContain("目前狀態：paid_ready");
-    expect(html).toContain("查看完整分析");
+    expect(html).toContain("完整報告已準備好");
+    expect(html).toContain("查看完整報告");
     expect(html).not.toContain("paidAccessToken");
     expect(html).not.toContain("generationJob");
     expect(html).not.toContain("pa_");
+  });
+
+  it("renders processing copy while paid generation is running", async () => {
+    mockResolvePaymentAccessHandoff.mockResolvedValue({
+      ok: true,
+      moduleSlug: "ambiguous-temperature",
+      state: "paid_processing",
+      accessPath: null,
+      retryable: true,
+    });
+
+    const page = await NewebPayReturnPage({
+      params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      searchParams: Promise.resolve({ checkoutToken: "pcs_redacted" }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("完整報告生成中");
+    expect(html).toContain("正在重新整理你的互動訊號");
+    expect(html).not.toContain("查看完整報告");
+  });
+
+  it("renders failed/support copy with refund and support links", async () => {
+    mockResolvePaymentAccessHandoff.mockResolvedValue({
+      ok: true,
+      moduleSlug: "ambiguous-temperature",
+      state: "paid_failed",
+      accessPath: null,
+      retryable: false,
+    });
+
+    const page = await NewebPayReturnPage({
+      params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      searchParams: Promise.resolve({ checkoutToken: "pcs_redacted" }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("報告暫時無法完成");
+    expect(html).toContain("hello@anyu.tw");
+    expect(html).toContain("3–7 個工作天內回覆處理結果");
+    expect(html).toContain("查看退款政策");
   });
 
   it("handles invalid checkout sessions safely", async () => {
@@ -85,7 +127,8 @@ describe("NewebPay ReturnURL pending page", () => {
     });
     const html = renderToStaticMarkup(page);
 
-    expect(html).toContain("付款確認中");
-    expect(html).toContain("保留付款時間與訂單資訊聯繫客服協助確認");
+    expect(html).toContain("這個付款狀態連結已失效");
+    expect(html).toContain("保留付款時間與訂單資訊聯絡客服協助確認");
+    expect(html).toContain("查看退款政策");
   });
 });

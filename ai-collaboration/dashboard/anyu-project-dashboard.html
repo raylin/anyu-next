@@ -329,10 +329,10 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed after the TradeInfo padding fix; NewebPay merchant review remains the external gate. Core Engine / Module Grammar v0 now defines how future modules should connect to reusable interactions, skills, traits, artifacts, and cross-links.</p>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed after the TradeInfo padding fix; NewebPay merchant review remains the external gate. ReturnURL now has launch-safe polling UX while staying non-mutating. Core Engine / Module Grammar v0 defines how future modules should connect to reusable interactions, skills, traits, artifacts, and cross-links.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-05-31 08:26 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Sandbox E2E passed; legacy LINE copy cleaned</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-05-31 16:22 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Sandbox E2E passed; ReturnURL polling polished</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Merchant approval / Module 02 concept decision</span></div>
       </div>
@@ -341,7 +341,7 @@
     <section>
       <h2>Status Cards</h2>
       <div class="grid">
-        <article class="card"><span class="badge done">Done</span><h3>Product / Module 01</h3><p>Free analysis, paid-report product structure, multi-state paid CTA copy, and server-rendered checkout-start wiring are implemented. Module 01 remains low-key active and monitored.</p></article>
+        <article class="card"><span class="badge done">Done</span><h3>Product / Module 01</h3><p>Free analysis, paid-report product structure, multi-state paid CTA copy, server-rendered checkout-start wiring, and ReturnURL polling UX are implemented. Module 01 remains low-key active and monitored.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Production public site</h3><p>anyu.tw storefront, product preview, NT$49 price, /refund, and /legal are live for merchant review.</p></article>
         <article class="card"><span class="badge waiting">Waiting external</span><h3>NewebPay merchant review</h3><p>Supplement package has been submitted externally. Current state is waiting for review outcome.</p></article>
         <article class="card"><span class="badge disabled">Disabled by design</span><h3>Payment runtime</h3><p>Broad production payment runtime remains off. Production checkout and fake-paid routes fail closed.</p></article>
@@ -401,7 +401,7 @@
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
           <li><span class="time">Current</span><span>Sandbox v5 passed after NewebPay-style manual 32-byte AES padding fix: real sandbox payment reached <code>paid_ready</code> and completed access rendered.</span></li>
-          <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned: review-pending disabled CTA, checkout-available NT$49 web delivery copy, and support/refund window.</span></li>
+          <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned: review-pending disabled CTA, checkout-available NT$49 web delivery copy, support/refund window, checkout-start wiring, and ReturnURL polling polish.</span></li>
         </ol>
       </div>
     </section>
@@ -409,7 +409,7 @@
     <section class="three">
       <div class="panel">
         <h2>Current Engineering Status</h2>
-        <p><strong>Implemented:</strong> Checkout Phase 1, NotifyURL Phase 2, Paid Delivery Phase 3, Access Handoff Phase 3B, Queue Phase 4A/4B.1/4B.2, targeted queue processor, manual fallback, and Module 01 multi-state paid CTA copy.</p>
+        <p><strong>Implemented:</strong> Checkout Phase 1, NotifyURL Phase 2, Paid Delivery Phase 3, Access Handoff Phase 3B, Queue Phase 4A/4B.1/4B.2, targeted queue processor, manual fallback, Module 01 multi-state paid CTA copy, checkout-start wiring, and ReturnURL polling UX.</p>
         <p><strong>Disabled:</strong> production runtime, public production checkout, production fake-paid, production queue trigger.</p>
         <p><strong>Not implemented:</strong> LINE paid delivery and refund tooling. Legacy LINE/contact copy is now framed as notification or short-code confirmation, not paid report delivery.</p>
         <p><strong>Not launched:</strong> real provider production payment.</p>
@@ -518,7 +518,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation while approval is pending:</strong> resume Result-Page Checkout Staging Sandbox QA v0 if a real sandbox card pass is desired, then prioritize ReturnURL Polling UX Polish v0 and Checkout-Start Visual Bridge Polish v0. If product expansion is the priority instead, run Module 02 Concept Spec: 職場暗流雷達 v0 using the Core Engine / Module Grammar as the planning contract.</p>
+        <p><strong>Current recommendation while approval is pending:</strong> resume Result-Page Checkout Staging Sandbox QA v0 if a real sandbox card pass through the user-facing CTA path is desired, then prioritize Checkout-Start Visual Bridge Polish v0. If product expansion is the priority instead, run Module 02 Concept Spec: 職場暗流雷達 v0 using the Core Engine / Module Grammar as the planning contract.</p>
         <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production runtime should remain disabled until the launch gate sequence is explicitly approved.</p>
         <p>If NewebPay merchant review approval/formal credentials are available, switch back to Production Payment Config Dry-Run v0 with runtime still disabled; do not jump directly to public checkout.</p>
       </div>
@@ -553,6 +553,7 @@
           <li><a href="../reports/2026-05-31-module-01-checkout-cta-wiring-plan-v0.md">Module 01 Checkout CTA Wiring Plan v0</a></li>
           <li><a href="../reports/2026-05-31-module-01-checkout-cta-wiring-implementation-v0.md">Module 01 Checkout CTA Wiring Implementation v0</a></li>
           <li><a href="../reports/2026-05-31-payment-ux-orchestration-plan-v0.md">Payment UX Orchestration Plan v0</a></li>
+          <li><a href="../reports/2026-05-31-returnurl-polling-ux-polish-v0.md">ReturnURL Polling UX Polish v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

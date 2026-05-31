@@ -7868,3 +7868,23 @@ Learnings:
 Unresolved questions:
 - Whether owner wants LINE notification before or after production payment launch.
 - Whether ReturnURL should auto-redirect after paid readiness or only show a clear button.
+
+## 2026-05-31 - ReturnURL Polling UX Polish v0
+
+Completed changes:
+- Added `PaymentReturnPoller` for the Module 01 NewebPay ReturnURL page.
+- Updated `/m/[moduleSlug]/payment/return` to render the poller inside the existing Module 01 theme shell while keeping ReturnURL non-mutating.
+- Added launch-safe state copy for waiting, processing, ready, failed/support, invalid/expired, and timeout states.
+- Kept ready behavior as a visible `查看完整報告` button rather than auto-redirect.
+- Added support/refund links and the 3-7 business day handling window to fallback states.
+- Added targeted ReturnURL/poller tests and updated the dashboard to mark ReturnURL polling polish complete.
+
+Learnings:
+- ReturnURL can remain read-only while still feeling less technical by polling the existing payment status endpoint from the browser.
+- The status endpoint is sufficient for a warm waiting/processing/ready flow without exposing raw `pcs_` or `pa_` values in rendered copy.
+- A visible ready-state button is the safest v0 because it avoids unexpected redirects and keeps payment truth messaging clear.
+
+Unresolved questions:
+- Full Result-Page Checkout Staging Sandbox QA through the real CTA path is still pending.
+- Checkout-start visual bridge polish remains a separate follow-up.
+- The broader payment shell / module accent system should wait for Claude Design direction.
