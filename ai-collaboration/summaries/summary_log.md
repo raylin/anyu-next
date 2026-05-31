@@ -8188,3 +8188,24 @@ Unresolved questions:
 - Confirm whether paid transition already calls `bindRecoveryContactsToEntitlement` after entitlement creation/reuse.
 - Decide whether the first implementation should split helper methods and UI into separate tasks or combine them.
 - Recovery link sending, LINE recovery binding, production recovery DB/env apply, and key rotation policy remain future work.
+
+## 2026-06-01 Post-Payment Recovery Helper Methods v0
+
+### Completed Changes
+
+- saved the Post-Payment Recovery Helper Methods v0 handoff and report
+- added server-only recovery status summary helpers for paid-ready/completed-result surfaces
+- added post-payment Email recovery contact helper with encrypted/hash storage and separate marketing consent
+- added non-fatal paid-delivery binding from recovery contacts to entitlement after payment delivery artifacts are available
+- added tests for unsaved/saved/failed/bound summary states, masked Email display, post-payment idempotency, and paid-delivery binding behavior
+
+### Learnings
+
+- Checkout-start recovery contacts were linked to payment intent, but paid delivery did not previously bind them to entitlement.
+- The existing schema already supports `paid_ready` and `completed_result` source values, so no migration was needed.
+- A sanitized summary contract lets future UI avoid raw recovery rows, encrypted values, hashes, and token context.
+
+### Unresolved Questions
+
+- Paid Ready / Completed Result Save CTA Implementation v0 is still needed to expose the post-payment save UX.
+- Recovery link sending, LINE recovery binding, production recovery DB/env apply, and key rotation policy remain future work.

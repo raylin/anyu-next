@@ -3,6 +3,7 @@ import { requireDb } from "@/lib/db/client";
 import { paymentRecoveryContacts } from "@/lib/db/schema";
 import {
   assertNoRecoveryBearerToken,
+  decryptRecoveryContactValue,
   encryptRecoveryContactValue,
   hashRecoveryContact,
   normalizeRecoveryEmail,
@@ -29,6 +30,29 @@ export type PaymentRecoveryContactType = (typeof PAYMENT_RECOVERY_CONTACT_TYPES)
 export type PaymentRecoveryContactSource = (typeof PAYMENT_RECOVERY_CONTACT_SOURCES)[number];
 export type PaymentRecoveryContactStatus = (typeof PAYMENT_RECOVERY_CONTACT_STATUSES)[number];
 export type PaymentRecoveryContact = typeof paymentRecoveryContacts.$inferSelect;
+export type PaymentRecoveryContactSummaryStatus = PaymentRecoveryContactStatus | "none";
+export type PaymentRecoveryPostPaymentAction =
+  | "none"
+  | "confirm_saved"
+  | "suggest_email_save"
+  | "suggest_line_save_later"
+  | "retry_email"
+  | "add_backup";
+
+export type PaymentRecoveryStatusSummary = {
+  hasRecoveryContact: boolean;
+  hasEmailRecovery: boolean;
+  hasLineRecovery: boolean;
+  emailStatus: PaymentRecoveryContactSummaryStatus;
+  lineStatus: PaymentRecoveryContactSummaryStatus;
+  transactionalConsentPresent: boolean;
+  marketingOptInPresent: boolean;
+  recommendedPostPaymentAction: PaymentRecoveryPostPaymentAction;
+  safeDisplayContact: {
+    type: "email";
+    maskedValue: string;
+  } | null;
+};
 
 function assertAllowed<T extends string>(
   value: string,
@@ -46,6 +70,140 @@ function assertNoBearerTokens(values: Array<string | null | undefined>) {
       assertNoRecoveryBearerToken(value);
     }
   }
+}
+
+function isActiveRecoveryStatus(status: string | null | undefined) {
+  return status !== "failed" && status !== "revoked";
+}
+
+function getStatusRank(status: PaymentRecoveryContactStatus) {
+  switch (status) {
+    case "bound":
+      return 5;
+    case "verified":
+      return 4;
+    case "pending":
+      return 3;
+    case "failed":
+      return 2;
+    case "revoked":
+      return 1;
+  }
+}
+
+function pickBestStatus(records: PaymentRecoveryContact[]): PaymentRecoveryContactSummaryStatus {
+  const statuses = records
+    .map((record) => record.status)
+    .filter((status): status is PaymentRecoveryContactStatus =>
+      PAYMENT_RECOVERY_CONTACT_STATUSES.includes(status as PaymentRecoveryContactStatus),
+    );
+
+  if (statuses.length === 0) {
+    return "none";
+  }
+
+  return statuses.reduce((best, status) =>
+    getStatusRank(status) > getStatusRank(best) ? status : best,
+  );
+}
+
+function maskRecoveryEmail(email: string) {
+  const normalized = normalizeRecoveryEmail(email);
+  const [localPart, domainPart] = normalized.split("@");
+
+  if (!localPart || !domainPart) {
+    return null;
+  }
+
+  const [domainName, ...domainSuffix] = domainPart.split(".");
+  const maskedLocal = `${localPart[0] ?? "*"}***`;
+  const maskedDomain = domainName ? `${domainName[0] ?? "*"}***` : "***";
+  const suffix = domainSuffix.length > 0 ? `.${domainSuffix.join(".")}` : "";
+
+  return `${maskedLocal}@${maskedDomain}${suffix}`;
+}
+
+function getSafeEmailDisplay(input: {
+  records: PaymentRecoveryContact[];
+  env?: NodeJS.ProcessEnv;
+}) {
+  const encryptedValue = input.records.find((record) => record.contactEncrypted)?.contactEncrypted;
+
+  if (!encryptedValue) {
+    return null;
+  }
+
+  try {
+    const maskedValue = maskRecoveryEmail(
+      decryptRecoveryContactValue({
+        encryptedValue,
+        env: input.env,
+      }),
+    );
+
+    return maskedValue ? { type: "email" as const, maskedValue } : null;
+  } catch {
+    return null;
+  }
+}
+
+function dedupeRecoveryContacts(records: PaymentRecoveryContact[]) {
+  const byId = new Map<string, PaymentRecoveryContact>();
+
+  for (const record of records) {
+    byId.set(record.id, record);
+  }
+
+  return [...byId.values()];
+}
+
+export function summarizePaymentRecoveryContacts(input: {
+  records: PaymentRecoveryContact[];
+  moduleSlug?: string;
+  env?: NodeJS.ProcessEnv;
+}): PaymentRecoveryStatusSummary {
+  const records = dedupeRecoveryContacts(input.records).filter((record) =>
+    input.moduleSlug ? record.moduleSlug === input.moduleSlug : true,
+  );
+  const emailRecords = records.filter((record) => record.contactType === "email");
+  const lineRecords = records.filter((record) => record.contactType === "line");
+  const activeEmailRecords = emailRecords.filter((record) => isActiveRecoveryStatus(record.status));
+  const activeLineRecords = lineRecords.filter((record) => isActiveRecoveryStatus(record.status));
+  const hasEmailRecovery = activeEmailRecords.length > 0;
+  const hasLineRecovery = activeLineRecords.length > 0;
+  const hasRecoveryContact = hasEmailRecovery || hasLineRecovery;
+  const emailStatus = pickBestStatus(emailRecords);
+  const lineStatus = pickBestStatus(lineRecords);
+  const transactionalConsentPresent = records.some((record) =>
+    Boolean(record.transactionalConsentAt),
+  );
+  const marketingOptInPresent = records.some((record) => Boolean(record.marketingOptInAt));
+  const safeDisplayContact = getSafeEmailDisplay({
+    records: activeEmailRecords,
+    env: input.env,
+  });
+
+  let recommendedPostPaymentAction: PaymentRecoveryPostPaymentAction = "none";
+
+  if (!hasRecoveryContact && emailStatus === "failed") {
+    recommendedPostPaymentAction = "retry_email";
+  } else if (!hasRecoveryContact) {
+    recommendedPostPaymentAction = "suggest_email_save";
+  } else if (hasRecoveryContact) {
+    recommendedPostPaymentAction = "confirm_saved";
+  }
+
+  return {
+    hasRecoveryContact,
+    hasEmailRecovery,
+    hasLineRecovery,
+    emailStatus,
+    lineStatus,
+    transactionalConsentPresent,
+    marketingOptInPresent,
+    recommendedPostPaymentAction,
+    safeDisplayContact,
+  };
 }
 
 async function getActiveRecoveryContactByResult(input: {
@@ -241,6 +399,44 @@ export async function getPaymentRecoveryContactsByResultId(analysisResultId: str
     .where(eq(paymentRecoveryContacts.analysisResultId, analysisResultId));
 }
 
+export async function getPaymentRecoveryStatusSummary(input: {
+  moduleSlug: string;
+  analysisResultId: string;
+  paymentIntentId?: string | null;
+  entitlementId?: string | null;
+  env?: NodeJS.ProcessEnv;
+}) {
+  const records = await getPaymentRecoveryContactsByResultId(input.analysisResultId);
+
+  return summarizePaymentRecoveryContacts({
+    records: records.filter((record) => {
+      if (record.moduleSlug !== input.moduleSlug) {
+        return false;
+      }
+
+      if (
+        input.entitlementId &&
+        record.entitlementId &&
+        record.entitlementId !== input.entitlementId
+      ) {
+        return false;
+      }
+
+      if (
+        input.paymentIntentId &&
+        record.paymentIntentId &&
+        record.paymentIntentId !== input.paymentIntentId
+      ) {
+        return false;
+      }
+
+      return true;
+    }),
+    moduleSlug: input.moduleSlug,
+    env: input.env,
+  });
+}
+
 export async function bindRecoveryContactsToEntitlement(input: {
   paymentIntentId: string;
   entitlementId: string;
@@ -257,6 +453,31 @@ export async function bindRecoveryContactsToEntitlement(input: {
     })
     .where(eq(paymentRecoveryContacts.paymentIntentId, input.paymentIntentId))
     .returning();
+}
+
+export async function createOrUpdatePostPaymentEmailRecoveryContact(input: {
+  moduleSlug: string;
+  analysisResultId: string;
+  email: string;
+  source: Extract<PaymentRecoveryContactSource, "paid_ready" | "completed_result" | "support">;
+  paymentIntentId?: string | null;
+  entitlementId?: string | null;
+  transactionalConsentAt?: Date;
+  marketingOptInAt?: Date | null;
+  env?: NodeJS.ProcessEnv;
+}) {
+  return createOrUpdateEmailRecoveryContact({
+    moduleSlug: input.moduleSlug,
+    analysisResultId: input.analysisResultId,
+    paymentIntentId: input.paymentIntentId,
+    entitlementId: input.entitlementId,
+    email: input.email,
+    source: input.source,
+    status: input.entitlementId ? "bound" : "verified",
+    transactionalConsentAt: input.transactionalConsentAt,
+    marketingOptInAt: input.marketingOptInAt,
+    env: input.env,
+  });
 }
 
 export async function markPaymentRecoveryContactStatus(input: {

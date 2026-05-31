@@ -4,11 +4,13 @@ const {
   mockGetEntitlementByPaymentIntentId,
   mockCreatePaymentSingleEntitlement,
   mockCreateOrReusePaidAnalysisJob,
+  mockBindRecoveryContactsToEntitlement,
   mockResolvePaidAccessToken,
 } = vi.hoisted(() => ({
   mockGetEntitlementByPaymentIntentId: vi.fn(),
   mockCreatePaymentSingleEntitlement: vi.fn(),
   mockCreateOrReusePaidAnalysisJob: vi.fn(),
+  mockBindRecoveryContactsToEntitlement: vi.fn(),
   mockResolvePaidAccessToken: vi.fn(),
 }));
 
@@ -19,6 +21,10 @@ vi.mock("@/lib/db/entitlements", () => ({
 
 vi.mock("@/lib/db/generation-jobs", () => ({
   createOrReusePaidAnalysisJob: mockCreateOrReusePaidAnalysisJob,
+}));
+
+vi.mock("@/lib/db/payment-recovery-contacts", () => ({
+  bindRecoveryContactsToEntitlement: mockBindRecoveryContactsToEntitlement,
 }));
 
 vi.mock("@/lib/payments/paid-access-resolver", () => ({
@@ -57,6 +63,7 @@ describe("paid delivery artifacts service", () => {
       job: generationJob,
       created: true,
     });
+    mockBindRecoveryContactsToEntitlement.mockResolvedValue([]);
     mockResolvePaidAccessToken.mockResolvedValue({
       ok: true,
       state: "pending",
@@ -98,7 +105,31 @@ describe("paid delivery artifacts service", () => {
         operatorTest: false,
       }),
     );
+    expect(mockBindRecoveryContactsToEntitlement).toHaveBeenCalledWith({
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+    });
     expect(mockResolvePaidAccessToken).not.toHaveBeenCalled();
+  });
+
+  it("does not fail paid delivery if recovery contact binding fails", async () => {
+    mockBindRecoveryContactsToEntitlement.mockRejectedValueOnce(
+      new Error("recovery_binding_failed"),
+    );
+
+    const result = await createPaidDeliveryArtifactsForPaymentIntent({
+      paymentIntent,
+      entitlementSource: "payment_single",
+      generationJobTriggerSource: "newebpay_notify",
+      exposeRawPaidAccessToken: false,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      entitlementCreated: true,
+      generationJobCreated: true,
+    });
+    expect(mockCreateOrReusePaidAnalysisJob).toHaveBeenCalled();
   });
 
   it("can expose the raw token only for explicit operator-controlled paths", async () => {

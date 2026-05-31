@@ -15,10 +15,12 @@ import {
   bindRecoveryContactsToEntitlement,
   createOrUpdateEmailRecoveryContact,
   createOrUpdateLineRecoveryContact,
+  createOrUpdatePostPaymentEmailRecoveryContact,
   PAYMENT_RECOVERY_CONTACT_SOURCES,
   PAYMENT_RECOVERY_CONTACT_STATUSES,
   PAYMENT_RECOVERY_CONTACT_TYPES,
   recordPaymentRecoveryMarketingOptIn,
+  summarizePaymentRecoveryContacts,
 } from "@/lib/db/payment-recovery-contacts";
 import {
   decryptRecoveryContactValue,
@@ -35,6 +37,10 @@ const TEST_ENV = {
   PAYMENT_RECOVERY_CONTACT_HASH_SECRET: "test-only-recovery-hash-secret",
   PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString("base64url"),
 } as NodeJS.ProcessEnv;
+const ENCRYPTED_OWNER_EMAIL = encryptRecoveryContactValue({
+  value: "owner@example.com",
+  env: TEST_ENV,
+});
 
 function createDbMock(input?: { selectRows?: unknown[]; insertRows?: unknown[]; updateRows?: unknown[] }) {
   const capture: {
@@ -229,6 +235,138 @@ describe("payment recovery contacts", () => {
     expect(dbMock.capture.insertValues).not.toHaveProperty("lineUserId");
   });
 
+  it("summarizes unsaved post-payment recovery state without exposing contacts", () => {
+    const summary = summarizePaymentRecoveryContacts({
+      records: [],
+      moduleSlug: "ambiguous-temperature",
+      env: TEST_ENV,
+    });
+
+    expect(summary).toEqual({
+      hasRecoveryContact: false,
+      hasEmailRecovery: false,
+      hasLineRecovery: false,
+      emailStatus: "none",
+      lineStatus: "none",
+      transactionalConsentPresent: false,
+      marketingOptInPresent: false,
+      recommendedPostPaymentAction: "suggest_email_save",
+      safeDisplayContact: null,
+    });
+  });
+
+  it("summarizes saved email recovery state with masked display only", () => {
+    const summary = summarizePaymentRecoveryContacts({
+      moduleSlug: "ambiguous-temperature",
+      env: TEST_ENV,
+      records: [
+        {
+          id: RECOVERY_CONTACT_ID,
+          moduleSlug: "ambiguous-temperature",
+          analysisResultId: RESULT_ID,
+          paymentIntentId: PAYMENT_INTENT_ID,
+          entitlementId: null,
+          contactType: "email",
+          contactHash: "redacted-hash",
+          contactEncrypted: ENCRYPTED_OWNER_EMAIL,
+          emailHash: "redacted-hash",
+          lineUserHash: null,
+          transactionalConsentAt: new Date("2026-06-01T01:00:00.000Z"),
+          marketingOptInAt: null,
+          source: "checkout_start",
+          status: "pending",
+          createdAt: new Date("2026-06-01T01:00:00.000Z"),
+          updatedAt: new Date("2026-06-01T01:00:00.000Z"),
+          lastUsedAt: null,
+        },
+      ],
+    });
+
+    expect(summary).toMatchObject({
+      hasRecoveryContact: true,
+      hasEmailRecovery: true,
+      hasLineRecovery: false,
+      emailStatus: "pending",
+      lineStatus: "none",
+      transactionalConsentPresent: true,
+      marketingOptInPresent: false,
+      recommendedPostPaymentAction: "confirm_saved",
+    });
+    expect(summary.safeDisplayContact?.maskedValue).toBe("o***@e***.com");
+    expect(summary.safeDisplayContact?.maskedValue).not.toBe("owner@example.com");
+  });
+
+  it("summarizes bound contacts and separated marketing opt-in", () => {
+    const summary = summarizePaymentRecoveryContacts({
+      moduleSlug: "ambiguous-temperature",
+      env: TEST_ENV,
+      records: [
+        {
+          id: RECOVERY_CONTACT_ID,
+          moduleSlug: "ambiguous-temperature",
+          analysisResultId: RESULT_ID,
+          paymentIntentId: PAYMENT_INTENT_ID,
+          entitlementId: ENTITLEMENT_ID,
+          contactType: "email",
+          contactHash: "redacted-hash",
+          contactEncrypted: ENCRYPTED_OWNER_EMAIL,
+          emailHash: "redacted-hash",
+          lineUserHash: null,
+          transactionalConsentAt: new Date("2026-06-01T01:00:00.000Z"),
+          marketingOptInAt: new Date("2026-06-01T01:10:00.000Z"),
+          source: "completed_result",
+          status: "bound",
+          createdAt: new Date("2026-06-01T01:00:00.000Z"),
+          updatedAt: new Date("2026-06-01T01:00:00.000Z"),
+          lastUsedAt: null,
+        },
+      ],
+    });
+
+    expect(summary).toMatchObject({
+      hasRecoveryContact: true,
+      hasEmailRecovery: true,
+      emailStatus: "bound",
+      marketingOptInPresent: true,
+      recommendedPostPaymentAction: "confirm_saved",
+    });
+  });
+
+  it("recommends retry when email recovery failed and no active contact exists", () => {
+    const summary = summarizePaymentRecoveryContacts({
+      moduleSlug: "ambiguous-temperature",
+      env: TEST_ENV,
+      records: [
+        {
+          id: RECOVERY_CONTACT_ID,
+          moduleSlug: "ambiguous-temperature",
+          analysisResultId: RESULT_ID,
+          paymentIntentId: PAYMENT_INTENT_ID,
+          entitlementId: null,
+          contactType: "email",
+          contactHash: "redacted-hash",
+          contactEncrypted: null,
+          emailHash: "redacted-hash",
+          lineUserHash: null,
+          transactionalConsentAt: new Date("2026-06-01T01:00:00.000Z"),
+          marketingOptInAt: null,
+          source: "completed_result",
+          status: "failed",
+          createdAt: new Date("2026-06-01T01:00:00.000Z"),
+          updatedAt: new Date("2026-06-01T01:00:00.000Z"),
+          lastUsedAt: null,
+        },
+      ],
+    });
+
+    expect(summary).toMatchObject({
+      hasRecoveryContact: false,
+      emailStatus: "failed",
+      recommendedPostPaymentAction: "retry_email",
+      safeDisplayContact: null,
+    });
+  });
+
   it("keeps transactional consent and marketing opt-in separate", async () => {
     const transactionalConsentAt = new Date("2026-05-31T02:00:00.000Z");
     const dbMock = createDbMock({
@@ -256,6 +394,74 @@ describe("payment recovery contacts", () => {
       marketingOptInAt: null,
     });
     expect(dbMock.capture.updateValues).toHaveProperty("marketingOptInAt");
+  });
+
+  it("creates post-payment email recovery contacts linked to entitlement context", async () => {
+    const dbMock = createDbMock({
+      insertRows: [{ id: RECOVERY_CONTACT_ID }],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+
+    await createOrUpdatePostPaymentEmailRecoveryContact({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: RESULT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      entitlementId: ENTITLEMENT_ID,
+      email: "owner@example.com",
+      source: "completed_result",
+      marketingOptInAt: null,
+      env: TEST_ENV,
+    });
+
+    expect(dbMock.capture.insertValues).toMatchObject({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: RESULT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      entitlementId: ENTITLEMENT_ID,
+      contactType: "email",
+      source: "completed_result",
+      status: "bound",
+      marketingOptInAt: null,
+    });
+    expect(dbMock.capture.insertValues).not.toHaveProperty("email");
+    expect(dbMock.capture.insertValues?.contactEncrypted).not.toContain("owner@example.com");
+  });
+
+  it("reuses post-payment email recovery contact idempotently", async () => {
+    const existing = {
+      id: RECOVERY_CONTACT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      entitlementId: null,
+      contactEncrypted: "old",
+      lineUserHash: null,
+      emailHash: "old-hash",
+      transactionalConsentAt: new Date("2026-06-01T01:00:00.000Z"),
+      marketingOptInAt: null,
+      status: "verified",
+    };
+    const dbMock = createDbMock({
+      selectRows: [existing],
+      updateRows: [{ ...existing, entitlementId: ENTITLEMENT_ID, status: "bound" }],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+
+    await createOrUpdatePostPaymentEmailRecoveryContact({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: RESULT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      entitlementId: ENTITLEMENT_ID,
+      email: "owner@example.com",
+      source: "paid_ready",
+      env: TEST_ENV,
+    });
+
+    expect(dbMock.db.insert).not.toHaveBeenCalled();
+    expect(dbMock.capture.updateValues).toMatchObject({
+      paymentIntentId: PAYMENT_INTENT_ID,
+      entitlementId: ENTITLEMENT_ID,
+      source: "paid_ready",
+      status: "bound",
+    });
   });
 
   it("links pre-payment contacts to entitlement after payment", async () => {

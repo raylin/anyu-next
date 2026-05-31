@@ -14,6 +14,7 @@ import {
   type GenerationJobTriggerSource,
 } from "@/lib/db/generation-jobs";
 import type { PaymentIntent } from "@/lib/db/payment-intents";
+import { bindRecoveryContactsToEntitlement } from "@/lib/db/payment-recovery-contacts";
 import { type PaidAccessResolutionState, resolvePaidAccessToken } from "@/lib/payments/paid-access-resolver";
 import { getPaidAccessTokenHashSecret } from "@/lib/payments/paid-access-token";
 
@@ -141,6 +142,15 @@ export async function createPaidDeliveryArtifactsForPaymentIntent(input: {
 
   if (!entitlement) {
     return { ok: false, status: 500, error: "entitlement_unavailable" };
+  }
+
+  try {
+    await bindRecoveryContactsToEntitlement({
+      paymentIntentId: input.paymentIntent.id,
+      entitlementId: entitlement.id,
+    });
+  } catch {
+    // Recovery identity is support infrastructure; it must not fail paid delivery.
   }
 
   let generationJobResult: Awaited<ReturnType<typeof createOrReusePaidAnalysisJob>>;
