@@ -42,10 +42,13 @@ describe("legal content", () => {
     expect(uiNotices.ctaConsent).toContain("第三方行銷");
     expect(uiNotices.resultDisclaimer).toContain("不是判決");
     expect(uiNotices.contactCapture).toContain("完整分析");
+    expect(uiNotices.contactCapture).not.toContain("內測");
     expect(uiNotices.paidUnlockNote).toContain("NT$49");
     expect(uiNotices.paidUnlockNote).toContain("付款確認後會於網頁提供結果");
     expect(uiNotices.paidProductDescription).toContain("一次性數位內容");
     expect(uiNotices.paidProductDescription).toContain("網頁交付完整結果");
+    expect(uiNotices.lineAddFriend).toContain("未來通知或客服溝通管道");
+    expect(uiNotices.lineAddFriend).not.toContain("完整分析連結");
   });
 
   it("publishes formal service-ready legal intros without draft warnings", () => {
@@ -90,20 +93,30 @@ describe("legal content", () => {
     const termsCopy = JSON.stringify(termsPageContent);
     const refundCopy = JSON.stringify(refundPageContent);
 
-    expect(termsCopy).toContain("曖昧溫度計完整分析預計為一次性數位內容");
-    expect(termsCopy).toContain("建議售價 NT$49");
-    expect(termsCopy).toContain("目前不會真的收費");
+    expect(termsCopy).toContain("曖昧溫度計完整分析是一份一次性數位內容服務");
+    expect(termsCopy).toContain("單次完整報告解鎖價格為 NT$49");
+    expect(termsCopy).toContain("非訂閱制");
+    expect(termsCopy).toContain("瀏覽器返回付款結果頁不等於付款完成");
+    expect(termsCopy).toContain("金流服務通知與系統紀錄為準");
     expect(termsCopy).toContain("若付款成功後系統未能成功產生完整分析");
     expect(termsCopy).toContain("重複付款");
     expect(termsCopy).toContain("客服僅需付款時間、必要的訂單資訊或錯誤狀況說明");
+    expect(termsCopy).toContain("3–7 個工作天內回覆處理結果");
     expect(termsCopy).toContain("本服務目前以個人小規模測試方式提供，暫未開立統一發票");
     expect(refundCopy).toContain("單次完整報告解鎖價格為 NT$49");
     expect(refundCopy).toContain("一次性數位內容服務");
     expect(refundCopy).toContain("非訂閱制");
+    expect(refundCopy).toContain("金流服務正式通知確認後");
+    expect(refundCopy).toContain("瀏覽器返回付款結果頁不等於付款完成");
     expect(refundCopy).toContain("重複付款");
     expect(refundCopy).toContain("付費結果連結因系統問題無法開啟");
     expect(refundCopy).toContain("不因主觀喜好");
     expect(refundCopy).toContain("3–7 個工作天內回覆處理結果");
+    expect(publicLegalCopy).not.toContain("目前不會真的收費");
+    expect(publicLegalCopy).not.toContain("網頁或 LINE 連結查看完整分析");
+    expect(publicLegalCopy).not.toContain("LINE 連結查看完整分析");
+    expect(publicLegalCopy).not.toContain("傳送完整分析");
+    expect(publicLegalCopy).not.toContain("內測期間");
     expect(termsCopy).not.toContain("checkout");
     expect(refundCopy).not.toContain("checkout");
     expect(termsCopy).not.toContain("NewebPay");

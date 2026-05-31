@@ -26,8 +26,8 @@ export default function LegalIndexPage() {
               這裡整理 ANYU 目前對外公開的退款補發、隱私、使用規則與免責說明。
             </p>
             <div className="anyu-legal-meta">
-              <span>版本 2026-05-27</span>
-              <span>更新日期 2026-05-27</span>
+              <span>版本 2026-05-31</span>
+              <span>更新日期 2026-05-31</span>
               <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
             </div>
           </div>

@@ -7618,3 +7618,22 @@ Unresolved questions:
 - Whether owner prefers Module 02 to move outside romance immediately with `職場暗流雷達` or stay relationship-adjacent with a concept like `答案壓力計`.
 - Whether future Personal Insight Graph should be exposed as a named user-facing feature or remain invisible personalization.
 - Whether NT$49 should remain the default future paid price for Module 02 if it becomes monetized.
+
+## 2026-05-31 - Public Legal Copy Launch Alignment v0
+
+Completed changes:
+- Audited launch-facing legal, refund, support, homepage, result CTA, and payment/access copy for internal-test, no-charge, contact-capture, and LINE-era language.
+- Updated public legal content so Terms/Privacy/Refund/Disclaimer align with NT$49 one-time digital AI report unlock, web delivery after provider notification, and support/refund handling through hello@anyu.tw.
+- Removed launch-facing Terms language that said current payment was internal-test/no-charge and removed LINE paid-delivery promises from public legal copy.
+- Added provider notification / system record payment-truth wording to Terms and Refund copy.
+- Updated legal index and dashboard status to reflect legal/support launch-readiness.
+- Added legal content tests for no-charge/LINE paid-delivery regressions, NT$49 one-time model, provider notification truth, and 3-7 business day handling window.
+
+Learnings:
+- The remaining stale public launch copy was concentrated in `apps/web/src/content/legal.ts`, especially Terms and Privacy contact-channel wording.
+- Legacy ContactCapture and LINE fulfillment code still contain internal-test / LINE-first copy, but they are no longer foregrounded by the main Module 01 paid CTA path.
+- ReturnURL/payment truth language is now consistent across UX and legal/refund copy.
+
+Unresolved questions:
+- Whether invoice/receipt wording should change before production payment launch depending on owner business/tax posture.
+- Whether legacy ContactCapture / LINE-first copy should be removed later or preserved for backward-compatible/internal paths.
