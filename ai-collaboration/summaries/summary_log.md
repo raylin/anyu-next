@@ -7810,3 +7810,21 @@ Learnings:
 Unresolved questions:
 - Whether production should use the same manual Neon SQL method or a verified non-transactional migration runner.
 - Whether to run an approved live staging duplicate-delivery smoke later that intentionally creates test rows.
+
+## 2026-05-31 - Module 01 Checkout CTA Wiring Plan v0
+
+Completed changes:
+- Inspected Module 01 result page, paid CTA view model, `PaidPreviewCard`, checkout route, checkout service, ReturnURL/status/access pages, tests, and sandbox helper.
+- Confirmed result-page CTA copy can render `checkout_available`, but the current `PaidPreviewCard` button remains disabled because no checkout action is passed.
+- Documented the existing NewebPay checkout route contract and provider form response shape.
+- Recommended a dedicated checkout-start page/route for v0 instead of client-side fetch.
+- Updated the dashboard next-task guidance and source links.
+
+Learnings:
+- The result page already has enough data to start checkout: `moduleSlug` and `resultId`.
+- The checkout route currently remains operator-gated while `ENABLE_PAYMENT_RUNTIME=false`; browser UI wiring must not expose `OPERATOR_TEST_SECRET`.
+- A dedicated server-rendered checkout-start page best matches NewebPay form submission and keeps production fail-closed behavior easier to test.
+
+Unresolved questions:
+- Which pre-launch staging UI gate should be approved for operator-only browser checkout before production runtime is enabled.
+- Whether checkout-start should auto-submit to NewebPay immediately or show one explicit confirmation button first.
