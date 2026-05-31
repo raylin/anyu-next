@@ -7655,3 +7655,21 @@ Learnings:
 Unresolved questions:
 - Whether a future task should add a Vercel Preview(staging) env name-only audit/diff command.
 - Whether production controlled-smoke should get a separate launch-gate preflight profile after NewebPay approval.
+
+## 2026-05-31 - Legacy ContactCapture / LINE-era Copy Cleanup v0
+
+Completed changes:
+- Audited ContactCapture, LINE helper copy, LINE bridge/webhook messages, active result paid CTA copy, and related tests/e2e strings for internal-test, no-charge, and LINE paid-delivery language.
+- Reframed ContactCapture from LINE-first complete-analysis delivery to optional LINE/Email notification/support wording.
+- Removed ContactCapture internal-test and no-charge copy.
+- Reframed LINE fulfillment bridge/webhook copy as short-code confirmation for an existing complete analysis page, not launch paid delivery.
+- Updated unit and e2e expectations for the new launch-safe wording.
+
+Learnings:
+- Active Module 01 result paid CTA already avoids ContactCapture; the remaining stale copy lived in legacy/fallback ContactCapture and LINE fulfillment surfaces.
+- Social share copy that mentions LINE / Threads is separate from paid delivery and can remain.
+- LINE infrastructure still exists, but visible copy no longer presents LINE as the paid report delivery promise.
+
+Unresolved questions:
+- Whether owner wants to remove/archive ContactCapture and LINE fulfillment routes later or keep them as legacy/fallback infrastructure.
+- Whether LINE should be reconsidered as a future support/notification feature after production payments stabilize.

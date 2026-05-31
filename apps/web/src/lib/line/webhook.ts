@@ -84,10 +84,10 @@ export async function replyLineText(input: {
 }
 
 export const LINE_WELCOME_MESSAGE =
-  "歡迎來到暗語 ANYU。\n請貼上剛剛頁面上的短碼，我會把完整分析連結送給你。";
+  "歡迎來到暗語 ANYU。\n請貼上剛剛頁面上的短碼，我會協助確認對應的完整分析頁。";
 
 export function buildLineSuccessMessage(url: string) {
-  return `收到，這是你的完整分析連結：\n${url}`;
+  return `收到，這是這組短碼對應的完整分析頁：\n${url}`;
 }
 
 export function buildLinePendingMessage(url: string) {
@@ -95,7 +95,7 @@ export function buildLinePendingMessage(url: string) {
 }
 
 export const LINE_INVALID_CODE_MESSAGE =
-  "我找不到這組短碼。請回到剛剛的結果頁重新產生一次，或改用 Email 接收。";
+  "我找不到這組短碼。請回到剛剛的結果頁重新產生一次，或改用網頁結果頁查看。";
 
 export const LINE_RATE_LIMITED_MESSAGE =
   "短時間內嘗試太多次了。請稍等一下，再回到結果頁重新產生短碼。";

@@ -27,7 +27,7 @@ type BindLiffPayload = {
 export async function POST(request: Request) {
   if (!isDbConfigured()) {
     return NextResponse.json(
-      { ok: false, error: "config_error", message: "LINE 領取服務尚未設定完成。" },
+      { ok: false, error: "config_error", message: "LINE 短碼確認服務尚未設定完成。" },
       { status: 503 },
     );
   }
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
   if (!body.unlockIntentId || !unlockToken || !idToken) {
     return NextResponse.json(
-      { ok: false, error: "invalid_input", message: "缺少 LINE 領取資料。" },
+      { ok: false, error: "invalid_input", message: "缺少 LINE 短碼確認資料。" },
       { status: 400 },
     );
   }

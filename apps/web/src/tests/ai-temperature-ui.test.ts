@@ -438,14 +438,17 @@ describe("ai-temperature UI helpers", () => {
     expect(getLineAddUrl(undefined)).toBeNull();
   });
 
-  it("keeps the line-first fulfillment copy explicit and the email fallback secondary", () => {
-    expect(LINE_PRIMARY_PANEL_TITLE).toBe("用 LINE 領取完整分析");
-    expect(LINE_PRIMARY_BODY).toContain("我們會把完整分析連結送給你");
-    expect(LINE_PRIMARY_CTA).toBe("用 LINE 領取完整分析");
+  it("keeps the legacy LINE copy framed as notification/support, not paid delivery", () => {
+    expect(LINE_PRIMARY_PANEL_TITLE).toBe("用 LINE 接收開放通知");
+    expect(LINE_PRIMARY_BODY).toContain("完整付費報告目前以網頁交付");
+    expect(LINE_PRIMARY_BODY).not.toContain("目前內測");
+    expect(LINE_PRIMARY_BODY).not.toContain("不會真的收費");
+    expect(LINE_PRIMARY_BODY).not.toContain("完整分析連結送給你");
+    expect(LINE_PRIMARY_CTA).toBe("用 LINE 接收通知");
     expect(EMAIL_FALLBACK_LABEL).toBe("改用 Email 接收通知");
     expect(EMAIL_FALLBACK_BODY).toContain("不寄日常電子報");
     expect(MISSING_LINE_URL_MESSAGE).toBe(
-      "LINE 連結暫時還沒準備好，請先改用 Email 接收通知。",
+      "LINE 通知連結暫時還沒準備好，請先改用 Email 接收通知。",
     );
   });
 });

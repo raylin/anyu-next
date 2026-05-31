@@ -5,7 +5,7 @@ test.describe("global LIFF fulfillment bridge", () => {
     await page.goto("/line/fulfill");
 
     await expect(page.getByRole("heading", { name: "正在領取完整分析" })).toBeVisible();
-    await expect(page.getByText("LINE 領取連結缺少有效測驗資料")).toBeVisible();
+    await expect(page.getByText("LINE 短碼連結缺少有效測驗資料")).toBeVisible();
     await expect(page.getByText("請回到結果頁重新產生", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "開始分析" })).toHaveCount(0);
   });
@@ -16,7 +16,7 @@ test.describe("global LIFF fulfillment bridge", () => {
     );
 
     await expect(page.getByRole("heading", { name: "正在領取完整分析" })).toBeVisible();
-    await expect(page.getByText("LINE 領取連結缺少有效測驗資料")).toBeVisible();
+    await expect(page.getByText("LINE 短碼連結缺少有效測驗資料")).toBeVisible();
     await expect(page.getByText("A7K2Q9")).toBeVisible();
     await expect(page.getByRole("button", { name: "開始分析" })).toHaveCount(0);
   });

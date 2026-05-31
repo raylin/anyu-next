@@ -55,7 +55,7 @@ export function LineFulfillBridge({
     getModuleBySlug("ambiguous-temperature");
   const initialTheme = getModuleThemeFromLineFulfillmentContext(initialParams);
   const [state, setState] = useState<BindState>(initialFallbackMessage ? "fallback" : "idle");
-  const [message, setMessage] = useState(initialFallbackMessage ?? "正在準備 LINE 領取流程…");
+  const [message, setMessage] = useState(initialFallbackMessage ?? "正在準備 LINE 短碼確認流程…");
   const [unlockedPath, setUnlockedPath] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<LiffDiagnosticSnapshot | null>(() =>
     buildInitialDiagnostic(initialParams),
@@ -78,7 +78,7 @@ export function LineFulfillBridge({
           lastSafeErrorCode: fallbackMessage ? "invalid_context" : "unsupported_module",
         });
         setState("fallback");
-        setMessage(fallbackMessage ?? "LINE 領取連結缺少有效測驗資料，請回到結果頁重新產生，或改用短碼。");
+        setMessage(fallbackMessage ?? "LINE 短碼連結缺少有效測驗資料，請回到結果頁重新產生，或改用短碼。");
         return;
       }
 
@@ -90,7 +90,7 @@ export function LineFulfillBridge({
           lastSafeErrorCode: "missing_liff_id",
         });
         setState("fallback");
-        setMessage("LINE 自動帶入暫時不可用，請改用短碼。");
+        setMessage("LINE 自動短碼確認暫時不可用，請改用短碼。");
         return;
       }
 
@@ -151,7 +151,7 @@ export function LineFulfillBridge({
             lastSafeErrorCode: !response.ok ? "bind_response_not_ok" : "invalid_redirect_target",
           });
           setState("fallback");
-          setMessage(payload.message ?? "LINE 自動領取失敗，請改用短碼。");
+          setMessage(payload.message ?? "LINE 自動短碼確認失敗，請改用短碼。");
           return;
         }
 
@@ -178,7 +178,7 @@ export function LineFulfillBridge({
             lastSafeErrorCode: "bind_exception",
           });
           setState("fallback");
-          setMessage("LINE 自動領取失敗，請改用短碼。");
+          setMessage("LINE 自動短碼確認失敗，請改用短碼。");
         }
       }
     }
@@ -201,8 +201,8 @@ export function LineFulfillBridge({
         </div>
 
         <Card>
-          <p className="anyu-kicker">LINE 領取</p>
-          <h1 className="anyu-section-title">正在領取完整分析</h1>
+          <p className="anyu-kicker">LINE 短碼確認</p>
+          <h1 className="anyu-section-title">正在確認完整分析頁</h1>
           <p className="anyu-copy">{message}</p>
 
           {state === "success" && unlockedPath ? (
@@ -364,11 +364,11 @@ function getFallbackMessage(params: ReturnType<typeof parseLineFulfillmentContex
   const moduleConfig = getModuleBySlug(params.moduleSlug);
 
   if (!params.moduleSlug || !moduleConfig) {
-    return "LINE 領取連結缺少有效測驗資料，請回到結果頁重新產生，或改用短碼。";
+    return "LINE 短碼連結缺少有效測驗資料，請回到結果頁重新產生，或改用短碼。";
   }
 
   if (!params.unlockIntentId || !params.unlockToken) {
-    return "LINE 自動帶入暫時不可用，請改用短碼。";
+    return "LINE 自動短碼確認暫時不可用，請改用短碼。";
   }
 
   return null;

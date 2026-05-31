@@ -79,10 +79,10 @@ test.describe("module 01 local ui smoke", () => {
     await page.getByRole("button", { name: "看下一句怎麼回" }).click();
 
     await expect(
-      page.getByRole("heading", { name: "用 LINE 領取完整分析" }),
+      page.getByRole("heading", { name: "用 LINE 接收開放通知" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "用 LINE 領取完整分析" }),
+      page.getByRole("heading", { name: "用 LINE 接收開放通知" }),
     ).toHaveCount(1);
     await expect(page.getByRole("button", { name: "解鎖下一句怎麼回 — NT$49" })).toBeVisible();
   });

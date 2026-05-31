@@ -87,7 +87,7 @@ export function ContactCapture({
     event.preventDefault();
 
     if (!onSubmit) {
-      setStatusMessage("這是 demo 路線，目前不會真的送出，但正式流程已預留位置。");
+      setStatusMessage("這個通知表單目前未連接送出流程；若需要協助，請來信 hello@anyu.tw。");
       setErrorMessage("");
       setIsSubmitted(true);
       return;
@@ -119,13 +119,13 @@ export function ContactCapture({
 
   return (
     <Card className="anyu-contact-card">
-      <p className="anyu-kicker">目前內測中</p>
+      <p className="anyu-kicker">通知設定</p>
       <h2 className="anyu-section-title">
         {isSubmitted ? "收到，我們會在開放時通知你。" : LINE_PRIMARY_PANEL_TITLE}
       </h2>
       <p className="anyu-copy">
         {isSubmitted
-          ? "我們會優先用你留下的方式通知完整分析開放或新測驗上線。這次不會真的收費。"
+          ? "我們會優先用你留下的方式通知完整分析開放或新測驗上線。完整付費報告目前以網頁交付。"
           : LINE_PRIMARY_BODY}
       </p>
       <p className="anyu-subtle-note">

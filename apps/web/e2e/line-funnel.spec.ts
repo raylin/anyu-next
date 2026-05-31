@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("module 01 line funnel smoke", () => {
-  test("paid CTA reveals the LINE-first contact panel and Email fallback", async ({ page }) => {
+  test("legacy contact panel frames LINE as notification and Email fallback", async ({ page }) => {
     await page.goto("/m/ambiguous-temperature/result/demo");
 
     await page.getByRole("button", { name: "解鎖下一句怎麼回 — NT$49" }).click();
 
-    const lineButton = page.getByRole("button", { name: "用 LINE 領取完整分析" });
+    const lineButton = page.getByRole("button", { name: "用 LINE 接收通知" });
     await expect(lineButton).toBeVisible();
     await expect(lineButton).toHaveAttribute("data-line-add-url", "https://lin.ee/S6dnbJO");
 
