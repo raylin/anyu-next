@@ -7673,3 +7673,18 @@ Learnings:
 Unresolved questions:
 - Whether owner wants to remove/archive ContactCapture and LINE fulfillment routes later or keep them as legacy/fallback infrastructure.
 - Whether LINE should be reconsidered as a future support/notification feature after production payments stabilize.
+
+## 2026-05-31 - Legacy ContactCapture / LINE-era Copy Cleanup v0 Verification
+
+Completed changes:
+- Re-ran the ContactCapture / LINE-era copy audit after the cleanup task was repeated.
+- Confirmed the prior cleanup at `7d1c51b` remains in place and no additional source copy edits were needed.
+- Added a verification handoff and execution report.
+
+Learnings:
+- `ContactCapture` is not imported by the active Module 01 result paid CTA path.
+- Remaining LINE references are notification/support, short-code confirmation, legal future-channel notes, social sharing, tests, or historical docs.
+- Active launch-facing paid report copy remains web-based and does not promise LINE delivery.
+
+Unresolved questions:
+- Whether to keep legacy ContactCapture / LINE fulfillment infrastructure as fallback/internal surfaces or schedule a later deprecation/removal task.
