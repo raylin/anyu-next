@@ -8118,3 +8118,26 @@ Unresolved questions:
 - Preview(staging) recovery secret presence still needs verification before live Email-save QA.
 - LINE recovery binding needs a recovery-specific LIFF state design instead of reusing legacy unlock state directly.
 - It remains open whether checkout-start marketing opt-in should stay here or move later to completed paid result.
+
+## 2026-06-01 Checkout-Start Recovery Soft Gate Staging QA v0
+
+### Completed Changes
+
+- saved the Checkout-Start Recovery Soft Gate Staging QA v0 handoff and report
+- confirmed staging is serving commit `61626dd5f692` on Preview(`staging`)
+- verified checkout-start recovery soft gate, Email-first UI, deferred LINE option, separate marketing opt-in, and skip acknowledgement render on staging
+- verified Email save fails safely when Preview(`staging`) recovery secrets are missing and does not create a recovery contact row
+- ran `qa:result-checkout:no-card`; result-page CTA, checkout-start recovery gate signals, operator fake-paid, queue, paid access render, and production fail-closed checks passed
+- confirmed production DB does not have `payment_recovery_contacts`
+
+### Learnings
+
+- Preview(`staging`) has `OPERATOR_TEST_SECRET` but lacks both recovery contact hash/encryption secrets.
+- The soft gate itself is deployed and visible; the remaining blocker is env readiness for Email row creation.
+- No-card QA can continue validating the skip/checkout path even while Email save is blocked by missing recovery secrets.
+
+### Unresolved Questions
+
+- Should recovery secrets be branch-scoped Preview(`staging`) only, or also configured for general Preview?
+- Should checkout-start marketing opt-in remain before payment or move later to paid-ready/completed result?
+- Email-save DB assertion needs rerun after recovery env alignment.
