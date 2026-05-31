@@ -15,11 +15,14 @@ Run staging sandbox QA through the real Module 01 result-page paid CTA path: res
 - Production remains disabled and fail-closed.
 - NewebPay sandbox E2E v5 passed through helper/operator flow, but result-page CTA UI path has not been smoke-tested.
 - Staging unique index for `entitlements(payment_intent_id)` is applied.
+- ReturnURL polling UX polish has since been implemented and pushed at `03b408e`.
 
 ## Relevant Files
 
 - `apps/web/src/app/m/[moduleSlug]/result/[resultId]/checkout/page.tsx`
 - `apps/web/src/app/m/[moduleSlug]/result/[resultId]/page.tsx`
+- `apps/web/src/app/m/[moduleSlug]/payment/return/page.tsx`
+- `apps/web/src/components/modules/ai-temperature/PaymentReturnPoller.tsx`
 - `apps/web/src/components/anyu/PaidPreviewCard.tsx`
 - `apps/web/scripts/newebpay-sandbox-e2e-helper.mjs`
 - `ai-collaboration/reports/`
@@ -45,7 +48,14 @@ Run staging sandbox QA through the real Module 01 result-page paid CTA path: res
 7. After confirmation, poll status/access and verify backend delivery/queue evidence.
 8. Record sanitized report, update summary/dashboard if status changes, validate docs, commit, and push.
 
+## Continuation Notes
+
+- Current run should verify staging deployment at `03b408e` or newer.
+- If the in-app browser is unavailable, use sanitized CLI HTTP checks for result/checkout-start and pause for owner browser payment.
+- Backend verification should use only sanitized state categories and booleans.
+- If local env DB target is not clearly staging app schema, do not use it for conclusions; use a verified Neon Preview(staging) branch instead.
+
 ## Uncertainties
 
-- Whether Preview(staging) deployment has completed for commit `31fdbe8`.
 - Whether owner can complete the manual sandbox payment during this run.
+- Whether Vercel request logs will expose provider NotifyURL/queue callback routes; database state may be needed for backend verification.

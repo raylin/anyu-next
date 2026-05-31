@@ -7888,3 +7888,25 @@ Unresolved questions:
 - Full Result-Page Checkout Staging Sandbox QA through the real CTA path is still pending.
 - Checkout-start visual bridge polish remains a separate follow-up.
 - The broader payment shell / module accent system should wait for Claude Design direction.
+
+## 2026-05-31 - Result-Page Checkout Staging Sandbox QA v0
+
+Completed changes:
+- Ran staging QA through the real Module 01 result-page paid CTA path.
+- Created a fresh normal staging result and verified the result page showed `解鎖完整報告｜NT$49` with a checkout-start link.
+- Verified checkout-start rendered HTTP 200, NT$49, non-subscription copy, web delivery copy, explicit NewebPay button, and sandbox ccore provider form without exposing operator/provider secrets.
+- Owner completed sandbox credit-card one-time payment and returned to staging.
+- Verified staging backend state: payment intent paid, NotifyURL received, active entitlement, paid access hash present, `newebpay_notify` generation job completed, and paid result completed.
+- Verified Vercel logs showed status polling and payment access HTTP 200 responses.
+- Confirmed production checkout/fake-paid routes remain JSON 404/not_found and public legal/refund pages remain live.
+- Updated the dashboard to mark result-page checkout staging QA passed.
+
+Learnings:
+- The real user-facing CTA path now reaches the same paid-ready/access outcome as the earlier helper/operator sandbox flow.
+- ReturnURL polling produced repeated status requests and then payment access requests without needing manual processor fallback.
+- Local `.env.local` `DATABASE_URL` did not target the same staging app schema, so Neon branch `preview` was used for sanitized backend verification.
+
+Unresolved questions:
+- Vercel request logs did not surface the provider NotifyURL or queue callback paths in the queried window, even though database state confirms NotifyURL receipt and completed generation.
+- Entitlement `generation_job_id` remained unset even though the generation job completed; decide later whether this should be linked/backfilled.
+- Checkout-start visual bridge polish remains pending.
