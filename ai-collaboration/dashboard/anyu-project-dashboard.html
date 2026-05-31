@@ -331,8 +331,8 @@
       <h1>暗語 ANYU / anyu-next</h1>
       <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed after the TradeInfo padding fix; NewebPay merchant review remains the external gate. Core Engine / Module Grammar v0 now defines how future modules should connect to reusable interactions, skills, traits, artifacts, and cross-links.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-05-31 08:01 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Sandbox E2E passed; legal copy launch-aligned</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-05-31 08:09 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Sandbox E2E passed; QA env preflight added</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Merchant approval / Module 02 concept decision</span></div>
       </div>
@@ -465,8 +465,9 @@
       <h2>QA Tooling</h2>
       <div class="panel">
         <p><strong>Sandbox helper:</strong> <code>corepack pnpm run qa:newebpay:sandbox -- create-checkout</code> creates a fresh staging sandbox checkout and writes the provider form outside the repo under <code>/private/tmp/anyu-newebpay-smoke/</code>.</p>
+        <p><strong>Env preflight:</strong> <code>corepack pnpm run qa:env:preflight -- fake_paid_queue</code> and related modes check local QA readiness by env name presence only before running staging smoke commands.</p>
         <p><strong>Verification:</strong> <code>poll-status</code> and <code>verify-after-payment</code> read local state from the temporary directory and print only sanitized status categories and booleans.</p>
-        <p><strong>Safety:</strong> helper output must not include provider secrets, TradeInfo, TradeSha, raw pcs_/pa_ tokens, tokenized URLs, raw input, or card data.</p>
+        <p><strong>Safety:</strong> helper and preflight output must not include provider secrets, TradeInfo, TradeSha, raw pcs_/pa_ tokens, tokenized URLs, raw input, card data, env values, lengths, prefixes, suffixes, hashes, or checksums.</p>
       </div>
     </section>
 

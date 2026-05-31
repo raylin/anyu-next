@@ -19,6 +19,7 @@
     "db:migrate": "drizzle-kit migrate",
     "brand:export": "node scripts/export-brand-assets.mjs",
     "module01:metrics": "node scripts/module-01-funnel-report.mjs",
+    "qa:env:preflight": "node scripts/qa-env-preflight.mjs",
     "qa:fake-paid": "node scripts/authorized-fake-paid-qa.mjs",
     "qa:newebpay:sandbox": "node scripts/newebpay-sandbox-e2e-helper.mjs"
   },

@@ -7637,3 +7637,21 @@ Learnings:
 Unresolved questions:
 - Whether invoice/receipt wording should change before production payment launch depending on owner business/tax posture.
 - Whether legacy ContactCapture / LINE-first copy should be removed later or preserved for backward-compatible/internal paths.
+
+## 2026-05-31 - Env Readiness / Local QA Bootstrap v0
+
+Completed changes:
+- Added `apps/web/scripts/qa-env-preflight.mjs`, a secret-safe presence-only preflight for local QA and staging smoke workflows.
+- Added package script `qa:env:preflight` with modes for fake-paid QA, queue-mode fake-paid QA, NewebPay sandbox checkout, sandbox verification, manual fallback, Vercel env alignment preflight, and all-mode summary.
+- Updated `apps/web/.env.example` with QA/payment/queue env names only and blank values.
+- Documented a local QA env matrix covering required local shell env, optional env, Preview(staging) counterpart names, match expectations, production cautions, and safe blocked behavior.
+- Updated the dashboard QA tooling section to include the new preflight command.
+
+Learnings:
+- Existing QA scripts use `process.env`; `.env.local` key presence alone does not make a QA command ready unless the shell exports the values or the runner loads them.
+- The preflight can safely read `.env.local` key names without printing values, lengths, prefixes, suffixes, hashes, or checksums.
+- Preview(staging) branch-scoped env remains the authoritative staging QA source and can diverge from local secure config without an explicit alignment workflow.
+
+Unresolved questions:
+- Whether a future task should add a Vercel Preview(staging) env name-only audit/diff command.
+- Whether production controlled-smoke should get a separate launch-gate preflight profile after NewebPay approval.
