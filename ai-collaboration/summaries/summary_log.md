@@ -7968,3 +7968,22 @@ Unresolved questions:
 - Whether owner wants to prioritize no-card QA before Module 02 concept work.
 - Whether ReturnURL visual continuity should be polished before or after the no-card QA script.
 - Full Payment Shell + Module Accent implementation remains intentionally deferred.
+
+## 2026-05-31 - Result-Page Checkout No-Card QA Bypass v0
+
+Completed changes:
+- Added `qa:result-checkout:no-card` for script-driven staging/operator no-card QA.
+- Added helper functions for safe target validation, result/checkout HTML summarization, route redaction, and token-like output blocking.
+- Added `result_checkout_no_card` support to `qa:env:preflight`.
+- Added safe blank no-card QA env names to `apps/web/.env.example`.
+- Added tests for production target rejection, result-page CTA parsing, checkout-start summary checks, route redaction, and unsafe token-like output blocking.
+- Ran the no-card QA path against Preview(staging); it passed through fresh result creation, result-page CTA, checkout-start, operator fake-paid success, Vercel Queue completion, paid access render, and production fail-closed checks.
+
+Learnings:
+- The no-card QA path is useful for repeated UI/downstream confidence but does not replace sandbox card E2E because operator fake-paid creates an `operator_fake` payment intent rather than mutating the NewebPay checkout intent.
+- The first staging run exposed a raw result ID in a sanitized path shape; route redaction was tightened before the final successful run.
+- `QA_NO_CARD_DISABLE_LOCAL_ENV=1` gives a reliable CI-like missing-secret dry run even when `.env.local` exists.
+
+Unresolved questions:
+- Whether to run ReturnURL Visual Continuity Polish v0 next.
+- Whether to move into Module 02 Concept Spec now that no-card payment QA exists.

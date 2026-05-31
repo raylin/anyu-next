@@ -329,10 +329,10 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through both helper/operator and real result-page CTA paths; NewebPay merchant review remains the external gate. Checkout-start now has a Direction C-inspired ANYU payment bridge that passed staging HTML smoke, and ReturnURL has launch-safe polling UX while staying non-mutating. Core Engine / Module Grammar v0 defines how future modules should connect to reusable interactions, skills, traits, artifacts, and cross-links.</p>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant review remains the external gate. Checkout-start now has a Direction C-inspired ANYU payment bridge that passed staging HTML smoke, and ReturnURL has launch-safe polling UX while staying non-mutating. Core Engine / Module Grammar v0 defines how future modules should connect to reusable interactions, skills, traits, artifacts, and cross-links.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-05-31 21:32 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Checkout-start visual bridge staging smoke passed</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-05-31 22:20 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">No-card result checkout QA passed</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Merchant approval / Module 02 concept decision</span></div>
       </div>
@@ -466,6 +466,7 @@
       <div class="panel">
         <p><strong>Sandbox helper:</strong> <code>corepack pnpm run qa:newebpay:sandbox -- create-checkout</code> creates a fresh staging sandbox checkout and writes the provider form outside the repo under <code>/private/tmp/anyu-newebpay-smoke/</code>.</p>
         <p><strong>Env preflight:</strong> <code>corepack pnpm run qa:env:preflight -- fake_paid_queue</code> and related modes check local QA readiness by env name presence only before running staging smoke commands.</p>
+        <p><strong>No-card result checkout QA:</strong> <code>corepack pnpm run qa:result-checkout:no-card</code> validates result page CTA, checkout-start, operator fake-paid downstream delivery, queue completion, paid access render, and production fail-closed behavior without submitting provider payment.</p>
         <p><strong>Local env autoload:</strong> QA scripts load <code>apps/web/.env.local</code> when shell env is absent. Exported shell env wins over local file values; values are never printed.</p>
         <p><strong>Verification:</strong> <code>poll-status</code> and <code>verify-after-payment</code> read local state from the temporary directory and print only sanitized status categories and booleans.</p>
         <p><strong>Safety:</strong> helper and preflight output must not include provider secrets, TradeInfo, TradeSha, raw pcs_/pa_ tokens, tokenized URLs, raw input, card data, env values, lengths, prefixes, suffixes, hashes, or checksums.</p>
@@ -518,7 +519,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation while approval is pending:</strong> run Result-Page Checkout No-Card QA Bypass v0 if launch confidence is the priority, or Module 02 Concept Spec: 職場暗流雷達 v0 if product exploration is the priority.</p>
+        <p><strong>Current recommendation while approval is pending:</strong> run ReturnURL Visual Continuity Polish v0 if launch confidence is still the priority, or Module 02 Concept Spec: 職場暗流雷達 v0 if product exploration is the priority.</p>
         <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production runtime should remain disabled until the launch gate sequence is explicitly approved.</p>
         <p>If NewebPay merchant review approval/formal credentials are available, switch back to Production Payment Config Dry-Run v0 with runtime still disabled; do not jump directly to public checkout.</p>
       </div>
@@ -558,6 +559,7 @@
           <li><a href="../reports/2026-05-31-checkout-start-visual-bridge-polish-v0.md">Checkout-Start Visual Bridge Polish v0</a></li>
           <li><a href="../reports/2026-05-31-checkout-start-visual-bridge-staging-smoke-v0.md">Checkout-Start Visual Bridge Staging Smoke v0</a></li>
           <li><a href="../reports/2026-05-31-module-01-payment-bridge-gap-closure-plan-v0.md">Module 01 Payment Bridge Gap Closure Plan v0</a></li>
+          <li><a href="../reports/2026-05-31-result-page-checkout-no-card-qa-bypass-v0.md">Result-Page Checkout No-Card QA Bypass v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>
