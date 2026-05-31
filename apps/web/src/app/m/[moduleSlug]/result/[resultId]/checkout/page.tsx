@@ -8,6 +8,7 @@ import { Wordmark } from "@/components/anyu/Wordmark";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 import { isDbConfigured } from "@/lib/db/client";
+import { getPaymentRecoveryContactsByResultId } from "@/lib/db/payment-recovery-contacts";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import { createNewebPayCheckout } from "@/lib/payments/newebpay/checkout-service";
@@ -19,6 +20,9 @@ type CheckoutStartPageProps = {
   params: Promise<{
     moduleSlug: string;
     resultId: string;
+  }>;
+  searchParams?: Promise<{
+    recovery?: string;
   }>;
 };
 
@@ -120,6 +124,127 @@ function CheckoutTrustBridge() {
   );
 }
 
+async function getExistingRecoveryState(resultId: string) {
+  try {
+    const contacts = await getPaymentRecoveryContactsByResultId(resultId);
+    const activeContacts = contacts.filter((contact) => contact.status !== "revoked");
+
+    return {
+      hasEmail: activeContacts.some((contact) => contact.contactType === "email"),
+      hasLine: activeContacts.some((contact) => contact.contactType === "line"),
+      hasAny: activeContacts.length > 0,
+    };
+  } catch {
+    return {
+      hasEmail: false,
+      hasLine: false,
+      hasAny: false,
+    };
+  }
+}
+
+function RecoverySoftGate({
+  moduleSlug,
+  resultId,
+  paymentIntentId,
+  recovery,
+  existingRecovery,
+}: {
+  moduleSlug: string;
+  resultId: string;
+  paymentIntentId: string;
+  recovery?: string;
+  existingRecovery: Awaited<ReturnType<typeof getExistingRecoveryState>>;
+}) {
+  const emailSaved = recovery === "email_saved" || existingRecovery.hasEmail;
+  const emailError = recovery === "email_error";
+  const savedLabel = emailSaved
+    ? "已保存到 Email"
+    : existingRecovery.hasLine
+      ? "已保存到 LINE"
+      : null;
+
+  return (
+    <div className="anyu-recovery-soft-gate" aria-labelledby="payment-recovery-title">
+      <div className="anyu-recovery-soft-gate-header">
+        <div>
+          <p className="anyu-kicker t-label-dim">result recovery</p>
+          <h2 id="payment-recovery-title" className="anyu-recovery-title">
+            建議先保存這次完整報告
+          </h2>
+        </div>
+        {savedLabel ? <span className="anyu-recovery-saved-badge">{savedLabel}</span> : null}
+      </div>
+      <p className="anyu-copy">
+        完整報告仍會在網頁中提供查看。保存一個找回方式，可以降低你關閉頁面、更換裝置或清除瀏覽資料後需要客服協助的機率。
+      </p>
+
+      <div className="anyu-recovery-options">
+        <form
+          method="post"
+          action={`/api/modules/${encodeURIComponent(moduleSlug)}/result/${encodeURIComponent(
+            resultId,
+          )}/recovery/email`}
+          className="anyu-recovery-email-form"
+        >
+          <input type="hidden" name="paymentIntentId" value={paymentIntentId} />
+          <label className="anyu-recovery-label" htmlFor="recovery-email">
+            Email 找回
+          </label>
+          <div className="anyu-recovery-email-row">
+            <input
+              id="recovery-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              className="anyu-recovery-input"
+              aria-describedby="recovery-email-help"
+              required
+            />
+            <Button type="submit">保存</Button>
+          </div>
+          <p id="recovery-email-help" className="anyu-subtle-note">
+            v0 不會寄送 Email；只會保存為這次完整報告的找回資料。Email 不會顯示在頁面或報告中。
+          </p>
+          <label className="anyu-recovery-checkbox">
+            <input type="checkbox" name="marketingOptIn" value="1" />
+            <span>也想收到新測驗、早鳥或限時解鎖通知</span>
+          </label>
+          {emailError ? (
+            <p className="anyu-recovery-error" role="status">
+              Email 保存暫時失敗，但你仍可繼續付款；若之後找不到完整報告，請聯絡客服協助。
+            </p>
+          ) : null}
+        </form>
+
+        <div className="anyu-recovery-line-option" aria-label="LINE 找回選項">
+          <div>
+            <p className="anyu-recovery-label">LINE 找回</p>
+            <p className="anyu-subtle-note">
+              LINE 之後會作為找回、完成通知與客服輔助，不是完整報告的交付管道。v0 先以 Email 保存為主。
+            </p>
+          </div>
+          <span className="anyu-recovery-soon-badge">稍後支援</span>
+        </div>
+      </div>
+
+      {existingRecovery.hasAny || emailSaved ? (
+        <p className="anyu-recovery-confirmation" role="status">
+          已保存找回方式。你可以繼續前往藍新安全付款頁。
+        </p>
+      ) : (
+        <div className="anyu-recovery-skip-warning">
+          <p className="anyu-kicker t-label-dim">skip allowed</p>
+          <p>
+            你仍然可以繼續付款。但若未保存，關閉頁面、更換裝置或清除瀏覽資料後，可能需要透過客服協助找回完整報告。
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CheckoutUnavailable({
   moduleConfig,
   title = "完整報告即將開放",
@@ -153,8 +278,9 @@ function CheckoutUnavailable({
   );
 }
 
-export default async function CheckoutStartPage({ params }: CheckoutStartPageProps) {
+export default async function CheckoutStartPage({ params, searchParams }: CheckoutStartPageProps) {
   const { moduleSlug, resultId } = await params;
+  const query = await searchParams;
   const moduleConfig = getModuleBySlug(moduleSlug);
 
   if (!moduleConfig) {
@@ -199,6 +325,8 @@ export default async function CheckoutStartPage({ params }: CheckoutStartPagePro
   }
 
   const { checkoutContract } = checkout;
+  const existingRecovery = await getExistingRecoveryState(resultId);
+  const recoverySaved = query?.recovery === "email_saved" || existingRecovery.hasAny;
 
   return (
     <CheckoutBridgeShell moduleConfig={moduleConfig} resultId={resultId}>
@@ -216,6 +344,13 @@ export default async function CheckoutStartPage({ params }: CheckoutStartPagePro
         </div>
 
         <OrderSummary moduleConfig={moduleConfig} />
+        <RecoverySoftGate
+          moduleSlug={moduleConfig.slug}
+          resultId={resultId}
+          paymentIntentId={checkout.paymentIntent.id}
+          recovery={query?.recovery}
+          existingRecovery={existingRecovery}
+        />
         <CheckoutTrustBridge />
 
         <div className="anyu-paid-policy-panel">
@@ -233,6 +368,12 @@ export default async function CheckoutStartPage({ params }: CheckoutStartPagePro
           {Object.entries(checkoutContract.fields).map(([name, value]) => (
             <input key={name} type="hidden" name={name} value={value} />
           ))}
+          {recoverySaved ? null : (
+            <label className="anyu-recovery-provider-ack">
+              <input type="checkbox" required />
+              <span>我了解尚未保存找回方式，仍要繼續付款。</span>
+            </label>
+          )}
           <Button type="submit" className="anyu-button-block">
             前往藍新安全付款頁
           </Button>

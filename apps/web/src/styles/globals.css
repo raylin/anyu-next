@@ -1147,13 +1147,139 @@ textarea {
 }
 
 .anyu-checkout-order-summary,
-.anyu-checkout-trust-bridge {
+.anyu-checkout-trust-bridge,
+.anyu-recovery-soft-gate {
   display: grid;
   gap: var(--anyu-space-3);
   padding: 0.95rem;
   border: 1px solid var(--anyu-line);
   border-radius: var(--anyu-radius-lg);
   background: color-mix(in srgb, var(--anyu-card) 72%, var(--anyu-bg));
+}
+
+.anyu-recovery-soft-gate-header,
+.anyu-recovery-email-row,
+.anyu-recovery-line-option,
+.anyu-recovery-provider-ack {
+  display: flex;
+  align-items: center;
+  gap: var(--anyu-space-2);
+}
+
+.anyu-recovery-soft-gate-header,
+.anyu-recovery-line-option {
+  justify-content: space-between;
+}
+
+.anyu-recovery-title {
+  margin: 0;
+  color: var(--anyu-ink);
+  font-size: var(--anyu-type-body-size);
+  line-height: var(--anyu-type-body-lh);
+}
+
+.anyu-recovery-saved-badge,
+.anyu-recovery-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.8rem;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: 999px;
+  background: var(--anyu-accent2-15);
+  color: var(--anyu-ink);
+  font-family: var(--anyu-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: var(--anyu-track-mono);
+  white-space: nowrap;
+}
+
+.anyu-recovery-options {
+  display: grid;
+  gap: var(--anyu-space-2);
+}
+
+.anyu-recovery-email-form,
+.anyu-recovery-line-option,
+.anyu-recovery-skip-warning,
+.anyu-recovery-confirmation {
+  padding: 0.8rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: var(--anyu-radius-lg);
+  background: color-mix(in srgb, var(--anyu-card) 78%, var(--anyu-bg));
+}
+
+.anyu-recovery-email-form {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.anyu-recovery-label {
+  margin: 0;
+  color: var(--anyu-ink);
+  font-size: var(--anyu-type-caption-size);
+  font-weight: 700;
+  line-height: var(--anyu-type-caption-lh);
+}
+
+.anyu-recovery-email-row {
+  align-items: stretch;
+}
+
+.anyu-recovery-input {
+  min-width: 0;
+  width: 100%;
+  min-height: 2.65rem;
+  padding: 0.72rem 0.8rem;
+  border: 1px solid var(--anyu-line);
+  border-radius: var(--anyu-radius-lg);
+  background: var(--anyu-surface);
+  color: var(--anyu-ink);
+  font: inherit;
+}
+
+.anyu-recovery-checkbox,
+.anyu-recovery-provider-ack {
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
+}
+
+.anyu-recovery-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.anyu-recovery-error,
+.anyu-recovery-confirmation,
+.anyu-recovery-skip-warning p {
+  margin: 0;
+  color: var(--anyu-dim);
+  font-size: var(--anyu-type-caption-size);
+  line-height: var(--anyu-type-caption-lh);
+}
+
+.anyu-recovery-confirmation {
+  border-color: color-mix(in srgb, var(--anyu-accent2) 58%, var(--anyu-line));
+  background: var(--anyu-accent2-15);
+  color: var(--anyu-ink);
+}
+
+.anyu-recovery-error,
+.anyu-recovery-skip-warning {
+  border-color: color-mix(in srgb, var(--anyu-accent) 42%, var(--anyu-line));
+  background: color-mix(in srgb, var(--anyu-accent) 8%, var(--anyu-card));
+}
+
+.anyu-recovery-provider-ack {
+  align-items: flex-start;
+  margin: 0 0 var(--anyu-space-2);
+  padding: 0.7rem;
+  border: 1px dashed var(--anyu-line);
+  border-radius: var(--anyu-radius-lg);
+  background: color-mix(in srgb, var(--anyu-card) 80%, var(--anyu-bg));
 }
 
 .anyu-checkout-order-title {
@@ -2331,7 +2457,8 @@ textarea {
 
 .anyu-v2 .anyu-checkout-step,
 .anyu-v2 .anyu-checkout-order-summary,
-.anyu-v2 .anyu-checkout-trust-bridge {
+.anyu-v2 .anyu-checkout-trust-bridge,
+.anyu-v2 .anyu-recovery-soft-gate {
   border: var(--anyu-border-base) solid var(--anyu-line);
   border-radius: var(--anyu-radius-sm);
   background: var(--anyu-card);
@@ -2362,6 +2489,24 @@ textarea {
 .anyu-v2 .anyu-checkout-order-total dd {
   color: var(--anyu-accent);
   text-shadow: 2px 2px 0 var(--anyu-accent2);
+}
+
+.anyu-v2 .anyu-recovery-email-form,
+.anyu-v2 .anyu-recovery-line-option,
+.anyu-v2 .anyu-recovery-skip-warning,
+.anyu-v2 .anyu-recovery-confirmation,
+.anyu-v2 .anyu-recovery-provider-ack,
+.anyu-v2 .anyu-recovery-input {
+  border: var(--anyu-border-base) solid var(--anyu-line);
+  border-radius: var(--anyu-radius-sm);
+  box-shadow: 2px 2px 0 var(--anyu-line);
+}
+
+.anyu-v2 .anyu-recovery-saved-badge,
+.anyu-v2 .anyu-recovery-soon-badge {
+  border: var(--anyu-border-base) solid var(--anyu-line);
+  border-radius: var(--anyu-radius-sm);
+  box-shadow: 1px 1px 0 var(--anyu-line);
 }
 
 .anyu-v2 .anyu-reply-card-open {

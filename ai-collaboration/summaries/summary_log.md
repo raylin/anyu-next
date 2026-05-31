@@ -8094,3 +8094,27 @@ Unresolved questions:
 - Production DB apply remains gated.
 - Checkout-start recovery soft gate UX is not implemented yet.
 - A future decision is needed on whether to add DB CHECK constraints for recovery contact enum-like fields.
+
+## 2026-06-01 Checkout-Start Recovery Soft Gate UX v0
+
+### Completed Changes
+
+- saved the Checkout-Start Recovery Soft Gate UX v0 handoff and report
+- added checkout-start recovery soft gate UI before NewebPay provider handoff
+- added Email recovery capture endpoint at `/api/modules/[moduleSlug]/result/[resultId]/recovery/email`
+- linked Email recovery contacts to module, result, and checkout-created payment intent
+- kept marketing opt-in separate from transactional recovery consent
+- deferred LINE recovery binding and framed LINE as future recovery/completion/support assistance, not paid report delivery
+- updated no-card QA helper checks to require recovery soft gate signals on checkout-start
+
+### Learnings
+
+- Checkout-start already creates/reuses the payment intent before rendering the provider form, so recovery contacts can be linked to payment intent without changing provider behavior.
+- A no-name required checkbox can enforce skip acknowledgement in the browser without adding extra fields to the NewebPay provider POST.
+- Live staging Email-save QA needs the deployed commit plus recovery hash/encryption secrets in Preview(staging).
+
+### Unresolved Questions
+
+- Preview(staging) recovery secret presence still needs verification before live Email-save QA.
+- LINE recovery binding needs a recovery-specific LIFF state design instead of reusing legacy unlock state directly.
+- It remains open whether checkout-start marketing opt-in should stay here or move later to completed paid result.

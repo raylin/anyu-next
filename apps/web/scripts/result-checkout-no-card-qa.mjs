@@ -159,6 +159,10 @@ async function verifyCheckoutStart(checkoutHref) {
     summary.newebpayTrustPresent &&
     summary.providerNotificationTruthPresent &&
     summary.webDeliveryPresent &&
+    summary.recoverySoftGatePresent &&
+    summary.recoveryEmailPrimaryPresent &&
+    summary.recoveryLineDeferredPresent &&
+    summary.recoverySkipWarningPresent &&
     summary.supportRefundPresent &&
     summary.submitButtonPresent &&
     summary.sandboxCcoreTargetPresent &&
