@@ -152,6 +152,23 @@ describe("ai-temperature result conversion polish", () => {
     expect(html).not.toContain("LINE 連結交付");
   });
 
+  it("can render checkout-available CTA as a checkout-start link", () => {
+    const html = renderToStaticMarkup(
+      <PaidPreviewCard
+        headline={resultFixture.paidHeadline}
+        price={resultFixture.paidPrice}
+        includedSections={resultFixture.paidIncludedSections}
+        previewCopy={resultFixture.paidPreviewCopy}
+        availability="checkout_available"
+        primaryHref="/m/ambiguous-temperature/result/result-1/checkout"
+      />,
+    );
+
+    expect(html).toContain('href="/m/ambiguous-temperature/result/result-1/checkout"');
+    expect(html).toContain("解鎖完整報告｜NT$49");
+    expect(html).not.toContain("完整報告即將開放");
+  });
+
   it("applies the editorial reading class only to long-form result surfaces", () => {
     const html = renderToStaticMarkup(
       <AiTemperatureResult

@@ -7828,3 +7828,23 @@ Learnings:
 Unresolved questions:
 - Which pre-launch staging UI gate should be approved for operator-only browser checkout before production runtime is enabled.
 - Whether checkout-start should auto-submit to NewebPay immediately or show one explicit confirmation button first.
+
+## 2026-05-31 - Module 01 Checkout CTA Wiring Implementation v0
+
+Completed changes:
+- Added server-rendered checkout-start page at `/m/[moduleSlug]/result/[resultId]/checkout`.
+- Added checkout gate helpers so result-page checkout can start through production runtime gates or a narrow Preview(`staging`) server-side operator gate.
+- Wired runtime result-page paid CTA to the checkout-start page when checkout is available.
+- Kept review-pending/payment-unavailable CTA disabled.
+- Rendered explicit NewebPay submit form with one user click instead of auto-submit.
+- Added tests for gate behavior, CTA link rendering, checkout-start page rendering, and secret/provider safety boundaries.
+- Confirmed production checkout and fake-paid routes remain JSON `not_found`.
+
+Learnings:
+- The result page already had enough state to create checkout safely: `moduleSlug` and `resultId`.
+- Server-rendered checkout-start avoids exposing `OPERATOR_TEST_SECRET` to browser code.
+- The checkout service still creates only `payment_intent` + `pcs_` session before NotifyURL; entitlement/job/queue remain post-payment only.
+
+Unresolved questions:
+- Full staging browser checkout smoke through the result-page CTA still needs to run.
+- Production launch remains blocked by external NewebPay approval, production config dry-run, production DB unique-index gate, and controlled production smoke.

@@ -28,6 +28,7 @@ type AiTemperatureResultProps = {
   mode: "demo" | "runtime";
   resultId: string;
   paidCtaAvailability?: PaidCtaAvailability;
+  checkoutHref?: string;
 };
 
 export function AiTemperatureResult({
@@ -36,6 +37,7 @@ export function AiTemperatureResult({
   mode,
   resultId,
   paidCtaAvailability = "review_pending",
+  checkoutHref,
 }: AiTemperatureResultProps) {
   const hasTrackedPageView = useRef(false);
   const paidPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -226,6 +228,7 @@ export function AiTemperatureResult({
           includedSections={result.paidIncludedSections}
           previewCopy={result.paidPreviewCopy}
           availability={paidCtaAvailability}
+          primaryHref={checkoutHref}
         />
       </div>
 

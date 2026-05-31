@@ -11,8 +11,7 @@ import {
 } from "@/lib/modules/ai-temperature-ui";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import {
-  isNewebPayCheckoutEnabled,
-  isPaymentRuntimeEnabled,
+  canStartNewebPayCheckoutFromResult,
 } from "@/lib/runtime/feature-flags";
 
 type ResultPageProps = {
@@ -81,10 +80,10 @@ export default async function ResultPage({ params }: ResultPageProps) {
   }
 
   const normalizedResult = normalizeProductResultForDisplay(record.normalizedResultJson);
-  const paidCtaAvailability =
-    isPaymentRuntimeEnabled() && isNewebPayCheckoutEnabled()
-      ? "checkout_available"
-      : "review_pending";
+  const checkoutStartPath = `/m/${moduleConfig.slug}/result/${record.id}/checkout`;
+  const paidCtaAvailability = canStartNewebPayCheckoutFromResult()
+    ? "checkout_available"
+    : "review_pending";
 
   return (
     <main className="anyu-shell">
@@ -94,6 +93,7 @@ export default async function ResultPage({ params }: ResultPageProps) {
         mode="runtime"
         resultId={record.id}
         paidCtaAvailability={paidCtaAvailability}
+        checkoutHref={paidCtaAvailability === "checkout_available" ? checkoutStartPath : undefined}
       />
     </main>
   );

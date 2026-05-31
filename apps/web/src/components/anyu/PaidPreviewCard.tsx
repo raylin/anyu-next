@@ -17,6 +17,7 @@ type PaidPreviewCardProps = {
   previewCopy: string;
   availability?: PaidCtaAvailability;
   onRevealContact?: () => Promise<{ ok: boolean; message?: string }>;
+  primaryHref?: string;
 };
 
 export function PaidPreviewCard({
@@ -26,6 +27,7 @@ export function PaidPreviewCard({
   previewCopy,
   availability = "review_pending",
   onRevealContact,
+  primaryHref,
 }: PaidPreviewCardProps) {
   const [revealed, setRevealed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,7 +73,8 @@ export function PaidPreviewCard({
     `客服會在 3–7 個工作天內回覆處理結果。`,
   ] as const;
   const viewModel = buildPaidCtaViewModel({ availability, price });
-  const primaryActionEnabled = viewModel.primaryEnabled && Boolean(onRevealContact);
+  const primaryActionEnabled =
+    viewModel.primaryEnabled && (Boolean(primaryHref) || Boolean(onRevealContact));
 
   return (
     <Card className="anyu-paid-card">
@@ -185,16 +188,22 @@ export function PaidPreviewCard({
 
       <p className="anyu-small-note">{viewModel.supportCopy}</p>
 
-      <Button
-        type="button"
-        className="anyu-button-block"
-        onClick={handleReveal}
-        disabled={isLoading || !primaryActionEnabled}
-        aria-disabled={!primaryActionEnabled}
-        aria-label={!primaryActionEnabled ? `${viewModel.primaryLabel}（尚未開放）` : undefined}
-      >
-        {isLoading ? "開啟中..." : viewModel.primaryLabel}
-      </Button>
+      {primaryHref && primaryActionEnabled ? (
+        <Button asChild href={primaryHref} className="anyu-button-block">
+          {viewModel.primaryLabel}
+        </Button>
+      ) : (
+        <Button
+          type="button"
+          className="anyu-button-block"
+          onClick={handleReveal}
+          disabled={isLoading || !primaryActionEnabled}
+          aria-disabled={!primaryActionEnabled}
+          aria-label={!primaryActionEnabled ? `${viewModel.primaryLabel}（尚未開放）` : undefined}
+        >
+          {isLoading ? "開啟中..." : viewModel.primaryLabel}
+        </Button>
+      )}
 
       {errorMessage ? (
         <p className="anyu-status-message anyu-status-message-error">{errorMessage}</p>
