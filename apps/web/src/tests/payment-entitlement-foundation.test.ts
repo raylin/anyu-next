@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const { mockRequireDb } = vi.hoisted(() => ({
@@ -291,6 +293,19 @@ describe("payment and entitlement foundation", () => {
     expect(capture.values?.paidAccessTokenHash).not.toBe(result.paidAccessToken);
     expect(capture.values).not.toHaveProperty("paidAccessToken");
     expect(capture.values).not.toHaveProperty("paidResultJson");
+  });
+
+  it("documents one entitlement lifecycle per non-null payment intent in migration SQL", () => {
+    const migration = readFileSync(
+      path.resolve(process.cwd(), "drizzle/0008_entitlements_payment_intent_unique.sql"),
+      "utf8",
+    );
+
+    expect(migration).toContain("CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS");
+    expect(migration).toContain('"entitlements_payment_intent_unique_idx"');
+    expect(migration).toContain('ON "entitlements" USING btree ("payment_intent_id")');
+    expect(migration).toContain('WHERE "payment_intent_id" IS NOT NULL');
+    expect(migration).not.toContain('"status"');
   });
 
   it("looks up and rotates paid access tokens by hash", async () => {

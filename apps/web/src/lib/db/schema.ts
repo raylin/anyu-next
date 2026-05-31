@@ -390,7 +390,9 @@ export const entitlements = pgTable(
     paidAccessTokenHashIdx: uniqueIndex("entitlements_paid_access_token_hash_idx")
       .on(table.paidAccessTokenHash)
       .where(sql`${table.paidAccessTokenHash} IS NOT NULL`),
-    paymentIntentIdx: index("entitlements_payment_intent_idx").on(table.paymentIntentId),
+    paymentIntentUniqueIdx: uniqueIndex("entitlements_payment_intent_unique_idx")
+      .on(table.paymentIntentId)
+      .where(sql`${table.paymentIntentId} IS NOT NULL`),
     resultIdx: index("entitlements_result_idx").on(table.analysisResultId),
     moduleStatusIdx: index("entitlements_module_status_idx").on(
       table.moduleSlug,

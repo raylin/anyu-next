@@ -144,6 +144,69 @@ describe("paid delivery artifacts service", () => {
     expect(mockCreatePaymentSingleEntitlement).not.toHaveBeenCalled();
   });
 
+  it("reuses an existing entitlement after a payment-intent unique conflict", async () => {
+    mockGetEntitlementByPaymentIntentId
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ ...entitlement, status: "refunded" });
+    mockCreatePaymentSingleEntitlement.mockRejectedValueOnce({
+      code: "23505",
+      constraint: "entitlements_payment_intent_unique_idx",
+    });
+    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
+      job: generationJob,
+      created: false,
+    });
+
+    const result = await createPaidDeliveryArtifactsForPaymentIntent({
+      paymentIntent,
+      entitlementSource: "payment_single",
+      generationJobTriggerSource: "newebpay_notify",
+      exposeRawPaidAccessToken: true,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      entitlement: { id: "entitlement-1", status: "refunded" },
+      entitlementCreated: false,
+      generationJobCreated: false,
+      paidAccessToken: null,
+      paidAccessTokenReturned: false,
+      unlockPath: null,
+    });
+    expect(mockGetEntitlementByPaymentIntentId).toHaveBeenCalledTimes(2);
+    expect(mockCreateOrReusePaidAnalysisJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        triggerSource: "newebpay_notify",
+        entitlementRefId: "entitlement-1",
+      }),
+    );
+  });
+
+  it("returns entitlement unavailable if unique conflict cannot be resolved by reread", async () => {
+    mockGetEntitlementByPaymentIntentId
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+    mockCreatePaymentSingleEntitlement.mockRejectedValueOnce({
+      cause: {
+        code: "23505",
+        constraint: "entitlements_payment_intent_unique_idx",
+      },
+    });
+
+    const result = await createPaidDeliveryArtifactsForPaymentIntent({
+      paymentIntent,
+      entitlementSource: "payment_single",
+      generationJobTriggerSource: "newebpay_notify",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      status: 500,
+      error: "entitlement_unavailable",
+    });
+    expect(mockCreateOrReusePaidAnalysisJob).not.toHaveBeenCalled();
+  });
+
   it("fails before creating artifacts when paid access token hash config is missing", async () => {
     delete process.env.PAID_ACCESS_TOKEN_HASH_SECRET;
 

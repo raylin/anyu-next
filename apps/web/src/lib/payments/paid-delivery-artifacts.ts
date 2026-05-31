@@ -58,6 +58,39 @@ function accessStateFromJob(job: GenerationJob): Exclude<PaidAccessResolutionSta
   return "pending";
 }
 
+function isPaymentIntentEntitlementUniqueConflict(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const candidate = error as {
+    code?: unknown;
+    constraint?: unknown;
+    constraint_name?: unknown;
+    cause?: unknown;
+    message?: unknown;
+  };
+
+  const constraint =
+    typeof candidate.constraint === "string"
+      ? candidate.constraint
+      : typeof candidate.constraint_name === "string"
+        ? candidate.constraint_name
+        : typeof candidate.message === "string" &&
+            candidate.message.includes("entitlements_payment_intent_unique_idx")
+          ? "entitlements_payment_intent_unique_idx"
+          : null;
+
+  if (
+    candidate.code === "23505" &&
+    constraint === "entitlements_payment_intent_unique_idx"
+  ) {
+    return true;
+  }
+
+  return isPaymentIntentEntitlementUniqueConflict(candidate.cause);
+}
+
 export async function createPaidDeliveryArtifactsForPaymentIntent(input: {
   paymentIntent: PaymentIntent;
   entitlementSource: EntitlementSource;
@@ -76,10 +109,8 @@ export async function createPaidDeliveryArtifactsForPaymentIntent(input: {
   let entitlement = existingEntitlement;
 
   if (!entitlement) {
-    let created: Awaited<ReturnType<typeof createPaymentSingleEntitlement>>;
-
     try {
-      created = await createPaymentSingleEntitlement({
+      const created = await createPaymentSingleEntitlement({
         moduleSlug: input.paymentIntent.moduleSlug,
         analysisRequestId: input.paymentIntent.analysisRequestId,
         analysisResultId: input.paymentIntent.analysisResultId,
@@ -88,20 +119,24 @@ export async function createPaidDeliveryArtifactsForPaymentIntent(input: {
         unlockIntentId: input.paymentIntent.unlockIntentId,
         activatedAt: new Date(),
       });
+      entitlement = created.entitlement;
+      paidAccessToken = input.exposeRawPaidAccessToken ? created.paidAccessToken : null;
+      entitlementCreated = true;
     } catch (error) {
-      return {
-        ok: false,
-        status: 500,
-        error:
-          error instanceof Error && error.message === "paid_access_token_hash_secret_missing"
-            ? "paid_access_token_create_failed"
-            : "entitlement_create_failed",
-      };
+      if (isPaymentIntentEntitlementUniqueConflict(error)) {
+        entitlement = await getEntitlementByPaymentIntentId(input.paymentIntent.id);
+        entitlementCreated = false;
+      } else {
+        return {
+          ok: false,
+          status: 500,
+          error:
+            error instanceof Error && error.message === "paid_access_token_hash_secret_missing"
+              ? "paid_access_token_create_failed"
+              : "entitlement_create_failed",
+        };
+      }
     }
-
-    entitlement = created.entitlement;
-    paidAccessToken = input.exposeRawPaidAccessToken ? created.paidAccessToken : null;
-    entitlementCreated = true;
   }
 
   if (!entitlement) {
@@ -151,4 +186,3 @@ export async function createPaidDeliveryArtifactsForPaymentIntent(input: {
       : null,
   };
 }
-

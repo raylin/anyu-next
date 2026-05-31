@@ -7772,3 +7772,21 @@ Learnings:
 Unresolved questions:
 - Whether Drizzle migration execution allows `CREATE INDEX CONCURRENTLY`, or whether this should be applied through a manually approved Neon SQL step.
 - Existing staging/production duplicate counts were not queried in this planning task.
+
+## 2026-05-31 - Entitlement Payment Intent Unique Index Migration v0
+
+Completed changes:
+- Added `apps/web/drizzle/0008_entitlements_payment_intent_unique.sql` with a partial unique index on non-null `entitlements.payment_intent_id`.
+- Updated Drizzle schema to model `entitlements_payment_intent_unique_idx`.
+- Added runtime conflict handling so paid delivery artifact creation re-reads and reuses an existing entitlement after the unique conflict.
+- Added tests for migration SQL shape, unique-conflict reuse, and unresolved conflict safety.
+- Updated dashboard tech-debt copy.
+
+Learnings:
+- `drizzle-kit check` passes, but the installed CLI does not support `generate --dry-run`.
+- Staging migration was not applied because this task did not have a verified staging-only DB target.
+- Conflict handling now prevents a concurrent duplicate entitlement race from turning into an unhandled 500 once the unique index exists.
+
+Unresolved questions:
+- Whether to apply `CREATE INDEX CONCURRENTLY` through the migration runner or a manually approved Neon SQL step.
+- Staging duplicate preflight and index application remain pending.
