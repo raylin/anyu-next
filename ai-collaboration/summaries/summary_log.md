@@ -8049,3 +8049,25 @@ Unresolved questions:
 - Owner must approve reversible encrypted Email storage versus hash-only storage.
 - Encryption key and rotation policy still need a dedicated implementation decision.
 - It remains open whether first UX should start Email-only or Email plus LINE.
+
+## 2026-05-31 Paid Result Recovery Identity Schema v0
+
+### Completed Changes
+
+- added `payment_recovery_contacts` schema and migration file
+- added recovery contact crypto helpers using explicit hash/encryption env names
+- added server-side recovery contact helpers for Email, LINE, lookup, entitlement binding, status changes, and marketing opt-in
+- added recovery contact tests covering encryption, hashing, idempotency, consent separation, bearer token rejection, and migration/schema seams
+- updated dashboard and `.env.example` for the new recovery identity foundation
+
+### Learnings
+
+- Recovery identity can be implemented without membership, checkout UI, LINE push, or Email sending.
+- Email recovery needs reversible encryption plus keyed hash if future support-assisted sending is expected.
+- LINE recovery can start as hashed identity only; raw LINE user ID should not enter analytics or reports.
+
+### Unresolved Questions
+
+- Staging DB apply is still pending.
+- Encryption key rotation policy is not yet defined.
+- Checkout-start recovery UX still needs a follow-up task after staging apply.
