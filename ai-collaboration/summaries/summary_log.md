@@ -8395,3 +8395,26 @@ Unresolved questions:
 - Final report code format still needs implementation choice.
 - Public retention/access language may need later alignment if report availability windows become explicit.
 - Share-safe artifact and PDF/export remain deferred.
+
+## 2026-06-01 LINE Recovery LIFF Page / UI Entry v0
+
+### Completed Changes
+
+- saved the LINE Recovery LIFF Page / UI Entry v0 handoff and report
+- added `/line/recovery/bind` as the recovery-specific LIFF page route
+- added `LineRecoveryBindBridge` to initialize LIFF, obtain ID token, call `/api/line/recovery/bind-liff`, and return to the safe route-provided recovery surface
+- added `parseLineRecoveryBindContext` to parse direct query and `liff.state` recovery state without accepting raw paid access, checkout session, unlock, short-code, or provider payload markers
+- added tests for recovery copy, non-LINE fallback, safe `liff.state` parsing, bind route call shape, raw token exclusion, and legacy fulfillment isolation
+- ran targeted LIFF/LINE/recovery tests, full lint, full tests, and build
+
+### Learnings
+
+- The LIFF page can reuse only the mechanical SDK loading/login pattern from the legacy bridge while keeping recovery semantics separate.
+- A visible checkout/result LINE CTA still needs to generate signed `rlb_` state and link to this page before owner-assisted staging smoke is meaningful.
+- Non-LINE fallback should keep Email as the reliable recovery path and never block checkout/report access.
+
+### Unresolved Questions
+
+- Owner-assisted LINE in-app staging smoke remains pending.
+- UI CTA wiring for LINE recovery is still unimplemented.
+- Desktop QR/open-on-phone behavior remains future work.
