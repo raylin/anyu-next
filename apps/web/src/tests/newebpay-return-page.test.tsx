@@ -1,13 +1,18 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockIsDbConfigured, mockResolvePaymentAccessHandoff } = vi.hoisted(() => ({
+const { mockIsDbConfigured, mockResolvePaymentAccessHandoff, mockGetPaymentRecoveryStatusSummary } = vi.hoisted(() => ({
   mockIsDbConfigured: vi.fn(),
   mockResolvePaymentAccessHandoff: vi.fn(),
+  mockGetPaymentRecoveryStatusSummary: vi.fn(),
 }));
 
 vi.mock("@/lib/db/client", () => ({
   isDbConfigured: mockIsDbConfigured,
+}));
+
+vi.mock("@/lib/db/payment-recovery-contacts", () => ({
+  getPaymentRecoveryStatusSummary: mockGetPaymentRecoveryStatusSummary,
 }));
 
 vi.mock("@/lib/payments/payment-access-handoff", () => ({
@@ -26,6 +31,10 @@ describe("NewebPay ReturnURL pending page", () => {
       moduleSlug: "ambiguous-temperature",
       accessPath: null,
       retryable: true,
+    });
+    mockGetPaymentRecoveryStatusSummary.mockResolvedValue({
+      hasRecoveryContact: false,
+      recommendedPostPaymentAction: "suggest_email_save",
     });
   });
 
@@ -57,6 +66,20 @@ describe("NewebPay ReturnURL pending page", () => {
       state: "paid_ready",
       accessPath: "/m/ambiguous-temperature/payment/access?checkoutToken=pcs_redacted",
       retryable: false,
+      paymentIntent: { id: "payment-1" },
+      entitlement: { id: "entitlement-1" },
+      record: { result: { id: "result-1" } },
+    });
+    mockGetPaymentRecoveryStatusSummary.mockResolvedValue({
+      hasRecoveryContact: false,
+      hasEmailRecovery: false,
+      hasLineRecovery: false,
+      emailStatus: "none",
+      lineStatus: "none",
+      transactionalConsentPresent: false,
+      marketingOptInPresent: false,
+      recommendedPostPaymentAction: "suggest_email_save",
+      safeDisplayContact: null,
     });
 
     const page = await NewebPayReturnPage({
@@ -67,6 +90,7 @@ describe("NewebPay ReturnURL pending page", () => {
 
     expect(html).toContain("付款已確認");
     expect(html).toContain("完整報告已準備好");
+    expect(html).toContain("建議先保存這份報告");
     expect(html).toContain("查看完整報告");
     expect(html).not.toContain("paidAccessToken");
     expect(html).not.toContain("generationJob");

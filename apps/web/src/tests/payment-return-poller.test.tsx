@@ -34,6 +34,59 @@ describe("PaymentReturnPoller", () => {
     expect(html).toContain('href="/m/ambiguous-temperature/payment/access?checkoutToken=redacted"');
   });
 
+  it("renders ready saved recovery confirmation without changing primary access CTA", () => {
+    const html = renderToStaticMarkup(
+      <PaymentReturnPoller
+        moduleSlug="ambiguous-temperature"
+        checkoutToken="redacted"
+        initialStatus="paid_ready"
+        initialAccessPath="/m/ambiguous-temperature/payment/access?checkoutToken=redacted"
+        initialRecoverySummary={{
+          hasRecoveryContact: true,
+          hasEmailRecovery: true,
+          hasLineRecovery: false,
+          emailStatus: "bound",
+          lineStatus: "none",
+          transactionalConsentPresent: true,
+          marketingOptInPresent: false,
+          recommendedPostPaymentAction: "confirm_saved",
+          safeDisplayContact: { type: "email", maskedValue: "o***@e***.com" },
+        }}
+      />,
+    );
+
+    expect(html).toContain("已保存找回方式：o***@e***.com");
+    expect(html).toContain("查看完整報告");
+    expect(html).not.toContain("owner@example.com");
+  });
+
+  it("renders ready unsaved recovery reminder without blocking access", () => {
+    const html = renderToStaticMarkup(
+      <PaymentReturnPoller
+        moduleSlug="ambiguous-temperature"
+        checkoutToken="redacted"
+        initialStatus="paid_ready"
+        initialAccessPath="/m/ambiguous-temperature/payment/access?checkoutToken=redacted"
+        initialRecoverySummary={{
+          hasRecoveryContact: false,
+          hasEmailRecovery: false,
+          hasLineRecovery: false,
+          emailStatus: "none",
+          lineStatus: "none",
+          transactionalConsentPresent: false,
+          marketingOptInPresent: false,
+          recommendedPostPaymentAction: "suggest_email_save",
+          safeDisplayContact: null,
+        }}
+      />,
+    );
+
+    expect(html).toContain("建議先保存這份報告");
+    expect(html).toContain("查看完整報告");
+    expect(html).not.toContain("Email 交付");
+    expect(html).not.toContain("LINE 交付");
+  });
+
   it("renders invalid session support and refund links", () => {
     const html = renderToStaticMarkup(
       <PaymentReturnPoller

@@ -1,17 +1,22 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Card } from "@/components/anyu/Card";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { PaidResultPendingPoller } from "@/components/modules/ai-temperature/PaidResultPendingPoller";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
-import { uiNotices } from "@/content/legal";
+import { LEGAL_CONTACT_EMAIL, uiNotices } from "@/content/legal";
 import {
   UnlockedResultViewTracker,
   type UnlockedPaidResultSource,
 } from "@/components/modules/ai-temperature/UnlockedResultViewTracker";
 import { isDbConfigured } from "@/lib/db/client";
+import {
+  createOrUpdatePostPaymentEmailRecoveryContact,
+  getPaymentRecoveryStatusSummary,
+  type PaymentRecoveryStatusSummary,
+} from "@/lib/db/payment-recovery-contacts";
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
 import { getPaidResultForAnalysisResult } from "@/lib/db/paid-results";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
@@ -39,6 +44,7 @@ import {
   type PaidAccessResolution,
 } from "@/lib/payments/paid-access-resolver";
 import { hasPaidAccessTokenPrefix } from "@/lib/payments/paid-access-token";
+import { RecoveryContactConfigError } from "@/lib/payments/recovery-contact-crypto";
 
 type UnlockPageProps = {
   params: Promise<{
@@ -111,6 +117,52 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
       );
     }
 
+    const recoverySummary = await getPaymentRecoveryStatusSummary({
+      moduleSlug,
+      analysisResultId: paidAccess.entitlement.analysisResultId,
+      paymentIntentId: paidAccess.entitlement.paymentIntentId,
+      entitlementId: paidAccess.entitlement.id,
+    });
+    const resolvedAnalysisResultId = paidAccess.entitlement.analysisResultId;
+    const resolvedPaymentIntentId = paidAccess.entitlement.paymentIntentId;
+    const resolvedEntitlementId = paidAccess.entitlement.id;
+    const resolvedModuleSlug = moduleSlug;
+    const resolvedUnlockToken = unlockToken;
+
+    async function savePaidAccessRecoveryEmail(formData: FormData) {
+      "use server";
+
+      const email = formData.get("email");
+      const marketingOptIn = formData.get("marketingOptIn") === "1";
+      const redirectPath = `/m/${resolvedModuleSlug}/unlock/${encodeURIComponent(
+        resolvedUnlockToken,
+      )}`;
+
+      if (typeof email !== "string" || !email.trim()) {
+        redirect(`${redirectPath}?recovery=email_error`);
+      }
+
+      try {
+        await createOrUpdatePostPaymentEmailRecoveryContact({
+          moduleSlug: resolvedModuleSlug,
+          analysisResultId: resolvedAnalysisResultId,
+          paymentIntentId: resolvedPaymentIntentId,
+          entitlementId: resolvedEntitlementId,
+          email,
+          source: "completed_result",
+          marketingOptInAt: marketingOptIn ? new Date() : null,
+        });
+      } catch (error) {
+        if (error instanceof RecoveryContactConfigError) {
+          redirect(`${redirectPath}?recovery=email_error`);
+        }
+
+        redirect(`${redirectPath}?recovery=email_error`);
+      }
+
+      redirect(`${redirectPath}?recovery=email_saved`);
+    }
+
     return (
       <UnlockCompleted
         moduleConfig={moduleConfig}
@@ -122,6 +174,9 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         scoreBucket={paidAccess.record.result.scoreBucket}
         resultCreatedAt={paidAccess.record.result.createdAt}
         themeCarryoverSource="paid_access_token"
+        recoverySummary={recoverySummary}
+        recoveryState={getSingleSearchParam(resolvedSearchParams?.recovery)}
+        recoveryEmailAction={savePaidAccessRecoveryEmail}
       />
     );
   }
@@ -202,6 +257,9 @@ export function UnlockCompleted({
   scoreBucket,
   resultCreatedAt,
   themeCarryoverSource,
+  recoverySummary,
+  recoveryState,
+  recoveryEmailAction,
 }: {
   moduleConfig: ProductModuleConfig;
   moduleSlug: string;
@@ -216,6 +274,9 @@ export function UnlockCompleted({
   scoreBucket?: string | null;
   resultCreatedAt?: Date | string | null;
   themeCarryoverSource?: string | null;
+  recoverySummary?: PaymentRecoveryStatusSummary | null;
+  recoveryState?: string | null;
+  recoveryEmailAction?: (formData: FormData) => Promise<void>;
 }) {
   const paidResult = normalizePaidResultForDisplay(
     storedPaidResult?.paidResultJson ?? result.paid_result,
@@ -257,6 +318,12 @@ export function UnlockCompleted({
               本結果是文字情境整理與溝通建議，不是心理治療、諮商、命理判斷，也不保證任何關係結果。
             </p>
           </Card>
+
+          <PaidResultRecoverySaveSection
+            recoverySummary={recoverySummary}
+            recoveryState={recoveryState}
+            recoveryEmailAction={recoveryEmailAction}
+          />
 
           <TemperatureCard
             score={result.free_result.temperature_score}
@@ -354,6 +421,117 @@ export function UnlockCompleted({
         </section>
       </ModuleThemeBoundary>
     </main>
+  );
+}
+
+function PaidResultRecoverySaveSection({
+  recoverySummary,
+  recoveryState,
+  recoveryEmailAction,
+}: {
+  recoverySummary?: PaymentRecoveryStatusSummary | null;
+  recoveryState?: string | null;
+  recoveryEmailAction?: (formData: FormData) => Promise<void>;
+}) {
+  if (!recoveryEmailAction && !recoverySummary) {
+    return null;
+  }
+
+  const emailSaved = recoveryState === "email_saved" || recoverySummary?.hasRecoveryContact;
+  const emailError =
+    recoveryState === "email_error" ||
+    recoverySummary?.recommendedPostPaymentAction === "retry_email";
+
+  if (emailSaved) {
+    return (
+      <Card className="anyu-recovery-soft-gate" aria-labelledby="paid-result-recovery-title">
+        <div className="anyu-recovery-soft-gate-header">
+          <div>
+            <p className="anyu-kicker t-label-dim">result recovery</p>
+            <h2 id="paid-result-recovery-title" className="anyu-recovery-title">
+              這份完整分析已保存
+            </h2>
+          </div>
+          <span className="anyu-recovery-saved-badge">已保存</span>
+        </div>
+        <p className="anyu-copy">
+          {recoverySummary?.safeDisplayContact
+            ? `已保存找回方式：${recoverySummary.safeDisplayContact.maskedValue}`
+            : "之後若換裝置或找不到頁面，可透過已保存的方式協助找回。"}
+        </p>
+        <p className="anyu-subtle-note">
+          Email / LINE 只作為找回、完成通知與客服協助；完整報告仍以此網頁查看為準。
+        </p>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="anyu-recovery-soft-gate" aria-labelledby="paid-result-recovery-title">
+      <div className="anyu-recovery-soft-gate-header">
+        <div>
+          <p className="anyu-kicker t-label-dim">result recovery</p>
+          <h2 id="paid-result-recovery-title" className="anyu-recovery-title">
+            保存這份完整分析
+          </h2>
+        </div>
+        <span className="anyu-recovery-soon-badge">建議保存</span>
+      </div>
+      <p className="anyu-copy">
+        之後換裝置、關閉頁面或清除瀏覽資料時，可以用 Email 協助找回。完整報告仍以網頁查看為準，Email 不會交付報告內容。
+      </p>
+
+      {recoveryEmailAction ? (
+        <form action={recoveryEmailAction} className="anyu-recovery-email-form">
+          <label className="anyu-recovery-label" htmlFor="paid-result-recovery-email">
+            Email 找回
+          </label>
+          <div className="anyu-recovery-email-row">
+            <input
+              id="paid-result-recovery-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              className="anyu-recovery-input"
+              aria-describedby="paid-result-recovery-email-help"
+              required
+            />
+            <button type="submit" className="anyu-button">
+              保存
+            </button>
+          </div>
+          <p id="paid-result-recovery-email-help" className="anyu-subtle-note">
+            v0 不會寄送 Email；只會保存為這次完整報告的找回資料。Email 不會顯示在頁面或報告中。
+          </p>
+          <label className="anyu-recovery-checkbox">
+            <input type="checkbox" name="marketingOptIn" value="1" />
+            <span>也想收到新測驗、早鳥或限時解鎖通知</span>
+          </label>
+          {emailError ? (
+            <p className="anyu-recovery-error" role="status">
+              Email 保存暫時沒有成功，但不影響你查看完整報告。可以稍後再試，或來信{" "}
+              <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a> 協助。
+            </p>
+          ) : null}
+        </form>
+      ) : (
+        <p className="anyu-subtle-note">
+          找回功能暫時無法使用；若之後找不到完整報告，請來信{" "}
+          <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a> 協助。
+        </p>
+      )}
+
+      <div className="anyu-recovery-line-option" aria-label="LINE 找回選項">
+        <div>
+          <p className="anyu-recovery-label">LINE 找回</p>
+          <p className="anyu-subtle-note">
+            LINE 之後會作為找回、完成通知與客服輔助，不是完整報告的交付管道。
+          </p>
+        </div>
+        <span className="anyu-recovery-soon-badge">稍後支援</span>
+      </div>
+    </Card>
   );
 }
 
@@ -595,6 +773,14 @@ function toUrlSearchParams(input?: Record<string, string | string[] | undefined>
   }
 
   return searchParams;
+}
+
+function getSingleSearchParam(value?: string | string[]) {
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+
+  return value ?? null;
 }
 
 function UnlockError({

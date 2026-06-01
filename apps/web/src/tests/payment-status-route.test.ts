@@ -1,10 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockIsDbConfigured, mockGetModuleBySlug, mockResolvePaymentAccessHandoff } = vi.hoisted(
+const {
+  mockIsDbConfigured,
+  mockGetModuleBySlug,
+  mockResolvePaymentAccessHandoff,
+  mockGetPaymentRecoveryStatusSummary,
+} = vi.hoisted(
   () => ({
     mockIsDbConfigured: vi.fn(),
     mockGetModuleBySlug: vi.fn(),
     mockResolvePaymentAccessHandoff: vi.fn(),
+    mockGetPaymentRecoveryStatusSummary: vi.fn(),
   }),
 );
 
@@ -14,6 +20,10 @@ vi.mock("@/lib/db/client", () => ({
 
 vi.mock("@/lib/modules/registry", () => ({
   getModuleBySlug: mockGetModuleBySlug,
+}));
+
+vi.mock("@/lib/db/payment-recovery-contacts", () => ({
+  getPaymentRecoveryStatusSummary: mockGetPaymentRecoveryStatusSummary,
 }));
 
 vi.mock("@/lib/payments/payment-access-handoff", () => ({
@@ -43,6 +53,10 @@ describe("payment status route", () => {
       retryable: true,
       accessPath: null,
     });
+    mockGetPaymentRecoveryStatusSummary.mockResolvedValue({
+      hasRecoveryContact: false,
+      recommendedPostPaymentAction: "suggest_email_save",
+    });
   });
 
   it("rejects missing checkout token", async () => {
@@ -63,6 +77,7 @@ describe("payment status route", () => {
       retryable: true,
       errorCategory: null,
       accessPath: null,
+      recoverySummary: null,
     });
     expect(JSON.stringify(data)).not.toContain("paymentIntent");
   });
@@ -73,6 +88,15 @@ describe("payment status route", () => {
       state: "paid_ready",
       retryable: false,
       accessPath: "/m/ambiguous-temperature/payment/access?checkoutToken=pcs_redacted",
+      paymentIntent: { id: "payment-1" },
+      entitlement: { id: "entitlement-1" },
+      record: { result: { id: "result-1" } },
+    });
+    mockGetPaymentRecoveryStatusSummary.mockResolvedValue({
+      hasRecoveryContact: true,
+      hasEmailRecovery: true,
+      recommendedPostPaymentAction: "confirm_saved",
+      safeDisplayContact: { type: "email", maskedValue: "o***@e***.com" },
     });
 
     const response = await POST(request({ checkoutToken: "pcs_redacted" }), params);
@@ -83,6 +107,12 @@ describe("payment status route", () => {
       status: "paid_ready",
       retryable: false,
       accessPath: "/m/ambiguous-temperature/payment/access?checkoutToken=pcs_redacted",
+      recoverySummary: {
+        hasRecoveryContact: true,
+        hasEmailRecovery: true,
+        recommendedPostPaymentAction: "confirm_saved",
+        safeDisplayContact: { type: "email", maskedValue: "o***@e***.com" },
+      },
     });
     expect(JSON.stringify(data)).not.toContain("pa_");
   });
@@ -103,7 +133,7 @@ describe("payment status route", () => {
       retryable: false,
       errorCategory: "invalid_session",
       accessPath: null,
+      recoverySummary: null,
     });
   });
 });
-

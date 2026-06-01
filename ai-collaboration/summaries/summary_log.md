@@ -8209,3 +8209,27 @@ Unresolved questions:
 
 - Paid Ready / Completed Result Save CTA Implementation v0 is still needed to expose the post-payment save UX.
 - Recovery link sending, LINE recovery binding, production recovery DB/env apply, and key rotation policy remain future work.
+
+## 2026-06-01 Paid Ready / Completed Result Save CTA Implementation v0
+
+### Completed Changes
+
+- saved the Paid Ready / Completed Result Save CTA Implementation v0 handoff and report
+- added paid-ready recovery reminder to ReturnURL polling while keeping `查看完整報告` as primary CTA
+- added completed paid result recovery save section with Email save, separate marketing opt-in, and deferred LINE option
+- wired sanitized recovery summary into payment status, ReturnURL initial state, payment access, and paid access token result rendering
+- added server-side post-payment Email save actions without hidden raw `pa_` or `pcs_` fields
+- updated tests for saved/unsaved paid-ready and completed-result recovery states
+
+### Learnings
+
+- Server actions need narrowed scalar values captured before action definition to satisfy Next.js type checking.
+- The completed result can show recovery UI without changing payment provider behavior or paid-result generation.
+- No-card QA passed on the currently deployed staging commit, but a post-deploy smoke is still required for the new save section.
+
+### Unresolved Questions
+
+- Recovery link sending remains unimplemented.
+- LINE recovery binding remains deferred until recovery-specific LIFF state exists.
+- Production recovery DB/env apply remains gated.
+- A staging smoke should verify the new post-payment save UI after this commit deploys.

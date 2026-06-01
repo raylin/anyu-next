@@ -1,11 +1,17 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockIsDbConfigured, mockGetModuleBySlug, mockResolvePaymentAccessHandoff } = vi.hoisted(
+const {
+  mockIsDbConfigured,
+  mockGetModuleBySlug,
+  mockResolvePaymentAccessHandoff,
+  mockGetPaymentRecoveryStatusSummary,
+} = vi.hoisted(
   () => ({
     mockIsDbConfigured: vi.fn(),
     mockGetModuleBySlug: vi.fn(),
     mockResolvePaymentAccessHandoff: vi.fn(),
+    mockGetPaymentRecoveryStatusSummary: vi.fn(),
   }),
 );
 
@@ -17,12 +23,26 @@ vi.mock("@/lib/modules/registry", () => ({
   getModuleBySlug: mockGetModuleBySlug,
 }));
 
+vi.mock("@/lib/db/payment-recovery-contacts", () => ({
+  getPaymentRecoveryStatusSummary: mockGetPaymentRecoveryStatusSummary,
+  createOrUpdatePostPaymentEmailRecoveryContact: vi.fn(),
+}));
+
 vi.mock("@/lib/payments/payment-access-handoff", () => ({
   resolvePaymentAccessHandoff: mockResolvePaymentAccessHandoff,
 }));
 
 vi.mock("@/app/m/[moduleSlug]/unlock/[unlockToken]/page", () => ({
-  UnlockCompleted: () => <div>MOCK_UNLOCK_COMPLETED</div>,
+  UnlockCompleted: (props: {
+    recoverySummary?: { hasRecoveryContact: boolean };
+    recoveryState?: string | null;
+  }) => (
+    <div>
+      MOCK_UNLOCK_COMPLETED
+      {props.recoverySummary ? ` recovery:${props.recoverySummary.hasRecoveryContact}` : null}
+      {props.recoveryState ? ` state:${props.recoveryState}` : null}
+    </div>
+  ),
 }));
 
 import PaymentAccessPage from "@/app/m/[moduleSlug]/payment/access/page";
@@ -41,6 +61,10 @@ describe("payment access page", () => {
       ok: false,
       state: "invalid_session",
       errorCategory: "invalid_session",
+    });
+    mockGetPaymentRecoveryStatusSummary.mockResolvedValue({
+      hasRecoveryContact: false,
+      recommendedPostPaymentAction: "suggest_email_save",
     });
   });
 
@@ -61,9 +85,12 @@ describe("payment access page", () => {
     mockResolvePaymentAccessHandoff.mockResolvedValue({
       ok: true,
       state: "paid_ready",
+      paymentIntent: { id: "payment-1" },
+      entitlement: { id: "entitlement-1" },
       record: {
         request: { anonymousSessionId: "session-1" },
         result: {
+          id: "result-1",
           normalizedResultJson: {},
           scoreBucket: "warm",
           createdAt: new Date("2026-05-30T00:00:00.000Z"),
@@ -82,9 +109,16 @@ describe("payment access page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("MOCK_UNLOCK_COMPLETED");
+    expect(html).toContain("recovery:false");
     expect(mockResolvePaymentAccessHandoff).toHaveBeenCalledWith({
       moduleSlug: "ambiguous-temperature",
       checkoutToken: "pcs_redacted",
+    });
+    expect(mockGetPaymentRecoveryStatusSummary).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
     });
   });
 });

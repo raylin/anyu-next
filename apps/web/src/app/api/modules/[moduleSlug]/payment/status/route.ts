@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isDbConfigured } from "@/lib/db/client";
+import { getPaymentRecoveryStatusSummary } from "@/lib/db/payment-recovery-contacts";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { resolvePaymentAccessHandoff } from "@/lib/payments/payment-access-handoff";
 
@@ -53,8 +54,19 @@ export async function POST(request: Request, { params }: RouteProps) {
       retryable: false,
       errorCategory: handoff.errorCategory,
       accessPath: null,
+      recoverySummary: null,
     });
   }
+
+  const recoverySummary =
+    handoff.state === "paid_ready" && handoff.record
+      ? await getPaymentRecoveryStatusSummary({
+          moduleSlug: moduleConfig.slug,
+          analysisResultId: handoff.record.result.id,
+          paymentIntentId: handoff.paymentIntent.id,
+          entitlementId: handoff.entitlement?.id ?? null,
+        })
+      : null;
 
   return NextResponse.json({
     ok: true,
@@ -62,6 +74,6 @@ export async function POST(request: Request, { params }: RouteProps) {
     retryable: handoff.retryable,
     errorCategory: handoff.state === "paid_failed" ? "payment_access_failed" : null,
     accessPath: handoff.accessPath,
+    recoverySummary,
   });
 }
-

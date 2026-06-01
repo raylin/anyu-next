@@ -2,7 +2,7 @@ import {
   PAID_RESULT_PROMPT_VERSION,
   PAID_RESULT_SCHEMA_VERSION,
 } from "@/lib/ai/paid-result-generation";
-import { getEntitlementByPaymentIntentId } from "@/lib/db/entitlements";
+import { getEntitlementByPaymentIntentId, type Entitlement } from "@/lib/db/entitlements";
 import {
   buildPaidAnalysisJobDedupeKey,
   getGenerationJobByDedupeKey,
@@ -31,6 +31,7 @@ export type PaymentAccessHandoffResolution =
       state: Exclude<PaymentAccessHandoffState, "invalid_session" | "expired">;
       moduleSlug: string;
       paymentIntent: PaymentIntent;
+      entitlement?: Entitlement | null;
       accessPath: string | null;
       retryable: boolean;
       record?: NonNullable<Awaited<ReturnType<typeof getAnalysisResultWithRequestById>>>;
@@ -122,6 +123,7 @@ export async function resolvePaymentAccessHandoff(input: {
         : "waiting_for_payment",
       moduleSlug: moduleConfig.slug,
       paymentIntent,
+      entitlement: null,
       accessPath: null,
       retryable: !isPaymentTerminalFailure(paymentIntent.status),
     };
@@ -135,6 +137,7 @@ export async function resolvePaymentAccessHandoff(input: {
       state: "paid_processing",
       moduleSlug: moduleConfig.slug,
       paymentIntent,
+      entitlement: null,
       accessPath: null,
       retryable: true,
     };
@@ -152,6 +155,7 @@ export async function resolvePaymentAccessHandoff(input: {
       state: "paid_failed",
       moduleSlug: moduleConfig.slug,
       paymentIntent,
+      entitlement,
       accessPath: null,
       retryable: false,
     };
@@ -179,6 +183,7 @@ export async function resolvePaymentAccessHandoff(input: {
       state: "paid_ready",
       moduleSlug: moduleConfig.slug,
       paymentIntent,
+      entitlement,
       accessPath: `/m/${moduleConfig.slug}/payment/access?checkoutToken=${encodeURIComponent(
         input.checkoutToken,
       )}`,
@@ -195,6 +200,7 @@ export async function resolvePaymentAccessHandoff(input: {
       state: "paid_failed",
       moduleSlug: moduleConfig.slug,
       paymentIntent,
+      entitlement,
       accessPath: null,
       retryable: false,
       record,
@@ -208,6 +214,7 @@ export async function resolvePaymentAccessHandoff(input: {
     state: "paid_processing",
     moduleSlug: moduleConfig.slug,
     paymentIntent,
+    entitlement,
     accessPath: null,
     retryable: true,
     record,
@@ -215,4 +222,3 @@ export async function resolvePaymentAccessHandoff(input: {
     generationJob,
   };
 }
-

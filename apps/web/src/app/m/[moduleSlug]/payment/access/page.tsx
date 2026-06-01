@@ -3,9 +3,15 @@ import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 import { isDbConfigured } from "@/lib/db/client";
+import {
+  createOrUpdatePostPaymentEmailRecoveryContact,
+  getPaymentRecoveryStatusSummary,
+} from "@/lib/db/payment-recovery-contacts";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import { RecoveryContactConfigError } from "@/lib/payments/recovery-contact-crypto";
 import { resolvePaymentAccessHandoff } from "@/lib/payments/payment-access-handoff";
 import { UnlockCompleted } from "@/app/m/[moduleSlug]/unlock/[unlockToken]/page";
+import { redirect } from "next/navigation";
 
 type PaymentAccessPageProps = {
   params: Promise<{
@@ -13,6 +19,7 @@ type PaymentAccessPageProps = {
   }>;
   searchParams: Promise<{
     checkoutToken?: string;
+    recovery?: string;
   }>;
 };
 
@@ -61,7 +68,8 @@ export default async function PaymentAccessPage({
   searchParams,
 }: PaymentAccessPageProps) {
   const { moduleSlug } = await params;
-  const { checkoutToken } = await searchParams;
+  const query = await searchParams;
+  const { checkoutToken } = query;
   const moduleConfig = getModuleBySlug(moduleSlug);
 
   if (!moduleConfig || !checkoutToken || !isDbConfigured()) {
@@ -82,6 +90,52 @@ export default async function PaymentAccessPage({
     );
   }
 
+  const recoverySummary = await getPaymentRecoveryStatusSummary({
+    moduleSlug: moduleConfig.slug,
+    analysisResultId: handoff.record.result.id,
+    paymentIntentId: handoff.paymentIntent.id,
+    entitlementId: handoff.entitlement?.id ?? null,
+  });
+  const resolvedModuleSlug = moduleConfig.slug;
+  const resolvedCheckoutToken = checkoutToken;
+  const resolvedAnalysisResultId = handoff.record.result.id;
+  const resolvedPaymentIntentId = handoff.paymentIntent.id;
+  const resolvedEntitlementId = handoff.entitlement?.id ?? null;
+
+  async function saveCompletedResultRecoveryEmail(formData: FormData) {
+    "use server";
+
+    const email = formData.get("email");
+    const marketingOptIn = formData.get("marketingOptIn") === "1";
+    const redirectPath = `/m/${resolvedModuleSlug}/payment/access?checkoutToken=${encodeURIComponent(
+      resolvedCheckoutToken,
+    )}`;
+
+    if (typeof email !== "string" || !email.trim()) {
+      redirect(`${redirectPath}&recovery=email_error`);
+    }
+
+    try {
+      await createOrUpdatePostPaymentEmailRecoveryContact({
+        moduleSlug: resolvedModuleSlug,
+        analysisResultId: resolvedAnalysisResultId,
+        paymentIntentId: resolvedPaymentIntentId,
+        entitlementId: resolvedEntitlementId,
+        email,
+        source: "completed_result",
+        marketingOptInAt: marketingOptIn ? new Date() : null,
+      });
+    } catch (error) {
+      if (error instanceof RecoveryContactConfigError) {
+        redirect(`${redirectPath}&recovery=email_error`);
+      }
+
+      redirect(`${redirectPath}&recovery=email_error`);
+    }
+
+    redirect(`${redirectPath}&recovery=email_saved`);
+  }
+
   return (
     <UnlockCompleted
       moduleConfig={moduleConfig}
@@ -92,6 +146,9 @@ export default async function PaymentAccessPage({
       scoreBucket={handoff.record.result.scoreBucket}
       resultCreatedAt={handoff.record.result.createdAt}
       themeCarryoverSource="payment_checkout_session"
+      recoverySummary={recoverySummary}
+      recoveryState={query.recovery}
+      recoveryEmailAction={saveCompletedResultRecoveryEmail}
     />
   );
 }

@@ -21,6 +21,28 @@ type PaymentReturnPollerProps = {
   checkoutToken?: string | null;
   initialStatus?: string | null;
   initialAccessPath?: string | null;
+  initialRecoverySummary?: PaymentRecoverySummary | null;
+};
+
+type PaymentRecoverySummary = {
+  hasRecoveryContact: boolean;
+  hasEmailRecovery: boolean;
+  hasLineRecovery: boolean;
+  emailStatus: "none" | "pending" | "verified" | "bound" | "failed" | "revoked";
+  lineStatus: "none" | "pending" | "verified" | "bound" | "failed" | "revoked";
+  transactionalConsentPresent: boolean;
+  marketingOptInPresent: boolean;
+  recommendedPostPaymentAction:
+    | "none"
+    | "confirm_saved"
+    | "suggest_email_save"
+    | "suggest_line_save_later"
+    | "retry_email"
+    | "add_backup";
+  safeDisplayContact: {
+    type: "email";
+    maskedValue: string;
+  } | null;
 };
 
 type PaymentStatusResponse =
@@ -30,6 +52,7 @@ type PaymentStatusResponse =
       retryable: boolean;
       errorCategory?: string | null;
       accessPath?: string | null;
+      recoverySummary?: PaymentRecoverySummary | null;
     }
   | {
       ok: false;
@@ -121,16 +144,56 @@ function isTerminalStatus(status: PaymentReturnStatus) {
   );
 }
 
+function PaymentReadyRecoveryReminder({
+  recoverySummary,
+}: {
+  recoverySummary?: PaymentRecoverySummary | null;
+}) {
+  if (!recoverySummary) {
+    return null;
+  }
+
+  if (recoverySummary.hasRecoveryContact) {
+    return (
+      <div className="anyu-recovery-confirmation" role="status">
+        {recoverySummary.safeDisplayContact ? (
+          <p>已保存找回方式：{recoverySummary.safeDisplayContact.maskedValue}</p>
+        ) : (
+          <p>這份完整分析已保存找回方式。</p>
+        )}
+      </div>
+    );
+  }
+
+  if (recoverySummary.recommendedPostPaymentAction === "retry_email") {
+    return (
+      <div className="anyu-recovery-skip-warning" role="status">
+        <p>找回方式暫時沒有保存成功，但不影響你查看完整報告。打開完整報告後可以再試一次。</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="anyu-recovery-skip-warning" role="status">
+      <p>建議先保存這份報告，之後換裝置也能找回。你也可以先查看完整報告，再在報告頁保存。</p>
+    </div>
+  );
+}
+
 export function PaymentReturnPoller({
   moduleSlug,
   checkoutToken,
   initialStatus,
   initialAccessPath,
+  initialRecoverySummary,
 }: PaymentReturnPollerProps) {
   const [status, setStatus] = useState<PaymentReturnStatus>(
     normalizePaymentReturnStatus(initialStatus),
   );
   const [accessPath, setAccessPath] = useState(initialAccessPath ?? null);
+  const [recoverySummary, setRecoverySummary] = useState<PaymentRecoverySummary | null>(
+    initialRecoverySummary ?? null,
+  );
   const [safeError, setSafeError] = useState<string | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
   const stateCopy = getStateCopy(status);
@@ -174,6 +237,7 @@ export function PaymentReturnPoller({
         const nextStatus = normalizePaymentReturnStatus(data.status);
         setStatus(nextStatus);
         setAccessPath(data.accessPath ?? null);
+        setRecoverySummary(data.recoverySummary ?? null);
         setSafeError(null);
 
         if (!isTerminalStatus(nextStatus)) {
@@ -230,6 +294,10 @@ export function PaymentReturnPoller({
       ) : null}
 
       {safeError ? <p className="anyu-status-message anyu-status-message-error">{safeError}</p> : null}
+
+      {status === "paid_ready" ? (
+        <PaymentReadyRecoveryReminder recoverySummary={recoverySummary} />
+      ) : null}
 
       {status === "paid_ready" && accessPath ? (
         <Link href={accessPath} className="anyu-button anyu-button-block">
