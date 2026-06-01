@@ -8517,3 +8517,26 @@ Unresolved questions:
 - Valid `/r/[recoveryToken]` staging smoke still needs a secure operator session with matching Preview(staging) `DATABASE_URL`, `OPERATOR_TEST_SECRET`, and `PAYMENT_RECOVERY_LINK_TOKEN_SECRET`.
 - If more DB-backed QA scripts are added, common no-card flow primitives should be extracted to avoid duplication.
 - Production recovery link DB/env remain gated.
+
+## 2026-06-02 Recovery Link Operator Smoke Secure Run v0
+
+### Completed Changes
+
+- saved the Recovery Link Operator Smoke Secure Run v0 handoff and report
+- ran local `qa:env:preflight recovery-link-smoke`; local `DATABASE_URL` and `OPERATOR_TEST_SECRET` are present, but local `PAYMENT_RECOVERY_LINK_TOKEN_SECRET` is missing
+- verified via Vercel env metadata that Preview(staging) already has `DATABASE_URL`, `OPERATOR_TEST_SECRET`, and branch-scoped `PAYMENT_RECOVERY_LINK_TOKEN_SECRET`
+- did not rotate or regenerate the existing Preview(staging) recovery link token secret
+- attempted secure temp-file Vercel env pull and process-only smoke execution without printing values
+- confirmed the local smoke remains blocked because sensitive Preview(staging) env values are not usable by the local process through Vercel CLI pull
+
+### Learnings
+
+- Vercel CLI can confirm encrypted Preview(staging) env name presence without values.
+- Vercel env pull is not a usable secure injection path for sensitive values in this setup; it does not make the existing recovery link token secret available to `qa:recovery-link:smoke`.
+- Because the existing token secret protects staging recovery link hashes, rotating it would be unsafe unless explicitly approved.
+
+### Unresolved Questions
+
+- Owner/operator needs to provide the existing Preview(staging) `PAYMENT_RECOVERY_LINK_TOKEN_SECRET` to a secure local shell session, or approve a Preview(staging)-runtime operator smoke path that can use runtime env without exposing the secret.
+- Valid `/r/[recoveryToken]` staging smoke remains pending.
+- Production recovery link DB/env/runtime remain gated.
