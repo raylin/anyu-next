@@ -149,7 +149,7 @@ async function createSourceResult() {
         relationshipStage: "曖昧中",
         userGoal: "我該怎麼回",
         primaryPain: "回覆變慢",
-        replyTone: "溫柔但有界線",
+        replyTone: "有界線但不冷",
       },
     }),
   });
