@@ -8493,3 +8493,27 @@ Unresolved questions:
 - Add a `Recovery Link Operator Smoke Helper v0` script or operator-only endpoint to complete valid `/r/[recoveryToken]` staging smoke.
 - Decide whether that helper should create temporary `operator_test` rows and clean them automatically.
 - Production recovery link DB/env remain gated.
+
+## 2026-06-01 Recovery Link Operator Smoke Helper v0
+
+### Completed Changes
+
+- saved the Recovery Link Operator Smoke Helper v0 handoff and report
+- added `qa:recovery-link:smoke` as a local operator QA command
+- added a recovery-link smoke helper that rejects production targets, creates a fresh no-card paid result, creates a temporary `operator_test` recovery link, verifies `/r/[recoveryToken]` internally, checks invalid-link safety, and deletes the operator test row when it can run
+- added helper-level redaction for `prl_` recovery tokens and `/r/[token]` paths
+- updated `qa:env:preflight` with a `recovery_link_smoke` mode
+- added targeted tests for redaction, production rejection, token hashing, 90-day expiry, package script registration, and preflight registration
+- updated the dashboard to show that valid-link smoke now has an operator helper but still needs secure local Preview(staging) env alignment
+
+### Learnings
+
+- A public endpoint is not needed for valid recovery-link smoke; a local operator script is enough and safer.
+- The script can create only temporary `operator_test` rows and avoid printing raw tokens, token hashes, paid access tokens, checkout session tokens, and DB row IDs.
+- Current local operator environment does not include `PAYMENT_RECOVERY_LINK_TOKEN_SECRET`, so live valid-link smoke blocks safely before DB writes.
+
+### Unresolved Questions
+
+- Valid `/r/[recoveryToken]` staging smoke still needs a secure operator session with matching Preview(staging) `DATABASE_URL`, `OPERATOR_TEST_SECRET`, and `PAYMENT_RECOVERY_LINK_TOKEN_SECRET`.
+- If more DB-backed QA scripts are added, common no-card flow primitives should be extracted to avoid duplication.
+- Production recovery link DB/env remain gated.

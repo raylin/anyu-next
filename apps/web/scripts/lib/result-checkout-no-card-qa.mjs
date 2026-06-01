@@ -21,6 +21,7 @@ const SECRET_NAME_PATTERNS = [
 const TOKEN_LIKE_PATTERNS = [
   /pcs_[A-Za-z0-9_-]{8,}/u,
   /pa_[A-Za-z0-9_-]{8,}/u,
+  /prl_[A-Za-z0-9_-]{8,}/u,
   /TradeInfo=[A-Za-z0-9%_-]+/u,
   /TradeSha=[A-Za-z0-9%_-]+/u,
 ];
@@ -88,6 +89,7 @@ function redactRouteShape(value) {
     .replace(/\/result\/[^/?#]+/gu, "/result/[REDACTED]")
     .replace(/checkoutToken=[^&#]+/gu, "checkoutToken=[REDACTED]")
     .replace(/\/unlock\/[^/?#]+/gu, "/unlock/[REDACTED]")
+    .replace(/\/r\/[^/?#]+/gu, "/r/[REDACTED]")
     .replace(/\/payment\/access\?checkoutToken=[^&#]+/gu, "/payment/access?checkoutToken=[REDACTED]");
 }
 

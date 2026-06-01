@@ -22,7 +22,8 @@
     "qa:env:preflight": "node scripts/qa-env-preflight.mjs",
     "qa:fake-paid": "node scripts/authorized-fake-paid-qa.mjs",
     "qa:newebpay:sandbox": "node scripts/newebpay-sandbox-e2e-helper.mjs",
-    "qa:result-checkout:no-card": "node scripts/result-checkout-no-card-qa.mjs"
+    "qa:result-checkout:no-card": "node scripts/result-checkout-no-card-qa.mjs",
+    "qa:recovery-link:smoke": "node scripts/recovery-link-smoke-qa.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
