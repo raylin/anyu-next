@@ -8372,3 +8372,26 @@ Unresolved questions:
 - A minimal recovery-specific LIFF page/UI entry is still needed to call the route from a real LINE context.
 - Owner-assisted staging LIFF bind smoke remains unrun.
 - DB-backed single-use bind state remains optional future work if replay diagnostics become necessary.
+
+## 2026-06-01 Paid Result Delivery Artifact Plan v0
+
+### Completed Changes
+
+- saved the Paid Result Delivery Artifact Plan v0 handoff and report
+- audited the current ReturnURL ready state, payment access page, paid access resolver, completed paid result rendering, recovery save section, paid result records, recovery helpers, and legal/support copy
+- defined Module 01's paid artifact as a web-first delivered report object rather than Email/LINE delivery, PDF export, or membership
+- recommended a minimal delivery artifact header/status card on the completed paid result page
+- recommended a display-only user-facing report reference code instead of exposing raw IDs, payment tokens, or provider order details
+- updated the dashboard next recommendation to prioritize Paid Result Delivery Artifact Implementation v0 when strengthening the Module 01 funnel
+
+### Learnings
+
+- Current paid content is complete and recovery-aware, but the top of the completed result still reads like a result page rather than a delivered report artifact.
+- A delivery header can improve perceived value and support recovery without changing payment provider behavior or adding membership.
+- A report reference code should be non-authorizing and display-only in v0; support lookup can be planned later if needed.
+
+### Unresolved Questions
+
+- Final report code format still needs implementation choice.
+- Public retention/access language may need later alignment if report availability windows become explicit.
+- Share-safe artifact and PDF/export remain deferred.
