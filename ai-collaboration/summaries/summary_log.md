@@ -8325,3 +8325,26 @@ Unresolved questions:
 - Whether recovery bind state needs a dedicated DB table or a short-lived signed server state still needs implementation approval.
 - LINE recovery bind UI and staging QA remain unimplemented.
 - Legacy LINE fulfillment retirement or containment should be planned after recovery binding is stable.
+
+## 2026-06-01 LINE Recovery Bind State Helpers v0
+
+### Completed Changes
+
+- saved the LINE Recovery Bind State Helpers v0 handoff and report
+- added server-only LINE recovery bind state helpers using short-lived signed `rlb_` tokens
+- added token/state validation that rejects raw `pa_`/`pcs_` bearer values, unlock/fulfillment markers, provider payload markers, external return paths, and `/unlock/` return paths
+- added a server-side bind helper that maps verified LINE identity into `payment_recovery_contacts` through the existing hash-only LINE recovery contact service
+- added targeted tests covering state round-trip, expiry, tamper failure, unsafe return paths, hash-only LINE binding, sanitized failure categories, marketing opt-in separation, and Email helper regression
+- updated the dashboard LINE roadmap to mark bind-state helpers implemented and route/callback as the next step
+
+### Learnings
+
+- A signed short-lived state token is enough for the first route-ready primitive and avoids introducing a new DB table before LIFF route requirements are proven.
+- Existing `PAYMENT_RECOVERY_CONTACT_HASH_SECRET` can protect both the state signature and LINE contact hash purpose without exposing raw LINE IDs.
+- The helper-layer boundary can keep legacy short-code/unlock-token semantics out of recovery binding.
+
+### Unresolved Questions
+
+- Future LIFF route may need DB-backed single-use state if replay diagnostics or stricter invalidation become necessary.
+- Desktop LINE binding UX still needs a QR/open-on-phone design.
+- Legacy LINE fulfillment retirement or containment remains deferred until recovery-specific binding is stable.
