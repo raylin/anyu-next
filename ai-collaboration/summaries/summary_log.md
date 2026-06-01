@@ -8418,3 +8418,28 @@ Unresolved questions:
 - Owner-assisted LINE in-app staging smoke remains pending.
 - UI CTA wiring for LINE recovery is still unimplemented.
 - Desktop QR/open-on-phone behavior remains future work.
+
+## 2026-06-01 Paid Result Recovery Link Delivery Plan v0
+
+### Completed Changes
+
+- saved the Paid Result Recovery Link Delivery Plan v0 handoff and report
+- clarified that Email/LINE "save" should eventually deliver a safe web return link after the paid result is ready, not the full report body
+- recommended a 90-day v0 recovery link validity window, with careful copy distinguishing link validity from permanent membership storage
+- recommended a DB-backed `paid_result_recovery_links` token model with hash-only token storage, revocation, expiry, send status, and channel metadata
+- recommended `/r/[recoveryToken]` as the short channel-neutral resolver route that exchanges into safe web access without exposing raw `pa_` or `pcs_` tokens
+- planned Email and LINE send behavior for pre-payment and post-payment saves without selecting providers or sending messages
+- updated the dashboard to prioritize Recovery Link Token Schema / Resolver v0 before Email sending, LINE push, or paid delivery artifact UI
+
+### Learnings
+
+- The existing recovery contact model stores identity, but it does not yet fulfill the user-facing promise of receiving a return link.
+- Raw paid access and checkout session tokens are not appropriate for Email/LINE delivery because they are bearer/session primitives rather than auditable recovery-link artifacts.
+- Link delivery is now the foundation for both recovery save UX and future support tooling; delivery artifact polish should build on top of that access primitive.
+
+### Unresolved Questions
+
+- Owner should approve the exact public retention copy before legal/support pages mention a 90-day recovery window.
+- Email provider and sender identity remain undecided.
+- LINE visible CTA wiring and owner-assisted LIFF smoke remain pending.
+- Implementation should decide whether the resolver directly renders paid access or exchanges into a short-lived server-side handoff.

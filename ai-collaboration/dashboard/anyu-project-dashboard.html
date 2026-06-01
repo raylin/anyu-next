@@ -506,8 +506,8 @@
       <div class="panel">
         <p><strong>Gap:</strong> paid access works through session-bound web handoff, but a user who closes the browser or loses the ReturnURL may need manual support to recover access.</p>
         <p><strong>Implemented flow:</strong> checkout-start now includes an Email-first soft gate, separate optional marketing consent, a deferred LINE recovery option, and skip-with-warning acknowledgement before provider handoff.</p>
-        <p><strong>Access rule:</strong> recovery messages should point back to secure web access using fresh short-lived recovery links; do not send raw pcs_ or pa_ tokens through LINE or Email.</p>
-        <p><strong>Implementation order:</strong> dedicated recovery contact schema/service layer is added and DB-applied on staging. Checkout-start soft gate UX is implemented and Email-save QA passes on staging with branch-scoped recovery secrets. Post-payment recovery status helpers, entitlement binding, paid-ready reminder, completed-result Email save section, LINE recovery bind-state helpers, the recovery-specific LIFF bind route, and `/line/recovery/bind` page are implemented. Paid Result Delivery Artifact Plan v0 recommends a web-first delivery header/status card plus display-only report reference before support ops tooling. Staging smoke confirmed deployed UI, no-card paid flow, owner-assisted real browser Email-save submission, and persisted saved state after reload. Production DB/env apply remains gated.</p>
+        <p><strong>Access rule:</strong> recovery messages should point back to secure web access using fresh recovery links; do not send full report content, raw pcs_ tokens, or raw pa_ tokens through LINE or Email.</p>
+        <p><strong>Implementation order:</strong> dedicated recovery contact schema/service layer is added and DB-applied on staging. Checkout-start soft gate UX is implemented and Email-save QA passes on staging with branch-scoped recovery secrets. Post-payment recovery status helpers, entitlement binding, paid-ready reminder, completed-result Email save section, LINE recovery bind-state helpers, the recovery-specific LIFF bind route, and `/line/recovery/bind` page are implemented. Paid Result Recovery Link Delivery Plan v0 clarifies that Email/LINE save should eventually send a safe web return link after the paid result is ready, not the report body. The next foundation should be recovery link token schema/resolver before Email sending, LINE push, or delivery artifact UI. Production DB/env apply remains gated.</p>
       </div>
     </section>
 
@@ -548,7 +548,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation while approval is pending:</strong> run Paid Result Delivery Artifact Implementation v0 if strengthening the Module 01 paid funnel is the priority, Checkout / Paid Result LINE Recovery CTA Wiring v0 if strengthening LINE recovery is the priority, Module 02 Concept Spec: 職場暗流雷達 v0 if product exploration is the priority, or Production Payment Config Dry-Run Plan v0 if NewebPay approval arrives.</p>
+        <p><strong>Current recommendation while approval is pending:</strong> run Recovery Link Token Schema / Resolver v0 first if strengthening the Module 01 recovery promise is the priority, then Email Recovery Link Sending v0 or LINE Recovery CTA Wiring v0 depending channel priority. Paid Result Delivery Artifact Implementation v0 remains useful after link delivery semantics are concrete. Module 02 Concept Spec: 職場暗流雷達 v0 is still safe if product exploration is the priority, and Production Payment Config Dry-Run Plan v0 should take over if NewebPay approval arrives.</p>
         <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production runtime should remain disabled until the launch gate sequence is explicitly approved.</p>
         <p>If NewebPay merchant review approval/formal credentials are available, switch back to Production Payment Config Dry-Run v0 with runtime still disabled; do not jump directly to public checkout.</p>
       </div>
@@ -608,6 +608,7 @@
           <li><a href="../reports/2026-06-01-line-recovery-bind-route-liff-callback-v0.md">LINE Recovery Bind Route / LIFF Callback v0</a></li>
           <li><a href="../reports/2026-06-01-paid-result-delivery-artifact-plan-v0.md">Paid Result Delivery Artifact Plan v0</a></li>
           <li><a href="../reports/2026-06-01-line-recovery-liff-page-ui-entry-v0.md">LINE Recovery LIFF Page / UI Entry v0</a></li>
+          <li><a href="../reports/2026-06-01-paid-result-recovery-link-delivery-plan-v0.md">Paid Result Recovery Link Delivery Plan v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>
