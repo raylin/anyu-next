@@ -173,6 +173,65 @@ export async function revokePaidResultRecoveryLink(input: {
   return record ?? null;
 }
 
+export async function markPaidResultRecoveryLinkSent(input: {
+  linkId: string;
+  sentAt?: Date;
+}) {
+  const sentAt = input.sentAt ?? new Date();
+  const db = requireDb();
+  const [record] = await db
+    .update(paidResultRecoveryLinks)
+    .set({
+      status: "sent",
+      sentAt,
+      updatedAt: sentAt,
+    })
+    .where(eq(paidResultRecoveryLinks.id, input.linkId))
+    .returning();
+
+  return record ?? null;
+}
+
+export async function markPaidResultRecoveryLinkFailed(input: {
+  linkId: string;
+  failedAt?: Date;
+}) {
+  const failedAt = input.failedAt ?? new Date();
+  const db = requireDb();
+  const [record] = await db
+    .update(paidResultRecoveryLinks)
+    .set({
+      status: "failed",
+      updatedAt: failedAt,
+    })
+    .where(eq(paidResultRecoveryLinks.id, input.linkId))
+    .returning();
+
+  return record ?? null;
+}
+
+export async function getRecentPaidResultRecoveryLinkForContact(input: {
+  entitlementId: string;
+  recoveryContactId: string;
+  channel: PaidResultRecoveryLinkChannel;
+}) {
+  const db = requireDb();
+  const [record] = await db
+    .select()
+    .from(paidResultRecoveryLinks)
+    .where(
+      and(
+        eq(paidResultRecoveryLinks.entitlementId, input.entitlementId),
+        eq(paidResultRecoveryLinks.recoveryContactId, input.recoveryContactId),
+        eq(paidResultRecoveryLinks.channel, input.channel),
+        eq(paidResultRecoveryLinks.purpose, PAID_RESULT_RECOVERY_LINK_PURPOSE),
+      ),
+    )
+    .limit(1);
+
+  return record ?? null;
+}
+
 export async function resolvePaidResultRecoveryLink(input: {
   rawToken: string;
   now?: Date;

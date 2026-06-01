@@ -79,6 +79,27 @@ describe("paid result recovery save section", () => {
     expect(html).not.toContain("LINE 交付");
   });
 
+  it("distinguishes an actual sent recovery link from saved-only state", () => {
+    const html = renderCompleted({
+      recoveryState: "email_sent",
+      recoverySummary: {
+        hasRecoveryContact: true,
+        hasEmailRecovery: true,
+        hasLineRecovery: false,
+        emailStatus: "bound",
+        lineStatus: "none",
+        transactionalConsentPresent: true,
+        marketingOptInPresent: false,
+        recommendedPostPaymentAction: "confirm_saved",
+        safeDisplayContact: { type: "email", maskedValue: "o***@e***.com" },
+      },
+    });
+
+    expect(html).toContain("已準備並寄出找回連結");
+    expect(html).toContain("Email 不包含報告內容");
+    expect(html).not.toContain("Email 交付");
+  });
+
   it("shows non-blocking email save section when unsaved", async () => {
     async function recoveryEmailAction() {
       "use server";
@@ -105,6 +126,7 @@ describe("paid result recovery save section", () => {
     expect(html).toContain("LINE 找回");
     expect(html).toContain("稍後支援");
     expect(html).toContain("完整報告仍以網頁查看為準");
+    expect(html).toContain("若 Email 寄送服務尚未啟用，系統仍會先保存找回方式");
     expect(html).not.toContain("Email 交付");
     expect(html).not.toContain("LINE 交付");
     expect(html).not.toContain("會員");

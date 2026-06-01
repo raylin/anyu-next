@@ -17,6 +17,9 @@ vi.mock("@/lib/db/entitlements", () => ({
 
 import {
   createPaidResultRecoveryLink,
+  getRecentPaidResultRecoveryLinkForContact,
+  markPaidResultRecoveryLinkFailed,
+  markPaidResultRecoveryLinkSent,
   PAID_RESULT_RECOVERY_LINK_CHANNELS,
   PAID_RESULT_RECOVERY_LINK_STATUSES,
   resolvePaidResultRecoveryLink,
@@ -288,6 +291,60 @@ describe("paid result recovery links", () => {
       updatedAt: NOW,
     });
     expect(dbMock.capture.updateValues).not.toHaveProperty("rawToken");
+  });
+
+  it("marks recovery link send status without exposing token values", async () => {
+    const sentDb = createDbMock({
+      updateRows: [recoveryLinkRecord({ status: "sent", sentAt: NOW })],
+    });
+    mockRequireDb.mockReturnValue(sentDb.db);
+
+    await markPaidResultRecoveryLinkSent({
+      linkId: RECOVERY_LINK_ID,
+      sentAt: NOW,
+    });
+
+    expect(sentDb.capture.updateValues).toMatchObject({
+      status: "sent",
+      sentAt: NOW,
+      updatedAt: NOW,
+    });
+    expect(sentDb.capture.updateValues).not.toHaveProperty("rawToken");
+
+    const failedDb = createDbMock({
+      updateRows: [recoveryLinkRecord({ status: "failed" })],
+    });
+    mockRequireDb.mockReturnValue(failedDb.db);
+
+    await markPaidResultRecoveryLinkFailed({
+      linkId: RECOVERY_LINK_ID,
+      failedAt: NOW,
+    });
+
+    expect(failedDb.capture.updateValues).toMatchObject({
+      status: "failed",
+      updatedAt: NOW,
+    });
+    expect(failedDb.capture.updateValues).not.toHaveProperty("rawToken");
+  });
+
+  it("finds existing recovery links for duplicate send prevention", async () => {
+    const dbMock = createDbMock({
+      selectRows: [recoveryLinkRecord({ status: "sent" })],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+
+    const result = await getRecentPaidResultRecoveryLinkForContact({
+      entitlementId: ENTITLEMENT_ID,
+      recoveryContactId: RECOVERY_CONTACT_ID,
+      channel: "email",
+    });
+
+    expect(result).toMatchObject({
+      id: RECOVERY_LINK_ID,
+      status: "sent",
+    });
+    expect(JSON.stringify(result)).not.toContain("prl_");
   });
 
   it("adds the paid result recovery links migration and schema seam", () => {

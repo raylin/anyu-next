@@ -8564,3 +8564,28 @@ Unresolved questions:
 - The Preview-only operator endpoint must remain gated and should not be enabled in Production.
 - QA scripts now duplicate result creation and checkout-start verification; extract shared helpers if this pattern grows.
 - Next recovery step should likely be Email Recovery Link Sending v0, unless LINE Recovery CTA Wiring is prioritized first.
+
+## 2026-06-02 Email Recovery Link Sending v0
+
+### Completed Changes
+
+- saved the Email Recovery Link Sending v0 handoff and report
+- added a server-only Email recovery link sender foundation
+- added default `noop`/test Email adapter behavior that does not claim real Email delivery
+- added a safe recovery Email template with Module 01 name, `/r/[recoveryToken]` link, 90-day retention copy, and support contact
+- added Email-channel recovery link orchestration that creates link rows, keeps raw `prl_` tokens in process only, and marks sent/failed only according to adapter result
+- wired completed-result Email save actions to attempt recovery link sending non-fatally after contact save
+- updated completed-result recovery copy away from stale “v0 不會寄送 Email” wording
+- documented `EMAIL_PROVIDER` and `EMAIL_FROM` env names
+
+### Learnings
+
+- Post-payment Email save can safely create recovery links without blocking paid report access.
+- The noop adapter is useful for staging/local validation but should not mark links as sent or claim user-visible Email delivery.
+- Automatic send after paid delivery readiness for checkout-start recovery contacts should be a separate non-fatal hook, not bundled into this first provider foundation.
+
+### Unresolved Questions
+
+- Choose and configure the real Email provider adapter before claiming real Email delivery.
+- Define resend/rate-limit behavior and cleanup for noop-created or failed recovery link rows.
+- Add a paid-delivery completion hook so Email contacts captured before payment receive recovery links when the paid report becomes ready.

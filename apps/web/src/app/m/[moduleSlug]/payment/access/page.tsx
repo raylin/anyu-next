@@ -8,6 +8,7 @@ import {
   getPaymentRecoveryStatusSummary,
 } from "@/lib/db/payment-recovery-contacts";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import { createAndSendEmailRecoveryLink } from "@/lib/notifications/email-recovery-link";
 import { RecoveryContactConfigError } from "@/lib/payments/recovery-contact-crypto";
 import { resolvePaymentAccessHandoff } from "@/lib/payments/payment-access-handoff";
 import { UnlockCompleted } from "@/app/m/[moduleSlug]/unlock/[unlockToken]/page";
@@ -101,6 +102,7 @@ export default async function PaymentAccessPage({
   const resolvedAnalysisResultId = handoff.record.result.id;
   const resolvedPaymentIntentId = handoff.paymentIntent.id;
   const resolvedEntitlementId = handoff.entitlement?.id ?? null;
+  const resolvedModuleTitle = moduleConfig.title;
 
   async function saveCompletedResultRecoveryEmail(formData: FormData) {
     "use server";
@@ -115,8 +117,10 @@ export default async function PaymentAccessPage({
       redirect(`${redirectPath}&recovery=email_error`);
     }
 
+    let recoveryState = "email_saved";
+
     try {
-      await createOrUpdatePostPaymentEmailRecoveryContact({
+      const recoveryContact = await createOrUpdatePostPaymentEmailRecoveryContact({
         moduleSlug: resolvedModuleSlug,
         analysisResultId: resolvedAnalysisResultId,
         paymentIntentId: resolvedPaymentIntentId,
@@ -125,6 +129,21 @@ export default async function PaymentAccessPage({
         source: "completed_result",
         marketingOptInAt: marketingOptIn ? new Date() : null,
       });
+
+      if (resolvedEntitlementId) {
+        const sendResult = await createAndSendEmailRecoveryLink({
+          moduleSlug: resolvedModuleSlug,
+          moduleTitle: resolvedModuleTitle,
+          analysisResultId: resolvedAnalysisResultId,
+          paymentIntentId: resolvedPaymentIntentId,
+          entitlementId: resolvedEntitlementId,
+          recoveryContact,
+        }).catch(() => null);
+
+        if (sendResult?.status === "sent") {
+          recoveryState = "email_sent";
+        }
+      }
     } catch (error) {
       if (error instanceof RecoveryContactConfigError) {
         redirect(`${redirectPath}&recovery=email_error`);
@@ -133,7 +152,7 @@ export default async function PaymentAccessPage({
       redirect(`${redirectPath}&recovery=email_error`);
     }
 
-    redirect(`${redirectPath}&recovery=email_saved`);
+    redirect(`${redirectPath}&recovery=${recoveryState}`);
   }
 
   return (

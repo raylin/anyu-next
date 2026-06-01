@@ -1,0 +1,222 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const {
+  mockCreatePaidResultRecoveryLink,
+  mockGetRecentPaidResultRecoveryLinkForContact,
+  mockMarkPaidResultRecoveryLinkFailed,
+  mockMarkPaidResultRecoveryLinkSent,
+  mockIsPaidResultRecoveryLinkExpired,
+  mockDecryptRecoveryContactValue,
+} = vi.hoisted(() => ({
+  mockCreatePaidResultRecoveryLink: vi.fn(),
+  mockGetRecentPaidResultRecoveryLinkForContact: vi.fn(),
+  mockMarkPaidResultRecoveryLinkFailed: vi.fn(),
+  mockMarkPaidResultRecoveryLinkSent: vi.fn(),
+  mockIsPaidResultRecoveryLinkExpired: vi.fn(),
+  mockDecryptRecoveryContactValue: vi.fn(),
+}));
+
+vi.mock("@/lib/db/paid-result-recovery-links", () => ({
+  createPaidResultRecoveryLink: mockCreatePaidResultRecoveryLink,
+  getRecentPaidResultRecoveryLinkForContact: mockGetRecentPaidResultRecoveryLinkForContact,
+  isPaidResultRecoveryLinkExpired: mockIsPaidResultRecoveryLinkExpired,
+  markPaidResultRecoveryLinkFailed: mockMarkPaidResultRecoveryLinkFailed,
+  markPaidResultRecoveryLinkSent: mockMarkPaidResultRecoveryLinkSent,
+}));
+
+vi.mock("@/lib/payments/recovery-contact-crypto", () => ({
+  decryptRecoveryContactValue: mockDecryptRecoveryContactValue,
+}));
+
+import {
+  buildRecoveryLinkEmail,
+  buildRecoveryLinkUrl,
+  createAndSendEmailRecoveryLink,
+  sendRecoveryEmail,
+} from "@/lib/notifications/email-recovery-link";
+
+const RAW_TOKEN = "prl_" + "a".repeat(43);
+
+function emailContact(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "contact-1",
+    moduleSlug: "ambiguous-temperature",
+    analysisResultId: "result-1",
+    paymentIntentId: "payment-1",
+    entitlementId: "entitlement-1",
+    contactType: "email",
+    contactHash: "redacted-contact-hash",
+    contactEncrypted: "encrypted-email",
+    lineUserHash: null,
+    emailHash: "redacted-email-hash",
+    transactionalConsentAt: new Date("2026-06-01T00:00:00.000Z"),
+    marketingOptInAt: null,
+    source: "completed_result",
+    status: "bound",
+    createdAt: new Date("2026-06-01T00:00:00.000Z"),
+    updatedAt: new Date("2026-06-01T00:00:00.000Z"),
+    lastUsedAt: null,
+    ...overrides,
+  };
+}
+
+describe("email recovery link sending", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetRecentPaidResultRecoveryLinkForContact.mockResolvedValue(null);
+    mockIsPaidResultRecoveryLinkExpired.mockReturnValue(false);
+    mockCreatePaidResultRecoveryLink.mockResolvedValue({
+      rawToken: RAW_TOKEN,
+      link: { id: "recovery-link-1", status: "created" },
+    });
+    mockDecryptRecoveryContactValue.mockReturnValue("qa-recovery@example.invalid");
+  });
+
+  it("builds a recovery link URL using /r/[token]", () => {
+    expect(
+      buildRecoveryLinkUrl({
+        rawToken: RAW_TOKEN,
+        env: { NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw/some/path" } as NodeJS.ProcessEnv,
+      }),
+    ).toBe(`https://staging.anyu.tw/r/${RAW_TOKEN}`);
+  });
+
+  it("builds a link-only recovery email template without report body or access tokens", () => {
+    const recoveryUrl = `https://staging.anyu.tw/r/${RAW_TOKEN}`;
+    const message = buildRecoveryLinkEmail({
+      to: "qa-recovery@example.invalid",
+      recoveryUrl,
+      moduleTitle: "曖昧溫度計",
+    });
+
+    expect(message.subject).toBe("你的 ANYU 完整報告已準備好");
+    expect(message.text).toContain("曖昧溫度計");
+    expect(message.text).toContain(recoveryUrl);
+    expect(message.text).toContain("此連結將保留 90 天");
+    expect(message.text).toContain("hello@anyu.tw");
+    expect(message.html).toContain(recoveryUrl);
+    expect(message.text).not.toContain("pa_");
+    expect(message.text).not.toContain("pcs_");
+    expect(message.text).not.toContain("原始輸入");
+    expect(message.text).not.toContain("完整摘要內容");
+  });
+
+  it("uses noop adapter by default and does not claim a real email was sent", async () => {
+    await expect(
+      sendRecoveryEmail({
+        message: buildRecoveryLinkEmail({
+          to: "qa-recovery@example.invalid",
+          recoveryUrl: `https://staging.anyu.tw/r/${RAW_TOKEN}`,
+        }),
+        env: {} as NodeJS.ProcessEnv,
+      }),
+    ).resolves.toEqual({ ok: true, provider: "noop", status: "noop" });
+  });
+
+  it("creates a recovery link for noop sending without returning raw token or marking sent", async () => {
+    const result = await createAndSendEmailRecoveryLink({
+      moduleSlug: "ambiguous-temperature",
+      moduleTitle: "曖昧溫度計",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+      recoveryContact: emailContact() as never,
+      env: {
+        NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw",
+        EMAIL_PROVIDER: "noop",
+      } as NodeJS.ProcessEnv,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "noop",
+      provider: "noop",
+      recoveryLinkCreated: true,
+      emailSent: false,
+    });
+    expect(mockCreatePaidResultRecoveryLink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        channel: "email",
+        entitlementId: "entitlement-1",
+        recoveryContactId: "contact-1",
+      }),
+    );
+    expect(mockMarkPaidResultRecoveryLinkSent).not.toHaveBeenCalled();
+    expect(mockMarkPaidResultRecoveryLinkFailed).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
+  });
+
+  it("prevents duplicate sends when a sent link already exists", async () => {
+    mockGetRecentPaidResultRecoveryLinkForContact.mockResolvedValue({
+      id: "existing-link-1",
+      status: "sent",
+    });
+
+    const result = await createAndSendEmailRecoveryLink({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+      recoveryContact: emailContact() as never,
+      env: { NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw" } as NodeJS.ProcessEnv,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "duplicate",
+      recoveryLinkCreated: false,
+      emailSent: false,
+    });
+    expect(mockCreatePaidResultRecoveryLink).not.toHaveBeenCalled();
+  });
+
+  it("creates a new link when the previous sent link is expired", async () => {
+    mockGetRecentPaidResultRecoveryLinkForContact.mockResolvedValue({
+      id: "existing-link-1",
+      status: "sent",
+    });
+    mockIsPaidResultRecoveryLinkExpired.mockReturnValue(true);
+
+    const result = await createAndSendEmailRecoveryLink({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+      recoveryContact: emailContact() as never,
+      env: {
+        NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw",
+        EMAIL_PROVIDER: "noop",
+      } as NodeJS.ProcessEnv,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "noop",
+      recoveryLinkCreated: true,
+    });
+    expect(mockCreatePaidResultRecoveryLink).toHaveBeenCalled();
+  });
+
+  it("fails safely when app URL is unavailable", async () => {
+    const result = await createAndSendEmailRecoveryLink({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+      recoveryContact: emailContact() as never,
+      env: {} as NodeJS.ProcessEnv,
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: "unavailable",
+      category: "app_url_unavailable",
+      recoveryLinkCreated: true,
+      emailSent: false,
+    });
+    expect(mockMarkPaidResultRecoveryLinkFailed).toHaveBeenCalledWith({
+      linkId: "recovery-link-1",
+    });
+    expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
+  });
+});

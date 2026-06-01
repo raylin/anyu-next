@@ -27,6 +27,7 @@ import {
   type ModuleThemeState,
 } from "@/lib/modules/module-theme";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import { createAndSendEmailRecoveryLink } from "@/lib/notifications/email-recovery-link";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import {
   hasPaidResult,
@@ -127,6 +128,7 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
     const resolvedPaymentIntentId = paidAccess.entitlement.paymentIntentId;
     const resolvedEntitlementId = paidAccess.entitlement.id;
     const resolvedModuleSlug = moduleSlug;
+    const resolvedModuleTitle = moduleConfig.title;
     const resolvedUnlockToken = unlockToken;
 
     async function savePaidAccessRecoveryEmail(formData: FormData) {
@@ -142,8 +144,10 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         redirect(`${redirectPath}?recovery=email_error`);
       }
 
+      let recoveryState = "email_saved";
+
       try {
-        await createOrUpdatePostPaymentEmailRecoveryContact({
+        const recoveryContact = await createOrUpdatePostPaymentEmailRecoveryContact({
           moduleSlug: resolvedModuleSlug,
           analysisResultId: resolvedAnalysisResultId,
           paymentIntentId: resolvedPaymentIntentId,
@@ -152,6 +156,18 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
           source: "completed_result",
           marketingOptInAt: marketingOptIn ? new Date() : null,
         });
+        const sendResult = await createAndSendEmailRecoveryLink({
+          moduleSlug: resolvedModuleSlug,
+          moduleTitle: resolvedModuleTitle,
+          analysisResultId: resolvedAnalysisResultId,
+          paymentIntentId: resolvedPaymentIntentId,
+          entitlementId: resolvedEntitlementId,
+          recoveryContact,
+        }).catch(() => null);
+
+        if (sendResult?.status === "sent") {
+          recoveryState = "email_sent";
+        }
       } catch (error) {
         if (error instanceof RecoveryContactConfigError) {
           redirect(`${redirectPath}?recovery=email_error`);
@@ -160,7 +176,7 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         redirect(`${redirectPath}?recovery=email_error`);
       }
 
-      redirect(`${redirectPath}?recovery=email_saved`);
+      redirect(`${redirectPath}?recovery=${recoveryState}`);
     }
 
     return (
@@ -437,7 +453,8 @@ function PaidResultRecoverySaveSection({
     return null;
   }
 
-  const emailSaved = recoveryState === "email_saved" || recoverySummary?.hasRecoveryContact;
+  const emailSent = recoveryState === "email_sent";
+  const emailSaved = emailSent || recoveryState === "email_saved" || recoverySummary?.hasRecoveryContact;
   const emailError =
     recoveryState === "email_error" ||
     recoverySummary?.recommendedPostPaymentAction === "retry_email";
@@ -460,7 +477,9 @@ function PaidResultRecoverySaveSection({
             : "之後若換裝置或找不到頁面，可透過已保存的方式協助找回。"}
         </p>
         <p className="anyu-subtle-note">
-          Email / LINE 只作為找回、完成通知與客服協助；完整報告仍以此網頁查看為準。
+          {emailSent
+            ? "已準備並寄出找回連結；完整報告仍以此網頁查看為準，Email 不包含報告內容。"
+            : "Email / LINE 只作為找回、完成通知與客服協助；完整報告仍以此網頁查看為準。"}
         </p>
       </Card>
     );
@@ -502,7 +521,7 @@ function PaidResultRecoverySaveSection({
             </button>
           </div>
           <p id="paid-result-recovery-email-help" className="anyu-subtle-note">
-            v0 不會寄送 Email；只會保存為這次完整報告的找回資料。Email 不會顯示在頁面或報告中。
+            保存後會準備一個找回連結；若 Email 寄送服務尚未啟用，系統仍會先保存找回方式。Email 不會包含完整報告內容。
           </p>
           <label className="anyu-recovery-checkbox">
             <input type="checkbox" name="marketingOptIn" value="1" />
