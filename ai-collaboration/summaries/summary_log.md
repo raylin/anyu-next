@@ -8443,3 +8443,28 @@ Unresolved questions:
 - Email provider and sender identity remain undecided.
 - LINE visible CTA wiring and owner-assisted LIFF smoke remain pending.
 - Implementation should decide whether the resolver directly renders paid access or exchanges into a short-lived server-side handoff.
+
+## 2026-06-01 Recovery Link Token Schema / Resolver v0
+
+### Completed Changes
+
+- saved the Recovery Link Token Schema / Resolver v0 handoff and report
+- added `paid_result_recovery_links` schema and migration file `apps/web/drizzle/0010_paid_result_recovery_links.sql`
+- added `PAYMENT_RECOVERY_LINK_TOKEN_SECRET` as the explicit recovery link token secret placeholder
+- added `prl_` recovery token helpers with hash-only storage, purpose-separated HMAC, 90-day default expiry, and fail-closed missing-secret behavior
+- added server helpers to create, resolve, mark-used, and revoke paid result recovery links
+- refactored paid access resolution so entitlement-backed recovery links can reuse existing paid result rendering without exposing raw `pa_` or `pcs_`
+- added `/r/[recoveryToken]` resolver page with safe invalid/expired/revoked/processing behavior
+- added targeted recovery link and resolver page tests; full lint, tests, build, and drizzle-kit check passed locally
+
+### Learnings
+
+- A dedicated `prl_` token layer is the right boundary between saved recovery identities and paid web access.
+- The resolver can render from entitlement context without generating or sending raw paid access tokens.
+- Multi-use until expiry is acceptable for v0 if paired with high-entropy token generation, hash-only storage, 90-day expiry, revocation, and generic failure copy.
+
+### Unresolved Questions
+
+- Staging DB migration apply and Preview(staging) recovery link secret alignment remain separate follow-up work.
+- Public/legal retention copy still needs owner approval before mentioning the 90-day window.
+- Email/LINE sender integration and support resend tooling remain deferred.

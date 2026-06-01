@@ -34,7 +34,7 @@ export type PaidAccessResolutionState =
 export type PaidAccessResolution =
   | {
       ok: true;
-      accessKind: "paid_access_token";
+      accessKind: "paid_access_token" | "paid_result_recovery_link";
       state: Exclude<PaidAccessResolutionState, "not_found">;
       moduleSlug: string;
       entitlement: Entitlement;
@@ -44,7 +44,7 @@ export type PaidAccessResolution =
     }
   | {
       ok: false;
-      accessKind: "paid_access_token";
+      accessKind: "paid_access_token" | "paid_result_recovery_link";
       state: "not_found";
       errorCategory: "invalid_token" | "not_found" | "config_unavailable";
     };
@@ -121,17 +121,6 @@ export async function resolvePaidAccessToken(input: {
     };
   }
 
-  const moduleConfig = getModuleBySlug(input.moduleSlug);
-
-  if (!moduleConfig) {
-    return {
-      ok: false,
-      accessKind: "paid_access_token",
-      state: "not_found",
-      errorCategory: "not_found",
-    };
-  }
-
   let entitlement: Entitlement | null;
 
   try {
@@ -145,7 +134,7 @@ export async function resolvePaidAccessToken(input: {
     };
   }
 
-  if (!entitlement || entitlement.moduleSlug !== input.moduleSlug) {
+  if (!entitlement) {
     return {
       ok: false,
       accessKind: "paid_access_token",
@@ -154,8 +143,34 @@ export async function resolvePaidAccessToken(input: {
     };
   }
 
+  return resolvePaidEntitlementAccess({
+    moduleSlug: input.moduleSlug,
+    entitlement,
+    accessKind: "paid_access_token",
+    now: input.now,
+  });
+}
+
+export async function resolvePaidEntitlementAccess(input: {
+  moduleSlug: string;
+  entitlement: Entitlement;
+  accessKind?: "paid_access_token" | "paid_result_recovery_link";
+  now?: Date;
+}): Promise<PaidAccessResolution> {
+  const accessKind = input.accessKind ?? "paid_access_token";
+  const moduleConfig = getModuleBySlug(input.moduleSlug);
+
+  if (!moduleConfig || input.entitlement.moduleSlug !== input.moduleSlug) {
+    return {
+      ok: false,
+      accessKind,
+      state: "not_found",
+      errorCategory: "not_found",
+    };
+  }
+
   const record = await getAnalysisResultWithRequestById(
-    entitlement.analysisResultId,
+    input.entitlement.analysisResultId,
     moduleConfig.moduleId,
     moduleConfig.slug,
   );
@@ -163,7 +178,7 @@ export async function resolvePaidAccessToken(input: {
   if (!record) {
     return {
       ok: false,
-      accessKind: "paid_access_token",
+      accessKind,
       state: "not_found",
       errorCategory: "not_found",
     };
@@ -171,41 +186,41 @@ export async function resolvePaidAccessToken(input: {
 
   const now = input.now ?? new Date();
   const generationJob = await getPaidAccessGenerationJob({
-    entitlement,
+    entitlement: input.entitlement,
     moduleSlug: moduleConfig.slug,
   });
   const currentPaidResult = await getPaidResultForAnalysisResult({
-    analysisResultId: entitlement.analysisResultId,
+    analysisResultId: input.entitlement.analysisResultId,
     promptVersion: PAID_RESULT_PROMPT_VERSION,
     schemaVersion: PAID_RESULT_SCHEMA_VERSION,
   });
   const storedPaidResult =
     currentPaidResult ??
     (await getPaidResultForAnalysisResult({
-      analysisResultId: entitlement.analysisResultId,
+      analysisResultId: input.entitlement.analysisResultId,
       status: "completed",
     }));
 
-  if (entitlement.status === "revoked") {
+  if (input.entitlement.status === "revoked") {
     return {
       ok: true,
-      accessKind: "paid_access_token",
+      accessKind,
       state: "revoked",
       moduleSlug: moduleConfig.slug,
-      entitlement,
+      entitlement: input.entitlement,
       record,
       storedPaidResult,
       generationJob,
     };
   }
 
-  if (entitlement.status === "refunded") {
+  if (input.entitlement.status === "refunded") {
     return {
       ok: true,
-      accessKind: "paid_access_token",
+      accessKind,
       state: "refunded",
       moduleSlug: moduleConfig.slug,
-      entitlement,
+      entitlement: input.entitlement,
       record,
       storedPaidResult,
       generationJob,
@@ -213,16 +228,16 @@ export async function resolvePaidAccessToken(input: {
   }
 
   if (
-    entitlement.status === "expired" ||
-    isPast(entitlement.expiresAt, now) ||
-    isPast(entitlement.paidAccessTokenExpiresAt, now)
+    input.entitlement.status === "expired" ||
+    isPast(input.entitlement.expiresAt, now) ||
+    isPast(input.entitlement.paidAccessTokenExpiresAt, now)
   ) {
     return {
       ok: true,
-      accessKind: "paid_access_token",
+      accessKind,
       state: "expired",
       moduleSlug: moduleConfig.slug,
-      entitlement,
+      entitlement: input.entitlement,
       record,
       storedPaidResult,
       generationJob,
@@ -232,10 +247,10 @@ export async function resolvePaidAccessToken(input: {
   if (storedPaidResult?.status === "failed") {
     return {
       ok: true,
-      accessKind: "paid_access_token",
+      accessKind,
       state: "failed",
       moduleSlug: moduleConfig.slug,
-      entitlement,
+      entitlement: input.entitlement,
       record,
       storedPaidResult,
       generationJob,
@@ -245,10 +260,10 @@ export async function resolvePaidAccessToken(input: {
   if (storedPaidResult?.status === "processing") {
     return {
       ok: true,
-      accessKind: "paid_access_token",
+      accessKind,
       state: "processing",
       moduleSlug: moduleConfig.slug,
-      entitlement,
+      entitlement: input.entitlement,
       record,
       storedPaidResult,
       generationJob,
@@ -258,10 +273,10 @@ export async function resolvePaidAccessToken(input: {
   if (storedPaidResult?.status === "pending") {
     return {
       ok: true,
-      accessKind: "paid_access_token",
+      accessKind,
       state: "pending",
       moduleSlug: moduleConfig.slug,
-      entitlement,
+      entitlement: input.entitlement,
       record,
       storedPaidResult,
       generationJob,
@@ -274,10 +289,10 @@ export async function resolvePaidAccessToken(input: {
   ) {
     return {
       ok: true,
-      accessKind: "paid_access_token",
+      accessKind,
       state: "ready",
       moduleSlug: moduleConfig.slug,
-      entitlement,
+      entitlement: input.entitlement,
       record,
       storedPaidResult,
       generationJob,
@@ -287,10 +302,10 @@ export async function resolvePaidAccessToken(input: {
   if (storedPaidResult?.paidResultJson || hasPaidResult(record.result.normalizedResultJson)) {
     return {
       ok: true,
-      accessKind: "paid_access_token",
+      accessKind,
       state: "ready",
       moduleSlug: moduleConfig.slug,
-      entitlement,
+      entitlement: input.entitlement,
       record,
       storedPaidResult,
       generationJob,
@@ -299,10 +314,10 @@ export async function resolvePaidAccessToken(input: {
 
   return {
     ok: true,
-    accessKind: "paid_access_token",
+    accessKind,
     state: mapJobState(generationJob),
     moduleSlug: moduleConfig.slug,
-    entitlement,
+    entitlement: input.entitlement,
     record,
     storedPaidResult,
     generationJob,
