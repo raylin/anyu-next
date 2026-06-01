@@ -8233,3 +8233,25 @@ Unresolved questions:
 - LINE recovery binding remains deferred until recovery-specific LIFF state exists.
 - Production recovery DB/env apply remains gated.
 - A staging smoke should verify the new post-payment save UI after this commit deploys.
+
+## 2026-06-01 Paid Result Save CTA Staging Smoke v0
+
+### Completed Changes
+
+- saved the Paid Result Save CTA Staging Smoke v0 handoff and report
+- confirmed staging is serving commit `46da41a088c4` on Preview(`staging`)
+- verified required recovery env names exist as encrypted Preview(`staging`) branch-scoped variables
+- ran `qa:result-checkout:no-card`; result CTA, checkout-start, fake-paid, queue, paid status, paid access, and production fail-closed checks passed
+- verified completed-result unsaved recovery save section renders on staging with Email input, separate marketing opt-in, and deferred LINE option
+
+### Learnings
+
+- The new completed-result save section is deployed and visible for unsaved paid results.
+- Direct Node POST to the Next server-action form returned HTTP 500 and should not be treated as browser-equivalent proof.
+- Local headless Chromium cannot launch in this sandbox due macOS Mach port restrictions, so live Email-save form submission remains unverified.
+
+### Unresolved Questions
+
+- Browser/manual Email-save submission on completed result still needs verification.
+- Staging DB row creation/update for completed-result Email save remains unverified.
+- Recovery link sending, LINE recovery binding, production recovery DB/env apply, and key rotation policy remain future work.
