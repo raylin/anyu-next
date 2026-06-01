@@ -8302,3 +8302,26 @@ Unresolved questions:
 - Production entitlement uniqueness and recovery contacts migrations remain gated.
 - Recovery link/support-assisted recovery workflow is still unimplemented.
 - Module 02 concept/spec remains the recommended next product task unless payment approval arrives first.
+
+## 2026-06-01 LINE Recovery Binding Reframe v0
+
+### Completed Changes
+
+- saved the LINE Recovery Binding Reframe v0 handoff and report
+- inventoried ContactCapture, LIFF bridge, LIFF bind API, webhook, short-code fallback, LineFulfillBridge, current LINE copy, and recovery contact LINE helper support
+- classified reusable primitives versus legacy unlock/fulfillment-specific pieces
+- defined new LINE semantics as paid result recovery identity, not paid report delivery
+- designed recovery-specific LIFF state principles that avoid raw `pa_`, `pcs_`, unlock tokens, tokenized URLs, raw report content, source text, and raw LINE user IDs
+- updated dashboard LINE roadmap wording and next recommendation
+
+### Learnings
+
+- Existing LINE ID token verification can be reused, but the current LIFF fulfillment flow should not be reused directly because it carries unlock-intent/token/link-delivery semantics.
+- `payment_recovery_contacts` already supports hash-only LINE recovery contacts, which is the right target model.
+- Existing legacy `unlock_intents.line_user_id` raw storage is privacy debt and should not be expanded.
+
+### Unresolved Questions
+
+- Whether recovery bind state needs a dedicated DB table or a short-lived signed server state still needs implementation approval.
+- LINE recovery bind UI and staging QA remain unimplemented.
+- Legacy LINE fulfillment retirement or containment should be planned after recovery binding is stable.

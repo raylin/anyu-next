@@ -497,7 +497,7 @@
       <div class="panel">
         <p><strong>Positioning:</strong> LINE should be an owned retention and notification layer, not the canonical paid report delivery path. Web access remains the source of truth for paid reports.</p>
         <p><strong>Useful roles:</strong> save-for-later, paid result recovery, completion notification, support handoff, new module notification, early access / discount, and future low-frequency insight loops.</p>
-        <p><strong>Near-term rule:</strong> do not add new LINE CTAs until Module 02 concept/spec, recovery channel schema, or channel data model is approved. Existing LINE/LIFF/short-code infrastructure is reusable but still carries legacy unlock assumptions.</p>
+        <p><strong>Near-term rule:</strong> LINE should next move through recovery-specific bind-state helpers, not direct reuse of legacy unlock/fulfillment routes. Existing LIFF identity verification is reusable, but legacy short-code and unlock-token delivery semantics should not become paid recovery semantics.</p>
       </div>
     </section>
 
@@ -548,7 +548,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation while approval is pending:</strong> run Module 02 Concept Spec: 職場暗流雷達 v0 if product exploration is the priority, Recovery Link / Support-Assisted Recovery Plan v0 if launch-support risk is the priority, or Production Payment Config Dry-Run Plan v0 if NewebPay approval arrives.</p>
+        <p><strong>Current recommendation while approval is pending:</strong> run LINE Recovery Bind State Helpers v0 if strengthening the Module 01 reference loop is the priority, Module 02 Concept Spec: 職場暗流雷達 v0 if product exploration is the priority, or Production Payment Config Dry-Run Plan v0 if NewebPay approval arrives.</p>
         <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production runtime should remain disabled until the launch gate sequence is explicitly approved.</p>
         <p>If NewebPay merchant review approval/formal credentials are available, switch back to Production Payment Config Dry-Run v0 with runtime still disabled; do not jump directly to public checkout.</p>
       </div>
@@ -603,6 +603,7 @@
           <li><a href="../reports/2026-06-01-paid-result-save-cta-staging-smoke-v0.md">Paid Result Save CTA Staging Smoke v0</a></li>
           <li><a href="../reports/2026-06-01-paid-result-save-cta-browser-email-save-smoke-v0.md">Paid Result Save CTA Browser Email Save Smoke v0</a></li>
           <li><a href="../reports/2026-06-01-module-01-current-state-launch-gate-snapshot-v0.md">Module 01 Current State / Launch-Gate Snapshot v0</a></li>
+          <li><a href="../reports/2026-06-01-line-recovery-binding-reframe-v0.md">LINE Recovery Binding Reframe v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>
