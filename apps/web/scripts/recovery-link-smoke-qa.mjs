@@ -36,7 +36,7 @@ const PAYMENT_STATUS_READY = new Set(["completed"]);
 const PAYMENT_STATUS_WAITING = new Set(["pending", "processing"]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const SYNTHETIC_INPUT =
-  "這是一段恢復連結 operator smoke 用的曖昧情境：對方最近回覆慢，但仍會在深夜分享生活片段。我想驗證付費結果可透過安全找回連結重新開啟。這段內容只用於 QA。";
+  "這是一段無卡 QA 用的曖昧情境：對方最近回覆變慢，但仍會主動分享生活片段，也會看限動。我想確認自己不要太急，也想用有界線但不冷的方式回覆。這段內容只用於驗證結果頁到結帳橋接頁與付費交付流程。";
 
 const baseUrl = normalizeBaseUrl(process.env.QA_RECOVERY_LINK_BASE_URL, DEFAULT_BASE_URL);
 const operatorSecret = process.env.OPERATOR_TEST_SECRET?.trim() ?? "";
@@ -143,12 +143,12 @@ async function createSourceResult() {
     },
     body: JSON.stringify({
       text: `${SYNTHETIC_INPUT}\n\n${inputSuffix}`,
-      situation: "回訊變慢但仍主動分享",
+      situation: "回訊變慢但看限動",
       anonymousSessionId: `recovery-link-smoke-${crypto.randomUUID()}`,
       userContext: {
         relationshipStage: "曖昧中",
         userGoal: "我該怎麼回",
-        primaryPain: "忽冷忽熱",
+        primaryPain: "回覆變慢",
         replyTone: "溫柔但有界線",
       },
     }),
