@@ -101,6 +101,18 @@ describe("email recovery link sending", () => {
     expect(message.text).not.toContain("完整摘要內容");
   });
 
+  it("escapes html fields in the recovery email template", () => {
+    const message = buildRecoveryLinkEmail({
+      to: "qa-recovery@example.invalid",
+      recoveryUrl: `https://staging.anyu.tw/r/${RAW_TOKEN}?x=<unsafe>`,
+      moduleTitle: '曖昧<溫度計>"',
+    });
+
+    expect(message.html).toContain("曖昧&lt;溫度計&gt;&quot;");
+    expect(message.html).toContain("&lt;unsafe&gt;");
+    expect(message.html).not.toContain("<unsafe>");
+  });
+
   it("uses noop adapter by default and does not claim a real email was sent", async () => {
     await expect(
       sendRecoveryEmail({
@@ -111,6 +123,89 @@ describe("email recovery link sending", () => {
         env: {} as NodeJS.ProcessEnv,
       }),
     ).resolves.toEqual({ ok: true, provider: "noop", status: "noop" });
+  });
+
+  it("sends through Resend when configured with a mocked safe payload", async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ id: "email-1" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    }));
+    const message = buildRecoveryLinkEmail({
+      to: "qa-recovery@example.invalid",
+      recoveryUrl: `https://staging.anyu.tw/r/${RAW_TOKEN}`,
+      moduleTitle: "曖昧溫度計",
+    });
+
+    await expect(
+      sendRecoveryEmail({
+        message,
+        idempotencyKey: "paid-result-recovery-link/recovery-link-1",
+        env: {
+          EMAIL_PROVIDER: "resend",
+          RESEND_API_KEY: "test-only-api-key",
+        } as NodeJS.ProcessEnv,
+        fetchImpl: fetchImpl as never,
+      }),
+    ).resolves.toEqual({ ok: true, provider: "resend", status: "sent" });
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://api.resend.com/emails",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Authorization: "Bearer test-only-api-key",
+          "Content-Type": "application/json",
+          "Idempotency-Key": "paid-result-recovery-link/recovery-link-1",
+        }),
+      }),
+    );
+    const body = JSON.parse(fetchImpl.mock.calls[0]?.[1]?.body as string);
+    expect(body).toMatchObject({
+      from: "hello@anyu.tw",
+      to: "qa-recovery@example.invalid",
+      subject: "你的 ANYU 完整報告已準備好",
+    });
+    expect(body.html).toContain(`/r/${RAW_TOKEN}`);
+    expect(body.html).not.toContain("pa_");
+    expect(body.html).not.toContain("pcs_");
+    expect(body.html).not.toContain("原始輸入");
+  });
+
+  it("fails safely when Resend config is missing or provider returns an error", async () => {
+    await expect(
+      sendRecoveryEmail({
+        message: buildRecoveryLinkEmail({
+          to: "qa-recovery@example.invalid",
+          recoveryUrl: `https://staging.anyu.tw/r/${RAW_TOKEN}`,
+        }),
+        env: { EMAIL_PROVIDER: "resend" } as NodeJS.ProcessEnv,
+        fetchImpl: vi.fn() as never,
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      provider: "resend",
+      status: "unavailable",
+      category: "missing_config",
+    });
+
+    await expect(
+      sendRecoveryEmail({
+        message: buildRecoveryLinkEmail({
+          to: "qa-recovery@example.invalid",
+          recoveryUrl: `https://staging.anyu.tw/r/${RAW_TOKEN}`,
+        }),
+        env: {
+          EMAIL_PROVIDER: "resend",
+          RESEND_API_KEY: "test-only-api-key",
+        } as NodeJS.ProcessEnv,
+        fetchImpl: vi.fn(async () => new Response("bad request", { status: 400 })) as never,
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      provider: "resend",
+      status: "failed",
+      category: "provider_error",
+    });
   });
 
   it("creates a recovery link for noop sending without returning raw token or marking sent", async () => {
@@ -144,6 +239,66 @@ describe("email recovery link sending", () => {
     expect(mockMarkPaidResultRecoveryLinkSent).not.toHaveBeenCalled();
     expect(mockMarkPaidResultRecoveryLinkFailed).not.toHaveBeenCalled();
     expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
+  });
+
+  it("marks recovery link as sent after mocked Resend success", async () => {
+    const result = await createAndSendEmailRecoveryLink({
+      moduleSlug: "ambiguous-temperature",
+      moduleTitle: "曖昧溫度計",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+      recoveryContact: emailContact() as never,
+      env: {
+        NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw",
+        EMAIL_PROVIDER: "resend",
+        RESEND_API_KEY: "test-only-api-key",
+      } as NodeJS.ProcessEnv,
+      fetchImpl: vi.fn(async () => new Response(JSON.stringify({ id: "email-1" }), {
+        status: 200,
+      })) as never,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "sent",
+      provider: "resend",
+      recoveryLinkCreated: true,
+      emailSent: true,
+    });
+    expect(mockMarkPaidResultRecoveryLinkSent).toHaveBeenCalledWith({
+      linkId: "recovery-link-1",
+    });
+    expect(mockMarkPaidResultRecoveryLinkFailed).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
+  });
+
+  it("marks recovery link failed after mocked provider failure", async () => {
+    const result = await createAndSendEmailRecoveryLink({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+      recoveryContact: emailContact() as never,
+      env: {
+        NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw",
+        EMAIL_PROVIDER: "resend",
+        RESEND_API_KEY: "test-only-api-key",
+      } as NodeJS.ProcessEnv,
+      fetchImpl: vi.fn(async () => new Response("provider error", { status: 500 })) as never,
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: "failed",
+      provider: "resend",
+      recoveryLinkCreated: true,
+      emailSent: false,
+    });
+    expect(mockMarkPaidResultRecoveryLinkFailed).toHaveBeenCalledWith({
+      linkId: "recovery-link-1",
+    });
+    expect(mockMarkPaidResultRecoveryLinkSent).not.toHaveBeenCalled();
   });
 
   it("prevents duplicate sends when a sent link already exists", async () => {

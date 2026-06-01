@@ -14,8 +14,9 @@ export type EmailRecoveryLinkSendStatus = "sent" | "noop" | "failed" | "duplicat
 
 export type EmailSendResult = {
   ok: boolean;
-  provider: "noop" | "unsupported";
+  provider: "noop" | "resend" | "unsupported";
   status: EmailRecoveryLinkSendStatus;
+  category?: "missing_config" | "provider_error" | "unsupported_provider";
 };
 
 export type EmailMessage = {
@@ -27,6 +28,9 @@ export type EmailMessage = {
 };
 
 const DEFAULT_EMAIL_FROM = LEGAL_CONTACT_EMAIL;
+const RESEND_EMAILS_ENDPOINT = "https://api.resend.com/emails";
+
+type EmailFetch = typeof fetch;
 
 function getEmailProvider(env: NodeJS.ProcessEnv = process.env) {
   return env.EMAIL_PROVIDER?.trim().toLowerCase() || "noop";
@@ -50,6 +54,14 @@ function getAppUrl(env: NodeJS.ProcessEnv = process.env) {
   }
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
 export function buildRecoveryLinkUrl(input: {
   rawToken: string;
   env?: NodeJS.ProcessEnv;
@@ -70,6 +82,8 @@ export function buildRecoveryLinkEmail(input: {
   from?: string;
 }) {
   const moduleTitle = input.moduleTitle ?? "曖昧溫度計";
+  const escapedModuleTitle = escapeHtml(moduleTitle);
+  const escapedRecoveryUrl = escapeHtml(input.recoveryUrl);
   const subject = "你的 ANYU 完整報告已準備好";
   const text = [
     "你的 ANYU 完整報告已準備好。",
@@ -82,8 +96,8 @@ export function buildRecoveryLinkEmail(input: {
   ].join("\n");
   const html = [
     "<p>你的 ANYU 完整報告已準備好。</p>",
-    `<p>報告：${moduleTitle}</p>`,
-    `<p><a href="${input.recoveryUrl}">回到 ANYU 查看完整報告</a></p>`,
+    `<p>報告：${escapedModuleTitle}</p>`,
+    `<p><a href="${escapedRecoveryUrl}">回到 ANYU 查看完整報告</a></p>`,
     `<p>此連結將保留 ${PAID_RESULT_RECOVERY_LINK_TTL_DAYS} 天。請勿轉傳給他人。</p>`,
     `<p>如果連結無法開啟，請聯絡 <a href="mailto:${LEGAL_CONTACT_EMAIL}">${LEGAL_CONTACT_EMAIL}</a>。</p>`,
   ].join("");
@@ -97,9 +111,65 @@ export function buildRecoveryLinkEmail(input: {
   } satisfies EmailMessage;
 }
 
+async function sendResendEmail(input: {
+  message: EmailMessage;
+  idempotencyKey?: string;
+  env: NodeJS.ProcessEnv;
+  fetchImpl: EmailFetch;
+}): Promise<EmailSendResult> {
+  const apiKey = input.env.RESEND_API_KEY?.trim();
+
+  if (!apiKey) {
+    return {
+      ok: false,
+      provider: "resend",
+      status: "unavailable",
+      category: "missing_config",
+    };
+  }
+
+  try {
+    const response = await input.fetchImpl(RESEND_EMAILS_ENDPOINT, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        ...(input.idempotencyKey ? { "Idempotency-Key": input.idempotencyKey } : {}),
+      },
+      body: JSON.stringify({
+        from: input.message.from,
+        to: input.message.to,
+        subject: input.message.subject,
+        html: input.message.html,
+        text: input.message.text,
+      }),
+    });
+
+    if (response.ok) {
+      return { ok: true, provider: "resend", status: "sent" };
+    }
+
+    return {
+      ok: false,
+      provider: "resend",
+      status: "failed",
+      category: "provider_error",
+    };
+  } catch {
+    return {
+      ok: false,
+      provider: "resend",
+      status: "failed",
+      category: "provider_error",
+    };
+  }
+}
+
 export async function sendRecoveryEmail(input: {
   message: EmailMessage;
+  idempotencyKey?: string;
   env?: NodeJS.ProcessEnv;
+  fetchImpl?: EmailFetch;
 }): Promise<EmailSendResult> {
   const provider = getEmailProvider(input.env);
 
@@ -107,7 +177,21 @@ export async function sendRecoveryEmail(input: {
     return { ok: true, provider: "noop", status: "noop" };
   }
 
-  return { ok: false, provider: "unsupported", status: "unavailable" };
+  if (provider === "resend") {
+    return sendResendEmail({
+      message: input.message,
+      idempotencyKey: input.idempotencyKey,
+      env: input.env ?? process.env,
+      fetchImpl: input.fetchImpl ?? fetch,
+    });
+  }
+
+  return {
+    ok: false,
+    provider: "unsupported",
+    status: "unavailable",
+    category: "unsupported_provider",
+  };
 }
 
 export async function createAndSendEmailRecoveryLink(input: {
@@ -118,6 +202,7 @@ export async function createAndSendEmailRecoveryLink(input: {
   entitlementId: string;
   recoveryContact: PaymentRecoveryContact;
   env?: NodeJS.ProcessEnv;
+  fetchImpl?: EmailFetch;
 }) {
   if (input.recoveryContact.contactType !== "email" || !input.recoveryContact.contactEncrypted) {
     return {
@@ -182,7 +267,9 @@ export async function createAndSendEmailRecoveryLink(input: {
   });
   const sendResult = await sendRecoveryEmail({
     message,
+    idempotencyKey: `paid-result-recovery-link/${link.link.id}`,
     env: input.env,
+    fetchImpl: input.fetchImpl,
   });
 
   if (sendResult.status === "sent") {

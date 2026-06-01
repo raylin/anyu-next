@@ -8589,3 +8589,27 @@ Unresolved questions:
 - Choose and configure the real Email provider adapter before claiming real Email delivery.
 - Define resend/rate-limit behavior and cleanup for noop-created or failed recovery link rows.
 - Add a paid-delivery completion hook so Email contacts captured before payment receive recovery links when the paid report becomes ready.
+
+## 2026-06-02 Email Recovery Link Provider Adapter Plan / Implementation v0
+
+### Completed Changes
+
+- saved the Email Recovery Link Provider Adapter v0 handoff and report
+- recommended Resend as the v0 real Email provider because it has a small REST API surface, simple HTML/text payloads, explicit sender/domain verification behavior, and idempotency-key support
+- added `EMAIL_PROVIDER=resend` support behind server-side `fetch`
+- kept `EMAIL_PROVIDER=noop` and `EMAIL_PROVIDER=test` as safe non-sending defaults
+- added name-only `RESEND_API_KEY` documentation in `.env.example`
+- added mocked provider tests for successful send, missing config, provider failure, sent/failed status updates, safe payload shape, and token/report-content exclusion
+- did not configure provider credentials and did not send real Email
+
+### Learnings
+
+- The current recovery link helper can support real Email sending without adding a dependency or changing schema.
+- Resend idempotency keys can use the recovery link row id without exposing raw `prl_` tokens.
+- Real Email delivery still needs sender/domain verification and an owner-approved Preview(staging) credential setup before live smoke.
+
+### Unresolved Questions
+
+- Owner must choose/verify sender identity and provide Resend credentials through branch-scoped Preview(staging) before real Email smoke.
+- Provider message id is not persisted; add audit storage later if support/debugging requires it.
+- Resend/rate-limit/bounce handling remains deferred.
