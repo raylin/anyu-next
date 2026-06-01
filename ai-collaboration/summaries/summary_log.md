@@ -8348,3 +8348,27 @@ Unresolved questions:
 - Future LIFF route may need DB-backed single-use state if replay diagnostics or stricter invalidation become necessary.
 - Desktop LINE binding UX still needs a QR/open-on-phone design.
 - Legacy LINE fulfillment retirement or containment remains deferred until recovery-specific binding is stable.
+
+## 2026-06-01 LINE Recovery Bind Route / LIFF Callback v0
+
+### Completed Changes
+
+- saved the LINE Recovery Bind Route / LIFF Callback v0 handoff and report
+- added `POST /api/line/recovery/bind-liff` as a recovery-specific LIFF bind route
+- reused `verifyLineIdToken` for server-side LINE identity verification and `rlb_` recovery state helpers for safe state resolution
+- bound verified LINE identity into `payment_recovery_contacts` using hash-only LINE recovery contact storage
+- kept legacy LINE fulfillment/unlock route unchanged and out of the recovery flow
+- added route tests for successful bind, raw LINE ID exclusion, missing/unverifiable LINE identity fallback, expired/tampered/token-like state failure, and marketing opt-in separation
+- reran staging no-card checkout QA; result CTA, checkout-start, operator fake-paid, queue, paid access, and production fail-closed checks passed
+
+### Learnings
+
+- Recovery-specific LINE binding can be isolated behind a new JSON route without reusing legacy short-code/unlock-token semantics.
+- The route can safely return a trusted internal recovery surface path only after `rlb_` state validates.
+- Full LIFF browser smoke remains a separate owner-assisted QA step because route tests cannot prove LINE in-app browser behavior.
+
+### Unresolved Questions
+
+- A minimal recovery-specific LIFF page/UI entry is still needed to call the route from a real LINE context.
+- Owner-assisted staging LIFF bind smoke remains unrun.
+- DB-backed single-use bind state remains optional future work if replay diagnostics become necessary.
