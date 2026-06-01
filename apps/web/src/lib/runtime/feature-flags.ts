@@ -18,6 +18,14 @@ export function isOperatorFakePaidSuccessEnabled(env: NodeJS.ProcessEnv = proces
   return getBooleanEnvFlag("ENABLE_OPERATOR_FAKE_PAID_SUCCESS", env);
 }
 
+export function isOperatorRecoveryLinkSmokeEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return (
+    env.VERCEL_ENV === "preview" &&
+    env.VERCEL_GIT_COMMIT_REF === "staging" &&
+    getBooleanEnvFlag("ENABLE_OPERATOR_RECOVERY_LINK_SMOKE", env)
+  );
+}
+
 export function isPaymentRuntimeEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return getBooleanEnvFlag("ENABLE_PAYMENT_RUNTIME", env);
 }

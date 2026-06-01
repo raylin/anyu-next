@@ -89,6 +89,9 @@ describe("recovery link smoke QA helpers", () => {
     );
     expect(preflight).toContain("recovery_link_smoke");
     expect(preflight).toContain("PAYMENT_RECOVERY_LINK_TOKEN_SECRET");
+    expect(preflight).toContain("ENABLE_OPERATOR_RECOVERY_LINK_SMOKE");
+    expect(script).toContain("/api/operator/recovery-link-smoke");
+    expect(script).toContain("not_required_for_runtime_mode");
     expect(script).toContain("operator_recovery_link_create");
     expect(script).toContain("rawTokenPrinted: false");
     expect(script).toContain("tokenHashPrinted: false");

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   canStartNewebPayCheckoutFromResult,
   isOperatorFakePaidSuccessEnabled,
+  isOperatorRecoveryLinkSmokeEnabled,
   isPaidJobQueueTriggerEnabled,
   isPaidGenerationJobsEnabled,
   isPaidGenerationProcessorEnabled,
@@ -42,6 +43,31 @@ describe("runtime feature flags", () => {
     ).toBe(true);
     expect(
       isOperatorFakePaidSuccessEnabled({ ENABLE_OPERATOR_FAKE_PAID_SUCCESS: "0" } as NodeJS.ProcessEnv),
+    ).toBe(false);
+  });
+
+  it("allows recovery link operator smoke only on Preview(staging) with explicit flag", () => {
+    expect(isOperatorRecoveryLinkSmokeEnabled({} as NodeJS.ProcessEnv)).toBe(false);
+    expect(
+      isOperatorRecoveryLinkSmokeEnabled({
+        VERCEL_ENV: "preview",
+        VERCEL_GIT_COMMIT_REF: "staging",
+        ENABLE_OPERATOR_RECOVERY_LINK_SMOKE: "true",
+      } as NodeJS.ProcessEnv),
+    ).toBe(true);
+    expect(
+      isOperatorRecoveryLinkSmokeEnabled({
+        VERCEL_ENV: "production",
+        VERCEL_GIT_COMMIT_REF: "staging",
+        ENABLE_OPERATOR_RECOVERY_LINK_SMOKE: "true",
+      } as NodeJS.ProcessEnv),
+    ).toBe(false);
+    expect(
+      isOperatorRecoveryLinkSmokeEnabled({
+        VERCEL_ENV: "preview",
+        VERCEL_GIT_COMMIT_REF: "feature",
+        ENABLE_OPERATOR_RECOVERY_LINK_SMOKE: "true",
+      } as NodeJS.ProcessEnv),
     ).toBe(false);
   });
 

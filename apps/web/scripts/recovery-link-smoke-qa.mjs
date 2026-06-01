@@ -43,6 +43,7 @@ const operatorSecret = process.env.OPERATOR_TEST_SECRET?.trim() ?? "";
 const internalJobSecret = process.env.INTERNAL_JOB_SECRET?.trim() ?? "";
 const recoveryLinkSecret = process.env.PAYMENT_RECOVERY_LINK_TOKEN_SECRET?.trim() ?? "";
 const databaseUrl = process.env.DATABASE_URL?.trim() ?? "";
+const smokeMode = process.env.QA_RECOVERY_LINK_MODE?.trim().toLowerCase() || "runtime";
 const processorMode =
   process.env.QA_RECOVERY_LINK_PROCESSOR_MODE?.trim().toLowerCase() ?? "queue";
 const inputSuffix =
@@ -364,6 +365,52 @@ async function verifyPaidAccessRender(unlockPath) {
   return pass;
 }
 
+async function runRuntimeOperatorSmoke(resultId) {
+  const result = await requestJson(`${baseUrl}/api/operator/recovery-link-smoke`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-operator-test-secret": operatorSecret,
+    },
+    body: JSON.stringify({
+      moduleSlug: MODULE_SLUG,
+      resultId,
+      idempotencyKey: `recovery-link-smoke-${crypto.randomUUID()}`,
+    }),
+  });
+  const body = result.json ?? {};
+  const pass =
+    result.status === 200 &&
+    body.ok === true &&
+    body.createdLink === true &&
+    body.resolverStatus === "passed" &&
+    body.invalidLinkSafety === "passed" &&
+    body.paidResultRenderMarker === true &&
+    (body.cleanup === "revoked" || body.cleanup === "deleted");
+
+  record("runtime_operator_recovery_link_smoke", pass ? "pass" : "fail", {
+    httpStatus: result.status,
+    ok: Boolean(body.ok),
+    createdLink: body.createdLink ?? null,
+    resolverStatus: body.resolverStatus ?? null,
+    invalidLinkSafety: body.invalidLinkSafety ?? null,
+    cleanup: body.cleanup ?? null,
+    paymentIntentStatus: body.paymentIntentStatus ?? null,
+    entitlementStatus: body.entitlementStatus ?? null,
+    generationJobStatus: body.generationJobStatus ?? null,
+    generationJobProcessorCategory: body.generationJobProcessorCategory ?? null,
+    paidResultRenderMarker: body.paidResultRenderMarker ?? null,
+    rawRecoveryTokenReturned: body.rawRecoveryTokenReturned ?? null,
+    tokenHashReturned: body.tokenHashReturned ?? null,
+    rawPaidAccessTokenReturned: body.rawPaidAccessTokenReturned ?? null,
+    rawCheckoutSessionTokenReturned: body.rawCheckoutSessionTokenReturned ?? null,
+    emailOrLineSent: body.emailOrLineSent ?? null,
+    error: body.error ?? null,
+  });
+
+  return pass;
+}
+
 async function createOperatorRecoveryLink(input) {
   const rawToken = generateOperatorRecoveryToken();
   const tokenHash = hashOperatorRecoveryToken(rawToken, recoveryLinkSecret);
@@ -476,7 +523,7 @@ async function cleanupOperatorRecoveryLink(linkId) {
 }
 
 async function productionDisabledCheck() {
-  const [health, checkout, fakePaid] = await Promise.all([
+  const [health, checkout, fakePaid, recoveryLinkSmoke] = await Promise.all([
     requestJson(`${PRODUCTION_BASE_URL}/api/health`),
     requestJson(`${PRODUCTION_BASE_URL}/api/modules/${MODULE_SLUG}/checkout/newebpay`, {
       method: "POST",
@@ -491,6 +538,14 @@ async function productionDisabledCheck() {
         resultId: "00000000-0000-0000-0000-000000000000",
       }),
     }),
+    requestJson(`${PRODUCTION_BASE_URL}/api/operator/recovery-link-smoke`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        moduleSlug: MODULE_SLUG,
+        resultId: "00000000-0000-0000-0000-000000000000",
+      }),
+    }),
   ]);
   const pass =
     health.status === 200 &&
@@ -498,7 +553,9 @@ async function productionDisabledCheck() {
     checkout.status === 404 &&
     checkout.json?.error === "not_found" &&
     fakePaid.status === 404 &&
-    fakePaid.json?.error === "not_found";
+    fakePaid.json?.error === "not_found" &&
+    recoveryLinkSmoke.status === 404 &&
+    recoveryLinkSmoke.json?.error === "not_found";
 
   record("production_disabled_check", pass ? "pass" : "fail", {
     productionHealthStatus: health.status,
@@ -508,6 +565,8 @@ async function productionDisabledCheck() {
     checkoutError: checkout.json?.error ?? null,
     fakePaidHttpStatus: fakePaid.status,
     fakePaidError: fakePaid.json?.error ?? null,
+    recoveryLinkSmokeHttpStatus: recoveryLinkSmoke.status,
+    recoveryLinkSmokeError: recoveryLinkSmoke.json?.error ?? null,
   });
 
   return pass;
@@ -526,20 +585,24 @@ async function main() {
     return;
   }
 
-  record("secret_preflight", operatorSecret && recoveryLinkSecret && databaseUrl ? "pass" : "blocked", {
+  const runtimeMode = smokeMode !== "local-db";
+  const secretsReady = runtimeMode ? Boolean(operatorSecret) : Boolean(operatorSecret && recoveryLinkSecret && databaseUrl);
+
+  record("secret_preflight", secretsReady ? "pass" : "blocked", {
     OPERATOR_TEST_SECRET: operatorSecret ? "present" : "missing",
-    PAYMENT_RECOVERY_LINK_TOKEN_SECRET: recoveryLinkSecret ? "present" : "missing",
-    DATABASE_URL: databaseUrl ? "present" : "missing",
+    PAYMENT_RECOVERY_LINK_TOKEN_SECRET: runtimeMode ? "not_required_for_runtime_mode" : recoveryLinkSecret ? "present" : "missing",
+    DATABASE_URL: runtimeMode ? "not_required_for_runtime_mode" : databaseUrl ? "present" : "missing",
     INTERNAL_JOB_SECRET: internalJobSecret ? "present" : "missing",
     valuesPrinted: false,
     lengthsPrinted: false,
     prefixesPrinted: false,
     suffixesPrinted: false,
     hashesPrinted: false,
+    smokeMode,
     processorMode,
   });
 
-  if (!operatorSecret || !recoveryLinkSecret || !databaseUrl) {
+  if (!secretsReady) {
     record("final_summary", "blocked", {
       reason: "required_operator_smoke_env_missing",
       validRecoveryLinkSmokePassed: false,
@@ -556,6 +619,30 @@ async function main() {
       validRecoveryLinkSmokePassed: false,
     });
     process.exitCode = 3;
+    return;
+  }
+
+  if (runtimeMode) {
+    const resultId = await createSourceResult();
+    const checkoutHref = await verifyResultPage(resultId);
+    await verifyCheckoutStart(checkoutHref);
+    const runtimeSmokePassed = await runRuntimeOperatorSmoke(resultId);
+    const productionOk = await productionDisabledCheck();
+    const pass = runtimeSmokePassed && productionOk;
+
+    record("final_summary", pass ? "pass" : "fail", {
+      validRecoveryLinkSmokePassed: pass,
+      runtimeOperatorEndpointCovered: true,
+      localDbModeUsed: false,
+      productionDisabledPassed: productionOk,
+      rawRecoveryTokenPrinted: false,
+      tokenHashPrinted: false,
+      rawPaidAccessTokenPrinted: false,
+      rawCheckoutSessionTokenPrinted: false,
+      emailOrLineSent: false,
+    });
+
+    process.exitCode = pass ? 0 : 5;
     return;
   }
 
