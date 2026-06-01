@@ -8468,3 +8468,28 @@ Unresolved questions:
 - Staging DB migration apply and Preview(staging) recovery link secret alignment remain separate follow-up work.
 - Public/legal retention copy still needs owner approval before mentioning the 90-day window.
 - Email/LINE sender integration and support resend tooling remain deferred.
+
+## 2026-06-01 Recovery Link Token Staging Apply / Smoke v0
+
+### Completed Changes
+
+- saved the Recovery Link Token Staging Apply / Smoke v0 handoff and report
+- verified Neon project `anyu-next` branch `preview` as the staging DB target
+- applied `apps/web/drizzle/0010_paid_result_recovery_links.sql` to staging preview branch only
+- verified `paid_result_recovery_links` table, expected columns, indexes, unique `token_hash` index, and zero row count
+- configured branch-scoped Preview(`staging`) `PAYMENT_RECOVERY_LINK_TOKEN_SECRET` as a sensitive env var and redeployed staging
+- reran no-card checkout QA successfully against staging commit `a3d64a1`
+- verified invalid `/r/[recoveryToken]` safety copy and production fail-closed behavior
+- confirmed production DB does not have `paid_result_recovery_links`
+
+### Learnings
+
+- Staging migration and env alignment are complete, but valid link smoke needs an operator-safe creation path.
+- Vercel pulled sensitive env values are not usable locally for computing matching recovery link hashes.
+- Without exposing staging DB credentials/hashes or adding a temporary route, the current repo cannot create a valid recovery link row for smoke through a safe public/operator interface.
+
+### Unresolved Questions
+
+- Add a `Recovery Link Operator Smoke Helper v0` script or operator-only endpoint to complete valid `/r/[recoveryToken]` staging smoke.
+- Decide whether that helper should create temporary `operator_test` rows and clean them automatically.
+- Production recovery link DB/env remain gated.
