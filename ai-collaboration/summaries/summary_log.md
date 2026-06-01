@@ -8540,3 +8540,27 @@ Unresolved questions:
 - Owner/operator needs to provide the existing Preview(staging) `PAYMENT_RECOVERY_LINK_TOKEN_SECRET` to a secure local shell session, or approve a Preview(staging)-runtime operator smoke path that can use runtime env without exposing the secret.
 - Valid `/r/[recoveryToken]` staging smoke remains pending.
 - Production recovery link DB/env/runtime remain gated.
+
+## 2026-06-02 Recovery Link Preview Runtime Operator Smoke Path v0
+
+### Completed Changes
+
+- saved the Recovery Link Preview Runtime Operator Smoke Path v0 handoff and report
+- added `POST /api/operator/recovery-link-smoke` as a Preview(staging)-only operator endpoint
+- added `ENABLE_OPERATOR_RECOVERY_LINK_SMOKE`, disabled by default and constrained to `VERCEL_ENV=preview` plus `VERCEL_GIT_COMMIT_REF=staging`
+- updated `qa:recovery-link:smoke` to use the Preview runtime endpoint by default, so local execution no longer needs `PAYMENT_RECOVERY_LINK_TOKEN_SECRET`
+- added branch-scoped Preview(staging) `ENABLE_OPERATOR_RECOVERY_LINK_SMOKE=true`
+- ran `qa:recovery-link:smoke` successfully against Preview(staging)
+- verified valid recovery link creation/resolution, invalid-link safety, cleanup by revocation, paid result render marker, and production fail-closed behavior
+
+### Learnings
+
+- Keeping recovery link token creation inside Preview runtime avoids local secret export while still producing meaningful end-to-end smoke evidence.
+- The endpoint can safely verify the recovery link by resolving it server-side and checking paid access readiness without returning raw `prl_`, `pa_`, `pcs_`, token hashes, or DB IDs.
+- Production safety should accept plain 404 for this operator-only endpoint because disabled routes may not return JSON.
+
+### Unresolved Questions
+
+- The Preview-only operator endpoint must remain gated and should not be enabled in Production.
+- QA scripts now duplicate result creation and checkout-start verification; extract shared helpers if this pattern grows.
+- Next recovery step should likely be Email Recovery Link Sending v0, unless LINE Recovery CTA Wiring is prioritized first.
