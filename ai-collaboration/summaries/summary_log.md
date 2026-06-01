@@ -8279,3 +8279,26 @@ Unresolved questions:
 - LINE recovery binding remains deferred until recovery-specific LIFF state exists.
 - Production recovery DB/env apply remains gated.
 - A repeatable non-tokenized staging verification path may be useful if this browser form smoke becomes frequent.
+
+## 2026-06-01 Module 01 Current State / Launch-Gate Snapshot v0
+
+### Completed Changes
+
+- saved the Module 01 Current State / Launch-Gate Snapshot v0 handoff and report
+- summarized current Module 01 status across staging-proven, production-disabled, production-gated, growth/ads-gated, and deferred areas
+- defined a three-gate launch model: Payment Capability Gate, Soft Public Availability Gate, and Growth / Ads Launch Gate
+- created a staging proof matrix covering analyze/result, result-page CTA, checkout-start, NewebPay sandbox payment, NotifyURL, paid transition, delivery artifacts, queue, ReturnURL polling, paid access, no-card QA, recovery soft gate, completed-result Email save, and production fail-closed checks
+- updated the dashboard to make the launch gate model explicit and to mark the current phase as Module 01 launch-gate snapshot complete
+
+### Learnings
+
+- Module 01 is stable enough for Module 02 concept/spec work because validated payment/recovery paths now have sandbox and no-card smoke protection.
+- NewebPay approval should be treated as a payment capability gate only; it should not automatically trigger growth/ads launch.
+- Production DB migration gates remain deliberate blockers for payment capability, not blockers for Module 02 planning.
+
+### Unresolved Questions
+
+- NewebPay formal approval and production credential readiness remain external.
+- Production entitlement uniqueness and recovery contacts migrations remain gated.
+- Recovery link/support-assisted recovery workflow is still unimplemented.
+- Module 02 concept/spec remains the recommended next product task unless payment approval arrives first.
