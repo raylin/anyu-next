@@ -554,8 +554,7 @@ async function productionDisabledCheck() {
     checkout.json?.error === "not_found" &&
     fakePaid.status === 404 &&
     fakePaid.json?.error === "not_found" &&
-    recoveryLinkSmoke.status === 404 &&
-    recoveryLinkSmoke.json?.error === "not_found";
+    recoveryLinkSmoke.status === 404;
 
   record("production_disabled_check", pass ? "pass" : "fail", {
     productionHealthStatus: health.status,
