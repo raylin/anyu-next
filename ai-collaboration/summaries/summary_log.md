@@ -8255,3 +8255,27 @@ Unresolved questions:
 - Browser/manual Email-save submission on completed result still needs verification.
 - Staging DB row creation/update for completed-result Email save remains unverified.
 - Recovery link sending, LINE recovery binding, production recovery DB/env apply, and key rotation policy remain future work.
+
+## 2026-06-01 Paid Result Save CTA Browser Email Save Smoke v0
+
+### Completed Changes
+
+- saved the Paid Result Save CTA Browser Email Save Smoke v0 handoff and report
+- confirmed staging is serving Preview(`staging`) commit `058a45c51aeb`, newer than required commit `46da41a`, with `payment-foundation-2026-05-29`
+- generated a fresh no-card completed paid result and used owner-assisted real browser submission for the completed-result Email recovery save form
+- verified the browser UI showed saved/success after submitting a reserved-domain fake Email
+- verified persisted saved state by reloading the completed-result page and observing saved confirmation plus masked contact display without printing tokenized URLs, raw Email, encrypted values, or hashes
+- reran `qa:result-checkout:no-card`; checkout-start recovery signals, fake-paid, queue, paid access, and production fail-closed checks passed
+
+### Learnings
+
+- Completed-result Email save works in a real browser on Preview(`staging`) and persists through the staging server path.
+- Direct Node POST to a Next server-action form is not browser-equivalent and can fail even when real browser submission succeeds.
+- Local browser/clipboard handoff is restricted in this sandbox, so tokenized URL handling should stay outside repo and use owner-assisted browser QA when needed.
+
+### Unresolved Questions
+
+- Recovery link sending remains unimplemented.
+- LINE recovery binding remains deferred until recovery-specific LIFF state exists.
+- Production recovery DB/env apply remains gated.
+- A repeatable non-tokenized staging verification path may be useful if this browser form smoke becomes frequent.
