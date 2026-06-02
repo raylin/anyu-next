@@ -37,11 +37,16 @@ type RecoveryBindResponse =
 
 export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: string }) {
   const context = useMemo(() => {
+    const serverContext = parseLineRecoveryBindContext(initialSearch ?? "");
+
     if (typeof window === "undefined") {
-      return parseLineRecoveryBindContext(initialSearch ?? "");
+      return serverContext;
     }
 
-    return parseLineRecoveryBindContext(window.location.search);
+    const browserSearch = [window.location.search, window.location.hash].filter(Boolean).join("&");
+    const browserContext = parseLineRecoveryBindContext(browserSearch);
+
+    return browserContext.state ? browserContext : serverContext;
   }, [initialSearch]);
   const initialFallback = getInitialFallbackMessage(context);
   const [state, setState] = useState<RecoveryBindState>(initialFallback ? "fallback" : "idle");

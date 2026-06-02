@@ -8,7 +8,7 @@ export type LineRecoveryBindContext = {
 };
 
 export function parseLineRecoveryBindContext(search: string): LineRecoveryBindContext {
-  const searchParams = new URLSearchParams(normalizeSearch(search));
+  const searchParams = parseSearchLike(search);
   const stateParams = parseLiffState(searchParams.get("liff.state"));
   const directState = searchParams.get("state") ?? searchParams.get("rlb");
   const liffState = stateParams.params.get("state") ?? stateParams.params.get("rlb");
@@ -52,7 +52,21 @@ function getSafeFallbackReturnPath(returnPath: string | null) {
 }
 
 function normalizeSearch(search: string) {
-  return search.startsWith("?") ? search.slice(1) : search;
+  return search.replace(/^[?#]/u, "");
+}
+
+function parseSearchLike(search: string) {
+  const normalized = normalizeSearch(search);
+
+  if (!normalized.startsWith("http")) {
+    return new URLSearchParams(normalized);
+  }
+
+  try {
+    return new URL(search).searchParams;
+  } catch {
+    return new URLSearchParams(normalized);
+  }
 }
 
 function parseLiffState(state: string | null): { params: URLSearchParams } {

@@ -66,6 +66,12 @@ describe("LINE recovery LIFF page", () => {
       stateSource: "liff_state",
       isStateShapeValid: true,
     });
+    expect(parseLineRecoveryBindContext(`#liff.state=${state}`)).toEqual({
+      state: "rlb_safeState",
+      fallbackReturnPath: "/m/ambiguous-temperature/result/result-1",
+      stateSource: "liff_state",
+      isStateShapeValid: true,
+    });
     expect(
       parseLineRecoveryBindContext(
         "?state=rlb_safeState&returnPath=https%3A%2F%2Fevil.example%2F",
@@ -84,6 +90,7 @@ describe("LINE recovery LIFF page", () => {
 
     expect(source).toContain('fetch("/api/line/recovery/bind-liff"');
     expect(source).toContain("state: context.state");
+    expect(source).toContain("browserContext.state ? browserContext : serverContext");
     expect(source).toContain("idToken");
     expect(source).not.toContain("lineUserId");
     expect(source).not.toContain("unlockIntentId");

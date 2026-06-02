@@ -8758,3 +8758,27 @@ Unresolved questions:
 - Run owner-assisted LINE Recovery Bind Staging Smoke v0 after Preview(staging) deploys this commit.
 - Decide whether to add a safe non-tokenized return handoff for completed-result LIFF success.
 - LINE recovery link sending remains deferred until LINE bind smoke passes.
+
+## 2026-06-03 LINE Recovery Bind Staging Smoke v0
+
+### Completed Changes
+
+- saved the LINE Recovery Bind Staging Smoke v0 handoff and report
+- confirmed Preview(staging) served commit `0ebe9e98c0a1`, environment `preview`, branch `staging`, and route bundle `payment-foundation-2026-05-29`
+- ran `qa:result-checkout:no-card`; result CTA, checkout-start, LINE recovery CTA signal, fake-paid, queue completion, paid access render, and production fail-closed checks passed
+- ran `qa:recovery-link:smoke`; Preview runtime recovery-link resolver, invalid-link safety, cleanup by revocation, and production fail-closed checks passed
+- verified checkout-start LINE CTA copy/href state safety with sanitized output
+- owner-assisted LINE mobile smoke failed with visible copy `缺少 LINE 保存狀態`
+- added a narrow LIFF recovery state preservation fix so the bridge falls back to server-rendered `initialSearch` when browser search is missing and also parses hash-based LIFF state
+
+### Learnings
+
+- The visible LINE CTA and `rlb_` state generation are live on Preview(staging), but LINE/LIFF navigation can strip or alter the browser query before the client bridge reads it.
+- Server-rendered search state must be preserved during hydration when browser-side state is missing.
+- The Neon `preview` branch can provide sanitized recovery-contact verification; before owner retry, LINE contact count was zero.
+
+### Unresolved Questions
+
+- Rerun owner-assisted LINE Recovery Bind Staging Smoke after the state-preservation fix is deployed.
+- Add a reusable sanitized LINE recovery bind DB-check helper if this smoke becomes repeated.
+- LINE recovery link sending remains deferred until hash-only LINE contact binding is staging-proven.
