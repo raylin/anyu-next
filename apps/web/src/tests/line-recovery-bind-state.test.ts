@@ -16,6 +16,7 @@ import {
   LINE_RECOVERY_BIND_STATE_PREFIX,
   resolveLineRecoveryBindStateToken,
 } from "@/lib/line/recovery-bind-state";
+import { createLineRecoveryBindHref } from "@/lib/line/recovery-bind-link";
 import {
   createOrUpdateEmailRecoveryContact,
 } from "@/lib/db/payment-recovery-contacts";
@@ -123,6 +124,48 @@ describe("LINE recovery bind state helpers", () => {
         source: "completed_result",
         returnPath: `/m/ambiguous-temperature/result/${RESULT_ID}?from=recovery`,
         marketingOptIn: true,
+      },
+    });
+  });
+
+  it("builds a recovery LIFF href with safe state and internal fallback only", () => {
+    const result = createLineRecoveryBindHref({
+      moduleSlug: "ambiguous-temperature",
+      resultId: RESULT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      entitlementId: ENTITLEMENT_ID,
+      source: "checkout_start",
+      returnPath: `/m/ambiguous-temperature/result/${RESULT_ID}/checkout`,
+      env: TEST_ENV,
+    });
+
+    expect(result.ok).toBe(true);
+
+    const href = result.ok ? result.href : "";
+    expect(href).toContain("/line/recovery/bind?state=rlb_");
+    expect(href).toContain("returnPath=%2Fm%2Fambiguous-temperature%2Fresult%2F");
+    expect(href).not.toContain("pa_");
+    expect(href).not.toContain("pcs_");
+    expect(href).not.toContain("prl_");
+    expect(href).not.toContain("/unlock/");
+    expect(href).not.toContain("unlockToken");
+    expect(href).not.toContain("short-code");
+    expect(href).not.toContain("TradeInfo");
+    expect(href).not.toContain("TradeSha");
+    expect(href).not.toContain("line-user-1");
+
+    const parsed = new URL(href, "https://staging.anyu.tw");
+    const resolved = resolveLineRecoveryBindStateToken({
+      token: parsed.searchParams.get("state"),
+      env: TEST_ENV,
+      now: NOW,
+    });
+
+    expect(resolved).toMatchObject({
+      ok: true,
+      payload: {
+        source: "checkout_start",
+        returnPath: `/m/ambiguous-temperature/result/${RESULT_ID}/checkout`,
       },
     });
   });

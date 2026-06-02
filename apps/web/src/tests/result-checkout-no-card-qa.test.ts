@@ -50,7 +50,7 @@ describe("result checkout no-card QA helpers", () => {
       你將前往藍新金流完成安全付款
       付款完成後，我們會等候藍新的正式通知。返回頁不會直接判定付款成功。
       完整報告將於網頁中提供查看
-      建議先保存這次完整報告 Email 找回 LINE 找回 稍後支援
+      建議先保存這次完整報告 Email 找回 LINE 找回 用 LINE 保存
       我了解尚未保存找回方式，仍要繼續付款
       <a href="/refund">退款</a> hello@anyu.tw 3–7 個工作天
       <form method="POST" action="https://ccore.newebpay.com/MPG/mpg_gateway">

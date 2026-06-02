@@ -136,7 +136,9 @@ function summarizeCheckoutStartHtml(html) {
     webDeliveryPresent: html.includes("完整報告將於網頁中提供查看"),
     recoverySoftGatePresent: html.includes("建議先保存這次完整報告"),
     recoveryEmailPrimaryPresent: html.includes("Email 找回"),
-    recoveryLineDeferredPresent: html.includes("LINE 找回") && html.includes("稍後支援"),
+    recoveryLineDeferredPresent:
+      html.includes("LINE 找回") &&
+      (html.includes("用 LINE 保存") || html.includes("稍後支援")),
     recoverySkipWarningPresent: html.includes("我了解尚未保存找回方式，仍要繼續付款"),
     supportRefundPresent:
       html.includes("/refund") &&

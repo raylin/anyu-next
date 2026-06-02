@@ -8734,3 +8734,27 @@ Unresolved questions:
 - Decide whether a human mobile screenshot check is needed before moving on.
 - Decide whether to add a reusable sanitized artifact visual-smoke helper.
 - LINE recovery CTA wiring remains deferred.
+
+## 2026-06-03 LINE Recovery CTA Wiring v0
+
+### Completed Changes
+
+- saved the LINE Recovery CTA Wiring v0 handoff and report
+- added a server-side LINE recovery bind href helper around the existing `rlb_` state helper
+- wired checkout-start LINE recovery CTA as a secondary save method while keeping Email primary
+- wired completed-result LINE recovery CTA for unsaved state and Email-saved backup state
+- passed payment/entitlement context into shared completed-result rendering so LINE bind can create paid-context recovery contacts
+- updated tests and no-card QA summarizer for the wired LINE CTA
+- ran lint, targeted tests, full tests, build, no-card QA, and recovery-link smoke
+
+### Learnings
+
+- Existing `rlb_` safety correctly rejects tokenized `/unlock/`, `pa_`, `pcs_`, and `prl_` return paths.
+- Checkout-start can safely return to its non-tokenized checkout route after LINE bind.
+- Completed-result LINE bind can safely write the recovery contact with entitlement context, but direct return to the same paid page needs a future non-tokenized paid access handoff.
+
+### Unresolved Questions
+
+- Run owner-assisted LINE Recovery Bind Staging Smoke v0 after Preview(staging) deploys this commit.
+- Decide whether to add a safe non-tokenized return handoff for completed-result LIFF success.
+- LINE recovery link sending remains deferred until LINE bind smoke passes.

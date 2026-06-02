@@ -9,6 +9,7 @@ import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleT
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 import { isDbConfigured } from "@/lib/db/client";
 import { getPaymentRecoveryContactsByResultId } from "@/lib/db/payment-recovery-contacts";
+import { createLineRecoveryBindHref } from "@/lib/line/recovery-bind-link";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import { createNewebPayCheckout } from "@/lib/payments/newebpay/checkout-service";
@@ -23,6 +24,7 @@ type CheckoutStartPageProps = {
   }>;
   searchParams?: Promise<{
     recovery?: string;
+    lineRecovery?: string;
   }>;
 };
 
@@ -148,19 +150,30 @@ function RecoverySoftGate({
   resultId,
   paymentIntentId,
   recovery,
+  lineRecovery,
   existingRecovery,
 }: {
   moduleSlug: string;
   resultId: string;
   paymentIntentId: string;
   recovery?: string;
+  lineRecovery?: string;
   existingRecovery: Awaited<ReturnType<typeof getExistingRecoveryState>>;
 }) {
   const emailSaved = recovery === "email_saved" || existingRecovery.hasEmail;
   const emailError = recovery === "email_error";
+  const lineSaved = lineRecovery === "line_saved" || existingRecovery.hasLine;
+  const lineError = lineRecovery === "line_error";
+  const lineBind = createLineRecoveryBindHref({
+    moduleSlug,
+    resultId,
+    paymentIntentId,
+    source: "checkout_start",
+    returnPath: `/m/${moduleSlug}/result/${resultId}/checkout`,
+  });
   const savedLabel = emailSaved
     ? "已保存到 Email"
-    : existingRecovery.hasLine
+    : lineSaved
       ? "已保存到 LINE"
       : null;
 
@@ -222,14 +235,25 @@ function RecoverySoftGate({
           <div>
             <p className="anyu-recovery-label">LINE 找回</p>
             <p className="anyu-subtle-note">
-              LINE 之後會作為找回、完成通知與客服輔助，不是完整報告的交付管道。v0 先以 Email 保存為主。
+              用 LINE 保存這份報告。之後可以透過 LINE 協助找回；LINE 綁定失敗也不影響付款或查看報告。
             </p>
+            {lineError ? (
+              <p className="anyu-recovery-error" role="status">
+                LINE 保存沒有完成。你仍可繼續付款，或改用 Email 保存。
+              </p>
+            ) : null}
           </div>
-          <span className="anyu-recovery-soon-badge">稍後支援</span>
+          {lineBind.ok ? (
+            <Link href={lineBind.href} className="anyu-storefront-link">
+              用 LINE 保存
+            </Link>
+          ) : (
+            <span className="anyu-recovery-soon-badge">暫時無法啟動</span>
+          )}
         </div>
       </div>
 
-      {existingRecovery.hasAny || emailSaved ? (
+      {existingRecovery.hasAny || emailSaved || lineSaved ? (
         <p className="anyu-recovery-confirmation" role="status">
           已保存找回方式。你可以繼續前往藍新安全付款頁。
         </p>
@@ -349,6 +373,7 @@ export default async function CheckoutStartPage({ params, searchParams }: Checko
           resultId={resultId}
           paymentIntentId={checkout.paymentIntent.id}
           recovery={query?.recovery}
+          lineRecovery={query?.lineRecovery}
           existingRecovery={existingRecovery}
         />
         <CheckoutTrustBridge />

@@ -20,6 +20,7 @@ import {
 import { getUnlockIntentByTokenHash } from "@/lib/db/runtime";
 import { getPaidResultForAnalysisResult } from "@/lib/db/paid-results";
 import { hashFulfillmentSecret, isExpired } from "@/lib/line/fulfillment";
+import { createLineRecoveryBindHref } from "@/lib/line/recovery-bind-link";
 import { formatPaidLikelihoodLabel } from "@/lib/modules/ai-temperature-ui";
 import {
   getModuleThemeFromSearchParams,
@@ -191,6 +192,8 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         result={paidAccess.record.result.normalizedResultJson}
         storedPaidResult={paidAccess.storedPaidResult}
         analysisResultId={paidAccess.entitlement.analysisResultId}
+        paymentIntentId={paidAccess.entitlement.paymentIntentId}
+        entitlementId={paidAccess.entitlement.id}
         anonymousSessionId={paidAccess.record.request.anonymousSessionId}
         scoreBucket={paidAccess.record.result.scoreBucket}
         resultCreatedAt={paidAccess.record.result.createdAt}
@@ -276,6 +279,8 @@ export function UnlockCompleted({
   result,
   storedPaidResult,
   analysisResultId,
+  paymentIntentId,
+  entitlementId,
   anonymousSessionId,
   scoreBucket,
   resultCreatedAt,
@@ -295,6 +300,8 @@ export function UnlockCompleted({
     completedAt?: Date | string | null;
   } | null;
   analysisResultId: string;
+  paymentIntentId?: string | null;
+  entitlementId?: string | null;
   anonymousSessionId?: string | null;
   scoreBucket?: string | null;
   resultCreatedAt?: Date | string | null;
@@ -358,6 +365,16 @@ export function UnlockCompleted({
             recoverySummary={recoverySummary}
             recoveryState={recoveryState}
             recoveryEmailAction={recoveryEmailAction}
+            lineRecoveryHref={
+              createLineRecoveryBindHref({
+                moduleSlug,
+                resultId: analysisResultId,
+                paymentIntentId,
+                entitlementId,
+                source: "completed_result",
+                returnPath: `/m/${moduleSlug}`,
+              })
+            }
           />
 
           <TemperatureCard
@@ -509,10 +526,12 @@ function PaidResultRecoverySaveSection({
   recoverySummary,
   recoveryState,
   recoveryEmailAction,
+  lineRecoveryHref,
 }: {
   recoverySummary?: PaymentRecoveryStatusSummary | null;
   recoveryState?: string | null;
   recoveryEmailAction?: (formData: FormData) => Promise<void>;
+  lineRecoveryHref?: ReturnType<typeof createLineRecoveryBindHref>;
 }) {
   if (!recoveryEmailAction && !recoverySummary) {
     return null;
@@ -539,13 +558,32 @@ function PaidResultRecoverySaveSection({
         <p className="anyu-copy">
           {recoverySummary?.safeDisplayContact
             ? `已保存找回方式：${recoverySummary.safeDisplayContact.maskedValue}`
-            : "之後若換裝置或找不到頁面，可透過已保存的方式協助找回。"}
+            : recoverySummary?.hasLineRecovery
+              ? "已用 LINE 保存這份報告；之後可以透過 LINE 協助找回。"
+              : "之後若換裝置或找不到頁面，可透過已保存的方式協助找回。"}
         </p>
         <p className="anyu-subtle-note">
           {emailSent
             ? "已準備並寄出找回連結；完整報告仍以此網頁查看為準，Email 不包含報告內容。"
             : "Email / LINE 只作為找回、完成通知與客服協助；完整報告仍以此網頁查看為準。"}
         </p>
+        {!recoverySummary?.hasLineRecovery ? (
+          <div className="anyu-recovery-line-option" aria-label="LINE 備用找回選項">
+            <div>
+              <p className="anyu-recovery-label">新增 LINE 備用找回</p>
+              <p className="anyu-subtle-note">
+                用 LINE 保存這份報告。之後可以透過 LINE 協助找回；LINE 綁定失敗也不影響查看報告。
+              </p>
+            </div>
+            {lineRecoveryHref?.ok ? (
+              <Link href={lineRecoveryHref.href} className="anyu-storefront-link">
+                用 LINE 保存
+              </Link>
+            ) : (
+              <span className="anyu-recovery-soon-badge">暫時無法啟動</span>
+            )}
+          </div>
+        ) : null}
       </Card>
     );
   }
@@ -610,10 +648,16 @@ function PaidResultRecoverySaveSection({
         <div>
           <p className="anyu-recovery-label">LINE 找回</p>
           <p className="anyu-subtle-note">
-            LINE 之後會作為找回、完成通知與客服輔助，不是完整報告的交付管道。
+            用 LINE 保存這份報告。之後可以透過 LINE 協助找回；LINE 綁定失敗也不影響付款或查看報告。
           </p>
         </div>
-        <span className="anyu-recovery-soon-badge">稍後支援</span>
+        {lineRecoveryHref?.ok ? (
+          <Link href={lineRecoveryHref.href} className="anyu-storefront-link">
+            用 LINE 保存
+          </Link>
+        ) : (
+          <span className="anyu-recovery-soon-badge">暫時無法啟動</span>
+        )}
       </div>
     </Card>
   );

@@ -42,6 +42,7 @@ describe("NewebPay checkout-start page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.OPERATOR_TEST_SECRET = "operator-secret";
+    process.env.PAYMENT_RECOVERY_CONTACT_HASH_SECRET = "test-only-recovery-hash-secret";
     mockCanStartNewebPayCheckoutFromResult.mockReturnValue(true);
     mockIsDbConfigured.mockReturnValue(true);
     mockGetPaymentRecoveryContactsByResultId.mockResolvedValue([]);
@@ -88,7 +89,10 @@ describe("NewebPay checkout-start page", () => {
     expect(html).toContain("建議先保存這次完整報告");
     expect(html).toContain("Email 找回");
     expect(html).toContain("LINE 找回");
-    expect(html).toContain("稍後支援");
+    expect(html).toContain("用 LINE 保存這份報告");
+    expect(html).toContain("之後可以透過 LINE 協助找回");
+    expect(html).toContain("LINE 綁定失敗也不影響付款或查看報告");
+    expect(html).toContain("/line/recovery/bind?state=rlb_");
     expect(html).toContain("完整報告仍會在網頁中提供查看");
     expect(html).toContain("回到 ANYU 的找回連結");
     expect(html).toContain("Email 不會包含完整報告內容");
@@ -124,6 +128,8 @@ describe("NewebPay checkout-start page", () => {
     expect(html).not.toContain("不收費");
     expect(html).not.toContain("no charge");
     expect(html).not.toContain("LINE 交付完整報告");
+    expect(html).not.toContain("LINE 領取完整分析");
+    expect(html).not.toContain("完整報告會傳到 LINE");
     expect(html).not.toContain("LINE paid report delivery");
     expect(html).not.toContain("operator-secret");
     expect(html).not.toContain("OPERATOR_TEST_SECRET");
@@ -136,6 +142,8 @@ describe("NewebPay checkout-start page", () => {
     expect(html).not.toContain("owner@example.com");
     expect(html).not.toContain("pa_secret");
     expect(html).not.toContain("pcs_secret");
+    expect(html).not.toContain("/unlock/");
+    expect(html).not.toContain("short-code");
     expect(mockCreateNewebPayCheckout).toHaveBeenCalledWith({
       moduleConfig: expect.objectContaining({
         slug: "ambiguous-temperature",

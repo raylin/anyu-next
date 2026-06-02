@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { UnlockCompleted } from "@/app/m/[moduleSlug]/unlock/[unlockToken]/page";
 
 const moduleConfig = {
@@ -62,6 +62,10 @@ function renderCompleted(input?: {
 }
 
 describe("paid result recovery save section", () => {
+  beforeEach(() => {
+    process.env.PAYMENT_RECOVERY_CONTACT_HASH_SECRET = "test-only-recovery-hash-secret";
+  });
+
   it("shows saved confirmation with masked email only", () => {
     const html = renderCompleted({
       recoverySummary: {
@@ -82,6 +86,9 @@ describe("paid result recovery save section", () => {
     expect(html).toContain("報告編號");
     expect(html).toContain("AT-20260601-");
     expect(html).toContain("已保存找回方式：o***@e***.com");
+    expect(html).toContain("新增 LINE 備用找回");
+    expect(html).toContain("用 LINE 保存這份報告");
+    expect(html).toContain("/line/recovery/bind?state=rlb_");
     expect(html).toContain("聯絡客服時可提供報告編號");
     expect(html).not.toContain("owner@example.com");
     expect(html).not.toContain("result_1234567890_private");
@@ -90,6 +97,8 @@ describe("paid result recovery save section", () => {
     expect(html).not.toContain("prl_");
     expect(html).not.toContain("Email 交付");
     expect(html).not.toContain("LINE 交付");
+    expect(html).not.toContain("LINE 領取完整分析");
+    expect(html).not.toContain("完整報告會傳到 LINE");
   });
 
   it("distinguishes an actual sent recovery link from saved-only state", () => {
@@ -140,11 +149,40 @@ describe("paid result recovery save section", () => {
     expect(html).toContain("Email 找回");
     expect(html).toContain("也想收到新測驗、早鳥或限時解鎖通知");
     expect(html).toContain("LINE 找回");
-    expect(html).toContain("稍後支援");
+    expect(html).toContain("用 LINE 保存這份報告");
+    expect(html).toContain("之後可以透過 LINE 協助找回");
+    expect(html).toContain("LINE 綁定失敗也不影響付款或查看報告");
+    expect(html).toContain("/line/recovery/bind?state=rlb_");
     expect(html).toContain("完整報告仍以網頁查看為準");
     expect(html).toContain("若 Email 寄送服務尚未啟用，系統仍會先保存找回方式");
     expect(html).not.toContain("Email 交付");
     expect(html).not.toContain("LINE 交付");
+    expect(html).not.toContain("LINE 領取完整分析");
+    expect(html).not.toContain("完整報告會傳到 LINE");
     expect(html).not.toContain("會員");
+  });
+
+  it("shows saved-to-LINE state without raw LINE identifiers", () => {
+    const html = renderCompleted({
+      recoverySummary: {
+        hasRecoveryContact: true,
+        hasEmailRecovery: false,
+        hasLineRecovery: true,
+        emailStatus: "none",
+        lineStatus: "bound",
+        transactionalConsentPresent: true,
+        marketingOptInPresent: false,
+        recommendedPostPaymentAction: "confirm_saved",
+        safeDisplayContact: null,
+      },
+    });
+
+    expect(html).toContain("這份完整分析已保存");
+    expect(html).toContain("已用 LINE 保存這份報告");
+    expect(html).toContain("完整報告仍以此網頁查看為準");
+    expect(html).not.toContain("line-user");
+    expect(html).not.toContain("lineUserId");
+    expect(html).not.toContain("LINE 交付");
+    expect(html).not.toContain("完整報告會傳到 LINE");
   });
 });

@@ -162,6 +162,8 @@ export default async function PaymentAccessPage({
       result={handoff.record.result.normalizedResultJson}
       storedPaidResult={handoff.storedPaidResult}
       analysisResultId={handoff.record.result.id}
+      paymentIntentId={handoff.paymentIntent.id}
+      entitlementId={handoff.entitlement?.id ?? null}
       anonymousSessionId={handoff.record.request.anonymousSessionId}
       scoreBucket={handoff.record.result.scoreBucket}
       resultCreatedAt={handoff.record.result.createdAt}
