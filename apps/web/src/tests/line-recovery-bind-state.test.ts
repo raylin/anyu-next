@@ -170,6 +170,50 @@ describe("LINE recovery bind state helpers", () => {
     });
   });
 
+  it("builds a recovery LIFF entry URL when LINE LIFF base URL is configured", () => {
+    const result = createLineRecoveryBindHref({
+      moduleSlug: "ambiguous-temperature",
+      resultId: RESULT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      entitlementId: ENTITLEMENT_ID,
+      source: "checkout_start",
+      returnPath: `/m/ambiguous-temperature/result/${RESULT_ID}/checkout`,
+      env: {
+        ...TEST_ENV,
+        NEXT_PUBLIC_LINE_LIFF_URL: "https://liff.line.me/2010157793-Q4JeeYv0/line/recovery/bind",
+      },
+    });
+
+    expect(result.ok).toBe(true);
+
+    const href = result.ok ? result.href : "";
+    expect(href).toContain("https://liff.line.me/2010157793-Q4JeeYv0?");
+    expect(href).not.toContain("/2010157793-Q4JeeYv0/line/recovery/bind");
+    expect(href).not.toContain("pa_");
+    expect(href).not.toContain("pcs_");
+    expect(href).not.toContain("prl_");
+    expect(href).not.toContain("/unlock/");
+    expect(href).not.toContain("unlockToken");
+    expect(href).not.toContain("short-code");
+    expect(href).not.toContain("TradeInfo");
+    expect(href).not.toContain("TradeSha");
+
+    const parsed = new URL(href);
+    const resolved = resolveLineRecoveryBindStateToken({
+      token: parsed.searchParams.get("state"),
+      env: TEST_ENV,
+      now: NOW,
+    });
+
+    expect(resolved).toMatchObject({
+      ok: true,
+      payload: {
+        source: "checkout_start",
+        returnPath: `/m/ambiguous-temperature/result/${RESULT_ID}/checkout`,
+      },
+    });
+  });
+
   it("rejects unsafe return paths and forbidden recovery state values", () => {
     expect(isSafeLineRecoveryReturnPath("/m/ambiguous-temperature/result/abc")).toBe(true);
     expect(isSafeLineRecoveryReturnPath("//evil.example/path")).toBe(false);

@@ -64,6 +64,7 @@ function renderCompleted(input?: {
 describe("paid result recovery save section", () => {
   beforeEach(() => {
     process.env.PAYMENT_RECOVERY_CONTACT_HASH_SECRET = "test-only-recovery-hash-secret";
+    delete process.env.NEXT_PUBLIC_LINE_LIFF_URL;
   });
 
   it("shows saved confirmation with masked email only", () => {

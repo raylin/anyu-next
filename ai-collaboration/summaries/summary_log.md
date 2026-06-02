@@ -8782,3 +8782,28 @@ Unresolved questions:
 - Rerun owner-assisted LINE Recovery Bind Staging Smoke after the state-preservation fix is deployed.
 - Add a reusable sanitized LINE recovery bind DB-check helper if this smoke becomes repeated.
 - LINE recovery link sending remains deferred until hash-only LINE contact binding is staging-proven.
+
+## 2026-06-03 LINE Recovery Bind Staging Smoke v0 Retry
+
+### Completed Changes
+
+- saved the LINE Recovery Bind Staging Smoke v0 Retry handoff and report
+- confirmed Preview(staging) served commit `472eef33e1a2`, environment `preview`, branch `staging`, and route bundle `payment-foundation-2026-05-29`
+- reran `qa:result-checkout:no-card`; result CTA, checkout-start, fake-paid, queue completion, paid access render, and production fail-closed checks passed
+- reran `qa:recovery-link:smoke`; Preview runtime recovery-link resolver, invalid-link safety, cleanup by revocation, and production fail-closed checks passed
+- verified checkout-start LINE CTA copy/href state safety with sanitized output
+- owner-assisted LINE mobile retry no longer showed `缺少 LINE 保存狀態`, confirming the first fix worked
+- retry then failed at LINE login with `400 Bad Request`, classified as `liff_context_failed`
+- added a narrow LIFF-entry URL fix so recovery LINE CTAs use `NEXT_PUBLIC_LINE_LIFF_URL` when configured and fall back to `/line/recovery/bind` only when LIFF URL config is absent
+
+### Learnings
+
+- Direct app-route LIFF login can fail with LINE `400 Bad Request`; recovery CTA should enter through `https://liff.line.me/{LIFF_ID}` like the proven legacy LIFF pattern.
+- The state-preservation fix solved the missing-state layer but exposed a separate LIFF entry/redirect configuration issue.
+- Tests now cover both internal fallback mode and configured LIFF-entry mode.
+
+### Unresolved Questions
+
+- Rerun owner-assisted LINE Recovery Bind Staging Smoke after the LIFF-entry URL fix deploys.
+- If another mobile-only failure occurs, add a recovery-specific LIFF diagnostic snapshot.
+- LINE recovery link sending remains deferred until hash-only LINE contact binding is staging-proven.

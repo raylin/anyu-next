@@ -43,6 +43,7 @@ describe("NewebPay checkout-start page", () => {
     vi.clearAllMocks();
     process.env.OPERATOR_TEST_SECRET = "operator-secret";
     process.env.PAYMENT_RECOVERY_CONTACT_HASH_SECRET = "test-only-recovery-hash-secret";
+    delete process.env.NEXT_PUBLIC_LINE_LIFF_URL;
     mockCanStartNewebPayCheckoutFromResult.mockReturnValue(true);
     mockIsDbConfigured.mockReturnValue(true);
     mockGetPaymentRecoveryContactsByResultId.mockResolvedValue([]);
