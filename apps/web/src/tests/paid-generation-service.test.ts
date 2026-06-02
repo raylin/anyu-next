@@ -18,6 +18,7 @@ const {
   mockMarkGenerationJobFailedFinal,
   mockMarkGenerationJobProcessing,
   mockResolveRuntimeStrategy,
+  mockSendRecoveryLinksForCompletedPaidResult,
 } = vi.hoisted(() => ({
   mockBuildProviderFallbackPaidResult: vi.fn(),
   mockCreatePaidResultRecord: vi.fn(),
@@ -36,6 +37,7 @@ const {
   mockMarkGenerationJobFailedFinal: vi.fn(),
   mockMarkGenerationJobProcessing: vi.fn(),
   mockResolveRuntimeStrategy: vi.fn(),
+  mockSendRecoveryLinksForCompletedPaidResult: vi.fn(),
 }));
 
 vi.mock("@/lib/ai/paid-result-generation", async (importOriginal) => {
@@ -82,6 +84,10 @@ vi.mock("@/lib/db/runtime", () => ({
   getAnalysisResultWithRequestById: mockGetAnalysisResultWithRequestById,
   getUnlockIntentById: mockGetUnlockIntentById,
   insertEvent: mockInsertEvent,
+}));
+
+vi.mock("@/lib/notifications/email-recovery-link", () => ({
+  sendRecoveryLinksForCompletedPaidResult: mockSendRecoveryLinksForCompletedPaidResult,
 }));
 
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
@@ -137,8 +143,17 @@ describe("deferred paid generation service", () => {
       job: {
         id: "job-1",
         status: "queued",
+        entitlementRefId: null,
       },
       created: true,
+    });
+    mockSendRecoveryLinksForCompletedPaidResult.mockResolvedValue({
+      attempted: 0,
+      sent: 0,
+      noop: 0,
+      duplicate: 0,
+      failed: 0,
+      unavailable: 0,
     });
   });
 
@@ -317,6 +332,77 @@ describe("deferred paid generation service", () => {
       }),
     );
     expect(mockMarkGenerationJobFailedFinal).not.toHaveBeenCalled();
+  });
+
+  it("attempts recovery Email sends after completed paid result when job mirror has entitlement context", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
+      job: {
+        id: "job-1",
+        status: "queued",
+        entitlementRefId: "entitlement-1",
+      },
+      created: false,
+    });
+    mockGeneratePaidResult.mockResolvedValue({
+      paidResult,
+      model: "claude-haiku-4-5-20251001",
+      source: "provider",
+    });
+
+    const result = await requestDeferredPaidGeneration({
+      moduleConfig: aiTemperatureModule,
+      resultId: "result-1",
+      unlockIntentId: "unlock-1",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "completed",
+    });
+    expect(mockSendRecoveryLinksForCompletedPaidResult).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      moduleTitle: "曖昧溫度計",
+      analysisResultId: "result-1",
+      entitlementId: "entitlement-1",
+    });
+  });
+
+  it("does not fail direct paid generation when recovery Email auto-send fails", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
+      job: {
+        id: "job-1",
+        status: "queued",
+        entitlementRefId: "entitlement-1",
+      },
+      created: false,
+    });
+    mockSendRecoveryLinksForCompletedPaidResult.mockRejectedValueOnce(
+      new Error("email_send_failed"),
+    );
+    mockGeneratePaidResult.mockResolvedValue({
+      paidResult,
+      model: "claude-haiku-4-5-20251001",
+      source: "provider",
+    });
+
+    const result = await requestDeferredPaidGeneration({
+      moduleConfig: aiTemperatureModule,
+      resultId: "result-1",
+      unlockIntentId: "unlock-1",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "completed",
+      paidResultId: "paid-1",
+    });
+    expect(mockInsertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventName: "paid_generation_completed",
+      }),
+    );
   });
 
   it("marks fallback success as completed job output instead of failing the mirror", async () => {

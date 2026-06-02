@@ -90,7 +90,8 @@ describe("NewebPay checkout-start page", () => {
     expect(html).toContain("LINE 找回");
     expect(html).toContain("稍後支援");
     expect(html).toContain("完整報告仍會在網頁中提供查看");
-    expect(html).toContain("v0 不會寄送 Email");
+    expect(html).toContain("回到 ANYU 的找回連結");
+    expect(html).toContain("Email 不會包含完整報告內容");
     expect(html).toContain("也想收到新測驗、早鳥或限時解鎖通知");
     expect(html).toContain("我了解尚未保存找回方式，仍要繼續付款");
     expect(html).toContain('method="POST"');

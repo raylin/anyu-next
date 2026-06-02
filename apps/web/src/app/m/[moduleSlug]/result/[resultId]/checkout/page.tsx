@@ -205,7 +205,7 @@ function RecoverySoftGate({
             <Button type="submit">保存</Button>
           </div>
           <p id="recovery-email-help" className="anyu-subtle-note">
-            v0 不會寄送 Email；只會保存為這次完整報告的找回資料。Email 不會顯示在頁面或報告中。
+            完整報告準備好後，系統會準備一個回到 ANYU 的找回連結；Email 不會包含完整報告內容。
           </p>
           <label className="anyu-recovery-checkbox">
             <input type="checkbox" name="marketingOptIn" value="1" />

@@ -17,6 +17,7 @@ const {
   mockMarkPaidResultFailed,
   mockMarkPaidResultProcessing,
   mockRecoverStalePaidAnalysisJobs,
+  mockSendRecoveryLinksForCompletedPaidResult,
 } = vi.hoisted(() => ({
   mockClaimDuePaidAnalysisJobById: vi.fn(),
   mockClaimDuePaidAnalysisJobs: vi.fn(),
@@ -34,6 +35,7 @@ const {
   mockMarkPaidResultFailed: vi.fn(),
   mockMarkPaidResultProcessing: vi.fn(),
   mockRecoverStalePaidAnalysisJobs: vi.fn(),
+  mockSendRecoveryLinksForCompletedPaidResult: vi.fn(),
 }));
 
 vi.mock("@/lib/db/generation-jobs", () => ({
@@ -62,6 +64,10 @@ vi.mock("@/lib/db/runtime", () => ({
 vi.mock("@/lib/modules/paid-generation-service", () => ({
   generateDeferredPaidResultPayload: mockGenerateDeferredPaidResultPayload,
   getSafePaidGenerationErrorCode: mockGetSafePaidGenerationErrorCode,
+}));
+
+vi.mock("@/lib/notifications/email-recovery-link", () => ({
+  sendRecoveryLinksForCompletedPaidResult: mockSendRecoveryLinksForCompletedPaidResult,
 }));
 
 import { aiTemperatureDemoProductResult } from "@/lib/modules/demo-result";
@@ -141,6 +147,14 @@ describe("paid generation processor", () => {
       },
     });
     mockGetSafePaidGenerationErrorCode.mockReturnValue("provider");
+    mockSendRecoveryLinksForCompletedPaidResult.mockResolvedValue({
+      attempted: 0,
+      sent: 0,
+      noop: 0,
+      duplicate: 0,
+      failed: 0,
+      unavailable: 0,
+    });
     mockRecord();
   });
 
@@ -203,6 +217,50 @@ describe("paid generation processor", () => {
       expect.objectContaining({
         outputRefId: "paid-1",
         source: "provider",
+      }),
+    );
+    expect(mockSendRecoveryLinksForCompletedPaidResult).not.toHaveBeenCalled();
+  });
+
+  it("attempts recovery Email sends after a paid generation job completes with entitlement context", async () => {
+    mockClaimDuePaidAnalysisJobs.mockResolvedValue([
+      {
+        ...JOB,
+        entitlementRefId: "entitlement-1",
+      },
+    ]);
+
+    const result = await processPaidAnalysisJobs({ now: NOW, lockedBy: "worker-1" });
+
+    expect(result).toMatchObject({ processed: 1, completed: 1 });
+    expect(mockSendRecoveryLinksForCompletedPaidResult).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      moduleTitle: "曖昧溫度計",
+      analysisResultId: JOB.inputRefId,
+      entitlementId: "entitlement-1",
+    });
+  });
+
+  it("keeps paid generation completed when recovery Email auto-send fails", async () => {
+    mockClaimDuePaidAnalysisJobs.mockResolvedValue([
+      {
+        ...JOB,
+        entitlementRefId: "entitlement-1",
+      },
+    ]);
+    mockSendRecoveryLinksForCompletedPaidResult.mockRejectedValueOnce(
+      new Error("email_send_failed"),
+    );
+
+    await expect(processPaidAnalysisJobs({ now: NOW })).resolves.toMatchObject({
+      processed: 1,
+      completed: 1,
+      failedFinal: 0,
+    });
+    expect(mockMarkGenerationJobCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jobId: "job-1",
+        outputRefId: "paid-1",
       }),
     );
   });

@@ -390,6 +390,42 @@ export async function getPaymentRecoveryContactsByEntitlementId(entitlementId: s
     .where(eq(paymentRecoveryContacts.entitlementId, entitlementId));
 }
 
+export async function getEligibleEmailRecoveryContactsForCompletedPaidResult(input: {
+  moduleSlug: string;
+  analysisResultId: string;
+  entitlementId: string;
+}) {
+  const records = await getPaymentRecoveryContactsByEntitlementId(input.entitlementId);
+
+  return records.filter((record) => {
+    if (record.moduleSlug !== input.moduleSlug) {
+      return false;
+    }
+
+    if (record.analysisResultId !== input.analysisResultId) {
+      return false;
+    }
+
+    if (record.contactType !== "email" || !record.contactEncrypted) {
+      return false;
+    }
+
+    if (!record.transactionalConsentAt) {
+      return false;
+    }
+
+    if (record.status !== "bound" && record.status !== "verified") {
+      return false;
+    }
+
+    return (
+      record.source === "checkout_start" ||
+      record.source === "return_waiting" ||
+      record.source === "paid_ready"
+    );
+  });
+}
+
 export async function getPaymentRecoveryContactsByResultId(analysisResultId: string) {
   const db = requireDb();
 

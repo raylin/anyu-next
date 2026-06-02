@@ -16,6 +16,7 @@ import {
   createOrUpdateEmailRecoveryContact,
   createOrUpdateLineRecoveryContact,
   createOrUpdatePostPaymentEmailRecoveryContact,
+  getEligibleEmailRecoveryContactsForCompletedPaidResult,
   PAYMENT_RECOVERY_CONTACT_SOURCES,
   PAYMENT_RECOVERY_CONTACT_STATUSES,
   PAYMENT_RECOVERY_CONTACT_TYPES,
@@ -42,6 +43,29 @@ const ENCRYPTED_OWNER_EMAIL = encryptRecoveryContactValue({
   env: TEST_ENV,
 });
 
+function recoveryContact(overrides: Record<string, unknown> = {}) {
+  return {
+    id: RECOVERY_CONTACT_ID,
+    moduleSlug: "ambiguous-temperature",
+    analysisResultId: RESULT_ID,
+    paymentIntentId: PAYMENT_INTENT_ID,
+    entitlementId: ENTITLEMENT_ID,
+    contactType: "email",
+    contactHash: "redacted-contact-hash",
+    contactEncrypted: ENCRYPTED_OWNER_EMAIL,
+    lineUserHash: null,
+    emailHash: "redacted-email-hash",
+    transactionalConsentAt: new Date("2026-06-01T01:00:00.000Z"),
+    marketingOptInAt: null,
+    source: "checkout_start",
+    status: "bound",
+    createdAt: new Date("2026-06-01T01:00:00.000Z"),
+    updatedAt: new Date("2026-06-01T01:00:00.000Z"),
+    lastUsedAt: null,
+    ...overrides,
+  };
+}
+
 function createDbMock(input?: { selectRows?: unknown[]; insertRows?: unknown[]; updateRows?: unknown[] }) {
   const capture: {
     insertValues?: Record<string, unknown>;
@@ -51,6 +75,9 @@ function createDbMock(input?: { selectRows?: unknown[]; insertRows?: unknown[]; 
     from: vi.fn(() => selectChain),
     where: vi.fn(() => selectChain),
     limit: vi.fn(async () => input?.selectRows ?? []),
+    then: vi.fn((resolve, reject) =>
+      Promise.resolve(input?.selectRows ?? []).then(resolve, reject),
+    ),
   };
   const insertChain = {
     values: vi.fn((values) => {
@@ -479,6 +506,31 @@ describe("payment recovery contacts", () => {
       entitlementId: ENTITLEMENT_ID,
       status: "bound",
     });
+  });
+
+  it("finds only eligible Email contacts for completed-result auto-send", async () => {
+    const eligible = recoveryContact({ id: "eligible-contact" });
+    const dbMock = createDbMock({
+      selectRows: [
+        eligible,
+        recoveryContact({ id: "line-contact", contactType: "line", lineUserHash: "line-hash" }),
+        recoveryContact({ id: "missing-consent", transactionalConsentAt: null }),
+        recoveryContact({ id: "failed-contact", status: "failed" }),
+        recoveryContact({ id: "revoked-contact", status: "revoked" }),
+        recoveryContact({ id: "post-payment-contact", source: "completed_result" }),
+        recoveryContact({ id: "wrong-result", analysisResultId: "99999999-9999-4999-8999-999999999999" }),
+        recoveryContact({ id: "missing-encrypted", contactEncrypted: null }),
+      ],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+
+    await expect(
+      getEligibleEmailRecoveryContactsForCompletedPaidResult({
+        moduleSlug: "ambiguous-temperature",
+        analysisResultId: RESULT_ID,
+        entitlementId: ENTITLEMENT_ID,
+      }),
+    ).resolves.toEqual([eligible]);
   });
 
   it("rejects raw paid access or checkout session bearer tokens as contact values", async () => {

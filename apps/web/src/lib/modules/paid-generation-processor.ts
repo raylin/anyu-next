@@ -26,6 +26,7 @@ import {
   generateDeferredPaidResultPayload,
   getSafePaidGenerationErrorCode,
 } from "@/lib/modules/paid-generation-service";
+import { sendRecoveryLinksForCompletedPaidResult } from "@/lib/notifications/email-recovery-link";
 
 export type PaidGenerationProcessorResult = {
   ok: true;
@@ -92,6 +93,26 @@ function isRetryablePaidGenerationError(errorCategory: string) {
     errorCategory === "provider_http_503" ||
     errorCategory === "provider_http_504"
   );
+}
+
+async function sendCompletedPaidResultRecoveryLinks(input: {
+  job: GenerationJob;
+  moduleTitle?: string;
+}) {
+  if (!input.job.entitlementRefId) {
+    return;
+  }
+
+  try {
+    await sendRecoveryLinksForCompletedPaidResult({
+      moduleSlug: input.job.moduleSlug,
+      moduleTitle: input.moduleTitle,
+      analysisResultId: input.job.inputRefId,
+      entitlementId: input.job.entitlementRefId,
+    });
+  } catch {
+    // Recovery Email is transactional support infrastructure; it must not fail paid delivery.
+  }
 }
 
 async function markJobFailure(input: {
@@ -181,6 +202,10 @@ async function processPaidAnalysisJob(job: GenerationJob, now: Date) {
       source: completed.model?.includes("fallback") ? "fallback" : "provider",
       modelName: completed.model,
     });
+    await sendCompletedPaidResultRecoveryLinks({
+      job,
+      moduleTitle: moduleConfig.title,
+    });
     return "completed" as const;
   }
 
@@ -241,6 +266,10 @@ async function processPaidAnalysisJob(job: GenerationJob, now: Date) {
       source: generated.source,
       modelProvider: generated.providerInfo.provider,
       modelName: generated.model,
+    });
+    await sendCompletedPaidResultRecoveryLinks({
+      job,
+      moduleTitle: moduleConfig.title,
     });
 
     return "completed" as const;

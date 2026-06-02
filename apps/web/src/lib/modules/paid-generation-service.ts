@@ -30,6 +30,7 @@ import {
 } from "@/lib/ai/provider";
 import { getAnalysisResultWithRequestById, getUnlockIntentById, insertEvent } from "@/lib/db/runtime";
 import type { ProductModuleConfig } from "@/lib/modules/types";
+import { sendRecoveryLinksForCompletedPaidResult } from "@/lib/notifications/email-recovery-link";
 import { isPaidGenerationJobsEnabled } from "@/lib/runtime/feature-flags";
 
 export type PaidGenerationStatus = "processing" | "completed" | "failed" | "expired";
@@ -206,6 +207,29 @@ async function markPaidGenerationJobCompleted(input: {
   }
 }
 
+async function sendCompletedPaidResultRecoveryLinks(input: {
+  moduleConfig: ProductModuleConfig;
+  analysisResultId: string;
+  jobMirror: PaidGenerationJobMirror | null;
+}) {
+  const entitlementId = input.jobMirror?.job.entitlementRefId;
+
+  if (!entitlementId) {
+    return;
+  }
+
+  try {
+    await sendRecoveryLinksForCompletedPaidResult({
+      moduleSlug: input.moduleConfig.slug,
+      moduleTitle: input.moduleConfig.title,
+      analysisResultId: input.analysisResultId,
+      entitlementId,
+    });
+  } catch {
+    // Recovery Email is transactional support infrastructure; it must not fail paid delivery.
+  }
+}
+
 async function markPaidGenerationJobFailedFinal(input: {
   jobMirror: PaidGenerationJobMirror | null;
   errorCategory: string;
@@ -271,6 +295,11 @@ export async function requestDeferredPaidGeneration(input: {
       paidResultId: completed.id,
       source: getPaidGenerationSourceFromModel(completed.model),
       modelName: completed.model,
+    });
+    await sendCompletedPaidResultRecoveryLinks({
+      moduleConfig: input.moduleConfig,
+      analysisResultId: input.resultId,
+      jobMirror: completedJobMirror,
     });
 
     return {
@@ -463,6 +492,11 @@ export async function requestDeferredPaidGeneration(input: {
       source: generated.source,
       modelProvider: providerInfo.provider,
       modelName: generated.model,
+    });
+    await sendCompletedPaidResultRecoveryLinks({
+      moduleConfig: input.moduleConfig,
+      analysisResultId: input.resultId,
+      jobMirror,
     });
 
     await insertEvent({

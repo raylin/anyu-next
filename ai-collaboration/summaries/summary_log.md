@@ -8638,3 +8638,28 @@ Unresolved questions:
 - Add `qa:email-recovery-link:smoke` if real-provider smoke needs to be repeated.
 - Decide whether to keep, remove, or consolidate the temporary operator Email smoke endpoint after launch-readiness proof is sufficient.
 - Add paid-delivery completion hook so checkout-start Email contacts receive recovery links automatically after paid readiness.
+
+## 2026-06-02 Paid Delivery Recovery Link Send Hook v0
+
+### Completed Changes
+
+- saved the Paid Delivery Recovery Link Send Hook v0 handoff and report
+- added eligible Email recovery contact lookup for completed paid results
+- added `sendRecoveryLinksForCompletedPaidResult(...)` to create/send Email-channel recovery links for eligible contacts
+- wired the hook into direct paid generation and queued paid generation completion paths after paid result/job completion
+- kept Email sending non-fatal so paid result completion is not rolled back or blocked by recovery send failure
+- updated checkout-start Email recovery copy away from stale “v0 不會寄送 Email” wording
+- added tests for eligibility, noop/provider behavior, duplicate prevention, provider failure, non-fatal generation completion, and checkout-start copy
+- reran full lint/test/build and staging-safe QA regressions
+
+### Learnings
+
+- The correct hook point is after the paid result is persisted and the generation job is marked completed, not at payment verification or ReturnURL.
+- Checkout-start recovery contacts become eligible after paid delivery binds them to the entitlement.
+- The existing no-card QA path cannot prove checkout-start auto-send because checkout-start creates a NewebPay payment intent while operator fake-paid creates a separate operator payment intent.
+
+### Unresolved Questions
+
+- Add a dedicated operator smoke path if live auto-send proof is needed without a real provider card payment.
+- Decide whether provider message IDs, resend limits, and bounce handling should be persisted before broader launch.
+- LINE recovery link sending remains deferred.

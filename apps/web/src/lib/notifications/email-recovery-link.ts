@@ -1,5 +1,8 @@
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
-import type { PaymentRecoveryContact } from "@/lib/db/payment-recovery-contacts";
+import {
+  getEligibleEmailRecoveryContactsForCompletedPaidResult,
+  type PaymentRecoveryContact,
+} from "@/lib/db/payment-recovery-contacts";
 import {
   createPaidResultRecoveryLink,
   getRecentPaidResultRecoveryLinkForContact,
@@ -285,4 +288,85 @@ export async function createAndSendEmailRecoveryLink(input: {
     recoveryLinkCreated: true,
     emailSent: sendResult.status === "sent",
   };
+}
+
+export type CompletedPaidResultRecoveryEmailSendSummary = {
+  attempted: number;
+  sent: number;
+  noop: number;
+  duplicate: number;
+  failed: number;
+  unavailable: number;
+};
+
+function emptyCompletedPaidResultRecoveryEmailSendSummary(): CompletedPaidResultRecoveryEmailSendSummary {
+  return {
+    attempted: 0,
+    sent: 0,
+    noop: 0,
+    duplicate: 0,
+    failed: 0,
+    unavailable: 0,
+  };
+}
+
+export async function sendRecoveryLinksForCompletedPaidResult(input: {
+  moduleSlug: string;
+  moduleTitle?: string;
+  analysisResultId: string;
+  paymentIntentId?: string | null;
+  entitlementId?: string | null;
+  env?: NodeJS.ProcessEnv;
+  fetchImpl?: EmailFetch;
+}): Promise<CompletedPaidResultRecoveryEmailSendSummary> {
+  const summary = emptyCompletedPaidResultRecoveryEmailSendSummary();
+
+  if (!input.entitlementId) {
+    return summary;
+  }
+
+  let contacts: PaymentRecoveryContact[];
+
+  try {
+    contacts = await getEligibleEmailRecoveryContactsForCompletedPaidResult({
+      moduleSlug: input.moduleSlug,
+      analysisResultId: input.analysisResultId,
+      entitlementId: input.entitlementId,
+    });
+  } catch {
+    return summary;
+  }
+
+  for (const recoveryContact of contacts) {
+    summary.attempted += 1;
+
+    try {
+      const result = await createAndSendEmailRecoveryLink({
+        moduleSlug: input.moduleSlug,
+        moduleTitle: input.moduleTitle,
+        analysisResultId: input.analysisResultId,
+        paymentIntentId: input.paymentIntentId ?? recoveryContact.paymentIntentId,
+        entitlementId: input.entitlementId,
+        recoveryContact,
+        env: input.env,
+        fetchImpl: input.fetchImpl,
+      });
+
+      if (result.status === "sent") {
+        summary.sent += 1;
+      } else if (result.status === "noop") {
+        summary.noop += 1;
+      } else if (result.status === "duplicate") {
+        summary.duplicate += 1;
+      } else if (result.status === "unavailable") {
+        summary.unavailable += 1;
+      } else {
+        summary.failed += 1;
+      }
+    } catch {
+      summary.failed += 1;
+    }
+  }
+
+  return summary;
 }
