@@ -8613,3 +8613,24 @@ Unresolved questions:
 - Owner must choose/verify sender identity and provide Resend credentials through branch-scoped Preview(staging) before real Email smoke.
 - Provider message id is not persisted; add audit storage later if support/debugging requires it.
 - Resend/rate-limit/bounce handling remains deferred.
+
+## 2026-06-02 Email Recovery Link Real Provider Smoke v0
+
+### Completed Changes
+
+- saved the Email Recovery Link Real Provider Smoke v0 handoff and blocked execution report
+- verified secure local env has `EMAIL_PROVIDER`, `EMAIL_FROM`, and `RESEND_API_KEY` present without printing values
+- checked common local-only smoke recipient env names and found none present
+- stopped before Preview(staging) env changes, redeploy, or real Email send because an owner-approved recipient could not be confirmed
+
+### Learnings
+
+- Resend sender/API key presence alone is not sufficient for a compliant real-send smoke; the recipient must also be explicit and local-only.
+- Applying Preview(staging) provider env without a recipient would change staging behavior without completing the verification loop.
+- A dedicated real-provider smoke helper would reduce ambiguity by standardizing the recipient env name and sanitized output.
+
+### Unresolved Questions
+
+- Add `QA_EMAIL_RECOVERY_SMOKE_TO` locally with an owner-approved test recipient, then rerun the smoke.
+- Decide whether to add a `qa:email-recovery-link:smoke` helper before retrying.
+- Preview(staging) Resend env was not changed in this blocked run.
