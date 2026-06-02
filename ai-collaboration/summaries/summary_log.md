@@ -8711,3 +8711,26 @@ Unresolved questions:
 - Decide whether to add persistent recovery link sent-state lookup before production payment capability.
 - Confirm public retention language before making broader “report saved for 90 days” or permanence claims.
 - LINE recovery CTA wiring and LINE message sending remain deferred.
+
+## 2026-06-03 Paid Result Delivery Artifact Staging Visual Smoke v0
+
+### Completed Changes
+
+- saved the Paid Result Delivery Artifact Staging Visual Smoke v0 handoff and report
+- confirmed Preview(staging) serves commit `2e59676fd949`, environment `preview`, branch `staging`, and route bundle `payment-foundation-2026-05-29`
+- reran `qa:result-checkout:no-card`; result checkout, checkout-start, operator fake-paid, queue completion, paid access render, and production fail-closed checks passed
+- reran `qa:recovery-link:smoke`; runtime recovery-link resolver, invalid-link safety, cleanup by revocation, and production fail-closed checks passed
+- ran a fresh completed-result artifact smoke with sanitized visible-text inspection after local browser launch was blocked by macOS sandbox permissions
+- verified artifact title, generated stamp/time, `AT-YYYYMMDD-XXXXXX` report reference shape, recovery state, support Email, report content signal, and visible copy/token safety
+
+### Learnings
+
+- The artifact is live on Preview(staging) and visible in completed paid result output.
+- Full raw HTML can contain tokenized route mechanics because the unlock path itself is token-based; visible-text checks are the correct safety boundary for copy/artifact leakage.
+- In this environment, Chromium cannot launch due macOS `MachPortRendezvousServer` permission denial, so exact mobile spacing still needs human/browser spot-check if required.
+
+### Unresolved Questions
+
+- Decide whether a human mobile screenshot check is needed before moving on.
+- Decide whether to add a reusable sanitized artifact visual-smoke helper.
+- LINE recovery CTA wiring remains deferred.
