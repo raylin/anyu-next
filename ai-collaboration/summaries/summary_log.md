@@ -8618,19 +8618,23 @@ Unresolved questions:
 
 ### Completed Changes
 
-- saved the Email Recovery Link Real Provider Smoke v0 handoff and blocked execution report
-- verified secure local env has `EMAIL_PROVIDER`, `EMAIL_FROM`, and `RESEND_API_KEY` present without printing values
-- checked common local-only smoke recipient env names and found none present
-- stopped before Preview(staging) env changes, redeploy, or real Email send because an owner-approved recipient could not be confirmed
+- saved the Email Recovery Link Real Provider Smoke v0 handoff and execution report
+- verified secure local env has `RESEND_API_KEY`, `EMAIL_RECOVERY_TEST_RECIPIENT`, and `OPERATOR_TEST_SECRET` present without printing values
+- configured branch-scoped Preview(staging) only: `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`, and `ENABLE_OPERATOR_EMAIL_RECOVERY_SMOKE=true`
+- added a narrow Preview(staging)-only `POST /api/operator/email-recovery-smoke` endpoint gated by operator secret and feature flag
+- deployed a Preview(staging) runtime with the Resend env and smoke endpoint
+- sent one controlled recovery Email through Resend to the owner-approved test recipient
+- owner verified inbox receipt, subject, sender, 90-day copy, support contact, no report body/raw input/`pa_`/`pcs_`, and `/r/` link paid-result access
+- reran `qa:recovery-link:smoke` and `qa:result-checkout:no-card`; both passed with production fail-closed checks
 
 ### Learnings
 
-- Resend sender/API key presence alone is not sufficient for a compliant real-send smoke; the recipient must also be explicit and local-only.
-- Applying Preview(staging) provider env without a recipient would change staging behavior without completing the verification loop.
-- A dedicated real-provider smoke helper would reduce ambiguity by standardizing the recipient env name and sanitized output.
+- Programmatic direct POST to Next server action still returns non-browser-equivalent 500 behavior, so a narrow Preview-runtime operator endpoint is safer for this real-provider smoke.
+- Resend provider path returned `sendStatus=sent` and delivered the Email without exposing raw `prl_`, token hash, raw Email, `pa_`, `pcs_`, provider payload, or report content.
+- Direct local DB verification was blocked because local `DATABASE_URL` did not point at the Preview(staging) schema with `payment_recovery_contacts`; use a sanctioned Preview DB assertion path if row-level proof is needed later.
 
 ### Unresolved Questions
 
-- Add `QA_EMAIL_RECOVERY_SMOKE_TO` locally with an owner-approved test recipient, then rerun the smoke.
-- Decide whether to add a `qa:email-recovery-link:smoke` helper before retrying.
-- Preview(staging) Resend env was not changed in this blocked run.
+- Add `qa:email-recovery-link:smoke` if real-provider smoke needs to be repeated.
+- Decide whether to keep, remove, or consolidate the temporary operator Email smoke endpoint after launch-readiness proof is sufficient.
+- Add paid-delivery completion hook so checkout-start Email contacts receive recovery links automatically after paid readiness.

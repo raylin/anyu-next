@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canStartNewebPayCheckoutFromResult,
+  isOperatorEmailRecoverySmokeEnabled,
   isOperatorFakePaidSuccessEnabled,
   isOperatorRecoveryLinkSmokeEnabled,
   isPaidJobQueueTriggerEnabled,
@@ -67,6 +68,31 @@ describe("runtime feature flags", () => {
         VERCEL_ENV: "preview",
         VERCEL_GIT_COMMIT_REF: "feature",
         ENABLE_OPERATOR_RECOVERY_LINK_SMOKE: "true",
+      } as NodeJS.ProcessEnv),
+    ).toBe(false);
+  });
+
+  it("allows email recovery operator smoke only on Preview(staging) with explicit flag", () => {
+    expect(isOperatorEmailRecoverySmokeEnabled({} as NodeJS.ProcessEnv)).toBe(false);
+    expect(
+      isOperatorEmailRecoverySmokeEnabled({
+        VERCEL_ENV: "preview",
+        VERCEL_GIT_COMMIT_REF: "staging",
+        ENABLE_OPERATOR_EMAIL_RECOVERY_SMOKE: "true",
+      } as NodeJS.ProcessEnv),
+    ).toBe(true);
+    expect(
+      isOperatorEmailRecoverySmokeEnabled({
+        VERCEL_ENV: "production",
+        VERCEL_GIT_COMMIT_REF: "staging",
+        ENABLE_OPERATOR_EMAIL_RECOVERY_SMOKE: "true",
+      } as NodeJS.ProcessEnv),
+    ).toBe(false);
+    expect(
+      isOperatorEmailRecoverySmokeEnabled({
+        VERCEL_ENV: "preview",
+        VERCEL_GIT_COMMIT_REF: "feature",
+        ENABLE_OPERATOR_EMAIL_RECOVERY_SMOKE: "true",
       } as NodeJS.ProcessEnv),
     ).toBe(false);
   });
