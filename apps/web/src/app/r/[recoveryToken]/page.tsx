@@ -78,6 +78,7 @@ export default async function PaidResultRecoveryLinkPage({ params }: RecoveryLin
       initialTheme={null}
       result={paidAccess.record.result.normalizedResultJson}
       storedPaidResult={paidAccess.storedPaidResult}
+      analysisResultId={paidAccess.entitlement.analysisResultId}
       anonymousSessionId={paidAccess.record.request.anonymousSessionId}
       scoreBucket={paidAccess.record.result.scoreBucket}
       resultCreatedAt={paidAccess.record.result.createdAt}

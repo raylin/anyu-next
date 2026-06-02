@@ -44,7 +44,12 @@ function renderCompleted(input?: {
       moduleConfig={moduleConfig}
       moduleSlug="ambiguous-temperature"
       result={result}
-      storedPaidResult={{ status: "completed", paidResultJson: result.paid_result }}
+      storedPaidResult={{
+        status: "completed",
+        paidResultJson: result.paid_result,
+        completedAt: new Date("2026-06-01T08:30:00.000Z"),
+      }}
+      analysisResultId="result_1234567890_private"
       anonymousSessionId="session-1"
       scoreBucket="warm"
       resultCreatedAt={new Date("2026-06-01T00:00:00.000Z")}
@@ -73,8 +78,16 @@ describe("paid result recovery save section", () => {
     });
 
     expect(html).toContain("這份完整分析已保存");
+    expect(html).toContain("曖昧溫度計｜完整分析報告");
+    expect(html).toContain("報告編號");
+    expect(html).toContain("AT-20260601-");
     expect(html).toContain("已保存找回方式：o***@e***.com");
+    expect(html).toContain("聯絡客服時可提供報告編號");
     expect(html).not.toContain("owner@example.com");
+    expect(html).not.toContain("result_1234567890_private");
+    expect(html).not.toContain("pa_");
+    expect(html).not.toContain("pcs_");
+    expect(html).not.toContain("prl_");
     expect(html).not.toContain("Email 交付");
     expect(html).not.toContain("LINE 交付");
   });
@@ -96,6 +109,7 @@ describe("paid result recovery save section", () => {
     });
 
     expect(html).toContain("已準備並寄出找回連結");
+    expect(html).toContain("已寄出找回連結");
     expect(html).toContain("Email 不包含報告內容");
     expect(html).not.toContain("Email 交付");
   });
@@ -121,6 +135,8 @@ describe("paid result recovery save section", () => {
     });
 
     expect(html).toContain("保存這份完整分析");
+    expect(html).toContain("尚未保存找回方式");
+    expect(html).not.toContain("已寄出找回連結");
     expect(html).toContain("Email 找回");
     expect(html).toContain("也想收到新測驗、早鳥或限時解鎖通知");
     expect(html).toContain("LINE 找回");

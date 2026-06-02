@@ -8688,3 +8688,26 @@ Unresolved questions:
 - Add a dedicated `qa:email-recovery:auto-send` wrapper if this smoke needs to be repeated often.
 - Provider message-id audit, bounce handling, and resend limits remain deferred.
 - LINE recovery link sending remains deferred.
+
+## 2026-06-02 Paid Result Delivery Artifact Implementation v0
+
+### Completed Changes
+
+- saved the Paid Result Delivery Artifact Implementation v0 handoff and report
+- added a sanitized paid-result delivery summary helper for completed Module 01 paid results
+- added a completed-result delivery artifact/status card to the shared `UnlockCompleted` renderer used by paid access, payment access, and `/r/` recovery-link access
+- added display-only report reference codes in `AT-YYYYMMDD-XXXXXX` format
+- integrated masked recovery saved/unsaved state and current-flow Email sent confirmation without exposing raw contact values or tokens
+- added Riso/editorial card styling and targeted tests for reference format, masked state, sent-state copy, and token/internal-id exclusion
+
+### Learnings
+
+- The shared completed-result renderer is the right insertion point because it covers paid access tokens, session-bound access, and recovery-link access together.
+- Report reference codes can improve supportability without using provider order numbers or authorizing tokens.
+- Persistent “Email link already sent” status should not be claimed until a summary helper explicitly reads sent recovery-link rows.
+
+### Unresolved Questions
+
+- Decide whether to add persistent recovery link sent-state lookup before production payment capability.
+- Confirm public retention language before making broader “report saved for 90 days” or permanence claims.
+- LINE recovery CTA wiring and LINE message sending remain deferred.

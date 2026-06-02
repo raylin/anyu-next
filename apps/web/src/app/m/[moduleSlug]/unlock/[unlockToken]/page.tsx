@@ -44,6 +44,10 @@ import {
   resolvePaidAccessToken,
   type PaidAccessResolution,
 } from "@/lib/payments/paid-access-resolver";
+import {
+  getPaidResultDeliverySummary,
+  type PaidResultDeliverySummary,
+} from "@/lib/payments/paid-result-delivery-artifact";
 import { hasPaidAccessTokenPrefix } from "@/lib/payments/paid-access-token";
 import { RecoveryContactConfigError } from "@/lib/payments/recovery-contact-crypto";
 
@@ -186,6 +190,7 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
         initialTheme={initialTheme}
         result={paidAccess.record.result.normalizedResultJson}
         storedPaidResult={paidAccess.storedPaidResult}
+        analysisResultId={paidAccess.entitlement.analysisResultId}
         anonymousSessionId={paidAccess.record.request.anonymousSessionId}
         scoreBucket={paidAccess.record.result.scoreBucket}
         resultCreatedAt={paidAccess.record.result.createdAt}
@@ -255,6 +260,7 @@ export default async function UnlockPage({ params, searchParams }: UnlockPagePro
       initialTheme={initialTheme}
       result={result}
       storedPaidResult={storedPaidResult}
+      analysisResultId={record.result.id}
       anonymousSessionId={record.unlockIntent.anonymousSessionId}
       scoreBucket={record.result.scoreBucket}
       resultCreatedAt={record.result.createdAt}
@@ -269,6 +275,7 @@ export function UnlockCompleted({
   initialTheme,
   result,
   storedPaidResult,
+  analysisResultId,
   anonymousSessionId,
   scoreBucket,
   resultCreatedAt,
@@ -285,7 +292,9 @@ export function UnlockCompleted({
     status?: string | null;
     model?: string | null;
     paidResultJson?: unknown;
+    completedAt?: Date | string | null;
   } | null;
+  analysisResultId: string;
   anonymousSessionId?: string | null;
   scoreBucket?: string | null;
   resultCreatedAt?: Date | string | null;
@@ -297,6 +306,14 @@ export function UnlockCompleted({
   const paidResult = normalizePaidResultForDisplay(
     storedPaidResult?.paidResultJson ?? result.paid_result,
   );
+  const deliverySummary = getPaidResultDeliverySummary({
+    moduleSlug,
+    moduleLabel: moduleConfig.title,
+    analysisResultId,
+    generatedAt: storedPaidResult?.completedAt ?? resultCreatedAt,
+    recoverySummary,
+    recoveryState,
+  });
 
   return (
     <main className="anyu-shell">
@@ -334,6 +351,8 @@ export function UnlockCompleted({
               本結果是文字情境整理與溝通建議，不是心理治療、諮商、命理判斷，也不保證任何關係結果。
             </p>
           </Card>
+
+          <PaidResultDeliveryArtifactCard summary={deliverySummary} />
 
           <PaidResultRecoverySaveSection
             recoverySummary={recoverySummary}
@@ -437,6 +456,52 @@ export function UnlockCompleted({
         </section>
       </ModuleThemeBoundary>
     </main>
+  );
+}
+
+export function PaidResultDeliveryArtifactCard({
+  summary,
+}: {
+  summary: PaidResultDeliverySummary;
+}) {
+  return (
+    <Card className="anyu-delivery-artifact" aria-labelledby="paid-result-delivery-title">
+      <div className="anyu-delivery-artifact-header">
+        <div>
+          <p className="anyu-kicker t-label-accent">delivery artifact</p>
+          <h2 id="paid-result-delivery-title" className="anyu-section-title">
+            {summary.moduleLabel}｜{summary.artifactTitle}
+          </h2>
+        </div>
+        <span className="anyu-delivery-stamp">{summary.statusLabel}</span>
+      </div>
+
+      <dl className="anyu-delivery-artifact-grid" aria-label="完整報告交付資訊">
+        <div>
+          <dt>報告編號</dt>
+          <dd>{summary.reportReferenceCode}</dd>
+        </div>
+        <div>
+          <dt>生成時間</dt>
+          <dd>{summary.generatedAtLabel}</dd>
+        </div>
+        <div>
+          <dt>找回狀態</dt>
+          <dd>{summary.recoveryStatusLabel}</dd>
+        </div>
+      </dl>
+
+      {summary.recoveryLinkSent ? (
+        <p className="anyu-delivery-artifact-note">
+          已寄出找回連結；完整報告仍以此網頁查看為準，Email 不包含報告內容。
+        </p>
+      ) : (
+        <p className="anyu-delivery-artifact-note">
+          找回連結目前以 90 天為限。請保存這份找回方式；聯絡客服時可提供報告編號：
+          <a href={`mailto:${summary.supportEmail}`}>{summary.supportEmail}</a>。
+        </p>
+      )}
+    </Card>
   );
 }
 
