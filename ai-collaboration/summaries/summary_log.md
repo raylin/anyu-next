@@ -8807,3 +8807,29 @@ Unresolved questions:
 - Rerun owner-assisted LINE Recovery Bind Staging Smoke after the LIFF-entry URL fix deploys.
 - If another mobile-only failure occurs, add a recovery-specific LIFF diagnostic snapshot.
 - LINE recovery link sending remains deferred until hash-only LINE contact binding is staging-proven.
+
+## 2026-06-03 LINE Recovery Bind Staging Smoke v0 Retry 2
+
+### Completed Changes
+
+- saved the LINE Recovery Bind Staging Smoke v0 Retry 2 handoff and report
+- confirmed Preview(staging) served commit `0f0801d9b5c5`, environment `preview`, branch `staging`, and route bundle `payment-foundation-2026-05-29`
+- reran `qa:result-checkout:no-card`; result CTA, checkout-start, fake-paid, queue completion, paid access render, and production fail-closed checks passed
+- reran `qa:recovery-link:smoke`; Preview runtime recovery-link resolver, invalid-link safety, cleanup by revocation, and production fail-closed checks passed
+- verified checkout-start LINE CTA uses `liff.line.me` with `rlb_[REDACTED]` state and no visible forbidden token substrings
+- owner-assisted LINE mobile Retry 2 no longer showed `缺少 LINE 保存狀態` or LINE login `400 Bad Request`
+- retry stopped at legacy fulfillment copy: `正在確認完整分析頁`, `LINE 短碼連結缺少有效測驗資料`
+- added a narrow compatibility handoff so global and module-scoped `/line/fulfill` detect recovery `rlb_` state and render `LineRecoveryBindBridge`
+- hardened recovery `liff.state` parsing for one percent-encoded layer
+
+### Learnings
+
+- The active LINE LIFF endpoint still resolves to legacy `/line/fulfill`, so recovery must be recognized there until a dedicated recovery LIFF endpoint is configured.
+- The LIFF-entry URL fix worked; the new issue was legacy page routing, not state loss or login.
+- Recovery and legacy fulfillment can safely share the LIFF endpoint if recovery state is detected before short-code fulfillment logic runs.
+
+### Unresolved Questions
+
+- Rerun owner-assisted LINE Recovery Bind Staging Smoke after the legacy-entry recovery handoff fix deploys.
+- Decide later whether to configure a dedicated LINE recovery LIFF endpoint or keep shared endpoint compatibility routing.
+- LINE recovery link sending remains deferred until hash-only LINE contact binding is staging-proven.

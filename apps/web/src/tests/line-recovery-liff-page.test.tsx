@@ -4,6 +4,8 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { LineRecoveryBindBridge } from "@/components/line/LineRecoveryBindBridge";
+import GlobalLineFulfillPage from "@/app/line/fulfill/page";
+import ModuleLineFulfillPage from "@/app/m/[moduleSlug]/line/fulfill/page";
 import {
   parseLineRecoveryBindContext,
 } from "@/lib/line/recovery-liff-context";
@@ -116,5 +118,37 @@ describe("LINE recovery LIFF page", () => {
     } finally {
       vi.stubGlobal("window", originalWindow);
     }
+  });
+
+  it("routes recovery liff.state through the global legacy LIFF entry page", async () => {
+    const liffState = encodeURIComponent(
+      "/line/recovery/bind?state=rlb_safeState&returnPath=%2Fm%2Fambiguous-temperature%2Fresult%2Fresult-1%2Fcheckout",
+    );
+    const page = await GlobalLineFulfillPage({
+      searchParams: Promise.resolve({ "liff.state": liffState }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("用 LINE 保存這份報告");
+    expect(html).toContain("之後可以透過 LINE 協助找回");
+    expect(html).not.toContain("LINE 短碼連結缺少有效測驗資料");
+    expect(html).not.toContain("正在確認完整分析頁");
+    expect(html).not.toContain("短碼");
+  });
+
+  it("routes recovery liff.state through the module legacy LIFF entry page", async () => {
+    const liffState = encodeURIComponent(
+      "/line/recovery/bind?state=rlb_safeState&returnPath=%2Fm%2Fambiguous-temperature%2Fresult%2Fresult-1%2Fcheckout",
+    );
+    const page = await ModuleLineFulfillPage({
+      params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      searchParams: Promise.resolve({ "liff.state": liffState }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("用 LINE 保存這份報告");
+    expect(html).toContain("完整報告仍以網頁查看為準");
+    expect(html).not.toContain("LINE 短碼連結缺少有效測驗資料");
+    expect(html).not.toContain("短碼");
   });
 });

@@ -74,13 +74,28 @@ function parseLiffState(state: string | null): { params: URLSearchParams } {
     return { params: new URLSearchParams() };
   }
 
+  const normalizedState = decodeStateOnce(state);
+
   try {
-    const stateUrl = state.startsWith("http")
-      ? new URL(state)
-      : new URL(state.startsWith("/") ? state : `?${normalizeSearch(state)}`, "https://anyu.tw");
+    const stateUrl = normalizedState.startsWith("http")
+      ? new URL(normalizedState)
+      : new URL(
+          normalizedState.startsWith("/")
+            ? normalizedState
+            : `?${normalizeSearch(normalizedState)}`,
+          "https://anyu.tw",
+        );
 
     return { params: stateUrl.searchParams };
   } catch {
-    return { params: new URLSearchParams(normalizeSearch(state)) };
+    return { params: new URLSearchParams(normalizeSearch(normalizedState)) };
+  }
+}
+
+function decodeStateOnce(state: string) {
+  try {
+    return decodeURIComponent(state);
+  } catch {
+    return state;
   }
 }
