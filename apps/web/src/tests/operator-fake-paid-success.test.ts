@@ -8,6 +8,7 @@ const {
   mockMarkPaymentPaid,
   mockGetEntitlementByPaymentIntentId,
   mockCreatePaidDeliveryArtifactsForPaymentIntent,
+  mockCreateOrUpdateEmailRecoveryContact,
 } = vi.hoisted(() => ({
   mockGetModuleBySlug: vi.fn(),
   mockGetAnalysisResultWithRequestById: vi.fn(),
@@ -16,6 +17,7 @@ const {
   mockMarkPaymentPaid: vi.fn(),
   mockGetEntitlementByPaymentIntentId: vi.fn(),
   mockCreatePaidDeliveryArtifactsForPaymentIntent: vi.fn(),
+  mockCreateOrUpdateEmailRecoveryContact: vi.fn(),
 }));
 
 vi.mock("@/lib/modules/registry", () => ({
@@ -38,6 +40,10 @@ vi.mock("@/lib/db/entitlements", () => ({
 
 vi.mock("@/lib/payments/paid-delivery-artifacts", () => ({
   createPaidDeliveryArtifactsForPaymentIntent: mockCreatePaidDeliveryArtifactsForPaymentIntent,
+}));
+
+vi.mock("@/lib/db/payment-recovery-contacts", () => ({
+  createOrUpdateEmailRecoveryContact: mockCreateOrUpdateEmailRecoveryContact,
 }));
 
 import { createOperatorFakePaidSuccess } from "@/lib/payments/operator-fake-paid-success";
@@ -101,6 +107,9 @@ describe("operator fake paid success service", () => {
         category: "disabled",
         provider: "none",
       },
+    });
+    mockCreateOrUpdateEmailRecoveryContact.mockResolvedValue({
+      id: "contact-1",
     });
   });
 
@@ -233,6 +242,28 @@ describe("operator fake paid success service", () => {
           triggerSource: "operator_fake_paid",
         },
       },
+    });
+  });
+
+  it("can create checkout-start style recovery contact before queue trigger for operator smoke", async () => {
+    const result = await createOperatorFakePaidSuccess({
+      moduleSlug: "ambiguous-temperature",
+      resultId: "result-1",
+      recoveryEmail: "owner@example.invalid",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      recoveryContactId: "contact-1",
+    });
+    expect(mockCreateOrUpdateEmailRecoveryContact).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+      email: "owner@example.invalid",
+      source: "checkout_start",
+      status: "bound",
     });
   });
 

@@ -8663,3 +8663,28 @@ Unresolved questions:
 - Add a dedicated operator smoke path if live auto-send proof is needed without a real provider card payment.
 - Decide whether provider message IDs, resend limits, and bounce handling should be persisted before broader launch.
 - LINE recovery link sending remains deferred.
+
+## 2026-06-02 Email Recovery Auto-Send Staging Operator Smoke v0
+
+### Completed Changes
+
+- saved the Email Recovery Auto-Send Staging Operator Smoke v0 handoff and report
+- extended the existing Preview(staging)-only Email recovery smoke endpoint with an auto-send-after-paid-ready mode
+- allowed the operator fake-paid service to create a checkout-start-style Email recovery contact in the same operator payment/entitlement context for smoke only
+- deployed a Preview(staging) build at commit marker `7f65d47e296a`
+- ran a controlled real Email auto-send smoke using the owner-approved test recipient from secure local env without printing the recipient
+- verified the auto-send hook exercised, paid generation completed, recovery link status was `sent`, and no raw tokens/contact values/report content were returned
+- owner verified Email receipt, subject, sender, 90-day copy, support contact, no report body/raw input/`pa_`/`pcs_`, and `/r/` paid-result access
+- reran recovery-link and no-card checkout QA with production fail-closed checks
+
+### Learnings
+
+- A same-payment-context operator smoke is required to prove checkout-start auto-send without a real card payment.
+- The existing Email recovery smoke feature flag/gate can safely host this mode as long as it remains Preview(staging)-only and operator-secret gated.
+- The paid-delivery hook now has live Preview(staging) evidence, not only unit coverage.
+
+### Unresolved Questions
+
+- Add a dedicated `qa:email-recovery:auto-send` wrapper if this smoke needs to be repeated often.
+- Provider message-id audit, bounce handling, and resend limits remain deferred.
+- LINE recovery link sending remains deferred.

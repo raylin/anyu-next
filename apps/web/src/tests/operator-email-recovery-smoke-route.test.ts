@@ -5,11 +5,17 @@ const {
   mockIsDbConfigured,
   mockCreateOrUpdatePostPaymentEmailRecoveryContact,
   mockCreateAndSendEmailRecoveryLink,
+  mockCreateOperatorFakePaidSuccess,
+  mockProcessPaidAnalysisJobById,
+  mockGetRecentPaidResultRecoveryLinkForContact,
 } = vi.hoisted(() => ({
   mockIsOperatorEmailRecoverySmokeEnabled: vi.fn(),
   mockIsDbConfigured: vi.fn(),
   mockCreateOrUpdatePostPaymentEmailRecoveryContact: vi.fn(),
   mockCreateAndSendEmailRecoveryLink: vi.fn(),
+  mockCreateOperatorFakePaidSuccess: vi.fn(),
+  mockProcessPaidAnalysisJobById: vi.fn(),
+  mockGetRecentPaidResultRecoveryLinkForContact: vi.fn(),
 }));
 
 vi.mock("@/lib/runtime/feature-flags", () => ({
@@ -28,7 +34,19 @@ vi.mock("@/lib/notifications/email-recovery-link", () => ({
   createAndSendEmailRecoveryLink: mockCreateAndSendEmailRecoveryLink,
 }));
 
-import { POST } from "@/app/api/operator/email-recovery-smoke/route";
+vi.mock("@/lib/payments/operator-fake-paid-success", () => ({
+  createOperatorFakePaidSuccess: mockCreateOperatorFakePaidSuccess,
+}));
+
+vi.mock("@/lib/modules/paid-generation-processor", () => ({
+  processPaidAnalysisJobById: mockProcessPaidAnalysisJobById,
+}));
+
+vi.mock("@/lib/db/paid-result-recovery-links", () => ({
+  getRecentPaidResultRecoveryLinkForContact: mockGetRecentPaidResultRecoveryLinkForContact,
+}));
+
+import { POST, PUT } from "@/app/api/operator/email-recovery-smoke/route";
 
 const RESULT_ID = "22222222-2222-4222-8222-222222222222";
 const PAYMENT_INTENT_ID = "33333333-3333-4333-8333-333333333333";
@@ -71,6 +89,22 @@ describe("operator email recovery smoke route", () => {
       status: "sent",
       recoveryLinkCreated: true,
       emailSent: true,
+    });
+    mockCreateOperatorFakePaidSuccess.mockResolvedValue({
+      ok: true,
+      generationJob: { id: "job-1" },
+      entitlement: { id: ENTITLEMENT_ID, status: "active" },
+      recoveryContactId: "contact-1",
+    });
+    mockProcessPaidAnalysisJobById.mockResolvedValue({
+      ok: true,
+      category: "processed",
+      jobId: "job-1",
+      jobResult: "completed",
+    });
+    mockGetRecentPaidResultRecoveryLinkForContact.mockResolvedValue({
+      id: "link-1",
+      status: "sent",
     });
   });
 
@@ -120,6 +154,7 @@ describe("operator email recovery smoke route", () => {
       category: null,
       recoveryLinkCreated: true,
       emailSent: true,
+      autoSendHookExercised: false,
       rawRecoveryTokenReturned: false,
       tokenHashReturned: false,
       rawEmailReturned: false,
@@ -176,5 +211,74 @@ describe("operator email recovery smoke route", () => {
       emailSent: false,
     });
     expect(JSON.stringify(data)).not.toContain("owner@example.invalid");
+  });
+
+  it("runs sanitized auto-send smoke through fake-paid and paid generation completion", async () => {
+    const response = await PUT(request({
+      secret: "operator-secret",
+      body: {
+        moduleSlug: "ambiguous-temperature",
+        resultId: RESULT_ID,
+        email: "owner@example.invalid",
+        idempotencyKey: "operator-auto-send-smoke",
+      },
+    }));
+    const data = await response.json();
+    const serialized = JSON.stringify(data);
+
+    expect(response.status).toBe(200);
+    expect(data).toEqual({
+      ok: true,
+      autoSendHookExercised: true,
+      fakePaidCreated: true,
+      recoveryContactCreated: true,
+      processorCategory: "processed",
+      processorJobResult: "completed",
+      emailSent: true,
+      recoveryLinkCreated: true,
+      recoveryLinkStatus: "sent",
+      rawRecoveryTokenReturned: false,
+      tokenHashReturned: false,
+      rawEmailReturned: false,
+      rawPaidAccessTokenReturned: false,
+      rawCheckoutSessionTokenReturned: false,
+      reportContentReturned: false,
+    });
+    expect(mockCreateOperatorFakePaidSuccess).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      resultId: RESULT_ID,
+      idempotencyKey: "operator-auto-send-smoke",
+      recoveryEmail: "owner@example.invalid",
+    });
+    expect(mockProcessPaidAnalysisJobById).toHaveBeenCalledWith({
+      generationJobId: "job-1",
+      lockedBy: "operator_email_recovery_auto_send_smoke",
+    });
+    expect(mockGetRecentPaidResultRecoveryLinkForContact).toHaveBeenCalledWith({
+      entitlementId: ENTITLEMENT_ID,
+      recoveryContactId: "contact-1",
+      channel: "email",
+    });
+    expect(serialized).not.toContain("owner@example.invalid");
+    expect(serialized).not.toContain("operator-secret");
+    expect(serialized).not.toContain("prl_");
+    expect(serialized).not.toContain("pa_");
+    expect(serialized).not.toContain("pcs_");
+  });
+
+  it("keeps auto-send smoke disabled under the same Preview-only feature gate", async () => {
+    mockIsOperatorEmailRecoverySmokeEnabled.mockReturnValue(false);
+
+    const response = await PUT(request({
+      secret: "operator-secret",
+      body: {
+        moduleSlug: "ambiguous-temperature",
+        resultId: RESULT_ID,
+        email: "owner@example.invalid",
+      },
+    }));
+
+    expect(response.status).toBe(404);
+    expect(mockCreateOperatorFakePaidSuccess).not.toHaveBeenCalled();
   });
 });

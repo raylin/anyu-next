@@ -11,6 +11,7 @@ import { type PaidAccessResolutionState } from "@/lib/payments/paid-access-resol
 import { getPaidAccessTokenHashSecret } from "@/lib/payments/paid-access-token";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { createPaidDeliveryArtifactsForPaymentIntent } from "@/lib/payments/paid-delivery-artifacts";
+import { createOrUpdateEmailRecoveryContact } from "@/lib/db/payment-recovery-contacts";
 import {
   triggerPaidJobProcessing,
   type PaidJobQueueTriggerResult,
@@ -35,6 +36,7 @@ export type OperatorFakePaidSuccessResult =
       paidAccessTokenReturned: boolean;
       unlockPath: string | null;
       queueTrigger: PaidJobQueueTriggerResult;
+      recoveryContactId: string | null;
     }
   | {
       ok: false;
@@ -70,6 +72,7 @@ export async function createOperatorFakePaidSuccess(input: {
   moduleSlug: string;
   resultId: string;
   idempotencyKey?: string | null;
+  recoveryEmail?: string | null;
 }): Promise<OperatorFakePaidSuccessResult> {
   const moduleConfig = getModuleBySlug(input.moduleSlug);
 
@@ -148,6 +151,25 @@ export async function createOperatorFakePaidSuccess(input: {
     return delivery;
   }
 
+  let recoveryContactId: string | null = null;
+
+  if (input.recoveryEmail) {
+    try {
+      const recoveryContact = await createOrUpdateEmailRecoveryContact({
+        moduleSlug: moduleConfig.slug,
+        analysisResultId: record.result.id,
+        paymentIntentId: paymentIntent.id,
+        entitlementId: delivery.entitlement.id,
+        email: input.recoveryEmail,
+        source: "checkout_start",
+        status: "bound",
+      });
+      recoveryContactId = recoveryContact?.id ?? null;
+    } catch {
+      // Operator smoke recovery contact setup must not fail fake paid delivery.
+    }
+  }
+
   const queueTrigger = await triggerPaidJobProcessing({
     paymentIntent,
     generationJob: delivery.generationJob,
@@ -169,5 +191,6 @@ export async function createOperatorFakePaidSuccess(input: {
     paidAccessTokenReturned: delivery.paidAccessTokenReturned,
     unlockPath: delivery.unlockPath,
     queueTrigger,
+    recoveryContactId,
   };
 }
