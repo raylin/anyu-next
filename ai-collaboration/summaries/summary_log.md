@@ -8882,3 +8882,26 @@ Unresolved questions:
 - Decide the secure recipient storage model for LINE Messaging API delivery: encrypted field, separate `line_recipient_secrets` table, or another privacy-reviewed mechanism.
 - Run real LINE recovery link smoke only after a sendable recipient can be resolved without storing raw LINE userId in `payment_recovery_contacts`.
 - Consider extracting shared recovery-link URL building if more delivery channels are added.
+
+## 2026-06-03 LINE Recovery Recipient Secret Design v0
+
+### Completed Changes
+
+- saved the LINE Recovery Recipient Secret Design v0 handoff and report
+- documented why LINE Messaging API push requires a sendable recipient ID and why hash-only LINE recovery identity cannot be used for push
+- evaluated five storage options: encrypted field on `payment_recovery_contacts`, separate LINE recipient table, generic recovery contact secrets table, legacy raw LINE storage reuse, and delaying until membership
+- recommended a separate `payment_recovery_contact_secrets` table linked to hash-only `payment_recovery_contacts`
+- recommended a separate `LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY` instead of reusing Email recovery contact encryption
+- defined bind-flow, send-flow, revocation, staging gates, and future membership migration implications
+
+### Learnings
+
+- The best boundary is to keep recovery contact metadata hash-only and isolate sendable delivery secrets in a server-only encrypted table.
+- Generic secret storage is preferable to a LINE-only table because it supports future channel/member migration without making the current recovery contact table secret-bearing.
+- Real LINE push should remain blocked until encrypted recipient secret storage and a safe resolver exist.
+
+### Unresolved Questions
+
+- Confirm exact key format during implementation, likely matching existing 32-byte base64url recovery crypto conventions.
+- Decide whether v0 should include key versioning or defer it until production scale.
+- Plan LINE block/unfollow handling before broad production LINE message sending.
