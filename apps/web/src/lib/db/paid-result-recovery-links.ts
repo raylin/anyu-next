@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { requireDb } from "@/lib/db/client";
 import { getEntitlementById, type Entitlement } from "@/lib/db/entitlements";
 import { paidResultRecoveryLinks } from "@/lib/db/schema";
@@ -24,11 +24,22 @@ export const PAID_RESULT_RECOVERY_LINK_STATUSES = [
   "revoked",
   "failed",
 ] as const;
+export const PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES = [
+  "provider_config_missing",
+  "provider_request_failed",
+  "provider_rejected",
+  "rate_limited",
+  "recipient_unavailable",
+  "recipient_blocked_or_unreachable",
+  "unknown",
+] as const;
 
 export type PaidResultRecoveryLinkChannel =
   (typeof PAID_RESULT_RECOVERY_LINK_CHANNELS)[number];
 export type PaidResultRecoveryLinkStatus =
   (typeof PAID_RESULT_RECOVERY_LINK_STATUSES)[number];
+export type PaidResultRecoveryLinkFailureCategory =
+  (typeof PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES)[number];
 export type PaidResultRecoveryLink = typeof paidResultRecoveryLinks.$inferSelect;
 
 export type PaidResultRecoveryLinkResolution =
@@ -196,6 +207,8 @@ export async function revokePaidResultRecoveryLink(input: {
 export async function markPaidResultRecoveryLinkSent(input: {
   linkId: string;
   sentAt?: Date;
+  providerMessageId?: string | null;
+  providerStatus?: string | null;
 }) {
   const sentAt = input.sentAt ?? new Date();
   const db = requireDb();
@@ -204,6 +217,11 @@ export async function markPaidResultRecoveryLinkSent(input: {
     .set({
       status: "sent",
       sentAt,
+      providerMessageId: input.providerMessageId ?? null,
+      lastSendAttemptAt: sentAt,
+      sendAttemptCount: sql`${paidResultRecoveryLinks.sendAttemptCount} + 1`,
+      lastFailureCategory: null,
+      lastProviderStatus: input.providerStatus ?? "accepted",
       updatedAt: sentAt,
     })
     .where(eq(paidResultRecoveryLinks.id, input.linkId))
@@ -215,6 +233,8 @@ export async function markPaidResultRecoveryLinkSent(input: {
 export async function markPaidResultRecoveryLinkFailed(input: {
   linkId: string;
   failedAt?: Date;
+  failureCategory?: PaidResultRecoveryLinkFailureCategory;
+  providerStatus?: string | null;
 }) {
   const failedAt = input.failedAt ?? new Date();
   const db = requireDb();
@@ -222,6 +242,10 @@ export async function markPaidResultRecoveryLinkFailed(input: {
     .update(paidResultRecoveryLinks)
     .set({
       status: "failed",
+      lastSendAttemptAt: failedAt,
+      sendAttemptCount: sql`${paidResultRecoveryLinks.sendAttemptCount} + 1`,
+      lastFailureCategory: input.failureCategory ?? "unknown",
+      lastProviderStatus: input.providerStatus ?? null,
       updatedAt: failedAt,
     })
     .where(eq(paidResultRecoveryLinks.id, input.linkId))

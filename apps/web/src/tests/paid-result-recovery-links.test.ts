@@ -24,6 +24,7 @@ import {
   markPaidResultRecoveryLinkFailed,
   markPaidResultRecoveryLinkSent,
   PAID_RESULT_RECOVERY_LINK_CHANNELS,
+  PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES,
   PAID_RESULT_RECOVERY_LINK_STATUSES,
   resolvePaidResultRecoveryLink,
   revokePaidResultRecoveryLink,
@@ -111,6 +112,11 @@ function recoveryLinkRecord(overrides: Record<string, unknown> = {}) {
     usedAt: null,
     revokedAt: null,
     sentAt: null,
+    providerMessageId: null,
+    lastSendAttemptAt: null,
+    sendAttemptCount: 0,
+    lastFailureCategory: null,
+    lastProviderStatus: null,
     createdAt: NOW,
     updatedAt: NOW,
     ...overrides,
@@ -136,6 +142,15 @@ describe("paid result recovery links", () => {
       "expired",
       "revoked",
       "failed",
+    ]);
+    expect(PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES).toEqual([
+      "provider_config_missing",
+      "provider_request_failed",
+      "provider_rejected",
+      "rate_limited",
+      "recipient_unavailable",
+      "recipient_blocked_or_unreachable",
+      "unknown",
     ]);
   });
 
@@ -306,13 +321,20 @@ describe("paid result recovery links", () => {
     await markPaidResultRecoveryLinkSent({
       linkId: RECOVERY_LINK_ID,
       sentAt: NOW,
+      providerMessageId: "email-1",
+      providerStatus: "accepted",
     });
 
     expect(sentDb.capture.updateValues).toMatchObject({
       status: "sent",
       sentAt: NOW,
+      providerMessageId: "email-1",
+      lastSendAttemptAt: NOW,
+      lastFailureCategory: null,
+      lastProviderStatus: "accepted",
       updatedAt: NOW,
     });
+    expect(sentDb.capture.updateValues?.sendAttemptCount).toBeDefined();
     expect(sentDb.capture.updateValues).not.toHaveProperty("rawToken");
 
     const failedDb = createDbMock({
@@ -323,12 +345,18 @@ describe("paid result recovery links", () => {
     await markPaidResultRecoveryLinkFailed({
       linkId: RECOVERY_LINK_ID,
       failedAt: NOW,
+      failureCategory: "provider_rejected",
+      providerStatus: "rejected",
     });
 
     expect(failedDb.capture.updateValues).toMatchObject({
       status: "failed",
+      lastSendAttemptAt: NOW,
+      lastFailureCategory: "provider_rejected",
+      lastProviderStatus: "rejected",
       updatedAt: NOW,
     });
+    expect(failedDb.capture.updateValues?.sendAttemptCount).toBeDefined();
     expect(failedDb.capture.updateValues).not.toHaveProperty("rawToken");
   });
 
@@ -474,5 +502,22 @@ describe("paid result recovery links", () => {
     expect(migration).not.toContain("paid_access_token");
     expect(migration).not.toContain("checkout_session_token");
     expect(migration).not.toContain("report_content");
+  });
+
+  it("adds send audit fields without storing provider payloads", () => {
+    const migration = readFileSync(
+      path.resolve(process.cwd(), "drizzle/0012_paid_result_recovery_link_send_audit.sql"),
+      "utf8",
+    );
+
+    expect(migration).toContain('"provider_message_id" text');
+    expect(migration).toContain('"last_send_attempt_at" timestamp with time zone');
+    expect(migration).toContain('"send_attempt_count" integer DEFAULT 0 NOT NULL');
+    expect(migration).toContain('"last_failure_category" text');
+    expect(migration).toContain('"last_provider_status" text');
+    expect(migration).not.toContain("provider_payload");
+    expect(migration).not.toContain("raw_email");
+    expect(migration).not.toContain("line_user_id");
+    expect(migration).not.toContain("paid_access_token");
   });
 });

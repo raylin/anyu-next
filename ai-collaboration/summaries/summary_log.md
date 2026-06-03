@@ -9121,3 +9121,27 @@ Unresolved questions:
 
 - Decide whether provider send audit data belongs on `paid_result_recovery_links` or a separate send-attempt table.
 - Define the support/operator verification flow before exposing a gated resend caller.
+
+## 2026-06-03 Provider Message ID / Send Attempt Audit v0
+
+### Completed Changes
+
+- saved the Provider Message ID / Send Attempt Audit v0 handoff and report
+- chose direct minimal audit fields on `paid_result_recovery_links` instead of a separate send-attempt table for v0
+- added migration `0012_paid_result_recovery_link_send_audit.sql`
+- added `provider_message_id`, `last_send_attempt_at`, `send_attempt_count`, `last_failure_category`, and `last_provider_status` to schema
+- updated Email/Resend send path to capture sanitized provider message id on success
+- updated Email and LINE send paths to store safe provider status and failure categories through central mark helpers
+- preserved noop/test behavior as non-sending and non-sent
+- preserved active sent/used link dedupe and support-channel resend helper behavior
+
+### Learnings
+
+- Inline audit fields are enough for v0 because current access-link delivery has one provider send lifecycle per generated link.
+- A separate send-attempt table should wait until public resend, bounce/block webhooks, or operator audit timelines are actually needed.
+- Provider “sent” remains provider acceptance, not inbox/LINE delivery; copy and support SOP should preserve that distinction.
+
+### Unresolved Questions
+
+- Apply `0012_paid_result_recovery_link_send_audit.sql` to Preview(staging) before runtime smoke can persist audit values.
+- Decide later whether support tooling needs a dedicated send-attempt history table.

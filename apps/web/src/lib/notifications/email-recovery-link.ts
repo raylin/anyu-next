@@ -21,6 +21,8 @@ export type EmailSendResult = {
   provider: "noop" | "resend" | "unsupported";
   status: EmailRecoveryLinkSendStatus;
   category?: "missing_config" | "provider_error" | "unsupported_provider";
+  providerMessageId?: string | null;
+  providerStatus?: string | null;
 };
 
 export type EmailMessage = {
@@ -35,6 +37,36 @@ const DEFAULT_EMAIL_FROM = LEGAL_CONTACT_EMAIL;
 const RESEND_EMAILS_ENDPOINT = "https://api.resend.com/emails";
 
 type EmailFetch = typeof fetch;
+
+function sanitizeProviderMessageId(value: unknown) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed || trimmed.length > 200 || !/^[A-Za-z0-9._:-]+$/.test(trimmed)) {
+    return null;
+  }
+
+  return trimmed;
+}
+
+function emailFailureAuditCategory(input: EmailSendResult) {
+  if (input.category === "missing_config" || input.category === "unsupported_provider") {
+    return "provider_config_missing" as const;
+  }
+
+  if (input.providerStatus === "rate_limited") {
+    return "rate_limited" as const;
+  }
+
+  if (input.providerStatus === "rejected") {
+    return "provider_rejected" as const;
+  }
+
+  return "provider_request_failed" as const;
+}
 
 function getEmailProvider(env: NodeJS.ProcessEnv = process.env) {
   return env.EMAIL_PROVIDER?.trim().toLowerCase() || "noop";
@@ -129,6 +161,7 @@ async function sendResendEmail(input: {
       provider: "resend",
       status: "unavailable",
       category: "missing_config",
+      providerStatus: "config_missing",
     };
   }
 
@@ -150,7 +183,23 @@ async function sendResendEmail(input: {
     });
 
     if (response.ok) {
-      return { ok: true, provider: "resend", status: "sent" };
+      let providerMessageId: string | null = null;
+
+      try {
+        const body = await response.clone().json();
+
+        providerMessageId = sanitizeProviderMessageId((body as { id?: unknown }).id);
+      } catch {
+        providerMessageId = null;
+      }
+
+      return {
+        ok: true,
+        provider: "resend",
+        status: "sent",
+        providerMessageId,
+        providerStatus: "accepted",
+      };
     }
 
     return {
@@ -158,6 +207,7 @@ async function sendResendEmail(input: {
       provider: "resend",
       status: "failed",
       category: "provider_error",
+      providerStatus: response.status === 429 ? "rate_limited" : "rejected",
     };
   } catch {
     return {
@@ -165,6 +215,7 @@ async function sendResendEmail(input: {
       provider: "resend",
       status: "failed",
       category: "provider_error",
+      providerStatus: "request_failed",
     };
   }
 }
@@ -178,7 +229,7 @@ export async function sendRecoveryEmail(input: {
   const provider = getEmailProvider(input.env);
 
   if (provider === "noop" || provider === "test") {
-    return { ok: true, provider: "noop", status: "noop" };
+    return { ok: true, provider: "noop", status: "noop", providerStatus: "noop" };
   }
 
   if (provider === "resend") {
@@ -195,6 +246,7 @@ export async function sendRecoveryEmail(input: {
     provider: "unsupported",
     status: "unavailable",
     category: "unsupported_provider",
+    providerStatus: "unsupported",
   };
 }
 
@@ -248,7 +300,11 @@ export async function createAndSendEmailRecoveryLink(input: {
   });
 
   if (!recoveryUrl) {
-    await markPaidResultRecoveryLinkFailed({ linkId: link.link.id });
+    await markPaidResultRecoveryLinkFailed({
+      linkId: link.link.id,
+      failureCategory: "unknown",
+      providerStatus: "app_url_unavailable",
+    });
 
     return {
       ok: false as const,
@@ -277,9 +333,17 @@ export async function createAndSendEmailRecoveryLink(input: {
   });
 
   if (sendResult.status === "sent") {
-    await markPaidResultRecoveryLinkSent({ linkId: link.link.id });
+    await markPaidResultRecoveryLinkSent({
+      linkId: link.link.id,
+      providerMessageId: sendResult.providerMessageId,
+      providerStatus: sendResult.providerStatus,
+    });
   } else if (!sendResult.ok) {
-    await markPaidResultRecoveryLinkFailed({ linkId: link.link.id });
+    await markPaidResultRecoveryLinkFailed({
+      linkId: link.link.id,
+      failureCategory: emailFailureAuditCategory(sendResult),
+      providerStatus: sendResult.providerStatus,
+    });
   }
 
   return {

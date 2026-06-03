@@ -169,7 +169,12 @@ describe("email recovery link sending", () => {
         }),
         env: {} as NodeJS.ProcessEnv,
       }),
-    ).resolves.toEqual({ ok: true, provider: "noop", status: "noop" });
+    ).resolves.toEqual({
+      ok: true,
+      provider: "noop",
+      status: "noop",
+      providerStatus: "noop",
+    });
   });
 
   it("sends through Resend when configured with a mocked safe payload", async () => {
@@ -193,7 +198,13 @@ describe("email recovery link sending", () => {
         } as NodeJS.ProcessEnv,
         fetchImpl: fetchImpl as never,
       }),
-    ).resolves.toEqual({ ok: true, provider: "resend", status: "sent" });
+    ).resolves.toEqual({
+      ok: true,
+      provider: "resend",
+      status: "sent",
+      providerMessageId: "email-1",
+      providerStatus: "accepted",
+    });
 
     expect(fetchImpl).toHaveBeenCalledWith(
       "https://api.resend.com/emails",
@@ -233,6 +244,7 @@ describe("email recovery link sending", () => {
       provider: "resend",
       status: "unavailable",
       category: "missing_config",
+      providerStatus: "config_missing",
     });
 
     await expect(
@@ -252,6 +264,7 @@ describe("email recovery link sending", () => {
       provider: "resend",
       status: "failed",
       category: "provider_error",
+      providerStatus: "rejected",
     });
   });
 
@@ -315,6 +328,8 @@ describe("email recovery link sending", () => {
     });
     expect(mockMarkPaidResultRecoveryLinkSent).toHaveBeenCalledWith({
       linkId: "recovery-link-1",
+      providerMessageId: "email-1",
+      providerStatus: "accepted",
     });
     expect(mockMarkPaidResultRecoveryLinkFailed).not.toHaveBeenCalled();
     expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
@@ -344,6 +359,8 @@ describe("email recovery link sending", () => {
     });
     expect(mockMarkPaidResultRecoveryLinkFailed).toHaveBeenCalledWith({
       linkId: "recovery-link-1",
+      failureCategory: "provider_rejected",
+      providerStatus: "rejected",
     });
     expect(mockMarkPaidResultRecoveryLinkSent).not.toHaveBeenCalled();
   });
@@ -437,6 +454,8 @@ describe("email recovery link sending", () => {
     });
     expect(mockMarkPaidResultRecoveryLinkFailed).toHaveBeenCalledWith({
       linkId: "recovery-link-1",
+      failureCategory: "unknown",
+      providerStatus: "app_url_unavailable",
     });
     expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
   });
@@ -488,6 +507,8 @@ describe("email recovery link sending", () => {
     });
     expect(mockMarkPaidResultRecoveryLinkSent).toHaveBeenCalledWith({
       linkId: "recovery-link-1",
+      providerMessageId: "email-1",
+      providerStatus: "accepted",
     });
     expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
     expect(JSON.stringify(result)).not.toContain("qa-recovery@example.invalid");
@@ -588,6 +609,8 @@ describe("email recovery link sending", () => {
     });
     expect(mockMarkPaidResultRecoveryLinkFailed).toHaveBeenCalledWith({
       linkId: "recovery-link-1",
+      failureCategory: "provider_rejected",
+      providerStatus: "rejected",
     });
     expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
     expect(JSON.stringify(result)).not.toContain("qa-recovery@example.invalid");
@@ -669,6 +692,7 @@ describe("email recovery link sending", () => {
     );
     expect(mockMarkPaidResultRecoveryLinkSent).toHaveBeenCalledWith({
       linkId: "recovery-link-1",
+      providerStatus: "accepted",
     });
     expect(mockMarkLineRecoveryRecipientSecretUsed).toHaveBeenCalledWith({
       recoveryContactId: "line-contact-1",

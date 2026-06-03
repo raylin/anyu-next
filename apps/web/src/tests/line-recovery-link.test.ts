@@ -98,7 +98,12 @@ describe("LINE recovery link sending", () => {
         }),
         env: {} as NodeJS.ProcessEnv,
       }),
-    ).resolves.toEqual({ ok: true, provider: "noop", status: "noop" });
+    ).resolves.toEqual({
+      ok: true,
+      provider: "noop",
+      status: "noop",
+      providerStatus: "noop",
+    });
   });
 
   it("sends through LINE Messaging API when explicitly configured with a sendable recipient", async () => {
@@ -117,7 +122,12 @@ describe("LINE recovery link sending", () => {
         } as NodeJS.ProcessEnv,
         fetchImpl: fetchImpl as never,
       }),
-    ).resolves.toEqual({ ok: true, provider: "line", status: "sent" });
+    ).resolves.toEqual({
+      ok: true,
+      provider: "line",
+      status: "sent",
+      providerStatus: "accepted",
+    });
 
     expect(fetchImpl).toHaveBeenCalledWith(
       "https://api.line.me/v2/bot/message/push",
@@ -151,7 +161,12 @@ describe("LINE recovery link sending", () => {
         } as NodeJS.ProcessEnv,
         fetchImpl: fetchImpl as never,
       }),
-    ).resolves.toEqual({ ok: true, provider: "line", status: "sent" });
+    ).resolves.toEqual({
+      ok: true,
+      provider: "line",
+      status: "sent",
+      providerStatus: "accepted",
+    });
 
     expect(fetchImpl).toHaveBeenCalledWith(
       "https://api.line.me/v2/bot/message/push",
@@ -178,6 +193,7 @@ describe("LINE recovery link sending", () => {
       provider: "line",
       status: "unavailable",
       category: "missing_config",
+      providerStatus: "config_missing",
     });
 
     await expect(
@@ -197,6 +213,7 @@ describe("LINE recovery link sending", () => {
       provider: "line",
       status: "failed",
       category: "provider_error",
+      providerStatus: "rejected",
     });
   });
 
@@ -295,6 +312,7 @@ describe("LINE recovery link sending", () => {
     );
     expect(mockMarkPaidResultRecoveryLinkSent).toHaveBeenCalledWith({
       linkId: "recovery-link-1",
+      providerStatus: "accepted",
     });
     expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
   });

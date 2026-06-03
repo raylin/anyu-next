@@ -28,6 +28,7 @@ export type LineSendResult = {
     | "provider_error"
     | "unsupported_provider"
     | "recipient_unavailable";
+  providerStatus?: string | null;
 };
 
 export type LineMessage = {
@@ -38,6 +39,26 @@ export type LineMessage = {
 const LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 
 type LineFetch = typeof fetch;
+
+function lineFailureAuditCategory(input: LineSendResult) {
+  if (input.category === "missing_config" || input.category === "unsupported_provider") {
+    return "provider_config_missing" as const;
+  }
+
+  if (input.category === "recipient_unavailable") {
+    return "recipient_unavailable" as const;
+  }
+
+  if (input.providerStatus === "rate_limited") {
+    return "rate_limited" as const;
+  }
+
+  if (input.providerStatus === "rejected") {
+    return "provider_rejected" as const;
+  }
+
+  return "provider_request_failed" as const;
+}
 
 function getLineRecoveryMessageProvider(env: NodeJS.ProcessEnv = process.env) {
   return env.LINE_RECOVERY_MESSAGE_PROVIDER?.trim().toLowerCase() || "noop";
@@ -104,6 +125,7 @@ async function sendLinePushMessage(input: {
       provider: "line",
       status: "unavailable",
       category: "missing_config",
+      providerStatus: "config_missing",
     };
   }
 
@@ -126,7 +148,7 @@ async function sendLinePushMessage(input: {
     });
 
     if (response.ok) {
-      return { ok: true, provider: "line", status: "sent" };
+      return { ok: true, provider: "line", status: "sent", providerStatus: "accepted" };
     }
 
     return {
@@ -134,6 +156,7 @@ async function sendLinePushMessage(input: {
       provider: "line",
       status: "failed",
       category: "provider_error",
+      providerStatus: response.status === 429 ? "rate_limited" : "rejected",
     };
   } catch {
     return {
@@ -141,6 +164,7 @@ async function sendLinePushMessage(input: {
       provider: "line",
       status: "failed",
       category: "provider_error",
+      providerStatus: "request_failed",
     };
   }
 }
@@ -153,7 +177,7 @@ export async function sendRecoveryLineMessage(input: {
   const provider = getLineRecoveryMessageProvider(input.env);
 
   if (provider === "noop" || provider === "test") {
-    return { ok: true, provider: "noop", status: "noop" };
+    return { ok: true, provider: "noop", status: "noop", providerStatus: "noop" };
   }
 
   if (provider === "line") {
@@ -169,6 +193,7 @@ export async function sendRecoveryLineMessage(input: {
     provider: "unsupported",
     status: "unavailable",
     category: "unsupported_provider",
+    providerStatus: "unsupported",
   };
 }
 
@@ -211,6 +236,7 @@ export async function createAndSendLineRecoveryLink(input: {
       ok: false as const,
       status: "unavailable" as const,
       category: "line_recipient_unavailable",
+      providerStatus: "recipient_unavailable",
       recoveryLinkCreated: false,
       lineSent: false,
     };
@@ -246,7 +272,11 @@ export async function createAndSendLineRecoveryLink(input: {
   });
 
   if (!recoveryUrl) {
-    await markPaidResultRecoveryLinkFailed({ linkId: link.link.id });
+    await markPaidResultRecoveryLinkFailed({
+      linkId: link.link.id,
+      failureCategory: "unknown",
+      providerStatus: "app_url_unavailable",
+    });
 
     return {
       ok: false as const,
@@ -269,12 +299,19 @@ export async function createAndSendLineRecoveryLink(input: {
   });
 
   if (sendResult.status === "sent") {
-    await markPaidResultRecoveryLinkSent({ linkId: link.link.id });
+    await markPaidResultRecoveryLinkSent({
+      linkId: link.link.id,
+      providerStatus: sendResult.providerStatus,
+    });
     await markLineRecoveryRecipientSecretUsed({
       recoveryContactId: input.recoveryContact.id,
     }).catch(() => null);
   } else if (!sendResult.ok) {
-    await markPaidResultRecoveryLinkFailed({ linkId: link.link.id });
+    await markPaidResultRecoveryLinkFailed({
+      linkId: link.link.id,
+      failureCategory: lineFailureAuditCategory(sendResult),
+      providerStatus: sendResult.providerStatus,
+    });
   }
 
   return {
