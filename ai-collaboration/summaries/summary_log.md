@@ -9274,3 +9274,29 @@ Unresolved questions:
 
 - Owner/provider dashboard still needs confirmation that only credit-card one-time payment is enabled and other methods remain disabled.
 - Decide whether Production Runtime Secret Alignment should happen before or as part of Production DB Migration Gate Plan / Apply v0.
+
+## 2026-06-04 Production DB Migration Gate Plan / Apply v0
+
+### Completed Changes
+
+- saved the Production DB Migration Gate Plan / Apply v0 handoff and report
+- verified the Neon Production DB target before running any SQL
+- ran read-only preflight checks for entitlement duplicate risk, existing tables, row counts, and provider audit column presence
+- applied production DB gates for entitlement payment-intent uniqueness, recovery contacts, paid result access links, LINE recipient secrets, and provider send audit columns
+- applied concurrent entitlement index changes outside a transaction
+- verified expected production tables, columns, indexes, constraints, audit columns, and aggregate row readability after apply
+- confirmed production checkout and operator routes remain fail-closed
+- confirmed production public pages remain live
+- inventoried Production env names presence-only without printing values
+
+### Learnings
+
+- Production DB migration gates can be applied safely while production payment runtime remains disabled.
+- Production payment/access-link runtime still needs a separate env gate before any controlled credit-card smoke.
+- Production DB currently has zero payment/recovery rows, so the migration gate did not require data remediation.
+
+### Unresolved Questions
+
+- Decide whether Production Access-Link / Provider Env Gate v0 should configure Email-only first or Email plus LINE.
+- Confirm production NewebPay dashboard payment-method settings before controlled smoke.
+- Decide the exact scope of Controlled Production Payment Smoke v0: payment and web access only, or payment plus access-link provider delivery.
