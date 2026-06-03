@@ -94,16 +94,16 @@ export function buildRecoveryLinkEmail(input: {
     "你的 ANYU 完整報告已準備好。",
     "",
     `報告：${moduleTitle}`,
-    `請回到 ANYU 查看：${input.recoveryUrl}`,
+    `點此回到 ANYU 查看完整報告：${input.recoveryUrl}`,
     "",
-    `此連結將保留 ${PAID_RESULT_RECOVERY_LINK_TTL_DAYS} 天。請勿轉傳給他人。`,
+    `此專屬查看連結將保留 ${PAID_RESULT_RECOVERY_LINK_TTL_DAYS} 天。請勿轉傳給他人。`,
     `如果連結無法開啟，請聯絡 ${LEGAL_CONTACT_EMAIL}。`,
   ].join("\n");
   const html = [
     "<p>你的 ANYU 完整報告已準備好。</p>",
     `<p>報告：${escapedModuleTitle}</p>`,
     `<p><a href="${escapedRecoveryUrl}">回到 ANYU 查看完整報告</a></p>`,
-    `<p>此連結將保留 ${PAID_RESULT_RECOVERY_LINK_TTL_DAYS} 天。請勿轉傳給他人。</p>`,
+    `<p>此專屬查看連結將保留 ${PAID_RESULT_RECOVERY_LINK_TTL_DAYS} 天。請勿轉傳給他人。</p>`,
     `<p>如果連結無法開啟，請聯絡 <a href="mailto:${LEGAL_CONTACT_EMAIL}">${LEGAL_CONTACT_EMAIL}</a>。</p>`,
   ].join("");
 

@@ -88,15 +88,15 @@ function getRecoveryStatusLabel(input: {
 }) {
   if (input.recoveryStatus === "saved") {
     return input.maskedRecoveryContact
-      ? `已保存找回方式：${input.maskedRecoveryContact}`
-      : "已保存找回方式";
+      ? `已保存查看連結：${input.maskedRecoveryContact}`
+      : "已保存查看連結";
   }
 
   if (input.recoveryStatus === "needs_retry") {
-    return "找回方式需要重新保存";
+    return "查看連結需要重新保存";
   }
 
-  return "尚未保存找回方式";
+  return "尚未保存查看連結";
 }
 
 function parseDate(input?: Date | string | null) {

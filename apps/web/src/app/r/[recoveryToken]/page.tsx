@@ -22,7 +22,7 @@ export default async function PaidResultRecoveryLinkPage({ params }: RecoveryLin
   const { recoveryToken } = await params;
 
   if (!isDbConfigured()) {
-    return <RecoveryLinkError message="完整報告找回服務尚未設定完成，請稍後再試。" />;
+    return <RecoveryLinkError message="完整報告查看連結服務尚未設定完成，請稍後再試。" />;
   }
 
   const recoveryLink = await resolvePaidResultRecoveryLink({
@@ -40,13 +40,13 @@ export default async function PaidResultRecoveryLinkPage({ params }: RecoveryLin
   });
 
   if (!paidAccess.ok) {
-    return <RecoveryLinkError message="這個找回連結暫時無法開啟完整報告，請聯絡客服協助。" />;
+    return <RecoveryLinkError message="這個查看連結暫時無法開啟完整報告，請聯絡客服協助查詢。" />;
   }
 
   const moduleConfig = getModuleBySlug(paidAccess.moduleSlug);
 
   if (!moduleConfig) {
-    return <RecoveryLinkError message="這個找回連結暫時無法開啟完整報告，請聯絡客服協助。" />;
+    return <RecoveryLinkError message="這個查看連結暫時無法開啟完整報告，請聯絡客服協助查詢。" />;
   }
 
   const terminalMessage = getPaidAccessTerminalMessage(paidAccess.state);
@@ -59,7 +59,7 @@ export default async function PaidResultRecoveryLinkPage({ params }: RecoveryLin
     return (
       <RecoveryLinkProcessing
         moduleSlug={moduleConfig.slug}
-        message="完整報告正在準備中。請稍後重新開啟這個找回連結，或聯絡客服協助確認付款狀態。"
+        message="完整報告正在準備中。請稍後重新開啟這個查看連結，或聯絡客服協助確認付款狀態。"
       />
     );
   }
@@ -118,8 +118,8 @@ function RecoveryLinkError({
             <Wordmark showMark />
           </div>
           <Card>
-            <p className="anyu-kicker">result recovery</p>
-            <h1 className="anyu-section-title">這個找回連結暫時不能使用</h1>
+            <p className="anyu-kicker">report access link</p>
+            <h1 className="anyu-section-title">這個查看連結暫時不能使用</h1>
             <p className="anyu-copy">{message}</p>
             <p className="anyu-subtle-note">
               若你已完成付款，請聯絡{" "}
@@ -144,7 +144,7 @@ function RecoveryLinkProcessing({
   const moduleConfig = getModuleBySlug(moduleSlug);
 
   if (!moduleConfig) {
-    return <RecoveryLinkError message="這個找回連結暫時無法開啟完整報告，請聯絡客服協助。" />;
+    return <RecoveryLinkError message="這個查看連結暫時無法開啟完整報告，請聯絡客服協助查詢。" />;
   }
 
   return (
@@ -162,11 +162,11 @@ function RecoveryLinkProcessing({
             <Wordmark showMark />
           </div>
           <Card>
-            <p className="anyu-kicker">result recovery</p>
+            <p className="anyu-kicker">report access link</p>
             <h1 className="anyu-section-title">完整報告確認中</h1>
             <p className="anyu-copy">{message}</p>
             <p className="anyu-subtle-note">
-              瀏覽器開啟找回連結不代表付款狀態會被更改；完整報告仍以付款確認與網頁狀態為準。
+              瀏覽器開啟查看連結不代表付款狀態會被更改；完整報告仍以付款確認與網頁狀態為準。
             </p>
           </Card>
           <LegalFooter />
@@ -182,19 +182,19 @@ function getRecoveryLinkErrorMessage(category: Exclude<
 >["category"]) {
   switch (category) {
     case "expired":
-      return "這個找回連結已超過可使用期限。";
+      return "這個查看連結已超過可使用期限。";
     case "revoked":
-      return "這個找回連結目前已停止使用。";
+      return "這個查看連結目前已停止使用。";
     case "failed":
-      return "這個找回連結目前無法使用。";
+      return "這個查看連結目前無法使用。";
     case "config_unavailable":
-      return "完整報告找回服務尚未設定完成，請稍後再試。";
+      return "完整報告查看連結服務尚未設定完成，請稍後再試。";
     case "entitlement_inactive":
       return "這份完整報告的付款權限目前無法使用。";
     case "invalid_token":
     case "not_found":
     case "entitlement_missing":
-      return "這個找回連結已失效或無法使用。";
+      return "這個查看連結已失效或無法使用。";
   }
 }
 

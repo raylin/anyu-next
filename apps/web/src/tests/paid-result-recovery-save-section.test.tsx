@@ -86,9 +86,9 @@ describe("paid result recovery save section", () => {
     expect(html).toContain("曖昧溫度計｜完整分析報告");
     expect(html).toContain("報告編號");
     expect(html).toContain("AT-20260601-");
-    expect(html).toContain("已保存找回方式：o***@e***.com");
-    expect(html).toContain("新增 LINE 備用找回");
-    expect(html).toContain("用 LINE 保存這份報告");
+    expect(html).toContain("已保存查看連結：o***@e***.com");
+    expect(html).toContain("新增 LINE 查看連結");
+    expect(html).toContain("用 LINE 保存查看連結");
     expect(html).toContain("/line/recovery/bind?state=rlb_");
     expect(html).toContain("聯絡客服時可提供報告編號");
     expect(html).not.toContain("owner@example.com");
@@ -118,8 +118,7 @@ describe("paid result recovery save section", () => {
       },
     });
 
-    expect(html).toContain("已準備並寄出找回連結");
-    expect(html).toContain("已寄出找回連結");
+    expect(html).toContain("已寄出專屬查看連結");
     expect(html).toContain("Email 不包含報告內容");
     expect(html).not.toContain("Email 交付");
   });
@@ -145,17 +144,17 @@ describe("paid result recovery save section", () => {
     });
 
     expect(html).toContain("保存這份完整分析");
-    expect(html).toContain("尚未保存找回方式");
-    expect(html).not.toContain("已寄出找回連結");
-    expect(html).toContain("Email 找回");
+    expect(html).toContain("尚未保存查看連結");
+    expect(html).not.toContain("已寄出專屬查看連結");
+    expect(html).toContain("Email 查看連結");
     expect(html).toContain("也想收到新測驗、早鳥或限時解鎖通知");
-    expect(html).toContain("LINE 找回");
-    expect(html).toContain("用 LINE 保存這份報告");
-    expect(html).toContain("之後可以透過 LINE 協助找回");
+    expect(html).toContain("LINE 查看連結");
+    expect(html).toContain("傳送查看連結到 LINE");
+    expect(html).toContain("從 LINE 回到 ANYU");
     expect(html).toContain("LINE 綁定失敗也不影響付款或查看報告");
     expect(html).toContain("/line/recovery/bind?state=rlb_");
-    expect(html).toContain("完整報告仍以網頁查看為準");
-    expect(html).toContain("若 Email 寄送服務尚未啟用，系統仍會先保存找回方式");
+    expect(html).toContain("完整報告的專屬查看連結");
+    expect(html).toContain("若 Email 寄送服務尚未啟用，系統仍會先保存查看連結狀態");
     expect(html).not.toContain("Email 交付");
     expect(html).not.toContain("LINE 交付");
     expect(html).not.toContain("LINE 領取完整分析");
@@ -179,7 +178,7 @@ describe("paid result recovery save section", () => {
     });
 
     expect(html).toContain("這份完整分析已保存");
-    expect(html).toContain("已用 LINE 保存這份報告");
+    expect(html).toContain("已用 LINE 保存專屬查看連結");
     expect(html).toContain("完整報告仍以此網頁查看為準");
     expect(html).not.toContain("line-user");
     expect(html).not.toContain("lineUserId");

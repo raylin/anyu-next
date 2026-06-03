@@ -48,7 +48,7 @@ describe("paid result delivery artifact", () => {
       artifactTitle: "完整分析報告",
       statusLabel: "已生成",
       recoveryStatus: "saved",
-      recoveryStatusLabel: "已保存找回方式：o***@e***.com",
+      recoveryStatusLabel: "已保存查看連結：o***@e***.com",
       maskedRecoveryContact: "o***@e***.com",
       recoveryLinkSent: true,
       supportEmail: "hello@anyu.tw",
@@ -80,7 +80,7 @@ describe("paid result delivery artifact", () => {
     });
 
     expect(summary.recoveryStatus).toBe("unsaved");
-    expect(summary.recoveryStatusLabel).toBe("尚未保存找回方式");
+    expect(summary.recoveryStatusLabel).toBe("尚未保存查看連結");
     expect(summary.recoveryLinkSent).toBe(false);
   });
 });

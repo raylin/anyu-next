@@ -503,18 +503,18 @@ export function PaidResultDeliveryArtifactCard({
           <dd>{summary.generatedAtLabel}</dd>
         </div>
         <div>
-          <dt>找回狀態</dt>
+          <dt>查看連結狀態</dt>
           <dd>{summary.recoveryStatusLabel}</dd>
         </div>
       </dl>
 
       {summary.recoveryLinkSent ? (
         <p className="anyu-delivery-artifact-note">
-          已寄出找回連結；完整報告仍以此網頁查看為準，Email 不包含報告內容。
+          已寄出專屬查看連結；完整報告仍以此網頁查看為準，Email 不包含報告內容。
         </p>
       ) : (
         <p className="anyu-delivery-artifact-note">
-          找回連結目前以 90 天為限。請保存這份找回方式；聯絡客服時可提供報告編號：
+          專屬查看連結目前以 90 天為限。請保存這份查看連結；聯絡客服時可提供報告編號：
           <a href={`mailto:${summary.supportEmail}`}>{summary.supportEmail}</a>。
         </p>
       )}
@@ -548,36 +548,36 @@ function PaidResultRecoverySaveSection({
       <Card className="anyu-recovery-soft-gate" aria-labelledby="paid-result-recovery-title">
         <div className="anyu-recovery-soft-gate-header">
           <div>
-            <p className="anyu-kicker t-label-dim">result recovery</p>
-            <h2 id="paid-result-recovery-title" className="anyu-recovery-title">
-              這份完整分析已保存
+          <p className="anyu-kicker t-label-dim">report access link</p>
+          <h2 id="paid-result-recovery-title" className="anyu-recovery-title">
+            這份完整分析已保存
             </h2>
           </div>
           <span className="anyu-recovery-saved-badge">已保存</span>
         </div>
         <p className="anyu-copy">
           {recoverySummary?.safeDisplayContact
-            ? `已保存找回方式：${recoverySummary.safeDisplayContact.maskedValue}`
+            ? `已保存查看連結：${recoverySummary.safeDisplayContact.maskedValue}`
             : recoverySummary?.hasLineRecovery
-              ? "已用 LINE 保存這份報告；之後可以透過 LINE 協助找回。"
-              : "之後若換裝置或找不到頁面，可透過已保存的方式協助找回。"}
+              ? "已用 LINE 保存專屬查看連結；之後可以從 LINE 回到 ANYU 查看完整報告。"
+              : "之後若換裝置或找不到頁面，可透過已保存的查看連結回到 ANYU。"}
         </p>
         <p className="anyu-subtle-note">
           {emailSent
-            ? "已準備並寄出找回連結；完整報告仍以此網頁查看為準，Email 不包含報告內容。"
-            : "Email / LINE 只作為找回、完成通知與客服協助；完整報告仍以此網頁查看為準。"}
+            ? "已寄出專屬查看連結；完整報告仍以此網頁查看為準，Email 不包含報告內容。"
+            : "Email / LINE 只會保存或傳送查看連結；完整報告仍以此網頁查看為準。"}
         </p>
         {!recoverySummary?.hasLineRecovery ? (
-          <div className="anyu-recovery-line-option" aria-label="LINE 備用找回選項">
+          <div className="anyu-recovery-line-option" aria-label="LINE 備用查看連結選項">
             <div>
-              <p className="anyu-recovery-label">新增 LINE 備用找回</p>
+              <p className="anyu-recovery-label">新增 LINE 查看連結</p>
               <p className="anyu-subtle-note">
-                用 LINE 保存這份報告。之後可以透過 LINE 協助找回；LINE 綁定失敗也不影響查看報告。
+                用 LINE 保存查看連結。之後可以從 LINE 回到 ANYU；LINE 綁定失敗也不影響查看報告。
               </p>
             </div>
             {lineRecoveryHref?.ok ? (
               <Link href={lineRecoveryHref.href} className="anyu-storefront-link">
-                用 LINE 保存
+                用 LINE 保存查看連結
               </Link>
             ) : (
               <span className="anyu-recovery-soon-badge">暫時無法啟動</span>
@@ -592,7 +592,7 @@ function PaidResultRecoverySaveSection({
     <Card className="anyu-recovery-soft-gate" aria-labelledby="paid-result-recovery-title">
       <div className="anyu-recovery-soft-gate-header">
         <div>
-          <p className="anyu-kicker t-label-dim">result recovery</p>
+          <p className="anyu-kicker t-label-dim">report access link</p>
           <h2 id="paid-result-recovery-title" className="anyu-recovery-title">
             保存這份完整分析
           </h2>
@@ -600,13 +600,13 @@ function PaidResultRecoverySaveSection({
         <span className="anyu-recovery-soon-badge">建議保存</span>
       </div>
       <p className="anyu-copy">
-        之後換裝置、關閉頁面或清除瀏覽資料時，可以用 Email 協助找回。完整報告仍以網頁查看為準，Email 不會交付報告內容。
+        把這份完整報告的專屬查看連結寄到 Email，之後可在有效期限內回到 ANYU 查看。Email 不會包含完整報告內容。
       </p>
 
       {recoveryEmailAction ? (
         <form action={recoveryEmailAction} className="anyu-recovery-email-form">
           <label className="anyu-recovery-label" htmlFor="paid-result-recovery-email">
-            Email 找回
+            Email 查看連結
           </label>
           <div className="anyu-recovery-email-row">
             <input
@@ -620,11 +620,11 @@ function PaidResultRecoverySaveSection({
               required
             />
             <button type="submit" className="anyu-button">
-              保存
+              寄送查看連結
             </button>
           </div>
           <p id="paid-result-recovery-email-help" className="anyu-subtle-note">
-            保存後會準備一個找回連結；若 Email 寄送服務尚未啟用，系統仍會先保存找回方式。Email 不會包含完整報告內容。
+            若 Email 寄送服務尚未啟用，系統仍會先保存查看連結狀態。Email 不會包含完整報告內容。
           </p>
           <label className="anyu-recovery-checkbox">
             <input type="checkbox" name="marketingOptIn" value="1" />
@@ -639,21 +639,21 @@ function PaidResultRecoverySaveSection({
         </form>
       ) : (
         <p className="anyu-subtle-note">
-          找回功能暫時無法使用；若之後找不到完整報告，請來信{" "}
+          查看連結功能暫時無法使用；若之後找不到完整報告，請來信{" "}
           <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a> 協助。
         </p>
       )}
 
-      <div className="anyu-recovery-line-option" aria-label="LINE 找回選項">
+      <div className="anyu-recovery-line-option" aria-label="LINE 查看連結選項">
         <div>
-          <p className="anyu-recovery-label">LINE 找回</p>
+          <p className="anyu-recovery-label">LINE 查看連結</p>
           <p className="anyu-subtle-note">
-            用 LINE 保存這份報告。之後可以透過 LINE 協助找回；LINE 綁定失敗也不影響付款或查看報告。
+            用 LINE 保存這份完整報告的查看連結。之後可以從 LINE 回到 ANYU；LINE 綁定失敗也不影響付款或查看報告。
           </p>
         </div>
         {lineRecoveryHref?.ok ? (
           <Link href={lineRecoveryHref.href} className="anyu-storefront-link">
-            用 LINE 保存
+            傳送查看連結到 LINE
           </Link>
         ) : (
           <span className="anyu-recovery-soon-badge">暫時無法啟動</span>

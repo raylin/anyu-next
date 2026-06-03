@@ -87,18 +87,18 @@ describe("NewebPay checkout-start page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("前往藍新安全付款頁");
-    expect(html).toContain("建議先保存這次完整報告");
-    expect(html).toContain("Email 找回");
-    expect(html).toContain("LINE 找回");
-    expect(html).toContain("用 LINE 保存這份報告");
-    expect(html).toContain("之後可以透過 LINE 協助找回");
+    expect(html).toContain("先保存查看連結");
+    expect(html).toContain("Email 查看連結");
+    expect(html).toContain("LINE 查看連結");
+    expect(html).toContain("用 LINE 保存查看連結");
+    expect(html).toContain("從 LINE 回到 ANYU 查看完整報告");
     expect(html).toContain("LINE 綁定失敗也不影響付款或查看報告");
     expect(html).toContain("/line/recovery/bind?state=rlb_");
-    expect(html).toContain("完整報告仍會在網頁中提供查看");
-    expect(html).toContain("回到 ANYU 的找回連結");
-    expect(html).toContain("Email 不會包含完整報告內容");
+    expect(html).toContain("完整報告的專屬查看連結");
+    expect(html).toContain("回到 ANYU 查看完整報告的連結");
+    expect(html).toContain("不會包含完整報告內容");
     expect(html).toContain("也想收到新測驗、早鳥或限時解鎖通知");
-    expect(html).toContain("我了解尚未保存找回方式，仍要繼續付款");
+    expect(html).toContain("我了解尚未保存查看連結，仍要繼續付款");
     expect(html).toContain('method="POST"');
     expect(html).toContain('action="https://ccore.newebpay.com/MPG/mpg_gateway"');
     expect(html).toContain(
@@ -166,8 +166,8 @@ describe("NewebPay checkout-start page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("已保存到 Email");
-    expect(html).toContain("已保存找回方式");
-    expect(html).not.toContain("我了解尚未保存找回方式，仍要繼續付款");
+    expect(html).toContain("已保存查看連結");
+    expect(html).not.toContain("我了解尚未保存查看連結，仍要繼續付款");
     expect(html).not.toContain("owner@example.com");
   });
 

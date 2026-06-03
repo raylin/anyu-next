@@ -51,7 +51,7 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
   const initialFallback = getInitialFallbackMessage(context);
   const [state, setState] = useState<RecoveryBindState>(initialFallback ? "fallback" : "idle");
   const [message, setMessage] = useState(
-    initialFallback ?? "正在準備 LINE 保存流程。之後可以透過 LINE 協助找回。",
+    initialFallback ?? "正在準備 LINE 保存流程。之後可以從 LINE 回到 ANYU 查看完整報告。",
   );
   const [returnPath, setReturnPath] = useState<string | null>(context.fallbackReturnPath);
 
@@ -71,7 +71,7 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
 
       if (!liffId) {
         setState("fallback");
-        setMessage("LINE 保存暫時無法啟動。你可以回到原頁，改用 Email 保存這份報告。");
+        setMessage("LINE 保存暫時無法啟動。你可以回到原頁，改用 Email 保存查看連結。");
         return;
       }
 
@@ -90,7 +90,7 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
 
         if (!idToken) {
           setState("fallback");
-          setMessage("LINE 身分確認沒有完成。你可以回到原頁，改用 Email 保存這份報告。");
+          setMessage("LINE 身分確認沒有完成。你可以回到原頁，改用 Email 保存查看連結。");
           return;
         }
 
@@ -117,7 +117,7 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
         }
 
         setState("success");
-        setMessage("已用 LINE 保存這份報告。之後可以透過 LINE 協助找回。");
+        setMessage("已用 LINE 保存專屬查看連結。之後可以從 LINE 回到 ANYU 查看完整報告。");
 
         if (payload.returnPath) {
           window.location.assign(payload.returnPath);
@@ -148,11 +148,11 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
         </div>
 
         <Card>
-          <p className="anyu-kicker">LINE recovery</p>
-          <h1 className="anyu-section-title">用 LINE 保存這份報告</h1>
+          <p className="anyu-kicker">LINE access link</p>
+          <h1 className="anyu-section-title">用 LINE 保存查看連結</h1>
           <p className="anyu-copy">{message}</p>
           <p className="anyu-subtle-note">
-            LINE 只作為找回、完成通知與客服輔助；完整報告仍以網頁查看為準。
+            LINE 只會保存或傳送查看連結；完整報告仍以網頁查看為準。
           </p>
 
           {state === "loading" ? (
@@ -203,11 +203,11 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
 
 function getInitialFallbackMessage(context: ReturnType<typeof parseLineRecoveryBindContext>) {
   if (!context.state) {
-    return "缺少 LINE 保存狀態。請回到原頁，改用 Email 保存這份報告。";
+    return "缺少 LINE 保存狀態。請回到原頁，改用 Email 保存查看連結。";
   }
 
   if (!context.isStateShapeValid) {
-    return "這個 LINE 保存連結已失效。請回到原頁，改用 Email 保存。";
+    return "這個 LINE 查看連結已失效。請回到原頁，改用 Email 保存查看連結。";
   }
 
   return null;
@@ -216,11 +216,11 @@ function getInitialFallbackMessage(context: ReturnType<typeof parseLineRecoveryB
 function getBindFailureMessage(error: string) {
   switch (error) {
     case "state_expired":
-      return "這個 LINE 保存連結已過期。請回到原頁重新開始，或改用 Email 保存。";
+      return "這個 LINE 查看連結已過期。請回到原頁重新開始，或改用 Email 保存查看連結。";
     case "line_user_missing":
-      return "LINE 身分確認沒有完成。你可以回到原頁，改用 Email 保存這份報告。";
+      return "LINE 身分確認沒有完成。你可以回到原頁，改用 Email 保存查看連結。";
     default:
-      return "LINE 綁定失敗也不影響付款或查看報告。你可以回到原頁，改用 Email 保存。";
+      return "LINE 綁定失敗也不影響付款或查看報告。你可以回到原頁，改用 Email 保存查看連結。";
   }
 }
 

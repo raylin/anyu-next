@@ -80,7 +80,7 @@ export function buildRecoveryLinkLineMessage(input: {
   const text = [
     `你的${moduleTitle}完整報告已準備好。`,
     `點這裡回到 ANYU 查看：${input.recoveryUrl}`,
-    `此找回連結將保留 ${PAID_RESULT_RECOVERY_LINK_TTL_DAYS} 天，請勿轉傳給他人。`,
+    `此專屬查看連結將保留 ${PAID_RESULT_RECOVERY_LINK_TTL_DAYS} 天，請勿轉傳給他人。`,
     `如果連結無法開啟，請聯絡 ${LEGAL_CONTACT_EMAIL}。`,
   ].join("\n");
 

@@ -142,7 +142,8 @@ describe("email recovery link sending", () => {
     expect(message.subject).toBe("你的 ANYU 完整報告已準備好");
     expect(message.text).toContain("曖昧溫度計");
     expect(message.text).toContain(recoveryUrl);
-    expect(message.text).toContain("此連結將保留 90 天");
+    expect(message.text).toContain("此專屬查看連結將保留 90 天");
+    expect(message.text).toContain("點此回到 ANYU 查看完整報告");
     expect(message.text).toContain("hello@anyu.tw");
     expect(message.html).toContain(recoveryUrl);
     expect(message.text).not.toContain("pa_");

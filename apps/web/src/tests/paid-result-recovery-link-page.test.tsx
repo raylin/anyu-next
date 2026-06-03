@@ -136,8 +136,8 @@ describe("paid result recovery link page", () => {
     });
     const html = renderToStaticMarkup(page);
 
-    expect(html).toContain("這個找回連結暫時不能使用");
-    expect(html).toContain("這個找回連結已超過可使用期限");
+    expect(html).toContain("這個查看連結暫時不能使用");
+    expect(html).toContain("這個查看連結已超過可使用期限");
     expect(html).toContain("hello@anyu.tw");
     expect(html).toContain("3–7 個工作天內回覆處理結果");
     expect(html).not.toContain(rawRecoveryToken);
@@ -167,7 +167,7 @@ describe("paid result recovery link page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("完整報告確認中");
-    expect(html).toContain("瀏覽器開啟找回連結不代表付款狀態會被更改");
+    expect(html).toContain("瀏覽器開啟查看連結不代表付款狀態會被更改");
     expect(html).not.toContain(rawRecoveryToken);
     expect(html).not.toContain("MOCK_RECOVERY_UNLOCK_COMPLETED");
   });

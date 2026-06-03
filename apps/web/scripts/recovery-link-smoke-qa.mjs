@@ -491,7 +491,7 @@ async function verifyInvalidRecoveryLinkFailsSafely() {
   const response = await fetch(`${baseUrl}${invalidPath}`);
   const html = await response.text();
   const safeFailureSignal =
-    html.includes("找回連結") && html.includes("hello@anyu.tw") && !html.includes("完整分析");
+    html.includes("查看連結") && html.includes("hello@anyu.tw") && !html.includes("完整分析");
   const pass = response.status === 200 && safeFailureSignal;
 
   record("invalid_recovery_link_safety", pass ? "pass" : "fail", {

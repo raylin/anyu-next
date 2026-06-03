@@ -9051,3 +9051,26 @@ Unresolved questions:
 
 - Decide whether next work prioritizes access-link copy/naming alignment, duplicate/resend policy, or Module 02 concept exploration.
 - Production DB/env/runtime remain gated until explicit launch decisions.
+
+## 2026-06-03 Recovery / Access Link User-Facing Copy + Engineering Naming Alignment v0
+
+### Completed Changes
+
+- saved the Recovery / Access Link User-Facing Copy + Engineering Naming Alignment v0 handoff and report
+- audited primary user-facing recovery/access-link copy across checkout-start, paid-ready, completed result, Email template, LINE template, LIFF bind, `/r/` failure pages, delivery artifact, QA helpers, and tests
+- reframed primary product copy toward 保存查看連結, 專屬查看連結, and 回 ANYU 查看完整報告
+- updated Email and LINE outbound templates to describe a link-only專屬查看連結 with 90-day retention copy
+- updated `/r/` invalid/expired/processing copy to use 查看連結 and keep support fallback through `hello@anyu.tw`
+- updated no-card QA detection strings and targeted tests for the new access-link wording
+- updated dashboard terminology to record that user-facing copy is aligned while internal recovery naming remains intentionally intact
+
+### Learnings
+
+- The implementation can present “access link” semantics cleanly without renaming DB tables, token prefixes, routes, or service internals.
+- Internal `recovery` naming remains useful as implementation continuity, but product language should now emphasize saved viewing links rather than recovery as the primary promise.
+- QA string detectors need to move with user-facing copy or they become false failures even when behavior is unchanged.
+
+### Unresolved Questions
+
+- Decide when to introduce `reportAccessLink` / `paidResultAccessLink` aliases in code and docs before any broad internal rename.
+- Define duplicate/resend policy before production provider messaging is enabled broadly.

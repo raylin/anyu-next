@@ -157,9 +157,9 @@ function PaymentReadyRecoveryReminder({
     return (
       <div className="anyu-recovery-confirmation" role="status">
         {recoverySummary.safeDisplayContact ? (
-          <p>已保存找回方式：{recoverySummary.safeDisplayContact.maskedValue}</p>
+          <p>已保存查看連結：{recoverySummary.safeDisplayContact.maskedValue}</p>
         ) : (
-          <p>這份完整分析已保存找回方式。</p>
+          <p>這份完整分析已保存查看連結。</p>
         )}
       </div>
     );
@@ -168,14 +168,14 @@ function PaymentReadyRecoveryReminder({
   if (recoverySummary.recommendedPostPaymentAction === "retry_email") {
     return (
       <div className="anyu-recovery-skip-warning" role="status">
-        <p>找回方式暫時沒有保存成功，但不影響你查看完整報告。打開完整報告後可以再試一次。</p>
+        <p>查看連結暫時沒有保存成功，但不影響你查看完整報告。打開完整報告後可以再試一次。</p>
       </div>
     );
   }
 
   return (
     <div className="anyu-recovery-skip-warning" role="status">
-      <p>建議先保存這份報告，之後換裝置也能找回。你也可以先查看完整報告，再在報告頁保存。</p>
+      <p>建議先保存這份報告的專屬查看連結。你也可以先查看完整報告，再在報告頁保存。</p>
     </div>
   );
 }

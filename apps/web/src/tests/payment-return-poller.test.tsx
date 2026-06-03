@@ -55,7 +55,7 @@ describe("PaymentReturnPoller", () => {
       />,
     );
 
-    expect(html).toContain("已保存找回方式：o***@e***.com");
+    expect(html).toContain("已保存查看連結：o***@e***.com");
     expect(html).toContain("查看完整報告");
     expect(html).not.toContain("owner@example.com");
   });
@@ -81,7 +81,7 @@ describe("PaymentReturnPoller", () => {
       />,
     );
 
-    expect(html).toContain("建議先保存這份報告");
+    expect(html).toContain("建議先保存這份報告的專屬查看連結");
     expect(html).toContain("查看完整報告");
     expect(html).not.toContain("Email 交付");
     expect(html).not.toContain("LINE 交付");

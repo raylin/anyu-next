@@ -19,8 +19,8 @@ describe("LINE recovery LIFF page", () => {
       }),
     );
 
-    expect(html).toContain("用 LINE 保存這份報告");
-    expect(html).toContain("之後可以透過 LINE 協助找回");
+    expect(html).toContain("用 LINE 保存查看連結");
+    expect(html).toContain("從 LINE 回到 ANYU 查看完整報告");
     expect(html).toContain("完整報告仍以網頁查看為準");
     expect(html).not.toContain("LINE 領取完整分析");
     expect(html).not.toContain("完整報告會傳到 LINE");
@@ -129,8 +129,8 @@ describe("LINE recovery LIFF page", () => {
     });
     const html = renderToStaticMarkup(page);
 
-    expect(html).toContain("用 LINE 保存這份報告");
-    expect(html).toContain("之後可以透過 LINE 協助找回");
+    expect(html).toContain("用 LINE 保存查看連結");
+    expect(html).toContain("從 LINE 回到 ANYU 查看完整報告");
     expect(html).not.toContain("LINE 短碼連結缺少有效測驗資料");
     expect(html).not.toContain("正在確認完整分析頁");
     expect(html).not.toContain("短碼");
@@ -146,7 +146,7 @@ describe("LINE recovery LIFF page", () => {
     });
     const html = renderToStaticMarkup(page);
 
-    expect(html).toContain("用 LINE 保存這份報告");
+    expect(html).toContain("用 LINE 保存查看連結");
     expect(html).toContain("完整報告仍以網頁查看為準");
     expect(html).not.toContain("LINE 短碼連結缺少有效測驗資料");
     expect(html).not.toContain("短碼");

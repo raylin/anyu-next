@@ -90,7 +90,7 @@ describe("NewebPay ReturnURL pending page", () => {
 
     expect(html).toContain("付款已確認");
     expect(html).toContain("完整報告已準備好");
-    expect(html).toContain("建議先保存這份報告");
+    expect(html).toContain("建議先保存這份報告的專屬查看連結");
     expect(html).toContain("查看完整報告");
     expect(html).not.toContain("paidAccessToken");
     expect(html).not.toContain("generationJob");

@@ -181,15 +181,15 @@ function RecoverySoftGate({
     <div className="anyu-recovery-soft-gate" aria-labelledby="payment-recovery-title">
       <div className="anyu-recovery-soft-gate-header">
         <div>
-          <p className="anyu-kicker t-label-dim">result recovery</p>
+          <p className="anyu-kicker t-label-dim">report access link</p>
           <h2 id="payment-recovery-title" className="anyu-recovery-title">
-            建議先保存這次完整報告
+            先保存查看連結
           </h2>
         </div>
         {savedLabel ? <span className="anyu-recovery-saved-badge">{savedLabel}</span> : null}
       </div>
       <p className="anyu-copy">
-        完整報告仍會在網頁中提供查看。保存一個找回方式，可以降低你關閉頁面、更換裝置或清除瀏覽資料後需要客服協助的機率。
+        付款完成後，我們會把完整報告的專屬查看連結寄到你的 Email 或傳到 LINE。之後即使關閉頁面，也可以在有效期限內從連結回到 ANYU 查看。
       </p>
 
       <div className="anyu-recovery-options">
@@ -202,7 +202,7 @@ function RecoverySoftGate({
         >
           <input type="hidden" name="paymentIntentId" value={paymentIntentId} />
           <label className="anyu-recovery-label" htmlFor="recovery-email">
-            Email 找回
+            Email 查看連結
           </label>
           <div className="anyu-recovery-email-row">
             <input
@@ -215,10 +215,10 @@ function RecoverySoftGate({
               aria-describedby="recovery-email-help"
               required
             />
-            <Button type="submit">保存</Button>
+            <Button type="submit">用 Email 保存查看連結</Button>
           </div>
           <p id="recovery-email-help" className="anyu-subtle-note">
-            完整報告準備好後，系統會準備一個回到 ANYU 的找回連結；Email 不會包含完整報告內容。
+            Email 只會收到回到 ANYU 查看完整報告的連結，不會包含完整報告內容。
           </p>
           <label className="anyu-recovery-checkbox">
             <input type="checkbox" name="marketingOptIn" value="1" />
@@ -231,11 +231,11 @@ function RecoverySoftGate({
           ) : null}
         </form>
 
-        <div className="anyu-recovery-line-option" aria-label="LINE 找回選項">
+        <div className="anyu-recovery-line-option" aria-label="LINE 查看連結選項">
           <div>
-            <p className="anyu-recovery-label">LINE 找回</p>
+            <p className="anyu-recovery-label">LINE 查看連結</p>
             <p className="anyu-subtle-note">
-              用 LINE 保存這份報告。之後可以透過 LINE 協助找回；LINE 綁定失敗也不影響付款或查看報告。
+              用 LINE 保存查看連結。之後可以從 LINE 回到 ANYU 查看完整報告；LINE 綁定失敗也不影響付款或查看報告。
             </p>
             {lineError ? (
               <p className="anyu-recovery-error" role="status">
@@ -245,7 +245,7 @@ function RecoverySoftGate({
           </div>
           {lineBind.ok ? (
             <Link href={lineBind.href} className="anyu-storefront-link">
-              用 LINE 保存
+              用 LINE 保存查看連結
             </Link>
           ) : (
             <span className="anyu-recovery-soon-badge">暫時無法啟動</span>
@@ -255,13 +255,13 @@ function RecoverySoftGate({
 
       {existingRecovery.hasAny || emailSaved || lineSaved ? (
         <p className="anyu-recovery-confirmation" role="status">
-          已保存找回方式。你可以繼續前往藍新安全付款頁。
+          已保存查看連結。你可以繼續前往藍新安全付款頁。
         </p>
       ) : (
         <div className="anyu-recovery-skip-warning">
           <p className="anyu-kicker t-label-dim">skip allowed</p>
           <p>
-            你仍然可以繼續付款。但若未保存，關閉頁面、更換裝置或清除瀏覽資料後，可能需要透過客服協助找回完整報告。
+            你仍然可以繼續付款。但如果未保存查看連結，關閉頁面或更換裝置後，可能需要聯絡客服協助查詢。
           </p>
         </div>
       )}
@@ -396,7 +396,7 @@ export default async function CheckoutStartPage({ params, searchParams }: Checko
           {recoverySaved ? null : (
             <label className="anyu-recovery-provider-ack">
               <input type="checkbox" required />
-              <span>我了解尚未保存找回方式，仍要繼續付款。</span>
+              <span>我了解尚未保存查看連結，仍要繼續付款。</span>
             </label>
           )}
           <Button type="submit" className="anyu-button-block">

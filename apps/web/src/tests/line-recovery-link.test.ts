@@ -85,7 +85,7 @@ describe("LINE recovery link sending", () => {
 
     expect(message.text).toContain("曖昧溫度計");
     expect(message.text).toContain(recoveryUrl);
-    expect(message.text).toContain("此找回連結將保留 90 天");
+    expect(message.text).toContain("此專屬查看連結將保留 90 天");
     expect(message.text).toContain("hello@anyu.tw");
     expect(message.text).not.toContain("pa_");
     expect(message.text).not.toContain("pcs_");
