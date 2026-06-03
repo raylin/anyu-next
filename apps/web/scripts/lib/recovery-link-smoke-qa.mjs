@@ -1,21 +1,25 @@
 import crypto from "node:crypto";
 
-const RECOVERY_LINK_TOKEN_PREFIX = "prl_";
+const ACCESS_LINK_TOKEN_PREFIX = "pal_";
+const LEGACY_RECOVERY_LINK_TOKEN_PREFIX = "prl_";
 const RECOVERY_LINK_TOKEN_RANDOM_BYTES = 32;
-const RECOVERY_LINK_TOKEN_PATTERN = /^prl_[A-Za-z0-9_-]{43}$/u;
+const RECOVERY_LINK_TOKEN_PATTERN = /^(?:pal|prl)_[A-Za-z0-9_-]{43}$/u;
 const RECOVERY_LINK_HASH_PURPOSE = "paid_result_recovery_link:v1";
+const ACCESS_LINK_HASH_PURPOSE = "paid_result_access_link:v1";
 const RECOVERY_LINK_TTL_DAYS = 90;
 const RECOVERY_LINK_PURPOSE = "paid_result_recovery";
 const RECOVERY_LINK_CHANNEL = "operator_test";
 const TOKEN_LIKE_PATTERNS = [
+  /pal_[A-Za-z0-9_-]{8,}/u,
   /prl_[A-Za-z0-9_-]{8,}/u,
   /pa_[A-Za-z0-9_-]{8,}/u,
   /pcs_[A-Za-z0-9_-]{8,}/u,
+  /\/r\/pal_[A-Za-z0-9_-]{8,}/u,
   /\/r\/prl_[A-Za-z0-9_-]{8,}/u,
 ];
 
 function generateOperatorRecoveryToken() {
-  return `${RECOVERY_LINK_TOKEN_PREFIX}${crypto
+  return `${ACCESS_LINK_TOKEN_PREFIX}${crypto
     .randomBytes(RECOVERY_LINK_TOKEN_RANDOM_BYTES)
     .toString("base64url")}`;
 }
@@ -33,9 +37,13 @@ function hashOperatorRecoveryToken(rawToken, secret) {
     throw new Error("payment_recovery_link_token_secret_missing");
   }
 
+  const hashPurpose = rawToken.startsWith(ACCESS_LINK_TOKEN_PREFIX)
+    ? ACCESS_LINK_HASH_PURPOSE
+    : RECOVERY_LINK_HASH_PURPOSE;
+
   return crypto
     .createHmac("sha256", secret.trim())
-    .update(`${RECOVERY_LINK_HASH_PURPOSE}:${rawToken}`)
+    .update(`${hashPurpose}:${rawToken}`)
     .digest("hex");
 }
 
@@ -78,6 +86,8 @@ function sanitizeRecoverySmokeRecord(value) {
 }
 
 export {
+  ACCESS_LINK_TOKEN_PREFIX,
+  LEGACY_RECOVERY_LINK_TOKEN_PREFIX,
   RECOVERY_LINK_CHANNEL,
   RECOVERY_LINK_PURPOSE,
   RECOVERY_LINK_TTL_DAYS,

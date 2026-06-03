@@ -9325,3 +9325,29 @@ Unresolved questions:
 - Decide whether to include route aliases in the same phase as code aliases or after DB rename.
 - Decide whether new LINE bind state prefix should be `alb_` or `lalb_` when the LINE bind token prefix is eventually renamed.
 - Decide whether controlled production payment smoke should wait for the access-link technical DB rename or proceed after env gates with recovery-named schema.
+
+## 2026-06-04 Access Link Code Alias + Script Rename v0
+
+### Completed Changes
+
+- saved the Access Link Code Alias + Script Rename v0 handoff and report
+- added access-link-facing helper aliases for paid result link creation, resolution, send marking, revoke, active lookup, support link creation, Email send, LINE send, and token utilities
+- added access-link wrapper modules for DB links, Email notification, LINE notification, and token helpers
+- introduced `pal_` for newly generated paid result access-link tokens
+- preserved `prl_` validation and resolver compatibility with purpose-separated hashing
+- kept `/r/` route behavior and `rlb_` LINE bind-state prefix unchanged
+- added package script aliases `qa:access-link:smoke` and `qa:line-access-link:smoke`
+- preserved existing `qa:recovery-link:smoke` and `qa:line-recovery:smoke` commands
+- added targeted tests for helper aliases, wrapper modules, token prefix compatibility, and script aliases
+
+### Learnings
+
+- The code already had one access-link helper name, `findActivePaidResultAccessLinkForContact`; this task extends that pattern instead of forcing a broad rename.
+- `pal_` can be introduced safely before DB rename because token hashes are purpose-separated and `/r/` can validate both `pal_` and legacy `prl_`.
+- Keeping existing file paths and adding wrapper modules is lower risk than renaming files before the DB forward migration.
+
+### Unresolved Questions
+
+- Decide exact route alias timing for `/api/.../access-link/...` paths.
+- Decide whether env names should remain recovery-named until after controlled production smoke.
+- Confirm whether the DB forward rename should happen before Production Access-Link / Provider Env Gate v0.

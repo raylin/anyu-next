@@ -111,6 +111,8 @@ export function buildRecoveryLinkUrl(input: {
   return `${appUrl}/r/${encodeURIComponent(input.rawToken)}`;
 }
 
+export const buildPaidResultAccessLinkUrl = buildRecoveryLinkUrl;
+
 export function buildRecoveryLinkEmail(input: {
   to: string;
   recoveryUrl: string;
@@ -146,6 +148,8 @@ export function buildRecoveryLinkEmail(input: {
     html,
   } satisfies EmailMessage;
 }
+
+export const buildPaidResultAccessLinkEmail = buildRecoveryLinkEmail;
 
 async function sendResendEmail(input: {
   message: EmailMessage;
@@ -249,6 +253,8 @@ export async function sendRecoveryEmail(input: {
     providerStatus: "unsupported",
   };
 }
+
+export const sendEmailAccessLink = sendRecoveryEmail;
 
 export async function createAndSendEmailRecoveryLink(input: {
   moduleSlug: string;
@@ -354,6 +360,8 @@ export async function createAndSendEmailRecoveryLink(input: {
     emailSent: sendResult.status === "sent",
   };
 }
+
+export const createAndSendEmailAccessLink = createAndSendEmailRecoveryLink;
 
 export type CompletedPaidResultRecoveryEmailSendSummary = {
   attempted: number;
@@ -507,3 +515,6 @@ export async function sendRecoveryLinksForCompletedPaidResult(input: {
 
   return summary;
 }
+
+export const sendAccessLinksForCompletedPaidResult =
+  sendRecoveryLinksForCompletedPaidResult;

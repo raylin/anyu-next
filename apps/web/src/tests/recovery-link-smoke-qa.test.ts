@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import { assertSafeQaBaseUrl } from "../../scripts/lib/result-checkout-no-card-qa.mjs";
 import {
+  ACCESS_LINK_TOKEN_PREFIX,
+  LEGACY_RECOVERY_LINK_TOKEN_PREFIX,
   RECOVERY_LINK_CHANNEL,
   RECOVERY_LINK_PURPOSE,
   RECOVERY_LINK_TTL_DAYS,
@@ -26,9 +28,11 @@ describe("recovery link smoke QA helpers", () => {
     expect(assertSafeQaBaseUrl("https://staging.anyu.tw")).toEqual({ ok: true });
   });
 
-  it("generates and hashes prl_ tokens without exposing token material in output helpers", () => {
+  it("generates and hashes pal_ tokens without exposing token material in output helpers", () => {
     const token = generateOperatorRecoveryToken();
 
+    expect(token.startsWith(ACCESS_LINK_TOKEN_PREFIX)).toBe(true);
+    expect(LEGACY_RECOVERY_LINK_TOKEN_PREFIX).toBe("prl_");
     expect(isRecoveryLinkToken(token)).toBe(true);
     expect(hashOperatorRecoveryToken(token, "test-only-recovery-link-secret")).toMatch(
       /^[a-f0-9]{64}$/u,
@@ -42,6 +46,17 @@ describe("recovery link smoke QA helpers", () => {
     expect(() => sanitizeRecoverySmokeRecord({ recoveryPath: `/r/${token}` })).toThrow(
       "unsafe_recovery_smoke_output_detected",
     );
+  });
+
+  it("keeps legacy prl_ detection for compatibility", () => {
+    const legacyToken = `prl_${"a".repeat(43)}`;
+
+    expect(isRecoveryLinkToken(legacyToken)).toBe(true);
+    expect(hashOperatorRecoveryToken(legacyToken, "test-only-recovery-link-secret")).toMatch(
+      /^[a-f0-9]{64}$/u,
+    );
+    expect(redactRecoveryLinkPath(`/r/${legacyToken}`)).toBe("/r/[REDACTED]");
+    expect(containsRecoverySmokeTokenLikeValue(`/r/${legacyToken}`)).toBe(true);
   });
 
   it("uses operator_test recovery links with the approved purpose and 90-day expiry", () => {
@@ -91,7 +106,13 @@ describe("recovery link smoke QA helpers", () => {
     expect(packageJson.scripts["qa:recovery-link:smoke"]).toBe(
       "node scripts/recovery-link-smoke-qa.mjs",
     );
+    expect(packageJson.scripts["qa:access-link:smoke"]).toBe(
+      "node scripts/recovery-link-smoke-qa.mjs",
+    );
     expect(packageJson.scripts["qa:line-recovery:smoke"]).toBe(
+      "node scripts/line-recovery-smoke-qa.mjs",
+    );
+    expect(packageJson.scripts["qa:line-access-link:smoke"]).toBe(
       "node scripts/line-recovery-smoke-qa.mjs",
     );
     expect(preflight).toContain("recovery_link_smoke");

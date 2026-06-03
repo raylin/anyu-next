@@ -91,6 +91,8 @@ function buildRecoveryLinkUrl(input: {
   return `${appUrl}/r/${encodeURIComponent(input.rawToken)}`;
 }
 
+export const buildPaidResultAccessLinkUrl = buildRecoveryLinkUrl;
+
 export function buildRecoveryLinkLineMessage(input: {
   to: string;
   recoveryUrl: string;
@@ -109,6 +111,8 @@ export function buildRecoveryLinkLineMessage(input: {
     text,
   } satisfies LineMessage;
 }
+
+export const buildPaidResultAccessLinkLineMessage = buildRecoveryLinkLineMessage;
 
 async function sendLinePushMessage(input: {
   message: LineMessage;
@@ -196,6 +200,8 @@ export async function sendRecoveryLineMessage(input: {
     providerStatus: "unsupported",
   };
 }
+
+export const sendLineAccessLink = sendRecoveryLineMessage;
 
 export async function createAndSendLineRecoveryLink(input: {
   moduleSlug: string;
@@ -322,3 +328,5 @@ export async function createAndSendLineRecoveryLink(input: {
     lineSent: sendResult.status === "sent",
   };
 }
+
+export const createAndSendLineAccessLink = createAndSendLineRecoveryLink;

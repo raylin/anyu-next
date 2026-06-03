@@ -18,9 +18,12 @@ const {
 
 vi.mock("@/lib/db/paid-result-recovery-links", () => ({
   createPaidResultRecoveryLink: mockCreatePaidResultRecoveryLink,
+  createPaidResultAccessLink: mockCreatePaidResultRecoveryLink,
   findActivePaidResultAccessLinkForContact: mockFindActivePaidResultAccessLinkForContact,
   markPaidResultRecoveryLinkFailed: mockMarkPaidResultRecoveryLinkFailed,
+  markPaidResultAccessLinkFailed: mockMarkPaidResultRecoveryLinkFailed,
   markPaidResultRecoveryLinkSent: mockMarkPaidResultRecoveryLinkSent,
+  markPaidResultAccessLinkSent: mockMarkPaidResultRecoveryLinkSent,
 }));
 
 vi.mock("@/lib/db/payment-recovery-contact-secrets", () => ({
@@ -29,12 +32,19 @@ vi.mock("@/lib/db/payment-recovery-contact-secrets", () => ({
 }));
 
 import {
+  buildPaidResultAccessLinkLineMessage,
   buildRecoveryLinkLineMessage,
+  createAndSendLineAccessLink,
   createAndSendLineRecoveryLink,
+  sendLineAccessLink,
   sendRecoveryLineMessage,
 } from "@/lib/notifications/line-recovery-link";
+import {
+  buildPaidResultAccessLinkLineMessage as buildPaidResultAccessLinkLineMessageFromAliasModule,
+  createAndSendLineAccessLink as createAndSendLineAccessLinkFromAliasModule,
+} from "@/lib/notifications/line-access-link";
 
-const RAW_TOKEN = "prl_" + "b".repeat(43);
+const RAW_TOKEN = "pal_" + "b".repeat(43);
 
 function lineContact(overrides: Record<string, unknown> = {}) {
   return {
@@ -73,7 +83,7 @@ describe("LINE recovery link sending", () => {
 
   it("builds a link-only LINE message without report body or access tokens", () => {
     const recoveryUrl = `https://staging.anyu.tw/r/${RAW_TOKEN}`;
-    const message = buildRecoveryLinkLineMessage({
+    const message = buildPaidResultAccessLinkLineMessage({
       to: "line-recipient-test-only",
       recoveryUrl,
       moduleTitle: "曖昧溫度計",
@@ -87,6 +97,16 @@ describe("LINE recovery link sending", () => {
     expect(message.text).not.toContain("pcs_");
     expect(message.text).not.toContain("原始輸入");
     expect(message.text).not.toContain("完整摘要內容");
+  });
+
+  it("keeps LINE access-link aliases compatible with recovery exports", () => {
+    expect(buildPaidResultAccessLinkLineMessage).toBe(buildRecoveryLinkLineMessage);
+    expect(sendLineAccessLink).toBe(sendRecoveryLineMessage);
+    expect(createAndSendLineAccessLink).toBe(createAndSendLineRecoveryLink);
+    expect(buildPaidResultAccessLinkLineMessageFromAliasModule).toBe(
+      buildRecoveryLinkLineMessage,
+    );
+    expect(createAndSendLineAccessLinkFromAliasModule).toBe(createAndSendLineRecoveryLink);
   });
 
   it("uses noop adapter by default and does not claim a real LINE message was sent", async () => {

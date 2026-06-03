@@ -3,10 +3,15 @@ import { requireDb } from "@/lib/db/client";
 import { getEntitlementById, type Entitlement } from "@/lib/db/entitlements";
 import { paidResultRecoveryLinks } from "@/lib/db/schema";
 import {
+  generatePaidResultAccessLinkToken,
   generatePaidResultRecoveryToken,
+  getDefaultPaidResultAccessLinkExpiresAt,
   getDefaultPaidResultRecoveryLinkExpiresAt,
+  hashPaidResultAccessLinkToken,
   hashPaidResultRecoveryToken,
+  isPaidResultAccessLinkToken,
   isPaidResultRecoveryToken,
+  PAID_RESULT_ACCESS_LINK_PURPOSE_ALIAS,
   PAID_RESULT_RECOVERY_LINK_PURPOSE,
 } from "@/lib/payments/recovery-link-token";
 
@@ -41,6 +46,11 @@ export type PaidResultRecoveryLinkStatus =
 export type PaidResultRecoveryLinkFailureCategory =
   (typeof PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES)[number];
 export type PaidResultRecoveryLink = typeof paidResultRecoveryLinks.$inferSelect;
+export type PaidResultAccessLinkChannel = PaidResultRecoveryLinkChannel;
+export type PaidResultAccessLinkStatus = PaidResultRecoveryLinkStatus;
+export type PaidResultAccessLinkFailureCategory =
+  PaidResultRecoveryLinkFailureCategory;
+export type PaidResultAccessLink = PaidResultRecoveryLink;
 
 export type PaidResultRecoveryLinkResolution =
   | {
@@ -60,6 +70,13 @@ export type PaidResultRecoveryLinkResolution =
         | "entitlement_inactive"
         | "config_unavailable";
     };
+export type PaidResultAccessLinkResolution = PaidResultRecoveryLinkResolution;
+
+export const PAID_RESULT_ACCESS_LINK_CHANNELS = PAID_RESULT_RECOVERY_LINK_CHANNELS;
+export const PAID_RESULT_ACCESS_LINK_STATUSES = PAID_RESULT_RECOVERY_LINK_STATUSES;
+export const PAID_RESULT_ACCESS_LINK_FAILURE_CATEGORIES =
+  PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES;
+export const PAID_RESULT_ACCESS_LINK_PURPOSE = PAID_RESULT_ACCESS_LINK_PURPOSE_ALIAS;
 
 function assertAllowed<T extends string>(
   value: string,
@@ -146,6 +163,8 @@ export async function createPaidResultRecoveryLink(input: {
   return { link, rawToken };
 }
 
+export const createPaidResultAccessLink = createPaidResultRecoveryLink;
+
 export async function getPaidResultRecoveryLinkByRawToken(
   rawToken: string,
   env?: NodeJS.ProcessEnv,
@@ -170,6 +189,8 @@ export async function getPaidResultRecoveryLinkByRawToken(
   return record ?? null;
 }
 
+export const getPaidResultAccessLinkByRawToken = getPaidResultRecoveryLinkByRawToken;
+
 export async function markPaidResultRecoveryLinkUsed(linkId: string, usedAt = new Date()) {
   const db = requireDb();
   const [record] = await db
@@ -184,6 +205,8 @@ export async function markPaidResultRecoveryLinkUsed(linkId: string, usedAt = ne
 
   return record ?? null;
 }
+
+export const markPaidResultAccessLinkUsed = markPaidResultRecoveryLinkUsed;
 
 export async function revokePaidResultRecoveryLink(input: {
   linkId: string;
@@ -203,6 +226,8 @@ export async function revokePaidResultRecoveryLink(input: {
 
   return record ?? null;
 }
+
+export const revokePaidResultAccessLink = revokePaidResultRecoveryLink;
 
 export async function markPaidResultRecoveryLinkSent(input: {
   linkId: string;
@@ -230,6 +255,8 @@ export async function markPaidResultRecoveryLinkSent(input: {
   return record ?? null;
 }
 
+export const markPaidResultAccessLinkSent = markPaidResultRecoveryLinkSent;
+
 export async function markPaidResultRecoveryLinkFailed(input: {
   linkId: string;
   failedAt?: Date;
@@ -254,6 +281,8 @@ export async function markPaidResultRecoveryLinkFailed(input: {
   return record ?? null;
 }
 
+export const markPaidResultAccessLinkFailed = markPaidResultRecoveryLinkFailed;
+
 export async function getRecentPaidResultRecoveryLinkForContact(input: {
   entitlementId: string;
   recoveryContactId: string;
@@ -276,6 +305,9 @@ export async function getRecentPaidResultRecoveryLinkForContact(input: {
 
   return record ?? null;
 }
+
+export const getRecentPaidResultAccessLinkForContact =
+  getRecentPaidResultRecoveryLinkForContact;
 
 export async function findActivePaidResultAccessLinkForContact(input: {
   entitlementId: string;
@@ -331,6 +363,8 @@ export async function createSupportPaidResultAccessLink(input: {
   });
 }
 
+export const createSupportPaidResultRecoveryLink = createSupportPaidResultAccessLink;
+
 export async function resolvePaidResultRecoveryLink(input: {
   rawToken: string;
   now?: Date;
@@ -378,3 +412,17 @@ export async function resolvePaidResultRecoveryLink(input: {
 
   return { ok: true, link, entitlement };
 }
+
+export const resolvePaidResultAccessLink = resolvePaidResultRecoveryLink;
+export const isPaidResultAccessLinkExpired = isPaidResultRecoveryLinkExpired;
+export const isPaidResultAccessLinkActive = isPaidResultRecoveryLinkActive;
+export {
+  generatePaidResultAccessLinkToken,
+  generatePaidResultRecoveryToken,
+  getDefaultPaidResultAccessLinkExpiresAt,
+  getDefaultPaidResultRecoveryLinkExpiresAt,
+  hashPaidResultAccessLinkToken,
+  hashPaidResultRecoveryToken,
+  isPaidResultAccessLinkToken,
+  isPaidResultRecoveryToken,
+};

@@ -16,25 +16,46 @@ vi.mock("@/lib/db/entitlements", () => ({
 }));
 
 import {
+  createPaidResultAccessLink,
   createSupportPaidResultAccessLink,
+  createSupportPaidResultRecoveryLink,
   findActivePaidResultAccessLinkForContact,
+  getRecentPaidResultAccessLinkForContact,
   createPaidResultRecoveryLink,
   getRecentPaidResultRecoveryLinkForContact,
+  isPaidResultAccessLinkActive,
   isPaidResultRecoveryLinkActive,
+  markPaidResultAccessLinkFailed,
+  markPaidResultAccessLinkSent,
   markPaidResultRecoveryLinkFailed,
   markPaidResultRecoveryLinkSent,
+  PAID_RESULT_ACCESS_LINK_CHANNELS,
+  PAID_RESULT_ACCESS_LINK_FAILURE_CATEGORIES,
+  PAID_RESULT_ACCESS_LINK_PURPOSE,
+  PAID_RESULT_ACCESS_LINK_STATUSES,
   PAID_RESULT_RECOVERY_LINK_CHANNELS,
   PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES,
   PAID_RESULT_RECOVERY_LINK_STATUSES,
+  resolvePaidResultAccessLink,
   resolvePaidResultRecoveryLink,
+  revokePaidResultAccessLink,
   revokePaidResultRecoveryLink,
 } from "@/lib/db/paid-result-recovery-links";
 import {
+  getDefaultPaidResultAccessLinkExpiresAt,
   getDefaultPaidResultRecoveryLinkExpiresAt,
+  hashPaidResultAccessLinkToken,
   hashPaidResultRecoveryToken,
+  isPaidResultAccessLinkToken,
   isPaidResultRecoveryToken,
+  PAID_RESULT_ACCESS_LINK_TOKEN_PREFIX,
+  PAID_RESULT_LEGACY_RECOVERY_LINK_TOKEN_PREFIX,
   PAID_RESULT_RECOVERY_LINK_PURPOSE,
 } from "@/lib/payments/recovery-link-token";
+import {
+  createPaidResultAccessLink as createPaidResultAccessLinkFromAliasModule,
+  resolvePaidResultAccessLink as resolvePaidResultAccessLinkFromAliasModule,
+} from "@/lib/db/paid-result-access-links";
 
 const RESULT_ID = "22222222-2222-4222-8222-222222222222";
 const PAYMENT_INTENT_ID = "33333333-3333-4333-8333-333333333333";
@@ -48,6 +69,10 @@ const TEST_ENV = {
 
 function syntheticRecoveryToken(seed: string) {
   return `prl_${seed.repeat(43)}`;
+}
+
+function syntheticAccessLinkToken(seed: string) {
+  return `pal_${seed.repeat(43)}`;
 }
 
 function createDbMock(input?: { selectRows?: unknown[]; insertRows?: unknown[]; updateRows?: unknown[] }) {
@@ -152,9 +177,15 @@ describe("paid result recovery links", () => {
       "recipient_blocked_or_unreachable",
       "unknown",
     ]);
+    expect(PAID_RESULT_ACCESS_LINK_CHANNELS).toBe(PAID_RESULT_RECOVERY_LINK_CHANNELS);
+    expect(PAID_RESULT_ACCESS_LINK_STATUSES).toBe(PAID_RESULT_RECOVERY_LINK_STATUSES);
+    expect(PAID_RESULT_ACCESS_LINK_FAILURE_CATEGORIES).toBe(
+      PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES,
+    );
+    expect(PAID_RESULT_ACCESS_LINK_PURPOSE).toBe("paid_result_access_link");
   });
 
-  it("generates recovery links with hash-only token storage and 90-day default expiry", async () => {
+  it("generates access links with pal_ tokens, hash-only token storage, and 90-day default expiry", async () => {
     const dbMock = createDbMock({
       insertRows: [recoveryLinkRecord()],
     });
@@ -171,7 +202,9 @@ describe("paid result recovery links", () => {
       env: TEST_ENV,
     });
 
+    expect(result.rawToken.startsWith(PAID_RESULT_ACCESS_LINK_TOKEN_PREFIX)).toBe(true);
     expect(isPaidResultRecoveryToken(result.rawToken)).toBe(true);
+    expect(isPaidResultAccessLinkToken(result.rawToken)).toBe(true);
     expect(dbMock.capture.insertValues).toMatchObject({
       moduleSlug: "ambiguous-temperature",
       analysisResultId: RESULT_ID,
@@ -186,9 +219,47 @@ describe("paid result recovery links", () => {
     expect(dbMock.capture.insertValues?.tokenHash).toBe(
       hashPaidResultRecoveryToken(result.rawToken, TEST_ENV),
     );
+    expect(dbMock.capture.insertValues?.tokenHash).toBe(
+      hashPaidResultAccessLinkToken(result.rawToken, TEST_ENV),
+    );
     expect(dbMock.capture.insertValues?.tokenHash).not.toBe(result.rawToken);
     expect(dbMock.capture.insertValues).not.toHaveProperty("rawToken");
     expect(JSON.stringify(dbMock.capture.insertValues)).not.toContain(result.rawToken);
+  });
+
+  it("keeps access-link helper aliases and alias modules compatible", async () => {
+    expect(createPaidResultAccessLink).toBe(createPaidResultRecoveryLink);
+    expect(resolvePaidResultAccessLink).toBe(resolvePaidResultRecoveryLink);
+    expect(createSupportPaidResultRecoveryLink).toBe(createSupportPaidResultAccessLink);
+    expect(getRecentPaidResultAccessLinkForContact).toBe(
+      getRecentPaidResultRecoveryLinkForContact,
+    );
+    expect(markPaidResultAccessLinkSent).toBe(markPaidResultRecoveryLinkSent);
+    expect(markPaidResultAccessLinkFailed).toBe(markPaidResultRecoveryLinkFailed);
+    expect(revokePaidResultAccessLink).toBe(revokePaidResultRecoveryLink);
+    expect(isPaidResultAccessLinkActive).toBe(isPaidResultRecoveryLinkActive);
+    expect(createPaidResultAccessLinkFromAliasModule).toBe(createPaidResultRecoveryLink);
+    expect(resolvePaidResultAccessLinkFromAliasModule).toBe(resolvePaidResultRecoveryLink);
+  });
+
+  it("accepts legacy prl_ tokens while treating pal_ as the new generated prefix", () => {
+    const legacyToken = syntheticRecoveryToken("l");
+    const accessToken = syntheticAccessLinkToken("a");
+
+    expect(PAID_RESULT_LEGACY_RECOVERY_LINK_TOKEN_PREFIX).toBe("prl_");
+    expect(PAID_RESULT_ACCESS_LINK_TOKEN_PREFIX).toBe("pal_");
+    expect(isPaidResultRecoveryToken(legacyToken)).toBe(true);
+    expect(isPaidResultRecoveryToken(accessToken)).toBe(true);
+    expect(isPaidResultAccessLinkToken(legacyToken)).toBe(true);
+    expect(isPaidResultAccessLinkToken(accessToken)).toBe(true);
+    expect(hashPaidResultRecoveryToken(legacyToken, TEST_ENV)).toMatch(/^[a-f0-9]{64}$/u);
+    expect(hashPaidResultRecoveryToken(accessToken, TEST_ENV)).toMatch(/^[a-f0-9]{64}$/u);
+    expect(hashPaidResultRecoveryToken(accessToken, TEST_ENV)).not.toBe(
+      hashPaidResultRecoveryToken(legacyToken, TEST_ENV),
+    );
+    expect(getDefaultPaidResultAccessLinkExpiresAt(NOW)).toEqual(
+      getDefaultPaidResultRecoveryLinkExpiresAt(NOW),
+    );
   });
 
   it("fails closed when recovery link token secret is missing", async () => {
@@ -208,7 +279,7 @@ describe("paid result recovery links", () => {
   });
 
   it("resolves valid recovery links to active entitlements and marks usage", async () => {
-    const rawToken = syntheticRecoveryToken("a");
+    const rawToken = syntheticAccessLinkToken("a");
     const dbMock = createDbMock({
       selectRows: [recoveryLinkRecord()],
       updateRows: [recoveryLinkRecord({ status: "used", usedAt: NOW })],
@@ -216,7 +287,7 @@ describe("paid result recovery links", () => {
     mockRequireDb.mockReturnValue(dbMock.db);
     mockGetEntitlementById.mockResolvedValue(activeEntitlement());
 
-    const result = await resolvePaidResultRecoveryLink({
+    const result = await resolvePaidResultAccessLink({
       rawToken,
       now: NOW,
       env: TEST_ENV,
@@ -233,6 +304,27 @@ describe("paid result recovery links", () => {
       updatedAt: NOW,
     });
     expect(JSON.stringify(result)).not.toContain(rawToken);
+  });
+
+  it("resolves legacy prl_ links for compatibility", async () => {
+    const rawToken = syntheticRecoveryToken("z");
+    const dbMock = createDbMock({
+      selectRows: [recoveryLinkRecord()],
+      updateRows: [recoveryLinkRecord({ status: "used", usedAt: NOW })],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+    mockGetEntitlementById.mockResolvedValue(activeEntitlement());
+
+    await expect(
+      resolvePaidResultAccessLink({
+        rawToken,
+        now: NOW,
+        env: TEST_ENV,
+      }),
+    ).resolves.toMatchObject({
+      ok: true,
+      link: { id: RECOVERY_LINK_ID },
+    });
   });
 
   it("fails invalid, expired, revoked, failed, and inactive entitlement links safely", async () => {
@@ -377,6 +469,7 @@ describe("paid result recovery links", () => {
       status: "sent",
     });
     expect(dbMock.selectChain.orderBy).toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain("pal_");
     expect(JSON.stringify(result)).not.toContain("prl_");
   });
 
@@ -459,6 +552,7 @@ describe("paid result recovery links", () => {
       status: "used",
     });
     expect(dbMock.selectChain.orderBy).toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain("pal_");
     expect(JSON.stringify(result)).not.toContain("prl_");
   });
 
@@ -478,7 +572,7 @@ describe("paid result recovery links", () => {
       env: TEST_ENV,
     });
 
-    expect(isPaidResultRecoveryToken(result.rawToken)).toBe(true);
+    expect(isPaidResultAccessLinkToken(result.rawToken)).toBe(true);
     expect(dbMock.capture.insertValues).toMatchObject({
       channel: "support",
       entitlementId: ENTITLEMENT_ID,

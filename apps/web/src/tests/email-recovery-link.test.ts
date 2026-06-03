@@ -24,9 +24,12 @@ const {
 
 vi.mock("@/lib/db/paid-result-recovery-links", () => ({
   createPaidResultRecoveryLink: mockCreatePaidResultRecoveryLink,
+  createPaidResultAccessLink: mockCreatePaidResultRecoveryLink,
   findActivePaidResultAccessLinkForContact: mockFindActivePaidResultAccessLinkForContact,
   markPaidResultRecoveryLinkFailed: mockMarkPaidResultRecoveryLinkFailed,
+  markPaidResultAccessLinkFailed: mockMarkPaidResultRecoveryLinkFailed,
   markPaidResultRecoveryLinkSent: mockMarkPaidResultRecoveryLinkSent,
+  markPaidResultAccessLinkSent: mockMarkPaidResultRecoveryLinkSent,
 }));
 
 vi.mock("@/lib/payments/recovery-contact-crypto", () => ({
@@ -46,14 +49,23 @@ vi.mock("@/lib/db/payment-recovery-contact-secrets", () => ({
 }));
 
 import {
+  buildPaidResultAccessLinkEmail,
+  buildPaidResultAccessLinkUrl,
   buildRecoveryLinkEmail,
   buildRecoveryLinkUrl,
+  createAndSendEmailAccessLink,
   createAndSendEmailRecoveryLink,
+  sendAccessLinksForCompletedPaidResult,
+  sendEmailAccessLink,
   sendRecoveryEmail,
   sendRecoveryLinksForCompletedPaidResult,
 } from "@/lib/notifications/email-recovery-link";
+import {
+  buildPaidResultAccessLinkEmail as buildPaidResultAccessLinkEmailFromAliasModule,
+  createAndSendEmailAccessLink as createAndSendEmailAccessLinkFromAliasModule,
+} from "@/lib/notifications/email-access-link";
 
-const RAW_TOKEN = "prl_" + "a".repeat(43);
+const RAW_TOKEN = "pal_" + "a".repeat(43);
 
 function emailContact(overrides: Record<string, unknown> = {}) {
   return {
@@ -120,11 +132,25 @@ describe("email recovery link sending", () => {
 
   it("builds a recovery link URL using /r/[token]", () => {
     expect(
-      buildRecoveryLinkUrl({
+      buildPaidResultAccessLinkUrl({
         rawToken: RAW_TOKEN,
         env: { NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw/some/path" } as NodeJS.ProcessEnv,
       }),
     ).toBe(`https://staging.anyu.tw/r/${RAW_TOKEN}`);
+  });
+
+  it("keeps Email access-link aliases compatible with recovery exports", () => {
+    expect(buildPaidResultAccessLinkUrl).toBe(buildRecoveryLinkUrl);
+    expect(buildPaidResultAccessLinkEmail).toBe(buildRecoveryLinkEmail);
+    expect(sendEmailAccessLink).toBe(sendRecoveryEmail);
+    expect(createAndSendEmailAccessLink).toBe(createAndSendEmailRecoveryLink);
+    expect(sendAccessLinksForCompletedPaidResult).toBe(
+      sendRecoveryLinksForCompletedPaidResult,
+    );
+    expect(buildPaidResultAccessLinkEmailFromAliasModule).toBe(buildRecoveryLinkEmail);
+    expect(createAndSendEmailAccessLinkFromAliasModule).toBe(
+      createAndSendEmailRecoveryLink,
+    );
   });
 
   it("builds a link-only recovery email template without report body or access tokens", () => {
