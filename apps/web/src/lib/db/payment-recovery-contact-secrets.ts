@@ -1,6 +1,6 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { requireDb } from "@/lib/db/client";
-import { paymentRecoveryContactSecrets } from "@/lib/db/schema";
+import { paymentAccessLinkContactSecrets } from "@/lib/db/schema";
 import {
   decryptLineRecoveryRecipient,
   encryptLineRecoveryRecipient,
@@ -10,7 +10,12 @@ import {
 export const PAYMENT_RECOVERY_CONTACT_SECRET_CHANNELS = ["line"] as const;
 export const PAYMENT_RECOVERY_CONTACT_SECRET_PURPOSES = [
   "recovery_link_delivery",
+  "access_link_delivery",
 ] as const;
+// Keep writing the legacy DB value until the table rename migration is applied everywhere.
+export const PAYMENT_ACCESS_LINK_CONTACT_SECRET_PURPOSE = "recovery_link_delivery";
+const PAYMENT_ACCESS_LINK_CONTACT_SECRET_COMPATIBLE_PURPOSES =
+  PAYMENT_RECOVERY_CONTACT_SECRET_PURPOSES;
 export const PAYMENT_RECOVERY_CONTACT_SECRET_STATUSES = [
   "active",
   "revoked",
@@ -25,7 +30,7 @@ export type PaymentRecoveryContactSecretPurpose =
 export type PaymentRecoveryContactSecretStatus =
   (typeof PAYMENT_RECOVERY_CONTACT_SECRET_STATUSES)[number];
 export type PaymentRecoveryContactSecret =
-  typeof paymentRecoveryContactSecrets.$inferSelect;
+  typeof paymentAccessLinkContactSecrets.$inferSelect;
 
 export type SanitizedPaymentRecoveryContactSecret = Pick<
   PaymentRecoveryContactSecret,
@@ -72,13 +77,16 @@ export async function getActiveLineRecoveryRecipientSecretByContactId(
   const db = requireDb();
   const [record] = await db
     .select()
-    .from(paymentRecoveryContactSecrets)
+    .from(paymentAccessLinkContactSecrets)
     .where(
       and(
-        eq(paymentRecoveryContactSecrets.recoveryContactId, recoveryContactId),
-        eq(paymentRecoveryContactSecrets.channel, "line"),
-        eq(paymentRecoveryContactSecrets.purpose, "recovery_link_delivery"),
-        eq(paymentRecoveryContactSecrets.status, "active"),
+        eq(paymentAccessLinkContactSecrets.recoveryContactId, recoveryContactId),
+        eq(paymentAccessLinkContactSecrets.channel, "line"),
+        inArray(
+          paymentAccessLinkContactSecrets.purpose,
+          PAYMENT_ACCESS_LINK_CONTACT_SECRET_COMPATIBLE_PURPOSES,
+        ),
+        eq(paymentAccessLinkContactSecrets.status, "active"),
       ),
     )
     .limit(1);
@@ -108,7 +116,7 @@ export async function createOrUpdateLineRecoveryRecipientSecret(input: {
 
   if (existing) {
     const [record] = await db
-      .update(paymentRecoveryContactSecrets)
+      .update(paymentAccessLinkContactSecrets)
       .set({
         recipientHash,
         encryptedRecipient,
@@ -118,18 +126,18 @@ export async function createOrUpdateLineRecoveryRecipientSecret(input: {
         revokedAt: null,
         updatedAt: now,
       })
-      .where(eq(paymentRecoveryContactSecrets.id, existing.id))
+      .where(eq(paymentAccessLinkContactSecrets.id, existing.id))
       .returning();
 
     return record ? sanitizePaymentRecoveryContactSecret(record) : null;
   }
 
   const [record] = await db
-    .insert(paymentRecoveryContactSecrets)
+    .insert(paymentAccessLinkContactSecrets)
     .values({
       recoveryContactId: input.recoveryContactId,
       channel: "line",
-      purpose: "recovery_link_delivery",
+      purpose: PAYMENT_ACCESS_LINK_CONTACT_SECRET_PURPOSE,
       recipientHash,
       encryptedRecipient,
       keyVersion: PAYMENT_RECOVERY_CONTACT_SECRET_KEY_VERSION,
@@ -166,17 +174,20 @@ export async function markLineRecoveryRecipientSecretUsed(input: {
   const usedAt = input.usedAt ?? new Date();
   const db = requireDb();
   const [record] = await db
-    .update(paymentRecoveryContactSecrets)
+    .update(paymentAccessLinkContactSecrets)
     .set({
       lastUsedAt: usedAt,
       updatedAt: usedAt,
     })
     .where(
       and(
-        eq(paymentRecoveryContactSecrets.recoveryContactId, input.recoveryContactId),
-        eq(paymentRecoveryContactSecrets.channel, "line"),
-        eq(paymentRecoveryContactSecrets.purpose, "recovery_link_delivery"),
-        eq(paymentRecoveryContactSecrets.status, "active"),
+        eq(paymentAccessLinkContactSecrets.recoveryContactId, input.recoveryContactId),
+        eq(paymentAccessLinkContactSecrets.channel, "line"),
+        inArray(
+          paymentAccessLinkContactSecrets.purpose,
+          PAYMENT_ACCESS_LINK_CONTACT_SECRET_COMPATIBLE_PURPOSES,
+        ),
+        eq(paymentAccessLinkContactSecrets.status, "active"),
       ),
     )
     .returning();
@@ -191,7 +202,7 @@ export async function revokeLineRecoveryRecipientSecret(input: {
   const revokedAt = input.revokedAt ?? new Date();
   const db = requireDb();
   const [record] = await db
-    .update(paymentRecoveryContactSecrets)
+    .update(paymentAccessLinkContactSecrets)
     .set({
       status: "revoked",
       revokedAt,
@@ -199,10 +210,13 @@ export async function revokeLineRecoveryRecipientSecret(input: {
     })
     .where(
       and(
-        eq(paymentRecoveryContactSecrets.recoveryContactId, input.recoveryContactId),
-        eq(paymentRecoveryContactSecrets.channel, "line"),
-        eq(paymentRecoveryContactSecrets.purpose, "recovery_link_delivery"),
-        eq(paymentRecoveryContactSecrets.status, "active"),
+        eq(paymentAccessLinkContactSecrets.recoveryContactId, input.recoveryContactId),
+        eq(paymentAccessLinkContactSecrets.channel, "line"),
+        inArray(
+          paymentAccessLinkContactSecrets.purpose,
+          PAYMENT_ACCESS_LINK_CONTACT_SECRET_COMPATIBLE_PURPOSES,
+        ),
+        eq(paymentAccessLinkContactSecrets.status, "active"),
       ),
     )
     .returning();
@@ -218,7 +232,7 @@ export async function markLineRecoveryRecipientSecretFailed(input: {
   const failedAt = input.failedAt ?? new Date();
   const db = requireDb();
   const [record] = await db
-    .update(paymentRecoveryContactSecrets)
+    .update(paymentAccessLinkContactSecrets)
     .set({
       status: "failed",
       failureCategory: input.failureCategory ?? "send_failed",
@@ -226,10 +240,13 @@ export async function markLineRecoveryRecipientSecretFailed(input: {
     })
     .where(
       and(
-        eq(paymentRecoveryContactSecrets.recoveryContactId, input.recoveryContactId),
-        eq(paymentRecoveryContactSecrets.channel, "line"),
-        eq(paymentRecoveryContactSecrets.purpose, "recovery_link_delivery"),
-        eq(paymentRecoveryContactSecrets.status, "active"),
+        eq(paymentAccessLinkContactSecrets.recoveryContactId, input.recoveryContactId),
+        eq(paymentAccessLinkContactSecrets.channel, "line"),
+        inArray(
+          paymentAccessLinkContactSecrets.purpose,
+          PAYMENT_ACCESS_LINK_CONTACT_SECRET_COMPATIBLE_PURPOSES,
+        ),
+        eq(paymentAccessLinkContactSecrets.status, "active"),
       ),
     )
     .returning();

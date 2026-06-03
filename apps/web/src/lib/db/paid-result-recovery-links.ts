@@ -1,7 +1,7 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { requireDb } from "@/lib/db/client";
 import { getEntitlementById, type Entitlement } from "@/lib/db/entitlements";
-import { paidResultRecoveryLinks } from "@/lib/db/schema";
+import { paidResultAccessLinks } from "@/lib/db/schema";
 import {
   generatePaidResultAccessLinkToken,
   generatePaidResultRecoveryToken,
@@ -45,7 +45,7 @@ export type PaidResultRecoveryLinkStatus =
   (typeof PAID_RESULT_RECOVERY_LINK_STATUSES)[number];
 export type PaidResultRecoveryLinkFailureCategory =
   (typeof PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES)[number];
-export type PaidResultRecoveryLink = typeof paidResultRecoveryLinks.$inferSelect;
+export type PaidResultRecoveryLink = typeof paidResultAccessLinks.$inferSelect;
 export type PaidResultAccessLinkChannel = PaidResultRecoveryLinkChannel;
 export type PaidResultAccessLinkStatus = PaidResultRecoveryLinkStatus;
 export type PaidResultAccessLinkFailureCategory =
@@ -77,6 +77,10 @@ export const PAID_RESULT_ACCESS_LINK_STATUSES = PAID_RESULT_RECOVERY_LINK_STATUS
 export const PAID_RESULT_ACCESS_LINK_FAILURE_CATEGORIES =
   PAID_RESULT_RECOVERY_LINK_FAILURE_CATEGORIES;
 export const PAID_RESULT_ACCESS_LINK_PURPOSE = PAID_RESULT_ACCESS_LINK_PURPOSE_ALIAS;
+const PAID_RESULT_ACCESS_LINK_COMPATIBLE_PURPOSES = [
+  PAID_RESULT_ACCESS_LINK_PURPOSE,
+  PAID_RESULT_RECOVERY_LINK_PURPOSE,
+] as const;
 
 function assertAllowed<T extends string>(
   value: string,
@@ -144,7 +148,7 @@ export async function createPaidResultRecoveryLink(input: {
   const expiresAt = input.expiresAt ?? getDefaultPaidResultRecoveryLinkExpiresAt(now);
   const db = requireDb();
   const [link] = await db
-    .insert(paidResultRecoveryLinks)
+    .insert(paidResultAccessLinks)
     .values({
       moduleSlug: input.moduleSlug,
       analysisResultId: input.analysisResultId,
@@ -152,7 +156,7 @@ export async function createPaidResultRecoveryLink(input: {
       entitlementId: input.entitlementId,
       recoveryContactId: input.recoveryContactId ?? null,
       tokenHash,
-      purpose: PAID_RESULT_RECOVERY_LINK_PURPOSE,
+      purpose: PAID_RESULT_ACCESS_LINK_PURPOSE,
       channel: input.channel,
       status: "created",
       expiresAt,
@@ -177,11 +181,11 @@ export async function getPaidResultRecoveryLinkByRawToken(
   const db = requireDb();
   const [record] = await db
     .select()
-    .from(paidResultRecoveryLinks)
+    .from(paidResultAccessLinks)
     .where(
       and(
-        eq(paidResultRecoveryLinks.tokenHash, tokenHash),
-        eq(paidResultRecoveryLinks.purpose, PAID_RESULT_RECOVERY_LINK_PURPOSE),
+        eq(paidResultAccessLinks.tokenHash, tokenHash),
+        inArray(paidResultAccessLinks.purpose, PAID_RESULT_ACCESS_LINK_COMPATIBLE_PURPOSES),
       ),
     )
     .limit(1);
@@ -194,13 +198,13 @@ export const getPaidResultAccessLinkByRawToken = getPaidResultRecoveryLinkByRawT
 export async function markPaidResultRecoveryLinkUsed(linkId: string, usedAt = new Date()) {
   const db = requireDb();
   const [record] = await db
-    .update(paidResultRecoveryLinks)
+    .update(paidResultAccessLinks)
     .set({
       status: "used",
       usedAt,
       updatedAt: usedAt,
     })
-    .where(eq(paidResultRecoveryLinks.id, linkId))
+    .where(eq(paidResultAccessLinks.id, linkId))
     .returning();
 
   return record ?? null;
@@ -215,13 +219,13 @@ export async function revokePaidResultRecoveryLink(input: {
   const revokedAt = input.revokedAt ?? new Date();
   const db = requireDb();
   const [record] = await db
-    .update(paidResultRecoveryLinks)
+    .update(paidResultAccessLinks)
     .set({
       status: "revoked",
       revokedAt,
       updatedAt: revokedAt,
     })
-    .where(eq(paidResultRecoveryLinks.id, input.linkId))
+    .where(eq(paidResultAccessLinks.id, input.linkId))
     .returning();
 
   return record ?? null;
@@ -238,18 +242,18 @@ export async function markPaidResultRecoveryLinkSent(input: {
   const sentAt = input.sentAt ?? new Date();
   const db = requireDb();
   const [record] = await db
-    .update(paidResultRecoveryLinks)
+    .update(paidResultAccessLinks)
     .set({
       status: "sent",
       sentAt,
       providerMessageId: input.providerMessageId ?? null,
       lastSendAttemptAt: sentAt,
-      sendAttemptCount: sql`${paidResultRecoveryLinks.sendAttemptCount} + 1`,
+      sendAttemptCount: sql`${paidResultAccessLinks.sendAttemptCount} + 1`,
       lastFailureCategory: null,
       lastProviderStatus: input.providerStatus ?? "accepted",
       updatedAt: sentAt,
     })
-    .where(eq(paidResultRecoveryLinks.id, input.linkId))
+    .where(eq(paidResultAccessLinks.id, input.linkId))
     .returning();
 
   return record ?? null;
@@ -266,16 +270,16 @@ export async function markPaidResultRecoveryLinkFailed(input: {
   const failedAt = input.failedAt ?? new Date();
   const db = requireDb();
   const [record] = await db
-    .update(paidResultRecoveryLinks)
+    .update(paidResultAccessLinks)
     .set({
       status: "failed",
       lastSendAttemptAt: failedAt,
-      sendAttemptCount: sql`${paidResultRecoveryLinks.sendAttemptCount} + 1`,
+      sendAttemptCount: sql`${paidResultAccessLinks.sendAttemptCount} + 1`,
       lastFailureCategory: input.failureCategory ?? "unknown",
       lastProviderStatus: input.providerStatus ?? null,
       updatedAt: failedAt,
     })
-    .where(eq(paidResultRecoveryLinks.id, input.linkId))
+    .where(eq(paidResultAccessLinks.id, input.linkId))
     .returning();
 
   return record ?? null;
@@ -291,16 +295,16 @@ export async function getRecentPaidResultRecoveryLinkForContact(input: {
   const db = requireDb();
   const [record] = await db
     .select()
-    .from(paidResultRecoveryLinks)
+    .from(paidResultAccessLinks)
     .where(
       and(
-        eq(paidResultRecoveryLinks.entitlementId, input.entitlementId),
-        eq(paidResultRecoveryLinks.recoveryContactId, input.recoveryContactId),
-        eq(paidResultRecoveryLinks.channel, input.channel),
-        eq(paidResultRecoveryLinks.purpose, PAID_RESULT_RECOVERY_LINK_PURPOSE),
+        eq(paidResultAccessLinks.entitlementId, input.entitlementId),
+        eq(paidResultAccessLinks.recoveryContactId, input.recoveryContactId),
+        eq(paidResultAccessLinks.channel, input.channel),
+        inArray(paidResultAccessLinks.purpose, PAID_RESULT_ACCESS_LINK_COMPATIBLE_PURPOSES),
       ),
     )
-    .orderBy(desc(paidResultRecoveryLinks.createdAt))
+    .orderBy(desc(paidResultAccessLinks.createdAt))
     .limit(1);
 
   return record ?? null;
@@ -318,16 +322,16 @@ export async function findActivePaidResultAccessLinkForContact(input: {
   const db = requireDb();
   const records = await db
     .select()
-    .from(paidResultRecoveryLinks)
+    .from(paidResultAccessLinks)
     .where(
       and(
-        eq(paidResultRecoveryLinks.entitlementId, input.entitlementId),
-        eq(paidResultRecoveryLinks.recoveryContactId, input.recoveryContactId),
-        eq(paidResultRecoveryLinks.channel, input.channel),
-        eq(paidResultRecoveryLinks.purpose, PAID_RESULT_RECOVERY_LINK_PURPOSE),
+        eq(paidResultAccessLinks.entitlementId, input.entitlementId),
+        eq(paidResultAccessLinks.recoveryContactId, input.recoveryContactId),
+        eq(paidResultAccessLinks.channel, input.channel),
+        inArray(paidResultAccessLinks.purpose, PAID_RESULT_ACCESS_LINK_COMPATIBLE_PURPOSES),
       ),
     )
-    .orderBy(desc(paidResultRecoveryLinks.createdAt))
+    .orderBy(desc(paidResultAccessLinks.createdAt))
     .limit(10);
 
   return (

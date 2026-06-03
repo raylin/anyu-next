@@ -1,6 +1,9 @@
-import { and, desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, ne } from "drizzle-orm";
 import { requireDb } from "@/lib/db/client";
-import { paymentRecoveryContactSecrets, paymentRecoveryContacts } from "@/lib/db/schema";
+import {
+  paymentAccessLinkContactSecrets,
+  paymentAccessLinkContacts,
+} from "@/lib/db/schema";
 import {
   assertNoRecoveryBearerToken,
   decryptRecoveryContactValue,
@@ -25,11 +28,15 @@ export const PAYMENT_RECOVERY_CONTACT_STATUSES = [
   "failed",
   "revoked",
 ] as const;
+const PAYMENT_ACCESS_LINK_CONTACT_SECRET_COMPATIBLE_PURPOSES = [
+  "access_link_delivery",
+  "recovery_link_delivery",
+] as const;
 
 export type PaymentRecoveryContactType = (typeof PAYMENT_RECOVERY_CONTACT_TYPES)[number];
 export type PaymentRecoveryContactSource = (typeof PAYMENT_RECOVERY_CONTACT_SOURCES)[number];
 export type PaymentRecoveryContactStatus = (typeof PAYMENT_RECOVERY_CONTACT_STATUSES)[number];
-export type PaymentRecoveryContact = typeof paymentRecoveryContacts.$inferSelect;
+export type PaymentRecoveryContact = typeof paymentAccessLinkContacts.$inferSelect;
 export type PaymentRecoveryContactSummaryStatus = PaymentRecoveryContactStatus | "none";
 export type PaymentRecoveryPostPaymentAction =
   | "none"
@@ -214,13 +221,13 @@ async function getActiveRecoveryContactByResult(input: {
   const db = requireDb();
   const [record] = await db
     .select()
-    .from(paymentRecoveryContacts)
+    .from(paymentAccessLinkContacts)
     .where(
       and(
-        eq(paymentRecoveryContacts.analysisResultId, input.analysisResultId),
-        eq(paymentRecoveryContacts.contactType, input.contactType),
-        eq(paymentRecoveryContacts.contactHash, input.contactHash),
-        ne(paymentRecoveryContacts.status, "revoked"),
+        eq(paymentAccessLinkContacts.analysisResultId, input.analysisResultId),
+        eq(paymentAccessLinkContacts.contactType, input.contactType),
+        eq(paymentAccessLinkContacts.contactHash, input.contactHash),
+        ne(paymentAccessLinkContacts.status, "revoked"),
       ),
     )
     .limit(1);
@@ -249,7 +256,7 @@ async function upsertRecoveryContact(input: {
 
   if (existing) {
     const [updated] = await db
-      .update(paymentRecoveryContacts)
+      .update(paymentAccessLinkContacts)
       .set({
         paymentIntentId: input.paymentIntentId ?? existing.paymentIntentId,
         entitlementId: input.entitlementId ?? existing.entitlementId,
@@ -263,14 +270,14 @@ async function upsertRecoveryContact(input: {
         status: input.status ?? existing.status,
         updatedAt: now,
       })
-      .where(eq(paymentRecoveryContacts.id, existing.id))
+      .where(eq(paymentAccessLinkContacts.id, existing.id))
       .returning();
 
     return updated ?? existing;
   }
 
   const [created] = await db
-    .insert(paymentRecoveryContacts)
+    .insert(paymentAccessLinkContacts)
     .values({
       moduleSlug: input.moduleSlug,
       analysisResultId: input.analysisResultId,
@@ -377,8 +384,8 @@ export async function getPaymentRecoveryContactsByPaymentIntentId(paymentIntentI
 
   return db
     .select()
-    .from(paymentRecoveryContacts)
-    .where(eq(paymentRecoveryContacts.paymentIntentId, paymentIntentId));
+    .from(paymentAccessLinkContacts)
+    .where(eq(paymentAccessLinkContacts.paymentIntentId, paymentIntentId));
 }
 
 export async function getPaymentRecoveryContactsByEntitlementId(entitlementId: string) {
@@ -386,8 +393,8 @@ export async function getPaymentRecoveryContactsByEntitlementId(entitlementId: s
 
   return db
     .select()
-    .from(paymentRecoveryContacts)
-    .where(eq(paymentRecoveryContacts.entitlementId, entitlementId));
+    .from(paymentAccessLinkContacts)
+    .where(eq(paymentAccessLinkContacts.entitlementId, entitlementId));
 }
 
 export async function getEligibleEmailRecoveryContactsForCompletedPaidResult(input: {
@@ -468,8 +475,8 @@ export async function getPaymentRecoveryContactsByResultId(analysisResultId: str
 
   return db
     .select()
-    .from(paymentRecoveryContacts)
-    .where(eq(paymentRecoveryContacts.analysisResultId, analysisResultId));
+    .from(paymentAccessLinkContacts)
+    .where(eq(paymentAccessLinkContacts.analysisResultId, analysisResultId));
 }
 
 export async function getPaymentRecoveryStatusSummary(input: {
@@ -518,13 +525,13 @@ export async function bindRecoveryContactsToEntitlement(input: {
   const now = new Date();
 
   return db
-    .update(paymentRecoveryContacts)
+    .update(paymentAccessLinkContacts)
     .set({
       entitlementId: input.entitlementId,
       status: "bound",
       updatedAt: now,
     })
-    .where(eq(paymentRecoveryContacts.paymentIntentId, input.paymentIntentId))
+    .where(eq(paymentAccessLinkContacts.paymentIntentId, input.paymentIntentId))
     .returning();
 }
 
@@ -536,14 +543,14 @@ export async function bindRecoveryContactToPaymentContext(input: {
   const db = requireDb();
   const now = new Date();
   const [record] = await db
-    .update(paymentRecoveryContacts)
+    .update(paymentAccessLinkContacts)
     .set({
       paymentIntentId: input.paymentIntentId,
       entitlementId: input.entitlementId,
       status: "bound",
       updatedAt: now,
     })
-    .where(eq(paymentRecoveryContacts.id, input.recoveryContactId))
+    .where(eq(paymentAccessLinkContacts.id, input.recoveryContactId))
     .returning();
 
   return record ?? null;
@@ -555,26 +562,32 @@ export async function getLatestLineRecoveryContactWithActiveRecipientSecret(inpu
   const db = requireDb();
   const [record] = await db
     .select({
-      contact: paymentRecoveryContacts,
+      contact: paymentAccessLinkContacts,
     })
-    .from(paymentRecoveryContacts)
+    .from(paymentAccessLinkContacts)
     .innerJoin(
-      paymentRecoveryContactSecrets,
+      paymentAccessLinkContactSecrets,
       and(
-        eq(paymentRecoveryContactSecrets.recoveryContactId, paymentRecoveryContacts.id),
-        eq(paymentRecoveryContactSecrets.channel, "line"),
-        eq(paymentRecoveryContactSecrets.purpose, "recovery_link_delivery"),
-        eq(paymentRecoveryContactSecrets.status, "active"),
+        eq(
+          paymentAccessLinkContactSecrets.recoveryContactId,
+          paymentAccessLinkContacts.id,
+        ),
+        eq(paymentAccessLinkContactSecrets.channel, "line"),
+        inArray(
+          paymentAccessLinkContactSecrets.purpose,
+          PAYMENT_ACCESS_LINK_CONTACT_SECRET_COMPATIBLE_PURPOSES,
+        ),
+        eq(paymentAccessLinkContactSecrets.status, "active"),
       ),
     )
     .where(
       and(
-        eq(paymentRecoveryContacts.moduleSlug, input.moduleSlug),
-        eq(paymentRecoveryContacts.contactType, "line"),
-        ne(paymentRecoveryContacts.status, "revoked"),
+        eq(paymentAccessLinkContacts.moduleSlug, input.moduleSlug),
+        eq(paymentAccessLinkContacts.contactType, "line"),
+        ne(paymentAccessLinkContacts.status, "revoked"),
       ),
     )
-    .orderBy(desc(paymentRecoveryContacts.updatedAt))
+    .orderBy(desc(paymentAccessLinkContacts.updatedAt))
     .limit(1);
 
   return record?.contact ?? null;
@@ -613,12 +626,12 @@ export async function markPaymentRecoveryContactStatus(input: {
 
   const db = requireDb();
   const [record] = await db
-    .update(paymentRecoveryContacts)
+    .update(paymentAccessLinkContacts)
     .set({
       status: input.status,
       updatedAt: new Date(),
     })
-    .where(eq(paymentRecoveryContacts.id, input.recoveryContactId))
+    .where(eq(paymentAccessLinkContacts.id, input.recoveryContactId))
     .returning();
 
   return record ?? null;
@@ -630,12 +643,12 @@ export async function recordPaymentRecoveryMarketingOptIn(input: {
 }) {
   const db = requireDb();
   const [record] = await db
-    .update(paymentRecoveryContacts)
+    .update(paymentAccessLinkContacts)
     .set({
       marketingOptInAt: input.marketingOptInAt ?? new Date(),
       updatedAt: new Date(),
     })
-    .where(eq(paymentRecoveryContacts.id, input.recoveryContactId))
+    .where(eq(paymentAccessLinkContacts.id, input.recoveryContactId))
     .returning();
 
   return record ?? null;

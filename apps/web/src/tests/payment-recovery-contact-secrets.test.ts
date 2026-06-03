@@ -109,6 +109,7 @@ describe("payment recovery contact secrets", () => {
     expect(PAYMENT_RECOVERY_CONTACT_SECRET_CHANNELS).toEqual(["line"]);
     expect(PAYMENT_RECOVERY_CONTACT_SECRET_PURPOSES).toEqual([
       "recovery_link_delivery",
+      "access_link_delivery",
     ]);
     expect(PAYMENT_RECOVERY_CONTACT_SECRET_STATUSES).toEqual([
       "active",
@@ -341,6 +342,10 @@ describe("payment recovery contact secrets", () => {
       path.resolve(process.cwd(), "drizzle/0011_payment_recovery_contact_secrets.sql"),
       "utf8",
     );
+    const schema = readFileSync(
+      path.resolve(process.cwd(), "src/lib/db/schema.ts"),
+      "utf8",
+    );
 
     expect(migration).toContain('CREATE TABLE "payment_recovery_contact_secrets"');
     expect(migration).toContain('"encrypted_recipient" text NOT NULL');
@@ -351,5 +356,8 @@ describe("payment recovery contact secrets", () => {
     expect(migration).not.toContain("pa_");
     expect(migration).not.toContain("pcs_");
     expect(migration).not.toContain("prl_");
+    expect(schema).toContain(
+      "export const paymentAccessLinkContactSecrets = paymentRecoveryContactSecrets;",
+    );
   });
 });

@@ -211,7 +211,7 @@ describe("paid result recovery links", () => {
       paymentIntentId: PAYMENT_INTENT_ID,
       entitlementId: ENTITLEMENT_ID,
       recoveryContactId: RECOVERY_CONTACT_ID,
-      purpose: PAID_RESULT_RECOVERY_LINK_PURPOSE,
+      purpose: PAID_RESULT_ACCESS_LINK_PURPOSE,
       channel: "email",
       status: "created",
       expiresAt: getDefaultPaidResultRecoveryLinkExpiresAt(NOW),
@@ -613,5 +613,32 @@ describe("paid result recovery links", () => {
     expect(migration).not.toContain("raw_email");
     expect(migration).not.toContain("line_user_id");
     expect(migration).not.toContain("paid_access_token");
+  });
+
+  it("adds a forward access-link table rename migration with recovery compatibility views", () => {
+    const migration = readFileSync(
+      path.resolve(process.cwd(), "drizzle/0013_access_link_technical_rename.sql"),
+      "utf8",
+    );
+    const schema = readFileSync(
+      path.resolve(process.cwd(), "src/lib/db/schema.ts"),
+      "utf8",
+    );
+
+    expect(migration).toContain("RENAME TO payment_access_link_contacts");
+    expect(migration).toContain("RENAME TO paid_result_access_links");
+    expect(migration).toContain("RENAME TO payment_access_link_contact_secrets");
+    expect(migration).toContain("CREATE OR REPLACE VIEW public.payment_recovery_contacts");
+    expect(migration).toContain("CREATE OR REPLACE VIEW public.paid_result_recovery_links");
+    expect(migration).toContain(
+      "CREATE OR REPLACE VIEW public.payment_recovery_contact_secrets",
+    );
+    expect(migration).not.toContain("DROP TABLE");
+    expect(migration).not.toContain("raw_email");
+    expect(migration).not.toContain("line_user_id");
+    expect(migration).not.toContain("provider_payload");
+    expect(schema).toContain(
+      "export const paidResultAccessLinks = paidResultRecoveryLinks;",
+    );
   });
 });

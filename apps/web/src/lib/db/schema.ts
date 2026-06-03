@@ -449,6 +449,7 @@ export const paymentRecoveryContacts = pgTable(
       .where(sql`${table.paymentIntentId} IS NOT NULL AND ${table.status} <> 'revoked'`),
   }),
 );
+export const paymentAccessLinkContacts = paymentRecoveryContacts;
 
 export const paidResultRecoveryLinks = pgTable(
   "paid_result_recovery_links",
@@ -499,6 +500,7 @@ export const paidResultRecoveryLinks = pgTable(
     ),
   }),
 );
+export const paidResultAccessLinks = paidResultRecoveryLinks;
 
 export const paymentRecoveryContactSecrets = pgTable(
   "payment_recovery_contact_secrets",
@@ -535,6 +537,7 @@ export const paymentRecoveryContactSecrets = pgTable(
       .where(sql`${table.status} = 'active'`),
   }),
 );
+export const paymentAccessLinkContactSecrets = paymentRecoveryContactSecrets;
 
 export const contactSubmissions = pgTable(
   "contact_submissions",

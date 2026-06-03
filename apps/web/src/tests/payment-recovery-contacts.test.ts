@@ -623,6 +623,7 @@ describe("payment recovery contacts", () => {
     expect(migration).toContain('"marketing_opt_in_at" timestamp with time zone');
     expect(migration).toContain('"payment_recovery_contacts_result_contact_active_idx"');
     expect(schema).toContain("export const paymentRecoveryContacts = pgTable(");
+    expect(schema).toContain("export const paymentAccessLinkContacts = paymentRecoveryContacts;");
     expect(schema).not.toContain("raw_pcs");
     expect(schema).not.toContain("raw_pa");
   });

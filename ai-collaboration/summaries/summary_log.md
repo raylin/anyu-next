@@ -9351,3 +9351,30 @@ Unresolved questions:
 - Decide exact route alias timing for `/api/.../access-link/...` paths.
 - Decide whether env names should remain recovery-named until after controlled production smoke.
 - Confirm whether the DB forward rename should happen before Production Access-Link / Provider Env Gate v0.
+
+## 2026-06-04 Access Link DB Forward Rename Migration Plan / Implementation v0
+
+### Completed Changes
+
+- saved the Access Link DB Forward Rename Migration Plan / Implementation v0 handoff and report
+- inventoried active recovery-named DB/helper/script references
+- added forward migration `0013_access_link_technical_rename.sql`
+- migration renames recovery-named tables to access-link table names while preserving data
+- migration renames key indexes/constraints where safe
+- migration creates recovery-named compatibility views so existing deployed code and raw SQL QA/support scripts can continue during the transition
+- added Drizzle schema aliases for `paymentAccessLinkContacts`, `paidResultAccessLinks`, and `paymentAccessLinkContactSecrets`
+- updated core DB helper modules to use access-link schema aliases while preserving recovery-named compatibility exports
+- kept `/r/`, `prl_` compatibility, `pal_` generation, and `rlb_` LINE bind state stable
+- added tests for the forward migration seam and schema aliases
+
+### Learnings
+
+- The safest forward rename is not an atomic code/schema switch; compatibility views let the DB table rename happen before raw SQL scripts and runtime schema definitions are fully switched.
+- LINE recipient-secret writes must keep `recovery_link_delivery` until the currently applied DB check constraint is widened or migrated.
+- Paid result access-link purpose values can already move to `paid_result_access_link` because the link table has no purpose check constraint and helpers read both new and legacy values.
+
+### Unresolved Questions
+
+- Decide whether Access Link DB Rename Staging Apply / Smoke v0 should also switch Drizzle `pgTable` names after verifying compatibility views.
+- Decide whether to widen or migrate LINE recipient-secret purpose constraints to include `access_link_delivery`.
+- Decide when to remove compatibility views after staging and production complete the technical rename.
