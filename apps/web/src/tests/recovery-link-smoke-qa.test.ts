@@ -96,6 +96,8 @@ describe("recovery link smoke QA helpers", () => {
     );
     expect(preflight).toContain("recovery_link_smoke");
     expect(preflight).toContain("line_recovery_smoke");
+    expect(preflight).toContain("support_ops_lookup");
+    expect(preflight).toContain("SUPPORT_OPS_DATABASE_URL");
     expect(preflight).toContain("PAYMENT_RECOVERY_LINK_TOKEN_SECRET");
     expect(preflight).toContain("ENABLE_OPERATOR_RECOVERY_LINK_SMOKE");
     expect(preflight).toContain("ENABLE_OPERATOR_LINE_RECOVERY_SMOKE");

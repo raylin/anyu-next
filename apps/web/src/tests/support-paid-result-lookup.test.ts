@@ -9,6 +9,7 @@ import {
   isActiveAccessLink,
   maskEmail,
   parseSupportLookupArgs,
+  resolveSupportOpsDatabaseUrl,
   summarizeAccessLinks,
   summarizeContacts,
 } from "../../scripts/support-paid-result-lookup.mjs";
@@ -34,12 +35,45 @@ describe("support paid result lookup helpers", () => {
         "--target",
         "production",
         "--allow-production-readonly",
+        "--allow-database-url-fallback",
         "--result-id",
         uuid("1"),
       ]).options,
     ).toMatchObject({
       target: "production",
       allowProductionReadonly: true,
+      allowDatabaseUrlFallback: true,
+    });
+  });
+
+  it("prefers explicit support ops database URL and requires opt-in for DATABASE_URL fallback", () => {
+    expect(
+      resolveSupportOpsDatabaseUrl({
+        SUPPORT_OPS_DATABASE_URL: "postgres://support-ops.example.invalid/db",
+        DATABASE_URL: "postgres://ambiguous.example.invalid/db",
+      } as NodeJS.ProcessEnv),
+    ).toMatchObject({
+      databaseUrl: "postgres://support-ops.example.invalid/db",
+      connectionSourceCategory: "support_ops_database_url",
+    });
+    expect(
+      resolveSupportOpsDatabaseUrl({
+        DATABASE_URL: "postgres://ambiguous.example.invalid/db",
+      } as NodeJS.ProcessEnv),
+    ).toMatchObject({
+      databaseUrl: null,
+      connectionSourceCategory: "missing",
+    });
+    expect(
+      resolveSupportOpsDatabaseUrl(
+        {
+          DATABASE_URL: "postgres://ambiguous.example.invalid/db",
+        } as NodeJS.ProcessEnv,
+        { allowDatabaseUrlFallback: true },
+      ),
+    ).toMatchObject({
+      databaseUrl: "postgres://ambiguous.example.invalid/db",
+      connectionSourceCategory: "database_url_explicit_fallback",
     });
   });
 

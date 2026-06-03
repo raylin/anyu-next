@@ -16,6 +16,8 @@ const ALLOWED_LOOKUP_TYPES = new Set([
   "reportReference",
 ]);
 const PRODUCTION_TARGETS = new Set(["production", "prod"]);
+const SUPPORT_OPS_DATABASE_URL_ENV = "SUPPORT_OPS_DATABASE_URL";
+const DATABASE_URL_FALLBACK_ENV = "DATABASE_URL";
 const TOKEN_LIKE_PATTERNS = [
   /pa_[A-Za-z0-9_-]{8,}/u,
   /pcs_[A-Za-z0-9_-]{8,}/u,
@@ -41,6 +43,7 @@ function parseSupportLookupArgs(argv, env = process.env) {
   const options = {
     target: env.SUPPORT_LOOKUP_TARGET?.trim() || "staging",
     allowProductionReadonly: env.SUPPORT_LOOKUP_ALLOW_PRODUCTION_READONLY === "1",
+    allowDatabaseUrlFallback: env.SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK === "1",
     disableLocalEnv: env.SUPPORT_LOOKUP_DISABLE_LOCAL_ENV === "1",
     json: true,
   };
@@ -59,6 +62,9 @@ function parseSupportLookupArgs(argv, env = process.env) {
         break;
       case "--allow-production-readonly":
         options.allowProductionReadonly = true;
+        break;
+      case "--allow-database-url-fallback":
+        options.allowDatabaseUrlFallback = true;
         break;
       case "--no-local-env":
         options.disableLocalEnv = true;
@@ -390,13 +396,47 @@ function safeErrorResponse(error) {
 }
 
 function getSqlClient(env = process.env) {
-  const databaseUrl = env.DATABASE_URL?.trim();
+  const resolved = resolveSupportOpsDatabaseUrl(env);
 
-  if (!databaseUrl) {
-    throw new SupportLookupInputError("database_url_missing");
+  if (!resolved.databaseUrl) {
+    throw new SupportLookupInputError("support_ops_database_url_missing", {
+      requiredEnv: SUPPORT_OPS_DATABASE_URL_ENV,
+      fallbackEnv: DATABASE_URL_FALLBACK_ENV,
+      fallbackRequires: "SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK=1_or_--allow-database-url-fallback",
+    });
   }
 
-  return neon(databaseUrl);
+  return {
+    sql: neon(resolved.databaseUrl),
+    connectionSourceCategory: resolved.connectionSourceCategory,
+  };
+}
+
+function resolveSupportOpsDatabaseUrl(env = process.env, options = {}) {
+  const supportOpsDatabaseUrl = env[SUPPORT_OPS_DATABASE_URL_ENV]?.trim();
+
+  if (supportOpsDatabaseUrl) {
+    return {
+      databaseUrl: supportOpsDatabaseUrl,
+      connectionSourceCategory: "support_ops_database_url",
+    };
+  }
+
+  if (options.allowDatabaseUrlFallback || env.SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK === "1") {
+    const fallbackDatabaseUrl = env[DATABASE_URL_FALLBACK_ENV]?.trim();
+
+    if (fallbackDatabaseUrl) {
+      return {
+        databaseUrl: fallbackDatabaseUrl,
+        connectionSourceCategory: "database_url_explicit_fallback",
+      };
+    }
+  }
+
+  return {
+    databaseUrl: null,
+    connectionSourceCategory: "missing",
+  };
 }
 
 async function resolveLookup(sql, lookup, env = process.env) {
@@ -794,7 +834,10 @@ function buildSummary(rows, lookup) {
 }
 
 async function lookupPaidResultSupport(input, env = process.env) {
-  const sql = getSqlClient(env);
+  const { sql, connectionSourceCategory } = getSqlClient({
+    ...env,
+    SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK: input.options.allowDatabaseUrlFallback ? "1" : env.SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK,
+  });
   const resolved = await resolveLookup(sql, input.lookup, env);
 
   if (!resolved.analysisResultId) {
@@ -823,6 +866,7 @@ async function lookupPaidResultSupport(input, env = process.env) {
         resolved: false,
         source: resolved.lookupSource,
       },
+      connectionSourceCategory,
       found: false,
       summary: {
         ...summary,
@@ -844,6 +888,7 @@ async function lookupPaidResultSupport(input, env = process.env) {
       resolved: true,
       source: resolved.lookupSource,
     },
+    connectionSourceCategory,
     found: true,
     summary,
     redaction: buildRedactionSummary(),
@@ -893,6 +938,7 @@ export {
   lookupPaidResultSupport,
   maskEmail,
   parseSupportLookupArgs,
+  resolveSupportOpsDatabaseUrl,
   summarizeAccessLinks,
   summarizeContacts,
 };

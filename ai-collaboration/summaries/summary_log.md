@@ -9220,3 +9220,30 @@ Unresolved questions:
 - Decide whether to add a dedicated staging DB env name for local support sessions.
 - Decide whether Email-hash lookup should be smoke-tested after `PAYMENT_RECOVERY_CONTACT_HASH_SECRET` is available locally.
 - Decide whether report references should become stored lookup keys before production payment launch.
+
+## 2026-06-04 Support Ops Env Alignment v0
+
+### Completed Changes
+
+- saved the Support Ops Env Alignment v0 handoff and report
+- chose `SUPPORT_OPS_DATABASE_URL` as the explicit local/operator DB env for support lookups
+- updated `ops:paid-result:lookup` to prefer `SUPPORT_OPS_DATABASE_URL`
+- changed `DATABASE_URL` fallback to require explicit opt-in via `SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK=1` or `--allow-database-url-fallback`
+- added `support_ops_lookup` mode to `qa:env:preflight`
+- added blank support ops env placeholders to `apps/web/.env.example`
+- added tests for explicit support DB env preference and fallback gating
+- verified missing support DB env blocks safely before DB query
+- verified explicit support DB env preflight passes without printing values
+- ran a staging lookup smoke with `connectionSourceCategory=support_ops_database_url`
+- reran recovery-link and no-card QA; both passed
+
+### Learnings
+
+- Silent `DATABASE_URL` fallback was too easy to mispoint; support diagnostics need an explicit support-only DB target.
+- `SUPPORT_OPS_DATABASE_URL` makes the operator intent visible while keeping runtime app DB config untouched.
+- Email-hash lookup remains dependent on local availability of `PAYMENT_RECOVERY_CONTACT_HASH_SECRET`.
+
+### Unresolved Questions
+
+- Decide whether to align `PAYMENT_RECOVERY_CONTACT_HASH_SECRET` locally for an Email-hash lookup smoke.
+- Decide whether Codex should write local-only `.env.local` support values in future tasks or keep using ephemeral shell env.
