@@ -8833,3 +8833,28 @@ Unresolved questions:
 - Rerun owner-assisted LINE Recovery Bind Staging Smoke after the legacy-entry recovery handoff fix deploys.
 - Decide later whether to configure a dedicated LINE recovery LIFF endpoint or keep shared endpoint compatibility routing.
 - LINE recovery link sending remains deferred until hash-only LINE contact binding is staging-proven.
+
+## 2026-06-03 LINE Recovery Bind Staging Smoke v0 Retry 3
+
+### Completed Changes
+
+- saved the LINE Recovery Bind Staging Smoke v0 Retry 3 handoff and report
+- confirmed Preview(staging) served commit `2de568380081`, environment `preview`, branch `staging`, and route bundle `payment-foundation-2026-05-29`
+- reran `qa:result-checkout:no-card`; result CTA, checkout-start, fake-paid, queue completion, paid access render, and production fail-closed checks passed
+- reran `qa:recovery-link:smoke`; Preview runtime recovery-link resolver, invalid-link safety, cleanup by revocation, and production fail-closed checks passed
+- verified checkout-start LINE CTA uses `liff.line.me` with `rlb_[REDACTED]` state and no visible forbidden token substrings
+- verified `/line/fulfill` recovery compatibility renders the recovery bridge and not legacy short-code error copy
+- owner-assisted LINE mobile Retry 3 passed with safe redirect back to result flow
+- verified sanitized staging DB row: one hash-only LINE recovery contact with transactional consent, checkout-start source, verified/bound status, and no missing hash fields
+
+### Learnings
+
+- The full visible LINE recovery bind path is now staging-proven through the shared LIFF endpoint.
+- Recovery and legacy fulfillment can coexist safely when recovery `rlb_` state is routed before short-code fulfillment logic.
+- LINE recovery is now bound as a recovery identity only; no LINE message sending or report-body delivery occurred.
+
+### Unresolved Questions
+
+- Implement LINE Recovery Link Sending v0 so saved LINE users can receive a safe `/r/` return link after paid result readiness.
+- Decide later whether shared `/line/fulfill` compatibility is sufficient or whether to configure a dedicated recovery LIFF endpoint.
+- Add a reusable sanitized LINE bind DB-check helper if repeated smoke is expected.
