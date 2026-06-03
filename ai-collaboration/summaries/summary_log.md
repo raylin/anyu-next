@@ -9169,3 +9169,28 @@ Unresolved questions:
 
 - Decide whether to run a controlled provider audit real-send smoke later or wait until the next real Email/LINE validation task.
 - Support Ops Helper v0 still needs verification rules and sanitized operator behavior.
+
+## 2026-06-03 Support Ops Helper v0
+
+### Completed Changes
+
+- saved the Support Ops Helper v0 handoff and report
+- added local operator command `ops:paid-result:lookup`
+- added a read-only support diagnostic script for Module 01 paid result/access-link cases
+- supported lookup by result id, payment intent id, merchant order number, Email hash, and internal recovery link id
+- accepted report reference input but returned a safe `report_reference_not_mapped` result because report references are display-only and not reverse-indexed
+- summarized payment, entitlement, generation, paid result, Email/LINE saved status, access-link state, and provider audit status without printing raw tokens, hashes, raw Email, LINE IDs, encrypted recipients, provider payloads, or source text
+- added diagnosis categories and recommended support actions without adding a public route, public UI, resend action, or provider send
+- added focused tests for production blocking, lookup parsing, redaction, active sent/used access links, contact masking, and diagnosis behavior
+
+### Learnings
+
+- Support diagnostics can answer most current Module 01 cases from existing tables if output is aggregate/status-based and avoids selecting sensitive columns.
+- Report reference codes are useful for user trust but not yet useful as a direct support lookup key because they are not stored.
+- Treating `used` links as active in support output is important because `/r/` links are multi-use until expiry/revocation.
+
+### Unresolved Questions
+
+- Decide whether report references should become stored support lookup keys before production payment launch.
+- Decide whether provider message ID values should ever be shown in redacted support output, or remain presence-only.
+- Decide when to add a gated support resend action on top of the existing server-only resend helper.
