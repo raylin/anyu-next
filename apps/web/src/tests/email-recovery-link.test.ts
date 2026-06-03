@@ -9,6 +9,8 @@ const {
   mockDecryptRecoveryContactValue,
   mockGetEligibleEmailRecoveryContactsForCompletedPaidResult,
   mockGetEligibleLineRecoveryContactsForCompletedPaidResult,
+  mockResolveLineRecoveryRecipientForSending,
+  mockMarkLineRecoveryRecipientSecretUsed,
 } = vi.hoisted(() => ({
   mockCreatePaidResultRecoveryLink: vi.fn(),
   mockGetRecentPaidResultRecoveryLinkForContact: vi.fn(),
@@ -18,6 +20,8 @@ const {
   mockDecryptRecoveryContactValue: vi.fn(),
   mockGetEligibleEmailRecoveryContactsForCompletedPaidResult: vi.fn(),
   mockGetEligibleLineRecoveryContactsForCompletedPaidResult: vi.fn(),
+  mockResolveLineRecoveryRecipientForSending: vi.fn(),
+  mockMarkLineRecoveryRecipientSecretUsed: vi.fn(),
 }));
 
 vi.mock("@/lib/db/paid-result-recovery-links", () => ({
@@ -37,6 +41,11 @@ vi.mock("@/lib/db/payment-recovery-contacts", () => ({
     mockGetEligibleEmailRecoveryContactsForCompletedPaidResult,
   getEligibleLineRecoveryContactsForCompletedPaidResult:
     mockGetEligibleLineRecoveryContactsForCompletedPaidResult,
+}));
+
+vi.mock("@/lib/db/payment-recovery-contact-secrets", () => ({
+  resolveLineRecoveryRecipientForSending: mockResolveLineRecoveryRecipientForSending,
+  markLineRecoveryRecipientSecretUsed: mockMarkLineRecoveryRecipientSecretUsed,
 }));
 
 import {
@@ -109,6 +118,8 @@ describe("email recovery link sending", () => {
       emailContact(),
     ]);
     mockGetEligibleLineRecoveryContactsForCompletedPaidResult.mockResolvedValue([]);
+    mockResolveLineRecoveryRecipientForSending.mockResolvedValue(null);
+    mockMarkLineRecoveryRecipientSecretUsed.mockResolvedValue({ id: "secret-1" });
   });
 
   it("builds a recovery link URL using /r/[token]", () => {
@@ -599,6 +610,54 @@ describe("email recovery link sending", () => {
     expect(mockCreatePaidResultRecoveryLink).not.toHaveBeenCalled();
     expect(mockMarkPaidResultRecoveryLinkSent).not.toHaveBeenCalled();
     expect(JSON.stringify(result)).not.toContain("line-user");
+    expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
+  });
+
+  it("auto-sends LINE recovery link when recipient secret resolves server-side", async () => {
+    mockGetEligibleEmailRecoveryContactsForCompletedPaidResult.mockResolvedValue([]);
+    mockGetEligibleLineRecoveryContactsForCompletedPaidResult.mockResolvedValue([
+      lineContact(),
+    ]);
+    mockResolveLineRecoveryRecipientForSending.mockResolvedValue("line-recipient-test-only");
+
+    const result = await sendRecoveryLinksForCompletedPaidResult({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: "result-1",
+      entitlementId: "entitlement-1",
+      env: {
+        NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw",
+        LINE_RECOVERY_MESSAGE_PROVIDER: "line",
+        LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: "test-only-line-token",
+      } as NodeJS.ProcessEnv,
+      fetchImpl: vi.fn(async () => new Response("{}", { status: 200 })) as never,
+    });
+
+    expect(result).toMatchObject({
+      attempted: 1,
+      sent: 1,
+      failed: 0,
+      unavailable: 0,
+      line: {
+        attempted: 1,
+        sent: 1,
+        failed: 0,
+        unavailable: 0,
+      },
+    });
+    expect(mockCreatePaidResultRecoveryLink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        channel: "line",
+        entitlementId: "entitlement-1",
+        recoveryContactId: "line-contact-1",
+      }),
+    );
+    expect(mockMarkPaidResultRecoveryLinkSent).toHaveBeenCalledWith({
+      linkId: "recovery-link-1",
+    });
+    expect(mockMarkLineRecoveryRecipientSecretUsed).toHaveBeenCalledWith({
+      recoveryContactId: "line-contact-1",
+    });
+    expect(JSON.stringify(result)).not.toContain("line-recipient-test-only");
     expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
   });
 });

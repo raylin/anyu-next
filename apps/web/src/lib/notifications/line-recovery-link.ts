@@ -1,4 +1,8 @@
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
+import {
+  markLineRecoveryRecipientSecretUsed,
+  resolveLineRecoveryRecipientForSending,
+} from "@/lib/db/payment-recovery-contact-secrets";
 import type { PaymentRecoveryContact } from "@/lib/db/payment-recovery-contacts";
 import {
   createPaidResultRecoveryLink,
@@ -91,7 +95,9 @@ async function sendLinePushMessage(input: {
   env: NodeJS.ProcessEnv;
   fetchImpl: LineFetch;
 }): Promise<LineSendResult> {
-  const channelAccessToken = input.env.LINE_CHANNEL_ACCESS_TOKEN?.trim();
+  const channelAccessToken =
+    input.env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN?.trim() ||
+    input.env.LINE_CHANNEL_ACCESS_TOKEN?.trim();
 
   if (!channelAccessToken) {
     return {
@@ -188,7 +194,20 @@ export async function createAndSendLineRecoveryLink(input: {
     };
   }
 
-  if (!input.lineRecipientId) {
+  let lineRecipientId = input.lineRecipientId ?? null;
+
+  if (!lineRecipientId) {
+    try {
+      lineRecipientId = await resolveLineRecoveryRecipientForSending({
+        recoveryContactId: input.recoveryContact.id,
+        env: input.env,
+      });
+    } catch {
+      lineRecipientId = null;
+    }
+  }
+
+  if (!lineRecipientId) {
     return {
       ok: false as const,
       status: "unavailable" as const,
@@ -240,7 +259,7 @@ export async function createAndSendLineRecoveryLink(input: {
   }
 
   const message = buildRecoveryLinkLineMessage({
-    to: input.lineRecipientId,
+    to: lineRecipientId,
     recoveryUrl,
     moduleTitle: input.moduleTitle,
   });
@@ -252,6 +271,9 @@ export async function createAndSendLineRecoveryLink(input: {
 
   if (sendResult.status === "sent") {
     await markPaidResultRecoveryLinkSent({ linkId: link.link.id });
+    await markLineRecoveryRecipientSecretUsed({
+      recoveryContactId: input.recoveryContact.id,
+    }).catch(() => null);
   } else if (!sendResult.ok) {
     await markPaidResultRecoveryLinkFailed({ linkId: link.link.id });
   }

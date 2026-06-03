@@ -6,12 +6,16 @@ const {
   mockMarkPaidResultRecoveryLinkFailed,
   mockMarkPaidResultRecoveryLinkSent,
   mockIsPaidResultRecoveryLinkExpired,
+  mockResolveLineRecoveryRecipientForSending,
+  mockMarkLineRecoveryRecipientSecretUsed,
 } = vi.hoisted(() => ({
   mockCreatePaidResultRecoveryLink: vi.fn(),
   mockGetRecentPaidResultRecoveryLinkForContact: vi.fn(),
   mockMarkPaidResultRecoveryLinkFailed: vi.fn(),
   mockMarkPaidResultRecoveryLinkSent: vi.fn(),
   mockIsPaidResultRecoveryLinkExpired: vi.fn(),
+  mockResolveLineRecoveryRecipientForSending: vi.fn(),
+  mockMarkLineRecoveryRecipientSecretUsed: vi.fn(),
 }));
 
 vi.mock("@/lib/db/paid-result-recovery-links", () => ({
@@ -20,6 +24,11 @@ vi.mock("@/lib/db/paid-result-recovery-links", () => ({
   isPaidResultRecoveryLinkExpired: mockIsPaidResultRecoveryLinkExpired,
   markPaidResultRecoveryLinkFailed: mockMarkPaidResultRecoveryLinkFailed,
   markPaidResultRecoveryLinkSent: mockMarkPaidResultRecoveryLinkSent,
+}));
+
+vi.mock("@/lib/db/payment-recovery-contact-secrets", () => ({
+  resolveLineRecoveryRecipientForSending: mockResolveLineRecoveryRecipientForSending,
+  markLineRecoveryRecipientSecretUsed: mockMarkLineRecoveryRecipientSecretUsed,
 }));
 
 import {
@@ -62,6 +71,8 @@ describe("LINE recovery link sending", () => {
       rawToken: RAW_TOKEN,
       link: { id: "recovery-link-1", status: "created" },
     });
+    mockResolveLineRecoveryRecipientForSending.mockResolvedValue(null);
+    mockMarkLineRecoveryRecipientSecretUsed.mockResolvedValue({ id: "secret-1" });
   });
 
   it("builds a link-only LINE message without report body or access tokens", () => {
@@ -129,6 +140,33 @@ describe("LINE recovery link sending", () => {
     expect(body.messages[0].text).not.toContain("pcs_");
   });
 
+  it("accepts the explicit LINE Messaging channel token env alias", async () => {
+    const fetchImpl = vi.fn(async () => new Response("{}", { status: 200 }));
+
+    await expect(
+      sendRecoveryLineMessage({
+        message: buildRecoveryLinkLineMessage({
+          to: "line-recipient-test-only",
+          recoveryUrl: `https://staging.anyu.tw/r/${RAW_TOKEN}`,
+        }),
+        env: {
+          LINE_RECOVERY_MESSAGE_PROVIDER: "line",
+          LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: "test-only-line-token",
+        } as NodeJS.ProcessEnv,
+        fetchImpl: fetchImpl as never,
+      }),
+    ).resolves.toEqual({ ok: true, provider: "line", status: "sent" });
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://api.line.me/v2/bot/message/push",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: "Bearer test-only-line-token",
+        }),
+      }),
+    );
+  });
+
   it("fails safely when LINE provider config is missing or provider returns an error", async () => {
     await expect(
       sendRecoveryLineMessage({
@@ -189,6 +227,42 @@ describe("LINE recovery link sending", () => {
     });
     expect(mockCreatePaidResultRecoveryLink).not.toHaveBeenCalled();
     expect(mockMarkPaidResultRecoveryLinkSent).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
+  });
+
+  it("resolves encrypted recipient secrets server-side before creating a LINE recovery link", async () => {
+    mockResolveLineRecoveryRecipientForSending.mockResolvedValue("line-recipient-test-only");
+
+    const result = await createAndSendLineRecoveryLink({
+      moduleSlug: "ambiguous-temperature",
+      moduleTitle: "曖昧溫度計",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+      recoveryContact: lineContact() as never,
+      env: {
+        NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw",
+        LINE_RECOVERY_MESSAGE_PROVIDER: "line",
+        LINE_MESSAGING_CHANNEL_ACCESS_TOKEN: "test-only-line-token",
+      } as NodeJS.ProcessEnv,
+      fetchImpl: vi.fn(async () => new Response("{}", { status: 200 })) as never,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "sent",
+      provider: "line",
+      recoveryLinkCreated: true,
+      lineSent: true,
+    });
+    expect(mockResolveLineRecoveryRecipientForSending).toHaveBeenCalledWith({
+      recoveryContactId: "line-contact-1",
+      env: expect.any(Object),
+    });
+    expect(mockMarkLineRecoveryRecipientSecretUsed).toHaveBeenCalledWith({
+      recoveryContactId: "line-contact-1",
+    });
+    expect(JSON.stringify(result)).not.toContain("line-recipient-test-only");
     expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
   });
 

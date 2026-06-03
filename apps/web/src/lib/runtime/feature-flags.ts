@@ -34,6 +34,14 @@ export function isOperatorEmailRecoverySmokeEnabled(env: NodeJS.ProcessEnv = pro
   );
 }
 
+export function isOperatorLineRecoverySmokeEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return (
+    env.VERCEL_ENV === "preview" &&
+    env.VERCEL_GIT_COMMIT_REF === "staging" &&
+    getBooleanEnvFlag("ENABLE_OPERATOR_LINE_RECOVERY_SMOKE", env)
+  );
+}
+
 export function isPaymentRuntimeEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return getBooleanEnvFlag("ENABLE_PAYMENT_RUNTIME", env);
 }

@@ -1,6 +1,6 @@
-import { and, eq, ne } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 import { requireDb } from "@/lib/db/client";
-import { paymentRecoveryContacts } from "@/lib/db/schema";
+import { paymentRecoveryContactSecrets, paymentRecoveryContacts } from "@/lib/db/schema";
 import {
   assertNoRecoveryBearerToken,
   decryptRecoveryContactValue,
@@ -526,6 +526,58 @@ export async function bindRecoveryContactsToEntitlement(input: {
     })
     .where(eq(paymentRecoveryContacts.paymentIntentId, input.paymentIntentId))
     .returning();
+}
+
+export async function bindRecoveryContactToPaymentContext(input: {
+  recoveryContactId: string;
+  paymentIntentId: string;
+  entitlementId: string;
+}) {
+  const db = requireDb();
+  const now = new Date();
+  const [record] = await db
+    .update(paymentRecoveryContacts)
+    .set({
+      paymentIntentId: input.paymentIntentId,
+      entitlementId: input.entitlementId,
+      status: "bound",
+      updatedAt: now,
+    })
+    .where(eq(paymentRecoveryContacts.id, input.recoveryContactId))
+    .returning();
+
+  return record ?? null;
+}
+
+export async function getLatestLineRecoveryContactWithActiveRecipientSecret(input: {
+  moduleSlug: string;
+}) {
+  const db = requireDb();
+  const [record] = await db
+    .select({
+      contact: paymentRecoveryContacts,
+    })
+    .from(paymentRecoveryContacts)
+    .innerJoin(
+      paymentRecoveryContactSecrets,
+      and(
+        eq(paymentRecoveryContactSecrets.recoveryContactId, paymentRecoveryContacts.id),
+        eq(paymentRecoveryContactSecrets.channel, "line"),
+        eq(paymentRecoveryContactSecrets.purpose, "recovery_link_delivery"),
+        eq(paymentRecoveryContactSecrets.status, "active"),
+      ),
+    )
+    .where(
+      and(
+        eq(paymentRecoveryContacts.moduleSlug, input.moduleSlug),
+        eq(paymentRecoveryContacts.contactType, "line"),
+        ne(paymentRecoveryContacts.status, "revoked"),
+      ),
+    )
+    .orderBy(desc(paymentRecoveryContacts.updatedAt))
+    .limit(1);
+
+  return record?.contact ?? null;
 }
 
 export async function createOrUpdatePostPaymentEmailRecoveryContact(input: {
