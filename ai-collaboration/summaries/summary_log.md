@@ -9028,3 +9028,26 @@ Unresolved questions:
 
 - Define duplicate-send and resend policy before broad production LINE recovery messaging.
 - Decide whether to keep the operator route as QA-only long term or replace it with a more general non-sending verification helper.
+
+## 2026-06-03 Module 01 Recovery End-to-End Launch Gate Snapshot v0
+
+### Completed Changes
+
+- saved the Module 01 Recovery End-to-End Launch Gate Snapshot v0 handoff and report
+- documented the full Module 01 paid result access-link flow from free result through checkout, payment, paid generation, Email/LINE `/r/` link delivery, resolver access, and delivery artifact
+- recorded Email access-link delivery as staging-proven
+- recorded LINE access-link delivery as staging-proven
+- documented `/r/` token model, recovery identity model, delivery artifact status, QA command matrix, and production gate map
+- recorded the owner terminology preference to shift user-facing copy toward 保存查看連結 / 專屬查看連結 / 回 ANYU 查看完整報告, with broad naming changes deferred to a scoped follow-up
+- updated dashboard to show Module 01 recovery/access-link loop complete in staging while production remains gated
+
+### Learnings
+
+- Module 01 now has a complete staging reference loop for paid result access-link delivery across both Email and LINE.
+- The main remaining launch-readiness gap is no longer basic recovery/access-link viability; it is production gating, duplicate/resend policy, provider operational handling, and copy/naming alignment.
+- NewebPay approval remains only the payment capability gate and should not be treated as growth/ads launch approval.
+
+### Unresolved Questions
+
+- Decide whether next work prioritizes access-link copy/naming alignment, duplicate/resend policy, or Module 02 concept exploration.
+- Production DB/env/runtime remain gated until explicit launch decisions.
