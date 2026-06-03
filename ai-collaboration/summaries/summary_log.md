@@ -8977,3 +8977,27 @@ Unresolved questions:
 - Deploy integration commit to Preview(staging) and rerun owner-assisted LINE bind smoke.
 - Verify sanitized DB state: hash-only contact plus active recipient secret row, without printing encrypted recipient/hash/raw LINE ID.
 - Real LINE message smoke remains gated until recipient secret creation is proven.
+
+## 2026-06-03 LINE Recovery Bind Recipient Secret Staging Smoke v0
+
+### Completed Changes
+
+- saved the LINE Recovery Bind Recipient Secret Staging Smoke v0 handoff and report
+- confirmed Preview(staging) served commit `debf5450cba8`, branch `staging`, route bundle `payment-foundation-2026-05-29`
+- verified staging schema readiness for `payment_recovery_contacts` and `payment_recovery_contact_secrets`
+- ran `qa:recovery-link:smoke`; it passed with valid resolver, invalid-link safety, cleanup by revocation, and production fail-closed checks
+- ran `qa:result-checkout:no-card`; it passed through result CTA, checkout-start, operator fake-paid, queue completion, paid access render, and production fail-closed checks
+- completed owner-assisted LINE mobile bind smoke successfully
+- verified sanitized Preview(staging) DB state: latest LINE contact is hash-only with transactional consent and checkout-start source, and one active linked encrypted recipient-secret row exists
+- confirmed Production DB/env/runtime remained untouched and no LINE messages or Email were sent
+
+### Learnings
+
+- Recipient-secret integration is now staging-proven: LINE bind writes both the hash-only recovery contact and encrypted sendable recipient secret.
+- Runtime success proves Preview(staging) has the recipient encryption key and contact hash secret without needing to expose or pull secret values locally.
+- Checkout-start LINE bind is expected to lack entitlement linkage until payment completion; paid-delivery binding remains the later context bridge.
+
+### Unresolved Questions
+
+- Real LINE Messaging API push is still unproven and should be tested in the next gated smoke.
+- Add a reusable sanitized DB verification helper if LINE recovery smoke checks become frequent.
