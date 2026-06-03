@@ -8858,3 +8858,27 @@ Unresolved questions:
 - Implement LINE Recovery Link Sending v0 so saved LINE users can receive a safe `/r/` return link after paid result readiness.
 - Decide later whether shared `/line/fulfill` compatibility is sufficient or whether to configure a dedicated recovery LIFF endpoint.
 - Add a reusable sanitized LINE bind DB-check helper if repeated smoke is expected.
+
+## 2026-06-03 LINE Recovery Link Sending v0
+
+### Completed Changes
+
+- saved the LINE Recovery Link Sending v0 handoff and execution report
+- added a server-only LINE recovery link sender foundation with noop default and a gated LINE Messaging API adapter path
+- added a safe LINE recovery message template containing only short recovery copy, module name, `/r/` web return link, 90-day retention copy, and support contact
+- added eligible LINE recovery contact lookup for completed paid results
+- extended the completed-paid-result recovery send hook to process eligible LINE contacts non-fatally after Email contacts
+- added tests for template safety, noop behavior, provider config failure, mocked provider success/failure, duplicate prevention, and hash-only recipient-unavailable behavior
+- updated `.env.example` with LINE recovery sender env names only, no values
+
+### Learnings
+
+- Real LINE push cannot be completed from the current `payment_recovery_contacts` row alone because LINE recovery identity is intentionally hash-only.
+- The correct implementation boundary is to support LINE sending mechanics while refusing to create/send a recovery link unless a future secure recipient resolver supplies a sendable LINE recipient.
+- The existing Email auto-send path remains unchanged; LINE failures/unavailable states remain non-fatal to paid delivery.
+
+### Unresolved Questions
+
+- Decide the secure recipient storage model for LINE Messaging API delivery: encrypted field, separate `line_recipient_secrets` table, or another privacy-reviewed mechanism.
+- Run real LINE recovery link smoke only after a sendable recipient can be resolved without storing raw LINE userId in `payment_recovery_contacts`.
+- Consider extracting shared recovery-link URL building if more delivery channels are added.

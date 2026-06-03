@@ -1,6 +1,7 @@
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 import {
   getEligibleEmailRecoveryContactsForCompletedPaidResult,
+  getEligibleLineRecoveryContactsForCompletedPaidResult,
   type PaymentRecoveryContact,
 } from "@/lib/db/payment-recovery-contacts";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/lib/db/paid-result-recovery-links";
 import { decryptRecoveryContactValue } from "@/lib/payments/recovery-contact-crypto";
 import { PAID_RESULT_RECOVERY_LINK_TTL_DAYS } from "@/lib/payments/recovery-link-token";
+import { createAndSendLineRecoveryLink } from "@/lib/notifications/line-recovery-link";
 
 export type EmailRecoveryLinkSendStatus = "sent" | "noop" | "failed" | "duplicate" | "unavailable";
 
@@ -297,10 +299,26 @@ export type CompletedPaidResultRecoveryEmailSendSummary = {
   duplicate: number;
   failed: number;
   unavailable: number;
+  email: {
+    attempted: number;
+    sent: number;
+    noop: number;
+    duplicate: number;
+    failed: number;
+    unavailable: number;
+  };
+  line: {
+    attempted: number;
+    sent: number;
+    noop: number;
+    duplicate: number;
+    failed: number;
+    unavailable: number;
+  };
 };
 
 function emptyCompletedPaidResultRecoveryEmailSendSummary(): CompletedPaidResultRecoveryEmailSendSummary {
-  return {
+  const emptyChannel = {
     attempted: 0,
     sent: 0,
     noop: 0,
@@ -308,6 +326,43 @@ function emptyCompletedPaidResultRecoveryEmailSendSummary(): CompletedPaidResult
     failed: 0,
     unavailable: 0,
   };
+
+  return {
+    attempted: 0,
+    sent: 0,
+    noop: 0,
+    duplicate: 0,
+    failed: 0,
+    unavailable: 0,
+    email: { ...emptyChannel },
+    line: { ...emptyChannel },
+  };
+}
+
+function recordRecoverySendSummary(
+  summary: CompletedPaidResultRecoveryEmailSendSummary,
+  channel: "email" | "line",
+  status: EmailRecoveryLinkSendStatus,
+) {
+  summary[channel].attempted += 1;
+  summary.attempted += 1;
+
+  if (status === "sent") {
+    summary[channel].sent += 1;
+    summary.sent += 1;
+  } else if (status === "noop") {
+    summary[channel].noop += 1;
+    summary.noop += 1;
+  } else if (status === "duplicate") {
+    summary[channel].duplicate += 1;
+    summary.duplicate += 1;
+  } else if (status === "unavailable") {
+    summary[channel].unavailable += 1;
+    summary.unavailable += 1;
+  } else {
+    summary[channel].failed += 1;
+    summary.failed += 1;
+  }
 }
 
 export async function sendRecoveryLinksForCompletedPaidResult(input: {
@@ -326,9 +381,15 @@ export async function sendRecoveryLinksForCompletedPaidResult(input: {
   }
 
   let contacts: PaymentRecoveryContact[];
+  let lineContacts: PaymentRecoveryContact[];
 
   try {
     contacts = await getEligibleEmailRecoveryContactsForCompletedPaidResult({
+      moduleSlug: input.moduleSlug,
+      analysisResultId: input.analysisResultId,
+      entitlementId: input.entitlementId,
+    });
+    lineContacts = await getEligibleLineRecoveryContactsForCompletedPaidResult({
       moduleSlug: input.moduleSlug,
       analysisResultId: input.analysisResultId,
       entitlementId: input.entitlementId,
@@ -338,8 +399,6 @@ export async function sendRecoveryLinksForCompletedPaidResult(input: {
   }
 
   for (const recoveryContact of contacts) {
-    summary.attempted += 1;
-
     try {
       const result = await createAndSendEmailRecoveryLink({
         moduleSlug: input.moduleSlug,
@@ -352,18 +411,33 @@ export async function sendRecoveryLinksForCompletedPaidResult(input: {
         fetchImpl: input.fetchImpl,
       });
 
-      if (result.status === "sent") {
-        summary.sent += 1;
-      } else if (result.status === "noop") {
-        summary.noop += 1;
-      } else if (result.status === "duplicate") {
-        summary.duplicate += 1;
-      } else if (result.status === "unavailable") {
-        summary.unavailable += 1;
-      } else {
-        summary.failed += 1;
-      }
+      recordRecoverySendSummary(summary, "email", result.status);
     } catch {
+      summary.email.attempted += 1;
+      summary.email.failed += 1;
+      summary.attempted += 1;
+      summary.failed += 1;
+    }
+  }
+
+  for (const recoveryContact of lineContacts) {
+    try {
+      const result = await createAndSendLineRecoveryLink({
+        moduleSlug: input.moduleSlug,
+        moduleTitle: input.moduleTitle,
+        analysisResultId: input.analysisResultId,
+        paymentIntentId: input.paymentIntentId ?? recoveryContact.paymentIntentId,
+        entitlementId: input.entitlementId,
+        recoveryContact,
+        env: input.env,
+        fetchImpl: input.fetchImpl,
+      });
+
+      recordRecoverySendSummary(summary, "line", result.status);
+    } catch {
+      summary.line.attempted += 1;
+      summary.line.failed += 1;
+      summary.attempted += 1;
       summary.failed += 1;
     }
   }

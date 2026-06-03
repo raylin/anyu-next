@@ -426,6 +426,43 @@ export async function getEligibleEmailRecoveryContactsForCompletedPaidResult(inp
   });
 }
 
+export async function getEligibleLineRecoveryContactsForCompletedPaidResult(input: {
+  moduleSlug: string;
+  analysisResultId: string;
+  entitlementId: string;
+}) {
+  const records = await getPaymentRecoveryContactsByEntitlementId(input.entitlementId);
+
+  return records.filter((record) => {
+    if (record.moduleSlug !== input.moduleSlug) {
+      return false;
+    }
+
+    if (record.analysisResultId !== input.analysisResultId) {
+      return false;
+    }
+
+    if (record.contactType !== "line" || !record.lineUserHash) {
+      return false;
+    }
+
+    if (!record.transactionalConsentAt) {
+      return false;
+    }
+
+    if (record.status !== "bound" && record.status !== "verified") {
+      return false;
+    }
+
+    return (
+      record.source === "checkout_start" ||
+      record.source === "return_waiting" ||
+      record.source === "paid_ready" ||
+      record.source === "completed_result"
+    );
+  });
+}
+
 export async function getPaymentRecoveryContactsByResultId(analysisResultId: string) {
   const db = requireDb();
 

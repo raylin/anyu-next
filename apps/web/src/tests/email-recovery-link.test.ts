@@ -8,6 +8,7 @@ const {
   mockIsPaidResultRecoveryLinkExpired,
   mockDecryptRecoveryContactValue,
   mockGetEligibleEmailRecoveryContactsForCompletedPaidResult,
+  mockGetEligibleLineRecoveryContactsForCompletedPaidResult,
 } = vi.hoisted(() => ({
   mockCreatePaidResultRecoveryLink: vi.fn(),
   mockGetRecentPaidResultRecoveryLinkForContact: vi.fn(),
@@ -16,6 +17,7 @@ const {
   mockIsPaidResultRecoveryLinkExpired: vi.fn(),
   mockDecryptRecoveryContactValue: vi.fn(),
   mockGetEligibleEmailRecoveryContactsForCompletedPaidResult: vi.fn(),
+  mockGetEligibleLineRecoveryContactsForCompletedPaidResult: vi.fn(),
 }));
 
 vi.mock("@/lib/db/paid-result-recovery-links", () => ({
@@ -33,6 +35,8 @@ vi.mock("@/lib/payments/recovery-contact-crypto", () => ({
 vi.mock("@/lib/db/payment-recovery-contacts", () => ({
   getEligibleEmailRecoveryContactsForCompletedPaidResult:
     mockGetEligibleEmailRecoveryContactsForCompletedPaidResult,
+  getEligibleLineRecoveryContactsForCompletedPaidResult:
+    mockGetEligibleLineRecoveryContactsForCompletedPaidResult,
 }));
 
 import {
@@ -68,6 +72,29 @@ function emailContact(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function lineContact(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "line-contact-1",
+    moduleSlug: "ambiguous-temperature",
+    analysisResultId: "result-1",
+    paymentIntentId: "payment-1",
+    entitlementId: "entitlement-1",
+    contactType: "line",
+    contactHash: "redacted-line-contact-hash",
+    contactEncrypted: null,
+    lineUserHash: "redacted-line-user-hash",
+    emailHash: null,
+    transactionalConsentAt: new Date("2026-06-01T00:00:00.000Z"),
+    marketingOptInAt: null,
+    source: "checkout_start",
+    status: "bound",
+    createdAt: new Date("2026-06-01T00:00:00.000Z"),
+    updatedAt: new Date("2026-06-01T00:00:00.000Z"),
+    lastUsedAt: null,
+    ...overrides,
+  };
+}
+
 describe("email recovery link sending", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -81,6 +108,7 @@ describe("email recovery link sending", () => {
     mockGetEligibleEmailRecoveryContactsForCompletedPaidResult.mockResolvedValue([
       emailContact(),
     ]);
+    mockGetEligibleLineRecoveryContactsForCompletedPaidResult.mockResolvedValue([]);
   });
 
   it("builds a recovery link URL using /r/[token]", () => {
@@ -414,6 +442,22 @@ describe("email recovery link sending", () => {
       duplicate: 0,
       failed: 0,
       unavailable: 0,
+      email: {
+        attempted: 1,
+        sent: 1,
+        noop: 0,
+        duplicate: 0,
+        failed: 0,
+        unavailable: 0,
+      },
+      line: {
+        attempted: 0,
+        sent: 0,
+        noop: 0,
+        duplicate: 0,
+        failed: 0,
+        unavailable: 0,
+      },
     });
     expect(mockMarkPaidResultRecoveryLinkSent).toHaveBeenCalledWith({
       linkId: "recovery-link-1",
@@ -436,6 +480,22 @@ describe("email recovery link sending", () => {
       duplicate: 0,
       failed: 0,
       unavailable: 0,
+      email: {
+        attempted: 0,
+        sent: 0,
+        noop: 0,
+        duplicate: 0,
+        failed: 0,
+        unavailable: 0,
+      },
+      line: {
+        attempted: 0,
+        sent: 0,
+        noop: 0,
+        duplicate: 0,
+        failed: 0,
+        unavailable: 0,
+      },
     });
     expect(mockGetEligibleEmailRecoveryContactsForCompletedPaidResult).not.toHaveBeenCalled();
   });
@@ -504,5 +564,41 @@ describe("email recovery link sending", () => {
     });
     expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
     expect(JSON.stringify(result)).not.toContain("qa-recovery@example.invalid");
+  });
+
+  it("keeps LINE auto-send non-fatal when only hash-only recovery identity is available", async () => {
+    mockGetEligibleEmailRecoveryContactsForCompletedPaidResult.mockResolvedValue([]);
+    mockGetEligibleLineRecoveryContactsForCompletedPaidResult.mockResolvedValue([
+      lineContact(),
+    ]);
+
+    const result = await sendRecoveryLinksForCompletedPaidResult({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: "result-1",
+      entitlementId: "entitlement-1",
+      env: {
+        NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw",
+        LINE_RECOVERY_MESSAGE_PROVIDER: "line",
+        LINE_CHANNEL_ACCESS_TOKEN: "test-only-line-token",
+      } as NodeJS.ProcessEnv,
+      fetchImpl: vi.fn() as never,
+    });
+
+    expect(result).toMatchObject({
+      attempted: 1,
+      sent: 0,
+      failed: 0,
+      unavailable: 1,
+      line: {
+        attempted: 1,
+        sent: 0,
+        failed: 0,
+        unavailable: 1,
+      },
+    });
+    expect(mockCreatePaidResultRecoveryLink).not.toHaveBeenCalled();
+    expect(mockMarkPaidResultRecoveryLinkSent).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain("line-user");
+    expect(JSON.stringify(result)).not.toContain(RAW_TOKEN);
   });
 });

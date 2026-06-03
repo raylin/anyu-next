@@ -17,6 +17,7 @@ import {
   createOrUpdateLineRecoveryContact,
   createOrUpdatePostPaymentEmailRecoveryContact,
   getEligibleEmailRecoveryContactsForCompletedPaidResult,
+  getEligibleLineRecoveryContactsForCompletedPaidResult,
   PAYMENT_RECOVERY_CONTACT_SOURCES,
   PAYMENT_RECOVERY_CONTACT_STATUSES,
   PAYMENT_RECOVERY_CONTACT_TYPES,
@@ -531,6 +532,56 @@ describe("payment recovery contacts", () => {
         entitlementId: ENTITLEMENT_ID,
       }),
     ).resolves.toEqual([eligible]);
+  });
+
+  it("finds only eligible LINE contacts for completed-result auto-send without raw recipient data", async () => {
+    const eligible = recoveryContact({
+      id: "eligible-line-contact",
+      contactType: "line",
+      contactEncrypted: null,
+      lineUserHash: "redacted-line-hash",
+      emailHash: null,
+      source: "completed_result",
+    });
+    const dbMock = createDbMock({
+      selectRows: [
+        eligible,
+        recoveryContact({ id: "email-contact" }),
+        recoveryContact({
+          id: "missing-line-hash",
+          contactType: "line",
+          contactEncrypted: null,
+          lineUserHash: null,
+          emailHash: null,
+        }),
+        recoveryContact({
+          id: "missing-consent",
+          contactType: "line",
+          contactEncrypted: null,
+          lineUserHash: "redacted-line-hash",
+          emailHash: null,
+          transactionalConsentAt: null,
+        }),
+        recoveryContact({
+          id: "revoked-line",
+          contactType: "line",
+          contactEncrypted: null,
+          lineUserHash: "redacted-line-hash",
+          emailHash: null,
+          status: "revoked",
+        }),
+      ],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+
+    await expect(
+      getEligibleLineRecoveryContactsForCompletedPaidResult({
+        moduleSlug: "ambiguous-temperature",
+        analysisResultId: RESULT_ID,
+        entitlementId: ENTITLEMENT_ID,
+      }),
+    ).resolves.toEqual([eligible]);
+    expect(JSON.stringify(eligible)).not.toContain("line-user");
   });
 
   it("rejects raw paid access or checkout session bearer tokens as contact values", async () => {
