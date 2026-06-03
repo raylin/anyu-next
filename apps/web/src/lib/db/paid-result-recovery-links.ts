@@ -12,7 +12,6 @@ import {
   isPaidResultAccessLinkToken,
   isPaidResultRecoveryToken,
   PAID_RESULT_ACCESS_LINK_PURPOSE_ALIAS,
-  PAID_RESULT_RECOVERY_LINK_PURPOSE,
 } from "@/lib/payments/recovery-link-token";
 
 export const PAID_RESULT_RECOVERY_LINK_CHANNELS = [
@@ -79,7 +78,6 @@ export const PAID_RESULT_ACCESS_LINK_FAILURE_CATEGORIES =
 export const PAID_RESULT_ACCESS_LINK_PURPOSE = PAID_RESULT_ACCESS_LINK_PURPOSE_ALIAS;
 const PAID_RESULT_ACCESS_LINK_COMPATIBLE_PURPOSES = [
   PAID_RESULT_ACCESS_LINK_PURPOSE,
-  PAID_RESULT_RECOVERY_LINK_PURPOSE,
 ] as const;
 
 function assertAllowed<T extends string>(

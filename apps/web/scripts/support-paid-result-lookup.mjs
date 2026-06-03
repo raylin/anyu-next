@@ -474,7 +474,7 @@ async function resolveLookup(sql, lookup, env = process.env) {
     const emailHash = hashRecoveryEmail(lookup.value, env);
     const [contact] = await sql`
       select analysis_result_id
-      from payment_recovery_contacts
+      from payment_access_link_contacts
       where contact_type = 'email'
         and contact_hash = ${emailHash}
         and status <> 'revoked'
@@ -487,7 +487,7 @@ async function resolveLookup(sql, lookup, env = process.env) {
   if (lookup.type === "recoveryLinkId") {
     const [link] = await sql`
       select analysis_result_id
-      from paid_result_recovery_links
+      from paid_result_access_links
       where id = ${lookup.value}
       limit 1
     `;
@@ -592,7 +592,7 @@ async function fetchSupportRows(sql, analysisResultId) {
           entitlement_id is not null as linked_entitlement,
           created_at,
           updated_at
-        from payment_recovery_contacts
+        from payment_access_link_contacts
         where analysis_result_id = ${analysisResultId}
         order by created_at desc
         limit 20
@@ -612,7 +612,7 @@ async function fetchSupportRows(sql, analysisResultId) {
           provider_message_id is not null as provider_message_id_present,
           created_at,
           updated_at
-        from paid_result_recovery_links
+        from paid_result_access_links
         where analysis_result_id = ${analysisResultId}
         order by created_at desc
         limit 30
@@ -627,7 +627,7 @@ async function fetchSupportRows(sql, analysisResultId) {
   for (const contactId of lineContactIds) {
     const rows = await sql`
       select recovery_contact_id, channel, purpose, status, key_version, last_used_at, revoked_at
-      from payment_recovery_contact_secrets
+      from payment_access_link_contact_secrets
       where recovery_contact_id = ${contactId}
       order by created_at desc
       limit 3

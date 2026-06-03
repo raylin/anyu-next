@@ -1,3 +1,31 @@
+DROP VIEW IF EXISTS public.payment_recovery_contact_secrets;
+--> statement-breakpoint
+DROP VIEW IF EXISTS public.paid_result_recovery_links;
+--> statement-breakpoint
+DROP VIEW IF EXISTS public.payment_recovery_contacts;
+--> statement-breakpoint
+DO $$
+BEGIN
+  IF to_regclass('public.paid_result_recovery_links') IS NOT NULL THEN
+    EXECUTE 'TRUNCATE TABLE public.paid_result_recovery_links';
+  END IF;
+  IF to_regclass('public.payment_recovery_contact_secrets') IS NOT NULL THEN
+    EXECUTE 'TRUNCATE TABLE public.payment_recovery_contact_secrets';
+  END IF;
+  IF to_regclass('public.payment_recovery_contacts') IS NOT NULL THEN
+    EXECUTE 'TRUNCATE TABLE public.payment_recovery_contacts';
+  END IF;
+  IF to_regclass('public.paid_result_access_links') IS NOT NULL THEN
+    EXECUTE 'TRUNCATE TABLE public.paid_result_access_links';
+  END IF;
+  IF to_regclass('public.payment_access_link_contact_secrets') IS NOT NULL THEN
+    EXECUTE 'TRUNCATE TABLE public.payment_access_link_contact_secrets';
+  END IF;
+  IF to_regclass('public.payment_access_link_contacts') IS NOT NULL THEN
+    EXECUTE 'TRUNCATE TABLE public.payment_access_link_contacts';
+  END IF;
+END $$;
+--> statement-breakpoint
 DO $$
 BEGIN
   IF to_regclass('public.payment_access_link_contacts') IS NULL
@@ -85,7 +113,6 @@ BEGIN
       RENAME CONSTRAINT payment_recovery_contacts_analysis_result_id_analysis_results_id_fk
       TO payment_access_link_contacts_analysis_result_id_analysis_results_id_fk;
   END IF;
-
   IF EXISTS (
     SELECT 1 FROM pg_constraint
     WHERE conname = 'payment_recovery_contacts_payment_intent_id_payment_intents_id_fk'
@@ -95,7 +122,6 @@ BEGIN
       RENAME CONSTRAINT payment_recovery_contacts_payment_intent_id_payment_intents_id_fk
       TO payment_access_link_contacts_payment_intent_id_payment_intents_id_fk;
   END IF;
-
   IF EXISTS (
     SELECT 1 FROM pg_constraint
     WHERE conname = 'payment_recovery_contacts_entitlement_id_entitlements_id_fk'
@@ -118,7 +144,6 @@ BEGIN
       RENAME CONSTRAINT paid_result_recovery_links_analysis_result_id_analysis_results_id_fk
       TO paid_result_access_links_analysis_result_id_analysis_results_id_fk;
   END IF;
-
   IF EXISTS (
     SELECT 1 FROM pg_constraint
     WHERE conname = 'paid_result_recovery_links_payment_intent_id_payment_intents_id_fk'
@@ -128,7 +153,6 @@ BEGIN
       RENAME CONSTRAINT paid_result_recovery_links_payment_intent_id_payment_intents_id_fk
       TO paid_result_access_links_payment_intent_id_payment_intents_id_fk;
   END IF;
-
   IF EXISTS (
     SELECT 1 FROM pg_constraint
     WHERE conname = 'paid_result_recovery_links_entitlement_id_entitlements_id_fk'
@@ -138,7 +162,6 @@ BEGIN
       RENAME CONSTRAINT paid_result_recovery_links_entitlement_id_entitlements_id_fk
       TO paid_result_access_links_entitlement_id_entitlements_id_fk;
   END IF;
-
   IF EXISTS (
     SELECT 1 FROM pg_constraint
     WHERE conname = 'paid_result_recovery_links_recovery_contact_id_payment_recovery_contacts_id_fk'
@@ -161,7 +184,12 @@ BEGIN
       RENAME CONSTRAINT payment_recovery_contact_secrets_recovery_contact_id_payment_recovery_contacts_id_fk
       TO payment_access_link_contact_secrets_recovery_contact_id_payment_access_link_contacts_id_fk;
   END IF;
-
+  ALTER TABLE public.payment_access_link_contact_secrets
+    DROP CONSTRAINT IF EXISTS payment_recovery_contact_secrets_purpose_check,
+    DROP CONSTRAINT IF EXISTS payment_access_link_contact_secrets_purpose_check;
+  ALTER TABLE public.payment_access_link_contact_secrets
+    ADD CONSTRAINT payment_access_link_contact_secrets_purpose_check
+    CHECK (purpose IN ('access_link_delivery'));
   IF EXISTS (
     SELECT 1 FROM pg_constraint
     WHERE conname = 'payment_recovery_contact_secrets_channel_check'
@@ -171,17 +199,6 @@ BEGIN
       RENAME CONSTRAINT payment_recovery_contact_secrets_channel_check
       TO payment_access_link_contact_secrets_channel_check;
   END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conname = 'payment_recovery_contact_secrets_purpose_check'
-      AND conrelid = 'public.payment_access_link_contact_secrets'::regclass
-  ) THEN
-    ALTER TABLE public.payment_access_link_contact_secrets
-      RENAME CONSTRAINT payment_recovery_contact_secrets_purpose_check
-      TO payment_access_link_contact_secrets_purpose_check;
-  END IF;
-
   IF EXISTS (
     SELECT 1 FROM pg_constraint
     WHERE conname = 'payment_recovery_contact_secrets_status_check'
@@ -192,12 +209,3 @@ BEGIN
       TO payment_access_link_contact_secrets_status_check;
   END IF;
 END $$;
---> statement-breakpoint
-CREATE OR REPLACE VIEW public.payment_recovery_contacts AS
-SELECT * FROM public.payment_access_link_contacts;
---> statement-breakpoint
-CREATE OR REPLACE VIEW public.paid_result_recovery_links AS
-SELECT * FROM public.paid_result_access_links;
---> statement-breakpoint
-CREATE OR REPLACE VIEW public.payment_recovery_contact_secrets AS
-SELECT * FROM public.payment_access_link_contact_secrets;

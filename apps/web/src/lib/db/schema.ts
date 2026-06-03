@@ -402,8 +402,8 @@ export const entitlements = pgTable(
   }),
 );
 
-export const paymentRecoveryContacts = pgTable(
-  "payment_recovery_contacts",
+export const paymentAccessLinkContacts = pgTable(
+  "payment_access_link_contacts",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     moduleSlug: text("module_slug").notNull(),
@@ -428,31 +428,31 @@ export const paymentRecoveryContacts = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    resultIdx: index("payment_recovery_contacts_result_idx").on(table.analysisResultId),
-    paymentIntentIdx: index("payment_recovery_contacts_payment_intent_idx").on(
+    resultIdx: index("payment_access_link_contacts_result_idx").on(table.analysisResultId),
+    paymentIntentIdx: index("payment_access_link_contacts_payment_intent_idx").on(
       table.paymentIntentId,
     ),
-    entitlementIdx: index("payment_recovery_contacts_entitlement_idx").on(table.entitlementId),
-    contactLookupIdx: index("payment_recovery_contacts_contact_lookup_idx").on(
+    entitlementIdx: index("payment_access_link_contacts_entitlement_idx").on(table.entitlementId),
+    contactLookupIdx: index("payment_access_link_contacts_contact_lookup_idx").on(
       table.contactType,
       table.contactHash,
     ),
     resultContactActiveIdx: uniqueIndex(
-      "payment_recovery_contacts_result_contact_active_idx",
+      "payment_access_link_contacts_result_contact_active_idx",
     )
       .on(table.analysisResultId, table.contactType, table.contactHash)
       .where(sql`${table.status} <> 'revoked'`),
     paymentContactActiveIdx: uniqueIndex(
-      "payment_recovery_contacts_payment_contact_active_idx",
+      "payment_access_link_contacts_payment_contact_active_idx",
     )
       .on(table.paymentIntentId, table.contactType, table.contactHash)
       .where(sql`${table.paymentIntentId} IS NOT NULL AND ${table.status} <> 'revoked'`),
   }),
 );
-export const paymentAccessLinkContacts = paymentRecoveryContacts;
+export const paymentRecoveryContacts = paymentAccessLinkContacts;
 
-export const paidResultRecoveryLinks = pgTable(
-  "paid_result_recovery_links",
+export const paidResultAccessLinks = pgTable(
+  "paid_result_access_links",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     moduleSlug: text("module_slug").notNull(),
@@ -463,7 +463,7 @@ export const paidResultRecoveryLinks = pgTable(
     entitlementId: uuid("entitlement_id")
       .notNull()
       .references(() => entitlements.id),
-    recoveryContactId: uuid("recovery_contact_id").references(() => paymentRecoveryContacts.id),
+    recoveryContactId: uuid("recovery_contact_id").references(() => paymentAccessLinkContacts.id),
     tokenHash: text("token_hash").notNull(),
     purpose: text("purpose").notNull(),
     channel: text("channel").notNull(),
@@ -481,34 +481,34 @@ export const paidResultRecoveryLinks = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    tokenHashIdx: uniqueIndex("paid_result_recovery_links_token_hash_idx").on(
+    tokenHashIdx: uniqueIndex("paid_result_access_links_token_hash_idx").on(
       table.tokenHash,
     ),
-    entitlementIdx: index("paid_result_recovery_links_entitlement_idx").on(
+    entitlementIdx: index("paid_result_access_links_entitlement_idx").on(
       table.entitlementId,
     ),
-    contactIdx: index("paid_result_recovery_links_contact_idx").on(
+    contactIdx: index("paid_result_access_links_contact_idx").on(
       table.recoveryContactId,
     ),
-    resultModuleIdx: index("paid_result_recovery_links_result_module_idx").on(
+    resultModuleIdx: index("paid_result_access_links_result_module_idx").on(
       table.analysisResultId,
       table.moduleSlug,
     ),
-    activeLookupIdx: index("paid_result_recovery_links_active_lookup_idx").on(
+    activeLookupIdx: index("paid_result_access_links_active_lookup_idx").on(
       table.status,
       table.expiresAt,
     ),
   }),
 );
-export const paidResultAccessLinks = paidResultRecoveryLinks;
+export const paidResultRecoveryLinks = paidResultAccessLinks;
 
-export const paymentRecoveryContactSecrets = pgTable(
-  "payment_recovery_contact_secrets",
+export const paymentAccessLinkContactSecrets = pgTable(
+  "payment_access_link_contact_secrets",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     recoveryContactId: uuid("recovery_contact_id")
       .notNull()
-      .references(() => paymentRecoveryContacts.id),
+      .references(() => paymentAccessLinkContacts.id),
     channel: text("channel").notNull(),
     purpose: text("purpose").notNull(),
     recipientHash: text("recipient_hash").notNull(),
@@ -522,22 +522,22 @@ export const paymentRecoveryContactSecrets = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    recoveryContactIdx: index("payment_recovery_contact_secrets_contact_idx").on(
+    recoveryContactIdx: index("payment_access_link_contact_secrets_contact_idx").on(
       table.recoveryContactId,
     ),
-    recipientLookupIdx: index("payment_recovery_contact_secrets_recipient_lookup_idx").on(
+    recipientLookupIdx: index("payment_access_link_contact_secrets_recipient_lookup_idx").on(
       table.channel,
       table.purpose,
       table.recipientHash,
     ),
     activeContactSecretIdx: uniqueIndex(
-      "payment_recovery_contact_secrets_active_contact_idx",
+      "payment_access_link_contact_secrets_active_contact_idx",
     )
       .on(table.recoveryContactId, table.channel, table.purpose)
       .where(sql`${table.status} = 'active'`),
   }),
 );
-export const paymentAccessLinkContactSecrets = paymentRecoveryContactSecrets;
+export const paymentRecoveryContactSecrets = paymentAccessLinkContactSecrets;
 
 export const contactSubmissions = pgTable(
   "contact_submissions",
@@ -575,8 +575,8 @@ export const analysisResultRelations = relations(analysisResults, ({ one, many }
   unlockIntents: many(unlockIntents),
   paymentIntents: many(paymentIntents),
   entitlements: many(entitlements),
-  paymentRecoveryContacts: many(paymentRecoveryContacts),
-  paidResultRecoveryLinks: many(paidResultRecoveryLinks),
+  paymentAccessLinkContacts: many(paymentAccessLinkContacts),
+  paidResultAccessLinks: many(paidResultAccessLinks),
   contactSubmissions: many(contactSubmissions),
 }));
 
@@ -588,8 +588,8 @@ export const unlockIntentRelations = relations(unlockIntents, ({ one, many }) =>
   paidResults: many(analysisPaidResults),
   paymentIntents: many(paymentIntents),
   entitlements: many(entitlements),
-  paymentRecoveryContacts: many(paymentRecoveryContacts),
-  paidResultRecoveryLinks: many(paidResultRecoveryLinks),
+  paymentAccessLinkContacts: many(paymentAccessLinkContacts),
+  paidResultAccessLinks: many(paidResultAccessLinks),
   contactSubmissions: many(contactSubmissions),
 }));
 
@@ -618,8 +618,8 @@ export const paymentIntentRelations = relations(paymentIntents, ({ one, many }) 
     references: [unlockIntents.id],
   }),
   entitlements: many(entitlements),
-  paymentRecoveryContacts: many(paymentRecoveryContacts),
-  paidResultRecoveryLinks: many(paidResultRecoveryLinks),
+  paymentAccessLinkContacts: many(paymentAccessLinkContacts),
+  paidResultAccessLinks: many(paidResultAccessLinks),
 }));
 
 export const entitlementRelations = relations(entitlements, ({ one, many }) => ({
@@ -643,61 +643,66 @@ export const entitlementRelations = relations(entitlements, ({ one, many }) => (
     fields: [entitlements.generationJobId],
     references: [generationJobs.id],
   }),
-  paymentRecoveryContacts: many(paymentRecoveryContacts),
-  paidResultRecoveryLinks: many(paidResultRecoveryLinks),
+  paymentAccessLinkContacts: many(paymentAccessLinkContacts),
+  paidResultAccessLinks: many(paidResultAccessLinks),
 }));
 
-export const paymentRecoveryContactRelations = relations(
-  paymentRecoveryContacts,
+export const paymentAccessLinkContactRelations = relations(
+  paymentAccessLinkContacts,
   ({ one, many }) => ({
     result: one(analysisResults, {
-      fields: [paymentRecoveryContacts.analysisResultId],
+      fields: [paymentAccessLinkContacts.analysisResultId],
       references: [analysisResults.id],
     }),
     paymentIntent: one(paymentIntents, {
-      fields: [paymentRecoveryContacts.paymentIntentId],
+      fields: [paymentAccessLinkContacts.paymentIntentId],
       references: [paymentIntents.id],
     }),
     entitlement: one(entitlements, {
-      fields: [paymentRecoveryContacts.entitlementId],
+      fields: [paymentAccessLinkContacts.entitlementId],
       references: [entitlements.id],
     }),
-    paidResultRecoveryLinks: many(paidResultRecoveryLinks),
-    paymentRecoveryContactSecrets: many(paymentRecoveryContactSecrets),
+    paidResultAccessLinks: many(paidResultAccessLinks),
+    paymentAccessLinkContactSecrets: many(paymentAccessLinkContactSecrets),
   }),
 );
 
-export const paymentRecoveryContactSecretRelations = relations(
-  paymentRecoveryContactSecrets,
+export const paymentAccessLinkContactSecretRelations = relations(
+  paymentAccessLinkContactSecrets,
   ({ one }) => ({
-    recoveryContact: one(paymentRecoveryContacts, {
-      fields: [paymentRecoveryContactSecrets.recoveryContactId],
-      references: [paymentRecoveryContacts.id],
+    accessLinkContact: one(paymentAccessLinkContacts, {
+      fields: [paymentAccessLinkContactSecrets.recoveryContactId],
+      references: [paymentAccessLinkContacts.id],
     }),
   }),
 );
 
-export const paidResultRecoveryLinkRelations = relations(
-  paidResultRecoveryLinks,
+export const paidResultAccessLinkRelations = relations(
+  paidResultAccessLinks,
   ({ one }) => ({
     result: one(analysisResults, {
-      fields: [paidResultRecoveryLinks.analysisResultId],
+      fields: [paidResultAccessLinks.analysisResultId],
       references: [analysisResults.id],
     }),
     paymentIntent: one(paymentIntents, {
-      fields: [paidResultRecoveryLinks.paymentIntentId],
+      fields: [paidResultAccessLinks.paymentIntentId],
       references: [paymentIntents.id],
     }),
     entitlement: one(entitlements, {
-      fields: [paidResultRecoveryLinks.entitlementId],
+      fields: [paidResultAccessLinks.entitlementId],
       references: [entitlements.id],
     }),
-    recoveryContact: one(paymentRecoveryContacts, {
-      fields: [paidResultRecoveryLinks.recoveryContactId],
-      references: [paymentRecoveryContacts.id],
+    accessLinkContact: one(paymentAccessLinkContacts, {
+      fields: [paidResultAccessLinks.recoveryContactId],
+      references: [paymentAccessLinkContacts.id],
     }),
   }),
 );
+
+export const paymentRecoveryContactRelations = paymentAccessLinkContactRelations;
+export const paymentRecoveryContactSecretRelations =
+  paymentAccessLinkContactSecretRelations;
+export const paidResultRecoveryLinkRelations = paidResultAccessLinkRelations;
 
 export const contactSubmissionRelations = relations(contactSubmissions, ({ one }) => ({
   result: one(analysisResults, {

@@ -24,9 +24,7 @@
     "qa:newebpay:sandbox": "node scripts/newebpay-sandbox-e2e-helper.mjs",
     "qa:result-checkout:no-card": "node scripts/result-checkout-no-card-qa.mjs",
     "qa:access-link:smoke": "node scripts/recovery-link-smoke-qa.mjs",
-    "qa:recovery-link:smoke": "node scripts/recovery-link-smoke-qa.mjs",
     "qa:line-access-link:smoke": "node scripts/line-recovery-smoke-qa.mjs",
-    "qa:line-recovery:smoke": "node scripts/line-recovery-smoke-qa.mjs",
     "ops:paid-result:lookup": "node scripts/support-paid-result-lookup.mjs"
   },
   "dependencies": {

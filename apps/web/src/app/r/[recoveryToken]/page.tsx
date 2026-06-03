@@ -36,7 +36,7 @@ export default async function PaidResultRecoveryLinkPage({ params }: RecoveryLin
   const paidAccess = await resolvePaidEntitlementAccess({
     moduleSlug: recoveryLink.link.moduleSlug,
     entitlement: recoveryLink.entitlement,
-    accessKind: "paid_result_recovery_link",
+    accessKind: "paid_result_access_link",
   });
 
   if (!paidAccess.ok) {

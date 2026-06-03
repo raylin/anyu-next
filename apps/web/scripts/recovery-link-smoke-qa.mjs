@@ -93,13 +93,13 @@ async function verifyDbSchema() {
       to_regclass('public.analysis_results') as analysis_results,
       to_regclass('public.payment_intents') as payment_intents,
       to_regclass('public.entitlements') as entitlements,
-      to_regclass('public.paid_result_recovery_links') as paid_result_recovery_links
+      to_regclass('public.paid_result_access_links') as paid_result_access_links
   `;
   const pass =
     tables?.analysis_results === "analysis_results" &&
     tables?.payment_intents === "payment_intents" &&
     tables?.entitlements === "entitlements" &&
-    tables?.paid_result_recovery_links === "paid_result_recovery_links";
+    tables?.paid_result_access_links === "paid_result_access_links";
 
   record("staging_db_schema_preflight", pass ? "pass" : "blocked", {
     connectionSourceCategory: "local DATABASE_URL",
@@ -108,7 +108,7 @@ async function verifyDbSchema() {
     analysisResultsPresent: tables?.analysis_results === "analysis_results",
     paymentIntentsPresent: tables?.payment_intents === "payment_intents",
     entitlementsPresent: tables?.entitlements === "entitlements",
-    recoveryLinksPresent: tables?.paid_result_recovery_links === "paid_result_recovery_links",
+    accessLinksPresent: tables?.paid_result_access_links === "paid_result_access_links",
   });
 
   return pass;
@@ -418,7 +418,7 @@ async function createOperatorRecoveryLink(input) {
   const expiresAt = getDefaultOperatorRecoveryLinkExpiresAt(now);
   const sql = getSqlClient();
   const [link] = await sql`
-    insert into paid_result_recovery_links (
+    insert into paid_result_access_links (
       module_slug,
       analysis_result_id,
       payment_intent_id,
@@ -487,7 +487,7 @@ async function verifyRecoveryLinkRender(rawToken) {
 }
 
 async function verifyInvalidRecoveryLinkFailsSafely() {
-  const invalidPath = `/r/prl_${"x".repeat(43)}`;
+  const invalidPath = `/r/pal_${"x".repeat(43)}`;
   const response = await fetch(`${baseUrl}${invalidPath}`);
   const html = await response.text();
   const safeFailureSignal =
@@ -506,7 +506,7 @@ async function verifyInvalidRecoveryLinkFailsSafely() {
 async function cleanupOperatorRecoveryLink(linkId) {
   const sql = getSqlClient();
   const result = await sql`
-    delete from paid_result_recovery_links
+    delete from paid_result_access_links
     where id = ${linkId}
       and channel = ${RECOVERY_LINK_CHANNEL}
     returning id

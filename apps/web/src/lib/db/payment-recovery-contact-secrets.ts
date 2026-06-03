@@ -12,8 +12,7 @@ export const PAYMENT_RECOVERY_CONTACT_SECRET_PURPOSES = [
   "recovery_link_delivery",
   "access_link_delivery",
 ] as const;
-// Keep writing the legacy DB value until the table rename migration is applied everywhere.
-export const PAYMENT_ACCESS_LINK_CONTACT_SECRET_PURPOSE = "recovery_link_delivery";
+export const PAYMENT_ACCESS_LINK_CONTACT_SECRET_PURPOSE = "access_link_delivery";
 const PAYMENT_ACCESS_LINK_CONTACT_SECRET_COMPATIBLE_PURPOSES =
   PAYMENT_RECOVERY_CONTACT_SECRET_PURPOSES;
 export const PAYMENT_RECOVERY_CONTACT_SECRET_STATUSES = [

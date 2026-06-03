@@ -34,7 +34,7 @@ export type PaidAccessResolutionState =
 export type PaidAccessResolution =
   | {
       ok: true;
-      accessKind: "paid_access_token" | "paid_result_recovery_link";
+      accessKind: "paid_access_token" | "paid_result_access_link";
       state: Exclude<PaidAccessResolutionState, "not_found">;
       moduleSlug: string;
       entitlement: Entitlement;
@@ -44,7 +44,7 @@ export type PaidAccessResolution =
     }
   | {
       ok: false;
-      accessKind: "paid_access_token" | "paid_result_recovery_link";
+      accessKind: "paid_access_token" | "paid_result_access_link";
       state: "not_found";
       errorCategory: "invalid_token" | "not_found" | "config_unavailable";
     };
@@ -154,7 +154,7 @@ export async function resolvePaidAccessToken(input: {
 export async function resolvePaidEntitlementAccess(input: {
   moduleSlug: string;
   entitlement: Entitlement;
-  accessKind?: "paid_access_token" | "paid_result_recovery_link";
+  accessKind?: "paid_access_token" | "paid_result_access_link";
   now?: Date;
 }): Promise<PaidAccessResolution> {
   const accessKind = input.accessKind ?? "paid_access_token";

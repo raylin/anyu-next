@@ -279,7 +279,7 @@ describe("LINE recovery bind state helpers", () => {
           id: "88888888-8888-4888-8888-888888888888",
           recoveryContactId: RECOVERY_CONTACT_ID,
           channel: "line",
-          purpose: "recovery_link_delivery",
+          purpose: "access_link_delivery",
           status: "active",
           keyVersion: "v1",
           failureCategory: null,
@@ -340,7 +340,7 @@ describe("LINE recovery bind state helpers", () => {
     expect(secretInsert).toMatchObject({
       recoveryContactId: RECOVERY_CONTACT_ID,
       channel: "line",
-      purpose: "recovery_link_delivery",
+      purpose: "access_link_delivery",
       keyVersion: "v1",
       status: "active",
     });

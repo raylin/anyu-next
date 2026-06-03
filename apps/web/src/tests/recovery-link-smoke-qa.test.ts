@@ -48,12 +48,12 @@ describe("recovery link smoke QA helpers", () => {
     );
   });
 
-  it("keeps legacy prl_ detection for compatibility", () => {
+  it("redacts legacy prl_ shaped values without accepting them as access-link tokens", () => {
     const legacyToken = `prl_${"a".repeat(43)}`;
 
-    expect(isRecoveryLinkToken(legacyToken)).toBe(true);
-    expect(hashOperatorRecoveryToken(legacyToken, "test-only-recovery-link-secret")).toMatch(
-      /^[a-f0-9]{64}$/u,
+    expect(isRecoveryLinkToken(legacyToken)).toBe(false);
+    expect(() => hashOperatorRecoveryToken(legacyToken, "test-only-recovery-link-secret")).toThrow(
+      "invalid_recovery_link_token",
     );
     expect(redactRecoveryLinkPath(`/r/${legacyToken}`)).toBe("/r/[REDACTED]");
     expect(containsRecoverySmokeTokenLikeValue(`/r/${legacyToken}`)).toBe(true);
@@ -64,13 +64,13 @@ describe("recovery link smoke QA helpers", () => {
     const expiresAt = getDefaultOperatorRecoveryLinkExpiresAt(now);
 
     expect(RECOVERY_LINK_CHANNEL).toBe("operator_test");
-    expect(RECOVERY_LINK_PURPOSE).toBe("paid_result_recovery");
+    expect(RECOVERY_LINK_PURPOSE).toBe("paid_result_access_link");
     expect(RECOVERY_LINK_TTL_DAYS).toBe(90);
     expect(expiresAt.toISOString()).toBe("2026-08-30T00:00:00.000Z");
   });
 
   it("summarizes recovery-link HTML and detects token leakage", () => {
-    const rawToken = `prl_${"a".repeat(43)}`;
+    const rawToken = `pal_${"a".repeat(43)}`;
     const clean = summarizeRecoveryLinkHtml("完整分析 48 小時", rawToken);
     const leaked = summarizeRecoveryLinkHtml(`完整分析 ${rawToken} pa_secret_value`, rawToken);
 
@@ -103,20 +103,16 @@ describe("recovery link smoke QA helpers", () => {
       "utf8",
     );
 
-    expect(packageJson.scripts["qa:recovery-link:smoke"]).toBe(
-      "node scripts/recovery-link-smoke-qa.mjs",
-    );
+    expect(packageJson.scripts["qa:recovery-link:smoke"]).toBeUndefined();
     expect(packageJson.scripts["qa:access-link:smoke"]).toBe(
       "node scripts/recovery-link-smoke-qa.mjs",
     );
-    expect(packageJson.scripts["qa:line-recovery:smoke"]).toBe(
-      "node scripts/line-recovery-smoke-qa.mjs",
-    );
+    expect(packageJson.scripts["qa:line-recovery:smoke"]).toBeUndefined();
     expect(packageJson.scripts["qa:line-access-link:smoke"]).toBe(
       "node scripts/line-recovery-smoke-qa.mjs",
     );
-    expect(preflight).toContain("recovery_link_smoke");
-    expect(preflight).toContain("line_recovery_smoke");
+    expect(preflight).toContain("access_link_smoke");
+    expect(preflight).toContain("line_access_link_smoke");
     expect(preflight).toContain("support_ops_lookup");
     expect(preflight).toContain("SUPPORT_OPS_DATABASE_URL");
     expect(preflight).toContain("PAYMENT_RECOVERY_LINK_TOKEN_SECRET");

@@ -17,14 +17,14 @@ const MODE_ALIASES = new Map([
   ["result-checkout-no-card", "result_checkout_no_card"],
   ["no_card_result_checkout", "result_checkout_no_card"],
   ["no-card-result-checkout", "result_checkout_no_card"],
-  ["recovery_link_smoke", "recovery_link_smoke"],
-  ["recovery-link-smoke", "recovery_link_smoke"],
-  ["recovery_link_operator_smoke", "recovery_link_smoke"],
-  ["recovery-link-operator-smoke", "recovery_link_smoke"],
-  ["line_recovery_smoke", "line_recovery_smoke"],
-  ["line-recovery-smoke", "line_recovery_smoke"],
-  ["line_recovery_message_smoke", "line_recovery_smoke"],
-  ["line-recovery-message-smoke", "line_recovery_smoke"],
+  ["access_link_smoke", "access_link_smoke"],
+  ["access-link-smoke", "access_link_smoke"],
+  ["access_link_operator_smoke", "access_link_smoke"],
+  ["access-link-operator-smoke", "access_link_smoke"],
+  ["line_access_link_smoke", "line_access_link_smoke"],
+  ["line-access-link-smoke", "line_access_link_smoke"],
+  ["line_access_link_message_smoke", "line_access_link_smoke"],
+  ["line-access-link-message-smoke", "line_access_link_smoke"],
   ["support_ops_lookup", "support_ops_lookup"],
   ["support-ops-lookup", "support_ops_lookup"],
   ["ops_paid_result_lookup", "support_ops_lookup"],
@@ -151,8 +151,8 @@ const MODE_DEFINITIONS = {
     ],
     missingBehavior: "blocks before result-page checkout no-card QA and never falls back to browser-visible fake payment",
   },
-  recovery_link_smoke: {
-    command: "corepack pnpm run qa:recovery-link:smoke",
+  access_link_smoke: {
+    command: "corepack pnpm run qa:access-link:smoke",
     requiredShell: ["OPERATOR_TEST_SECRET"],
     optionalShell: [
       "DATABASE_URL",
@@ -188,8 +188,8 @@ const MODE_DEFINITIONS = {
     ],
     missingBehavior: "runtime mode only needs OPERATOR_TEST_SECRET locally; local-db mode additionally needs DATABASE_URL and PAYMENT_RECOVERY_LINK_TOKEN_SECRET",
   },
-  line_recovery_smoke: {
-    command: "corepack pnpm run qa:line-recovery:smoke",
+  line_access_link_smoke: {
+    command: "corepack pnpm run qa:line-access-link:smoke",
     requiredShell: ["OPERATOR_TEST_SECRET"],
     optionalShell: ["QA_LINE_RECOVERY_BASE_URL", "QA_LINE_RECOVERY_DISABLE_LOCAL_ENV"],
     previewStaging: [

@@ -242,21 +242,17 @@ describe("paid result recovery links", () => {
     expect(resolvePaidResultAccessLinkFromAliasModule).toBe(resolvePaidResultRecoveryLink);
   });
 
-  it("accepts legacy prl_ tokens while treating pal_ as the new generated prefix", () => {
+  it("accepts only pal_ access-link tokens for new clean schema", () => {
     const legacyToken = syntheticRecoveryToken("l");
     const accessToken = syntheticAccessLinkToken("a");
 
     expect(PAID_RESULT_LEGACY_RECOVERY_LINK_TOKEN_PREFIX).toBe("prl_");
     expect(PAID_RESULT_ACCESS_LINK_TOKEN_PREFIX).toBe("pal_");
-    expect(isPaidResultRecoveryToken(legacyToken)).toBe(true);
+    expect(isPaidResultRecoveryToken(legacyToken)).toBe(false);
     expect(isPaidResultRecoveryToken(accessToken)).toBe(true);
-    expect(isPaidResultAccessLinkToken(legacyToken)).toBe(true);
+    expect(isPaidResultAccessLinkToken(legacyToken)).toBe(false);
     expect(isPaidResultAccessLinkToken(accessToken)).toBe(true);
-    expect(hashPaidResultRecoveryToken(legacyToken, TEST_ENV)).toMatch(/^[a-f0-9]{64}$/u);
     expect(hashPaidResultRecoveryToken(accessToken, TEST_ENV)).toMatch(/^[a-f0-9]{64}$/u);
-    expect(hashPaidResultRecoveryToken(accessToken, TEST_ENV)).not.toBe(
-      hashPaidResultRecoveryToken(legacyToken, TEST_ENV),
-    );
     expect(getDefaultPaidResultAccessLinkExpiresAt(NOW)).toEqual(
       getDefaultPaidResultRecoveryLinkExpiresAt(NOW),
     );
@@ -306,14 +302,10 @@ describe("paid result recovery links", () => {
     expect(JSON.stringify(result)).not.toContain(rawToken);
   });
 
-  it("resolves legacy prl_ links for compatibility", async () => {
+  it("rejects legacy prl_ links after clean access-link reset", async () => {
     const rawToken = syntheticRecoveryToken("z");
-    const dbMock = createDbMock({
-      selectRows: [recoveryLinkRecord()],
-      updateRows: [recoveryLinkRecord({ status: "used", usedAt: NOW })],
-    });
+    const dbMock = createDbMock();
     mockRequireDb.mockReturnValue(dbMock.db);
-    mockGetEntitlementById.mockResolvedValue(activeEntitlement());
 
     await expect(
       resolvePaidResultAccessLink({
@@ -322,9 +314,10 @@ describe("paid result recovery links", () => {
         env: TEST_ENV,
       }),
     ).resolves.toMatchObject({
-      ok: true,
-      link: { id: RECOVERY_LINK_ID },
+      ok: false,
+      category: "invalid_token",
     });
+    expect(dbMock.db.select).not.toHaveBeenCalled();
   });
 
   it("fails invalid, expired, revoked, failed, and inactive entitlement links safely", async () => {
@@ -341,7 +334,7 @@ describe("paid result recovery links", () => {
     mockRequireDb.mockReturnValue(expiredDb.db);
     await expect(
       resolvePaidResultRecoveryLink({
-        rawToken: syntheticRecoveryToken("b"),
+        rawToken: syntheticAccessLinkToken("b"),
         now: NOW,
         env: TEST_ENV,
       }),
@@ -353,7 +346,7 @@ describe("paid result recovery links", () => {
     mockRequireDb.mockReturnValue(revokedDb.db);
     await expect(
       resolvePaidResultRecoveryLink({
-        rawToken: syntheticRecoveryToken("c"),
+        rawToken: syntheticAccessLinkToken("c"),
         now: NOW,
         env: TEST_ENV,
       }),
@@ -365,7 +358,7 @@ describe("paid result recovery links", () => {
     mockRequireDb.mockReturnValue(failedDb.db);
     await expect(
       resolvePaidResultRecoveryLink({
-        rawToken: syntheticRecoveryToken("d"),
+        rawToken: syntheticAccessLinkToken("d"),
         now: NOW,
         env: TEST_ENV,
       }),
@@ -378,7 +371,7 @@ describe("paid result recovery links", () => {
     mockGetEntitlementById.mockResolvedValue(activeEntitlement({ status: "refunded" }));
     await expect(
       resolvePaidResultRecoveryLink({
-        rawToken: syntheticRecoveryToken("e"),
+        rawToken: syntheticAccessLinkToken("e"),
         now: NOW,
         env: TEST_ENV,
       }),
@@ -615,7 +608,7 @@ describe("paid result recovery links", () => {
     expect(migration).not.toContain("paid_access_token");
   });
 
-  it("adds a forward access-link table rename migration with recovery compatibility views", () => {
+  it("adds a clean access-link table rename/reset migration without compatibility views", () => {
     const migration = readFileSync(
       path.resolve(process.cwd(), "drizzle/0013_access_link_technical_rename.sql"),
       "utf8",
@@ -628,9 +621,11 @@ describe("paid result recovery links", () => {
     expect(migration).toContain("RENAME TO payment_access_link_contacts");
     expect(migration).toContain("RENAME TO paid_result_access_links");
     expect(migration).toContain("RENAME TO payment_access_link_contact_secrets");
-    expect(migration).toContain("CREATE OR REPLACE VIEW public.payment_recovery_contacts");
-    expect(migration).toContain("CREATE OR REPLACE VIEW public.paid_result_recovery_links");
-    expect(migration).toContain(
+    expect(migration).toContain("TRUNCATE TABLE public.paid_result_recovery_links");
+    expect(migration).toContain("TRUNCATE TABLE public.payment_recovery_contacts");
+    expect(migration).not.toContain("CREATE OR REPLACE VIEW public.payment_recovery_contacts");
+    expect(migration).not.toContain("CREATE OR REPLACE VIEW public.paid_result_recovery_links");
+    expect(migration).not.toContain(
       "CREATE OR REPLACE VIEW public.payment_recovery_contact_secrets",
     );
     expect(migration).not.toContain("DROP TABLE");
@@ -638,7 +633,7 @@ describe("paid result recovery links", () => {
     expect(migration).not.toContain("line_user_id");
     expect(migration).not.toContain("provider_payload");
     expect(schema).toContain(
-      "export const paidResultAccessLinks = paidResultRecoveryLinks;",
+      'export const paidResultAccessLinks = pgTable(\n  "paid_result_access_links"',
     );
   });
 });

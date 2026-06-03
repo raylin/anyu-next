@@ -104,7 +104,7 @@ export async function runOperatorRecoveryLinkSmoke(input: {
       const paidAccess = await resolvePaidEntitlementAccess({
         moduleSlug: recoveryLink.link.moduleSlug,
         entitlement: recoveryLink.entitlement,
-        accessKind: "paid_result_recovery_link",
+        accessKind: "paid_result_access_link",
       });
 
       if (!paidAccess.ok) {
@@ -125,7 +125,7 @@ export async function runOperatorRecoveryLinkSmoke(input: {
         };
       }
 
-      const invalidLink = await resolvePaidResultRecoveryLink({ rawToken: `prl_${"x".repeat(43)}` });
+      const invalidLink = await resolvePaidResultRecoveryLink({ rawToken: `pal_${"x".repeat(43)}` });
 
       if (invalidLink.ok) {
         return {

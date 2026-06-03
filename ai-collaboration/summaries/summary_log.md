@@ -9378,3 +9378,29 @@ Unresolved questions:
 - Decide whether Access Link DB Rename Staging Apply / Smoke v0 should also switch Drizzle `pgTable` names after verifying compatibility views.
 - Decide whether to widen or migrate LINE recipient-secret purpose constraints to include `access_link_delivery`.
 - Decide when to remove compatibility views after staging and production complete the technical rename.
+
+## 2026-06-04 Access Link Clean Schema Rename / Reset v0
+
+### Completed Changes
+
+- saved the Access Link Clean Schema Rename / Reset v0 handoff and report
+- replaced the compatibility-first `0013` migration with a clean reset/rename migration
+- updated active Drizzle schema table names to `payment_access_link_contacts`, `paid_result_access_links`, and `payment_access_link_contact_secrets`
+- kept deprecated recovery helper exports as code-level aliases only
+- removed long-term recovery-named DB compatibility views from the migration
+- changed active access-link token validation to accept `pal_` only
+- removed legacy package script aliases `qa:recovery-link:smoke` and `qa:line-recovery:smoke`
+- updated support lookup SQL, local access-link smoke SQL, and tests to use access-link table names
+- ran aggregate-only staging/production preflight row counts before destructive DB apply
+
+### Learnings
+
+- Owner/operator rows on Preview(staging) are safe to discard under the clarified no-real-users premise.
+- Production recovery/access-link tables currently have zero rows, so the clean reset is operationally low-risk while runtime remains disabled.
+- `/r/` can stay stable while token compatibility is narrowed to `pal_`.
+
+### Unresolved Questions
+
+- Decide when to rename recovery-named env names to access-link names.
+- Decide whether to rename `rlb_` LINE bind state after the clean DB reset.
+- Decide whether to rename recovery-named files/modules after DB/runtime alignment is stable.

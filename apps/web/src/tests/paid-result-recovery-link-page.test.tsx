@@ -56,7 +56,7 @@ const moduleConfig = {
   moduleId: "ai-temperature",
   slug: "ambiguous-temperature",
 };
-const rawRecoveryToken = `prl_${"a".repeat(43)}`;
+const rawRecoveryToken = `pal_${"a".repeat(43)}`;
 const entitlement = {
   id: "entitlement-1",
   moduleSlug: "ambiguous-temperature",
@@ -85,7 +85,7 @@ describe("paid result recovery link page", () => {
     });
     mockResolvePaidEntitlementAccess.mockResolvedValue({
       ok: true,
-      accessKind: "paid_result_recovery_link",
+      accessKind: "paid_result_access_link",
       state: "ready",
       moduleSlug: "ambiguous-temperature",
       entitlement,
@@ -118,7 +118,7 @@ describe("paid result recovery link page", () => {
     expect(mockResolvePaidEntitlementAccess).toHaveBeenCalledWith({
       moduleSlug: "ambiguous-temperature",
       entitlement,
-      accessKind: "paid_result_recovery_link",
+      accessKind: "paid_result_access_link",
     });
     expect(html).not.toContain(rawRecoveryToken);
     expect(html).not.toContain("pa_");
@@ -155,7 +155,7 @@ describe("paid result recovery link page", () => {
     });
     mockResolvePaidEntitlementAccess.mockResolvedValue({
       ok: true,
-      accessKind: "paid_result_recovery_link",
+      accessKind: "paid_result_access_link",
       state: "processing",
       moduleSlug: "ambiguous-temperature",
       entitlement,

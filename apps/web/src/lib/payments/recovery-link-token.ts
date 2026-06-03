@@ -3,15 +3,14 @@ import { createHmac, randomBytes } from "node:crypto";
 export const PAID_RESULT_ACCESS_LINK_TOKEN_PREFIX = "pal_";
 export const PAID_RESULT_LEGACY_RECOVERY_LINK_TOKEN_PREFIX = "prl_";
 export const PAID_RESULT_RECOVERY_LINK_TOKEN_PREFIX =
-  PAID_RESULT_LEGACY_RECOVERY_LINK_TOKEN_PREFIX;
-export const PAID_RESULT_RECOVERY_LINK_PURPOSE = "paid_result_recovery";
+  PAID_RESULT_ACCESS_LINK_TOKEN_PREFIX;
+export const PAID_RESULT_RECOVERY_LINK_PURPOSE = "paid_result_access_link";
 export const PAID_RESULT_RECOVERY_LINK_TTL_DAYS = 90;
 export const PAID_RESULT_ACCESS_LINK_PURPOSE_ALIAS = "paid_result_access_link";
 export const PAID_RESULT_ACCESS_LINK_TTL_DAYS = PAID_RESULT_RECOVERY_LINK_TTL_DAYS;
 
 const RECOVERY_LINK_TOKEN_RANDOM_BYTES = 32;
-const ACCESS_LINK_TOKEN_PATTERN = /^(?:pal|prl)_[A-Za-z0-9_-]{43}$/u;
-const RECOVERY_LINK_HASH_PURPOSE = "paid_result_recovery_link:v1";
+const ACCESS_LINK_TOKEN_PATTERN = /^pal_[A-Za-z0-9_-]{43}$/u;
 const ACCESS_LINK_HASH_PURPOSE = "paid_result_access_link:v1";
 
 export function generatePaidResultRecoveryToken() {
@@ -25,10 +24,7 @@ export function isPaidResultRecoveryToken(value: string) {
 }
 
 export function hasPaidResultRecoveryTokenPrefix(value: string) {
-  return (
-    value.startsWith(PAID_RESULT_ACCESS_LINK_TOKEN_PREFIX) ||
-    value.startsWith(PAID_RESULT_LEGACY_RECOVERY_LINK_TOKEN_PREFIX)
-  );
+  return value.startsWith(PAID_RESULT_ACCESS_LINK_TOKEN_PREFIX);
 }
 
 export function getPaidResultRecoveryLinkTokenSecret(
@@ -49,12 +45,8 @@ export function hashPaidResultRecoveryToken(
     throw new Error("payment_recovery_link_token_secret_missing");
   }
 
-  const hashPurpose = rawToken.startsWith(PAID_RESULT_ACCESS_LINK_TOKEN_PREFIX)
-    ? ACCESS_LINK_HASH_PURPOSE
-    : RECOVERY_LINK_HASH_PURPOSE;
-
   return createHmac("sha256", secret)
-    .update(`${hashPurpose}:${rawToken}`)
+    .update(`${ACCESS_LINK_HASH_PURPOSE}:${rawToken}`)
     .digest("hex");
 }
 

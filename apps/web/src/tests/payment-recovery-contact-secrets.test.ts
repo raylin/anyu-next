@@ -83,7 +83,7 @@ function secretRecord(overrides: Record<string, unknown> = {}) {
     id: SECRET_ID,
     recoveryContactId: RECOVERY_CONTACT_ID,
     channel: "line",
-    purpose: "recovery_link_delivery",
+    purpose: "access_link_delivery",
     recipientHash: hashLineRecoveryRecipient({
       lineUserId: RAW_LINE_USER_ID,
       env: TEST_ENV,
@@ -209,7 +209,7 @@ describe("payment recovery contact secrets", () => {
     expect(dbMock.capture.insertValues).toMatchObject({
       recoveryContactId: RECOVERY_CONTACT_ID,
       channel: "line",
-      purpose: "recovery_link_delivery",
+      purpose: "access_link_delivery",
       keyVersion: "v1",
       status: "active",
       updatedAt: NOW,
@@ -227,7 +227,7 @@ describe("payment recovery contact secrets", () => {
       id: SECRET_ID,
       recoveryContactId: RECOVERY_CONTACT_ID,
       channel: "line",
-      purpose: "recovery_link_delivery",
+      purpose: "access_link_delivery",
       status: "active",
     });
     expect(result).not.toHaveProperty("recipientHash");
@@ -357,7 +357,10 @@ describe("payment recovery contact secrets", () => {
     expect(migration).not.toContain("pcs_");
     expect(migration).not.toContain("prl_");
     expect(schema).toContain(
-      "export const paymentAccessLinkContactSecrets = paymentRecoveryContactSecrets;",
+      'export const paymentAccessLinkContactSecrets = pgTable(\n  "payment_access_link_contact_secrets"',
+    );
+    expect(schema).toContain(
+      "export const paymentRecoveryContactSecrets = paymentAccessLinkContactSecrets;",
     );
   });
 });
