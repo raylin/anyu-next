@@ -9247,3 +9247,30 @@ Unresolved questions:
 
 - Decide whether to align `PAYMENT_RECOVERY_CONTACT_HASH_SECRET` locally for an Email-hash lookup smoke.
 - Decide whether Codex should write local-only `.env.local` support values in future tasks or keep using ephemeral shell env.
+
+## 2026-06-04 Production Payment Config Dry-Run v0
+
+### Completed Changes
+
+- saved the Production Payment Config Dry-Run v0 handoff and report
+- inspected NewebPay config helper, checkout route, NotifyURL route, and feature flags
+- confirmed public production checkout requires both `ENABLE_NEWEBPAY_CHECKOUT` and `ENABLE_PAYMENT_RUNTIME`
+- configured Production Vercel env names for NewebPay production provider settings without printing values
+- set Production `ENABLE_NEWEBPAY_CHECKOUT=false` and `ENABLE_PAYMENT_RUNTIME=false`
+- redeployed the existing latest Production deployment URL rather than deploying the local staging worktree
+- verified Production health is `environment=production`, branch `main`, route bundle `payment-foundation-2026-05-29`
+- verified home/refund/legal public pages return 200
+- verified production checkout and operator routes remain fail-closed
+- ran secret-safe config-shape dry-run without generating provider form, TradeInfo, or TradeSha
+- inventoried Production DB migration gates read-only
+
+### Learnings
+
+- Production NewebPay provider config can be staged safely while keeping checkout/runtime disabled.
+- Production DB is still missing entitlement payment-intent uniqueness and all recovery/access-link tables.
+- Controlled production payment smoke should not proceed until production DB migrations and payment/access-link runtime secrets are explicitly gated.
+
+### Unresolved Questions
+
+- Owner/provider dashboard still needs confirmation that only credit-card one-time payment is enabled and other methods remain disabled.
+- Decide whether Production Runtime Secret Alignment should happen before or as part of Production DB Migration Gate Plan / Apply v0.

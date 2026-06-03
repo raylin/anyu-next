@@ -329,19 +329,19 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant review remains an external payment capability gate, not the commercial growth/ads launch gate. Checkout-start, ReturnURL polling, paid access, and recovery save are staging-verified. Core Engine / Module Grammar v0 defines future module grammar, and LINE is planned as a consent-based owned channel rather than paid report delivery.</p>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant approval is complete and production provider config dry-run passed with checkout still fail-closed. Checkout-start, ReturnURL polling, paid access, and recovery save are staging-verified. Core Engine / Module Grammar v0 defines future module grammar, and LINE is planned as a consent-based owned channel rather than paid report delivery.</p>
       <div class="snapshot" aria-label="Project snapshot">
         <div><span class="label">Last updated</span><span class="value">2026-06-01 13:47 CST</span></div>
         <div><span class="label">Current phase</span><span class="value">Module 01 launch-gate snapshot complete</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Payment capability gate / Module 02 concept decision</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Production DB migration gate / Module 02 concept decision</span></div>
       </div>
     </header>
 
     <section>
       <h2>Launch Gate Model</h2>
       <div class="grid">
-        <article class="card"><span class="badge waiting">Gate 1</span><h3>Payment capability</h3><p>Requires NewebPay formal approval, production credentials, production config dry-run, production DB migration gates, recovery env, rollback/runbook readiness, and one controlled production payment smoke.</p></article>
+        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval is complete and Production provider env dry-run passed with checkout/runtime disabled. Still requires production DB migration gates, payment/access-link runtime secrets, rollback/runbook readiness, and one controlled production credit-card smoke.</p></article>
         <article class="card"><span class="badge waiting">Gate 2</span><h3>Soft public availability</h3><p>Allows low/no-traffic production checkout only after controlled smoke, support/recovery readiness, monitoring, and rollback thresholds. No ads yet.</p></article>
         <article class="card"><span class="badge waiting">Gate 3</span><h3>Growth / ads launch</h3><p>Requires stable soft availability, conversion tracking, support cadence, stop-loss thresholds, channel readiness, and ad budget controls. NewebPay approval does not equal commercial launch.</p></article>
       </div>
@@ -433,9 +433,9 @@
       </div>
       <div class="panel">
         <h2>NewebPay Status</h2>
-        <p>Merchant review supplement submitted. Production public pages are ready. Sandbox shop is created and operating.</p>
+        <p>Merchant review approval is complete. Production public pages are ready. Production NewebPay provider config dry-run passed with runtime still disabled. Sandbox shop remains available for regression QA.</p>
         <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
-        <p>Next action: keep production disabled while waiting for merchant approval. If launch QA is the priority, add a result-page checkout no-card QA bypass; if product exploration is the priority, run Module 02 concept/spec. If approval arrives, run Production Payment Config Dry-Run v0.</p>
+        <p>Next action: keep production disabled and run Production DB Migration Gate Plan / Apply v0 before any controlled production credit-card smoke. If product exploration is the priority, run Module 02 concept/spec.</p>
       </div>
     </section>
 
@@ -519,7 +519,7 @@
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
           <tr><td>P0</td><td>NewebPay approval / credential readiness</td><td>Owner / NewebPay</td><td>Wait for review outcome and confirm formal credential availability.</td></tr>
-          <tr><td>P0</td><td>Production config dry-run</td><td>Ops</td><td>After merchant approval/formal credentials, configure production env with runtime still disabled.</td></tr>
+          <tr><td>P0</td><td>Production DB migration gate</td><td>Ops</td><td>Plan/apply required production DB migrations before controlled production payment smoke.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke</td><td>Owner / ops</td><td>Run one small controlled payment only after launch gate approval.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -550,9 +550,9 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation while approval is pending:</strong> run Support Ops Helper v0 next if operational readiness remains the priority. Module 02 Concept Spec: 職場暗流雷達 v0 can start if product exploration is the priority. Production Payment Config Dry-Run Plan v0 should take over if NewebPay approval arrives.</p>
-        <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production runtime should remain disabled until the launch gate sequence is explicitly approved.</p>
-        <p>If NewebPay merchant review approval/formal credentials are available, switch back to Production Payment Config Dry-Run v0 with runtime still disabled; do not jump directly to public checkout.</p>
+        <p><strong>Current recommendation:</strong> run Production DB Migration Gate Plan / Apply v0 if payment launch readiness is the priority, or Module 02 Concept Spec: 職場暗流雷達 v0 if product exploration is the priority.</p>
+        <p>Fresh sandbox v5 passed after the TradeInfo padding compatibility fix. Production provider config dry-run passed, but production runtime should remain disabled until the DB migration gate and controlled smoke are explicitly approved.</p>
+        <p>Do not jump directly to public checkout: the next payment step is a production DB/access-link gate, then one controlled production credit-card one-time payment smoke.</p>
       </div>
     </section>
 
@@ -644,6 +644,7 @@
           <li><a href="../reports/2026-06-03-support-ops-helper-v0.md">Support Ops Helper v0</a></li>
           <li><a href="../reports/2026-06-03-support-ops-helper-staging-lookup-smoke-v0.md">Support Ops Helper Staging Lookup Smoke v0</a></li>
           <li><a href="../reports/2026-06-04-support-ops-env-alignment-v0.md">Support Ops Env Alignment v0</a></li>
+          <li><a href="../reports/2026-06-04-production-payment-config-dry-run-v0.md">Production Payment Config Dry-Run v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>
