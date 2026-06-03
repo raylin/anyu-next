@@ -8929,3 +8929,29 @@ Unresolved questions:
 - Apply the new table and `LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY` to Preview(staging) next.
 - Integrate `/api/line/recovery/bind-liff` to write encrypted recipient secrets after staging apply.
 - Multi-key rotation and LINE block/unfollow handling remain deferred.
+
+## 2026-06-03 LINE Recovery Recipient Secret Staging Apply v0
+
+### Completed Changes
+
+- saved the LINE Recovery Recipient Secret Staging Apply v0 handoff and report
+- verified Neon target as project `anyu-next`, non-default `preview` branch, database `neondb`
+- confirmed `payment_recovery_contact_secrets` was absent before apply
+- applied `apps/web/drizzle/0011_payment_recovery_contact_secrets.sql` to Preview(staging) only
+- verified table, columns, indexes, FK, check constraints, and zero row count
+- verified Production DB does not have `payment_recovery_contact_secrets`
+- configured branch-scoped Preview(staging) `LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY` without printing values
+- redeployed Preview(staging) and pointed `staging.anyu.tw` to commit `35fdec93998a`
+- reran `qa:recovery-link:smoke` and `qa:result-checkout:no-card`; both passed
+
+### Learnings
+
+- The migration applies cleanly with the established manual Neon preview-branch SQL method.
+- Runtime env is now ready for bind integration to store encrypted LINE recipient secrets.
+- No staging recipient rows were inserted because bind route integration is the correct first writer.
+
+### Unresolved Questions
+
+- Integrate `/api/line/recovery/bind-liff` to call `createOrUpdateLineRecoveryRecipientSecret`.
+- Run owner-assisted LINE bind smoke again after integration and verify sanitized secret row creation.
+- Real LINE push remains gated until recipient secret creation is proven.
