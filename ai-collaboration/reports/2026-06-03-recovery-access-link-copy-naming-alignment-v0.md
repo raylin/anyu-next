@@ -68,15 +68,23 @@
 
 ## Validation
 
+- `cd apps/web && corepack pnpm lint` passed.
 - Targeted copy/template/access-link tests: `corepack pnpm vitest run src/tests/newebpay-checkout-start-page.test.tsx src/tests/paid-result-recovery-save-section.test.tsx src/tests/payment-return-poller.test.tsx src/tests/newebpay-return-page.test.tsx src/tests/email-recovery-link.test.ts src/tests/line-recovery-link.test.ts src/tests/line-recovery-liff-page.test.tsx src/tests/paid-result-recovery-link-page.test.tsx src/tests/result-checkout-no-card-qa.test.ts src/tests/paid-result-delivery-artifact.test.ts` passed.
-- Full validation results are recorded in the final completion summary.
+- `cd apps/web && corepack pnpm test` passed: 78 files, 526 tests.
+- `cd apps/web && corepack pnpm build` passed.
+- `cd apps/web && corepack pnpm run qa:recovery-link:smoke` initially failed before deployment freshness because Preview(staging) still served `a3f4c5587f48` while local QA expected the new copy. After staging served `22b7877d9ea9`, it passed with runtime operator endpoint coverage, invalid-link safety, cleanup by revocation, and production fail-closed checks.
+- `cd apps/web && corepack pnpm run qa:result-checkout:no-card` passed after staging served `22b7877d9ea9`, including updated checkout-start copy detection, fake-paid completion, paid access render, and production fail-closed checks.
+- Docs presence check passed.
+- Dashboard HTML parse passed.
+- `git diff --check` passed.
+- Secret/private scan found only intentional test/documentation token-shape literals and fake test values; no secret values were found.
 
 ## Git Commit
 
-- Commit hash: `pending`
+- Commit hash: `22b7877d9ea9` for implementation; docs-only validation-status follow-up commit pending at time of this report edit.
 - Commit message: `copy: align recovery access link wording`
 
 ## Staging Push
 
-- Push status: `pending`
+- Push status: pushed to `origin/staging`
 - Push command: `git push origin HEAD:staging`
