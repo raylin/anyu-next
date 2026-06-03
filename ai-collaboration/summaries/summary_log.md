@@ -9300,3 +9300,28 @@ Unresolved questions:
 - Decide whether Production Access-Link / Provider Env Gate v0 should configure Email-only first or Email plus LINE.
 - Confirm production NewebPay dashboard payment-method settings before controlled smoke.
 - Decide the exact scope of Controlled Production Payment Smoke v0: payment and web access only, or payment plus access-link provider delivery.
+
+## 2026-06-04 Access Link Technical Naming Alignment Plan v0
+
+### Completed Changes
+
+- saved the Access Link Technical Naming Alignment Plan v0 handoff and report
+- audited active recovery-named DB/schema, migration, server helper, route, script, token, env, test, and documentation surfaces
+- corrected the stale task context: Production DB migration gates are already applied, so both staging and production now have recovery-named schema while production runtime remains disabled
+- recommended target names: `paid_result_access_links`, `payment_access_link_contacts`, and `payment_access_link_contact_secrets`
+- recommended keeping `/r/` stable
+- recommended introducing `pal_` for new paid result access links with `prl_` compatibility, while keeping `rlb_` temporarily for LINE bind state
+- recommended forward rename migration `0013_access_link_technical_rename.sql` instead of rewriting already-applied migrations
+- recommended phased implementation: code/script aliases, token prefix compatibility, DB rename, staging apply/regression, then production rename apply
+
+### Learnings
+
+- Recovery naming is active across schema, helpers, routes, scripts, tests, and docs; a broad replacement would be risky.
+- The most important semantic correction is DB/helper naming, not the public `/r/` route.
+- Because production schema is already applied, rename must be treated as a real forward migration even though production runtime is still disabled and rows are currently empty.
+
+### Unresolved Questions
+
+- Decide whether to include route aliases in the same phase as code aliases or after DB rename.
+- Decide whether new LINE bind state prefix should be `alb_` or `lalb_` when the LINE bind token prefix is eventually renamed.
+- Decide whether controlled production payment smoke should wait for the access-link technical DB rename or proceed after env gates with recovery-named schema.
