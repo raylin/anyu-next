@@ -83,13 +83,23 @@ describe("recovery link smoke QA helpers", () => {
       path.resolve(process.cwd(), "scripts/recovery-link-smoke-qa.mjs"),
       "utf8",
     );
+    const lineScript = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/line-recovery-smoke-qa.mjs"),
+      "utf8",
+    );
 
     expect(packageJson.scripts["qa:recovery-link:smoke"]).toBe(
       "node scripts/recovery-link-smoke-qa.mjs",
     );
+    expect(packageJson.scripts["qa:line-recovery:smoke"]).toBe(
+      "node scripts/line-recovery-smoke-qa.mjs",
+    );
     expect(preflight).toContain("recovery_link_smoke");
+    expect(preflight).toContain("line_recovery_smoke");
     expect(preflight).toContain("PAYMENT_RECOVERY_LINK_TOKEN_SECRET");
     expect(preflight).toContain("ENABLE_OPERATOR_RECOVERY_LINK_SMOKE");
+    expect(preflight).toContain("ENABLE_OPERATOR_LINE_RECOVERY_SMOKE");
+    expect(preflight).toContain("LINE_MESSAGING_CHANNEL_ACCESS_TOKEN");
     expect(script).toContain("/api/operator/recovery-link-smoke");
     expect(script).toContain("not_required_for_runtime_mode");
     expect(script).toContain("operator_recovery_link_create");
@@ -97,5 +107,11 @@ describe("recovery link smoke QA helpers", () => {
     expect(script).toContain("tokenHashPrinted: false");
     expect(script).not.toContain("console.log(rawToken");
     expect(script).not.toContain("console.log(tokenHash");
+    expect(lineScript).toContain("/api/operator/line-recovery-smoke");
+    expect(lineScript).toContain("privateRecipientPrinted: false");
+    expect(lineScript).toContain("privateRecipientHashPrinted: false");
+    expect(lineScript).toContain('/"recipientHash"\\s*:');
+    expect(lineScript).not.toContain("console.log(lineUserId");
+    expect(lineScript).not.toContain("console.log(recipientHash");
   });
 });

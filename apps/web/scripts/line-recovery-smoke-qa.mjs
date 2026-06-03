@@ -51,7 +51,7 @@ function assertSanitizedPayload(payload) {
     /lineUserId/u,
     /idToken/u,
     /encryptedRecipient/u,
-    /recipientHash/u,
+    /"recipientHash"\s*:/u,
     /tokenHash/u,
   ];
 

@@ -9001,3 +9001,30 @@ Unresolved questions:
 
 - Real LINE Messaging API push is still unproven and should be tested in the next gated smoke.
 - Add a reusable sanitized DB verification helper if LINE recovery smoke checks become frequent.
+
+## 2026-06-03 LINE Recovery Link Real Message Smoke v0
+
+### Completed Changes
+
+- saved the LINE Recovery Link Real Message Smoke v0 handoff and report
+- added server-side recipient-secret resolution to LINE recovery link sending
+- added `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` support while preserving `LINE_CHANNEL_ACCESS_TOKEN` compatibility
+- added Preview(staging)-only `POST /api/operator/line-recovery-smoke`
+- added `qa:line-recovery:smoke` and env preflight metadata
+- added tests for LINE recipient resolution, provider alias, operator route gating, sanitized response, and QA command registration
+- deployed Preview(staging) commit `eb832e599c02` and aliased it to `staging.anyu.tw`
+- configured non-secret branch-scoped Preview(staging) flags `ENABLE_OPERATOR_LINE_RECOVERY_SMOKE` and `LINE_RECOVERY_MESSAGE_PROVIDER`
+- ran one real LINE recovery message smoke; owner verified message received, link-only copy, and `/r/` paid-result access
+- verified sanitized DB state: LINE recovery link sent/used, token hash present but not printed, linked contact/context present, recipient secret `last_used_at` present
+- reran recovery-link and no-card staging regressions; both passed
+
+### Learnings
+
+- The encrypted recipient secret design is sufficient for real LINE push without storing raw LINE userId in `payment_recovery_contacts`.
+- Owner clicking the `/r/` link changes the latest LINE recovery link status from `sent` to `used`; `sent_at` remains the right send evidence.
+- The first local line smoke command had a redaction false positive on a safe boolean key name; the real runtime result was safe and the script guard was tightened without re-sending.
+
+### Unresolved Questions
+
+- Define duplicate-send and resend policy before broad production LINE recovery messaging.
+- Decide whether to keep the operator route as QA-only long term or replace it with a more general non-sending verification helper.
