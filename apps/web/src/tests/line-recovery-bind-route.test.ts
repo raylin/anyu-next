@@ -28,6 +28,7 @@ const NOW = new Date("2030-06-01T10:00:00.000Z");
 const TEST_ENV = {
   PAYMENT_RECOVERY_CONTACT_HASH_SECRET: "test-only-recovery-hash-secret",
   PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString("base64url"),
+  LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY: Buffer.alloc(32, 9).toString("base64url"),
 } as NodeJS.ProcessEnv;
 
 function createDbMock(input?: {
@@ -37,8 +38,10 @@ function createDbMock(input?: {
 }) {
   const capture: {
     insertValues?: Record<string, unknown>;
+    insertValuesList: Record<string, unknown>[];
     updateValues?: Record<string, unknown>;
-  } = {};
+  } = { insertValuesList: [] };
+  const insertRows = [...(input?.insertRows ?? [])];
   const selectChain = {
     from: vi.fn(() => selectChain),
     where: vi.fn(() => selectChain),
@@ -47,9 +50,13 @@ function createDbMock(input?: {
   const insertChain = {
     values: vi.fn((values) => {
       capture.insertValues = values;
+      capture.insertValuesList.push(values);
       return insertChain;
     }),
-    returning: vi.fn(async () => input?.insertRows ?? []),
+    returning: vi.fn(async () => {
+      const next = insertRows.shift();
+      return next ? [next] : [];
+    }),
   };
   const updateChain = {
     set: vi.fn((values) => {
@@ -98,6 +105,8 @@ describe("LINE recovery bind LIFF route", () => {
       TEST_ENV.PAYMENT_RECOVERY_CONTACT_HASH_SECRET;
     process.env.PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY =
       TEST_ENV.PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY;
+    process.env.LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY =
+      TEST_ENV.LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY;
     mockIsDbConfigured.mockReturnValue(true);
     mockVerifyLineIdToken.mockResolvedValue({
       ok: true,
@@ -108,7 +117,22 @@ describe("LINE recovery bind LIFF route", () => {
 
   it("binds verified LIFF identity to hash-only LINE recovery contact", async () => {
     const dbMock = createDbMock({
-      insertRows: [{ id: RECOVERY_CONTACT_ID }],
+      insertRows: [
+        { id: RECOVERY_CONTACT_ID },
+        {
+          id: "88888888-8888-4888-8888-888888888888",
+          recoveryContactId: RECOVERY_CONTACT_ID,
+          channel: "line",
+          purpose: "recovery_link_delivery",
+          status: "active",
+          keyVersion: "v1",
+          failureCategory: null,
+          lastUsedAt: null,
+          revokedAt: null,
+          createdAt: NOW,
+          updatedAt: NOW,
+        },
+      ],
     });
     mockRequireDb.mockReturnValue(dbMock.db);
     const state = createState();
@@ -136,7 +160,8 @@ describe("LINE recovery bind LIFF route", () => {
       contactType: "line",
       env: TEST_ENV,
     });
-    expect(dbMock.capture.insertValues).toMatchObject({
+    const [contactInsert, secretInsert] = dbMock.capture.insertValuesList;
+    expect(contactInsert).toMatchObject({
       moduleSlug: "ambiguous-temperature",
       analysisResultId: RESULT_ID,
       paymentIntentId: PAYMENT_INTENT_ID,
@@ -150,9 +175,21 @@ describe("LINE recovery bind LIFF route", () => {
       status: "bound",
       marketingOptInAt: expect.any(Date),
     });
-    expect(dbMock.capture.insertValues).not.toHaveProperty("lineUserId");
-    expect(JSON.stringify(dbMock.capture.insertValues)).not.toContain("verified-line-user");
+    expect(contactInsert).not.toHaveProperty("lineUserId");
+    expect(JSON.stringify(contactInsert)).not.toContain("verified-line-user");
+    expect(secretInsert).toMatchObject({
+      recoveryContactId: RECOVERY_CONTACT_ID,
+      channel: "line",
+      purpose: "recovery_link_delivery",
+      keyVersion: "v1",
+      status: "active",
+    });
+    expect(secretInsert?.encryptedRecipient).toEqual(expect.any(String));
+    expect(secretInsert?.recipientHash).toEqual(expect.any(String));
+    expect(JSON.stringify(secretInsert)).not.toContain("verified-line-user");
     expect(JSON.stringify(data)).not.toContain("verified-line-user");
+    expect(JSON.stringify(data)).not.toContain("encryptedRecipient");
+    expect(JSON.stringify(data)).not.toContain("recipientHash");
     expect(JSON.stringify(data)).not.toContain("line-id-token");
     expect(JSON.stringify(data)).not.toContain("pa_");
     expect(JSON.stringify(data)).not.toContain("pcs_");
@@ -241,7 +278,22 @@ describe("LINE recovery bind LIFF route", () => {
 
   it("keeps marketing opt-in separate when the recovery state does not request it", async () => {
     const dbMock = createDbMock({
-      insertRows: [{ id: RECOVERY_CONTACT_ID }],
+      insertRows: [
+        { id: RECOVERY_CONTACT_ID },
+        {
+          id: "88888888-8888-4888-8888-888888888888",
+          recoveryContactId: RECOVERY_CONTACT_ID,
+          channel: "line",
+          purpose: "recovery_link_delivery",
+          status: "active",
+          keyVersion: "v1",
+          failureCategory: null,
+          lastUsedAt: null,
+          revokedAt: null,
+          createdAt: NOW,
+          updatedAt: NOW,
+        },
+      ],
     });
     mockRequireDb.mockReturnValue(dbMock.db);
     const state = createState({
@@ -259,11 +311,40 @@ describe("LINE recovery bind LIFF route", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(dbMock.capture.insertValues).toMatchObject({
+    expect(dbMock.capture.insertValuesList[0]).toMatchObject({
       source: "paid_ready",
       status: "verified",
       marketingOptInAt: null,
     });
+  });
+
+  it("fails safely when recipient secret storage is unavailable", async () => {
+    delete process.env.LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY;
+    const dbMock = createDbMock({
+      insertRows: [{ id: RECOVERY_CONTACT_ID }],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+    const state = createState();
+    expect(state.ok).toBe(true);
+
+    const response = await POST(
+      recoveryRequest({
+        state: state.ok ? state.token : "",
+        idToken: "line-id-token",
+      }),
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(data).toEqual({
+      ok: false,
+      error: "bind_failed",
+      returnPath: `/m/ambiguous-temperature/result/${RESULT_ID}?lineRecovery=line_error`,
+      bindCategory: "recipient_secret_write_failed",
+    });
+    expect(JSON.stringify(data)).not.toContain("verified-line-user");
+    expect(JSON.stringify(data)).not.toContain("encryptedRecipient");
+    expect(JSON.stringify(data)).not.toContain("recipientHash");
   });
 
   it("fails closed when recovery config or DB config is unavailable", async () => {
@@ -277,6 +358,7 @@ describe("LINE recovery bind LIFF route", () => {
     expect(dbResponse.status).toBe(503);
 
     delete process.env.PAYMENT_RECOVERY_CONTACT_HASH_SECRET;
+    delete process.env.LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY;
     const configResponse = await POST(
       recoveryRequest({
         state: "rlb_missing-config",

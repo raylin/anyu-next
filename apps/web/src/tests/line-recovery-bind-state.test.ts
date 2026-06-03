@@ -32,6 +32,7 @@ const NOW = new Date("2026-06-01T10:00:00.000Z");
 const TEST_ENV = {
   PAYMENT_RECOVERY_CONTACT_HASH_SECRET: "test-only-recovery-hash-secret",
   PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString("base64url"),
+  LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY: Buffer.alloc(32, 9).toString("base64url"),
 } as NodeJS.ProcessEnv;
 
 function createDbMock(input?: {
@@ -41,8 +42,10 @@ function createDbMock(input?: {
 }) {
   const capture: {
     insertValues?: Record<string, unknown>;
+    insertValuesList: Record<string, unknown>[];
     updateValues?: Record<string, unknown>;
-  } = {};
+  } = { insertValuesList: [] };
+  const insertRows = [...(input?.insertRows ?? [])];
   const selectChain = {
     from: vi.fn(() => selectChain),
     where: vi.fn(() => selectChain),
@@ -51,9 +54,13 @@ function createDbMock(input?: {
   const insertChain = {
     values: vi.fn((values) => {
       capture.insertValues = values;
+      capture.insertValuesList.push(values);
       return insertChain;
     }),
-    returning: vi.fn(async () => input?.insertRows ?? []),
+    returning: vi.fn(async () => {
+      const next = insertRows.shift();
+      return next ? [next] : [];
+    }),
   };
   const updateChain = {
     set: vi.fn((values) => {
@@ -266,7 +273,22 @@ describe("LINE recovery bind state helpers", () => {
 
   it("binds a verified LINE user as a hash-only recovery contact", async () => {
     const dbMock = createDbMock({
-      insertRows: [{ id: RECOVERY_CONTACT_ID }],
+      insertRows: [
+        { id: RECOVERY_CONTACT_ID },
+        {
+          id: "88888888-8888-4888-8888-888888888888",
+          recoveryContactId: RECOVERY_CONTACT_ID,
+          channel: "line",
+          purpose: "recovery_link_delivery",
+          status: "active",
+          keyVersion: "v1",
+          failureCategory: null,
+          lastUsedAt: null,
+          revokedAt: null,
+          createdAt: NOW,
+          updatedAt: NOW,
+        },
+      ],
     });
     mockRequireDb.mockReturnValue(dbMock.db);
 
@@ -297,7 +319,8 @@ describe("LINE recovery bind state helpers", () => {
       contactType: "line",
       env: TEST_ENV,
     });
-    expect(dbMock.capture.insertValues).toMatchObject({
+    const [contactInsert, secretInsert] = dbMock.capture.insertValuesList;
+    expect(contactInsert).toMatchObject({
       moduleSlug: "ambiguous-temperature",
       analysisResultId: RESULT_ID,
       paymentIntentId: PAYMENT_INTENT_ID,
@@ -312,8 +335,18 @@ describe("LINE recovery bind state helpers", () => {
       transactionalConsentAt: NOW,
       marketingOptInAt: NOW,
     });
-    expect(dbMock.capture.insertValues).not.toHaveProperty("lineUserId");
-    expect(JSON.stringify(dbMock.capture.insertValues)).not.toContain("line-user-1");
+    expect(contactInsert).not.toHaveProperty("lineUserId");
+    expect(JSON.stringify(contactInsert)).not.toContain("line-user-1");
+    expect(secretInsert).toMatchObject({
+      recoveryContactId: RECOVERY_CONTACT_ID,
+      channel: "line",
+      purpose: "recovery_link_delivery",
+      keyVersion: "v1",
+      status: "active",
+    });
+    expect(secretInsert?.encryptedRecipient).toEqual(expect.any(String));
+    expect(secretInsert?.recipientHash).toEqual(expect.any(String));
+    expect(JSON.stringify(secretInsert)).not.toContain("line-user-1");
   });
 
   it("keeps LINE bind failures sanitized", async () => {
@@ -341,6 +374,24 @@ describe("LINE recovery bind state helpers", () => {
         env: {} as NodeJS.ProcessEnv,
       }),
     ).resolves.toEqual({ ok: false, category: "line_hash_failed" });
+
+    mockRequireDb.mockReturnValue(
+      createDbMock({
+        insertRows: [{ id: RECOVERY_CONTACT_ID }],
+      }).db,
+    );
+    await expect(
+      bindVerifiedLineUserToRecoveryContact({
+        state: resolved.ok ? resolved.payload : ({} as never),
+        lineUserId: "line-user-1",
+        env: {
+          PAYMENT_RECOVERY_CONTACT_HASH_SECRET:
+            TEST_ENV.PAYMENT_RECOVERY_CONTACT_HASH_SECRET,
+          PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY:
+            TEST_ENV.PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY,
+        } as NodeJS.ProcessEnv,
+      }),
+    ).resolves.toEqual({ ok: false, category: "recipient_secret_write_failed" });
   });
 
   it("leaves Email recovery helpers unaffected", async () => {

@@ -8955,3 +8955,25 @@ Unresolved questions:
 - Integrate `/api/line/recovery/bind-liff` to call `createOrUpdateLineRecoveryRecipientSecret`.
 - Run owner-assisted LINE bind smoke again after integration and verify sanitized secret row creation.
 - Real LINE push remains gated until recipient secret creation is proven.
+
+## 2026-06-03 LINE Recovery Bind Recipient Secret Integration v0
+
+### Completed Changes
+
+- saved the LINE Recovery Bind Recipient Secret Integration v0 handoff and report
+- updated `bindVerifiedLineUserToRecoveryContact` so successful LINE bind now creates/updates both hash-only `payment_recovery_contacts` and encrypted `payment_recovery_contact_secrets`
+- added safe `recipient_secret_write_failed` handling when recipient secret storage fails
+- updated LINE bind route/helper tests to assert sanitized response, contact write, recipient secret write, missing key failure, and no raw LINE/idToken/token leakage
+- ran targeted LINE recipient/bind tests, lint, full tests, build, `qa:recovery-link:smoke`, and `qa:result-checkout:no-card`
+
+### Learnings
+
+- The correct success boundary for LINE save is now both contact identity and recipient secret stored.
+- Recipient secret write failure should not be hidden as success because later LINE push would still be impossible.
+- Staging owner-assisted LINE smoke must be repeated after this commit deploys because CLI cannot complete the LINE mobile account action.
+
+### Unresolved Questions
+
+- Deploy integration commit to Preview(staging) and rerun owner-assisted LINE bind smoke.
+- Verify sanitized DB state: hash-only contact plus active recipient secret row, without printing encrypted recipient/hash/raw LINE ID.
+- Real LINE message smoke remains gated until recipient secret creation is proven.

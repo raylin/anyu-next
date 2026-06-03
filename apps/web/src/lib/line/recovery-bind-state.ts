@@ -1,9 +1,11 @@
 import crypto from "node:crypto";
+import { createOrUpdateLineRecoveryRecipientSecret } from "@/lib/db/payment-recovery-contact-secrets";
 import {
   createOrUpdateLineRecoveryContact,
   type PaymentRecoveryContactSource,
 } from "@/lib/db/payment-recovery-contacts";
 import { RecoveryContactConfigError } from "@/lib/payments/recovery-contact-crypto";
+import { LineRecoveryRecipientConfigError } from "@/lib/payments/line-recovery-recipient-crypto";
 
 export const LINE_RECOVERY_BIND_STATE_PREFIX = "rlb_";
 const LINE_RECOVERY_BIND_STATE_TTL_SECONDS = 10 * 60;
@@ -52,7 +54,8 @@ export type LineRecoveryBindResult =
         | "state_invalid"
         | "line_user_missing"
         | "line_hash_failed"
-        | "recovery_contact_write_failed";
+        | "recovery_contact_write_failed"
+        | "recipient_secret_write_failed";
     };
 
 function getRecoveryBindStateSecret(env: NodeJS.ProcessEnv = process.env) {
@@ -306,11 +309,35 @@ export async function bindVerifiedLineUserToRecoveryContact(input: {
       marketingOptInAt: input.state.marketingOptIn ? (input.now ?? new Date()) : null,
       env: input.env,
     });
+    const recoveryContactId = record?.id ?? null;
+
+    if (!recoveryContactId) {
+      return { ok: false, category: "recovery_contact_write_failed" };
+    }
+
+    try {
+      const secret = await createOrUpdateLineRecoveryRecipientSecret({
+        recoveryContactId,
+        lineUserId,
+        env: input.env,
+        now: input.now,
+      });
+
+      if (!secret) {
+        return { ok: false, category: "recipient_secret_write_failed" };
+      }
+    } catch (error) {
+      if (error instanceof LineRecoveryRecipientConfigError) {
+        return { ok: false, category: "recipient_secret_write_failed" };
+      }
+
+      return { ok: false, category: "recipient_secret_write_failed" };
+    }
 
     return {
       ok: true,
       category: "success",
-      recoveryContactId: record?.id ?? null,
+      recoveryContactId,
       status: input.state.entitlementId ? "bound" : "verified",
     };
   } catch (error) {
