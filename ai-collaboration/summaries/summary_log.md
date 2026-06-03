@@ -9194,3 +9194,29 @@ Unresolved questions:
 - Decide whether report references should become stored support lookup keys before production payment launch.
 - Decide whether provider message ID values should ever be shown in redacted support output, or remain presence-only.
 - Decide when to add a gated support resend action on top of the existing server-only resend helper.
+
+## 2026-06-03 Support Ops Helper Staging Lookup Smoke v0
+
+### Completed Changes
+
+- saved the Support Ops Helper Staging Lookup Smoke v0 handoff and report
+- verified local env presence without printing values
+- found local `.env.local` `DATABASE_URL` present but not usable for the Preview(staging) payment schema
+- resolved the Preview(staging) Neon branch through operator tooling and used the connection ephemerally without documenting credentials
+- ran `ops:paid-result:lookup` by result id against a paid staging artifact
+- ran `ops:paid-result:lookup` by internal recovery link id against an active LINE access-link artifact
+- verified sanitized output for payment, entitlement, generation, paid result, LINE saved state, recipient-secret presence, access-link status, provider audit summary, diagnosis categories, and recommended actions
+- verified production target blocks by default
+- reran `qa:recovery-link:smoke` and `qa:result-checkout:no-card`; both passed on Preview(staging) commit `89b875a04dec`
+
+### Learnings
+
+- The helper is useful for both “paid result ready but no saved contact” and “paid result ready with active LINE access link” support cases.
+- Operator/test artifacts may correctly raise `duplicate_payment_possible`; support operators should interpret that with artifact source context.
+- Support lookup sessions need a clearly named Preview(staging) DB target because the current local `DATABASE_URL` is not the staging app schema.
+
+### Unresolved Questions
+
+- Decide whether to add a dedicated staging DB env name for local support sessions.
+- Decide whether Email-hash lookup should be smoke-tested after `PAYMENT_RECOVERY_CONTACT_HASH_SECRET` is available locally.
+- Decide whether report references should become stored lookup keys before production payment launch.
