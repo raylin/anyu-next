@@ -16,8 +16,11 @@ vi.mock("@/lib/db/entitlements", () => ({
 }));
 
 import {
+  createSupportPaidResultAccessLink,
+  findActivePaidResultAccessLinkForContact,
   createPaidResultRecoveryLink,
   getRecentPaidResultRecoveryLinkForContact,
+  isPaidResultRecoveryLinkActive,
   markPaidResultRecoveryLinkFailed,
   markPaidResultRecoveryLinkSent,
   PAID_RESULT_RECOVERY_LINK_CHANNELS,
@@ -54,6 +57,7 @@ function createDbMock(input?: { selectRows?: unknown[]; insertRows?: unknown[]; 
   const selectChain = {
     from: vi.fn(() => selectChain),
     where: vi.fn(() => selectChain),
+    orderBy: vi.fn(() => selectChain),
     limit: vi.fn(async () => input?.selectRows ?? []),
   };
   const insertChain = {
@@ -77,7 +81,7 @@ function createDbMock(input?: { selectRows?: unknown[]; insertRows?: unknown[]; 
     update: vi.fn(() => updateChain),
   };
 
-  return { db, capture };
+  return { db, capture, selectChain };
 }
 
 function activeEntitlement(overrides: Record<string, unknown> = {}) {
@@ -344,7 +348,117 @@ describe("paid result recovery links", () => {
       id: RECOVERY_LINK_ID,
       status: "sent",
     });
+    expect(dbMock.selectChain.orderBy).toHaveBeenCalled();
     expect(JSON.stringify(result)).not.toContain("prl_");
+  });
+
+  it("classifies active access links as multi-use until expiry or revocation", () => {
+    expect(
+      isPaidResultRecoveryLinkActive({
+        link: recoveryLinkRecord({ status: "sent", sentAt: NOW }),
+        now: NOW,
+      }),
+    ).toBe(true);
+    expect(
+      isPaidResultRecoveryLinkActive({
+        link: recoveryLinkRecord({ status: "used", usedAt: NOW }),
+        now: NOW,
+      }),
+    ).toBe(true);
+    expect(
+      isPaidResultRecoveryLinkActive({
+        link: recoveryLinkRecord({ status: "created", sentAt: NOW }),
+        now: NOW,
+      }),
+    ).toBe(true);
+    expect(
+      isPaidResultRecoveryLinkActive({
+        link: recoveryLinkRecord({ status: "created", usedAt: NOW }),
+        now: NOW,
+      }),
+    ).toBe(true);
+    expect(
+      isPaidResultRecoveryLinkActive({
+        link: recoveryLinkRecord({ status: "created" }),
+        now: NOW,
+      }),
+    ).toBe(false);
+    expect(
+      isPaidResultRecoveryLinkActive({
+        link: recoveryLinkRecord({ status: "revoked", revokedAt: NOW }),
+        now: NOW,
+      }),
+    ).toBe(false);
+    expect(
+      isPaidResultRecoveryLinkActive({
+        link: recoveryLinkRecord({ status: "failed" }),
+        now: NOW,
+      }),
+    ).toBe(false);
+    expect(
+      isPaidResultRecoveryLinkActive({
+        link: recoveryLinkRecord({ status: "sent", expiresAt: new Date("2026-05-01") }),
+        now: NOW,
+      }),
+    ).toBe(false);
+  });
+
+  it("finds the latest active access link and skips inactive rows", async () => {
+    const activeUsedLink = recoveryLinkRecord({
+      id: "active-used-link",
+      status: "used",
+      usedAt: NOW,
+      createdAt: new Date("2026-05-30T00:00:00.000Z"),
+    });
+    const dbMock = createDbMock({
+      selectRows: [
+        recoveryLinkRecord({ id: "latest-failed-link", status: "failed" }),
+        recoveryLinkRecord({ id: "latest-revoked-link", status: "revoked", revokedAt: NOW }),
+        activeUsedLink,
+      ],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+
+    const result = await findActivePaidResultAccessLinkForContact({
+      entitlementId: ENTITLEMENT_ID,
+      recoveryContactId: RECOVERY_CONTACT_ID,
+      channel: "email",
+      now: NOW,
+    });
+
+    expect(result).toMatchObject({
+      id: "active-used-link",
+      status: "used",
+    });
+    expect(dbMock.selectChain.orderBy).toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain("prl_");
+  });
+
+  it("creates fresh support-channel access links for verified operator resend contexts", async () => {
+    const dbMock = createDbMock({
+      insertRows: [recoveryLinkRecord({ channel: "support" })],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+
+    const result = await createSupportPaidResultAccessLink({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: RESULT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      entitlementId: ENTITLEMENT_ID,
+      recoveryContactId: RECOVERY_CONTACT_ID,
+      now: NOW,
+      env: TEST_ENV,
+    });
+
+    expect(isPaidResultRecoveryToken(result.rawToken)).toBe(true);
+    expect(dbMock.capture.insertValues).toMatchObject({
+      channel: "support",
+      entitlementId: ENTITLEMENT_ID,
+      recoveryContactId: RECOVERY_CONTACT_ID,
+      status: "created",
+    });
+    expect(dbMock.capture.insertValues).not.toHaveProperty("rawToken");
+    expect(JSON.stringify(result.link)).not.toContain(result.rawToken);
   });
 
   it("adds the paid result recovery links migration and schema seam", () => {

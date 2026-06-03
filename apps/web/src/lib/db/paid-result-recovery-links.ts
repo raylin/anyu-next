@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { requireDb } from "@/lib/db/client";
 import { getEntitlementById, type Entitlement } from "@/lib/db/entitlements";
 import { paidResultRecoveryLinks } from "@/lib/db/schema";
@@ -75,6 +75,26 @@ export function isPaidResultRecoveryLinkExpired(input: {
   now?: Date;
 }) {
   return isPast(input.link.expiresAt, input.now ?? new Date());
+}
+
+export function isPaidResultRecoveryLinkActive(input: {
+  link: Pick<
+    PaidResultRecoveryLink,
+    "expiresAt" | "revokedAt" | "sentAt" | "status" | "usedAt"
+  >;
+  now?: Date;
+}) {
+  const { link } = input;
+
+  if (link.status === "failed" || link.status === "expired" || link.status === "revoked") {
+    return false;
+  }
+
+  if (link.revokedAt || isPaidResultRecoveryLinkExpired({ link, now: input.now })) {
+    return false;
+  }
+
+  return link.status === "sent" || link.status === "used" || Boolean(link.sentAt || link.usedAt);
 }
 
 export async function createPaidResultRecoveryLink(input: {
@@ -227,9 +247,64 @@ export async function getRecentPaidResultRecoveryLinkForContact(input: {
         eq(paidResultRecoveryLinks.purpose, PAID_RESULT_RECOVERY_LINK_PURPOSE),
       ),
     )
+    .orderBy(desc(paidResultRecoveryLinks.createdAt))
     .limit(1);
 
   return record ?? null;
+}
+
+export async function findActivePaidResultAccessLinkForContact(input: {
+  entitlementId: string;
+  recoveryContactId: string;
+  channel: PaidResultRecoveryLinkChannel;
+  now?: Date;
+}) {
+  const db = requireDb();
+  const records = await db
+    .select()
+    .from(paidResultRecoveryLinks)
+    .where(
+      and(
+        eq(paidResultRecoveryLinks.entitlementId, input.entitlementId),
+        eq(paidResultRecoveryLinks.recoveryContactId, input.recoveryContactId),
+        eq(paidResultRecoveryLinks.channel, input.channel),
+        eq(paidResultRecoveryLinks.purpose, PAID_RESULT_RECOVERY_LINK_PURPOSE),
+      ),
+    )
+    .orderBy(desc(paidResultRecoveryLinks.createdAt))
+    .limit(10);
+
+  return (
+    records.find((link) =>
+      isPaidResultRecoveryLinkActive({
+        link,
+        now: input.now,
+      }),
+    ) ?? null
+  );
+}
+
+export async function createSupportPaidResultAccessLink(input: {
+  moduleSlug: string;
+  analysisResultId: string;
+  entitlementId: string;
+  paymentIntentId?: string | null;
+  recoveryContactId?: string | null;
+  expiresAt?: Date;
+  now?: Date;
+  env?: NodeJS.ProcessEnv;
+}) {
+  return createPaidResultRecoveryLink({
+    moduleSlug: input.moduleSlug,
+    analysisResultId: input.analysisResultId,
+    paymentIntentId: input.paymentIntentId,
+    entitlementId: input.entitlementId,
+    recoveryContactId: input.recoveryContactId,
+    channel: "support",
+    expiresAt: input.expiresAt,
+    now: input.now,
+    env: input.env,
+  });
 }
 
 export async function resolvePaidResultRecoveryLink(input: {

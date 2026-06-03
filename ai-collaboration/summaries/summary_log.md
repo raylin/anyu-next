@@ -9097,3 +9097,27 @@ Unresolved questions:
 
 - Decide whether Access Link Resend Helper v0 or Module 02 Concept Spec should be next based on owner priority.
 - Decide whether resend audit data belongs directly on `paid_result_recovery_links` or in a separate access-link send attempts table.
+
+## 2026-06-03 Access Link Resend Helper v0
+
+### Completed Changes
+
+- saved the Access Link Resend Helper v0 handoff and report
+- added active access-link semantics for `paid_result_recovery_links`
+- updated Email and LINE automatic send helpers to dedupe active sent or used links by entitlement/contact/channel
+- added deterministic newest-`created_at` ordering for recent paid result recovery link lookup
+- added `findActivePaidResultAccessLinkForContact` for automatic send dedupe
+- added `createSupportPaidResultAccessLink` as a server-only support/operator resend helper that creates fresh `support` channel links without adding public UI or public routes
+- added targeted tests for active link policy, used-link dedupe, ordering, and support-channel helper behavior
+- updated dashboard recommendation toward provider send-attempt audit or support ops helper after resend helper readiness
+
+### Learnings
+
+- `/r/` resolver marking a link as `used` must not make the link inactive; access links are multi-use until expiry or revocation.
+- Automatic send dedupe needs to search recent rows for an active link rather than trusting the latest arbitrary row.
+- Support/operator resend can be introduced safely as a server-only creation helper before adding any public or operator UI.
+
+### Unresolved Questions
+
+- Decide whether provider send audit data belongs on `paid_result_recovery_links` or a separate send-attempt table.
+- Define the support/operator verification flow before exposing a gated resend caller.

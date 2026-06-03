@@ -6,8 +6,7 @@ import {
 import type { PaymentRecoveryContact } from "@/lib/db/payment-recovery-contacts";
 import {
   createPaidResultRecoveryLink,
-  getRecentPaidResultRecoveryLinkForContact,
-  isPaidResultRecoveryLinkExpired,
+  findActivePaidResultAccessLinkForContact,
   markPaidResultRecoveryLinkFailed,
   markPaidResultRecoveryLinkSent,
 } from "@/lib/db/paid-result-recovery-links";
@@ -217,13 +216,13 @@ export async function createAndSendLineRecoveryLink(input: {
     };
   }
 
-  const existing = await getRecentPaidResultRecoveryLinkForContact({
+  const existingActiveLink = await findActivePaidResultAccessLinkForContact({
     entitlementId: input.entitlementId,
     recoveryContactId: input.recoveryContact.id,
     channel: "line",
   });
 
-  if (existing?.status === "sent" && !isPaidResultRecoveryLinkExpired({ link: existing })) {
+  if (existingActiveLink) {
     return {
       ok: true as const,
       status: "duplicate" as const,

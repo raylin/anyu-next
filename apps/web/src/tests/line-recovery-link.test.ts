@@ -2,26 +2,23 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockCreatePaidResultRecoveryLink,
-  mockGetRecentPaidResultRecoveryLinkForContact,
+  mockFindActivePaidResultAccessLinkForContact,
   mockMarkPaidResultRecoveryLinkFailed,
   mockMarkPaidResultRecoveryLinkSent,
-  mockIsPaidResultRecoveryLinkExpired,
   mockResolveLineRecoveryRecipientForSending,
   mockMarkLineRecoveryRecipientSecretUsed,
 } = vi.hoisted(() => ({
   mockCreatePaidResultRecoveryLink: vi.fn(),
-  mockGetRecentPaidResultRecoveryLinkForContact: vi.fn(),
+  mockFindActivePaidResultAccessLinkForContact: vi.fn(),
   mockMarkPaidResultRecoveryLinkFailed: vi.fn(),
   mockMarkPaidResultRecoveryLinkSent: vi.fn(),
-  mockIsPaidResultRecoveryLinkExpired: vi.fn(),
   mockResolveLineRecoveryRecipientForSending: vi.fn(),
   mockMarkLineRecoveryRecipientSecretUsed: vi.fn(),
 }));
 
 vi.mock("@/lib/db/paid-result-recovery-links", () => ({
   createPaidResultRecoveryLink: mockCreatePaidResultRecoveryLink,
-  getRecentPaidResultRecoveryLinkForContact: mockGetRecentPaidResultRecoveryLinkForContact,
-  isPaidResultRecoveryLinkExpired: mockIsPaidResultRecoveryLinkExpired,
+  findActivePaidResultAccessLinkForContact: mockFindActivePaidResultAccessLinkForContact,
   markPaidResultRecoveryLinkFailed: mockMarkPaidResultRecoveryLinkFailed,
   markPaidResultRecoveryLinkSent: mockMarkPaidResultRecoveryLinkSent,
 }));
@@ -65,8 +62,7 @@ function lineContact(overrides: Record<string, unknown> = {}) {
 describe("LINE recovery link sending", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetRecentPaidResultRecoveryLinkForContact.mockResolvedValue(null);
-    mockIsPaidResultRecoveryLinkExpired.mockReturnValue(false);
+    mockFindActivePaidResultAccessLinkForContact.mockResolvedValue(null);
     mockCreatePaidResultRecoveryLink.mockResolvedValue({
       rawToken: RAW_TOKEN,
       link: { id: "recovery-link-1", status: "created" },
@@ -304,10 +300,36 @@ describe("LINE recovery link sending", () => {
   });
 
   it("prevents duplicate LINE sends when a sent link already exists", async () => {
-    mockGetRecentPaidResultRecoveryLinkForContact.mockResolvedValue({
+    mockFindActivePaidResultAccessLinkForContact.mockResolvedValue({
       id: "existing-link-1",
       status: "sent",
       expiresAt: new Date("2026-09-01T00:00:00.000Z"),
+    });
+
+    const result = await createAndSendLineRecoveryLink({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: "result-1",
+      paymentIntentId: "payment-1",
+      entitlementId: "entitlement-1",
+      recoveryContact: lineContact() as never,
+      lineRecipientId: "line-recipient-test-only",
+      env: { NEXT_PUBLIC_APP_URL: "https://staging.anyu.tw" } as NodeJS.ProcessEnv,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      status: "duplicate",
+      recoveryLinkCreated: false,
+      lineSent: false,
+    });
+    expect(mockCreatePaidResultRecoveryLink).not.toHaveBeenCalled();
+  });
+
+  it("prevents duplicate LINE sends when a used active link already exists", async () => {
+    mockFindActivePaidResultAccessLinkForContact.mockResolvedValue({
+      id: "existing-link-1",
+      status: "used",
+      usedAt: new Date("2026-06-01T00:00:00.000Z"),
     });
 
     const result = await createAndSendLineRecoveryLink({
