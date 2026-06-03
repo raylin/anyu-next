@@ -9074,3 +9074,26 @@ Unresolved questions:
 
 - Decide when to introduce `reportAccessLink` / `paidResultAccessLink` aliases in code and docs before any broad internal rename.
 - Define duplicate/resend policy before production provider messaging is enabled broadly.
+
+## 2026-06-03 Duplicate / Resend Policy Plan v0
+
+### Completed Changes
+
+- saved the Duplicate / Resend Policy Plan v0 handoff and report
+- audited current Email/LINE access-link creation and send paths
+- documented current `paid_result_recovery_links` status behavior: `created`, `sent`, `used`, `expired`, `revoked`, `failed`
+- documented that automatic Email/LINE sends currently dedupe only an existing non-expired `status=sent` link for the same entitlement/contact/channel
+- recommended v0 policy: automatic sends dedupe active sent/used links; support/operator resend creates a fresh support-channel link after verification; Email and LINE remain channel-independent; public self-service resend is deferred
+- documented data model gaps: provider message id, send attempt count, last send attempt, failure category, resend chain/supersession, and operator audit note
+- updated dashboard next recommendation toward Access Link Resend Helper v0 if support readiness is prioritized
+
+### Learnings
+
+- Current duplicate behavior is safe enough to prevent basic repeated automatic sends after provider success, but it does not treat `used` links as active even though links are multi-use until expiry/revocation.
+- Support/operator resend should not reuse smoke endpoints; it needs a separate helper with sanitized output, verification, and rate limits.
+- Provider success means accepted-by-provider, not inbox/LINE delivery, so support tooling needs audit fields before broader launch.
+
+### Unresolved Questions
+
+- Decide whether Access Link Resend Helper v0 or Module 02 Concept Spec should be next based on owner priority.
+- Decide whether resend audit data belongs directly on `paid_result_recovery_links` or in a separate access-link send attempts table.
