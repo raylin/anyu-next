@@ -9145,3 +9145,27 @@ Unresolved questions:
 
 - Apply `0012_paid_result_recovery_link_send_audit.sql` to Preview(staging) before runtime smoke can persist audit values.
 - Decide later whether support tooling needs a dedicated send-attempt history table.
+
+## 2026-06-03 Provider Send Audit Staging Apply v0
+
+### Completed Changes
+
+- saved the Provider Send Audit Staging Apply v0 handoff and report
+- verified Neon project `anyu-next`, Preview(staging) branch `br-fragrant-union-aoh4udf1`, and production branch `br-square-star-aosaqd0q`
+- preflighted `paid_result_recovery_links` on Preview(staging): table existed, 29 rows, audit columns absent
+- applied `apps/web/drizzle/0012_paid_result_recovery_link_send_audit.sql` to Preview(staging) only
+- verified audit columns exist with safe defaults/nullability and existing rows remain readable
+- verified production DB was not migrated and does not have the recovery-link table
+- ran `qa:recovery-link:smoke` and `qa:result-checkout:no-card`; both passed on staging commit `dc854f7e3493`
+- confirmed no Email/LINE was sent and production fail-closed checks passed
+
+### Learnings
+
+- The provider audit migration is compatible with existing staging rows; `send_attempt_count` defaults to 0 for all existing links.
+- No-send regression smokes keep provider audit fields empty, which is expected and safe.
+- Preview(staging) is now ready to persist provider message id/status/failure metadata on future real Email/LINE sends.
+
+### Unresolved Questions
+
+- Decide whether to run a controlled provider audit real-send smoke later or wait until the next real Email/LINE validation task.
+- Support Ops Helper v0 still needs verification rules and sanitized operator behavior.
