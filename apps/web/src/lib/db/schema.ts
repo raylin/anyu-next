@@ -495,6 +495,42 @@ export const paidResultRecoveryLinks = pgTable(
   }),
 );
 
+export const paymentRecoveryContactSecrets = pgTable(
+  "payment_recovery_contact_secrets",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    recoveryContactId: uuid("recovery_contact_id")
+      .notNull()
+      .references(() => paymentRecoveryContacts.id),
+    channel: text("channel").notNull(),
+    purpose: text("purpose").notNull(),
+    recipientHash: text("recipient_hash").notNull(),
+    encryptedRecipient: text("encrypted_recipient").notNull(),
+    keyVersion: text("key_version").default("v1").notNull(),
+    status: text("status").default("active").notNull(),
+    failureCategory: text("failure_category"),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    recoveryContactIdx: index("payment_recovery_contact_secrets_contact_idx").on(
+      table.recoveryContactId,
+    ),
+    recipientLookupIdx: index("payment_recovery_contact_secrets_recipient_lookup_idx").on(
+      table.channel,
+      table.purpose,
+      table.recipientHash,
+    ),
+    activeContactSecretIdx: uniqueIndex(
+      "payment_recovery_contact_secrets_active_contact_idx",
+    )
+      .on(table.recoveryContactId, table.channel, table.purpose)
+      .where(sql`${table.status} = 'active'`),
+  }),
+);
+
 export const contactSubmissions = pgTable(
   "contact_submissions",
   {
@@ -619,6 +655,17 @@ export const paymentRecoveryContactRelations = relations(
       references: [entitlements.id],
     }),
     paidResultRecoveryLinks: many(paidResultRecoveryLinks),
+    paymentRecoveryContactSecrets: many(paymentRecoveryContactSecrets),
+  }),
+);
+
+export const paymentRecoveryContactSecretRelations = relations(
+  paymentRecoveryContactSecrets,
+  ({ one }) => ({
+    recoveryContact: one(paymentRecoveryContacts, {
+      fields: [paymentRecoveryContactSecrets.recoveryContactId],
+      references: [paymentRecoveryContacts.id],
+    }),
   }),
 );
 

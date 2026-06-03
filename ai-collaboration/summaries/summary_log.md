@@ -8905,3 +8905,27 @@ Unresolved questions:
 - Confirm exact key format during implementation, likely matching existing 32-byte base64url recovery crypto conventions.
 - Decide whether v0 should include key versioning or defer it until production scale.
 - Plan LINE block/unfollow handling before broad production LINE message sending.
+
+## 2026-06-03 LINE Recovery Recipient Secret Schema v0
+
+### Completed Changes
+
+- saved the LINE Recovery Recipient Secret Schema v0 handoff and report
+- added `apps/web/drizzle/0011_payment_recovery_contact_secrets.sql`
+- added Drizzle schema for `payment_recovery_contact_secrets`
+- added separate LINE recipient crypto helper using `LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY`
+- added server-only DB helpers to create/update, resolve, mark used, revoke, and mark failed encrypted LINE recipient secrets
+- added tests for encryption, deterministic recipient hashing, fail-closed key behavior, sanitized returns, raw token rejection, revocation/failure handling, and migration seam
+- updated `.env.example` with the new env name only
+
+### Learnings
+
+- The recipient encryption key format now follows the existing 32-byte base64url/base64/hex convention.
+- `key_version` is cheap to include now and avoids forcing a future schema change for first rotation planning.
+- Bind route integration should wait until the staging DB migration is applied; otherwise the current staging-proven LINE bind path could fail on a missing table.
+
+### Unresolved Questions
+
+- Apply the new table and `LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY` to Preview(staging) next.
+- Integrate `/api/line/recovery/bind-liff` to write encrypted recipient secrets after staging apply.
+- Multi-key rotation and LINE block/unfollow handling remain deferred.
