@@ -1,28 +1,56 @@
-DROP VIEW IF EXISTS public.payment_recovery_contact_secrets;
---> statement-breakpoint
-DROP VIEW IF EXISTS public.paid_result_recovery_links;
---> statement-breakpoint
-DROP VIEW IF EXISTS public.payment_recovery_contacts;
---> statement-breakpoint
 DO $$
 BEGIN
-  IF to_regclass('public.paid_result_recovery_links') IS NOT NULL THEN
-    EXECUTE 'TRUNCATE TABLE public.paid_result_recovery_links';
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'payment_recovery_contact_secrets'
+      AND c.relkind IN ('v', 'm')
+  ) THEN
+    DROP VIEW public.payment_recovery_contact_secrets;
   END IF;
-  IF to_regclass('public.payment_recovery_contact_secrets') IS NOT NULL THEN
-    EXECUTE 'TRUNCATE TABLE public.payment_recovery_contact_secrets';
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'paid_result_recovery_links'
+      AND c.relkind IN ('v', 'm')
+  ) THEN
+    DROP VIEW public.paid_result_recovery_links;
   END IF;
-  IF to_regclass('public.payment_recovery_contacts') IS NOT NULL THEN
-    EXECUTE 'TRUNCATE TABLE public.payment_recovery_contacts';
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'payment_recovery_contacts'
+      AND c.relkind IN ('v', 'm')
+  ) THEN
+    DROP VIEW public.payment_recovery_contacts;
   END IF;
-  IF to_regclass('public.paid_result_access_links') IS NOT NULL THEN
-    EXECUTE 'TRUNCATE TABLE public.paid_result_access_links';
-  END IF;
-  IF to_regclass('public.payment_access_link_contact_secrets') IS NOT NULL THEN
-    EXECUTE 'TRUNCATE TABLE public.payment_access_link_contact_secrets';
-  END IF;
-  IF to_regclass('public.payment_access_link_contacts') IS NOT NULL THEN
-    EXECUTE 'TRUNCATE TABLE public.payment_access_link_contacts';
+END $$;
+--> statement-breakpoint
+DO $$
+DECLARE
+  reset_tables text[];
+BEGIN
+  SELECT array_agg(format('%I.%I', schemaname, tablename))
+  INTO reset_tables
+  FROM pg_tables
+  WHERE schemaname = 'public'
+    AND tablename IN (
+      'paid_result_recovery_links',
+      'payment_recovery_contact_secrets',
+      'payment_recovery_contacts',
+      'paid_result_access_links',
+      'payment_access_link_contact_secrets',
+      'payment_access_link_contacts'
+    );
+
+  IF reset_tables IS NOT NULL THEN
+    EXECUTE 'TRUNCATE TABLE ' || array_to_string(reset_tables, ', ') || ' CASCADE';
   END IF;
 END $$;
 --> statement-breakpoint

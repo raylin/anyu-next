@@ -71,7 +71,42 @@ No private row values were printed.
 
 ## DB Apply Status
 
-Pending at initial code push. This report will be updated after staging/production DB apply and smoke verification.
+Applied.
+
+Preview(staging):
+
+- target verified as Neon Preview(staging) branch before apply
+- destructive reset/rename migration applied after owner confirmation
+- final table names verified:
+  - `payment_access_link_contacts`
+  - `paid_result_access_links`
+  - `payment_access_link_contact_secrets`
+- old recovery-named tables/views verified absent:
+  - `payment_recovery_contacts`
+  - `paid_result_recovery_links`
+  - `payment_recovery_contact_secrets`
+- final row state after smoke:
+  - access-link contacts: 0
+  - access links: 1 operator-smoke row
+  - access-link contact secrets: 0
+
+Production:
+
+- target verified as Neon Production branch before apply
+- preflight row counts were all zero
+- destructive reset/rename migration applied after owner confirmation
+- final table names verified:
+  - `payment_access_link_contacts`
+  - `paid_result_access_links`
+  - `payment_access_link_contact_secrets`
+- old recovery-named tables/views verified absent
+- final row counts remain zero across the three access-link tables
+- production runtime stayed disabled; no payment, Email, or LINE message was sent
+
+The migration file was corrected during staging apply to:
+
+- only drop old recovery names when they are views/materialized views, not tables
+- truncate whichever recovery/access-link tables exist with `CASCADE` so FK order cannot block the reset
 
 ## Validation
 
@@ -83,13 +118,35 @@ Passed before DB apply:
 - `cd apps/web && corepack pnpm build`
 - `cd apps/web && corepack pnpm exec drizzle-kit check`
 
+Passed after Preview(staging) apply:
+
+- `cd apps/web && corepack pnpm run qa:access-link:smoke`
+- `cd apps/web && corepack pnpm run qa:result-checkout:no-card`
+
+Safely blocked after reset:
+
+- `cd apps/web && corepack pnpm run qa:line-access-link:smoke`
+  - blocked with `recipient_secret_missing`
+  - expected after destructive reset because the prior owner/test LINE recipient secret was deleted
+  - no LINE message was sent
+
+Production safety verified after Production apply:
+
+- production health reports `environment=production`
+- production fake-paid operator POST returns `not_found`
+- production checkout path returns 404
+- public `/`, `/refund`, and `/legal` return 200
+- no production payment runtime was enabled
+
 ## Blockers
 
-- None for code/migration preparation.
+- None for clean schema reset.
+- LINE real-message smoke requires a fresh owner-assisted LINE bind to recreate an encrypted recipient secret after the intentional reset.
 
 ## Uncertainties
 
-- Staging deployment and DB migration must be coordinated because there are intentionally no compatibility views.
+- Env-name alignment is deferred. Existing production/staging configured env names still use recovery terminology.
+- `rlb_` LINE bind state prefix remains intentionally unchanged for now.
 
 ## Tech Debt Review
 
@@ -100,5 +157,6 @@ Passed before DB apply:
 
 ## Suggested Next Steps
 
-- Apply clean DB rename/reset to Preview(staging), verify, then apply to Production while runtime remains disabled.
-- After clean DB apply passes, run Production Access-Link / Provider Env Gate v0 or controlled production smoke planning.
+- Run a fresh owner-assisted LINE bind if another LINE real-message access-link smoke is required after reset.
+- Proceed to Production Access-Link / Provider Env Gate v0 while production runtime remains disabled.
+- Later, plan env-name and file/module cleanup once the production controlled smoke path is stable.

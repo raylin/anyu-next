@@ -9392,15 +9392,25 @@ Unresolved questions:
 - removed legacy package script aliases `qa:recovery-link:smoke` and `qa:line-recovery:smoke`
 - updated support lookup SQL, local access-link smoke SQL, and tests to use access-link table names
 - ran aggregate-only staging/production preflight row counts before destructive DB apply
+- applied the clean reset/rename migration to Preview(staging) after owner confirmation
+- verified Preview(staging) now has access-link table names only, with old recovery-named tables/views absent
+- ran `qa:access-link:smoke` and `qa:result-checkout:no-card` successfully after Preview(staging) apply
+- confirmed `qa:line-access-link:smoke` is safely blocked with `recipient_secret_missing` after reset because the prior owner/test LINE recipient secret was intentionally deleted
+- applied the clean reset/rename migration to Production after zero-row preflight and owner confirmation
+- verified Production now has access-link table names only, old recovery-named tables/views absent, and zero access-link rows
+- confirmed Production runtime remains disabled/fail-closed and public pages remain live
 
 ### Learnings
 
 - Owner/operator rows on Preview(staging) are safe to discard under the clarified no-real-users premise.
 - Production recovery/access-link tables currently have zero rows, so the clean reset is operationally low-risk while runtime remains disabled.
 - `/r/` can stay stable while token compatibility is narrowed to `pal_`.
+- Destructive reset migration needs guarded view drops and FK-safe `TRUNCATE ... CASCADE`; direct `DROP VIEW IF EXISTS` on an existing table and FK-ordered standalone truncates both fail safely before changes.
+- After deleting access-link contact secrets, LINE real-message smoke requires a fresh LINE bind before it can prove sending again.
 
 ### Unresolved Questions
 
 - Decide when to rename recovery-named env names to access-link names.
 - Decide whether to rename `rlb_` LINE bind state after the clean DB reset.
 - Decide whether to rename recovery-named files/modules after DB/runtime alignment is stable.
+- Decide whether to run a fresh owner-assisted LINE bind before Production Access-Link / Provider Env Gate v0 or defer it until the next LINE message smoke.
