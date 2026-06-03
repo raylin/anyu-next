@@ -621,8 +621,10 @@ describe("paid result recovery links", () => {
     expect(migration).toContain("RENAME TO payment_access_link_contacts");
     expect(migration).toContain("RENAME TO paid_result_access_links");
     expect(migration).toContain("RENAME TO payment_access_link_contact_secrets");
-    expect(migration).toContain("TRUNCATE TABLE public.paid_result_recovery_links");
-    expect(migration).toContain("TRUNCATE TABLE public.payment_recovery_contacts");
+    expect(migration).toContain("TRUNCATE TABLE ' || array_to_string(reset_tables, ', ') || ' CASCADE");
+    expect(migration).toContain("'paid_result_recovery_links'");
+    expect(migration).toContain("'payment_recovery_contacts'");
+    expect(migration).toContain("'paid_result_access_links'");
     expect(migration).not.toContain("CREATE OR REPLACE VIEW public.payment_recovery_contacts");
     expect(migration).not.toContain("CREATE OR REPLACE VIEW public.paid_result_recovery_links");
     expect(migration).not.toContain(

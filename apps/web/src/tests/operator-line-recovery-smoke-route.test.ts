@@ -183,4 +183,30 @@ describe("operator LINE recovery smoke route", () => {
     expect(serialized).not.toContain("pa_");
     expect(serialized).not.toContain("pcs_");
   });
+
+  it("passes when processor reports already completed and the LINE access link is sent", async () => {
+    mockProcessPaidAnalysisJobById.mockResolvedValue({
+      ok: true,
+      category: "already_completed",
+      jobId: "job-1",
+    });
+
+    const response = await POST(request({ secret: "operator-secret" }));
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toMatchObject({
+      ok: true,
+      processorCategory: "already_completed",
+      processorJobResult: null,
+      lineMessageSent: true,
+      recoveryLinkCreated: true,
+      recoveryLinkStatus: "sent",
+      rawRecoveryTokenReturned: false,
+      tokenHashReturned: false,
+      rawLineUserIdReturned: false,
+      privateRecipientReturned: false,
+      privateRecipientHashReturned: false,
+    });
+  });
 });

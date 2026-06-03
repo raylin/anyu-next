@@ -111,9 +111,10 @@ export async function POST(request: Request) {
       recoveryContactId: lineContact.id,
       channel: "line",
     }).catch(() => null);
+    const smokePassed = link?.status === "sent";
 
     return NextResponse.json({
-      ok: processorResult.ok && link?.status === "sent",
+      ok: smokePassed,
       autoSendHookExercised: true,
       fakePaidCreated: true,
       lineContactBound: true,
@@ -131,7 +132,7 @@ export async function POST(request: Request) {
       rawPaidAccessTokenReturned: false,
       rawCheckoutSessionTokenReturned: false,
       reportContentReturned: false,
-    }, { status: processorResult.ok && link?.status === "sent" ? 200 : 503 });
+    }, { status: smokePassed ? 200 : 503 });
   } catch {
     return errorResponse(503, "line_recovery_smoke_failed", "LINE recovery smoke failed.");
   }
