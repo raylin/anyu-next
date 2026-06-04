@@ -9662,3 +9662,30 @@ Unresolved questions:
 - Reconcile the canonical Production Vercel project/env/deploy target before retrying v1.
 - Update production preflight to verify the same Vercel project target used by `vercel deploy`.
 - Decide whether to keep using local CLI deploys or switch to git-integrated production deployments for clearer commit metadata.
+
+## 2026-06-04 Production Vercel Project / Env Source-of-Truth Reconciliation v0
+
+### Completed Changes
+
+- saved the Production Vercel Project / Env Source-of-Truth Reconciliation v0 handoff and report
+- inspected local Vercel link metadata
+- confirmed repo root is linked to Vercel project `anyu-next` with root directory `apps/web`
+- confirmed `apps/web` is linked to a separate Vercel project `web`
+- confirmed root project `anyu-next` has the required Production env names
+- confirmed app-directory project `web` has no required Production env names after temporary runtime flags were removed
+- confirmed `https://anyu.tw` currently points to a `web` deployment
+- updated `qa:production:payment-preflight` to detect root/app Vercel project-link mismatch
+- added tests for project-link metadata reading and mismatch readiness classification
+- reran updated preflight; it now blocks with `blocked_project_link_mismatch`
+
+### Learnings
+
+- The previous v1 retry failed because env metadata/preflight and deploy/alias target were not the same Vercel project.
+- Production smoke deploys must run from the repo root project `anyu-next`, not from `apps/web` while it is linked to `web`.
+- `anyu.tw` should not remain on a non-canonical `web` deployment before another payment smoke.
+
+### Unresolved Questions
+
+- Decide whether to relink/remove `apps/web/.vercel/project.json` or enforce root-only production deploys.
+- Deploy the canonical `anyu-next` project fail-closed and re-alias `anyu.tw` after verification.
+- Rerun production preflight and retry v1 only after `blocked_project_link_mismatch` is resolved.

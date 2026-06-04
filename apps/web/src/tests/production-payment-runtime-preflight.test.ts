@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -8,6 +9,7 @@ import {
   classifyReadiness,
   parseArgs,
   parseVercelEnvNames,
+  readVercelProjectLink,
 } from "../../scripts/production-payment-runtime-preflight.mjs";
 
 const ALL_REQUIRED_NAMES = [
@@ -71,6 +73,10 @@ function classifyFromNames(names: string[], env: NodeJS.ProcessEnv = {}) {
       checked: true,
       ok: true,
     },
+    projectLinking: {
+      checked: true,
+      ok: true,
+    },
   });
 }
 
@@ -129,6 +135,34 @@ describe("production payment runtime preflight", () => {
     ).toBe("blocked_runtime_flags_not_expected");
   });
 
+  it("blocks when root and app Vercel project links are mismatched", () => {
+    const envChecklist = buildEnvChecklist(
+      presence(ALL_REQUIRED_NAMES),
+      { mode: "dry-run" },
+      {},
+    );
+
+    expect(
+      classifyReadiness({
+        envChecklist,
+        dbSchema: {
+          checked: true,
+          ok: true,
+          missingTables: [],
+          missingAuditColumns: [],
+        },
+        productionSafety: {
+          checked: true,
+          ok: true,
+        },
+        projectLinking: {
+          checked: true,
+          ok: false,
+        },
+      }),
+    ).toBe("blocked_project_link_mismatch");
+  });
+
   it("parses Vercel production env names without values", () => {
     const names = parseVercelEnvNames(`
       Retrieving project…
@@ -163,5 +197,32 @@ describe("production payment runtime preflight", () => {
         bad: ["pc", "s_abcdefghijklmnopqrstuvwxyz1234567890"].join(""),
       }),
     ).toThrow("preflight_output_not_sanitized");
+  });
+
+  it("reads Vercel project link metadata without env values", () => {
+    const fixturePath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), "vercel-link-")),
+      "project.json",
+    );
+
+    fs.writeFileSync(
+      fixturePath,
+      JSON.stringify({
+        orgId: "team_safe",
+        projectId: "prj_safe",
+        projectName: "anyu-next",
+        settings: {
+          rootDirectory: "apps/web",
+        },
+      }),
+    );
+
+    expect(readVercelProjectLink(fixturePath)).toMatchObject({
+      pathPresent: true,
+      orgId: "team_safe",
+      projectId: "prj_safe",
+      projectName: "anyu-next",
+      rootDirectory: "apps/web",
+    });
   });
 });

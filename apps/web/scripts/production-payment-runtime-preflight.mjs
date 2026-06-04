@@ -166,6 +166,63 @@ function readEnvFileKeys(envFile) {
   };
 }
 
+function readVercelProjectLink(projectJsonPath) {
+  if (!fs.existsSync(projectJsonPath)) {
+    return {
+      pathPresent: false,
+      orgId: null,
+      projectId: null,
+      projectName: null,
+      rootDirectory: null,
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(fs.readFileSync(projectJsonPath, "utf8"));
+
+    return {
+      pathPresent: true,
+      orgId: typeof parsed.orgId === "string" ? parsed.orgId : null,
+      projectId: typeof parsed.projectId === "string" ? parsed.projectId : null,
+      projectName: typeof parsed.projectName === "string" ? parsed.projectName : null,
+      rootDirectory:
+        typeof parsed.settings?.rootDirectory === "string"
+          ? parsed.settings.rootDirectory
+          : null,
+    };
+  } catch {
+    return {
+      pathPresent: true,
+      orgId: null,
+      projectId: null,
+      projectName: null,
+      rootDirectory: null,
+      parseError: true,
+    };
+  }
+}
+
+function getVercelProjectLinkingStatus() {
+  const webAppDir = findWebAppDir();
+  const repoRoot = path.resolve(webAppDir, "..", "..");
+  const rootProject = readVercelProjectLink(path.join(repoRoot, ".vercel", "project.json"));
+  const webAppProject = readVercelProjectLink(path.join(webAppDir, ".vercel", "project.json"));
+  const hasComparableIds = Boolean(rootProject.projectId && webAppProject.projectId);
+  const projectIdMismatch =
+    hasComparableIds && rootProject.projectId !== webAppProject.projectId;
+
+  return {
+    checked: true,
+    ok: !projectIdMismatch,
+    rootProject,
+    webAppProject,
+    projectIdMismatch,
+    recommendation: projectIdMismatch
+      ? "Run production deploy/preflight from the repository root or relink apps/web to the canonical project before enabling runtime."
+      : "Vercel project links are aligned.",
+  };
+}
+
 function loadPreflightLocalEnv(options) {
   if (options.envFile) {
     const envFilePath = path.resolve(options.envFile);
@@ -492,8 +549,12 @@ async function verifyProductionSafety(options) {
 }
 
 function classifyReadiness(input) {
-  const { envChecklist, dbSchema, productionSafety } = input;
+  const { envChecklist, dbSchema, productionSafety, projectLinking } = input;
   const groups = envChecklist.groups;
+
+  if (projectLinking?.checked && projectLinking.ok === false) {
+    return "blocked_project_link_mismatch";
+  }
 
   if (groups.paymentProvider.missingNames.length > 0) {
     return "blocked_missing_payment_env";
@@ -574,7 +635,13 @@ async function runProductionPaymentRuntimePreflight(argv = process.argv.slice(2)
     verifyDatabaseSchema(options, env),
     verifyProductionSafety(options),
   ]);
-  const readiness = classifyReadiness({ envChecklist, dbSchema, productionSafety });
+  const projectLinking = getVercelProjectLinkingStatus();
+  const readiness = classifyReadiness({
+    envChecklist,
+    dbSchema,
+    productionSafety,
+    projectLinking,
+  });
   const ok = readiness === "pass_ready_for_controlled_smoke";
 
   return assertSanitizedPreflightOutput({
@@ -597,6 +664,7 @@ async function runProductionPaymentRuntimePreflight(argv = process.argv.slice(2)
       valuesAvailableForFlagChecks: presence.valuesAvailableForFlagChecks,
       localEnv: presence.localEnv,
     },
+    projectLinking,
     envChecklist,
     dbSchema,
     productionSafety,
@@ -640,7 +708,9 @@ export {
   assertSanitizedPreflightOutput,
   buildEnvChecklist,
   classifyReadiness,
+  getVercelProjectLinkingStatus,
   parseArgs,
   parseVercelEnvNames,
+  readVercelProjectLink,
   runProductionPaymentRuntimePreflight,
 };
