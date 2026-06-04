@@ -9632,3 +9632,33 @@ Unresolved questions:
 - Decide whether to temporarily enable checkout/runtime for a LINE-bind-only retry window before payment.
 - Alternatively implement a tightly gated production LINE bind-only smoke helper.
 - Controlled Production Payment Smoke v1 remains pending until LINE bind can be retried and verified.
+
+## 2026-06-04 Controlled Production Payment Smoke v1 Retry with LINE Bind Checkpoint
+
+### Completed Changes
+
+- saved the Controlled Production Payment Smoke v1 Retry with LINE Bind Checkpoint handoff and execution report
+- ran Production payment runtime preflight in dry-run mode; readiness returned `pass_ready_for_controlled_smoke`
+- temporarily enabled `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT` on the currently linked Vercel project
+- redeployed Production and aliased `https://anyu.tw` to the runtime-enabled deployment
+- created a fresh synthetic Production Module 01 result with non-private test text
+- checked checkout-start and checkout API before owner payment
+- discovered checkout API returned missing NewebPay checkout/notify config after runtime flags were enabled
+- classified the blocker as `production_vercel_project_env_mismatch`
+- aborted before Email save, LINE bind, card payment, Email send, or LINE send
+- removed the two temporary runtime flags
+- redeployed Production fail-closed and re-aliased `https://anyu.tw`
+- verified public pages return 200, checkout API returns 404 `not_found`, and fake-paid route returns 404
+- read-only aggregate DB check showed 0 LINE contacts and 0 LINE recipient secrets
+
+### Learnings
+
+- The local Vercel CLI deployment target is project `web`, and it did not have the full Production payment/provider env set.
+- The dry-run preflight env-name source and the actual local CLI deploy target are not currently proven to be the same source of truth.
+- A real payment smoke should not proceed until deploy target, domain alias, and env target are reconciled.
+
+### Unresolved Questions
+
+- Reconcile the canonical Production Vercel project/env/deploy target before retrying v1.
+- Update production preflight to verify the same Vercel project target used by `vercel deploy`.
+- Decide whether to keep using local CLI deploys or switch to git-integrated production deployments for clearer commit metadata.
