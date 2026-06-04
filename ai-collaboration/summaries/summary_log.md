@@ -9799,3 +9799,34 @@ Unresolved questions:
 - Diagnose why Production LINE bind shows `LINE 身分確認沒有完成`.
 - Provide or align a safe read-only Production support lookup env before the next smoke.
 - Retry controlled Production payment only after LINE bind passes again in a fresh runtime window.
+
+## 2026-06-04 Production LINE Bind Identity Completion Fix v0
+
+### Completed Changes
+
+- saved the Production LINE Bind Identity Completion Fix v0 handoff and execution report
+- inspected LINE recovery bind bridge, LIFF context parser, LIFF config helpers, and `/api/line/recovery/bind-liff`
+- identified the visible failure as client-side `getIDToken()` missing after LIFF init/login
+- confirmed Production has LINE LIFF/message env names present without printing values
+- implemented LIFF URL-first ID derivation so the CTA entry URL and frontend LIFF init use the same LIFF app by default
+- kept explicit `LINE_LOGIN_CHANNEL_ID` as the highest-priority server verification override
+- added regression tests for LIFF URL priority and explicit channel override
+- passed targeted LINE tests, lint, full tests, and build
+- committed/pushed code fix `69f4c7b`
+- deployed `69f4c7b` to Production fail-closed
+- briefly enabled runtime/checkout for a mobile LINE bind retry only
+- owner confirmed mobile LINE bind succeeded; desktop browser still failed
+- disabled runtime/checkout again and verified final fail-closed Production safety
+
+### Learnings
+
+- The likely Production issue was LIFF URL / legacy LIFF ID ambiguity: the CTA used `NEXT_PUBLIC_LINE_LIFF_URL`, but LIFF init used `NEXT_PUBLIC_LINE_LIFF_ID`.
+- Mobile LINE context is the supported identity path and now passes.
+- Desktop browser attempts should not be treated as a blocker for LIFF identity completion.
+- Sanitized DB verification remains slower than ideal because local `SUPPORT_OPS_DATABASE_URL` is not aligned.
+
+### Unresolved Questions
+
+- Align `SUPPORT_OPS_DATABASE_URL` before the next controlled payment smoke for faster sanitized DB checks.
+- Decide whether to add clearer desktop/non-LINE fallback copy.
+- Retry Controlled Production Payment Smoke v1 with mobile LINE bind checkpoint and fresh NewebPay form.
