@@ -56,7 +56,7 @@ describe("NewebPay checkout route", () => {
         method: "POST",
         merchantOrderNo: "ANYUNPORDEREXISTING000000000",
         returnUrl:
-          "https://staging.anyu.tw/m/ambiguous-temperature/payment/return?merchantOrderNo=ANYUNPORDEREXISTING000000000&checkoutToken=pcs_redacted",
+          "https://staging.anyu.tw/payment/newebpay/return?merchantOrderNo=ANYUNPORDEREXISTING000000000&checkoutToken=pcs_redacted",
         fields: {
           MerchantID: "MS123456789",
           TradeInfo: "encrypted-trade-info",
@@ -103,7 +103,7 @@ describe("NewebPay checkout route", () => {
         method: "POST",
         merchantOrderNo: "ANYUNPORDEREXISTING000000000",
         returnUrl:
-          "https://staging.anyu.tw/m/ambiguous-temperature/payment/return?merchantOrderNo=ANYUNPORDEREXISTING000000000&checkoutToken=pcs_redacted",
+          "https://staging.anyu.tw/payment/newebpay/return?merchantOrderNo=ANYUNPORDEREXISTING000000000&checkoutToken=pcs_redacted",
         fields: {
           MerchantID: "MS123456789",
           TradeInfo: "encrypted-trade-info",
@@ -112,7 +112,7 @@ describe("NewebPay checkout route", () => {
         },
       },
       pendingReturnPath:
-        "/m/ambiguous-temperature/payment/return?merchantOrderNo=ANYUNPORDEREXISTING000000000&checkoutToken=pcs_redacted",
+        "/payment/newebpay/return?merchantOrderNo=ANYUNPORDEREXISTING000000000&checkoutToken=pcs_redacted",
     });
     expect(JSON.stringify(data)).not.toContain("operator-secret");
     expect(JSON.stringify(data)).not.toContain("NEWEBPAY_HASH");

@@ -99,7 +99,10 @@ describe("NewebPay checkout service", () => {
       },
     });
     expect(result.checkoutContract.returnUrl).toContain(
-      `https://staging.anyu.tw/m/ambiguous-temperature/payment/return?merchantOrderNo=${merchantOrderNo}`,
+      `https://staging.anyu.tw/payment/newebpay/return?merchantOrderNo=${merchantOrderNo}`,
+    );
+    expect(result.checkoutContract.returnUrl).not.toContain(
+      "/m/ambiguous-temperature/payment/return",
     );
     expect(result.checkoutContract.returnUrl).toContain("checkoutToken=pcs_");
     expect(result.checkoutContract.fields.TradeInfo).toMatch(/^[a-f0-9]+$/u);

@@ -329,19 +329,19 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant approval, production provider config dry-run, and production DB migration gate have passed with checkout still fail-closed. Checkout-start, ReturnURL polling, paid access, and access-link save/delivery are staging-verified. Core Engine / Module Grammar v0 defines future module grammar, and LINE is planned as a consent-based owned channel rather than paid report delivery.</p>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant approval, production provider config dry-run, and production DB migration gate have passed with checkout still fail-closed. Checkout-start, provider-level ReturnURL polling, paid access, and access-link save/delivery are staging-verified. Core Engine / Module Grammar v0 defines future module grammar, and LINE is planned as a consent-based owned channel rather than paid report delivery.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-04 23:30 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Production DB gate passed; runtime still disabled</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-04 11:15 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Unified ReturnURL added; runtime still disabled</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Owner-side NewebPay dashboard confirmation before controlled production smoke</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Owner-side NewebPay dashboard URLs/methods confirmation before controlled production smoke</span></div>
       </div>
     </header>
 
     <section>
       <h2>Launch Gate Model</h2>
       <div class="grid">
-        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, and Production DB migration gate have passed with checkout/runtime disabled. Still requires payment/access-link runtime secrets, rollback/runbook readiness, and one controlled production credit-card smoke.</p></article>
+        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, and provider-level ReturnURL implementation have passed with checkout/runtime disabled. Still requires dashboard URL/method confirmation, rollback/runbook readiness, and one controlled production credit-card smoke.</p></article>
         <article class="card"><span class="badge waiting">Gate 2</span><h3>Soft public availability</h3><p>Allows low/no-traffic production checkout only after controlled smoke, support/access-link readiness, monitoring, and rollback thresholds. No ads yet.</p></article>
         <article class="card"><span class="badge waiting">Gate 3</span><h3>Growth / ads launch</h3><p>Requires stable soft availability, conversion tracking, support cadence, stop-loss thresholds, channel readiness, and ad budget controls. NewebPay approval does not equal commercial launch.</p></article>
       </div>
@@ -388,7 +388,7 @@
         <div class="progressbar"><span style="width: 90%"></span></div>
         <p><strong>Production launch readiness</strong></p>
         <div class="progressbar"><span style="width: 64%"></span></div>
-        <p>The launch gap is not queue architecture, sandbox payment flow, production payment env names, access-link crypto env names, Email/LINE provider env names, redeploy activation, or production DB schema. The active blockers are owner-side provider dashboard method/URL confirmation and controlled production smoke.</p>
+        <p>The launch gap is not queue architecture, sandbox payment flow, production payment env names, access-link crypto env names, Email/LINE provider env names, redeploy activation, production DB schema, or provider-level ReturnURL code. The active blockers are owner-side provider dashboard method/URL confirmation and controlled production smoke.</p>
       </div>
     </section>
 
@@ -435,7 +435,7 @@
         <h2>NewebPay Status</h2>
         <p>Merchant review approval is complete. Production public pages are ready. Production NewebPay provider config dry-run and Production DB migration gate passed with runtime still disabled. Sandbox shop remains available for regression QA.</p>
         <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
-        <p>Next action: keep production disabled and run Production Access-Link / Provider Env Gate v0 before any controlled production credit-card smoke. If product exploration is the priority, run Module 02 concept/spec.</p>
+        <p>Next action: keep production disabled and confirm the NewebPay dashboard uses ReturnURL <code>https://anyu.tw/payment/newebpay/return</code> and NotifyURL <code>https://anyu.tw/api/payments/newebpay/notify</code> before any controlled production credit-card smoke. If product exploration is the priority, run Module 02 concept/spec.</p>
       </div>
     </section>
 
@@ -519,7 +519,7 @@
       <table>
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
-          <tr><td>P0</td><td>NewebPay dashboard confirmation</td><td>Owner</td><td>Confirm credit-card one-time only, production NotifyURL/ReturnURL, and disabled non-card methods before controlled production smoke.</td></tr>
+          <tr><td>P0</td><td>NewebPay dashboard confirmation</td><td>Owner</td><td>Confirm credit-card one-time only, ReturnURL <code>https://anyu.tw/payment/newebpay/return</code>, NotifyURL <code>https://anyu.tw/api/payments/newebpay/notify</code>, and disabled non-card methods before controlled production smoke.</td></tr>
           <tr><td>P0</td><td>Provider dashboard payment methods</td><td>Owner / NewebPay</td><td>Confirm credit-card one-time payment only for first controlled smoke; keep other methods disabled or non-blocking.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke</td><td>Owner / ops</td><td>Run one small controlled payment only after launch gate approval.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>

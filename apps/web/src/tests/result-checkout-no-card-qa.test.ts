@@ -100,8 +100,8 @@ describe("result checkout no-card QA helpers", () => {
       "/m/ambiguous-temperature/unlock/[REDACTED]",
     );
     expect(
-      redactRouteShape("/m/ambiguous-temperature/payment/return?checkoutToken=pcs_secret_token_value"),
-    ).toBe("/m/ambiguous-temperature/payment/return?checkoutToken=[REDACTED]");
+      redactRouteShape("/payment/newebpay/return?checkoutToken=pcs_secret_token_value"),
+    ).toBe("/payment/newebpay/return?checkoutToken=[REDACTED]");
     expect(redactRouteShape("/r/prl_secret_token_value")).toBe("/r/[REDACTED]");
     expect(containsTokenLikeValue("raw pa_secret_token_value")).toBe(true);
     expect(containsTokenLikeValue("raw prl_secret_token_value")).toBe(true);

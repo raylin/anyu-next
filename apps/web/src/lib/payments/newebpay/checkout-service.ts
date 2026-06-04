@@ -127,7 +127,7 @@ export async function createNewebPayCheckout(input: {
     }
   }
 
-  const returnUrl = `${config.returnUrlBase}/m/${input.moduleConfig.slug}/payment/return?merchantOrderNo=${encodeURIComponent(
+  const returnUrl = `${config.returnUrlBase}/payment/newebpay/return?merchantOrderNo=${encodeURIComponent(
     merchantOrderNo,
   )}&checkoutToken=${encodeURIComponent(
     checkoutSession.token,

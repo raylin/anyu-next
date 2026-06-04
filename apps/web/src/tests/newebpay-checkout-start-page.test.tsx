@@ -56,7 +56,7 @@ describe("NewebPay checkout-start page", () => {
         method: "POST",
         merchantOrderNo: "ANYUNPORDEREXISTING000000000",
         returnUrl:
-          "https://staging.anyu.tw/m/ambiguous-temperature/payment/return?merchantOrderNo=ANYUNPORDEREXISTING000000000&checkoutToken=redacted",
+          "https://staging.anyu.tw/payment/newebpay/return?merchantOrderNo=ANYUNPORDEREXISTING000000000&checkoutToken=redacted",
         fields: {
           MerchantID: "MS123456789",
           TradeInfo: "encrypted-trade-info",

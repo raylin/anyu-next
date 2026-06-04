@@ -9497,3 +9497,27 @@ Unresolved questions:
 
 - Owner-side NewebPay dashboard confirmation remains the final blocker before controlled production smoke.
 - Decide exact controlled-smoke recipient handling for production Email and LINE before enabling runtime.
+
+## 2026-06-04 Unified NewebPay ReturnURL Route v0
+
+### Completed Changes
+
+- saved the Unified NewebPay ReturnURL Route v0 handoff and report
+- added provider-level `/payment/newebpay/return` route
+- factored shared non-mutating ReturnURL UX into `NewebPayReturnExperience`
+- kept `/m/[moduleSlug]/payment/return` compatible as a module-specific wrapper
+- updated NewebPay checkout generation to use `/payment/newebpay/return`
+- preserved NotifyURL payment truth at `/api/payments/newebpay/notify`
+- added unified route and checkout payload tests
+- ran lint, targeted ReturnURL/payment tests, full tests, build, access-link smoke, and no-card QA
+
+### Learnings
+
+- The signed `pcs_` checkout session already contains module context, so the unified provider-level ReturnURL can resolve Module 01 safely without trusting a user-provided module slug.
+- Existing client polling can remain module-scoped because the shared ReturnURL experience resolves the module before rendering `PaymentReturnPoller`.
+- Staging QA commands validated the currently deployed baseline commit before this new route was pushed; local tests/build covered the new route.
+
+### Unresolved Questions
+
+- Confirm owner-side NewebPay dashboard ReturnURL is updated to `https://anyu.tw/payment/newebpay/return`.
+- Decide whether to add a provider-level payment status endpoint later for full provider-neutrality before Module 02.

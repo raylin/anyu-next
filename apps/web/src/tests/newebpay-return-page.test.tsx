@@ -1,10 +1,16 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockIsDbConfigured, mockResolvePaymentAccessHandoff, mockGetPaymentRecoveryStatusSummary } = vi.hoisted(() => ({
+const {
+  mockIsDbConfigured,
+  mockResolvePaymentAccessHandoff,
+  mockGetPaymentRecoveryStatusSummary,
+  mockResolvePaymentCheckoutSessionToken,
+} = vi.hoisted(() => ({
   mockIsDbConfigured: vi.fn(),
   mockResolvePaymentAccessHandoff: vi.fn(),
   mockGetPaymentRecoveryStatusSummary: vi.fn(),
+  mockResolvePaymentCheckoutSessionToken: vi.fn(),
 }));
 
 vi.mock("@/lib/db/client", () => ({
@@ -19,12 +25,26 @@ vi.mock("@/lib/payments/payment-access-handoff", () => ({
   resolvePaymentAccessHandoff: mockResolvePaymentAccessHandoff,
 }));
 
+vi.mock("@/lib/payments/payment-checkout-session", () => ({
+  resolvePaymentCheckoutSessionToken: mockResolvePaymentCheckoutSessionToken,
+}));
+
 import NewebPayReturnPage from "@/app/m/[moduleSlug]/payment/return/page";
+import UnifiedNewebPayReturnPage from "@/app/payment/newebpay/return/page";
 
 describe("NewebPay ReturnURL pending page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockIsDbConfigured.mockReturnValue(true);
+    mockResolvePaymentCheckoutSessionToken.mockReturnValue({
+      ok: true,
+      payload: {
+        moduleSlug: "ambiguous-temperature",
+        merchantOrderNo: "ANYUNPORDEREXISTING000000000",
+        exp: 1_800_000_000,
+        nonce: "nonce",
+      },
+    });
     mockResolvePaymentAccessHandoff.mockResolvedValue({
       ok: true,
       state: "waiting_for_payment",
@@ -57,6 +77,40 @@ describe("NewebPay ReturnURL pending page", () => {
       moduleSlug: "ambiguous-temperature",
       checkoutToken: "pcs_redacted",
     });
+  });
+
+  it("renders the unified provider-level ReturnURL from signed checkout session context", async () => {
+    const page = await UnifiedNewebPayReturnPage({
+      searchParams: Promise.resolve({
+        merchantOrderNo: "ANYUNPORDEREXISTING000000000",
+        checkoutToken: "pcs_redacted",
+      }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("付款確認中");
+    expect(html).toContain("瀏覽器回到此頁不代表付款已完成");
+    expect(html).not.toContain("TradeInfo");
+    expect(html).not.toContain("TradeSha");
+    expect(html).not.toContain("pal_");
+    expect(mockResolvePaymentCheckoutSessionToken).toHaveBeenCalledWith({
+      token: "pcs_redacted",
+    });
+    expect(mockResolvePaymentAccessHandoff).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      checkoutToken: "pcs_redacted",
+    });
+  });
+
+  it("shows safe support state for unified ReturnURL when checkout context is missing", async () => {
+    const page = await UnifiedNewebPayReturnPage({
+      searchParams: Promise.resolve({}),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("這個付款狀態連結已失效");
+    expect(html).toContain("hello@anyu.tw");
+    expect(mockResolvePaymentAccessHandoff).not.toHaveBeenCalled();
   });
 
   it("can show ready continuation without exposing raw paid access token", async () => {
