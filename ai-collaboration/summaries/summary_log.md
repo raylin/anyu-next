@@ -9830,3 +9830,30 @@ Unresolved questions:
 - Align `SUPPORT_OPS_DATABASE_URL` before the next controlled payment smoke for faster sanitized DB checks.
 - Decide whether to add clearer desktop/non-LINE fallback copy.
 - Retry Controlled Production Payment Smoke v1 with mobile LINE bind checkpoint and fresh NewebPay form.
+
+## 2026-06-04 Production Processor Auth Env Fix + Paid Order Completion v0
+
+### Completed Changes
+
+- saved the Production Processor Auth Env Fix + Paid Order Completion handoff and execution report
+- reviewed processor auth requirements for `/api/cron/paid-generation` and `/api/internal/jobs/process`
+- configured non-empty Production `CRON_SECRET` and `INTERNAL_JOB_SECRET` without printing values
+- set `ENABLE_PAID_GENERATION_PROCESSOR=true` for the authenticated processor path
+- redeployed Production from repo root to canonical `anyu-next` while checkout/runtime remained disabled
+- invoked `/api/cron/paid-generation` once with sanitized aggregate output
+- processed and completed the queued Production paid-generation job for the already-paid smoke order
+- verified sanitized Production DB state: payment paid, NotifyURL received, entitlement active, paid result completed, Email access-link sent/provider-accepted, LINE access-link sent/provider-accepted, LINE recipient secret active
+- verified Production public pages are live and checkout/fake-paid/operator routes fail closed
+- reran Production payment preflight; readiness returned `pass_ready_for_controlled_smoke`
+
+### Learnings
+
+- Payment truth and access-link contact capture were correct; the remaining blocker was processor auth/gating.
+- `CRON_SECRET` can exist by name while being unusable/empty, so name-only preflight was insufficient for this dependency.
+- `ENABLE_PAID_GENERATION_PROCESSOR` is a separate processor gate and can remain enabled while checkout/runtime stay disabled.
+
+### Unresolved Questions
+
+- Owner still needs to confirm Email inbox receipt, LINE message receipt, `/r/ link opening, and browser paid result render.
+- Add a safe preflight enhancement to validate processor auth usability, not only env-name presence.
+- Align `SUPPORT_OPS_DATABASE_URL` for faster Production support lookup in future smokes.
