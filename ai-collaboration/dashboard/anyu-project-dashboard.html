@@ -329,12 +329,12 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」is back in Preview(staging) stabilization. Production public content is live but payment runtime and checkout are frozen/fail-closed. Preview(staging) enforces access-link save before payment: desktop shows Email only, while mobile/in-app browsers show LINE first above Email fallback. Automated staging no-card/access-link QA passes, and fresh real staging Email/LINE messages were owner-verified. Support DB URL Bootstrap v1 is blocked because local/operator <code>SUPPORT_OPS_DATABASE_URL</code> is still unavailable.</p>
+      <p class="lead">Module 01「曖昧溫度計」is back in Preview(staging) stabilization. Production public content is live but payment runtime and checkout are frozen/fail-closed. Preview(staging) enforces access-link save before payment: desktop shows Email only, while mobile/in-app browsers show LINE first above Email fallback. Automated staging no-card/access-link QA passes, and fresh real staging Email/LINE messages were owner-verified. Support lookup source policy now allows <code>DATABASE_URL</code> only after schema verification, but the current <code>apps/web/.env.local</code> DB target does not expose the clean access-link schema.</p>
       <div class="snapshot" aria-label="Project snapshot">
         <div><span class="label">Last updated</span><span class="value">2026-06-04 23:40 CST</span></div>
         <div><span class="label">Current phase</span><span class="value">Staging stabilization baseline partial</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">SUPPORT_OPS_DATABASE_URL missing</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">local DATABASE_URL schema mismatch</span></div>
       </div>
     </header>
 
@@ -435,7 +435,7 @@
         <h2>NewebPay Status</h2>
         <p>Merchant review approval is complete. Production public pages are ready. Production NewebPay provider config dry-run, Production DB migration gate, unified ReturnURL, and one recovered controlled production payment smoke passed with runtime disabled again. Sandbox shop remains available for regression QA.</p>
         <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
-        <p>Next action: keep production disabled. Owner/operator must provide a Preview(staging) <code>SUPPORT_OPS_DATABASE_URL</code> through an untracked local env file or process-only export, then rerun support lookup against the staging artifacts before returning to production smoke.</p>
+        <p>Next action: keep production disabled. Correct the local operator DB source so either <code>apps/web/.env.local</code> <code>DATABASE_URL</code> or <code>SUPPORT_OPS_DATABASE_URL</code> points to the clean Preview(staging) schema, then rerun support lookup against the staging artifacts before returning to production smoke.</p>
       </div>
     </section>
 
@@ -520,7 +520,7 @@
       <table>
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
-          <tr><td>P0</td><td>Support DB env alignment</td><td>Ops</td><td>Blocked: local/operator <code>SUPPORT_OPS_DATABASE_URL</code> is missing, local <code>DATABASE_URL</code> points to the wrong schema, and Vercel env pull did not provide a usable value.</td></tr>
+          <tr><td>P0</td><td>Support DB env alignment</td><td>Ops</td><td>Blocked: support lookup now accepts schema-verified <code>DATABASE_URL</code>, but current <code>apps/web/.env.local</code> <code>DATABASE_URL</code> fails the clean access-link schema probe.</td></tr>
           <tr><td>P0</td><td>Staging baseline acceptance</td><td>Owner / ops</td><td>Accept after support lookup passes; real staging Email/LINE channel verification already passed.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke v1 final confirmation</td><td>Owner / ops</td><td>Resume only after support lookup and staging baseline acceptance. Production checkout remains disabled.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
@@ -553,8 +553,8 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> provide a secure local/operator Preview(staging) <code>SUPPORT_OPS_DATABASE_URL</code>, then rerun `qa:env:preflight -- support-ops-lookup` and `ops:paid-result:lookup` against the staging Email/LINE artifacts.</p>
-        <p>Preview(staging) automated no-card/access-link smokes and real Email/LINE receipt/link-click checks pass with the mandatory-save UX gate, but the baseline remains partial until support lookup passes. Support Ops DB URL Bootstrap v1 could not complete without the missing env.</p>
+        <p><strong>Current recommendation:</strong> correct the local DB source, then rerun `qa:env:preflight -- support-ops-lookup` and `ops:paid-result:lookup` against the staging Email/LINE artifacts.</p>
+        <p>Preview(staging) automated no-card/access-link smokes and real Email/LINE receipt/link-click checks pass with the mandatory-save UX gate, but the baseline remains partial until support lookup passes. Support lookup source policy is fixed; the remaining issue is the current local DB target.</p>
         <p>Do not return to production smoke until the staging baseline is accepted. Production remains frozen and fail-closed.</p>
       </div>
     </section>
@@ -663,6 +663,7 @@
           <li><a href="../reports/2026-06-04-module-01-staging-end-to-end-stabilization-baseline-v0.md">Module 01 Staging End-to-End Stabilization Baseline v0</a></li>
           <li><a href="../reports/2026-06-04-module-01-staging-baseline-completion-v1.md">Module 01 Staging Baseline Completion v1</a></li>
           <li><a href="../reports/2026-06-04-support-ops-db-url-bootstrap-v1.md">Support Ops DB URL Bootstrap v1</a></li>
+          <li><a href="../reports/2026-06-04-env-source-reconciliation-support-ops-db-source-fix-v1.md">Env Source Reconciliation + Support Ops DB Source Fix v1</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

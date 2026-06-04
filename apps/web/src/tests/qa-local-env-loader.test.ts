@@ -9,7 +9,7 @@ import {
   parseLocalEnvContent,
 } from "../../scripts/lib/load-local-env.mjs";
 
-const MUTABLE_ENV_NAMES = ["QA_LOADER_SECRET", "QA_LOADER_EXISTING"];
+const MUTABLE_ENV_NAMES = ["QA_LOADER_SECRET", "QA_LOADER_EXISTING", "QA_LOADER_ROOT_ONLY"];
 
 afterEach(() => {
   for (const name of MUTABLE_ENV_NAMES) {
@@ -70,6 +70,28 @@ QA_WITH_COMMENT=value # comment
       writeFileSync(path.join(webDir, "package.json"), JSON.stringify({ name: "anyu-next-web" }));
 
       expect(findWebAppDir(root)).toBe(webDir);
+    } finally {
+      rmSync(root, { force: true, recursive: true });
+    }
+  });
+
+  it("loads apps/web/.env.local from repo-root cwd shape and ignores root .env", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "anyu-qa-env-root-"));
+    const webDir = path.join(root, "apps", "web");
+
+    try {
+      mkdirSync(webDir, { recursive: true });
+      writeFileSync(path.join(root, ".env"), "QA_LOADER_ROOT_ONLY=from-root\n");
+      writeFileSync(path.join(webDir, "package.json"), JSON.stringify({ name: "anyu-next-web" }));
+      writeFileSync(path.join(webDir, ".env.local"), "QA_LOADER_SECRET=from-web\n");
+
+      const result = loadLocalEnv({ startDir: root });
+
+      expect(result.envFilePath).toBe(path.join(webDir, ".env.local"));
+      expect(result.loaded).toContain("QA_LOADER_SECRET");
+      expect(result.loaded).not.toContain("QA_LOADER_ROOT_ONLY");
+      expect(process.env.QA_LOADER_SECRET).toBe("from-web");
+      expect(process.env.QA_LOADER_ROOT_ONLY).toBeUndefined();
     } finally {
       rmSync(root, { force: true, recursive: true });
     }

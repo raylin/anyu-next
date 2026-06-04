@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import { loadLocalEnv } from "./lib/load-local-env.mjs";
+import { verifyDatabaseUrlCleanAccessLinkSchema } from "./support-paid-result-lookup.mjs";
 
 const MODE_ALIASES = new Map([
   ["all", "all"],
@@ -220,8 +221,10 @@ const MODE_DEFINITIONS = {
   },
   support_ops_lookup: {
     command: "corepack pnpm run ops:paid-result:lookup -- --result-id <id>",
-    requiredShell: ["SUPPORT_OPS_DATABASE_URL"],
+    requiredShell: [],
     optionalShell: [
+      "SUPPORT_OPS_DATABASE_URL",
+      "DATABASE_URL",
       "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
       "SUPPORT_LOOKUP_TARGET",
       "SUPPORT_LOOKUP_ALLOW_PRODUCTION_READONLY",
@@ -232,13 +235,13 @@ const MODE_DEFINITIONS = {
       "DATABASE_URL",
       "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
     ],
-    mustMatchPreviewStaging: ["SUPPORT_OPS_DATABASE_URL"],
+    mustMatchPreviewStaging: ["SUPPORT_OPS_DATABASE_URL", "DATABASE_URL"],
     neverProduction: [
       "SUPPORT_OPS_DATABASE_URL",
       "SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK",
       "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
     ],
-    missingBehavior: "blocks local support lookup before any DB query; DATABASE_URL fallback requires explicit SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK=1 or --allow-database-url-fallback",
+    missingBehavior: "blocks local support lookup if neither SUPPORT_OPS_DATABASE_URL nor clean-schema-verified DATABASE_URL is available",
   },
   manual_fallback: {
     command: "manual processor path used by qa:fake-paid default mode",
@@ -343,7 +346,7 @@ function envPresence(name) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
-function summarizeMode(mode, definition, envLocal) {
+async function summarizeMode(mode, definition, envLocal) {
   const requiredShell = definition.requiredShell ?? [];
   const optionalShell = definition.optionalShell ?? [];
   const requiredEnvLocalKeys = definition.requiredEnvLocalKeys ?? [];
@@ -352,7 +355,7 @@ function summarizeMode(mode, definition, envLocal) {
   const optionalShellPresent = optionalShell.filter(envPresence);
   const optionalShellMissing = optionalShell.filter((name) => !envPresence(name));
 
-  return {
+  const summary = {
     mode,
     ok: missingShell.length === 0 && missingEnvLocalKeys.length === 0,
     command: definition.command,
@@ -378,6 +381,54 @@ function summarizeMode(mode, definition, envLocal) {
     },
     missingBehavior: definition.missingBehavior,
   };
+
+  if (mode === "support_ops_lookup") {
+    const supportOpsPresent = envPresence("SUPPORT_OPS_DATABASE_URL");
+    const databaseUrlPresent = envPresence("DATABASE_URL");
+    let databaseUrlSchemaProbe = {
+      checked: false,
+      category: databaseUrlPresent ? "not_needed" : "database_url_missing",
+      accessLinkTablesPresent: null,
+      oldRecoveryTablesAbsent: null,
+      valuesPrinted: false,
+    };
+
+    if (!supportOpsPresent && databaseUrlPresent) {
+      const probe = await verifyDatabaseUrlCleanAccessLinkSchema(process.env.DATABASE_URL).catch(() => ({
+        ok: false,
+        category: "database_url_schema_probe_failed",
+        accessLinkTablesPresent: false,
+        oldRecoveryTablesAbsent: false,
+        valuesPrinted: false,
+      }));
+      databaseUrlSchemaProbe = {
+        checked: true,
+        category: probe.category,
+        accessLinkTablesPresent: probe.accessLinkTablesPresent,
+        oldRecoveryTablesAbsent: probe.oldRecoveryTablesAbsent,
+        valuesPrinted: false,
+      };
+    }
+
+    summary.supportLookupSource = {
+      category: supportOpsPresent
+        ? "support_ops_database_url"
+        : databaseUrlSchemaProbe.category === "database_url_schema_verified"
+          ? "database_url_schema_verified"
+          : databaseUrlPresent
+            ? "blocked_database_url_schema_mismatch"
+            : "blocked_missing_db_url",
+      supportOpsDatabaseUrlPresent: supportOpsPresent,
+      databaseUrlPresent,
+      databaseUrlSchemaProbe,
+      valuesPrinted: false,
+    };
+    summary.ok =
+      summary.ok &&
+      (supportOpsPresent || summary.supportLookupSource.category === "database_url_schema_verified");
+  }
+
+  return summary;
 }
 
 function printJson(value) {
@@ -390,8 +441,10 @@ const selectedModes =
   mode === "all"
     ? Object.keys(MODE_DEFINITIONS)
     : [mode];
-const summaries = selectedModes.map((selectedMode) =>
-  summarizeMode(selectedMode, MODE_DEFINITIONS[selectedMode], envLocal),
+const summaries = await Promise.all(
+  selectedModes.map((selectedMode) =>
+    summarizeMode(selectedMode, MODE_DEFINITIONS[selectedMode], envLocal),
+  ),
 );
 const ok = summaries.every((summary) => summary.ok);
 

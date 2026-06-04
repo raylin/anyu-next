@@ -395,14 +395,15 @@ function safeErrorResponse(error) {
   });
 }
 
-function getSqlClient(env = process.env) {
-  const resolved = resolveSupportOpsDatabaseUrl(env);
+async function getSqlClient(env = process.env, options = {}) {
+  const resolved = await resolveSupportOpsDatabaseUrl(env, options);
 
   if (!resolved.databaseUrl) {
-    throw new SupportLookupInputError("support_ops_database_url_missing", {
+    throw new SupportLookupInputError(resolved.errorCategory ?? "blocked_missing_db_url", {
       requiredEnv: SUPPORT_OPS_DATABASE_URL_ENV,
       fallbackEnv: DATABASE_URL_FALLBACK_ENV,
-      fallbackRequires: "SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK=1_or_--allow-database-url-fallback",
+      fallbackPolicy: "DATABASE_URL_allowed_only_after_clean_access_link_schema_probe",
+      connectionSourceCategory: resolved.connectionSourceCategory,
     });
   }
 
@@ -412,7 +413,58 @@ function getSqlClient(env = process.env) {
   };
 }
 
-function resolveSupportOpsDatabaseUrl(env = process.env, options = {}) {
+async function verifyDatabaseUrlCleanAccessLinkSchema(databaseUrl, schemaProbe = probeCleanAccessLinkSchema) {
+  if (!databaseUrl?.trim()) {
+    return {
+      ok: false,
+      category: "database_url_missing",
+      accessLinkTablesPresent: false,
+      oldRecoveryTablesAbsent: false,
+      valuesPrinted: false,
+    };
+  }
+
+  return schemaProbe(databaseUrl);
+}
+
+async function probeCleanAccessLinkSchema(databaseUrl) {
+  const sql = neon(databaseUrl);
+  const rows = await sql`
+    select table_name
+    from information_schema.tables
+    where table_schema = 'public'
+      and table_name in (
+        'payment_access_link_contacts',
+        'paid_result_access_links',
+        'payment_access_link_contact_secrets',
+        'payment_recovery_contacts',
+        'paid_result_recovery_links',
+        'payment_recovery_contact_secrets'
+      )
+  `;
+  const names = new Set(rows.map((row) => row.table_name));
+  const accessLinkTablesPresent =
+    names.has("payment_access_link_contacts") &&
+    names.has("paid_result_access_links") &&
+    names.has("payment_access_link_contact_secrets");
+  const oldRecoveryTablesAbsent =
+    !names.has("payment_recovery_contacts") &&
+    !names.has("paid_result_recovery_links") &&
+    !names.has("payment_recovery_contact_secrets");
+
+  return {
+    ok: accessLinkTablesPresent && oldRecoveryTablesAbsent,
+    category:
+      accessLinkTablesPresent && oldRecoveryTablesAbsent
+        ? "database_url_schema_verified"
+        : "database_url_schema_mismatch",
+    accessLinkTablesPresent,
+    oldRecoveryTablesAbsent,
+    valuesPrinted: false,
+  };
+}
+
+async function resolveSupportOpsDatabaseUrl(env = process.env, options = {}) {
   const supportOpsDatabaseUrl = env[SUPPORT_OPS_DATABASE_URL_ENV]?.trim();
 
   if (supportOpsDatabaseUrl) {
@@ -422,20 +474,40 @@ function resolveSupportOpsDatabaseUrl(env = process.env, options = {}) {
     };
   }
 
-  if (options.allowDatabaseUrlFallback || env.SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK === "1") {
-    const fallbackDatabaseUrl = env[DATABASE_URL_FALLBACK_ENV]?.trim();
+  const fallbackDatabaseUrl = env[DATABASE_URL_FALLBACK_ENV]?.trim();
 
-    if (fallbackDatabaseUrl) {
-      return {
-        databaseUrl: fallbackDatabaseUrl,
-        connectionSourceCategory: "database_url_explicit_fallback",
-      };
-    }
+  if (!fallbackDatabaseUrl) {
+    return {
+      databaseUrl: null,
+      connectionSourceCategory: "missing",
+      errorCategory: "blocked_missing_db_url",
+    };
+  }
+
+  const schema = await verifyDatabaseUrlCleanAccessLinkSchema(
+    fallbackDatabaseUrl,
+    options.schemaProbe,
+  ).catch(() => ({
+    ok: false,
+    category: "database_url_schema_probe_failed",
+    accessLinkTablesPresent: false,
+    oldRecoveryTablesAbsent: false,
+    valuesPrinted: false,
+  }));
+
+  if (schema.ok) {
+    return {
+      databaseUrl: fallbackDatabaseUrl,
+      connectionSourceCategory: "database_url_schema_verified",
+      schema,
+    };
   }
 
   return {
     databaseUrl: null,
-    connectionSourceCategory: "missing",
+    connectionSourceCategory: "blocked_database_url_schema_mismatch",
+    errorCategory: "blocked_database_url_schema_mismatch",
+    schema,
   };
 }
 
@@ -834,10 +906,7 @@ function buildSummary(rows, lookup) {
 }
 
 async function lookupPaidResultSupport(input, env = process.env) {
-  const { sql, connectionSourceCategory } = getSqlClient({
-    ...env,
-    SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK: input.options.allowDatabaseUrlFallback ? "1" : env.SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK,
-  });
+  const { sql, connectionSourceCategory } = await getSqlClient(env);
   const resolved = await resolveLookup(sql, input.lookup, env);
 
   if (!resolved.analysisResultId) {
@@ -939,6 +1008,7 @@ export {
   maskEmail,
   parseSupportLookupArgs,
   resolveSupportOpsDatabaseUrl,
+  verifyDatabaseUrlCleanAccessLinkSchema,
   summarizeAccessLinks,
   summarizeContacts,
 };

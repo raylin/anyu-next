@@ -10,6 +10,7 @@ import {
   maskEmail,
   parseSupportLookupArgs,
   resolveSupportOpsDatabaseUrl,
+  verifyDatabaseUrlCleanAccessLinkSchema,
   summarizeAccessLinks,
   summarizeContacts,
 } from "../../scripts/support-paid-result-lookup.mjs";
@@ -46,34 +47,74 @@ describe("support paid result lookup helpers", () => {
     });
   });
 
-  it("prefers explicit support ops database URL and requires opt-in for DATABASE_URL fallback", () => {
-    expect(
+  it("prefers explicit support ops database URL and gates DATABASE_URL fallback by schema probe", async () => {
+    await expect(
       resolveSupportOpsDatabaseUrl({
         SUPPORT_OPS_DATABASE_URL: "postgres://support-ops.example.invalid/db",
         DATABASE_URL: "postgres://ambiguous.example.invalid/db",
       } as NodeJS.ProcessEnv),
-    ).toMatchObject({
+    ).resolves.toMatchObject({
       databaseUrl: "postgres://support-ops.example.invalid/db",
       connectionSourceCategory: "support_ops_database_url",
     });
-    expect(
+    await expect(
       resolveSupportOpsDatabaseUrl({
         DATABASE_URL: "postgres://ambiguous.example.invalid/db",
-      } as NodeJS.ProcessEnv),
-    ).toMatchObject({
+      } as NodeJS.ProcessEnv, {
+        schemaProbe: async () => ({
+          ok: false,
+          category: "database_url_schema_mismatch",
+          accessLinkTablesPresent: false,
+          oldRecoveryTablesAbsent: true,
+          valuesPrinted: false,
+        }),
+      }),
+    ).resolves.toMatchObject({
       databaseUrl: null,
-      connectionSourceCategory: "missing",
+      connectionSourceCategory: "blocked_database_url_schema_mismatch",
+      errorCategory: "blocked_database_url_schema_mismatch",
     });
-    expect(
+    await expect(
       resolveSupportOpsDatabaseUrl(
         {
           DATABASE_URL: "postgres://ambiguous.example.invalid/db",
         } as NodeJS.ProcessEnv,
-        { allowDatabaseUrlFallback: true },
+        {
+          schemaProbe: async () => ({
+            ok: true,
+            category: "database_url_schema_verified",
+            accessLinkTablesPresent: true,
+            oldRecoveryTablesAbsent: true,
+            valuesPrinted: false,
+          }),
+        },
       ),
-    ).toMatchObject({
+    ).resolves.toMatchObject({
       databaseUrl: "postgres://ambiguous.example.invalid/db",
-      connectionSourceCategory: "database_url_explicit_fallback",
+      connectionSourceCategory: "database_url_schema_verified",
+    });
+  });
+
+  it("returns a safe schema verification result without exposing values", async () => {
+    await expect(
+      verifyDatabaseUrlCleanAccessLinkSchema("postgres://example.invalid/db", async () => ({
+        ok: true,
+        category: "database_url_schema_verified",
+        accessLinkTablesPresent: true,
+        oldRecoveryTablesAbsent: true,
+        valuesPrinted: false,
+      })),
+    ).resolves.toMatchObject({
+      ok: true,
+      category: "database_url_schema_verified",
+      valuesPrinted: false,
+    });
+    await expect(verifyDatabaseUrlCleanAccessLinkSchema("", async () => {
+      throw new Error("should_not_probe");
+    })).resolves.toMatchObject({
+      ok: false,
+      category: "database_url_missing",
+      valuesPrinted: false,
     });
   });
 

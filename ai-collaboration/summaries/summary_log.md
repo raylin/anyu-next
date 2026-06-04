@@ -9968,3 +9968,35 @@ Unresolved questions:
 - Owner/operator needs to provide Preview(staging) `SUPPORT_OPS_DATABASE_URL` through an untracked local env file or process-only export.
 - Decide whether a future helper should support an approved Neon CLI/API-token bootstrap flow without printing connection strings.
 - Do not return to Production smoke until support lookup passes and the owner accepts the staging baseline.
+
+## 2026-06-05 Env Source Reconciliation + Support Ops DB Source Fix v1
+
+### Completed Changes
+
+- saved the Env Source Reconciliation + Support Ops DB Source Fix v1 handoff
+- inventoried the four intended env sources by key presence only:
+  - local staging: `apps/web/.env.local`
+  - host staging: Vercel Preview(staging)
+  - local production: `apps/web/.env`
+  - host production: Vercel Production
+- confirmed shared local QA env loading defaults to `apps/web/.env.local` and ignores repo-root `.env`
+- changed support lookup source policy:
+  - `SUPPORT_OPS_DATABASE_URL` remains first priority
+  - `DATABASE_URL` can be used only after clean access-link schema verification
+  - schema mismatch blocks with `blocked_database_url_schema_mismatch`
+- updated support preflight to run the same schema-gated fallback check
+- added tests for schema-gated DATABASE_URL fallback and repo-root cwd env loading behavior
+- probed `apps/web/.env.local` `DATABASE_URL` safely; it is present but does not expose the clean access-link schema
+- reran staging access-link/no-card QA and production preflight successfully
+
+### Learnings
+
+- The source model is now codified in behavior, but the current local `apps/web/.env.local` DB target does not match the clean Preview(staging) schema.
+- The previous “wrong schema” conclusion is still true for the current file, but the failure category is now precise and test-backed.
+- Support lookup no longer requires a separate support env if `DATABASE_URL` is verified clean; it blocks only when the schema probe fails or no DB URL exists.
+
+### Unresolved Questions
+
+- Update `apps/web/.env.local` `DATABASE_URL` outside git, or provide `SUPPORT_OPS_DATABASE_URL`, so it points to the clean Preview(staging) DB.
+- Rerun support preflight and `ops:paid-result:lookup` after local DB source correction.
+- Keep Module 01 staging baseline partial until support lookup passes.
