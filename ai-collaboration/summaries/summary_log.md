@@ -9470,3 +9470,30 @@ Unresolved questions:
 
 - Decide whether the first controlled production credit-card smoke should include real Email/LINE provider sends or payment/access-link runtime only.
 - Confirm owner-side NewebPay dashboard settings for credit-card one-time only, NotifyURL, ReturnURL, and disabled non-card methods.
+
+## 2026-06-04 Production Email/LINE Provider Env Alignment v0
+
+### Completed Changes
+
+- saved the Production Email/LINE Provider Env Alignment v0 handoff and report
+- confirmed active Email env names: `EMAIL_PROVIDER`, `EMAIL_FROM`, `RESEND_API_KEY`
+- confirmed active LINE access-link env names: `LINE_RECOVERY_MESSAGE_PROVIDER` and `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` with fallback to `LINE_CHANNEL_ACCESS_TOKEN`
+- added Production `EMAIL_PROVIDER`, `EMAIL_FROM`, `RESEND_API_KEY`, and `LINE_RECOVERY_MESSAGE_PROVIDER` without printing values
+- reused existing Production `LINE_CHANNEL_ACCESS_TOKEN` and LINE LIFF/public env names
+- redeployed the existing Production deployment by deployment ID with explicit Vercel scope
+- verified post-redeploy Production health remains `environment=production`, branch `main`, route bundle `payment-foundation-2026-05-29`
+- verified `/`, `/refund`, and `/legal` return 200
+- verified production fake-paid, synthetic checkout, LINE operator smoke, and access-link operator smoke routes remain 404 fail-closed
+- verified Production clean access-link DB schema remains present and aggregate access-link row counts remain zero
+- did not enable runtime, run payment, send Email, or send LINE
+
+### Learnings
+
+- Production provider env names for the full paid delivery loop are now present and activated by redeploy.
+- The LINE sender can use existing `LINE_CHANNEL_ACCESS_TOKEN`; only `LINE_RECOVERY_MESSAGE_PROVIDER=line` was needed to enable the access-link sender path once runtime is later enabled.
+- Vercel redeploy by deployment ID required explicit `--scope studioanyu-1488s-projects`.
+
+### Unresolved Questions
+
+- Owner-side NewebPay dashboard confirmation remains the final blocker before controlled production smoke.
+- Decide exact controlled-smoke recipient handling for production Email and LINE before enabling runtime.

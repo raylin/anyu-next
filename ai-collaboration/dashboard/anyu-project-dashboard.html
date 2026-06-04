@@ -334,7 +334,7 @@
         <div><span class="label">Last updated</span><span class="value">2026-06-04 23:30 CST</span></div>
         <div><span class="label">Current phase</span><span class="value">Production DB gate passed; runtime still disabled</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Production Email/LINE provider env gate and approved production redeploy before controlled smoke</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Owner-side NewebPay dashboard confirmation before controlled production smoke</span></div>
       </div>
     </header>
 
@@ -362,7 +362,7 @@
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge progress">Planning</span><h3>Multi-module direction</h3><p>Recommended review-wait path: specify Module 02「職場暗流雷達」first, then add lightweight homepage cross-linking only when approved.</p></article>
-        <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: queue audit persistence, domain/project ambiguity, optional provider fields, future production smoke tooling, and deferred recovery-named env/module cleanup. New NewebPay generation jobs now use <code>newebpay_notify</code>; legacy <code>payment_success_future</code> remains accepted. Entitlement/payment-intent uniqueness and clean access-link schemas are applied and verified on staging and production. Production access-link crypto env names are present; Email/LINE provider-send env remains gated.</p></article>
+        <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: queue audit persistence, domain/project ambiguity, optional provider fields, future production smoke tooling, and deferred recovery-named env/module cleanup. New NewebPay generation jobs now use <code>newebpay_notify</code>; legacy <code>payment_success_future</code> remains accepted. Entitlement/payment-intent uniqueness and clean access-link schemas are applied and verified on staging and production. Production access-link crypto and Email/LINE provider-send env names are present and activated by redeploy.</p></article>
       </div>
     </section>
 
@@ -388,7 +388,7 @@
         <div class="progressbar"><span style="width: 90%"></span></div>
         <p><strong>Production launch readiness</strong></p>
         <div class="progressbar"><span style="width: 64%"></span></div>
-        <p>The launch gap is not queue architecture, sandbox payment flow, production payment env names, access-link crypto env names, or production DB schema. The active blockers are production Email/LINE provider-send env alignment if the first smoke includes messages, provider dashboard method confirmation, approved production redeploy, and controlled production smoke.</p>
+        <p>The launch gap is not queue architecture, sandbox payment flow, production payment env names, access-link crypto env names, Email/LINE provider env names, redeploy activation, or production DB schema. The active blockers are owner-side provider dashboard method/URL confirmation and controlled production smoke.</p>
       </div>
     </section>
 
@@ -519,7 +519,7 @@
       <table>
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
-          <tr><td>P0</td><td>Production Email/LINE provider env gate</td><td>Ops / Owner</td><td>Access-link crypto env is present; align production Email and LINE provider-send env if controlled smoke should include real messages.</td></tr>
+          <tr><td>P0</td><td>NewebPay dashboard confirmation</td><td>Owner</td><td>Confirm credit-card one-time only, production NotifyURL/ReturnURL, and disabled non-card methods before controlled production smoke.</td></tr>
           <tr><td>P0</td><td>Provider dashboard payment methods</td><td>Owner / NewebPay</td><td>Confirm credit-card one-time payment only for first controlled smoke; keep other methods disabled or non-blocking.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke</td><td>Owner / ops</td><td>Run one small controlled payment only after launch gate approval.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
