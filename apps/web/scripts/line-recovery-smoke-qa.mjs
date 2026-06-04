@@ -46,13 +46,14 @@ function assertSanitizedPayload(payload) {
   const serialized = JSON.stringify(payload ?? {});
   const forbiddenPatterns = [
     /prl_[A-Za-z0-9_-]+/u,
+    /pal_[A-Za-z0-9_-]+/u,
     /pa_[A-Za-z0-9_-]+/u,
     /pcs_[A-Za-z0-9_-]+/u,
-    /lineUserId/u,
-    /idToken/u,
-    /encryptedRecipient/u,
+    /"lineUserId"\s*:/u,
+    /"idToken"\s*:/u,
+    /"encryptedRecipient"\s*:/u,
     /"recipientHash"\s*:/u,
-    /tokenHash/u,
+    /"tokenHash"\s*:/u,
   ];
 
   return !forbiddenPatterns.some((pattern) => pattern.test(serialized));

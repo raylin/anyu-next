@@ -129,7 +129,10 @@ describe("recovery link smoke QA helpers", () => {
     expect(lineScript).toContain("/api/operator/line-recovery-smoke");
     expect(lineScript).toContain("privateRecipientPrinted: false");
     expect(lineScript).toContain("privateRecipientHashPrinted: false");
+    expect(lineScript).toContain("/pal_[A-Za-z0-9_-]+/u");
+    expect(lineScript).toContain('/"lineUserId"\\s*:');
     expect(lineScript).toContain('/"recipientHash"\\s*:');
+    expect(lineScript).not.toContain("/lineUserId/u");
     expect(lineScript).not.toContain("console.log(lineUserId");
     expect(lineScript).not.toContain("console.log(recipientHash");
   });
