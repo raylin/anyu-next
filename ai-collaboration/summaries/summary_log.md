@@ -9689,3 +9689,29 @@ Unresolved questions:
 - Decide whether to relink/remove `apps/web/.vercel/project.json` or enforce root-only production deploys.
 - Deploy the canonical `anyu-next` project fail-closed and re-alias `anyu.tw` after verification.
 - Rerun production preflight and retry v1 only after `blocked_project_link_mismatch` is resolved.
+
+## 2026-06-04 Production Vercel Project Relink / Canonical Deploy v0
+
+### Completed Changes
+
+- saved the Production Vercel Project Relink / Canonical Deploy v0 handoff and report
+- verified Production was fail-closed before changing the deploy target
+- moved the local `apps/web/.vercel/project.json` link aside so app-directory deploys no longer target non-canonical project `web`
+- reran production preflight; project-link mismatch cleared
+- deployed Production from repo root to canonical Vercel project `anyu-next`
+- Vercel deployment `dpl_AbXKWQcZicH58iJe7PSaGDz5tqcZ` completed successfully
+- verified `https://anyu.tw` and `https://www.anyu.tw` now point to canonical project `anyu-next`
+- verified health reports environment `production`, branch `staging`, commit `28663af45e67`, and route bundle `payment-foundation-2026-05-29`
+- reran production preflight; readiness returned `pass_ready_for_controlled_smoke`
+- verified public pages 200 and checkout/fake-paid routes fail-closed
+
+### Learnings
+
+- Root-level Vercel deploy is the correct near-term CLI path because the root project has rootDirectory `apps/web` and the full Production env set.
+- The canonical deploy restored commit metadata in `/api/health`.
+- Vercel automatically aliased `anyu.tw` and `www.anyu.tw` to the canonical project after the root Production deploy.
+
+### Unresolved Questions
+
+- Add a root-level production deploy wrapper or runbook update so future operators do not deploy from `apps/web`.
+- Proceed to Controlled Production Payment Smoke v1 Retry only through the canonical root deploy/preflight path.

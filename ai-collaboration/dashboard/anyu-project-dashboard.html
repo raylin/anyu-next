@@ -329,19 +329,19 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant approval, production provider config dry-run, production DB migration gate, unified ReturnURL, and production runtime preflight helper are complete. One controlled production credit-card smoke accepted payment and recovered through NotifyURL resend after missing runtime env was corrected; paid result and Email provider acceptance were verified. Controlled production smoke v1 retries are paused: reconciliation found repo root project `anyu-next` has the full Production env set, but `apps/web` local deploys targeted separate project `web`, and `anyu.tw` currently points to a `web` deployment. Core Engine / Module Grammar v0 defines future module grammar, and LINE is planned as a consent-based owned channel rather than paid report delivery.</p>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant approval, production provider config dry-run, production DB migration gate, unified ReturnURL, and production runtime preflight helper are complete. One controlled production credit-card smoke accepted payment and recovered through NotifyURL resend after missing runtime env was corrected; paid result and Email provider acceptance were verified. Vercel deploy/env source of truth is now reconciled: `anyu.tw` points to canonical project `anyu-next`, health reports commit `28663af45e67`, and production preflight passes while checkout remains disabled. Core Engine / Module Grammar v0 defines future module grammar, and LINE is planned as a consent-based owned channel rather than paid report delivery.</p>
       <div class="snapshot" aria-label="Project snapshot">
         <div><span class="label">Last updated</span><span class="value">2026-06-04 12:40 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Canonical Vercel project identified; runtime disabled</span></div>
+        <div><span class="label">Current phase</span><span class="value">Canonical deploy restored; runtime disabled</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Vercel deploy/env source-of-truth mismatch</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Controlled production payment smoke v1</span></div>
       </div>
     </header>
 
     <section>
       <h2>Launch Gate Model</h2>
       <div class="grid">
-        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, and one recovered controlled production credit-card smoke have passed with checkout/runtime disabled again. Controlled production smoke v1 was intentionally aborted once for LINE LIFF state handling and then again before payment when a runtime-enabled retry exposed a Vercel project/env mismatch. Resolve deploy/env source of truth before another v1 attempt.</p></article>
+        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, and one recovered controlled production credit-card smoke have passed with checkout/runtime disabled again. Vercel deploy/env source of truth is reconciled: Production now points to canonical `anyu-next`, and preflight passes. Still requires a clean controlled production v1 smoke before soft-open.</p></article>
         <article class="card"><span class="badge waiting">Gate 2</span><h3>Soft public availability</h3><p>Allows low/no-traffic production checkout only after controlled smoke, support/access-link readiness, monitoring, and rollback thresholds. No ads yet.</p></article>
         <article class="card"><span class="badge waiting">Gate 3</span><h3>Growth / ads launch</h3><p>Requires stable soft availability, conversion tracking, support cadence, stop-loss thresholds, channel readiness, and ad budget controls. NewebPay approval does not equal commercial launch.</p></article>
       </div>
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers are Production Vercel project/env reconciliation, a Production LINE bind retry, a clean controlled production v1 smoke, and an explicit soft-availability decision. No ads.</p></article>
+        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers are Production LINE bind retry inside a controlled smoke, a clean controlled production v1 smoke, and an explicit soft-availability decision. No ads.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge progress">Planning</span><h3>Multi-module direction</h3><p>Recommended review-wait path: specify Module 02「職場暗流雷達」first, then add lightweight homepage cross-linking only when approved.</p></article>
@@ -520,8 +520,7 @@
       <table>
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
-          <tr><td>P0</td><td>Production Vercel project/env source of truth</td><td>Ops</td><td>Use root project `anyu-next` as canonical; deploy fail-closed from repo root and re-alias anyu.tw away from non-canonical `web` before enabling runtime again.</td></tr>
-          <tr><td>P0</td><td>Production LINE bind retry</td><td>Owner / ops</td><td>After env/deploy reconciliation, retry LINE bind before payment using a temporary runtime window or a bind-only helper.</td></tr>
+          <tr><td>P0</td><td>Production LINE bind retry</td><td>Owner / ops</td><td>Retry LINE bind before payment inside the next controlled runtime window.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke v1</td><td>Owner / ops</td><td>After LINE bind retry passes, run one clean credit-card one-time smoke after preflight; verify paid render, Email inbox/link, and LINE message without NotifyURL recovery intervention.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
@@ -659,6 +658,7 @@
           <li><a href="../reports/2026-06-04-production-deploy-line-bind-retry-v0.md">Production Deploy + LINE Bind Retry v0</a></li>
           <li><a href="../reports/2026-06-04-controlled-production-payment-smoke-v1-retry-line-bind-checkpoint.md">Controlled Production Payment Smoke v1 Retry with LINE Bind Checkpoint</a></li>
           <li><a href="../reports/2026-06-04-production-vercel-project-env-source-of-truth-reconciliation-v0.md">Production Vercel Project / Env Source-of-Truth Reconciliation v0</a></li>
+          <li><a href="../reports/2026-06-04-production-vercel-project-relink-canonical-deploy-v0.md">Production Vercel Project Relink / Canonical Deploy v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>
