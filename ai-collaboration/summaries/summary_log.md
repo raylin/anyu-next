@@ -9440,3 +9440,33 @@ Unresolved questions:
 
 - Decide when to rename recovery-named endpoint/script/module files.
 - Decide when to align recovery-named env vars to access-link terminology.
+
+## 2026-06-04 Production Access-Link / Provider Env Gate v0
+
+### Completed Changes
+
+- saved the Production Access-Link / Provider Env Gate v0 handoff and report
+- verified Production health reports `environment=production`, branch `main`, and route bundle `payment-foundation-2026-05-29`
+- verified public `/`, `/refund`, and `/legal` return 200
+- verified production checkout/fake-paid/operator smoke routes remain fail-closed with 404
+- verified Production DB has clean access-link tables and provider audit columns, with old recovery-named tables absent
+- verified Production access-link aggregate row counts are zero
+- listed Vercel Production env names only, without printing values
+- generated and added missing Production access-link crypto env names:
+  - `PAYMENT_RECOVERY_LINK_TOKEN_SECRET`
+  - `PAYMENT_RECOVERY_CONTACT_HASH_SECRET`
+  - `PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY`
+  - `LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY`
+- did not add Email provider env or LINE access-link message-provider flag
+- did not redeploy Production, enable runtime, run payment, or send messages
+
+### Learnings
+
+- Production payment provider env names are present, but local Vercel env-pull did not provide usable exact value equality checks; live route behavior remains the reliable fail-closed evidence from this shell.
+- Production access-link crypto env readiness is now aligned, but a future approved Production redeploy is required before newly added env names are guaranteed active in runtime.
+- Full Email/LINE access-link provider readiness remains blocked until production Email provider env and LINE message-provider flag are explicitly configured.
+
+### Unresolved Questions
+
+- Decide whether the first controlled production credit-card smoke should include real Email/LINE provider sends or payment/access-link runtime only.
+- Confirm owner-side NewebPay dashboard settings for credit-card one-time only, NotifyURL, ReturnURL, and disabled non-card methods.
