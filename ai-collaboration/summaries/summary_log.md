@@ -9883,3 +9883,32 @@ Unresolved questions:
 - Deploy this implementation to Preview(staging) and complete the broad staging E2E matrix.
 - Owner approval is needed before `qa:line-access-link:smoke` if it will send a real staging LINE message.
 - Remaining recovery-named env/module aliases are recorded as follow-up tech debt, not cleaned in this task.
+
+## 2026-06-04 Module 01 Staging End-to-End Stabilization Baseline v0 Final
+
+### Completed Changes
+
+- deployed mandatory access-link save gating to Preview(staging) at commit `a50d338`
+- updated staging QA scripts to match the new required-save checkout-start contract
+- verified desktop/non-mobile checkout-start shows Email only, hides LINE, and blocks payment before Email save
+- verified mobile checkout-start shows LINE first above Email fallback and blocks payment before LINE or Email save
+- verified saved access-link state unlocks provider handoff without printing provider fields or token values
+- passed `qa:result-checkout:no-card` against Preview(staging)
+- passed `qa:access-link:smoke` against Preview(staging) on retry after one transient paid-result readiness race
+- confirmed Production remains frozen/fail-closed through production payment preflight
+- attempted support lookup against a staging paid-result artifact; it failed safely with `support_ops_database_url_missing`
+- updated the execution report and dashboard with a partial baseline classification
+
+### Learnings
+
+- The new UX gate is working at render and automated QA levels: payment handoff is hidden until an Email or LINE access-link save exists.
+- Desktop Email-only and mobile LINE-first behavior can be server-rendered from user-agent without changing DB/provider behavior.
+- Existing QA scripts encoded the previous optional save/skip-warning behavior and needed alignment before they could validate the new baseline.
+- `ops:paid-result:lookup` is intentionally strict about `SUPPORT_OPS_DATABASE_URL`, so support diagnostics are blocked until local/operator env alignment is fixed.
+- Real staging Email/LINE owner verification was not repeated in this task; historical proof remains but this baseline should not be marked pass.
+
+### Unresolved Questions
+
+- Align `SUPPORT_OPS_DATABASE_URL` so staging and production support lookups can run without manual Neon confusion.
+- Decide whether to approve one real staging Email and one real staging LINE message for a fresh manual channel verification task.
+- Keep Production frozen until the staging manual channel verification and support lookup blocker are resolved.
