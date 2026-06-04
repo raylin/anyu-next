@@ -9605,3 +9605,30 @@ Unresolved questions:
 
 - Deploy the fix and retry owner-assisted production LINE bind before rerunning payment.
 - Decide whether to reuse the current unpaid production checkout result or create a fresh result for the next v1 attempt.
+
+## 2026-06-04 Production Deploy + LINE Bind Retry v0
+
+### Completed Changes
+
+- saved the Production Deploy + LINE Bind Retry v0 handoff and execution report
+- deployed the LINE LIFF parser fix from local source commit `538eccb87e2f40593340ed3b1b19b90f0ab92e89`
+- Vercel Production deployment `dpl_FZiXV9L7EgbwahgSZo6tUF6WLTdV` completed successfully
+- aliased `https://anyu.tw` to the new deployment
+- verified public pages `/`, `/refund`, and `/legal` return 200
+- ran `qa:production:payment-preflight` in dry-run mode after deploy; readiness remained `pass_ready_for_controlled_smoke`
+- verified checkout and fake-paid routes remain fail-closed
+- created one fresh synthetic Production free result to test whether LINE bind could be retried without enabling checkout/runtime
+- verified checkout-disabled state does not expose the LINE save CTA, so owner-assisted LINE bind retry could not be run under this task's constraints
+- ran read-only aggregate Production DB checks; no LINE contact and no LINE recipient secret rows exist yet
+
+### Learnings
+
+- The parser fix is deployed to Production, but the app health route reports git metadata as `unknown` for local Vercel CLI deploys.
+- With Production checkout/runtime disabled, checkout pages render the checkout-unavailable state and cannot be used for a LINE bind retry.
+- The current system has no production-safe LINE-bind-only retry surface independent of checkout availability.
+
+### Unresolved Questions
+
+- Decide whether to temporarily enable checkout/runtime for a LINE-bind-only retry window before payment.
+- Alternatively implement a tightly gated production LINE bind-only smoke helper.
+- Controlled Production Payment Smoke v1 remains pending until LINE bind can be retried and verified.
