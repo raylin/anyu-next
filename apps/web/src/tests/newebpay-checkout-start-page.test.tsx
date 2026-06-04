@@ -6,11 +6,13 @@ const {
   mockIsDbConfigured,
   mockCreateNewebPayCheckout,
   mockGetPaymentRecoveryContactsByResultId,
+  mockHeaders,
 } = vi.hoisted(() => ({
   mockCanStartNewebPayCheckoutFromResult: vi.fn(),
   mockIsDbConfigured: vi.fn(),
   mockCreateNewebPayCheckout: vi.fn(),
   mockGetPaymentRecoveryContactsByResultId: vi.fn(),
+  mockHeaders: vi.fn(),
 }));
 
 vi.mock("@/lib/runtime/feature-flags", () => ({
@@ -29,6 +31,10 @@ vi.mock("@/lib/db/payment-recovery-contacts", () => ({
   getPaymentRecoveryContactsByResultId: mockGetPaymentRecoveryContactsByResultId,
 }));
 
+vi.mock("next/headers", () => ({
+  headers: mockHeaders,
+}));
+
 import CheckoutStartPage from "@/app/m/[moduleSlug]/result/[resultId]/checkout/page";
 
 const params = {
@@ -44,6 +50,7 @@ describe("NewebPay checkout-start page", () => {
     process.env.OPERATOR_TEST_SECRET = "operator-secret";
     process.env.PAYMENT_RECOVERY_CONTACT_HASH_SECRET = "test-only-recovery-hash-secret";
     delete process.env.NEXT_PUBLIC_LINE_LIFF_URL;
+    mockHeaders.mockResolvedValue(new Headers({ "user-agent": "Mozilla/5.0 Macintosh" }));
     mockCanStartNewebPayCheckoutFromResult.mockReturnValue(true);
     mockIsDbConfigured.mockReturnValue(true);
     mockGetPaymentRecoveryContactsByResultId.mockResolvedValue([]);
@@ -82,32 +89,34 @@ describe("NewebPay checkout-start page", () => {
     expect(html).not.toContain("TradeSha");
   });
 
-  it("creates checkout server-side and renders an explicit NewebPay submit form", async () => {
+  it("requires Email save before rendering provider fields on desktop", async () => {
     const page = await CheckoutStartPage(params);
     const html = renderToStaticMarkup(page);
 
-    expect(html).toContain("前往藍新安全付款頁");
+    expect(html).toContain("先保存查看連結");
+    expect(html).toContain("請先用 Email 保存查看連結");
     expect(html).toContain("先保存查看連結");
     expect(html).toContain("Email 查看連結");
-    expect(html).toContain("LINE 查看連結");
-    expect(html).toContain("用 LINE 保存查看連結");
-    expect(html).toContain("從 LINE 回到 ANYU 查看完整報告");
-    expect(html).toContain("LINE 綁定失敗也不影響付款或查看報告");
-    expect(html).toContain("/line/recovery/bind?state=rlb_");
+    expect(html).toContain("用 Email 保存查看連結");
+    expect(html).not.toContain("LINE 查看連結");
+    expect(html).not.toContain("用 LINE 保存查看連結");
+    expect(html).not.toContain("/line/recovery/bind?state=rlb_");
     expect(html).toContain("完整報告的專屬查看連結");
     expect(html).toContain("回到 ANYU 查看完整報告的連結");
     expect(html).toContain("不會包含完整報告內容");
     expect(html).toContain("也想收到新測驗、早鳥或限時解鎖通知");
-    expect(html).toContain("我了解尚未保存查看連結，仍要繼續付款");
-    expect(html).toContain('method="POST"');
-    expect(html).toContain('action="https://ccore.newebpay.com/MPG/mpg_gateway"');
+    expect(html).toContain("付款前請先保存查看連結");
+    expect(html).toContain("請先完成 Email 查看連結保存，付款按鈕就會開啟");
+    expect(html).toContain("繼續付款");
+    expect(html).not.toContain("我了解尚未保存查看連結，仍要繼續付款");
+    expect(html).not.toContain('action="https://ccore.newebpay.com/MPG/mpg_gateway"');
     expect(html).toContain(
       'action="/api/modules/ambiguous-temperature/result/result-1/recovery/email"',
     );
-    expect(html).toContain('name="MerchantID"');
-    expect(html).toContain('name="TradeInfo"');
-    expect(html).toContain('name="TradeSha"');
-    expect(html).toContain('name="Version"');
+    expect(html).not.toContain('name="MerchantID"');
+    expect(html).not.toContain('name="TradeInfo"');
+    expect(html).not.toContain('name="TradeSha"');
+    expect(html).not.toContain('name="Version"');
     expect(html).toContain("MODULE 01");
     expect(html).toContain("曖昧溫度計");
     expect(html).toContain("完整報告 · 下一句怎麼回");
@@ -153,6 +162,26 @@ describe("NewebPay checkout-start page", () => {
     });
   });
 
+  it("renders LINE first above Email on mobile before payment is unlocked", async () => {
+    mockHeaders.mockResolvedValue(new Headers({ "user-agent": "Mozilla/5.0 iPhone Mobile" }));
+
+    const page = await CheckoutStartPage(params);
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("建議用 LINE 保存查看連結");
+    expect(html).toContain("用 LINE 保存查看連結");
+    expect(html).toContain("改用 Email 保存查看連結");
+    expect(html).toContain("/line/recovery/bind?state=rlb_");
+    expect(html.indexOf("建議用 LINE 保存查看連結")).toBeLessThan(
+      html.indexOf("Email 備用查看連結"),
+    );
+    expect(html).toContain("請先完成 LINE 或 Email 查看連結保存，付款按鈕就會開啟");
+    expect(html).not.toContain('action="https://ccore.newebpay.com/MPG/mpg_gateway"');
+    expect(html).not.toContain('name="TradeInfo"');
+    expect(html).not.toContain("完整報告會傳到 LINE");
+    expect(html).not.toContain("LINE 交付完整報告");
+  });
+
   it("shows saved state when an existing recovery contact is present", async () => {
     mockGetPaymentRecoveryContactsByResultId.mockResolvedValue([
       {
@@ -167,11 +196,17 @@ describe("NewebPay checkout-start page", () => {
 
     expect(html).toContain("已保存到 Email");
     expect(html).toContain("已保存查看連結");
+    expect(html).toContain('action="https://ccore.newebpay.com/MPG/mpg_gateway"');
+    expect(html).toContain('name="MerchantID"');
+    expect(html).toContain('name="TradeInfo"');
+    expect(html).toContain('name="TradeSha"');
+    expect(html).toContain('name="Version"');
+    expect(html).toContain("繼續付款");
     expect(html).not.toContain("我了解尚未保存查看連結，仍要繼續付款");
     expect(html).not.toContain("owner@example.com");
   });
 
-  it("shows a safe email recovery error without blocking checkout", async () => {
+  it("shows a safe email save error and keeps payment locked", async () => {
     const page = await CheckoutStartPage({
       ...params,
       searchParams: Promise.resolve({ recovery: "email_error" }),
@@ -179,7 +214,8 @@ describe("NewebPay checkout-start page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("Email 保存暫時失敗");
-    expect(html).toContain("前往藍新安全付款頁");
+    expect(html).toContain("請先完成 Email 查看連結保存，付款按鈕就會開啟");
+    expect(html).not.toContain('action="https://ccore.newebpay.com/MPG/mpg_gateway"');
     expect(html).not.toContain("owner@example.com");
   });
 

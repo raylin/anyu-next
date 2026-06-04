@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { Button } from "@/components/anyu/Button";
@@ -27,6 +28,8 @@ type CheckoutStartPageProps = {
     lineRecovery?: string;
   }>;
 };
+
+type CheckoutDeviceContext = "desktop" | "mobile";
 
 function CheckoutBridgeShell({
   moduleConfig,
@@ -145,6 +148,20 @@ async function getExistingRecoveryState(resultId: string) {
   }
 }
 
+function detectCheckoutDeviceContext(userAgent: string | null): CheckoutDeviceContext {
+  const normalized = userAgent?.toLowerCase() ?? "";
+
+  if (
+    /mobile|iphone|ipod|android.*mobile|windows phone|instagram|fbav|fban|threads|line\//u.test(
+      normalized,
+    )
+  ) {
+    return "mobile";
+  }
+
+  return "desktop";
+}
+
 function RecoverySoftGate({
   moduleSlug,
   resultId,
@@ -152,6 +169,7 @@ function RecoverySoftGate({
   recovery,
   lineRecovery,
   existingRecovery,
+  deviceContext,
 }: {
   moduleSlug: string;
   resultId: string;
@@ -159,6 +177,7 @@ function RecoverySoftGate({
   recovery?: string;
   lineRecovery?: string;
   existingRecovery: Awaited<ReturnType<typeof getExistingRecoveryState>>;
+  deviceContext: CheckoutDeviceContext;
 }) {
   const emailSaved = recovery === "email_saved" || existingRecovery.hasEmail;
   const emailError = recovery === "email_error";
@@ -176,6 +195,70 @@ function RecoverySoftGate({
     : lineSaved
       ? "已保存到 LINE"
       : null;
+  const showLineOption = deviceContext === "mobile";
+  const emailOption = (
+    <form
+      method="post"
+      action={`/api/modules/${encodeURIComponent(moduleSlug)}/result/${encodeURIComponent(
+        resultId,
+      )}/recovery/email`}
+      className="anyu-recovery-email-form"
+    >
+      <input type="hidden" name="paymentIntentId" value={paymentIntentId} />
+      <label className="anyu-recovery-label" htmlFor="recovery-email">
+        {showLineOption ? "Email 備用查看連結" : "Email 查看連結"}
+      </label>
+      <div className="anyu-recovery-email-row">
+        <input
+          id="recovery-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          className="anyu-recovery-input"
+          aria-describedby="recovery-email-help"
+          required
+        />
+        <Button type="submit">
+          {showLineOption ? "改用 Email 保存查看連結" : "用 Email 保存查看連結"}
+        </Button>
+      </div>
+      <p id="recovery-email-help" className="anyu-subtle-note">
+        Email 只會收到回到 ANYU 查看完整報告的連結，不會包含完整報告內容。
+      </p>
+      <label className="anyu-recovery-checkbox">
+        <input type="checkbox" name="marketingOptIn" value="1" />
+        <span>也想收到新測驗、早鳥或限時解鎖通知</span>
+      </label>
+      {emailError ? (
+        <p className="anyu-recovery-error" role="status">
+          Email 保存暫時失敗。請再試一次，或聯絡客服協助查詢。
+        </p>
+      ) : null}
+    </form>
+  );
+  const lineOption = showLineOption ? (
+    <div className="anyu-recovery-line-option" aria-label="LINE 查看連結選項">
+      <div>
+        <p className="anyu-recovery-label">建議用 LINE 保存查看連結</p>
+        <p className="anyu-subtle-note">
+          付款完成後，我們會把完整報告的專屬查看連結傳到 LINE。也可以改用 Email 保存。
+        </p>
+        {lineError ? (
+          <p className="anyu-recovery-error" role="status">
+            LINE 保存沒有完成。你可以重試 LINE，或改用 Email 保存查看連結。
+          </p>
+        ) : null}
+      </div>
+      {lineBind.ok ? (
+        <Link href={lineBind.href} className="anyu-storefront-link">
+          用 LINE 保存查看連結
+        </Link>
+      ) : (
+        <span className="anyu-recovery-soon-badge">暫時無法啟動</span>
+      )}
+    </div>
+  ) : null;
 
   return (
     <div className="anyu-recovery-soft-gate" aria-labelledby="payment-recovery-title">
@@ -189,68 +272,14 @@ function RecoverySoftGate({
         {savedLabel ? <span className="anyu-recovery-saved-badge">{savedLabel}</span> : null}
       </div>
       <p className="anyu-copy">
-        付款完成後，我們會把完整報告的專屬查看連結寄到你的 Email 或傳到 LINE。之後即使關閉頁面，也可以在有效期限內從連結回到 ANYU 查看。
+        {showLineOption
+          ? "付款完成後，我們會把完整報告的專屬查看連結傳到 LINE。也可以改用 Email 保存。"
+          : "請先用 Email 保存查看連結。付款完成後，我們會把完整報告的專屬查看連結寄到你的 Email，之後可在有效期限內回 ANYU 查看。"}
       </p>
 
       <div className="anyu-recovery-options">
-        <form
-          method="post"
-          action={`/api/modules/${encodeURIComponent(moduleSlug)}/result/${encodeURIComponent(
-            resultId,
-          )}/recovery/email`}
-          className="anyu-recovery-email-form"
-        >
-          <input type="hidden" name="paymentIntentId" value={paymentIntentId} />
-          <label className="anyu-recovery-label" htmlFor="recovery-email">
-            Email 查看連結
-          </label>
-          <div className="anyu-recovery-email-row">
-            <input
-              id="recovery-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-              className="anyu-recovery-input"
-              aria-describedby="recovery-email-help"
-              required
-            />
-            <Button type="submit">用 Email 保存查看連結</Button>
-          </div>
-          <p id="recovery-email-help" className="anyu-subtle-note">
-            Email 只會收到回到 ANYU 查看完整報告的連結，不會包含完整報告內容。
-          </p>
-          <label className="anyu-recovery-checkbox">
-            <input type="checkbox" name="marketingOptIn" value="1" />
-            <span>也想收到新測驗、早鳥或限時解鎖通知</span>
-          </label>
-          {emailError ? (
-            <p className="anyu-recovery-error" role="status">
-              Email 保存暫時失敗，但你仍可繼續付款；若之後找不到完整報告，請聯絡客服協助。
-            </p>
-          ) : null}
-        </form>
-
-        <div className="anyu-recovery-line-option" aria-label="LINE 查看連結選項">
-          <div>
-            <p className="anyu-recovery-label">LINE 查看連結</p>
-            <p className="anyu-subtle-note">
-              用 LINE 保存查看連結。之後可以從 LINE 回到 ANYU 查看完整報告；LINE 綁定失敗也不影響付款或查看報告。
-            </p>
-            {lineError ? (
-              <p className="anyu-recovery-error" role="status">
-                LINE 保存沒有完成。你仍可繼續付款，或改用 Email 保存。
-              </p>
-            ) : null}
-          </div>
-          {lineBind.ok ? (
-            <Link href={lineBind.href} className="anyu-storefront-link">
-              用 LINE 保存查看連結
-            </Link>
-          ) : (
-            <span className="anyu-recovery-soon-badge">暫時無法啟動</span>
-          )}
-        </div>
+        {showLineOption ? lineOption : null}
+        {emailOption}
       </div>
 
       {existingRecovery.hasAny || emailSaved || lineSaved ? (
@@ -258,10 +287,10 @@ function RecoverySoftGate({
           已保存查看連結。你可以繼續前往藍新安全付款頁。
         </p>
       ) : (
-        <div className="anyu-recovery-skip-warning">
-          <p className="anyu-kicker t-label-dim">skip allowed</p>
+        <div className="anyu-recovery-required-warning" role="status">
+          <p className="anyu-kicker t-label-dim">required before payment</p>
           <p>
-            你仍然可以繼續付款。但如果未保存查看連結，關閉頁面或更換裝置後，可能需要聯絡客服協助查詢。
+            付款前請先保存查看連結。若未保存，關閉頁面或更換裝置後，可能需要聯絡客服協助查詢。
           </p>
         </div>
       )}
@@ -350,7 +379,12 @@ export default async function CheckoutStartPage({ params, searchParams }: Checko
 
   const { checkoutContract } = checkout;
   const existingRecovery = await getExistingRecoveryState(resultId);
-  const recoverySaved = query?.recovery === "email_saved" || existingRecovery.hasAny;
+  const recoverySaved =
+    query?.recovery === "email_saved" ||
+    query?.lineRecovery === "line_saved" ||
+    existingRecovery.hasAny;
+  const requestHeaders = await headers();
+  const deviceContext = detectCheckoutDeviceContext(requestHeaders.get("user-agent"));
 
   return (
     <CheckoutBridgeShell moduleConfig={moduleConfig} resultId={resultId}>
@@ -375,6 +409,7 @@ export default async function CheckoutStartPage({ params, searchParams }: Checko
           recovery={query?.recovery}
           lineRecovery={query?.lineRecovery}
           existingRecovery={existingRecovery}
+          deviceContext={deviceContext}
         />
         <CheckoutTrustBridge />
 
@@ -389,20 +424,28 @@ export default async function CheckoutStartPage({ params, searchParams }: Checko
           </ul>
         </div>
 
-        <form method={checkoutContract.method} action={checkoutContract.actionUrl}>
-          {Object.entries(checkoutContract.fields).map(([name, value]) => (
-            <input key={name} type="hidden" name={name} value={value} />
-          ))}
-          {recoverySaved ? null : (
-            <label className="anyu-recovery-provider-ack">
-              <input type="checkbox" required />
-              <span>我了解尚未保存查看連結，仍要繼續付款。</span>
-            </label>
-          )}
-          <Button type="submit" className="anyu-button-block">
-            前往藍新安全付款頁
-          </Button>
-        </form>
+        {recoverySaved ? (
+          <form method={checkoutContract.method} action={checkoutContract.actionUrl}>
+            {Object.entries(checkoutContract.fields).map(([name, value]) => (
+              <input key={name} type="hidden" name={name} value={value} />
+            ))}
+            <Button type="submit" className="anyu-button-block">
+              繼續付款
+            </Button>
+          </form>
+        ) : (
+          <div className="anyu-recovery-payment-locked" role="status">
+            <p className="anyu-kicker t-label-dim">payment locked</p>
+            <p>
+              {deviceContext === "mobile"
+                ? "請先完成 LINE 或 Email 查看連結保存，付款按鈕就會開啟。"
+                : "請先完成 Email 查看連結保存，付款按鈕就會開啟。"}
+            </p>
+            <Button type="button" className="anyu-button-block" disabled>
+              繼續付款
+            </Button>
+          </div>
+        )}
 
         <p className="anyu-subtle-note">
           請只在藍新付款頁輸入付款資訊。暗語 ANYU 不會向你索取完整卡號、密碼或任何支付驗證碼。

@@ -9857,3 +9857,29 @@ Unresolved questions:
 - Owner still needs to confirm Email inbox receipt, LINE message receipt, `/r/ link opening, and browser paid result render.
 - Add a safe preflight enhancement to validate processor auth usability, not only env-name presence.
 - Align `SUPPORT_OPS_DATABASE_URL` for faster Production support lookup in future smokes.
+
+## 2026-06-04 Module 01 Staging End-to-End Stabilization Baseline v0
+
+### Completed Changes
+
+- saved the Module 01 staging stabilization baseline handoff
+- verified Production freeze before staging work: public pages live, checkout/fake-paid/operator routes fail closed, Production preflight passed, and runtime/checkout flags remained disabled
+- reconciled Preview(staging) health, env-name presence, and clean access-link schema before implementation
+- implemented mandatory access-link save on checkout-start:
+  - desktop/non-mobile shows Email only
+  - mobile/in-app browsers show LINE first above Email fallback
+  - provider form/fields remain hidden until Email or LINE save succeeds
+  - saved Email/LINE state unlocks payment handoff
+- passed lint, targeted checkout/access-link/LINE/ReturnURL tests, full tests, and build locally
+
+### Learnings
+
+- The previous checkout-start page still allowed payment with an acknowledgment checkbox before saving an access link.
+- Server-side user-agent detection is enough for the first baseline: desktop gets Email-only, mobile gets LINE-first.
+- Preview(staging) schema is clean access-link schema and old recovery-named DB tables are absent.
+
+### Unresolved Questions
+
+- Deploy this implementation to Preview(staging) and complete the broad staging E2E matrix.
+- Owner approval is needed before `qa:line-access-link:smoke` if it will send a real staging LINE message.
+- Remaining recovery-named env/module aliases are recorded as follow-up tech debt, not cleaned in this task.

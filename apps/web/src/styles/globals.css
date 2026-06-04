@@ -1273,6 +1273,8 @@ textarea {
 .anyu-recovery-email-form,
 .anyu-recovery-line-option,
 .anyu-recovery-skip-warning,
+.anyu-recovery-required-warning,
+.anyu-recovery-payment-locked,
 .anyu-recovery-confirmation {
   padding: 0.8rem;
   border: 1px solid var(--anyu-line);
@@ -1324,6 +1326,8 @@ textarea {
 
 .anyu-recovery-error,
 .anyu-recovery-confirmation,
+.anyu-recovery-required-warning p,
+.anyu-recovery-payment-locked p,
 .anyu-recovery-skip-warning p {
   margin: 0;
   color: var(--anyu-dim);
@@ -1338,9 +1342,16 @@ textarea {
 }
 
 .anyu-recovery-error,
+.anyu-recovery-required-warning,
+.anyu-recovery-payment-locked,
 .anyu-recovery-skip-warning {
   border-color: color-mix(in srgb, var(--anyu-accent) 42%, var(--anyu-line));
   background: color-mix(in srgb, var(--anyu-accent) 8%, var(--anyu-card));
+}
+
+.anyu-recovery-payment-locked {
+  display: grid;
+  gap: var(--anyu-space-2);
 }
 
 .anyu-recovery-provider-ack {
@@ -2570,6 +2581,8 @@ textarea {
 .anyu-v2 .anyu-recovery-email-form,
 .anyu-v2 .anyu-recovery-line-option,
 .anyu-v2 .anyu-recovery-skip-warning,
+.anyu-v2 .anyu-recovery-required-warning,
+.anyu-v2 .anyu-recovery-payment-locked,
 .anyu-v2 .anyu-recovery-confirmation,
 .anyu-v2 .anyu-recovery-provider-ack,
 .anyu-v2 .anyu-recovery-input {
