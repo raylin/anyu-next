@@ -10000,3 +10000,28 @@ Unresolved questions:
 - Update `apps/web/.env.local` `DATABASE_URL` outside git, or provide `SUPPORT_OPS_DATABASE_URL`, so it points to the clean Preview(staging) DB.
 - Rerun support preflight and `ops:paid-result:lookup` after local DB source correction.
 - Keep Module 01 staging baseline partial until support lookup passes.
+
+## 2026-06-05 Local / Staging DB Branch Reconciliation v0
+
+### Completed Changes
+
+- saved the Local / Staging DB Branch Reconciliation v0 handoff
+- performed read-only local env file presence checks by key name only
+- probed `apps/web/.env.local` `DATABASE_URL` without printing connection details
+- confirmed local `.env.local` DB has the older analysis/session/unlock schema and no payment/access-link tables
+- inspected Neon Preview(staging) and confirmed it has clean access-link/payment schema with old recovery tables absent
+- inspected Neon `dev/local` and confirmed its table set and aggregate counts match local `.env.local` DB
+- ran production payment preflight in dry-run mode; production public pages are live and checkout/fake-paid remain fail-closed
+- documented that support lookup should use explicit Preview(staging) `SUPPORT_OPS_DATABASE_URL`, not local `.env.local` `DATABASE_URL`
+
+### Learnings
+
+- `apps/web/.env.local` `DATABASE_URL` matches the separate `dev/local` branch, not Vercel Preview(staging).
+- The previous “wrong schema” finding was accurate for support lookup, but the cause is branch/source mismatch rather than a broken local env file.
+- Preview(staging) is clean and contains the current payment/access-link schema; support lookup needs a local operator DB source pointed at that branch.
+
+### Unresolved Questions
+
+- Provide Preview(staging) `SUPPORT_OPS_DATABASE_URL` through an untracked local/operator mechanism.
+- Decide later whether to migrate/reset `dev/local` for local Module 01 payment/access-link development.
+- Keep Module 01 staging baseline partial until support lookup passes against staging artifacts.

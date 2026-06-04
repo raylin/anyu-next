@@ -410,7 +410,7 @@
           <li><span class="time">Sandbox preflight</span><span>Sandbox checkout preflight passed with ccore gateway, MPG 2.0, NT$49, and pcs_ handoff.</span></li>
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
-          <li><span class="time">Current</span><span>Production is frozen. Preview(staging) mandatory access-link save gate is deployed: desktop Email-only, mobile LINE-first with Email fallback. Automated access-link/no-card QA and real staging Email/LINE receipt/link-click checks pass. Baseline remains partial pending support lookup env.</span></li>
+          <li><span class="time">Current</span><span>Production is frozen. Preview(staging) mandatory access-link save gate is deployed: desktop Email-only, mobile LINE-first with Email fallback. Automated access-link/no-card QA and real staging Email/LINE receipt/link-click checks pass. Baseline remains partial pending Preview(staging) support lookup DB source.</span></li>
           <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned; checkout-start wiring, visual bridge polish and staging smoke, and ReturnURL polling implemented; result-page checkout staging sandbox QA passed end-to-end.</span></li>
         </ol>
       </div>
@@ -435,7 +435,7 @@
         <h2>NewebPay Status</h2>
         <p>Merchant review approval is complete. Production public pages are ready. Production NewebPay provider config dry-run, Production DB migration gate, unified ReturnURL, and one recovered controlled production payment smoke passed with runtime disabled again. Sandbox shop remains available for regression QA.</p>
         <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
-        <p>Next action: keep production disabled. Correct the local operator DB source so either <code>apps/web/.env.local</code> <code>DATABASE_URL</code> or <code>SUPPORT_OPS_DATABASE_URL</code> points to the clean Preview(staging) schema, then rerun support lookup against the staging artifacts before returning to production smoke.</p>
+        <p>Next action: keep production disabled. Use an explicit <code>SUPPORT_OPS_DATABASE_URL</code> for Preview(staging) support lookup; <code>apps/web/.env.local</code> <code>DATABASE_URL</code> matches the separate <code>dev/local</code> branch and should not be treated as Preview(staging). Then rerun support lookup against the staging artifacts before returning to production smoke.</p>
       </div>
     </section>
 
@@ -520,7 +520,7 @@
       <table>
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
-          <tr><td>P0</td><td>Support DB env alignment</td><td>Ops</td><td>Blocked: support lookup now accepts schema-verified <code>DATABASE_URL</code>, but current <code>apps/web/.env.local</code> <code>DATABASE_URL</code> fails the clean access-link schema probe.</td></tr>
+          <tr><td>P0</td><td>Support DB env alignment</td><td>Ops</td><td>Blocked: <code>apps/web/.env.local</code> <code>DATABASE_URL</code> matches the separate <code>dev/local</code> branch, not Preview(staging). Use explicit Preview(staging) <code>SUPPORT_OPS_DATABASE_URL</code> for support lookup.</td></tr>
           <tr><td>P0</td><td>Staging baseline acceptance</td><td>Owner / ops</td><td>Accept after support lookup passes; real staging Email/LINE channel verification already passed.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke v1 final confirmation</td><td>Owner / ops</td><td>Resume only after support lookup and staging baseline acceptance. Production checkout remains disabled.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
@@ -554,7 +554,7 @@
       <h2>Next Recommended Task</h2>
       <div class="panel">
         <p><strong>Current recommendation:</strong> correct the local DB source, then rerun `qa:env:preflight -- support-ops-lookup` and `ops:paid-result:lookup` against the staging Email/LINE artifacts.</p>
-        <p>Preview(staging) automated no-card/access-link smokes and real Email/LINE receipt/link-click checks pass with the mandatory-save UX gate, but the baseline remains partial until support lookup passes. Support lookup source policy is fixed; the remaining issue is the current local DB target.</p>
+        <p>Preview(staging) automated no-card/access-link smokes and real Email/LINE receipt/link-click checks pass with the mandatory-save UX gate, but the baseline remains partial until support lookup passes. Support lookup source policy is fixed; the remaining issue is that local <code>.env.local</code> intentionally targets <code>dev/local</code>, while staging artifacts require an explicit Preview(staging) support DB source.</p>
         <p>Do not return to production smoke until the staging baseline is accepted. Production remains frozen and fail-closed.</p>
       </div>
     </section>
