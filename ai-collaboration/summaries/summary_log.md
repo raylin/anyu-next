@@ -9745,3 +9745,29 @@ Unresolved questions:
 - Deploy the expired-link ReturnURL fix to Production while keeping runtime disabled.
 - Retry Controlled Production Payment Smoke v1 with a freshly generated provider form.
 - If more provider failure variants appear, expand the browser-return classifier with documented NewebPay-specific categories.
+
+## 2026-06-04 Production Deploy ReturnURL Expiry Fix + Controlled Smoke v1 Retry Prep
+
+### Completed Changes
+
+- saved the Production Deploy ReturnURL Expiry Fix + Controlled Smoke v1 Retry Prep handoff and report
+- confirmed local source was commit `5e0e1ee`
+- ran pre-deploy Production payment runtime preflight; readiness returned `pass_ready_for_controlled_smoke`
+- deployed from repo root to canonical Vercel project `anyu-next`
+- Production deployment `dpl_CnJumu2bAeJTR9mT9FTs3ofumTbJ` completed and was aliased to `anyu.tw`
+- verified `anyu.tw` and `www.anyu.tw` health report environment `production`, commit `5e0e1ee924d4`, branch `staging`, and route bundle `payment-foundation-2026-05-29`
+- verified public `/`, `/refund`, and `/legal` return 200
+- verified checkout, fake-paid, and operator access-link smoke routes fail closed
+- safely checked ReturnURL expired/failure UX without a real payment token; terminal expired/support copy appeared and `付款確認中` did not appear
+- ran post-deploy Production payment runtime preflight; readiness remained `pass_ready_for_controlled_smoke`
+
+### Learnings
+
+- The ReturnURL expired-link fix is now live on Production while payment runtime remains disabled.
+- A non-tokenized provider-return status check is enough to verify the UX guard without mutating payment state.
+- The next controlled payment smoke should minimize time between provider form generation and owner card submission.
+
+### Unresolved Questions
+
+- Run Controlled Production Payment Smoke v1 Clean Retry with a freshly generated NewebPay form.
+- Confirm whether to disable runtime again after the clean retry or leave it enabled for no-ads soft availability.
