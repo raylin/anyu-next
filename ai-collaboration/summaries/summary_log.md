@@ -9941,3 +9941,30 @@ Unresolved questions:
 - Bootstrap a local/operator-only `SUPPORT_OPS_DATABASE_URL` for Preview(staging) without committing secrets.
 - Rerun support lookup against the v1 staging artifacts after DB URL alignment.
 - Keep Production frozen until support lookup passes and owner accepts the staging baseline.
+
+## 2026-06-04 Support Ops DB URL Bootstrap v1
+
+### Completed Changes
+
+- saved the Support Ops DB URL Bootstrap v1 handoff
+- re-verified Production freeze: public pages live, checkout/operator routes fail closed, and production preflight passed
+- checked local shell and local env files by key presence only for `SUPPORT_OPS_DATABASE_URL` and Neon API-token names
+- confirmed `SUPPORT_OPS_DATABASE_URL` is not available locally/operator-side
+- reconfirmed local `DATABASE_URL` is not safe to use because it does not point to the Preview clean access-link schema
+- attempted Vercel Preview env pull to untracked temp files; no usable non-empty DB value was available to the operator process
+- removed temporary env pull files
+- ran `qa:env:preflight -- support-ops-lookup`; it failed safely with missing `SUPPORT_OPS_DATABASE_URL`
+- reran staging regressions: `qa:access-link:smoke` and `qa:result-checkout:no-card` passed
+- documented the task as blocked with `support_ops_db_missing`
+
+### Learnings
+
+- The support helper is correctly preventing accidental wrong-DB lookup by requiring explicit `SUPPORT_OPS_DATABASE_URL`.
+- Current local env cannot complete support lookup, and Vercel env pull is not a sufficient bootstrap path in this setup.
+- The Module 01 staging baseline remains partial solely because support lookup cannot run.
+
+### Unresolved Questions
+
+- Owner/operator needs to provide Preview(staging) `SUPPORT_OPS_DATABASE_URL` through an untracked local env file or process-only export.
+- Decide whether a future helper should support an approved Neon CLI/API-token bootstrap flow without printing connection strings.
+- Do not return to Production smoke until support lookup passes and the owner accepts the staging baseline.
