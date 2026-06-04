@@ -9521,3 +9521,34 @@ Unresolved questions:
 
 - Confirm owner-side NewebPay dashboard ReturnURL is updated to `https://anyu.tw/payment/newebpay/return`.
 - Decide whether to add a provider-level payment status endpoint later for full provider-neutrality before Module 02.
+
+## 2026-06-04 Controlled Production Payment Smoke v0
+
+### Completed Changes
+
+- saved the Controlled Production Payment Smoke v0 handoff, production smoke decision record, and execution report
+- temporarily enabled Production payment runtime/checkout for one controlled NT$49 NewebPay credit-card one-time payment
+- deployed Production on commit `48028426da61` with provider-level `/payment/newebpay/return`
+- owner completed one production card payment
+- verified NotifyURL payment truth marked the payment intent paid
+- diagnosed missing Production runtime env after the first post-payment delivery path stalled
+- added missing Production runtime env names for checkout session signing, paid access signing, queue trigger, and paid generation processor
+- owner resent the NotifyURL from NewebPay after env correction
+- verified the resent NotifyURL created/linked the entitlement, completed the generation job, completed the paid result, and created one Email access-link row with provider status accepted
+- verified only an Email access-link contact existed for the production payment context; LINE delivery was not covered
+- disabled Production runtime/checkout/queue/processor flags again and redeployed
+- verified public pages remain live and checkout/fake-paid routes are fail-closed again
+
+### Learnings
+
+- Production provider payment truth worked, but presence-only env gates missed runtime secrets needed by checkout session signing and paid access signing.
+- Production paid delivery also requires queue trigger and processor flags; without them the first paid browser experience can remain stuck at payment confirmation even when NotifyURL succeeds.
+- NotifyURL resend was sufficient to recover the controlled smoke after env correction without manual DB mutation.
+- Email access-link provider acceptance is verified after recovery; final owner inbox confirmation after the recovered send remains a follow-up check.
+- LINE access-link delivery requires a LINE contact/recipient secret in the same production payment context; no LINE send should be expected without that bind.
+
+### Unresolved Questions
+
+- Decide whether to run a second controlled production smoke specifically covering production LINE bind/message delivery.
+- Add a production runtime preflight helper before any future production payment smoke or soft availability decision.
+- Confirm owner browser refresh and Email inbox result after the recovered paid delivery.
