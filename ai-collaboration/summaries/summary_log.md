@@ -9912,3 +9912,32 @@ Unresolved questions:
 - Align `SUPPORT_OPS_DATABASE_URL` so staging and production support lookups can run without manual Neon confusion.
 - Decide whether to approve one real staging Email and one real staging LINE message for a fresh manual channel verification task.
 - Keep Production frozen until the staging manual channel verification and support lookup blocker are resolved.
+
+## 2026-06-04 Module 01 Staging Baseline Completion v1
+
+### Completed Changes
+
+- saved the Module 01 Staging Baseline Completion v1 handoff
+- verified Production stayed frozen/fail-closed: public pages live, checkout/operator routes fail closed, and production preflight passed
+- verified Preview(staging) served commit `cd71d5481683` with the expected route bundle
+- verified Preview(staging) has clean access-link tables and old recovery-named tables absent using schema/aggregate-only checks
+- confirmed local `SUPPORT_OPS_DATABASE_URL` is missing and local `DATABASE_URL` is not the Preview clean access-link schema target
+- attempted Vercel Preview env pull to temp files; key names existed but values were not usable for local support lookup, then temp files were removed
+- ran an approved real staging Email access-link smoke; owner confirmed the Email arrived and its `/r/` link opened the completed paid result
+- ran an approved real staging LINE access-link smoke; owner confirmed the LINE message arrived and its `/r/` link opened the completed paid result
+- verified direct staging checkout render: desktop Email-only locked, mobile LINE-first locked, saved state unlocks provider handoff
+- passed lint, targeted tests, full tests, build, `qa:access-link:smoke`, `qa:result-checkout:no-card`, `qa:line-access-link:smoke`, and production preflight
+- created the v1 execution report with a partial baseline classification
+
+### Learnings
+
+- The core user-facing staging channel loop is now freshly verified for both Email and LINE.
+- Owner clicking `/r/` links moves access-link rows from `sent` to `used`, so DB verification should count `sent_at`/`used_at`, not only `status='sent'`.
+- `ops:paid-result:lookup` is still blocked because it requires explicit `SUPPORT_OPS_DATABASE_URL`; using local `DATABASE_URL` would target the wrong schema.
+- Vercel Preview env pull is not sufficient as a local support DB bootstrap in the current setup.
+
+### Unresolved Questions
+
+- Bootstrap a local/operator-only `SUPPORT_OPS_DATABASE_URL` for Preview(staging) without committing secrets.
+- Rerun support lookup against the v1 staging artifacts after DB URL alignment.
+- Keep Production frozen until support lookup passes and owner accepts the staging baseline.

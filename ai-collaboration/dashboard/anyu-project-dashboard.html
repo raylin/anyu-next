@@ -329,19 +329,19 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」is back in Preview(staging) stabilization. Production public content is live but payment runtime and checkout are frozen/fail-closed. Preview(staging) now enforces access-link save before payment: desktop shows Email only, while mobile/in-app browsers show LINE first above Email fallback. Automated staging no-card and access-link smoke pass, but the current baseline is partial until support lookup env alignment and fresh owner-verified staging Email/LINE message checks are completed.</p>
+      <p class="lead">Module 01「曖昧溫度計」is back in Preview(staging) stabilization. Production public content is live but payment runtime and checkout are frozen/fail-closed. Preview(staging) enforces access-link save before payment: desktop shows Email only, while mobile/in-app browsers show LINE first above Email fallback. Automated staging no-card/access-link QA passes, and fresh real staging Email/LINE messages were owner-verified. The current baseline remains partial only because support lookup still lacks a local/operator <code>SUPPORT_OPS_DATABASE_URL</code>.</p>
       <div class="snapshot" aria-label="Project snapshot">
         <div><span class="label">Last updated</span><span class="value">2026-06-04 23:40 CST</span></div>
         <div><span class="label">Current phase</span><span class="value">Staging stabilization baseline partial</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Support lookup env + fresh channel verification</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Support lookup env alignment</span></div>
       </div>
     </header>
 
     <section>
       <h2>Launch Gate Model</h2>
       <div class="grid">
-        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, canonical Vercel deploy alignment, mobile LINE bind, real credit-card payment truth, paid generation completion, and Email/LINE provider acceptance have been proven in pieces. Gate 1 is paused until Preview(staging) has a smooth manual channel baseline and support lookup works.</p></article>
+        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, canonical Vercel deploy alignment, mobile LINE bind, real credit-card payment truth, paid generation completion, and Email/LINE provider acceptance have been proven in pieces. Gate 1 is paused until Preview(staging) support lookup works and the owner accepts the baseline.</p></article>
         <article class="card"><span class="badge waiting">Gate 2</span><h3>Soft public availability</h3><p>Allows low/no-traffic production checkout only after controlled smoke, support/access-link readiness, monitoring, and rollback thresholds. No ads yet.</p></article>
         <article class="card"><span class="badge waiting">Gate 3</span><h3>Growth / ads launch</h3><p>Requires stable soft availability, conversion tracking, support cadence, stop-loss thresholds, channel readiness, and ad budget controls. NewebPay approval does not equal commercial launch.</p></article>
       </div>
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers are staging support lookup env alignment, fresh owner-verified staging Email/LINE `/r/` link checks, and then a controlled production smoke decision. No ads.</p></article>
+        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers are staging support lookup env alignment, owner acceptance of the staging baseline, and then a controlled production smoke decision. No ads.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge progress">Planning</span><h3>Multi-module direction</h3><p>Recommended review-wait path: specify Module 02「職場暗流雷達」first, then add lightweight homepage cross-linking only when approved.</p></article>
@@ -388,7 +388,7 @@
         <div class="progressbar"><span style="width: 90%"></span></div>
         <p><strong>Production launch readiness</strong></p>
         <div class="progressbar"><span style="width: 70%"></span></div>
-        <p>The current gap is not the mandatory-save checkout UX or automated staging access-link/no-card regression path. The active blockers are support lookup env alignment and a fresh owner-verified staging Email/LINE channel check before returning to production smoke.</p>
+        <p>The current gap is not the mandatory-save checkout UX, automated staging access-link/no-card regression path, or real staging Email/LINE channel delivery. The active blocker is support lookup env alignment before returning to production smoke.</p>
       </div>
     </section>
 
@@ -410,7 +410,7 @@
           <li><span class="time">Sandbox preflight</span><span>Sandbox checkout preflight passed with ccore gateway, MPG 2.0, NT$49, and pcs_ handoff.</span></li>
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
-          <li><span class="time">Current</span><span>Production is frozen. Preview(staging) mandatory access-link save gate is deployed: desktop Email-only, mobile LINE-first with Email fallback, and automated access-link/no-card QA passes. Baseline remains partial pending support lookup env and fresh channel verification.</span></li>
+          <li><span class="time">Current</span><span>Production is frozen. Preview(staging) mandatory access-link save gate is deployed: desktop Email-only, mobile LINE-first with Email fallback. Automated access-link/no-card QA and real staging Email/LINE receipt/link-click checks pass. Baseline remains partial pending support lookup env.</span></li>
           <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned; checkout-start wiring, visual bridge polish and staging smoke, and ReturnURL polling implemented; result-page checkout staging sandbox QA passed end-to-end.</span></li>
         </ol>
       </div>
@@ -435,7 +435,7 @@
         <h2>NewebPay Status</h2>
         <p>Merchant review approval is complete. Production public pages are ready. Production NewebPay provider config dry-run, Production DB migration gate, unified ReturnURL, and one recovered controlled production payment smoke passed with runtime disabled again. Sandbox shop remains available for regression QA.</p>
         <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
-        <p>Next action: keep production disabled, align <code>SUPPORT_OPS_DATABASE_URL</code>, then run an owner-approved staging manual channel verification with one real Email and one real LINE message before returning to production smoke.</p>
+        <p>Next action: keep production disabled, align <code>SUPPORT_OPS_DATABASE_URL</code>, then rerun support lookup against the staging artifacts before returning to production smoke.</p>
       </div>
     </section>
 
@@ -506,7 +506,7 @@
     <section>
       <h2>Paid Result Access Links</h2>
       <div class="panel">
-        <p><strong>Status:</strong> Module 01 paid result access-link loop has historical staging proof for Email and LINE. The current stabilization baseline is partial: automated Preview(staging) access-link/no-card QA passes, but fresh owner-verified staging Email/LINE messages were not rerun in this task.</p>
+        <p><strong>Status:</strong> Module 01 paid result access-link loop has fresh staging proof for Email and LINE. The current stabilization baseline is partial only because support lookup env alignment is still blocked.</p>
         <p><strong>Implemented flow:</strong> checkout-start now requires a saved access link before provider handoff. Desktop/non-mobile shows Email only. Mobile/in-app browsers show LINE first above Email fallback. The previous skip-with-warning path is removed from the active checkout UX.</p>
         <p><strong>Access rule:</strong> Email/LINE messages point back to secure web access using fresh access links; do not send full report content, raw pcs_ tokens, or raw pa_ tokens through LINE or Email.</p>
         <p><strong>Naming note:</strong> User-facing wording is now aligned toward 保存查看連結 / 專屬查看連結 / 回 ANYU 查看完整報告. Active schema/runtime now targets clean access-link table names and <code>pal_</code> access-link tokens only; old <code>prl_</code> links and recovery-named DB rows were destructively reset under the no-real-users premise. Staging and Production now have access-link table names only; old recovery-named tables/views are absent. Fresh LINE bind and real LINE access-link message smoke passed again after the clean reset.</p>
@@ -521,8 +521,8 @@
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
           <tr><td>P0</td><td>Support DB env alignment</td><td>Ops</td><td>Provide local <code>SUPPORT_OPS_DATABASE_URL</code> for sanitized Preview(staging) and future Production support lookup.</td></tr>
-          <tr><td>P0</td><td>Staging manual channel verification</td><td>Owner / ops</td><td>Approve and run one real staging Email and one real staging LINE access-link message, then verify both `/r/` links open the paid result.</td></tr>
-          <tr><td>P0</td><td>Controlled production payment smoke v1 final confirmation</td><td>Owner / ops</td><td>Resume only after the staging baseline is accepted. Production checkout remains disabled.</td></tr>
+          <tr><td>P0</td><td>Staging baseline acceptance</td><td>Owner / ops</td><td>Accept after support lookup passes; real staging Email/LINE channel verification already passed.</td></tr>
+          <tr><td>P0</td><td>Controlled production payment smoke v1 final confirmation</td><td>Owner / ops</td><td>Resume only after support lookup and staging baseline acceptance. Production checkout remains disabled.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -553,8 +553,8 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> run Support Ops Env Alignment v1, then Module 01 Staging Manual Channel Verification v0 with explicit approval for one real staging Email and one real staging LINE message.</p>
-        <p>Preview(staging) automated no-card and access-link smokes pass with the mandatory-save UX gate, but the baseline remains partial until support lookup and fresh channel receipt/link-click checks pass.</p>
+        <p><strong>Current recommendation:</strong> run Support Ops DB URL Bootstrap v1, then rerun `ops:paid-result:lookup` against the staging Email/LINE artifacts.</p>
+        <p>Preview(staging) automated no-card/access-link smokes and real Email/LINE receipt/link-click checks pass with the mandatory-save UX gate, but the baseline remains partial until support lookup passes.</p>
         <p>Do not return to production smoke until the staging baseline is accepted. Production remains frozen and fail-closed.</p>
       </div>
     </section>
@@ -661,6 +661,7 @@
           <li><a href="../reports/2026-06-04-production-vercel-project-env-source-of-truth-reconciliation-v0.md">Production Vercel Project / Env Source-of-Truth Reconciliation v0</a></li>
           <li><a href="../reports/2026-06-04-production-vercel-project-relink-canonical-deploy-v0.md">Production Vercel Project Relink / Canonical Deploy v0</a></li>
           <li><a href="../reports/2026-06-04-module-01-staging-end-to-end-stabilization-baseline-v0.md">Module 01 Staging End-to-End Stabilization Baseline v0</a></li>
+          <li><a href="../reports/2026-06-04-module-01-staging-baseline-completion-v1.md">Module 01 Staging Baseline Completion v1</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>
