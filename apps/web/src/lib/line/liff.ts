@@ -1,3 +1,5 @@
+import { getLineLiffId } from "@/lib/line/config";
+
 export type LineIdTokenVerification =
   | {
       ok: true;
@@ -26,7 +28,7 @@ export function getLineLoginChannelId(input: {
     return explicit;
   }
 
-  const liffId = input.liffId?.trim() || process.env.NEXT_PUBLIC_LINE_LIFF_ID?.trim();
+  const liffId = input.liffId?.trim() || getLineLiffId();
   const derived = liffId?.split("-")[0]?.trim();
 
   return derived || null;

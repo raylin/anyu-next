@@ -1,7 +1,36 @@
 import { getLineAddUrl } from "@/lib/modules/ai-temperature-ui";
 import { appendModuleThemeToSearchParams, type ModuleThemeSource, type ModuleThemeVariant } from "@/lib/modules/module-theme";
 
-export function getLineLiffId(envValue = process.env.NEXT_PUBLIC_LINE_LIFF_ID): string | null {
+export function getLineLiffIdFromUrl(envValue = process.env.NEXT_PUBLIC_LINE_LIFF_URL): string | null {
+  const candidate = envValue?.trim();
+
+  if (!candidate) {
+    return null;
+  }
+
+  try {
+    const url = new URL(candidate);
+
+    if (url.hostname !== "liff.line.me") {
+      return null;
+    }
+
+    return url.pathname.split("/").filter(Boolean)[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function getLineLiffId(
+  envValue = process.env.NEXT_PUBLIC_LINE_LIFF_ID,
+  liffUrlValue = process.env.NEXT_PUBLIC_LINE_LIFF_URL,
+): string | null {
+  const urlLiffId = getLineLiffIdFromUrl(liffUrlValue);
+
+  if (urlLiffId) {
+    return urlLiffId;
+  }
+
   const candidate = envValue?.trim();
 
   return candidate ? candidate : null;

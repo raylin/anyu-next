@@ -442,6 +442,54 @@ describe("LINE fulfillment helpers", () => {
     expect(getLineLoginChannelId({ liffId: "1234567890-abc" })).toBe("1234567890");
   });
 
+  it("derives LINE Login channel ID from LIFF URL before legacy LIFF ID env", () => {
+    const originalLiffUrl = process.env.NEXT_PUBLIC_LINE_LIFF_URL;
+    const originalLiffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
+    const originalChannelId = process.env.LINE_LOGIN_CHANNEL_ID;
+
+    process.env.NEXT_PUBLIC_LINE_LIFF_URL = "https://liff.line.me/2222222222-prod";
+    process.env.NEXT_PUBLIC_LINE_LIFF_ID = "1111111111-legacy";
+    delete process.env.LINE_LOGIN_CHANNEL_ID;
+
+    try {
+      expect(getLineLoginChannelId()).toBe("2222222222");
+    } finally {
+      if (originalLiffUrl === undefined) {
+        delete process.env.NEXT_PUBLIC_LINE_LIFF_URL;
+      } else {
+        process.env.NEXT_PUBLIC_LINE_LIFF_URL = originalLiffUrl;
+      }
+
+      if (originalLiffId === undefined) {
+        delete process.env.NEXT_PUBLIC_LINE_LIFF_ID;
+      } else {
+        process.env.NEXT_PUBLIC_LINE_LIFF_ID = originalLiffId;
+      }
+
+      if (originalChannelId === undefined) {
+        delete process.env.LINE_LOGIN_CHANNEL_ID;
+      } else {
+        process.env.LINE_LOGIN_CHANNEL_ID = originalChannelId;
+      }
+    }
+  });
+
+  it("keeps explicit LINE Login channel ID above LIFF URL derivation", () => {
+    const originalLiffUrl = process.env.NEXT_PUBLIC_LINE_LIFF_URL;
+
+    process.env.NEXT_PUBLIC_LINE_LIFF_URL = "https://liff.line.me/2222222222-prod";
+
+    try {
+      expect(getLineLoginChannelId({ explicitChannelId: "3333333333" })).toBe("3333333333");
+    } finally {
+      if (originalLiffUrl === undefined) {
+        delete process.env.NEXT_PUBLIC_LINE_LIFF_URL;
+      } else {
+        process.env.NEXT_PUBLIC_LINE_LIFF_URL = originalLiffUrl;
+      }
+    }
+  });
+
   it("verifies LINE ID tokens through the LINE verify endpoint", async () => {
     const calls: Array<{ url: string; body: string }> = [];
     const fetchImpl = async (url: string | URL | Request, init?: RequestInit) => {
