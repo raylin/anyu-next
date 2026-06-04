@@ -136,15 +136,29 @@ function summarizeCheckoutStartHtml(html) {
     webDeliveryPresent: html.includes("完整報告將於網頁中提供查看"),
     recoverySoftGatePresent: html.includes("先保存查看連結"),
     recoveryEmailPrimaryPresent: html.includes("Email 查看連結"),
+    recoveryEmailOnlyDesktopPresent:
+      html.includes("請先用 Email 保存查看連結") &&
+      html.includes("用 Email 保存查看連結") &&
+      !html.includes("用 LINE 保存查看連結"),
+    recoveryLineFirstMobilePresent:
+      html.includes("建議用 LINE 保存查看連結") &&
+      html.includes("用 LINE 保存查看連結") &&
+      html.includes("改用 Email 保存查看連結"),
     recoveryLineDeferredPresent:
       html.includes("LINE 查看連結") &&
       (html.includes("用 LINE 保存查看連結") || html.includes("稍後支援")),
     recoverySkipWarningPresent: html.includes("我了解尚未保存查看連結，仍要繼續付款"),
+    recoveryRequiredWarningPresent: html.includes("付款前請先保存查看連結"),
+    paymentLockedPresent:
+      html.includes("payment locked") &&
+      (html.includes("請先完成 Email 查看連結保存，付款按鈕就會開啟") ||
+        html.includes("請先完成 LINE 或 Email 查看連結保存，付款按鈕就會開啟")),
     supportRefundPresent:
       html.includes("/refund") &&
       html.includes("hello@anyu.tw") &&
       html.includes("3–7 個工作天"),
-    submitButtonPresent: html.includes("前往藍新安全付款頁"),
+    submitButtonPresent:
+      html.includes("前往藍新安全付款頁") || html.includes("繼續付款"),
     sandboxCcoreTargetPresent: html.includes("https://ccore.newebpay.com/MPG/mpg_gateway"),
     formMethodPostPresent: html.includes('method="POST"') || html.includes('method="post"'),
     providerFieldNamesPresent: {

@@ -146,7 +146,9 @@ async function verifyCheckoutStart(checkoutHref) {
   const response = await fetch(checkoutUrl);
   const html = await response.text();
   const summary = summarizeCheckoutStartHtml(html);
-  const providerFieldsPresent = Object.values(summary.providerFieldNamesPresent).every(Boolean);
+  const providerFieldsHidden = Object.values(summary.providerFieldNamesPresent).every(
+    (present) => !present,
+  );
   const pass =
     response.status === 200 &&
     summary.anyuWordmarkPresent &&
@@ -161,13 +163,14 @@ async function verifyCheckoutStart(checkoutHref) {
     summary.webDeliveryPresent &&
     summary.recoverySoftGatePresent &&
     summary.recoveryEmailPrimaryPresent &&
-    summary.recoveryLineDeferredPresent &&
-    summary.recoverySkipWarningPresent &&
+    summary.recoveryEmailOnlyDesktopPresent &&
+    summary.recoveryRequiredWarningPresent &&
+    summary.paymentLockedPresent &&
     summary.supportRefundPresent &&
     summary.submitButtonPresent &&
-    summary.sandboxCcoreTargetPresent &&
+    !summary.sandboxCcoreTargetPresent &&
     summary.formMethodPostPresent &&
-    providerFieldsPresent &&
+    providerFieldsHidden &&
     summary.forbiddenCopyFound.length === 0 &&
     summary.secretNameLeaksFound.length === 0;
 

@@ -50,16 +50,13 @@ describe("result checkout no-card QA helpers", () => {
       你將前往藍新金流完成安全付款
       付款完成後，我們會等候藍新的正式通知。返回頁不會直接判定付款成功。
       完整報告將於網頁中提供查看
-      先保存查看連結 Email 查看連結 LINE 查看連結 用 LINE 保存查看連結
-      我了解尚未保存查看連結，仍要繼續付款
+      先保存查看連結 請先用 Email 保存查看連結 Email 查看連結 用 Email 保存查看連結
+      付款前請先保存查看連結 payment locked 請先完成 Email 查看連結保存，付款按鈕就會開啟
       <a href="/refund">退款</a> hello@anyu.tw 3–7 個工作天
-      <form method="POST" action="https://ccore.newebpay.com/MPG/mpg_gateway">
-        <input type="hidden" name="MerchantID" value="mock-merchant">
-        <input type="hidden" name="TradeInfo" value="mock-trade-info">
-        <input type="hidden" name="TradeSha" value="mock-trade-sha">
-        <input type="hidden" name="Version" value="2.0">
-        <button>前往藍新安全付款頁</button>
+      <form method="POST" action="/api/modules/ambiguous-temperature/result/result-1/recovery/email">
+        <button>用 Email 保存查看連結</button>
       </form>
+      <button disabled>繼續付款</button>
     `;
 
     expect(summarizeCheckoutStartHtml(html)).toMatchObject({
@@ -75,17 +72,20 @@ describe("result checkout no-card QA helpers", () => {
       webDeliveryPresent: true,
       recoverySoftGatePresent: true,
       recoveryEmailPrimaryPresent: true,
-      recoveryLineDeferredPresent: true,
-      recoverySkipWarningPresent: true,
+      recoveryEmailOnlyDesktopPresent: true,
+      recoveryLineDeferredPresent: false,
+      recoverySkipWarningPresent: false,
+      recoveryRequiredWarningPresent: true,
+      paymentLockedPresent: true,
       supportRefundPresent: true,
       submitButtonPresent: true,
-      sandboxCcoreTargetPresent: true,
+      sandboxCcoreTargetPresent: false,
       formMethodPostPresent: true,
       providerFieldNamesPresent: {
-        merchantId: true,
-        tradeInfo: true,
-        tradeSha: true,
-        version: true,
+        merchantId: false,
+        tradeInfo: false,
+        tradeSha: false,
+        version: false,
       },
       forbiddenCopyFound: [],
       secretNameLeaksFound: [],
