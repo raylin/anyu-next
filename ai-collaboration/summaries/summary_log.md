@@ -9552,3 +9552,29 @@ Unresolved questions:
 - Decide whether to run a second controlled production smoke specifically covering production LINE bind/message delivery.
 - Add a production runtime preflight helper before any future production payment smoke or soft availability decision.
 - Confirm owner browser refresh and Email inbox result after the recovered paid delivery.
+
+## 2026-06-04 Production Payment Runtime Preflight Helper v0
+
+### Completed Changes
+
+- saved the Production Payment Runtime Preflight Helper v0 handoff and report
+- added `qa:production:payment-preflight`
+- added `apps/web/scripts/production-payment-runtime-preflight.mjs`
+- added dry-run and smoke-ready modes without enabling runtime
+- added Vercel Production env-name metadata checks without printing values
+- added live production safety checks for public pages, checkout fail-closed, fake-paid fail-closed, NotifyURL reachability, and ReturnURL reachability
+- added optional local DB schema check support for explicit production preflight DB URLs
+- added targeted tests for missing checkout session, paid access, queue, processor, Email, LINE, and output redaction
+- ran the preflight against Vercel Production in dry-run mode; it returned `pass_ready_for_controlled_smoke`
+- verified Production DB required tables and access-link audit columns read-only through Neon MCP
+
+### Learnings
+
+- The v0 production smoke gaps are now encoded as preflight categories instead of tribal memory.
+- Vercel env metadata can prove name presence but not actual values, so live route behavior remains necessary to prove dry-run fail-closed state.
+- Production currently has all required env names for payment, checkout session, paid access, queue, processor, access-link, Email, and LINE provider readiness.
+
+### Unresolved Questions
+
+- Decide whether Controlled Production Payment Smoke v1 should include production LINE bind/message delivery or remain Email-only.
+- Consider a future deployed runtime config-shape endpoint if value-shape checks are needed without exposing values.
