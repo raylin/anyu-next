@@ -9414,3 +9414,29 @@ Unresolved questions:
 - Decide whether to rename `rlb_` LINE bind state after the clean DB reset.
 - Decide whether to rename recovery-named files/modules after DB/runtime alignment is stable.
 - Decide whether to run a fresh owner-assisted LINE bind before Production Access-Link / Provider Env Gate v0 or defer it until the next LINE message smoke.
+
+## 2026-06-04 Fresh LINE Access-Link Smoke After Clean Reset v0
+
+### Completed Changes
+
+- saved the Fresh LINE Access-Link Smoke After Clean Reset v0 handoff and report
+- confirmed Preview(staging) freshness on clean access-link commits through `fd3924a`
+- ran baseline `qa:access-link:smoke` and `qa:result-checkout:no-card`
+- owner completed a fresh LINE mobile bind from the checkout-start LINE save route
+- verified Preview(staging) clean-schema DB has one LINE contact and one active v1 encrypted recipient secret, without printing private values
+- ran controlled LINE access-link smoke; real LINE message path reached `lineMessageSent=true` and access-link status `sent`
+- owner confirmed the LINE message was received and the `/r/` link opens the paid result
+- fixed the Preview-only operator LINE smoke endpoint so already-completed targeted jobs can still re-run the completed-result access-link hook for smoke verification
+- fixed the local LINE access-link smoke sanitizer to detect actual private JSON fields and `pal_` tokens without false-failing on safe boolean audit field names
+- re-ran non-message regressions: `qa:access-link:smoke` and `qa:result-checkout:no-card`
+
+### Learnings
+
+- The clean reset correctly removed the previous LINE recipient secret; a fresh LIFF bind recreates the encrypted recipient secret under `payment_access_link_contact_secrets`.
+- Repeated operator smoke can encounter an `already_completed` targeted generation job; the smoke endpoint must explicitly re-run the non-fatal access-link send hook when no sent link exists for the new entitlement.
+- The previous QA wrapper redaction pattern was too broad and matched safe boolean field names; field-name-specific matching is safer.
+
+### Unresolved Questions
+
+- Decide when to rename recovery-named endpoint/script/module files.
+- Decide when to align recovery-named env vars to access-link terminology.
