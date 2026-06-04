@@ -76,9 +76,10 @@ function normalizePaymentReturnStatus(status?: string | null): PaymentReturnStat
     case "paid_ready":
     case "paid_failed":
     case "invalid_session":
+    case "expired":
     case "expired_session":
     case "timeout":
-      return status;
+      return status === "expired" ? "expired_session" : status;
     default:
       return "unknown";
   }

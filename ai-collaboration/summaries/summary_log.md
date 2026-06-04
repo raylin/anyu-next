@@ -9715,3 +9715,33 @@ Unresolved questions:
 
 - Add a root-level production deploy wrapper or runbook update so future operators do not deploy from `apps/web`.
 - Proceed to Controlled Production Payment Smoke v1 Retry only through the canonical root deploy/preflight path.
+
+## 2026-06-04 Controlled Production Payment Smoke v1 Retry with LINE Bind Checkpoint
+
+### Completed Changes
+
+- saved and updated the Controlled Production Payment Smoke v1 Retry handoff and execution report
+- ran Production payment runtime preflight; readiness returned `pass_ready_for_controlled_smoke`
+- temporarily enabled only `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT` on canonical `anyu-next`
+- redeployed Production from the repo root and verified checkout-start copy
+- created a fresh Production Module 01 result with non-private smoke input
+- owner confirmed pre-payment Email save and LINE bind both worked
+- sanitized DB checkpoint confirmed Email contact, verified LINE contact, transactional consent, and one active LINE recipient secret in the payment context
+- aborted before card payment when owner encountered an expired NewebPay payment link
+- disabled runtime/checkout again, redeployed Production fail-closed, and verified public pages plus disabled checkout/fake-paid routes
+- implemented a ReturnURL UX fix so expired/failed NewebPay browser returns render terminal support states instead of entering payment polling
+- fixed expired checkout-session handoff state so it maps to terminal expired/support UI instead of pending/polling
+- added regression tests for unified and legacy ReturnURL expired/failed provider returns and expired checkout-session handoff state
+
+### Learnings
+
+- The LINE parser/deploy issue is no longer the active blocker; pre-payment LINE bind passed in Production.
+- The next blocker is provider-link expiry UX: expired NewebPay browser returns must not imply payment checking is still active.
+- ReturnURL can safely classify browser-return failure/expiry for UX while leaving NotifyURL as the only payment truth.
+- The existing handoff/poller status vocabulary had an `expired` versus `expired_session` mismatch that belonged to the same bug boundary.
+
+### Unresolved Questions
+
+- Deploy the expired-link ReturnURL fix to Production while keeping runtime disabled.
+- Retry Controlled Production Payment Smoke v1 with a freshly generated provider form.
+- If more provider failure variants appear, expand the browser-return classifier with documented NewebPay-specific categories.

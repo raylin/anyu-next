@@ -9,12 +9,14 @@ import {
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { resolvePaymentAccessHandoff } from "@/lib/payments/payment-access-handoff";
 import { resolvePaymentCheckoutSessionToken } from "@/lib/payments/payment-checkout-session";
+import type { NewebPayBrowserReturnSignal } from "@/lib/payments/newebpay/return-signal";
 
 type ModuleConfig = NonNullable<ReturnType<typeof getModuleBySlug>>;
 
 type NewebPayReturnExperienceProps = {
   checkoutToken?: string | null;
   moduleSlugHint?: string | null;
+  browserReturnSignal?: NewebPayBrowserReturnSignal | null;
 };
 
 function getFallbackModule() {
@@ -69,6 +71,7 @@ function resolveModuleSlugFromSignedCheckoutToken(checkoutToken?: string | null)
 export async function NewebPayReturnExperience({
   checkoutToken,
   moduleSlugHint,
+  browserReturnSignal,
 }: NewebPayReturnExperienceProps) {
   const tokenModuleSlug = moduleSlugHint
     ? null
@@ -84,6 +87,10 @@ export async function NewebPayReturnExperience({
 
   if (!moduleConfig || !checkoutToken || !isDbConfigured()) {
     return <ReturnShell moduleConfig={displayModule} state="invalid_session" />;
+  }
+
+  if (browserReturnSignal) {
+    return <ReturnShell moduleConfig={moduleConfig} state={browserReturnSignal.state} />;
   }
 
   const handoff = await resolvePaymentAccessHandoff({

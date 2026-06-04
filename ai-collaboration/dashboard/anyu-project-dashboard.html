@@ -329,19 +329,19 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant approval, production provider config dry-run, production DB migration gate, unified ReturnURL, and production runtime preflight helper are complete. One controlled production credit-card smoke accepted payment and recovered through NotifyURL resend after missing runtime env was corrected; paid result and Email provider acceptance were verified. Vercel deploy/env source of truth is now reconciled: `anyu.tw` points to canonical project `anyu-next`, health reports commit `28663af45e67`, and production preflight passes while checkout remains disabled. Core Engine / Module Grammar v0 defines future module grammar, and LINE is planned as a consent-based owned channel rather than paid report delivery.</p>
+      <p class="lead">Module 01「曖昧溫度計」目前低調 production active / monitor。Production public content live; payment runtime disabled; staging sandbox payment/queue/access flow passed through helper/operator, real result-page CTA card flow, and no-card result checkout QA. NewebPay merchant approval, production provider config dry-run, production DB migration gate, unified ReturnURL, and production runtime preflight helper are complete. One controlled production credit-card smoke accepted payment and recovered through NotifyURL resend after missing runtime env was corrected; paid result and Email provider acceptance were verified. Vercel deploy/env source of truth is reconciled: `anyu.tw` points to canonical project `anyu-next`, production preflight passes while checkout remains disabled, and the latest v1 retry proved Email save + LINE bind before aborting on an expired provider link before card payment. A ReturnURL expired-link UX fix is ready for deployment. Core Engine / Module Grammar v0 defines future module grammar, and LINE is planned as a consent-based owned channel rather than paid report delivery.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-04 12:40 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Canonical deploy restored; runtime disabled</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-04 14:50 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Expired-link fix ready; runtime disabled</span></div>
         <div><span class="label">Production posture</span><span class="value">Public content live; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Controlled production payment smoke v1</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Deploy fix, then clean v1 smoke</span></div>
       </div>
     </header>
 
     <section>
       <h2>Launch Gate Model</h2>
       <div class="grid">
-        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, and one recovered controlled production credit-card smoke have passed with checkout/runtime disabled again. Vercel deploy/env source of truth is reconciled: Production now points to canonical `anyu-next`, and preflight passes. Still requires a clean controlled production v1 smoke before soft-open.</p></article>
+        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, and one recovered controlled production credit-card smoke have passed with checkout/runtime disabled again. Vercel deploy/env source of truth is reconciled. The latest v1 retry proved pre-payment Email save and LINE bind, then aborted before card payment on an expired provider link; ReturnURL now has a fix to avoid routing expired/failed provider browser returns into payment checking. Still requires deployment of the fix and a clean controlled production v1 smoke before soft-open.</p></article>
         <article class="card"><span class="badge waiting">Gate 2</span><h3>Soft public availability</h3><p>Allows low/no-traffic production checkout only after controlled smoke, support/access-link readiness, monitoring, and rollback thresholds. No ads yet.</p></article>
         <article class="card"><span class="badge waiting">Gate 3</span><h3>Growth / ads launch</h3><p>Requires stable soft availability, conversion tracking, support cadence, stop-loss thresholds, channel readiness, and ad budget controls. NewebPay approval does not equal commercial launch.</p></article>
       </div>
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers are Production LINE bind retry inside a controlled smoke, a clean controlled production v1 smoke, and an explicit soft-availability decision. No ads.</p></article>
+        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; hard blockers are deploying the expired-provider-link ReturnURL fix, a clean controlled production v1 smoke, and an explicit soft-availability decision. No ads.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge progress">Planning</span><h3>Multi-module direction</h3><p>Recommended review-wait path: specify Module 02「職場暗流雷達」first, then add lightweight homepage cross-linking only when approved.</p></article>
@@ -388,7 +388,7 @@
         <div class="progressbar"><span style="width: 90%"></span></div>
         <p><strong>Production launch readiness</strong></p>
         <div class="progressbar"><span style="width: 70%"></span></div>
-        <p>The launch gap is not queue architecture, sandbox payment flow, production payment env names, access-link crypto env names, Email/LINE provider env names, redeploy activation, production DB schema, provider-level ReturnURL code, production runtime preflight coverage, or basic provider payment acceptance. The active blockers are a clean controlled v1 smoke and soft-open decision discipline.</p>
+        <p>The launch gap is not queue architecture, sandbox payment flow, production payment env names, access-link crypto env names, Email/LINE provider env names, redeploy activation, production DB schema, provider-level ReturnURL code, production runtime preflight coverage, or basic provider payment acceptance. The active blockers are deploying the expired-provider-link ReturnURL fix, a clean controlled v1 smoke, and soft-open decision discipline.</p>
       </div>
     </section>
 
@@ -410,7 +410,7 @@
           <li><span class="time">Sandbox preflight</span><span>Sandbox checkout preflight passed with ccore gateway, MPG 2.0, NT$49, and pcs_ handoff.</span></li>
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
-          <li><span class="time">Current</span><span>Production runtime preflight helper is ready and passes against Vercel Production env-name metadata plus live fail-closed route checks; runtime remains disabled.</span></li>
+          <li><span class="time">Current</span><span>Production runtime preflight helper passes, runtime remains disabled, pre-payment Email save + LINE bind passed in the latest v1 retry, and a ReturnURL expired-provider-link UX fix is ready for deployment before retrying card payment.</span></li>
           <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned; checkout-start wiring, visual bridge polish and staging smoke, and ReturnURL polling implemented; result-page checkout staging sandbox QA passed end-to-end.</span></li>
         </ol>
       </div>
@@ -435,7 +435,7 @@
         <h2>NewebPay Status</h2>
         <p>Merchant review approval is complete. Production public pages are ready. Production NewebPay provider config dry-run, Production DB migration gate, unified ReturnURL, and one recovered controlled production payment smoke passed with runtime disabled again. Sandbox shop remains available for regression QA.</p>
         <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
-        <p>Next action: keep production disabled, run <code>corepack pnpm run qa:production:payment-preflight -- --source vercel-production --mode dry-run</code>, then run a clean controlled production smoke v1 with Email inbox confirmation and optional LINE bind/message coverage. If product exploration is the priority, run Module 02 concept/spec separately.</p>
+        <p>Next action: keep production disabled, deploy the expired-provider-link ReturnURL fix, run <code>corepack pnpm run qa:production:payment-preflight -- --source vercel-production --mode dry-run</code>, then run a clean controlled production smoke v1 with Email inbox confirmation and LINE bind/message coverage. If product exploration is the priority, run Module 02 concept/spec separately.</p>
       </div>
     </section>
 
@@ -520,8 +520,8 @@
       <table>
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
-          <tr><td>P0</td><td>Production LINE bind retry</td><td>Owner / ops</td><td>Retry LINE bind before payment inside the next controlled runtime window.</td></tr>
-          <tr><td>P0</td><td>Controlled production payment smoke v1</td><td>Owner / ops</td><td>After LINE bind retry passes, run one clean credit-card one-time smoke after preflight; verify paid render, Email inbox/link, and LINE message without NotifyURL recovery intervention.</td></tr>
+          <tr><td>P0</td><td>Expired provider ReturnURL fix</td><td>Ops</td><td>Deploy the fix that prevents expired/failed NewebPay browser returns from entering the payment-checking page.</td></tr>
+          <tr><td>P0</td><td>Controlled production payment smoke v1</td><td>Owner / ops</td><td>Run one clean credit-card one-time smoke after preflight; verify paid render, Email inbox/link, and LINE message without NotifyURL recovery intervention.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>

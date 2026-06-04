@@ -1,4 +1,5 @@
 import { NewebPayReturnExperience } from "@/components/payments/NewebPayReturnExperience";
+import { classifyNewebPayBrowserReturnSignal } from "@/lib/payments/newebpay/return-signal";
 
 type ReturnPageProps = {
   params: Promise<{
@@ -7,12 +8,20 @@ type ReturnPageProps = {
   searchParams: Promise<{
     merchantOrderNo?: string;
     checkoutToken?: string;
+    Status?: string | string[];
+    Message?: string | string[];
+    RespondCode?: string | string[];
   }>;
 };
 
 export default async function NewebPayReturnPage({ params, searchParams }: ReturnPageProps) {
   const { moduleSlug } = await params;
-  const { checkoutToken } = await searchParams;
+  const query = await searchParams;
+  const { checkoutToken } = query;
 
-  return NewebPayReturnExperience({ moduleSlugHint: moduleSlug, checkoutToken });
+  return NewebPayReturnExperience({
+    moduleSlugHint: moduleSlug,
+    checkoutToken,
+    browserReturnSignal: classifyNewebPayBrowserReturnSignal(query),
+  });
 }

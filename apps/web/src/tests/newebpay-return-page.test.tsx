@@ -102,6 +102,60 @@ describe("NewebPay ReturnURL pending page", () => {
     });
   });
 
+  it("does not poll when unified ReturnURL receives an expired provider browser return", async () => {
+    const page = await UnifiedNewebPayReturnPage({
+      searchParams: Promise.resolve({
+        merchantOrderNo: "ANYUNPORDEREXISTING000000000",
+        checkoutToken: "pcs_redacted",
+        Status: "MPG_TIMEOUT",
+        Message: "付款連結逾時",
+      }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("這個付款狀態連結已失效");
+    expect(html).toContain("保留付款時間與訂單資訊聯絡客服協助確認");
+    expect(html).not.toContain("付款確認中");
+    expect(html).not.toContain("等候藍新正式付款通知");
+    expect(mockResolvePaymentAccessHandoff).not.toHaveBeenCalled();
+  });
+
+  it("keeps successful provider browser returns on the polling path", async () => {
+    const page = await UnifiedNewebPayReturnPage({
+      searchParams: Promise.resolve({
+        merchantOrderNo: "ANYUNPORDEREXISTING000000000",
+        checkoutToken: "pcs_redacted",
+        Status: "SUCCESS",
+        Message: "付款完成",
+      }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("付款確認中");
+    expect(html).toContain("瀏覽器回到此頁不代表付款已完成");
+    expect(mockResolvePaymentAccessHandoff).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      checkoutToken: "pcs_redacted",
+    });
+  });
+
+  it("does not poll when legacy module ReturnURL receives a failed provider browser return", async () => {
+    const page = await NewebPayReturnPage({
+      params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      searchParams: Promise.resolve({
+        checkoutToken: "pcs_redacted",
+        Status: "FAILED",
+        Message: "付款取消",
+      }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("報告暫時無法完成");
+    expect(html).toContain("hello@anyu.tw");
+    expect(html).not.toContain("付款確認中");
+    expect(mockResolvePaymentAccessHandoff).not.toHaveBeenCalled();
+  });
+
   it("shows safe support state for unified ReturnURL when checkout context is missing", async () => {
     const page = await UnifiedNewebPayReturnPage({
       searchParams: Promise.resolve({}),
@@ -208,5 +262,23 @@ describe("NewebPay ReturnURL pending page", () => {
     expect(html).toContain("這個付款狀態連結已失效");
     expect(html).toContain("保留付款時間與訂單資訊聯絡客服協助確認");
     expect(html).toContain("查看退款政策");
+  });
+
+  it("maps expired checkout sessions to the safe expired support state", async () => {
+    mockResolvePaymentAccessHandoff.mockResolvedValue({
+      ok: false,
+      state: "expired",
+      errorCategory: "expired",
+    });
+
+    const page = await NewebPayReturnPage({
+      params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }),
+      searchParams: Promise.resolve({ checkoutToken: "pcs_expired" }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("這個付款狀態連結已失效");
+    expect(html).toContain("保留付款時間與訂單資訊聯絡客服協助確認");
+    expect(html).not.toContain("付款確認中");
   });
 });
