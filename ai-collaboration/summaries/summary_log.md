@@ -9771,3 +9771,31 @@ Unresolved questions:
 
 - Run Controlled Production Payment Smoke v1 Clean Retry with a freshly generated NewebPay form.
 - Confirm whether to disable runtime again after the clean retry or leave it enabled for no-ads soft availability.
+
+## 2026-06-04 Controlled Production Payment Smoke v1 Clean Retry with Fresh NewebPay Form
+
+### Completed Changes
+
+- saved the clean retry handoff and execution report
+- ran Production payment preflight; readiness returned `pass_ready_for_controlled_smoke`
+- temporarily enabled only `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT`
+- deployed runtime-enabled Production from repo root to canonical `anyu-next`
+- created a fresh Production Module 01 result with non-private smoke input
+- verified checkout-start showed NT$49, Email/LINE 保存查看連結, provider form fields, no internal/no-charge copy, and no report-body delivery promise
+- owner confirmed Email save worked
+- owner reported LINE bind failed with `LINE 身分確認沒有完成`
+- aborted before card payment
+- removed runtime flags, redeployed Production fail-closed, and verified public pages plus checkout/fake-paid/operator route closure
+- reran Production payment preflight; readiness remained `pass_ready_for_controlled_smoke`
+
+### Learnings
+
+- The expired ReturnURL bug is fixed and deployed, but the clean v1 retry now blocks earlier at LINE identity completion.
+- The correct operational behavior is to abort before card payment when the LINE checkpoint fails.
+- Local support lookup needs `SUPPORT_OPS_DATABASE_URL` for fast sanitized Production artifact inspection; it correctly blocked without guessing DB target.
+
+### Unresolved Questions
+
+- Diagnose why Production LINE bind shows `LINE 身分確認沒有完成`.
+- Provide or align a safe read-only Production support lookup env before the next smoke.
+- Retry controlled Production payment only after LINE bind passes again in a fresh runtime window.
