@@ -8,6 +8,7 @@ const {
   mockCreateOperatorFakePaidSuccess,
   mockProcessPaidAnalysisJobById,
   mockGetRecentPaidResultRecoveryLinkForContact,
+  mockSendAccessLinksForCompletedPaidResult,
 } = vi.hoisted(() => ({
   mockIsOperatorLineRecoverySmokeEnabled: vi.fn(),
   mockIsDbConfigured: vi.fn(),
@@ -16,6 +17,7 @@ const {
   mockCreateOperatorFakePaidSuccess: vi.fn(),
   mockProcessPaidAnalysisJobById: vi.fn(),
   mockGetRecentPaidResultRecoveryLinkForContact: vi.fn(),
+  mockSendAccessLinksForCompletedPaidResult: vi.fn(),
 }));
 
 vi.mock("@/lib/runtime/feature-flags", () => ({
@@ -42,6 +44,10 @@ vi.mock("@/lib/modules/paid-generation-processor", () => ({
 
 vi.mock("@/lib/db/paid-result-recovery-links", () => ({
   getRecentPaidResultRecoveryLinkForContact: mockGetRecentPaidResultRecoveryLinkForContact,
+}));
+
+vi.mock("@/lib/notifications/email-recovery-link", () => ({
+  sendAccessLinksForCompletedPaidResult: mockSendAccessLinksForCompletedPaidResult,
 }));
 
 import { POST } from "@/app/api/operator/line-recovery-smoke/route";
@@ -94,6 +100,10 @@ describe("operator LINE recovery smoke route", () => {
       category: "processed",
       jobId: "job-1",
       jobResult: "completed",
+    });
+    mockSendAccessLinksForCompletedPaidResult.mockResolvedValue({
+      attempted: 1,
+      sent: 1,
     });
     mockGetRecentPaidResultRecoveryLinkForContact.mockResolvedValue({
       id: "line-link-1",
@@ -184,7 +194,7 @@ describe("operator LINE recovery smoke route", () => {
     expect(serialized).not.toContain("pcs_");
   });
 
-  it("passes when processor reports already completed and the LINE access link is sent", async () => {
+  it("passes when processor reports already completed and a LINE access link is already sent", async () => {
     mockProcessPaidAnalysisJobById.mockResolvedValue({
       ok: true,
       category: "already_completed",
@@ -207,6 +217,39 @@ describe("operator LINE recovery smoke route", () => {
       rawLineUserIdReturned: false,
       privateRecipientReturned: false,
       privateRecipientHashReturned: false,
+    });
+  });
+
+  it("runs the completed-result access-link hook when an already completed job has no current sent LINE link", async () => {
+    mockProcessPaidAnalysisJobById.mockResolvedValue({
+      ok: true,
+      category: "already_completed",
+      jobId: "job-1",
+    });
+    mockGetRecentPaidResultRecoveryLinkForContact
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: "line-link-1",
+        status: "sent",
+      });
+
+    const response = await POST(request({ secret: "operator-secret" }));
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toMatchObject({
+      ok: true,
+      processorCategory: "already_completed",
+      lineMessageSent: true,
+      recoveryLinkCreated: true,
+      recoveryLinkStatus: "sent",
+    });
+    expect(mockSendAccessLinksForCompletedPaidResult).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      moduleTitle: "曖昧溫度計",
+      analysisResultId: RESULT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      entitlementId: ENTITLEMENT_ID,
     });
   });
 });

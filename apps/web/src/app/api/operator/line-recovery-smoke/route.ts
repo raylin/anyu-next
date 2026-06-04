@@ -6,6 +6,7 @@ import {
 } from "@/lib/db/payment-recovery-contacts";
 import { getRecentPaidResultRecoveryLinkForContact } from "@/lib/db/paid-result-recovery-links";
 import { processPaidAnalysisJobById } from "@/lib/modules/paid-generation-processor";
+import { sendAccessLinksForCompletedPaidResult } from "@/lib/notifications/email-recovery-link";
 import { createOperatorFakePaidSuccess } from "@/lib/payments/operator-fake-paid-success";
 import {
   getOperatorTestMode,
@@ -106,11 +107,27 @@ export async function POST(request: Request) {
       generationJobId: fakePaid.generationJob.id,
       lockedBy: "operator_line_recovery_real_message_smoke",
     });
-    const link = await getRecentPaidResultRecoveryLinkForContact({
+    let link = await getRecentPaidResultRecoveryLinkForContact({
       entitlementId: fakePaid.entitlement.id,
       recoveryContactId: lineContact.id,
       channel: "line",
     }).catch(() => null);
+
+    if (processorResult.ok && link?.status !== "sent") {
+      await sendAccessLinksForCompletedPaidResult({
+        moduleSlug: payload.moduleSlug,
+        moduleTitle: "曖昧溫度計",
+        analysisResultId: lineContact.analysisResultId,
+        paymentIntentId: fakePaid.paymentIntent.id,
+        entitlementId: fakePaid.entitlement.id,
+      }).catch(() => null);
+      link = await getRecentPaidResultRecoveryLinkForContact({
+        entitlementId: fakePaid.entitlement.id,
+        recoveryContactId: lineContact.id,
+        channel: "line",
+      }).catch(() => null);
+    }
+
     const smokePassed = link?.status === "sent";
 
     return NextResponse.json({
