@@ -74,6 +74,12 @@ describe("LINE recovery LIFF page", () => {
       stateSource: "liff_state",
       isStateShapeValid: true,
     });
+    expect(parseLineRecoveryBindContext(`?state=line-oauth-state&liff.state=${state}`)).toEqual({
+      state: "rlb_safeState",
+      fallbackReturnPath: "/m/ambiguous-temperature/result/result-1",
+      stateSource: "liff_state",
+      isStateShapeValid: true,
+    });
     expect(
       parseLineRecoveryBindContext(
         "?state=rlb_safeState&returnPath=https%3A%2F%2Fevil.example%2F",

@@ -12,7 +12,7 @@ export function parseLineRecoveryBindContext(search: string): LineRecoveryBindCo
   const stateParams = parseLiffState(searchParams.get("liff.state"));
   const directState = searchParams.get("state") ?? searchParams.get("rlb");
   const liffState = stateParams.params.get("state") ?? stateParams.params.get("rlb");
-  const state = directState ?? liffState ?? "";
+  const state = chooseRecoveryBindState({ directState, liffState });
   const directReturnPath = searchParams.get("returnPath");
   const liffReturnPath = stateParams.params.get("returnPath");
   const fallbackReturnPath = getSafeFallbackReturnPath(directReturnPath ?? liffReturnPath);
@@ -20,9 +20,25 @@ export function parseLineRecoveryBindContext(search: string): LineRecoveryBindCo
   return {
     state,
     fallbackReturnPath,
-    stateSource: directState ? "direct_query" : liffState ? "liff_state" : "missing",
+    stateSource:
+      state && state === directState ? "direct_query" : state && state === liffState ? "liff_state" : "missing",
     isStateShapeValid: isRecoveryBindStateShape(state),
   };
+}
+
+function chooseRecoveryBindState(input: {
+  directState: string | null;
+  liffState: string | null;
+}) {
+  if (input.directState && isRecoveryBindStateShape(input.directState)) {
+    return input.directState;
+  }
+
+  if (input.liffState && isRecoveryBindStateShape(input.liffState)) {
+    return input.liffState;
+  }
+
+  return input.directState ?? input.liffState ?? "";
 }
 
 export function isRecoveryBindStateShape(state: string) {

@@ -9578,3 +9578,30 @@ Unresolved questions:
 
 - Decide whether Controlled Production Payment Smoke v1 should include production LINE bind/message delivery or remain Email-only.
 - Consider a future deployed runtime config-shape endpoint if value-shape checks are needed without exposing values.
+
+## 2026-06-04 Controlled Production Payment Smoke v1 LINE Bind Abort / Fix
+
+### Completed Changes
+
+- saved the Controlled Production Payment Smoke v1 handoff update and execution report
+- ran production payment runtime preflight; readiness was `pass_ready_for_controlled_smoke`
+- temporarily enabled Production runtime/checkout/queue/processor flags and redeployed for v1
+- created a fresh production result and verified checkout-start rendered Email/LINE save copy, NT$49, provider form, and no report-body delivery promise
+- owner attempted LINE bind before payment and saw `這個 LINE 查看連結已失效`
+- sanitized DB verification showed Email contact linked to the payment intent, but no LINE contact and no LINE recipient secret
+- aborted v1 before payment per owner instruction
+- disabled Production runtime/checkout/queue/processor flags again and redeployed
+- fixed LINE LIFF parsing so LINE OAuth `state` no longer overrides valid recovery bind state inside `liff.state`
+- added regression test coverage for direct OAuth `state` plus valid `liff.state`
+- targeted LINE tests, lint, full tests, and build passed
+
+### Learnings
+
+- The checkout LINE CTA generated a valid LIFF URL with `rlb_` state and checkout return path.
+- LINE login can add a direct OAuth `state` query parameter; the parser must not treat that as the recovery bind state if `liff.state` contains the valid `rlb_` state.
+- Production v1 did not reach payment; no new production payment, Email send, or LINE send occurred in this attempt.
+
+### Unresolved Questions
+
+- Deploy the fix and retry owner-assisted production LINE bind before rerunning payment.
+- Decide whether to reuse the current unpaid production checkout result or create a fresh result for the next v1 attempt.
