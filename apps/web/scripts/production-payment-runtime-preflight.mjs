@@ -8,6 +8,8 @@ import { findWebAppDir, loadLocalEnv, parseLocalEnvContent } from "./lib/load-lo
 
 const DEFAULT_PRODUCTION_BASE_URL = "https://anyu.tw";
 const DEFAULT_VERCEL_SCOPE = "studioanyu-1488s-projects";
+const DEFAULT_PRODUCTION_ENV_FILE_NAME = ".env.production";
+const DEPRECATED_PRODUCTION_ENV_FILE_NAME = ".env";
 
 const REQUIRED_TABLES = [
   "analysis_results",
@@ -234,18 +236,18 @@ function loadPreflightLocalEnv(options) {
   }
 
   const webAppDir = findWebAppDir();
-  const envLocalPath = path.join(webAppDir, ".env.local");
-  const envPath = path.join(webAppDir, ".env");
-  const envFilePath = fs.existsSync(envLocalPath) ? envLocalPath : envPath;
+  const envFilePath = path.join(webAppDir, DEFAULT_PRODUCTION_ENV_FILE_NAME);
+  const deprecatedEnvPath = path.join(webAppDir, DEPRECATED_PRODUCTION_ENV_FILE_NAME);
 
   return {
     localEnv: loadLocalEnv({ envFilePath }),
     keySource: readEnvFileKeys(envFilePath),
+    deprecatedEnvPresent: fs.existsSync(deprecatedEnvPath),
   };
 }
 
 function getLocalEnvPresence(options, env = process.env) {
-  const { localEnv, keySource } = loadPreflightLocalEnv(options);
+  const { localEnv, keySource, deprecatedEnvPresent = false } = loadPreflightLocalEnv(options);
   const names = new Set([
     ...Object.keys(env).filter((name) => typeof env[name] === "string" && env[name]?.trim()),
     ...keySource.names,
@@ -259,6 +261,9 @@ function getLocalEnvPresence(options, env = process.env) {
       pathPresent: localEnv.envFilePresent,
       valuesLoadedButNotPrinted: localEnv.loaded.length > 0,
       keyNamesOnly: true,
+      expectedFileName: options.envFile ? path.basename(options.envFile) : DEFAULT_PRODUCTION_ENV_FILE_NAME,
+      envProductionMissing: !localEnv.envFilePresent,
+      envProductionLegacyDeprecated: deprecatedEnvPresent,
     },
   };
 }
@@ -709,6 +714,7 @@ export {
   buildEnvChecklist,
   classifyReadiness,
   getVercelProjectLinkingStatus,
+  getLocalEnvPresence,
   parseArgs,
   parseVercelEnvNames,
   readVercelProjectLink,

@@ -75,7 +75,7 @@ QA_WITH_COMMENT=value # comment
     }
   });
 
-  it("loads apps/web/.env.local from repo-root cwd shape and ignores root .env", () => {
+  it("loads apps/web/.env.staging from repo-root cwd shape and ignores root .env", () => {
     const root = mkdtempSync(path.join(tmpdir(), "anyu-qa-env-root-"));
     const webDir = path.join(root, "apps", "web");
 
@@ -83,15 +83,38 @@ QA_WITH_COMMENT=value # comment
       mkdirSync(webDir, { recursive: true });
       writeFileSync(path.join(root, ".env"), "QA_LOADER_ROOT_ONLY=from-root\n");
       writeFileSync(path.join(webDir, "package.json"), JSON.stringify({ name: "anyu-next-web" }));
-      writeFileSync(path.join(webDir, ".env.local"), "QA_LOADER_SECRET=from-web\n");
+      writeFileSync(path.join(webDir, ".env.local"), "QA_LOADER_ROOT_ONLY=deprecated-web-local\n");
+      writeFileSync(path.join(webDir, ".env.staging"), "QA_LOADER_SECRET=from-web\n");
 
       const result = loadLocalEnv({ startDir: root });
 
-      expect(result.envFilePath).toBe(path.join(webDir, ".env.local"));
+      expect(result.envFilePath).toBe(path.join(webDir, ".env.staging"));
       expect(result.loaded).toContain("QA_LOADER_SECRET");
       expect(result.loaded).not.toContain("QA_LOADER_ROOT_ONLY");
       expect(process.env.QA_LOADER_SECRET).toBe("from-web");
       expect(process.env.QA_LOADER_ROOT_ONLY).toBeUndefined();
+      expect(result.deprecatedEnvLocalPresent).toBe(true);
+    } finally {
+      rmSync(root, { force: true, recursive: true });
+    }
+  });
+
+  it("reports missing .env.staging without falling back to deprecated .env.local", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "anyu-qa-env-root-"));
+    const webDir = path.join(root, "apps", "web");
+
+    try {
+      mkdirSync(webDir, { recursive: true });
+      writeFileSync(path.join(webDir, "package.json"), JSON.stringify({ name: "anyu-next-web" }));
+      writeFileSync(path.join(webDir, ".env.local"), "QA_LOADER_SECRET=deprecated\n");
+
+      const result = loadLocalEnv({ startDir: root });
+
+      expect(result.envFilePath).toBe(path.join(webDir, ".env.staging"));
+      expect(result.envFilePresent).toBe(false);
+      expect(result.loaded).not.toContain("QA_LOADER_SECRET");
+      expect(process.env.QA_LOADER_SECRET).toBeUndefined();
+      expect(result.deprecatedEnvLocalPresent).toBe(true);
     } finally {
       rmSync(root, { force: true, recursive: true });
     }

@@ -134,6 +134,12 @@ describe("support paid result lookup helpers", () => {
     });
   });
 
+  it("keeps direct DB lookup in explicit process-env-only legacy mode", () => {
+    expect(parseSupportLookupArgs(["--no-local-env", "--result-id", uuid("1")]).options).toMatchObject({
+      disableLocalEnv: true,
+    });
+  });
+
   it("hashes email lookup values without returning raw email", () => {
     const hash = hashRecoveryEmail("Owner@Example.com", {
       PAYMENT_RECOVERY_CONTACT_HASH_SECRET: "test-only-hash-secret",

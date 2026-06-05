@@ -7,6 +7,7 @@ import {
   assertSanitizedPreflightOutput,
   buildEnvChecklist,
   classifyReadiness,
+  getLocalEnvPresence,
   parseArgs,
   parseVercelEnvNames,
   readVercelProjectLink,
@@ -224,5 +225,31 @@ describe("production payment runtime preflight", () => {
       projectName: "anyu-next",
       rootDirectory: "apps/web",
     });
+  });
+
+  it("uses explicit .env.production for local production mirror checks", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "anyu-production-env-"));
+    const envProductionPath = path.join(dir, ".env.production");
+    const envLegacyPath = path.join(dir, ".env");
+
+    try {
+      fs.writeFileSync(envProductionPath, "PAYMENT_CHECKOUT_SESSION_SECRET=from-production\n");
+      fs.writeFileSync(envLegacyPath, "DATABASE_URL=deprecated\n");
+
+      const localPresence = getLocalEnvPresence(
+        {
+          source: "local",
+          mode: "dry-run",
+          envFile: envProductionPath,
+        },
+        {},
+      );
+
+      expect(localPresence.names.has("PAYMENT_CHECKOUT_SESSION_SECRET")).toBe(true);
+      expect(localPresence.names.has("DATABASE_URL")).toBe(false);
+      expect(localPresence.localEnv.expectedFileName).toBe(".env.production");
+    } finally {
+      fs.rmSync(dir, { force: true, recursive: true });
+    }
   });
 });

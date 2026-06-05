@@ -72,11 +72,16 @@ function parseLocalEnvContent(content) {
   return entries;
 }
 
+const DEFAULT_STAGING_ENV_FILE_NAME = ".env.staging";
+const DEPRECATED_STAGING_ENV_FILE_NAME = ".env.local";
+
 function loadLocalEnv(options = {}) {
   const webAppDir = options.webAppDir ?? findWebAppDir(options.startDir);
-  const envFilePath = options.envFilePath ?? path.join(webAppDir, ".env.local");
+  const envFilePath =
+    options.envFilePath ?? path.join(webAppDir, DEFAULT_STAGING_ENV_FILE_NAME);
   const loaded = [];
   const skippedExisting = [];
+  const deprecatedEnvLocalPath = path.join(webAppDir, DEPRECATED_STAGING_ENV_FILE_NAME);
 
   if (!fs.existsSync(envFilePath)) {
     return {
@@ -84,6 +89,8 @@ function loadLocalEnv(options = {}) {
       skippedExisting,
       envFilePath,
       envFilePresent: false,
+      deprecatedEnvLocalPresent: fs.existsSync(deprecatedEnvLocalPath),
+      defaultEnvFileName: DEFAULT_STAGING_ENV_FILE_NAME,
     };
   }
 
@@ -104,7 +111,14 @@ function loadLocalEnv(options = {}) {
     skippedExisting,
     envFilePath,
     envFilePresent: true,
+    deprecatedEnvLocalPresent: fs.existsSync(deprecatedEnvLocalPath),
+    defaultEnvFileName: DEFAULT_STAGING_ENV_FILE_NAME,
   };
 }
 
-export { findWebAppDir, loadLocalEnv, parseLocalEnvContent };
+export {
+  DEFAULT_STAGING_ENV_FILE_NAME,
+  findWebAppDir,
+  loadLocalEnv,
+  parseLocalEnvContent,
+};

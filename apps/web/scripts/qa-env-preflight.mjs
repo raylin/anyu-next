@@ -37,7 +37,7 @@ const MODE_ALIASES = new Map([
 ]);
 
 const localEnv = loadLocalEnv();
-const ENV_LOCAL_PATH = localEnv.envFilePath;
+const ENV_MIRROR_PATH = localEnv.envFilePath;
 
 const MODE_DEFINITIONS = {
   fake_paid: {
@@ -220,7 +220,7 @@ const MODE_DEFINITIONS = {
     missingBehavior: "blocks real LINE recovery message smoke or safely returns provider/config unavailable without printing LINE recipient data",
   },
   support_ops_lookup: {
-    command: "corepack pnpm run ops:paid-result:lookup -- --result-id <id>",
+    command: "corepack pnpm run ops:paid-result:lookup -- --no-local-env --result-id <id>",
     requiredShell: [],
     optionalShell: [
       "SUPPORT_OPS_DATABASE_URL",
@@ -241,7 +241,7 @@ const MODE_DEFINITIONS = {
       "SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK",
       "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
     ],
-    missingBehavior: "blocks local support lookup if neither SUPPORT_OPS_DATABASE_URL nor clean-schema-verified DATABASE_URL is available",
+    missingBehavior: "legacy direct DB helper blocks unless process env is explicit; target architecture is Admin API lookup",
   },
   manual_fallback: {
     command: "manual processor path used by qa:fake-paid default mode",
@@ -310,14 +310,14 @@ function parseMode() {
 }
 
 function parseEnvLocalKeys() {
-  if (!fs.existsSync(ENV_LOCAL_PATH)) {
+  if (!fs.existsSync(ENV_MIRROR_PATH)) {
     return {
-      envLocalPathPresent: false,
+      envMirrorPathPresent: false,
       keys: new Set(),
     };
   }
 
-  const content = fs.readFileSync(ENV_LOCAL_PATH, "utf8");
+  const content = fs.readFileSync(ENV_MIRROR_PATH, "utf8");
   const keys = new Set();
 
   for (const line of content.split(/\r?\n/u)) {
@@ -335,7 +335,7 @@ function parseEnvLocalKeys() {
   }
 
   return {
-    envLocalPathPresent: true,
+    envMirrorPathPresent: true,
     keys,
   };
 }
@@ -366,9 +366,11 @@ async function summarizeMode(mode, definition, envLocal) {
       optionalMissing: optionalShellMissing,
     },
     envLocal: {
-      pathPresent: envLocal.envLocalPathPresent,
+      pathPresent: envLocal.envMirrorPathPresent,
       requiredKeysPresent: requiredEnvLocalKeys.filter((name) => envLocal.keys.has(name)),
       requiredKeysMissing: missingEnvLocalKeys,
+      expectedFileName: ".env.staging",
+      envLocalDeprecatedPresent: localEnv.deprecatedEnvLocalPresent,
     },
     previewStaging: {
       expectedNames: definition.previewStaging ?? [],
@@ -460,10 +462,13 @@ printJson({
   },
   cwd: process.cwd(),
   envLocal: {
-    pathPresent: envLocal.envLocalPathPresent,
+    pathPresent: envLocal.envMirrorPathPresent,
     valuesLoadedButNotPrinted: localEnv.loaded.length > 0,
     exportedEnvTakesPrecedence: true,
     keyNamesOnly: true,
+    expectedFileName: ".env.staging",
+    envStagingMissing: !envLocal.envMirrorPathPresent,
+    envLocalDeprecatedPresent: localEnv.deprecatedEnvLocalPresent,
   },
   modes: summaries,
 });

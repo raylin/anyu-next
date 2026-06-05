@@ -10055,3 +10055,29 @@ Unresolved questions:
 - Implement env mirror rename safely without committing secrets or silently repointing DB URLs.
 - Decide during implementation whether legacy direct DB helper should be deprecated first or removed immediately after Admin API/CLI passes staging smoke.
 - Choose whether Admin API response schema is shared via zod contract or duplicated minimally in CLI v0 to avoid web-runtime coupling.
+
+## 2026-06-05 Env File Rename / Server Mirror Alignment v0
+
+### Completed Changes
+
+- saved the Env File Rename / Server Mirror Alignment v0 handoff
+- confirmed `apps/web/.env.staging` and `apps/web/.env.production` exist and are gitignored
+- confirmed `apps/web/.env.local` and `apps/web/.env` are absent, so no deletion was needed
+- updated the shared local env loader to default to `apps/web/.env.staging`
+- updated production preflight local mode to default to `apps/web/.env.production`
+- removed implicit `.env.local` / `.env` fallback behavior from project scripts
+- updated the legacy direct DB support helper so it no longer auto-loads web env mirror files
+- updated `.env.example`, tests, dashboard, and this summary for the explicit server mirror model
+- passed lint, targeted tests, full tests, build, access-link smoke, no-card QA, and Vercel Production dry-run preflight
+
+### Learnings
+
+- Staging QA now uses the explicit `.env.staging` mirror when shell env is absent.
+- Vercel Production dry-run preflight remains the canonical production safety check and passed.
+- Local `.env.production` exists but is incomplete for local production payment-runtime preflight; this is a local mirror completeness issue, not a production runtime issue.
+
+### Unresolved Questions
+
+- Decide whether to complete local `.env.production` for local preflight parity or keep it partial.
+- Implement Admin Paid Result Lookup API v0 next.
+- Remove or fully deprecate legacy direct DB support lookup after Admin API/CLI smoke passes.

@@ -817,7 +817,7 @@ async function evaluateModel({
 
 async function main() {
   const appRoot = process.cwd();
-  const envPath = resolve(appRoot, ".env.local");
+  const envPath = resolve(appRoot, ".env.staging");
   loadEnvFile(envPath);
 
   const args = parseArgs(process.argv.slice(2));

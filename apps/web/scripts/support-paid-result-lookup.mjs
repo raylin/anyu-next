@@ -2,7 +2,6 @@
 
 import crypto from "node:crypto";
 import { neon } from "@neondatabase/serverless";
-import { loadLocalEnv } from "./lib/load-local-env.mjs";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -982,7 +981,10 @@ async function main() {
     const parsedBeforeEnv = parseSupportLookupArgs(process.argv.slice(2), process.env);
 
     if (!parsedBeforeEnv.options.disableLocalEnv) {
-      loadLocalEnv();
+      throw new SupportLookupInputError("legacy_local_env_autoload_removed", {
+        reason:
+          "Direct DB support lookup no longer reads apps/web env mirror files. Provide process env explicitly or migrate to Admin API lookup.",
+      });
     }
 
     const parsed = parseSupportLookupArgs(process.argv.slice(2), process.env);
