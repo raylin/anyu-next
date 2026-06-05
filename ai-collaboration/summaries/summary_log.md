@@ -10141,3 +10141,35 @@ Unresolved questions:
 - Implement the thin Module 01 Release Validation Suite v0 wrapper.
 - Decide when to configure Preview(staging) `ADMIN_API_TOKEN` so Admin API smoke can run inside the suite.
 - Decide when to deprecate or remove legacy direct DB support lookup after Admin API/CLI coverage is stable.
+
+## 2026-06-06 Module 01 Release Validation Suite v0
+
+### Completed Changes
+
+- saved the Module 01 Release Validation Suite v0 handoff
+- added `apps/web/scripts/module01-release-validation-suite.mjs`
+- added package scripts:
+  - `qa:module01:local`
+  - `qa:module01:staging`
+  - `qa:module01:production-preflight`
+  - `qa:module01:release`
+- added generated summary output under ignored `apps/web/.qa/`
+- added tests for command registration, gate status aggregation, summary shape, and redaction
+- kept existing one-off smokes available as suite building blocks
+- ran the new suite commands:
+  - local: pass
+  - staging: partial
+  - production-preflight: pass
+  - release: partial
+
+### Learnings
+
+- The suite can consolidate existing validation without rewriting the underlying smoke helpers.
+- Staging validation is useful and safe by default, but remains partial when `ADMIN_API_TOKEN` is absent and real channel checks are not run.
+- Production preflight remains read-only and fail-closed; production runtime was not touched.
+
+### Unresolved Questions
+
+- Configure Preview(staging) `ADMIN_API_TOKEN` and provide a safe known staging result ID so Admin API lookup can move from partial to pass inside `qa:module01:staging`.
+- Decide whether to implement `qa:module01:staging:channels` for owner-approved real Email/LINE checks.
+- Decide when release-suite partial is acceptable for production readiness versus requiring full pass.
