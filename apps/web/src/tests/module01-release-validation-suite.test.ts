@@ -41,6 +41,12 @@ describe("Module 01 release validation suite", () => {
     ).toBe("partial");
     expect(
       deriveGateStatus({
+        required: makeCheck("required", "pass"),
+        optional: makeCheck("optional", "skipped", { required: false }),
+      }),
+    ).toBe("pass");
+    expect(
+      deriveGateStatus({
         required: makeCheck("required", "blocked"),
         optional: makeCheck("optional", "pass", { required: false }),
       }),
@@ -59,6 +65,10 @@ describe("Module 01 release validation suite", () => {
         admin: makeCheck("admin_api_lookup", "partial", {
           required: false,
           warnings: ["skipped_missing_admin_token"],
+        }),
+        channels: makeCheck("channel_manual_acceptance", "skipped", {
+          required: false,
+          manualRequired: true,
         }),
       },
       manualRequired: ["ownerEmailReceived"],

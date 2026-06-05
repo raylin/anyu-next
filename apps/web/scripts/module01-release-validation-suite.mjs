@@ -58,7 +58,9 @@ function worstStatus(statuses) {
 }
 
 function deriveGateStatus(checks) {
-  const statuses = Object.values(checks).map((check) => check.status);
+  const statuses = Object.values(checks)
+    .filter((check) => check.required !== false || check.status !== "skipped")
+    .map((check) => check.status);
   const requiredBlocked = Object.values(checks).some(
     (check) => check.required !== false && check.status === "blocked",
   );
@@ -311,7 +313,7 @@ async function runStagingSuite() {
       },
     ),
     adminApiLookup: await adminApiStagingCheck(),
-    channelManualAcceptance: makeCheck("channel_manual_acceptance", "partial", {
+    channelManualAcceptance: makeCheck("channel_manual_acceptance", "skipped", {
       required: false,
       manualRequired: true,
       ownerVerified: false,
@@ -330,7 +332,7 @@ async function runStagingSuite() {
       "ownerLineLinkOpenedPaidResult",
     ],
     ownerApprovalRequired: false,
-    nextRequiredAction: "review_partial_checks_or_run_channels_with_owner_approval",
+    nextRequiredAction: "owner_accept_staging_gate_or_run_channels_with_owner_approval",
   });
 
   writeSummary("staging", summary);

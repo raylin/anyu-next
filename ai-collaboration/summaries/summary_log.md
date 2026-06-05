@@ -10173,3 +10173,30 @@ Unresolved questions:
 - Configure Preview(staging) `ADMIN_API_TOKEN` and provide a safe known staging result ID so Admin API lookup can move from partial to pass inside `qa:module01:staging`.
 - Decide whether to implement `qa:module01:staging:channels` for owner-approved real Email/LINE checks.
 - Decide when release-suite partial is acceptable for production readiness versus requiring full pass.
+
+## 2026-06-06 Staging Admin API Gate Setup + Module01 Suite Rerun v0
+
+### Completed Changes
+
+- saved the Staging Admin API Gate Setup + Module01 Suite Rerun v0 handoff
+- generated and set `ADMIN_API_TOKEN` for Vercel Preview(staging) branch `staging` only
+- restored missing Preview(staging) provider env-name coverage for `ANTHROPIC_API_KEY` from the approved local staging server-env mirror, without printing values
+- redeployed Preview(staging) on canonical `anyu-next`
+- selected a known staging result ID for Admin API lookup without printing the ID
+- updated Module 01 suite status aggregation so optional skipped real-channel checks do not downgrade the safe staging gate
+- reran validation:
+  - `qa:module01:local`: pass
+  - `qa:module01:staging`: pass
+  - `qa:module01:production-preflight`: pass
+
+### Learnings
+
+- Admin API staging smoke can run inside the reusable suite and should not remain a separate one-off gate.
+- Preview(staging) branch-scoped env can drift from local `.env.staging`; missing provider env caused analyze/provider errors until the branch-scoped Vercel env was restored.
+- Real Email/LINE channel checks should stay outside the default suite and run only through an explicit owner-approved channel command.
+
+### Unresolved Questions
+
+- Decide whether to add a dedicated `qa:module01:staging:channels` command for one approved real Email and one approved real LINE message.
+- Consider adding a safe env-name drift check for key Preview(staging) provider dependencies.
+- Owner should accept the safe staging gate before any production readiness task resumes.
