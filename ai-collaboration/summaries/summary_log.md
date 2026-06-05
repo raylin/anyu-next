@@ -10106,3 +10106,38 @@ Unresolved questions:
 - Set `ADMIN_API_TOKEN` on Preview(staging) in a separate approved smoke task before calling the deployed endpoint.
 - Implement pure Admin CLI Lookup Client v0 after the API smoke path is verified.
 - Deprecate or remove legacy direct DB support lookup after Admin API/CLI staging smoke passes.
+
+## 2026-06-05 Module 01 QA Coverage & Release Validation Plan v0
+
+### Completed Changes
+
+- saved the Module 01 QA Coverage & Release Validation Plan v0 handoff
+- inventoried existing package QA scripts, smoke helpers, production preflight, legacy support lookup, and relevant tests
+- defined a layered validation model:
+  - local unit/route tests
+  - integration tests
+  - Preview(staging) release validation
+  - manual acceptance checkpoints
+  - production preflight / controlled smoke
+- mapped Module 01 user/payment/access-link/admin journeys to current coverage and gaps
+- proposed reusable commands:
+  - `pnpm qa:module01:local`
+  - `pnpm qa:module01:staging`
+  - `pnpm qa:module01:staging:channels`
+  - `pnpm qa:module01:production-preflight`
+  - `pnpm qa:module01:release`
+- folded Admin API staging smoke into the staging release suite rather than treating it as a one-off handoff
+- defined manual acceptance fields for Email, LINE, card payment, and browser paid-result confirmation
+- documented production gating policy requiring suite pass or owner-accepted partial before any controlled production smoke
+
+### Learnings
+
+- Existing coverage is broad but fragmented; the missing piece is orchestration and a central coverage report, not more standalone smoke scripts.
+- Real staging Email/LINE checks should be optional owner-approved channel validation, not default automation.
+- Production smoke should be blocked by release-suite status plus explicit owner approval, not by a Codex “recommended next task” alone.
+
+### Unresolved Questions
+
+- Implement the thin Module 01 Release Validation Suite v0 wrapper.
+- Decide when to configure Preview(staging) `ADMIN_API_TOKEN` so Admin API smoke can run inside the suite.
+- Decide when to deprecate or remove legacy direct DB support lookup after Admin API/CLI coverage is stable.
