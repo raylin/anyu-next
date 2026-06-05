@@ -10025,3 +10025,33 @@ Unresolved questions:
 - Provide Preview(staging) `SUPPORT_OPS_DATABASE_URL` through an untracked local/operator mechanism.
 - Decide later whether to migrate/reset `dev/local` for local Module 01 payment/access-link development.
 - Keep Module 01 staging baseline partial until support lookup passes against staging artifacts.
+
+## 2026-06-05 Admin Ops Boundary + Env Naming Plan v0
+
+### Completed Changes
+
+- saved the Admin Ops Boundary + Env Naming Plan v0 handoff
+- documented the intended env model:
+  - local dev stays separate from Host Preview(staging)
+  - server staging mirror should become `apps/web/.env.staging`
+  - server production mirror should become `apps/web/.env.production`
+  - staging is the main integration environment
+  - production is touched only through explicit gates/smokes
+- defined Admin API as the single operational boundary for support lookup
+- defined local CLI as a pure Admin API client using `ADMIN_API_TOKEN`
+- planned read-only Admin API v0: `GET /api/admin/paid-results/:resultId`
+- planned CLI v0: `pnpm ops lookup-result --env staging|production --id <resultId>`
+- declared direct DB support lookup legacy rather than target architecture
+- updated dashboard wording to point next work at Admin API/CLI instead of direct DB source repair
+
+### Learnings
+
+- The support lookup issue should be solved architecturally, not by continuing to bind local CLI behavior to DB URLs and env files.
+- Admin API gives the future Admin UI and local CLI the same sanitized operational boundary.
+- Env mirror file naming should clarify server runtime context, while ops CLI should avoid those files entirely.
+
+### Unresolved Questions
+
+- Implement env mirror rename safely without committing secrets or silently repointing DB URLs.
+- Decide during implementation whether legacy direct DB helper should be deprecated first or removed immediately after Admin API/CLI passes staging smoke.
+- Choose whether Admin API response schema is shared via zod contract or duplicated minimally in CLI v0 to avoid web-runtime coupling.
