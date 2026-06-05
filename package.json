@@ -1,0 +1,7 @@
+{
+  "name": "anyu-next",
+  "private": true,
+  "scripts": {
+    "ops": "corepack pnpm --dir tools/admin-cli exec tsx src/index.ts"
+  }
+}

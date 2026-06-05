@@ -10200,3 +10200,29 @@ Unresolved questions:
 - Decide whether to add a dedicated `qa:module01:staging:channels` command for one approved real Email and one approved real LINE message.
 - Consider adding a safe env-name drift check for key Preview(staging) provider dependencies.
 - Owner should accept the safe staging gate before any production readiness task resumes.
+
+## 2026-06-06 Admin CLI Lookup Client v0
+
+### Completed Changes
+
+- saved the Admin CLI Lookup Client v0 handoff
+- added standalone package `tools/admin-cli`
+- added root `pnpm ops` command wiring for:
+  - `pnpm ops lookup-result --env staging --id <resultId>`
+  - `pnpm ops lookup-result --env production --id <resultId>`
+- implemented a pure Admin API HTTP client using `ADMIN_API_TOKEN` from current shell/process env only
+- hardcoded v0 base URLs for staging and production
+- added response shape validation and forbidden-field/token redaction checks
+- added mocked CLI tests for auth, errors, env mapping, redaction, JSON/pretty output, and no DB/Vercel/web-env dependency
+
+### Learnings
+
+- The CLI can stay fully outside `apps/web` and does not need DB, Neon, Vercel env, or web runtime imports.
+- The root repo did not previously have a package script surface, so a minimal private root `package.json` is now used for `pnpm ops`.
+- In this shell, bare `pnpm` is unavailable; `corepack pnpm ops ...` is the validated equivalent.
+
+### Unresolved Questions
+
+- Run Staging Admin CLI Lookup Smoke v0 with `ADMIN_API_TOKEN` supplied explicitly through the shell.
+- Decide later whether to remove or keep legacy direct DB support lookup after Admin CLI usage is stable.
+- Decide whether production read-only Admin CLI smoke should be done before or after owner acceptance of the staging gate.
