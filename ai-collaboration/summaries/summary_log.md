@@ -10081,3 +10081,28 @@ Unresolved questions:
 - Decide whether to complete local `.env.production` for local preflight parity or keep it partial.
 - Implement Admin Paid Result Lookup API v0 next.
 - Remove or fully deprecate legacy direct DB support lookup after Admin API/CLI smoke passes.
+
+## 2026-06-05 Admin Paid Result Lookup API v0
+
+### Completed Changes
+
+- saved the Admin Paid Result Lookup API v0 handoff
+- added read-only `GET /api/admin/paid-results/[resultId]`
+- required `x-admin-api-token` and server runtime `ADMIN_API_TOKEN`
+- made missing server admin token fail closed before lookup
+- added sanitized paid-result summary helper for result/module, payment, entitlement, generation, paid result, Email access-link, LINE access-link, diagnosis, and recommended actions
+- represented provider message IDs and merchant order numbers as presence booleans only
+- added route/helper tests for auth, missing result, ready result, pending delivery, no saved contact, access-link sent categories, and redaction
+- passed lint, targeted admin tests, full tests, build, access-link smoke, no-card QA, and Vercel Production dry-run preflight
+
+### Learnings
+
+- The Admin API boundary can reuse app DB/schema access safely inside server runtime while keeping CLI work out of the web app for now.
+- Auth must run before result lookup so the route does not leak result existence to unauthenticated callers.
+- The current stable v0 shape is sufficient for support triage without exposing Email, LINE identity, token, provider payload, merchant-order, or paid-result content.
+
+### Unresolved Questions
+
+- Set `ADMIN_API_TOKEN` on Preview(staging) in a separate approved smoke task before calling the deployed endpoint.
+- Implement pure Admin CLI Lookup Client v0 after the API smoke path is verified.
+- Deprecate or remove legacy direct DB support lookup after Admin API/CLI staging smoke passes.
