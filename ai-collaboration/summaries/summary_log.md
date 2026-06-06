@@ -10458,3 +10458,32 @@ Unresolved questions:
 - Owner should confirm whether the 5 decision tables are included in the full reset.
 - Apply task must not start until provider/DB credential preservation source is available.
 - Production remains frozen until v2 apply and production preflight pass.
+
+## 2026-06-06 Env Mirror Strategy v2 Apply / Clean Reset v0
+
+### Completed Changes
+
+- saved the Env Mirror Strategy v2 Apply / Clean Reset v0 handoff
+- cleared the owner-approved runtime/test reset scope in both Preview(staging) and Production without dropping schema
+- reset 15 tables in staging and production to zero before validation
+- regenerated app-owned internal/stateful secrets local-mirror-first for staging and production
+- rewrote ignored `apps/web/.env.staging` and `apps/web/.env.production` into reduced active key sets with true owner-fill blanks only
+- synced 76 non-empty local mirror values to matching Vercel environments by key name only
+- redeployed Preview(staging) and Production, with Production remaining fail-closed
+- reran Module 01 gates
+
+### Learnings
+
+- The clean reset succeeded: production reset-scope tables remained zero after validation; staging was repopulated only by safe QA artifacts.
+- `qa:module01:local` passes.
+- `qa:module01:staging` passes with Admin API and Admin CLI lookup after a fresh safe no-card staging artifact was created.
+- Hardened `qa:module01:production-preflight` now blocks only on the local production mirror LINE provider token shape: `LINE_CHANNEL_ACCESS_TOKEN` is still empty.
+- Generated app-owned crypto/internal auth and processor auth now pass local mirror shape.
+- Production public pages remained live and checkout/fake-paid/operator routes remained fail-closed.
+
+### Unresolved Questions
+
+- Owner must fill production `LINE_CHANNEL_ACCESS_TOKEN` and `LINE_CHANNEL_SECRET` from trusted LINE provider sources, with `LINE_CHANNEL_ACCESS_TOKEN` currently blocking production preflight.
+- Staging LINE owner-fill values remain blank too; default staging gate does not send real LINE, but future channel validation will require them.
+- Rerun production preflight after owner fill; do not resume controlled production smoke until it passes.
+- Theme Architecture remains preserved and deferred.
