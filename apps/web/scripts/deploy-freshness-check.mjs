@@ -36,7 +36,9 @@ function parseArgs(argv = process.argv.slice(2)) {
     const arg = argv[index];
     const next = argv[index + 1];
 
-    if (arg === "--env") {
+    if (arg === "--") {
+      continue;
+    } else if (arg === "--env") {
       options.env = next ?? "";
       index += 1;
     } else if (arg === "--expected-commit") {
@@ -336,4 +338,3 @@ export {
   normalizeCommit,
   parseArgs,
 };
-

@@ -5,6 +5,7 @@ import {
   classifyHealth,
   commitMatches,
   hasUsableCommit,
+  parseArgs,
 } from "../../scripts/deploy-freshness-check.mjs";
 
 function response(input: {
@@ -25,6 +26,15 @@ function response(input: {
 }
 
 describe("deploy freshness check", () => {
+  it("accepts pnpm forwarded argument separator", () => {
+    expect(
+      parseArgs(["--", "--env", "staging", "--expected-commit", "abcdef1"]),
+    ).toMatchObject({
+      env: "staging",
+      expectedCommit: "abcdef1",
+    });
+  });
+
   it("matches full and short commit identifiers without exposing values", () => {
     expect(hasUsableCommit("abcdef1")).toBe(true);
     expect(hasUsableCommit("unknown")).toBe(false);
@@ -164,4 +174,3 @@ describe("deploy freshness check", () => {
     });
   });
 });
-
