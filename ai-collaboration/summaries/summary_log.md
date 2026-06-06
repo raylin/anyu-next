@@ -10678,3 +10678,24 @@ Unresolved questions:
 - Implement the real owner-approved staging channels runner only when repeatable channel proof is needed.
 - Consider an Admin API-based no-card wait path later if the operator no-card runner can stop keeping paid-access token status in memory.
 - Production smoke remains owner-gated; no production runtime, payment, Email, LINE, env, or DB mutation occurred.
+
+## 2026-06-06 Codex Operating Policy + Handoff Template v0
+
+### Completed Changes
+
+- replaced the stale root `AGENTS.md` with concise ANYU-specific Codex operating rules
+- added detailed process docs under `ai-collaboration/process/`
+- added a reusable handoff template with low/medium-risk and high-risk handoff guidance
+- updated the dashboard to reference shared operating policy docs and the handoff template
+- saved the task handoff and execution report
+
+### Learnings
+
+- Future handoffs can reference `AGENTS.md` and `ai-collaboration/process/*.md` instead of repeating every shared rule.
+- High-risk production/payment/env tasks should still repeat the 5-10 task-critical hard rules inline.
+- The shared policies now codify model/effort, timing reporting, env mirror governance, Admin API/CLI ops boundary, QA tier selection, production gate rules, and theme route preservation.
+
+### Unresolved Questions
+
+- Historical reports and handoffs still contain older process language and should remain historical.
+- Future templates under `ai-collaboration/templates/` may be aligned later if they are still actively used.
