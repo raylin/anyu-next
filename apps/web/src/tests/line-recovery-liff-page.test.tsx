@@ -38,6 +38,7 @@ describe("LINE recovery LIFF page", () => {
     );
 
     expect(html).toContain("缺少 LINE 保存狀態");
+    expect(html).toContain("data-line-diagnostic-category=\"liff_state_missing\"");
     expect(html).toContain("請在 LINE 中開啟此頁，或回到原頁改用 Email 保存");
     expect(html).toContain("LINE 綁定失敗也不影響付款或查看報告");
   });
@@ -99,6 +100,8 @@ describe("LINE recovery LIFF page", () => {
     expect(source).toContain('fetch("/api/line/recovery/bind-liff"');
     expect(source).toContain("state: context.state");
     expect(source).toContain("browserContext.state ? browserContext : serverContext");
+    expect(source).toContain("mapLineRecoveryBindApiFailure");
+    expect(source).toContain("data-line-diagnostic-category");
     expect(source).toContain("idToken");
     expect(source).not.toContain("lineUserId");
     expect(source).not.toContain("unlockIntentId");

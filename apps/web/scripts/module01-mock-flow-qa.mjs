@@ -17,6 +17,7 @@ const TARGETED_TESTS = [
   "src/tests/payment-recovery-contact-secrets.test.ts",
   "src/tests/email-recovery-link.test.ts",
   "src/tests/line-recovery-link.test.ts",
+  "src/tests/line-recovery-bind-diagnostics.test.ts",
   "src/tests/paid-result-recovery-links.test.ts",
   "src/tests/paid-generation-service.test.ts",
   "src/tests/paid-generation-processor.test.ts",
@@ -45,6 +46,58 @@ const SCENARIOS = [
       "src/tests/payment-recovery-contact-secrets.test.ts",
       "src/tests/line-recovery-link.test.ts",
       "src/tests/admin-paid-result-lookup.test.ts",
+    ],
+  },
+  {
+    id: "line_liff_bind_success",
+    validates: [
+      "liff_state_valid",
+      "id_token_present",
+      "bind_api_success_category",
+      "no_private_diagnostic_output",
+    ],
+    tests: ["src/tests/line-recovery-bind-diagnostics.test.ts"],
+  },
+  {
+    id: "line_liff_missing_state",
+    validates: [
+      "missing_liff_state_category",
+      "email_fallback_available",
+      "no_private_diagnostic_output",
+    ],
+    tests: ["src/tests/line-recovery-bind-diagnostics.test.ts"],
+  },
+  {
+    id: "line_liff_missing_id_token",
+    validates: [
+      "id_token_missing_after_login_category",
+      "line_retry_or_email_fallback",
+      "no_id_token_output",
+    ],
+    tests: ["src/tests/line-recovery-bind-diagnostics.test.ts"],
+  },
+  {
+    id: "line_bind_recipient_secret_failure",
+    validates: [
+      "recipient_secret_failure_category",
+      "line_bind_failure_safe_message",
+      "no_raw_line_identity_output",
+    ],
+    tests: [
+      "src/tests/line-recovery-bind-diagnostics.test.ts",
+      "src/tests/line-recovery-bind-route.test.ts",
+    ],
+  },
+  {
+    id: "line_email_fallback_after_bind_failure",
+    validates: [
+      "bind_failure_allows_email_fallback",
+      "line_retry_available",
+      "payment_not_unlocked_by_failed_line_bind",
+    ],
+    tests: [
+      "src/tests/line-recovery-bind-diagnostics.test.ts",
+      "src/tests/newebpay-checkout-start-page.test.tsx",
     ],
   },
   {

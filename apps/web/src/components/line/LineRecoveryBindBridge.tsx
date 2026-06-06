@@ -6,6 +6,14 @@ import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { getLineLiffId } from "@/lib/line/config";
+import {
+  buildLineRecoveryBindDiagnosticResult,
+  evaluateLineRecoveryBindDiagnostic,
+  getInitialLineRecoveryBindDiagnostic,
+  getLineRecoveryBindDiagnosticMessage,
+  mapLineRecoveryBindApiFailure,
+  type LineRecoveryBindDiagnosticCategory,
+} from "@/lib/line/recovery-bind-diagnostics";
 import { parseLineRecoveryBindContext } from "@/lib/line/recovery-liff-context";
 
 declare global {
@@ -32,6 +40,7 @@ type RecoveryBindResponse =
   | {
       ok: false;
       error: string;
+      bindCategory?: string;
       returnPath?: string | null;
     };
 
@@ -48,40 +57,84 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
 
     return browserContext.state ? browserContext : serverContext;
   }, [initialSearch]);
-  const initialFallback = getInitialFallbackMessage(context);
+  const initialFallbackCategory = getInitialLineRecoveryBindDiagnostic(context);
+  const initialFallback = initialFallbackCategory
+    ? getLineRecoveryBindDiagnosticMessage(initialFallbackCategory)
+    : null;
   const [state, setState] = useState<RecoveryBindState>(initialFallback ? "fallback" : "idle");
   const [message, setMessage] = useState(
     initialFallback ?? "正在準備 LINE 保存流程。之後可以從 LINE 回到 ANYU 查看完整報告。",
   );
+  const [diagnosticCategory, setDiagnosticCategory] =
+    useState<LineRecoveryBindDiagnosticCategory | null>(initialFallbackCategory);
   const [returnPath, setReturnPath] = useState<string | null>(context.fallbackReturnPath);
 
   useEffect(() => {
     let cancelled = false;
 
     async function bindRecoveryLine() {
-      const fallback = getInitialFallbackMessage(context);
+      const fallbackCategory = getInitialLineRecoveryBindDiagnostic(context);
 
-      if (fallback) {
+      if (fallbackCategory) {
+        const fallback = buildLineRecoveryBindDiagnosticResult(fallbackCategory);
         setState("fallback");
-        setMessage(fallback);
+        setDiagnosticCategory(fallbackCategory);
+        setMessage(fallback.safeMessage);
         return;
       }
 
       const liffId = getLineLiffId();
 
       if (!liffId) {
+        const fallback = evaluateLineRecoveryBindDiagnostic({
+          context,
+          liffIdConfigured: false,
+        });
         setState("fallback");
-        setMessage("LINE 保存暫時無法啟動。你可以回到原頁，改用 Email 保存查看連結。");
+        setDiagnosticCategory(fallback.category);
+        setMessage(fallback.safeMessage);
         return;
       }
 
       setState("loading");
 
       try {
-        await loadLiffSdk();
-        await window.liff?.init({ liffId });
+        try {
+          await loadLiffSdk();
+        } catch {
+          const fallback = evaluateLineRecoveryBindDiagnostic({
+            context,
+            sdkLoadStatus: "failed",
+          });
+          setState("fallback");
+          setDiagnosticCategory(fallback.category);
+          setMessage(fallback.safeMessage);
+          return;
+        }
+
+        try {
+          await window.liff?.init({ liffId });
+        } catch {
+          const fallback = evaluateLineRecoveryBindDiagnostic({
+            context,
+            sdkLoadStatus: "loaded",
+            initStatus: "failed",
+          });
+          setState("fallback");
+          setDiagnosticCategory(fallback.category);
+          setMessage(fallback.safeMessage);
+          return;
+        }
 
         if (!window.liff?.isLoggedIn()) {
+          const redirect = evaluateLineRecoveryBindDiagnostic({
+            context,
+            sdkLoadStatus: "loaded",
+            initStatus: "success",
+            loggedIn: false,
+          });
+          setDiagnosticCategory(redirect.category);
+          setMessage(redirect.safeMessage);
           window.liff?.login({ redirectUri: window.location.href });
           return;
         }
@@ -89,8 +142,16 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
         const idToken = window.liff.getIDToken();
 
         if (!idToken) {
+          const fallback = evaluateLineRecoveryBindDiagnostic({
+            context,
+            sdkLoadStatus: "loaded",
+            initStatus: "success",
+            loggedIn: true,
+            idTokenPresent: false,
+          });
           setState("fallback");
-          setMessage("LINE 身分確認沒有完成。你可以回到原頁，改用 Email 保存查看連結。");
+          setDiagnosticCategory(fallback.category);
+          setMessage(fallback.safeMessage);
           return;
         }
 
@@ -111,21 +172,33 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
         setReturnPath(payload.returnPath ?? context.fallbackReturnPath);
 
         if (!response.ok || !payload.ok) {
+          const category = payload.ok
+            ? "bind_api_failed"
+            : mapLineRecoveryBindApiFailure({
+                error: payload.error,
+                bindCategory: "bindCategory" in payload ? payload.bindCategory : null,
+              });
+          const fallback = buildLineRecoveryBindDiagnosticResult(category);
           setState("fallback");
-          setMessage(getBindFailureMessage(payload.ok ? "bind_failed" : payload.error));
+          setDiagnosticCategory(fallback.category);
+          setMessage(fallback.safeMessage);
           return;
         }
 
+        const success = buildLineRecoveryBindDiagnosticResult("bind_success");
         setState("success");
-        setMessage("已用 LINE 保存專屬查看連結。之後可以從 LINE 回到 ANYU 查看完整報告。");
+        setDiagnosticCategory(success.category);
+        setMessage(success.safeMessage);
 
         if (payload.returnPath) {
           window.location.assign(payload.returnPath);
         }
       } catch {
         if (!cancelled) {
+          const fallback = buildLineRecoveryBindDiagnosticResult("bind_api_failed");
           setState("fallback");
-          setMessage("LINE 綁定失敗也不影響付款或查看報告。你可以回到原頁，改用 Email 保存。");
+          setDiagnosticCategory(fallback.category);
+          setMessage(fallback.safeMessage);
         }
       }
     }
@@ -150,6 +223,15 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
         <Card>
           <p className="anyu-kicker">LINE access link</p>
           <h1 className="anyu-section-title">用 LINE 保存查看連結</h1>
+          {diagnosticCategory ? (
+            <p
+              hidden
+              className="anyu-subtle-note"
+              data-line-diagnostic-category={diagnosticCategory}
+            >
+              狀態代碼：{diagnosticCategory}
+            </p>
+          ) : null}
           <p className="anyu-copy">{message}</p>
           <p className="anyu-subtle-note">
             LINE 只會保存或傳送查看連結；完整報告仍以網頁查看為準。
@@ -199,29 +281,6 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
       </section>
     </main>
   );
-}
-
-function getInitialFallbackMessage(context: ReturnType<typeof parseLineRecoveryBindContext>) {
-  if (!context.state) {
-    return "缺少 LINE 保存狀態。請回到原頁，改用 Email 保存查看連結。";
-  }
-
-  if (!context.isStateShapeValid) {
-    return "這個 LINE 查看連結已失效。請回到原頁，改用 Email 保存查看連結。";
-  }
-
-  return null;
-}
-
-function getBindFailureMessage(error: string) {
-  switch (error) {
-    case "state_expired":
-      return "這個 LINE 查看連結已過期。請回到原頁重新開始，或改用 Email 保存查看連結。";
-    case "line_user_missing":
-      return "LINE 身分確認沒有完成。你可以回到原頁，改用 Email 保存查看連結。";
-    default:
-      return "LINE 綁定失敗也不影響付款或查看報告。你可以回到原頁，改用 Email 保存查看連結。";
-  }
 }
 
 function loadLiffSdk() {

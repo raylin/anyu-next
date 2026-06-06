@@ -10774,6 +10774,28 @@ Unresolved questions:
 - `qa:module01:production-preflight` was intentionally skipped because no production/env/preflight behavior changed.
 - Next mainline task remains LINE / LIFF Bind Diagnostic Harness v0.
 
+## 2026-06-07 LINE / LIFF Bind Diagnostic Harness v0
+
+### Completed Changes
+
+- saved the LINE / LIFF Bind Diagnostic Harness v0 handoff
+- added a pure `recovery-bind-diagnostics` state-machine helper for LIFF SDK/init/login/idToken/bind API outcomes
+- updated `LineRecoveryBindBridge` to use safe hidden diagnostic categories while preserving safe fallback copy
+- added targeted tests for LIFF bind success, missing/invalid/expired state, SDK/init failures, login redirect, missing idToken, bind API failures, and unsafe diagnostic output rejection
+- extended `qa:module01:mock-flow` with LIFF diagnostic scenarios
+
+### Learnings
+
+- The server-side contact/recipient-secret invariant is covered, but pre-payment production bind failures still need client/LIFF bridge diagnostics.
+- Local diagnostic categories now exist without real LINE, owner manual action, production, or provider calls.
+- Admin API pre-payment diagnostics are likely useful because current Admin API starts from paid-result/result state and cannot inspect a failed bind attempt before payment.
+
+### Unresolved Questions
+
+- Decide whether to implement Admin API Pre-Payment Bind Diagnostics v0 next for persisted safe bind-attempt visibility.
+- If Admin API diagnostics are deferred, proceed to LINE production bind fix using the new categories and targeted/mock/UI/staging validation.
+- No production runtime, payment, Email, LINE, Vercel env, or DB mutation occurred.
+
 ## 2026-06-06 Codex Approval Policy Deprecation Warning Fix v0
 
 ### Completed Changes

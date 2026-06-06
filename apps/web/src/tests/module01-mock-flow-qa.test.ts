@@ -12,6 +12,11 @@ describe("Module 01 mock-flow QA helper", () => {
     expect(SCENARIOS.map((scenario) => scenario.id)).toEqual([
       "email_happy_path",
       "line_happy_path_with_recipient_secret",
+      "line_liff_bind_success",
+      "line_liff_missing_state",
+      "line_liff_missing_id_token",
+      "line_bind_recipient_secret_failure",
+      "line_email_fallback_after_bind_failure",
       "line_partial_bind_without_recipient_secret",
       "email_fallback_after_line_incomplete",
       "paid_generation_to_admin_ready_summary",
@@ -25,6 +30,7 @@ describe("Module 01 mock-flow QA helper", () => {
         "src/tests/payment-recovery-contact-secrets.test.ts",
         "src/tests/email-recovery-link.test.ts",
         "src/tests/line-recovery-link.test.ts",
+        "src/tests/line-recovery-bind-diagnostics.test.ts",
       ]),
     );
   });
@@ -61,6 +67,12 @@ describe("Module 01 mock-flow QA helper", () => {
     });
     expect(summary.scenarios.line_happy_path_with_recipient_secret.validates).toEqual(
       expect.arrayContaining(["recipient_secret_write", "deliverable_line_summary"]),
+    );
+    expect(summary.scenarios.line_liff_missing_id_token.validates).toEqual(
+      expect.arrayContaining(["id_token_missing_after_login_category", "no_id_token_output"]),
+    );
+    expect(summary.scenarios.line_bind_recipient_secret_failure.validates).toEqual(
+      expect.arrayContaining(["recipient_secret_failure_category", "no_raw_line_identity_output"]),
     );
     expect(summary.warnings).toEqual(
       expect.arrayContaining(["no_real_newebpay", "no_real_email", "no_real_line"]),
