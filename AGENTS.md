@@ -53,6 +53,7 @@ Every report and completion summary must include:
 - Do not default to staging smoke.
 - Use targeted tests, `qa:module01:mock-flow`, and `qa:module01:ui` before staging when possible.
 - Use `qa:module01:staging` for deployed integration/release-candidate checks.
+- Deployed staging/production gates must assert target commit freshness before substantive checks; stale or mixed-deployment runs are invalid evidence.
 - Real Email, LINE, and credit-card payment require explicit owner approval.
 - Do not use ad hoc heredoc scripts, random temp-file handoffs, or repeated full-suite polling as normal QA.
 - Use structured helpers such as `qa:module01:wait-result`.

@@ -66,6 +66,15 @@ cd apps/web && corepack pnpm run qa:module01:staging
 
 Do not rerun the full staging gate just to wait for one async result. Use structured wait helpers instead.
 
+For code that must be verified on a deployed commit, assert deployment freshness first:
+
+```bash
+cd apps/web && corepack pnpm run qa:deploy:freshness -- --env staging --expected-commit <sha>
+cd apps/web && MODULE01_EXPECTED_DEPLOY_COMMIT=<sha> corepack pnpm run qa:module01:staging
+```
+
+If `MODULE01_EXPECTED_DEPLOY_COMMIT` is supplied and the target commit is not live, `qa:module01:staging` must block before access-link, no-card, Admin API, or Admin CLI checks. Do not use the full staging gate as a deploy polling mechanism.
+
 ### Module 01 Production Preflight
 
 Run when production gate, env mirror, Vercel, fail-closed behavior, or production smoke readiness changes.
@@ -87,6 +96,32 @@ cd apps/web && corepack pnpm run qa:module01:wait-result -- --env staging --resu
 ```
 
 Do not use heredoc scripts, random temp-file handoffs, or repeated full-suite polling.
+
+## Deployed Gate Freshness
+
+Any deployed staging or production gate must assert the target deployment before substantive checks.
+
+Rules:
+
+- Use the health endpoint or `qa:deploy:freshness` for lightweight deploy freshness waiting.
+- A gate run is valid only if `deployedCommitAtGateStart` matches `targetDeployCommit`.
+- If a gate starts on a stale commit and changes mid-run, classify it as `mixed_deployment_gate_invalid`.
+- If health does not expose usable commit metadata, classify it as `commit_metadata_unknown`.
+- If the target commit is not live before timeout, classify it as `staging_freshness_timeout` or `production_freshness_timeout`.
+- If no expected commit is supplied, report `freshnessStatus=not_asserted`, not pass.
+- Reports must separate `commandExitCode` from `gateStatus`; an exit code of 0 can still produce `gateStatus=partial`.
+
+For any deployed gate, report:
+
+- `targetDeployCommit`
+- `deployedCommitAtGateStart`
+- `deployedCommitAtGateEnd`
+- `freshnessStatus`
+- `mixedDeploymentDetected`
+- `gateStatus`
+- `commandExitCode`
+- `requiredChecksStatus`
+- `optionalChecksStatus`
 
 ## Smoke Fixtures
 
@@ -124,6 +159,7 @@ For each gate, report:
 
 - command
 - result
+- gateStatus and commandExitCode separately
 - whether it mutates staging data
 - whether it touches production read-only checks
 - whether it sends Email/LINE

@@ -5,6 +5,8 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { checkDeployFreshness } from "./deploy-freshness-check.mjs";
+
 const MODULE = "ai-temperature";
 const STAGING_BASE_URL = "https://staging.anyu.tw";
 const OUTPUT_DIR = ".qa";
@@ -245,6 +247,18 @@ function deriveGateStatus(checks) {
   return worstStatus(statuses);
 }
 
+function deriveChecksStatus(checks, required) {
+  const statuses = Object.values(checks)
+    .filter((check) => (required ? check.required !== false : check.required === false))
+    .map((check) => check.status);
+
+  if (statuses.length === 0) {
+    return "not_applicable";
+  }
+
+  return worstStatus(statuses);
+}
+
 function buildSummary(input) {
   const checks = input.checks ?? {};
   const checkValues = Object.values(checks);
@@ -258,11 +272,26 @@ function buildSummary(input) {
   ];
   const status = blockers.length > 0 ? "blocked" : deriveGateStatus(checks);
 
+  const requiredChecksStatus = deriveChecksStatus(checks, true);
+  const optionalChecksStatus = deriveChecksStatus(checks, false);
+  const deploy = input.deployFreshness ?? {};
+  const mixedDeploymentDetected = Boolean(deploy.mixedDeploymentDetected);
+  const gateStatus = mixedDeploymentDetected ? "blocked" : status;
+
   return {
     module: MODULE,
     environment: input.environment,
     command: input.command,
-    status,
+    status: gateStatus,
+    gateStatus,
+    commandExitCode: gateStatus === "blocked" ? 1 : 0,
+    requiredChecksStatus,
+    optionalChecksStatus,
+    targetDeployCommit: deploy.targetDeployCommit ?? null,
+    deployedCommitAtGateStart: deploy.deployedCommitAtGateStart ?? null,
+    deployedCommitAtGateEnd: deploy.deployedCommitAtGateEnd ?? null,
+    freshnessStatus: deploy.freshnessStatus ?? "not_applicable",
+    mixedDeploymentDetected,
     generatedAt: input.generatedAt ?? nowIso(),
     checks,
     manualRequired: input.manualRequired ?? [],
@@ -273,7 +302,7 @@ function buildSummary(input) {
     mutatesData: checkValues.some((check) => check.mutatesData),
     productionTouched: checkValues.some((check) => check.productionTouched),
     ownerApprovalRequired: input.ownerApprovalRequired ?? false,
-    nextRequiredAction: input.nextRequiredAction ?? inferNextRequiredAction(status, checks),
+    nextRequiredAction: input.nextRequiredAction ?? inferNextRequiredAction(gateStatus, checks),
   };
 }
 
@@ -448,6 +477,57 @@ async function stagingHealthCheck() {
       blockers: ["staging_health_unreachable"],
     });
   }
+}
+
+function expectedDeployCommitFromEnv(env = process.env) {
+  return (
+    env.MODULE01_EXPECTED_DEPLOY_COMMIT?.trim() ??
+    env.QA_EXPECTED_DEPLOY_COMMIT?.trim() ??
+    ""
+  );
+}
+
+function deployFreshnessCheckFromResult(result, options = {}) {
+  const pass = result.status === "pass";
+  const category = result.category ?? (pass ? "pass" : "staging_freshness_not_ready");
+
+  return makeCheck("deployed_freshness", pass ? "pass" : "blocked", {
+    required: true,
+    category,
+    targetDeployCommit: result.targetDeployCommit ?? null,
+    deployedCommitAtGateStart: result.deployedCommitAtGateStart ?? null,
+    deployedCommitAtGateEnd: result.deployedCommitAtGateEnd ?? null,
+    freshnessStatus: result.freshnessStatus ?? (pass ? "pass" : "blocked"),
+    mixedDeploymentDetected: Boolean(result.mixedDeploymentDetected),
+    attempts: result.attempts ?? null,
+    blockers: pass ? [] : [category],
+    warnings: options.warnings ?? [],
+    valuesPrinted: false,
+    lengthsPrinted: false,
+    prefixesPrinted: false,
+    suffixesPrinted: false,
+    hashesPrinted: false,
+    checksumsPrinted: false,
+  });
+}
+
+function deployFreshnessNotAssertedCheck() {
+  return makeCheck("deployed_freshness", "skipped", {
+    required: false,
+    category: "not_asserted",
+    freshnessStatus: "not_asserted",
+    warnings: ["expected_deploy_commit_not_provided"],
+  });
+}
+
+function deployFreshnessSummaryFromCheck(check) {
+  return {
+    targetDeployCommit: check.targetDeployCommit ?? null,
+    deployedCommitAtGateStart: check.deployedCommitAtGateStart ?? null,
+    deployedCommitAtGateEnd: check.deployedCommitAtGateEnd ?? null,
+    freshnessStatus: check.freshnessStatus ?? check.category ?? "not_applicable",
+    mixedDeploymentDetected: Boolean(check.mixedDeploymentDetected),
+  };
 }
 
 function safeAdminApiResponse(json) {
@@ -636,8 +716,42 @@ async function runLocalSuite() {
 }
 
 async function runStagingSuite() {
+  const expectedCommit = expectedDeployCommitFromEnv();
+  const stagingEnvMirror = stagingEnvMirrorCheck();
+  let deployedFreshness;
+
+  if (expectedCommit) {
+    const freshnessResult = await checkDeployFreshness({
+      env: "staging",
+      expectedCommit,
+      timeoutMs: Number(process.env.MODULE01_DEPLOY_FRESHNESS_TIMEOUT_MS),
+      intervalMs: Number(process.env.MODULE01_DEPLOY_FRESHNESS_INTERVAL_MS),
+    });
+    deployedFreshness = deployFreshnessCheckFromResult(freshnessResult);
+  } else {
+    deployedFreshness = deployFreshnessNotAssertedCheck();
+  }
+
+  if (deployedFreshness.status === "blocked") {
+    const checks = {
+      stagingEnvMirror,
+      deployedFreshness,
+    };
+    const summary = buildSummary({
+      environment: "staging",
+      command: "qa:module01:staging",
+      checks,
+      deployFreshness: deployFreshnessSummaryFromCheck(deployedFreshness),
+      nextRequiredAction: "wait_for_target_deploy_commit_and_rerun",
+    });
+
+    writeSummary("staging", summary);
+    return summary;
+  }
+
   const checks = {
-    stagingEnvMirror: stagingEnvMirrorCheck(),
+    stagingEnvMirror,
+    deployedFreshness,
     stagingHealth: await stagingHealthCheck(),
     accessLinkSmoke: runCommand("access_link_smoke", "corepack", ["pnpm", "run", "qa:access-link:smoke"], {
       mutatesData: true,
@@ -663,11 +777,43 @@ async function runStagingSuite() {
       warnings: ["real_email_line_channel_checks_not_run_by_default"],
     }),
   };
+  const deployFreshness = deployFreshnessSummaryFromCheck(deployedFreshness);
+
+  if (expectedCommit) {
+    const endFreshness = await checkDeployFreshness({
+      env: "staging",
+      expectedCommit,
+      timeoutMs: 0,
+      intervalMs: 1,
+    });
+    deployFreshness.deployedCommitAtGateEnd = endFreshness.deployedCommitAtGateEnd ?? null;
+    deployFreshness.mixedDeploymentDetected =
+      Boolean(deployFreshness.deployedCommitAtGateStart && deployFreshness.deployedCommitAtGateEnd) &&
+      deployFreshness.deployedCommitAtGateStart !== deployFreshness.deployedCommitAtGateEnd;
+
+    if (deployFreshness.mixedDeploymentDetected || endFreshness.status !== "pass") {
+      const category = deployFreshness.mixedDeploymentDetected
+        ? "mixed_deployment_gate_invalid"
+        : (endFreshness.category ?? "staging_freshness_not_ready");
+      checks.deployedFreshness = makeCheck("deployed_freshness", "blocked", {
+        required: true,
+        category,
+        targetDeployCommit: deployFreshness.targetDeployCommit,
+        deployedCommitAtGateStart: deployFreshness.deployedCommitAtGateStart,
+        deployedCommitAtGateEnd: deployFreshness.deployedCommitAtGateEnd,
+        freshnessStatus: "blocked",
+        mixedDeploymentDetected: deployFreshness.mixedDeploymentDetected,
+        blockers: [category],
+      });
+      deployFreshness.freshnessStatus = "blocked";
+    }
+  }
 
   const summary = buildSummary({
     environment: "staging",
     command: "qa:module01:staging",
     checks,
+    deployFreshness,
     manualRequired: [
       "ownerEmailReceived",
       "ownerEmailLinkOpenedPaidResult",
@@ -792,7 +938,11 @@ export {
   parseAdminCliJsonOutput,
   parseEnvMirrorContent,
   parseSuiteKnownResultArtifact,
+  deployFreshnessCheckFromResult,
+  deployFreshnessNotAssertedCheck,
   resolveKnownResultId,
+  deployFreshnessSummaryFromCheck,
+  deriveChecksStatus,
   stagingEnvMirrorCheck,
   verifyEnvMirrorShape,
   worstStatus,

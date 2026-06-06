@@ -6,7 +6,10 @@ import { describe, expect, it } from "vitest";
 import {
   assertSanitizedSummary,
   buildSummary,
+  deployFreshnessCheckFromResult,
+  deployFreshnessNotAssertedCheck,
   deriveGateStatus,
+  deriveChecksStatus,
   makeCheck,
   parseAdminCliJsonOutput,
   parseSuiteKnownResultArtifact,
@@ -24,6 +27,9 @@ describe("Module 01 release validation suite", () => {
       fs.readFileSync(path.resolve(process.cwd(), "../../package.json"), "utf8"),
     );
 
+    expect(packageJson.scripts["qa:deploy:freshness"]).toBe(
+      "node scripts/deploy-freshness-check.mjs",
+    );
     expect(packageJson.scripts["qa:module01:local"]).toBe(
       "node scripts/module01-release-validation-suite.mjs local",
     );
@@ -85,6 +91,24 @@ describe("Module 01 release validation suite", () => {
         optional: makeCheck("optional", "pass", { required: false }),
       }),
     ).toBe("blocked");
+    expect(
+      deriveChecksStatus(
+        {
+          required: makeCheck("required", "pass"),
+          optional: makeCheck("optional", "partial", { required: false }),
+        },
+        true,
+      ),
+    ).toBe("pass");
+    expect(
+      deriveChecksStatus(
+        {
+          required: makeCheck("required", "pass"),
+          optional: makeCheck("optional", "partial", { required: false }),
+        },
+        false,
+      ),
+    ).toBe("partial");
   });
 
   it("builds a summary with explicit safety and manual fields", () => {
@@ -118,6 +142,11 @@ describe("Module 01 release validation suite", () => {
       environment: "staging",
       command: "qa:module01:staging",
       status: "partial",
+      gateStatus: "partial",
+      commandExitCode: 0,
+      requiredChecksStatus: "pass",
+      optionalChecksStatus: "partial",
+      freshnessStatus: "not_applicable",
       sendsRealEmail: false,
       sendsRealLine: false,
       mutatesData: true,
@@ -127,6 +156,107 @@ describe("Module 01 release validation suite", () => {
     });
     expect(JSON.stringify(summary)).toContain("adminCliLookupStatus");
     expect(JSON.stringify(summary)).not.toContain("11111111-1111-4111-8111-111111111111");
+  });
+
+  it("adds deploy freshness metadata to summaries", () => {
+    const summary = buildSummary({
+      environment: "staging",
+      command: "qa:module01:staging",
+      deployFreshness: {
+        targetDeployCommit: "abcdef1",
+        deployedCommitAtGateStart: "abcdef123456",
+        deployedCommitAtGateEnd: "abcdef123456",
+        freshnessStatus: "pass",
+        mixedDeploymentDetected: false,
+      },
+      checks: {
+        deployedFreshness: makeCheck("deployed_freshness", "pass"),
+        noCard: makeCheck("no_card", "pass"),
+        optional: makeCheck("optional", "skipped", { required: false }),
+      },
+    });
+
+    expect(summary).toMatchObject({
+      gateStatus: "pass",
+      commandExitCode: 0,
+      targetDeployCommit: "abcdef1",
+      deployedCommitAtGateStart: "abcdef123456",
+      deployedCommitAtGateEnd: "abcdef123456",
+      freshnessStatus: "pass",
+      mixedDeploymentDetected: false,
+      requiredChecksStatus: "pass",
+      optionalChecksStatus: "skipped",
+    });
+  });
+
+  it("marks mixed deployment summaries as blocked", () => {
+    const summary = buildSummary({
+      environment: "staging",
+      command: "qa:module01:staging",
+      deployFreshness: {
+        targetDeployCommit: "abcdef1",
+        deployedCommitAtGateStart: "1111111",
+        deployedCommitAtGateEnd: "abcdef123456",
+        freshnessStatus: "blocked",
+        mixedDeploymentDetected: true,
+      },
+      checks: {
+        deployedFreshness: makeCheck("deployed_freshness", "blocked", {
+          blockers: ["mixed_deployment_gate_invalid"],
+        }),
+      },
+    });
+
+    expect(summary).toMatchObject({
+      gateStatus: "blocked",
+      commandExitCode: 1,
+      mixedDeploymentDetected: true,
+      blockers: ["mixed_deployment_gate_invalid"],
+    });
+  });
+
+  it("converts deploy freshness helper results into suite checks", () => {
+    expect(
+      deployFreshnessCheckFromResult({
+        status: "pass",
+        category: "pass",
+        targetDeployCommit: "abcdef1",
+        deployedCommitAtGateStart: "abcdef123456",
+        deployedCommitAtGateEnd: "abcdef123456",
+        freshnessStatus: "pass",
+        mixedDeploymentDetected: false,
+        attempts: 1,
+      }),
+    ).toMatchObject({
+      id: "deployed_freshness",
+      status: "pass",
+      category: "pass",
+      targetDeployCommit: "abcdef1",
+      deployedCommitAtGateStart: "abcdef123456",
+      deployedCommitAtGateEnd: "abcdef123456",
+      freshnessStatus: "pass",
+      mixedDeploymentDetected: false,
+    });
+    expect(
+      deployFreshnessCheckFromResult({
+        status: "blocked",
+        category: "staging_freshness_timeout",
+        targetDeployCommit: "abcdef1",
+        deployedCommitAtGateStart: "1111111",
+        deployedCommitAtGateEnd: "1111111",
+        freshnessStatus: "blocked",
+        mixedDeploymentDetected: false,
+      }),
+    ).toMatchObject({
+      status: "blocked",
+      blockers: ["staging_freshness_timeout"],
+    });
+    expect(deployFreshnessNotAssertedCheck()).toMatchObject({
+      status: "skipped",
+      required: false,
+      category: "not_asserted",
+      freshnessStatus: "not_asserted",
+    });
   });
 
   it("rejects unsafe summary output", () => {

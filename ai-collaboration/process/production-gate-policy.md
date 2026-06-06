@@ -25,6 +25,15 @@ cd apps/web && corepack pnpm run qa:module01:production-preflight
 
 All must pass or be explicitly owner-accepted partials.
 
+For deployed gates, Codex must assert the intended target commit before substantive checks. Use lightweight freshness checks instead of the full staging/production gate as a polling mechanism:
+
+```bash
+cd apps/web && corepack pnpm run qa:deploy:freshness -- --env staging --expected-commit <sha>
+cd apps/web && corepack pnpm run qa:deploy:freshness -- --env production --expected-commit <sha>
+```
+
+If a deployed gate starts on a stale commit, the run is invalid for the target fix. If the deployed commit changes mid-run, classify it as `mixed_deployment_gate_invalid`.
+
 Production smoke must also prepare a tracked Module 01 fixture before runtime enablement:
 
 ```bash
@@ -110,6 +119,11 @@ Leave runtime enabled only if owner explicitly chooses soft public availability.
 
 Production reports must include:
 
+- codeFixCommit, reportCommit, and targetDeployCommit when they differ
+- deployedCommitAtGateStart and deployedCommitAtGateEnd for deployed gates
+- freshnessStatus and mixedDeploymentDetected for deployed gates
+- gateStatus and commandExitCode separately
+- requiredChecksStatus and optionalChecksStatus
 - preflight results
 - runtime enablement window
 - payment method

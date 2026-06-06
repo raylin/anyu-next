@@ -69,6 +69,13 @@ Real Email/LINE/payment:
 
 - <not allowed / owner-approved only / explicitly approved>
 
+For deployed staging/production gates, include:
+
+- targetDeployCommit: <sha or not applicable>
+- freshness command: `qa:deploy:freshness -- --env <env> --expected-commit <sha>`
+- substantive gate command only after freshness passes
+- no repeated full-gate polling
+
 ## Reporting Requirements
 
 Report:
@@ -83,6 +90,20 @@ Report:
 - first failure category if failed
 - task-specific outcome fields
 
+For deployed gates, also report:
+
+- codeFixCommit
+- reportCommit
+- targetDeployCommit
+- deployedCommitAtGateStart
+- deployedCommitAtGateEnd
+- freshnessStatus
+- mixedDeploymentDetected
+- gateStatus
+- commandExitCode
+- requiredChecksStatus
+- optionalChecksStatus
+
 ## Completion Summary Requirements
 
 Final response must include:
@@ -91,6 +112,7 @@ Final response must include:
 - commit hash
 - staging push status
 - validation results
+- gateStatus and commandExitCode separately for deployed gates
 - whether runtime/payment/Email/LINE occurred
 - recommended next task aligned with owner/PM mainline
 
@@ -160,6 +182,7 @@ What Changed:
 Validation:
 - <validation result 1>
 - <validation result 2>
+- deployed gate freshness: <targetDeployCommit / deployedCommitAtGateStart / deployedCommitAtGateEnd / freshnessStatus / mixedDeploymentDetected / gateStatus / commandExitCode>
 
 Tech Debt / Cleanup Notes:
 - New technical debt introduced: <note or none>
