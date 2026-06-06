@@ -10699,3 +10699,28 @@ Unresolved questions:
 
 - Historical reports and handoffs still contain older process language and should remain historical.
 - Future templates under `ai-collaboration/templates/` may be aligned later if they are still actively used.
+
+## 2026-06-06 Controlled Production Payment Smoke v1 Clean Retry Final
+
+### Completed Changes
+
+- saved the controlled production smoke final handoff and execution report
+- ran all required pre-enable gates: `qa:module01:local`, `qa:module01:mock-flow`, `qa:module01:ui`, `qa:module01:staging`, and `qa:module01:production-preflight`
+- temporarily enabled Production payment runtime and NewebPay checkout after gates passed
+- created one fresh production Module 01 result and verified result/checkout pages were reachable
+- stopped before payment when owner reported mobile LINE bind failure after LINE login redirect
+- disabled Production runtime/checkout again, synced Vercel Production, redeployed fail-closed, and reran `qa:module01:production-preflight`
+- updated dashboard status to record this retry as failed before payment with first failure `line_bind_failed`
+
+### Learnings
+
+- The previous LINE contact-without-secret invariant fix did not cover this production bind failure mode; the retry now fails earlier at the user-visible mobile LINE bind step.
+- Two initial operator-created analyze API attempts failed safe validation before owner action; the corrected valid-length production result creation succeeded.
+- After shutdown, the already-created checkout page route can still return 200, while hardened production preflight verifies the payment checkout route fail-closed with 404.
+- No production payment, Email, LINE message, ads, or broad traffic occurred in this retry.
+
+### Unresolved Questions
+
+- Diagnose production LINE bind redirect/state failure before any further production payment attempt.
+- Confirm whether the failure is LIFF production callback/domain config, state/session mismatch, route error handling, or another deployed-only bind issue.
+- Future diagnosis should use targeted tests/mock/UI first, staging only if deployed LIFF behavior must be proven, and no production payment until pre-payment LINE bind passes.
