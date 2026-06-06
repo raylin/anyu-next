@@ -81,6 +81,21 @@ describe("LINE recovery LIFF page", () => {
       stateSource: "liff_state",
       isStateShapeValid: true,
     });
+    expect(parseLineRecoveryBindContext(`?state=line-oauth-state&rlb=rlb_safeState`)).toEqual({
+      state: "rlb_safeState",
+      fallbackReturnPath: null,
+      stateSource: "direct_query",
+      isStateShapeValid: true,
+    });
+    const nestedRlbState = encodeURIComponent(
+      "/line/recovery/bind?state=line-oauth-state&rlb=rlb_safeState",
+    );
+    expect(parseLineRecoveryBindContext(`?liff.state=${nestedRlbState}`)).toEqual({
+      state: "rlb_safeState",
+      fallbackReturnPath: null,
+      stateSource: "liff_state",
+      isStateShapeValid: true,
+    });
     expect(
       parseLineRecoveryBindContext(
         "?state=rlb_safeState&returnPath=https%3A%2F%2Fevil.example%2F",
@@ -99,6 +114,8 @@ describe("LINE recovery LIFF page", () => {
 
     expect(source).toContain('fetch("/api/line/recovery/bind-liff"');
     expect(source).toContain("state: context.state");
+    expect(source).toContain('url.searchParams.set("rlb", context.state)');
+    expect(source).toContain("buildLineRecoveryLoginRedirectUri(context)");
     expect(source).toContain("browserContext.state ? browserContext : serverContext");
     expect(source).toContain("mapLineRecoveryBindApiFailure");
     expect(source).toContain("data-line-diagnostic-category");

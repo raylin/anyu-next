@@ -108,7 +108,7 @@ describe("NewebPay checkout-start page", () => {
     expect(html).toContain("用 Email 保存查看連結");
     expect(html).not.toContain("LINE 查看連結");
     expect(html).not.toContain("用 LINE 保存查看連結");
-    expect(html).not.toContain("/line/recovery/bind?state=rlb_");
+    expect(html).not.toContain("/line/recovery/bind?rlb=rlb_");
     expect(html).toContain("完整報告的專屬查看連結");
     expect(html).toContain("回到 ANYU 查看完整報告的連結");
     expect(html).toContain("不會包含完整報告內容");
@@ -179,7 +179,7 @@ describe("NewebPay checkout-start page", () => {
     expect(html).toContain("建議用 LINE 保存查看連結");
     expect(html).toContain("用 LINE 保存查看連結");
     expect(html).toContain("改用 Email 保存查看連結");
-    expect(html).toContain("/line/recovery/bind?state=rlb_");
+    expect(html).toContain("/line/recovery/bind?rlb=rlb_");
     expect(html.indexOf("建議用 LINE 保存查看連結")).toBeLessThan(
       html.indexOf("Email 備用查看連結"),
     );

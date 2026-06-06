@@ -155,7 +155,7 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
           });
           setDiagnosticCategory(redirect.category);
           setMessage(redirect.safeMessage);
-          window.liff?.login({ redirectUri: window.location.href });
+          window.liff?.login({ redirectUri: buildLineRecoveryLoginRedirectUri(context) });
           return;
         }
 
@@ -336,6 +336,22 @@ function recordLineRecoveryBindDiagnostic(input: {
       recipientSecretCreated: input.recipientSecretCreated,
     }),
   }).catch(() => null);
+}
+
+function buildLineRecoveryLoginRedirectUri(context: {
+  state: string;
+  fallbackReturnPath: string | null;
+}) {
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.hash = "";
+  url.searchParams.set("rlb", context.state);
+
+  if (context.fallbackReturnPath) {
+    url.searchParams.set("returnPath", context.fallbackReturnPath);
+  }
+
+  return url.toString();
 }
 
 function loadLiffSdk() {

@@ -149,7 +149,7 @@ describe("LINE recovery bind state helpers", () => {
     expect(result.ok).toBe(true);
 
     const href = result.ok ? result.href : "";
-    expect(href).toContain("/line/recovery/bind?state=rlb_");
+    expect(href).toContain("/line/recovery/bind?rlb=rlb_");
     expect(href).toContain("returnPath=%2Fm%2Fambiguous-temperature%2Fresult%2F");
     expect(href).not.toContain("pa_");
     expect(href).not.toContain("pcs_");
@@ -163,7 +163,7 @@ describe("LINE recovery bind state helpers", () => {
 
     const parsed = new URL(href, "https://staging.anyu.tw");
     const resolved = resolveLineRecoveryBindStateToken({
-      token: parsed.searchParams.get("state"),
+      token: parsed.searchParams.get("rlb"),
       env: TEST_ENV,
       now: NOW,
     });
@@ -207,7 +207,7 @@ describe("LINE recovery bind state helpers", () => {
 
     const parsed = new URL(href);
     const resolved = resolveLineRecoveryBindStateToken({
-      token: parsed.searchParams.get("state"),
+      token: parsed.searchParams.get("rlb"),
       env: TEST_ENV,
       now: NOW,
     });

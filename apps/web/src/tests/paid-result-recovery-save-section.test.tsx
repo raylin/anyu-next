@@ -89,7 +89,7 @@ describe("paid result recovery save section", () => {
     expect(html).toContain("已保存查看連結：o***@e***.com");
     expect(html).toContain("新增 LINE 查看連結");
     expect(html).toContain("用 LINE 保存查看連結");
-    expect(html).toContain("/line/recovery/bind?state=rlb_");
+    expect(html).toContain("/line/recovery/bind?rlb=rlb_");
     expect(html).toContain("聯絡客服時可提供報告編號");
     expect(html).not.toContain("owner@example.com");
     expect(html).not.toContain("result_1234567890_private");
@@ -152,7 +152,7 @@ describe("paid result recovery save section", () => {
     expect(html).toContain("傳送查看連結到 LINE");
     expect(html).toContain("從 LINE 回到 ANYU");
     expect(html).toContain("LINE 綁定失敗也不影響付款或查看報告");
-    expect(html).toContain("/line/recovery/bind?state=rlb_");
+    expect(html).toContain("/line/recovery/bind?rlb=rlb_");
     expect(html).toContain("完整報告的專屬查看連結");
     expect(html).toContain("若 Email 寄送服務尚未啟用，系統仍會先保存查看連結狀態");
     expect(html).not.toContain("Email 交付");

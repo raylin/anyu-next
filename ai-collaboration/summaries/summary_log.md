@@ -10850,3 +10850,38 @@ Unresolved questions:
 - `qa:module01:staging` was intentionally skipped because no migration was applied and no deployed endpoint verification was required.
 - `qa:module01:production-preflight` was intentionally skipped because production schema/env/preflight behavior did not change.
 - Next mainline task: LINE production bind fix with targeted/mock/UI/staging validation, using the new diagnostics.
+
+## 2026-06-07 LINE Production Bind Root-Cause Narrowing + Fix v0
+
+### Completed Changes
+
+- saved the LINE Production Bind Root-Cause Narrowing + Fix v0 handoff
+- narrowed the production bind failure to `line_liff_redirect_state_collision`
+- changed outbound LINE bind URLs to use `rlb=<signed-bind-token>` instead of the generic OAuth-colliding `state=<signed-bind-token>`
+- made LINE bind context parsing choose a valid ANYU bind token from either `state` or `rlb`, including nested `liff.state`
+- changed the LIFF login redirect URI to a canonical bind URL that preserves `rlb` and safe `returnPath` instead of passing raw `window.location.href`
+- updated targeted tests and checkout/result CTA expectations for the new `rlb` parameter
+
+### Learnings
+
+- The failed production smoke did not safely record a source-categorized result ID, and pre-payment bind diagnostics were added after that attempt, so no Admin CLI lookup was run for the ambiguous failed result.
+- Local and Vercel Preview/Production key-name checks show the active LIFF key names exist; host values remain encrypted/protected, and no env or LINE console action was identified from key-name comparison.
+- The likely production failure mode was LINE OAuth overwriting or competing with ANYU's use of the `state` query key after `liff.login()`.
+
+### Validation
+
+- Targeted LINE/LIFF/Admin diagnostics tests passed: 9 files / 50 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 92 files / 631 tests.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass, 2 files / 23 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass after sandbox-escalated browser rerun.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass.
+
+### Unresolved Questions
+
+- `qa:module01:staging` is pending after push because deployed client/link behavior changed.
+- `qa:module01:production-preflight` was intentionally skipped because production/env/preflight behavior did not change.
+- No production runtime, payment, Email, LINE, Vercel env, or DB mutation occurred.
+- Next mainline task after staging verification: Production Runtime Window + Vercel Alias Guard v0.

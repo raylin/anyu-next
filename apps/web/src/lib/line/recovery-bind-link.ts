@@ -31,7 +31,7 @@ export function createLineRecoveryBindHref(input: {
   }
 
   const searchParams = new URLSearchParams({
-    state: state.token,
+    rlb: state.token,
     returnPath: input.returnPath,
   });
 

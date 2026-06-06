@@ -10,8 +10,14 @@ export type LineRecoveryBindContext = {
 export function parseLineRecoveryBindContext(search: string): LineRecoveryBindContext {
   const searchParams = parseSearchLike(search);
   const stateParams = parseLiffState(searchParams.get("liff.state"));
-  const directState = searchParams.get("state") ?? searchParams.get("rlb");
-  const liffState = stateParams.params.get("state") ?? stateParams.params.get("rlb");
+  const directState = chooseRecoveryBindStateParam(
+    searchParams.get("state"),
+    searchParams.get("rlb"),
+  );
+  const liffState = chooseRecoveryBindStateParam(
+    stateParams.params.get("state"),
+    stateParams.params.get("rlb"),
+  );
   const state = chooseRecoveryBindState({ directState, liffState });
   const directReturnPath = searchParams.get("returnPath");
   const liffReturnPath = stateParams.params.get("returnPath");
@@ -24,6 +30,18 @@ export function parseLineRecoveryBindContext(search: string): LineRecoveryBindCo
       state && state === directState ? "direct_query" : state && state === liffState ? "liff_state" : "missing",
     isStateShapeValid: isRecoveryBindStateShape(state),
   };
+}
+
+function chooseRecoveryBindStateParam(state: string | null, rlb: string | null) {
+  if (state && isRecoveryBindStateShape(state)) {
+    return state;
+  }
+
+  if (rlb && isRecoveryBindStateShape(rlb)) {
+    return rlb;
+  }
+
+  return state ?? rlb;
 }
 
 function chooseRecoveryBindState(input: {
