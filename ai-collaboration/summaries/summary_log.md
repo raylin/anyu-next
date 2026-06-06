@@ -10652,3 +10652,29 @@ Unresolved questions:
 - If owner wants live user-channel proof later, implement or run an explicit owner-approved staging channels gate.
 - Production smoke retry remains owner-gated and should not proceed until the owner explicitly approves it.
 - Theme Architecture remains preserved and deferred.
+
+## 2026-06-06 Module 01 QA Foundation Follow-up v1
+
+### Completed Changes
+
+- saved the Module 01 QA Foundation Follow-up v1 handoff
+- added a shared `module01-wait` helper and rewired `qa:result-checkout:no-card` to use it for paid-status polling
+- replaced the fixture-only Playwright checkout-start suite with a routed mocked checkout harness
+- expanded Playwright UI coverage to Email saved, LINE deliverable, and LINE contact-only incomplete states
+- expanded `qa:module01:mock-flow` summary output into named scenarios
+- added a guarded `qa:module01:staging:channels` skeleton that refuses by default and is not part of staging/release gates
+- updated dashboard QA policy to prefer targeted tests, mock-flow, and UI before staging
+
+### Learnings
+
+- The no-card runner still needs staging because it verifies the deployed no-card/operator path, but it no longer owns a bespoke polling loop.
+- The routed Playwright harness gives stable local UI-state coverage without a live app server or provider calls.
+- Mock-flow now documents the intended scenario coverage directly in `.qa/module01-mock-flow-summary.json`.
+- The staging channels command is explicit and owner-gated, but the real channel runner remains intentionally unimplemented.
+- Local validation passed: lint, targeted helper tests, full tests, build, mock-flow, UI, and `qa:module01:local`.
+
+### Unresolved Questions
+
+- Implement the real owner-approved staging channels runner only when repeatable channel proof is needed.
+- Consider an Admin API-based no-card wait path later if the operator no-card runner can stop keeping paid-access token status in memory.
+- Production smoke remains owner-gated; no production runtime, payment, Email, LINE, env, or DB mutation occurred.

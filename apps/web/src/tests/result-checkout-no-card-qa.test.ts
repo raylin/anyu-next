@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -11,6 +13,17 @@ import {
 } from "../../scripts/lib/result-checkout-no-card-qa.mjs";
 
 describe("result checkout no-card QA helpers", () => {
+  it("uses the shared Module 01 wait helper for paid-status polling", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/result-checkout-no-card-qa.mjs"),
+      "utf8",
+    );
+
+    expect(source).toContain('import { waitForCondition } from "./lib/module01-wait.mjs";');
+    expect(source).toContain("const waitResult = await waitForCondition");
+    expect(source).not.toContain("for (let attempt = 1; attempt <= 24; attempt += 1)");
+  });
+
   it("rejects production targets", () => {
     expect(assertSafeQaBaseUrl("https://anyu.tw")).toEqual({
       ok: false,

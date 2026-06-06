@@ -20,6 +20,68 @@ const TARGETED_TESTS = [
   "src/tests/paid-generation-service.test.ts",
   "src/tests/paid-generation-processor.test.ts",
 ];
+const SCENARIOS = [
+  {
+    id: "email_happy_path",
+    validates: [
+      "email_save_route",
+      "email_access_link_template",
+      "email_access_link_send_helper",
+      "paid_ready_email_auto_send",
+    ],
+    tests: ["src/tests/payment-recovery-email-route.test.ts", "src/tests/email-recovery-link.test.ts"],
+  },
+  {
+    id: "line_happy_path_with_recipient_secret",
+    validates: [
+      "verified_liff_bind",
+      "recipient_secret_write",
+      "line_access_link_send_helper",
+      "deliverable_line_summary",
+    ],
+    tests: [
+      "src/tests/line-recovery-bind-route.test.ts",
+      "src/tests/payment-recovery-contact-secrets.test.ts",
+      "src/tests/line-recovery-link.test.ts",
+      "src/tests/admin-paid-result-lookup.test.ts",
+    ],
+  },
+  {
+    id: "line_partial_bind_without_recipient_secret",
+    validates: [
+      "contact_only_not_deliverable",
+      "contact_only_does_not_unlock_checkout",
+      "recipient_secret_missing_diagnosis",
+    ],
+    tests: [
+      "src/tests/line-recovery-bind-route.test.ts",
+      "src/tests/newebpay-checkout-start-page.test.tsx",
+      "src/tests/admin-paid-result-lookup.test.ts",
+    ],
+  },
+  {
+    id: "email_fallback_after_line_incomplete",
+    validates: [
+      "mobile_email_fallback_available",
+      "line_incomplete_keeps_payment_locked",
+      "email_saved_state_unlocks_payment",
+    ],
+    tests: ["src/tests/newebpay-checkout-start-page.test.tsx"],
+  },
+  {
+    id: "paid_generation_to_admin_ready_summary",
+    validates: [
+      "mock_payment_truth_equivalent",
+      "paid_generation_processor_completion",
+      "paid_result_ready_admin_summary",
+    ],
+    tests: [
+      "src/tests/paid-generation-service.test.ts",
+      "src/tests/paid-generation-processor.test.ts",
+      "src/tests/admin-paid-result-lookup-route.test.ts",
+    ],
+  },
+];
 const TOKEN_LIKE_PATTERNS = [
   /pa_[A-Za-z0-9_-]{8,}/u,
   /pcs_[A-Za-z0-9_-]{8,}/u,
@@ -38,6 +100,20 @@ const TOKEN_LIKE_PATTERNS = [
 
 function buildMockFlowSummary(input) {
   const status = input.exitStatus === 0 ? "pass" : "blocked";
+  const scenarios = Object.fromEntries(
+    SCENARIOS.map((scenario) => [
+      scenario.id,
+      {
+        status,
+        validates: scenario.validates,
+        tests: scenario.tests,
+        mutatesData: false,
+        sendsRealEmail: false,
+        sendsRealLine: false,
+        productionTouched: false,
+      },
+    ]),
+  );
 
   return {
     module: MODULE,
@@ -45,14 +121,8 @@ function buildMockFlowSummary(input) {
     command: "qa:module01:mock-flow",
     status,
     generatedAt: input.generatedAt ?? new Date().toISOString(),
-    checks: {
-      mockedEmailSave: status,
-      mockedLineBindRecipientSecret: status,
-      mockedPaymentNotifyEquivalent: status,
-      mockedPaidGeneration: status,
-      mockedAccessLinkCreationSend: status,
-      mockedAdminApiSummary: status,
-    },
+    scenarios,
+    checks: Object.fromEntries(SCENARIOS.map((scenario) => [scenario.id, status])),
     targetedTests: TARGETED_TESTS,
     blockers: status === "pass" ? [] : ["module01_mock_flow_tests_failed"],
     warnings: [
@@ -109,4 +179,4 @@ if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).
   main();
 }
 
-export { TARGETED_TESTS, assertSafeSummary, buildMockFlowSummary, writeSummary };
+export { SCENARIOS, TARGETED_TESTS, assertSafeSummary, buildMockFlowSummary, writeSummary };

@@ -33,6 +33,9 @@ describe("Module 01 release validation suite", () => {
     expect(packageJson.scripts["qa:module01:staging"]).toBe(
       "node scripts/module01-release-validation-suite.mjs staging",
     );
+    expect(packageJson.scripts["qa:module01:staging:channels"]).toBe(
+      "node scripts/module01-staging-channels-qa.mjs",
+    );
     expect(packageJson.scripts["qa:module01:ui"]).toBe(
       "PLAYWRIGHT_BROWSERS_PATH=../../.playwright-browsers playwright test --config=playwright.module01-ui.config.ts --project=chromium",
     );
@@ -49,6 +52,16 @@ describe("Module 01 release validation suite", () => {
     expect(rootPackageJson.scripts["ops"]).toBe("corepack pnpm --filter @anyu/admin-cli ops");
     expect(rootPackageJson.scripts["ops"]).not.toContain("--dir");
     expect(rootPackageJson.scripts["ops"]).not.toContain("exec tsx");
+  });
+
+  it("keeps real staging channels out of default staging and release suites", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/module01-release-validation-suite.mjs"),
+      "utf8",
+    );
+
+    expect(source).not.toContain("qa:module01:staging:channels");
+    expect(source).not.toContain("module01-staging-channels-qa.mjs");
   });
 
   it("derives pass, partial, and blocked gate statuses", () => {

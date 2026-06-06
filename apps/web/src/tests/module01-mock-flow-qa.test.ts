@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  SCENARIOS,
   TARGETED_TESTS,
   assertSafeSummary,
   buildMockFlowSummary,
@@ -8,6 +9,13 @@ import {
 
 describe("Module 01 mock-flow QA helper", () => {
   it("covers the expected no-provider test surface", () => {
+    expect(SCENARIOS.map((scenario) => scenario.id)).toEqual([
+      "email_happy_path",
+      "line_happy_path_with_recipient_secret",
+      "line_partial_bind_without_recipient_secret",
+      "email_fallback_after_line_incomplete",
+      "paid_generation_to_admin_ready_summary",
+    ]);
     expect(TARGETED_TESTS).toEqual(
       expect.arrayContaining([
         "src/tests/admin-paid-result-lookup.test.ts",
@@ -38,6 +46,20 @@ describe("Module 01 mock-flow QA helper", () => {
       productionTouched: false,
       nextRequiredAction: "use_for_backend_flow_regression",
     });
+    expect(summary.scenarios.line_partial_bind_without_recipient_secret).toMatchObject({
+      status: "pass",
+      validates: expect.arrayContaining([
+        "contact_only_not_deliverable",
+        "contact_only_does_not_unlock_checkout",
+        "recipient_secret_missing_diagnosis",
+      ]),
+      sendsRealEmail: false,
+      sendsRealLine: false,
+      productionTouched: false,
+    });
+    expect(summary.scenarios.line_happy_path_with_recipient_secret.validates).toEqual(
+      expect.arrayContaining(["recipient_secret_write", "deliverable_line_summary"]),
+    );
     expect(summary.warnings).toEqual(
       expect.arrayContaining(["no_real_newebpay", "no_real_email", "no_real_line"]),
     );

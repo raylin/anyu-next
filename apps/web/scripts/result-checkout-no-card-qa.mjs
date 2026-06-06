@@ -13,6 +13,7 @@ import {
   summarizeCheckoutStartHtml,
   summarizeResultPageHtml,
 } from "./lib/result-checkout-no-card-qa.mjs";
+import { waitForCondition } from "./lib/module01-wait.mjs";
 
 if (process.env.QA_NO_CARD_DISABLE_LOCAL_ENV !== "1") {
   loadLocalEnv();
@@ -278,25 +279,21 @@ async function pollPaidStatus(paidAccessToken, stepName) {
     errorCategory: body.errorCategory ?? null,
   });
 
-  return body.status ?? null;
+  return {
+    status: body.status ?? null,
+  };
 }
 
 async function waitForPaidCompleted(paidAccessToken) {
-  for (let attempt = 1; attempt <= 24; attempt += 1) {
-    const status = await pollPaidStatus(paidAccessToken, `paid_status_poll_${attempt}`);
+  const waitResult = await waitForCondition({
+    maxAttempts: 24,
+    intervalMs: 3000,
+    poll: (attempt) => pollPaidStatus(paidAccessToken, `paid_status_poll_${attempt}`),
+    isReady: (result) => PAYMENT_STATUS_READY.has(result.status),
+    isWaiting: (result) => PAYMENT_STATUS_WAITING.has(result.status),
+  });
 
-    if (PAYMENT_STATUS_READY.has(status)) {
-      return true;
-    }
-
-    if (!PAYMENT_STATUS_WAITING.has(status)) {
-      return false;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-  }
-
-  return false;
+  return waitResult.status === "pass";
 }
 
 async function processPaidGenerationJob() {
