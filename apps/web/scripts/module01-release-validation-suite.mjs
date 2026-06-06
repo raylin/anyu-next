@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 const MODULE = "ai-temperature";
 const STAGING_BASE_URL = "https://staging.anyu.tw";
 const OUTPUT_DIR = ".qa";
+const STAGING_ENV_MIRROR_PATH = ".env.staging";
 const STATUS_ORDER = {
   pass: 0,
   skipped: 1,
@@ -29,6 +30,45 @@ const TOKEN_LIKE_PATTERNS = [
   /tradesha/iu,
   /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/iu,
 ];
+const PLACEHOLDER_VALUE_PATTERN = /^(?:todo|change_me|placeholder|owner_fill_required|""|'')$/iu;
+const STAGING_ENV_MIRROR_REQUIRED_KEYS = [
+  "ADMIN_API_TOKEN",
+  "ANALYSIS_CACHE_HASH_SECRET",
+  "ANTHROPIC_API_KEY",
+  "CRON_SECRET",
+  "DATABASE_URL",
+  "EMAIL_FROM",
+  "EMAIL_PROVIDER",
+  "ENABLE_NEWEBPAY_CHECKOUT",
+  "ENABLE_OPERATOR_FAKE_PAID_SUCCESS",
+  "ENABLE_OPERATOR_RECOVERY_LINK_SMOKE",
+  "ENABLE_PAID_GENERATION_PROCESSOR",
+  "ENABLE_PAID_JOB_QUEUE_TRIGGER",
+  "ENABLE_PAYMENT_RUNTIME",
+  "INTERNAL_JOB_SECRET",
+  "LINE_CHANNEL_ACCESS_TOKEN",
+  "LINE_CHANNEL_SECRET",
+  "LINE_RECOVERY_MESSAGE_PROVIDER",
+  "LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY",
+  "NEWEBPAY_CHECKOUT_URL",
+  "NEWEBPAY_ENVIRONMENT",
+  "NEWEBPAY_HASH_IV",
+  "NEWEBPAY_HASH_KEY",
+  "NEWEBPAY_MERCHANT_ID",
+  "NEWEBPAY_NOTIFY_URL",
+  "NEXT_PUBLIC_APP_URL",
+  "NEXT_PUBLIC_LINE_LIFF_ID",
+  "NEXT_PUBLIC_LINE_LIFF_URL",
+  "OPERATOR_TEST_SECRET",
+  "PAID_ACCESS_TOKEN_HASH_SECRET",
+  "PAID_JOB_QUEUE_PROVIDER",
+  "PAID_JOB_QUEUE_TOPIC",
+  "PAYMENT_CHECKOUT_SESSION_SECRET",
+  "PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY",
+  "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
+  "PAYMENT_RECOVERY_LINK_TOKEN_SECRET",
+  "RESEND_API_KEY",
+];
 
 function nowIso() {
   return new Date().toISOString();
@@ -48,6 +88,136 @@ function makeCheck(id, status, details = {}) {
     warnings: [],
     ...details,
   };
+}
+
+function parseEnvMirrorContent(content) {
+  const env = new Map();
+  const duplicateNames = [];
+
+  for (const line of content.split(/\r?\n/u)) {
+    const trimmed = line.trim();
+
+    if (!trimmed || trimmed.startsWith("#")) {
+      continue;
+    }
+
+    const match = trimmed.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/u);
+
+    if (!match) {
+      continue;
+    }
+
+    const [, name, rawValue] = match;
+    let value = rawValue.trim();
+
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    } else {
+      const commentIndex = value.search(/\s#/u);
+
+      if (commentIndex >= 0) {
+        value = value.slice(0, commentIndex).trimEnd();
+      }
+    }
+
+    if (env.has(name)) {
+      duplicateNames.push(name);
+    }
+
+    env.set(name, value);
+  }
+
+  return { env, duplicateNames };
+}
+
+function verifyEnvMirrorShape(content, requiredKeys) {
+  const { env, duplicateNames } = parseEnvMirrorContent(content);
+  const missingNames = [];
+  const emptyNames = [];
+  const placeholderNames = [];
+  const passNames = [];
+
+  for (const key of requiredKeys) {
+    if (!env.has(key)) {
+      missingNames.push(key);
+      continue;
+    }
+
+    const value = env.get(key)?.trim() ?? "";
+
+    if (!value) {
+      emptyNames.push(key);
+      continue;
+    }
+
+    if (PLACEHOLDER_VALUE_PATTERN.test(value)) {
+      placeholderNames.push(key);
+      continue;
+    }
+
+    passNames.push(key);
+  }
+
+  let category = "pass_mirror_shape";
+
+  if (missingNames.length > 0) {
+    category = "blocked_missing_local_mirror_secret";
+  } else if (emptyNames.length > 0) {
+    category = "blocked_empty_local_mirror_secret";
+  } else if (placeholderNames.length > 0) {
+    category = "blocked_placeholder_local_mirror_secret";
+  } else if (duplicateNames.length > 0) {
+    category = "blocked_duplicate_local_mirror_key";
+  }
+
+  return {
+    category,
+    passNames,
+    missingNames,
+    emptyNames,
+    placeholderNames,
+    duplicateNames,
+  };
+}
+
+function stagingEnvMirrorCheck() {
+  const mirrorPath = path.resolve(process.cwd(), STAGING_ENV_MIRROR_PATH);
+
+  if (!fs.existsSync(mirrorPath)) {
+    return makeCheck("staging_env_mirror", "blocked", {
+      required: true,
+      category: "blocked_missing_local_mirror_file",
+      envMirrorPath: STAGING_ENV_MIRROR_PATH,
+      blockers: ["staging_env_mirror_missing"],
+    });
+  }
+
+  const shape = verifyEnvMirrorShape(
+    fs.readFileSync(mirrorPath, "utf8"),
+    STAGING_ENV_MIRROR_REQUIRED_KEYS,
+  );
+  const pass = shape.category === "pass_mirror_shape";
+
+  return makeCheck("staging_env_mirror", pass ? "pass" : "blocked", {
+    required: true,
+    category: shape.category,
+    envMirrorPath: STAGING_ENV_MIRROR_PATH,
+    passCount: shape.passNames.length,
+    missingNames: shape.missingNames,
+    emptyNames: shape.emptyNames,
+    placeholderNames: shape.placeholderNames,
+    duplicateNames: shape.duplicateNames,
+    valuesPrinted: false,
+    lengthsPrinted: false,
+    prefixesPrinted: false,
+    suffixesPrinted: false,
+    hashesPrinted: false,
+    checksumsPrinted: false,
+    blockers: pass ? [] : [shape.category],
+  });
 }
 
 function worstStatus(statuses) {
@@ -388,6 +558,7 @@ async function runLocalSuite() {
 
 async function runStagingSuite() {
   const checks = {
+    stagingEnvMirror: stagingEnvMirrorCheck(),
     stagingHealth: await stagingHealthCheck(),
     accessLinkSmoke: runCommand("access_link_smoke", "corepack", ["pnpm", "run", "qa:access-link:smoke"], {
       mutatesData: true,
@@ -540,5 +711,8 @@ export {
   deriveGateStatus,
   makeCheck,
   parseAdminCliJsonOutput,
+  parseEnvMirrorContent,
+  stagingEnvMirrorCheck,
+  verifyEnvMirrorShape,
   worstStatus,
 };

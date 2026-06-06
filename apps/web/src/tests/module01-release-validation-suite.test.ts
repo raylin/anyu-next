@@ -8,6 +8,7 @@ import {
   deriveGateStatus,
   makeCheck,
   parseAdminCliJsonOutput,
+  verifyEnvMirrorShape,
   worstStatus,
 } from "../../scripts/module01-release-validation-suite.mjs";
 
@@ -130,5 +131,43 @@ $ tsx src/index.ts lookup-result --json
       lookup: { ok: true },
     });
     expect(parseAdminCliJsonOutput("ANYU ops error: admin_auth_failed\n")).toBeNull();
+  });
+
+  it("verifies env mirror shape without exposing values", () => {
+    const requiredKeys = ["REQUIRED_ONE", "REQUIRED_TWO", "REQUIRED_THREE"];
+    const shape = verifyEnvMirrorShape(
+      [
+        "REQUIRED_ONE=value-one-redacted",
+        "REQUIRED_TWO=value-two-redacted",
+        "REQUIRED_THREE=value-three-redacted",
+      ].join("\n"),
+      requiredKeys,
+    );
+
+    expect(shape).toMatchObject({
+      category: "pass_mirror_shape",
+      missingNames: [],
+      emptyNames: [],
+      placeholderNames: [],
+      duplicateNames: [],
+    });
+    expect(JSON.stringify(shape)).not.toContain("value-one-redacted");
+    expect(JSON.stringify(shape)).not.toContain("value-two-redacted");
+    expect(JSON.stringify(shape)).not.toContain("value-three-redacted");
+  });
+
+  it("blocks env mirror shape for missing, empty, placeholder, and duplicate keys", () => {
+    expect(verifyEnvMirrorShape("A=ok\n", ["A", "B"]).category).toBe(
+      "blocked_missing_local_mirror_secret",
+    );
+    expect(verifyEnvMirrorShape("A=\n", ["A"]).category).toBe(
+      "blocked_empty_local_mirror_secret",
+    );
+    expect(verifyEnvMirrorShape("A=CHANGE_ME\n", ["A"]).category).toBe(
+      "blocked_placeholder_local_mirror_secret",
+    );
+    expect(verifyEnvMirrorShape("A=ok\nA=still-ok\n", ["A"]).category).toBe(
+      "blocked_duplicate_local_mirror_key",
+    );
   });
 });

@@ -10487,3 +10487,30 @@ Unresolved questions:
 - Staging LINE owner-fill values remain blank too; default staging gate does not send real LINE, but future channel validation will require them.
 - Rerun production preflight after owner fill; do not resume controlled production smoke until it passes.
 - Theme Architecture remains preserved and deferred.
+
+## 2026-06-06 Env Mirror Final Verification + Cleanup v0
+
+### Completed Changes
+
+- saved the Env Mirror Final Verification + Cleanup v0 handoff
+- explained why staging runtime validation previously passed while `.env.staging` still had local mirror gaps
+- added a safe `stagingEnvMirror` shape gate to `qa:module01:staging`
+- cleaned ignored `.env.staging` and `.env.production` formatting with block-level comments only while preserving values
+- verified both local mirrors pass non-empty/placeholder/duplicate shape checks
+- synced 82 active local mirror keys to matching Vercel targets without printing values
+- redeployed Preview(staging) and Production fail-closed
+- reran Module 01 gates
+
+### Learnings
+
+- Staging suite previously hit hosted Preview runtime and did not fully validate local `.env.staging` mirror shape.
+- A first Vercel sync attempt treated quoted env-file values as literal values; staging AI provider calls returned `provider_error` until a quote-stripping sync and redeploy were completed.
+- `qa:module01:local`, `qa:module01:staging`, and `qa:module01:production-preflight` now pass.
+- Production preflight returns `pass_ready_for_controlled_smoke`.
+- Production public pages remain live and checkout/fake-paid/operator routes remain fail-closed.
+
+### Unresolved Questions
+
+- Controlled Production Payment Smoke v1 Clean Retry requires explicit owner approval before enabling production runtime/checkout temporarily.
+- Active recovery-named env keys remain as compatibility debt.
+- Theme Architecture remains preserved and deferred.
