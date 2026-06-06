@@ -10514,3 +10514,34 @@ Unresolved questions:
 - Controlled Production Payment Smoke v1 Clean Retry requires explicit owner approval before enabling production runtime/checkout temporarily.
 - Active recovery-named env keys remain as compatibility debt.
 - Theme Architecture remains preserved and deferred.
+
+## 2026-06-06 Controlled Production Payment Smoke v1 Clean Retry
+
+### Completed Changes
+
+- saved the Controlled Production Payment Smoke v1 Clean Retry handoff
+- reran Module 01 local, staging, and production-preflight gates before enabling production runtime
+- temporarily enabled production payment runtime and NewebPay checkout for one owner-approved NT$49 credit-card payment
+- created a fresh production Module 01 result and owner completed a real production payment
+- verified payment truth and entitlement through Admin CLI
+- found paid generation initially queued, then found the internal processor endpoint failed with `processor_disabled`
+- enabled the production paid-generation processor flag, redeployed Production, and invoked the approved internal processor once
+- verified paid result generation completed and delivery artifact became ready
+- owner confirmed the generated result and an access link opened the completed paid result
+- returned Production to fail-closed by disabling payment runtime and checkout, syncing Vercel env, redeploying, and rerunning production preflight
+
+### Learnings
+
+- Real production payment and NotifyURL/payment truth worked after the clean reset.
+- Paid generation can complete in Production once the processor flag is enabled and the internal processor is invoked.
+- The smoke did not clean-pass: no LINE message arrived.
+- Admin CLI showed the production result had a LINE contact but no recipient secret, no LINE send, and no active LINE access link.
+- Admin CLI also did not show Email contact saved/sent for this production result, so full Email channel delivery was not established by the ops summary.
+- Final `qa:module01:production-preflight` passed after runtime shutdown, and Production is fail-closed again.
+
+### Unresolved Questions
+
+- Diagnose why production mobile LINE bind saved contact state without creating the recipient secret required for LINE access-link delivery.
+- Confirm whether the production smoke flow should require both Email and LINE pre-payment saves in the UI before card handoff, or whether owner used a narrower path during this run.
+- Add a smoke-window checklist item for `ENABLE_PAID_GENERATION_PROCESSOR=true` so paid generation does not remain queued during the payment window.
+- Theme Architecture remains preserved and deferred.
