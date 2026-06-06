@@ -10724,3 +10724,28 @@ Unresolved questions:
 - Diagnose production LINE bind redirect/state failure before any further production payment attempt.
 - Confirm whether the failure is LIFF production callback/domain config, state/session mismatch, route error handling, or another deployed-only bind issue.
 - Future diagnosis should use targeted tests/mock/UI first, staging only if deployed LIFF behavior must be proven, and no production payment until pre-payment LINE bind passes.
+
+## 2026-06-06 ANYU Engineering Foundation Audit v0
+
+### Completed Changes
+
+- saved the ANYU Engineering Foundation Audit v0 handoff
+- inspected repository structure, package/workspace layout, app/runtime directories, Admin CLI, process docs, design archive, Drizzle migrations, QA scripts, tests, and Playwright setup
+- audited Module 01 QA/test architecture, scripts-vs-tests boundaries, fixtures/mocks, Admin API/ops boundary, env/Vercel/deploy model, LINE/LIFF/access-link foundation, payment/NotifyURL/processor foundation, and code maintainability
+- created the detailed engineering audit report and updated the dashboard to prioritize foundation work before another production smoke
+
+### Learnings
+
+- The highest-risk gap is now engineering foundation rather than basic payment/generation capability: the production LINE/LIFF bind redirect path is not reproducible enough outside owner manual action.
+- QA coverage is broad but fragmented across Vitest, scripts, Playwright harnesses, deployed staging smokes, production preflight, Admin API/CLI, and manual owner checks.
+- Active scripts still mix reusable QA runners, staging smokes, operator tools, production preflight, metrics, and legacy access-link helpers in one directory.
+- The Module 01 Playwright UI suite is fast and useful but still a route-intercepted harness, not a real local Next route.
+- There is no shared production-valid Module 01 analyze fixture/helper, which caused wasted controlled-runtime time during the latest smoke retry.
+- Admin API/CLI are safe and useful for post-result support state, but pre-payment LINE bind diagnostics remain too thin.
+
+### Unresolved Questions
+
+- Build Phase 0 foundation before any further production payment smoke: LINE/LIFF bind diagnostics, shared production-valid fixtures, QA layer cleanup, and stronger browser harness coverage.
+- Decide whether to implement guarded Preview-only QA fixture endpoints after the fixture/test architecture is designed.
+- Add Vercel alias target inspection later to close the remaining canonical deploy/source guard gap.
+- Theme Architecture remains archived and preserved; runtime theme work remains deferred behind production-gate foundation.
