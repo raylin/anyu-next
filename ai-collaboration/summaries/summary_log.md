@@ -10408,3 +10408,28 @@ Unresolved questions:
 - Owner must fill the listed `.env.production` owner-fill-required critical values before the next production smoke.
 - Rerun `qa:module01:production-preflight` after owner fill; do not bypass the hardened mirror-shape gate.
 - Theme Architecture implementation remains preserved and deferred.
+
+## 2026-06-06 Env Key Ownership & Pruning Audit v0
+
+### Completed Changes
+
+- saved the Env Key Ownership & Pruning Audit v0 handoff
+- inventoried 95 env key names across examples, ignored staging/production mirrors, Vercel Preview(staging), Vercel Production, source references, scripts, tests, and preflights
+- classified keys by usage, category, scope, owner/Codex responsibility, and value policy
+- explained the owner-fill keys that were causing confusion
+- separated owner-required provider/DB values from Codex-set plain config and Codex-generated internal/app-owned secrets
+- documented reset implications for app-owned stateful crypto
+- recommended a Hybrid env mirror strategy v2
+
+### Learnings
+
+- The owner-fill list from mirror reconciliation was too broad; many blanks are runtime flags, model config, queue config, endpoint config, or internal auth rather than owner-owned secrets.
+- True owner-fill values are provider-issued credentials and DB URLs.
+- App-owned stateful crypto can be regenerated if affected test data is deliberately cleared.
+- Direct DB support lookup env keys remain the primary prune candidates.
+
+### Unresolved Questions
+
+- Decide whether to implement the recommended Hybrid reset strategy.
+- Define exact staging/production tables to clear before regenerating app-owned stateful crypto.
+- Keep Theme Architecture preserved and deferred.
