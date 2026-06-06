@@ -163,6 +163,21 @@ function runCommand(id, command, args, options = {}) {
   });
 }
 
+function runCommandCapture(id, command, args, options = {}) {
+  console.log(JSON.stringify({ step: "module01_suite_check_start", id, command: [command, ...args] }));
+  const result = spawnSync(command, args, {
+    cwd: options.cwd ?? process.cwd(),
+    env: { ...process.env, ...(options.env ?? {}) },
+    encoding: "utf8",
+  });
+
+  return {
+    status: result.status ?? 1,
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? "",
+  };
+}
+
 async function requestJson(url, options = {}) {
   const response = await fetch(url, options);
   const text = await response.text();
@@ -263,6 +278,83 @@ async function adminApiStagingCheck() {
   });
 }
 
+function parseAdminCliJsonOutput(stdout) {
+  const jsonStart = stdout.indexOf("{");
+
+  if (jsonStart === -1) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(stdout.slice(jsonStart));
+  } catch {
+    return null;
+  }
+}
+
+function safeAdminCliOutput(stdout) {
+  let parsed = null;
+
+  parsed = parseAdminCliJsonOutput(stdout);
+
+  if (!parsed || parsed.ok !== true || parsed.env !== "staging" || parsed.lookup?.ok !== true) {
+    return false;
+  }
+
+  const serialized = JSON.stringify(parsed);
+  return !TOKEN_LIKE_PATTERNS.some((pattern) => pattern.test(serialized));
+}
+
+function adminCliStagingCheck() {
+  const token = process.env.ADMIN_API_TOKEN?.trim() ?? "";
+  const resultId =
+    process.env.MODULE01_ADMIN_LOOKUP_RESULT_ID?.trim() ??
+    process.env.QA_MODULE01_ADMIN_RESULT_ID?.trim() ??
+    "";
+
+  if (!token) {
+    return makeCheck("admin_cli_lookup", "partial", {
+      required: false,
+      adminCliLookupStatus: "skipped_missing_admin_token",
+      adminCliLookupCommand: "pnpm ops lookup-result --env staging --id [REDACTED] --json",
+      warnings: ["skipped_missing_admin_token"],
+      nextRequiredAction: "set_preview_admin_api_token_and_rerun",
+    });
+  }
+
+  if (!resultId) {
+    return makeCheck("admin_cli_lookup", "partial", {
+      required: false,
+      adminCliLookupStatus: "skipped_missing_known_result_id",
+      adminCliLookupCommand: "pnpm ops lookup-result --env staging --id [REDACTED] --json",
+      warnings: ["skipped_missing_known_result_id"],
+      nextRequiredAction: "provide_module01_admin_lookup_result_id",
+    });
+  }
+
+  const rootDir = path.resolve(process.cwd(), "../..");
+  const result = runCommandCapture(
+    "admin_cli_lookup",
+    "corepack",
+    ["pnpm", "--silent", "ops", "lookup-result", "--env", "staging", "--id", resultId, "--json"],
+    {
+      cwd: rootDir,
+      env: {
+        ADMIN_API_TOKEN: token,
+      },
+    },
+  );
+  const pass = result.status === 0 && safeAdminCliOutput(result.stdout);
+
+  return makeCheck("admin_cli_lookup", pass ? "pass" : "blocked", {
+    required: true,
+    adminCliLookupCommand: "pnpm ops lookup-result --env staging --id [REDACTED] --json",
+    adminCliLookupStatus: pass ? "pass" : "blocked",
+    responseSanitized: pass,
+    blockers: pass ? [] : ["admin_cli_lookup_failed_or_unsafe"],
+  });
+}
+
 async function runLocalSuite() {
   const checks = {
     lint: runCommand("lint", "corepack", ["pnpm", "lint"]),
@@ -313,6 +405,7 @@ async function runStagingSuite() {
       },
     ),
     adminApiLookup: await adminApiStagingCheck(),
+    adminCliLookup: adminCliStagingCheck(),
     channelManualAcceptance: makeCheck("channel_manual_acceptance", "skipped", {
       required: false,
       manualRequired: true,
@@ -446,5 +539,6 @@ export {
   buildSummary,
   deriveGateStatus,
   makeCheck,
+  parseAdminCliJsonOutput,
   worstStatus,
 };

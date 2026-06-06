@@ -329,9 +329,9 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」is in reusable release validation. Production public content is live but payment runtime and checkout are frozen/fail-closed. Preview(staging) enforces access-link save before payment: desktop shows Email only, while mobile/in-app browsers show LINE first above Email fallback. Automated staging no-card/access-link QA passes, fresh real staging Email/LINE messages were owner-verified, and the Module 01 release validation suite now passes the safe staging gate with Admin API smoke included.</p>
+      <p class="lead">Module 01「曖昧溫度計」is in reusable release validation. Production public content is live but payment runtime and checkout are frozen/fail-closed. Preview(staging) enforces access-link save before payment: desktop shows Email only, while mobile/in-app browsers show LINE first above Email fallback. Automated staging no-card/access-link QA passes, fresh real staging Email/LINE messages were owner-verified, and the Module 01 release validation suite now passes the safe staging gate with Admin API and Admin CLI smoke included.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-06 00:45 CST</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-06 01:25 CST</span></div>
         <div><span class="label">Current phase</span><span class="value">Staging release gate pass</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Owner acceptance before production readiness</span></div>
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; the safe Module 01 staging gate now passes with Admin API smoke included. Real channel checks remain owner-approved/manual and production remains frozen until explicit acceptance. No ads.</p></article>
+        <article class="card"><span class="badge waiting">Waiting gates</span><h3>Launch readiness</h3><p>Launch plan exists; the safe Module 01 staging gate now passes with Admin API and Admin CLI smoke included. Real channel checks remain owner-approved/manual and production remains frozen until explicit acceptance. No ads.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge progress">Planning</span><h3>Multi-module direction</h3><p>Recommended review-wait path: specify Module 02「職場暗流雷達」first, then add lightweight homepage cross-linking only when approved.</p></article>
@@ -410,7 +410,7 @@
           <li><span class="time">Sandbox preflight</span><span>Sandbox checkout preflight passed with ccore gateway, MPG 2.0, NT$49, and pcs_ handoff.</span></li>
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
-          <li><span class="time">Current</span><span>Production is frozen. Module 01 release validation suite exists. Latest run: local pass, staging pass with Admin API smoke, production-preflight pass. Real Email/LINE channel checks are intentionally not run by the default suite.</span></li>
+          <li><span class="time">Current</span><span>Production is frozen. Module 01 release validation suite exists. Latest run: local pass, staging pass with Admin API and Admin CLI smoke, production-preflight pass. Real Email/LINE channel checks are intentionally not run by the default suite.</span></li>
           <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned; checkout-start wiring, visual bridge polish and staging smoke, and ReturnURL polling implemented; result-page checkout staging sandbox QA passed end-to-end.</span></li>
         </ol>
       </div>
@@ -481,7 +481,7 @@
         <p><strong>Access-link smoke QA:</strong> use <code>corepack pnpm run qa:access-link:smoke</code>. Legacy recovery-named smoke script aliases were removed during the clean access-link schema reset.</p>
         <p><strong>Module 01 release validation suite:</strong> use <code>corepack pnpm run qa:module01:local</code>, <code>corepack pnpm run qa:module01:staging</code>, <code>corepack pnpm run qa:module01:production-preflight</code>, and <code>corepack pnpm run qa:module01:release</code>. Summaries are written under ignored <code>apps/web/.qa/</code>. Admin API staging smoke now runs inside <code>qa:module01:staging</code> when <code>ADMIN_API_TOKEN</code> and a known result ID are supplied. Real Email/LINE channel validation remains a future owner-approved <code>qa:module01:staging:channels</code> command.</p>
         <p><strong>Local env autoload:</strong> staging QA scripts load <code>apps/web/.env.staging</code> when shell env is absent; production preflight local mode uses <code>apps/web/.env.production</code>. Exported shell env wins over local file values; values are never printed. The Admin CLI does not load these mirror files.</p>
-        <p><strong>Admin CLI:</strong> use <code>pnpm ops lookup-result --env staging --id &lt;resultId&gt;</code> or <code>pnpm ops lookup-result --env production --id &lt;resultId&gt;</code> with <code>ADMIN_API_TOKEN</code> supplied by the current shell/process env. v0 has no <code>--base-url</code>, token flag, DB URL, Vercel env, or Neon access.</p>
+        <p><strong>Admin CLI:</strong> use <code>pnpm ops lookup-result --env staging --id &lt;resultId&gt;</code> or <code>pnpm ops lookup-result --env production --id &lt;resultId&gt;</code> with <code>ADMIN_API_TOKEN</code> supplied by the current shell/process env. v0 has no <code>--base-url</code>, token flag, DB URL, Vercel env, or Neon access. Live Preview(staging) CLI lookup has passed in pretty and JSON modes.</p>
         <p><strong>Verification:</strong> <code>poll-status</code> and <code>verify-after-payment</code> read local state from the temporary directory and print only sanitized status categories and booleans.</p>
         <p><strong>Safety:</strong> helper and preflight output must not include provider secrets, TradeInfo, TradeSha, raw pcs_/pa_ tokens, tokenized URLs, raw input, card data, env values, lengths, prefixes, suffixes, hashes, or checksums.</p>
       </div>
@@ -508,7 +508,7 @@
     <section>
       <h2>Paid Result Access Links</h2>
       <div class="panel">
-        <p><strong>Status:</strong> Module 01 paid result access-link loop has fresh staging proof for Email and LINE. The release suite now reports current gate state directly: staging passes with token-gated Admin API smoke included; real Email/LINE channel checks remain explicit owner-approved manual evidence.</p>
+        <p><strong>Status:</strong> Module 01 paid result access-link loop has fresh staging proof for Email and LINE. The release suite now reports current gate state directly: staging passes with token-gated Admin API and Admin CLI smoke included; real Email/LINE channel checks remain explicit owner-approved manual evidence.</p>
         <p><strong>Implemented flow:</strong> checkout-start now requires a saved access link before provider handoff. Desktop/non-mobile shows Email only. Mobile/in-app browsers show LINE first above Email fallback. The previous skip-with-warning path is removed from the active checkout UX.</p>
         <p><strong>Access rule:</strong> Email/LINE messages point back to secure web access using fresh access links; do not send full report content, raw pcs_ tokens, or raw pa_ tokens through LINE or Email.</p>
         <p><strong>Naming note:</strong> User-facing wording is now aligned toward 保存查看連結 / 專屬查看連結 / 回 ANYU 查看完整報告. Active schema/runtime now targets clean access-link table names and <code>pal_</code> access-link tokens only; old <code>prl_</code> links and recovery-named DB rows were destructively reset under the no-real-users premise. Staging and Production now have access-link table names only; old recovery-named tables/views are absent. Fresh LINE bind and real LINE access-link message smoke passed again after the clean reset.</p>
@@ -522,8 +522,8 @@
       <table>
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
-          <tr><td>P0</td><td>Module 01 release validation suite</td><td>Code / Ops</td><td>Implemented. Latest gate: local pass, staging pass with Admin API smoke, production-preflight pass. Next: owner acceptance or explicit channel-validation command.</td></tr>
-          <tr><td>P0</td><td>Admin ops boundary</td><td>Code / Ops</td><td>Read-only Admin paid-result lookup API and pure Admin CLI are implemented. Next: run staging CLI lookup smoke with explicit shell <code>ADMIN_API_TOKEN</code>.</td></tr>
+          <tr><td>P0</td><td>Module 01 release validation suite</td><td>Code / Ops</td><td>Implemented. Latest gate: local pass, staging pass with Admin API + Admin CLI smoke, production-preflight pass. Next: owner acceptance or explicit channel-validation command.</td></tr>
+          <tr><td>P0</td><td>Admin ops boundary</td><td>Code / Ops</td><td>Read-only Admin paid-result lookup API and pure Admin CLI are implemented. Preview(staging) CLI lookup smoke passed; production read-only CLI smoke requires explicit approval.</td></tr>
           <tr><td>P0</td><td>Controlled production payment smoke v1 final confirmation</td><td>Owner / ops</td><td>Resume only after owner accepts the release-suite gate plus explicit production approval. Production checkout remains disabled.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
@@ -555,7 +555,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> run Staging Admin CLI Lookup Smoke v0 with <code>ADMIN_API_TOKEN</code> supplied explicitly in the shell, then owner reviews and accepts the safe Module 01 staging release gate. Future Module 01 handoffs should run <code>qa:module01:staging</code> or <code>qa:module01:release</code> and include the gate result in the same completion summary.</p>
+        <p><strong>Current recommendation:</strong> owner reviews and accepts the safe Module 01 staging release gate, now including Admin API and Admin CLI lookup smoke. Future Module 01 handoffs should run <code>qa:module01:staging</code> or <code>qa:module01:release</code> and include the gate result in the same completion summary.</p>
         <p>If fresh real channel evidence is needed, implement or run an explicit owner-approved <code>qa:module01:staging:channels</code> path instead of folding real Email/LINE sends into the default suite.</p>
         <p>Production controlled smoke cannot start from a one-off Codex next step. It requires release-suite pass or owner acceptance, production preflight pass, and explicit owner approval.</p>
       </div>

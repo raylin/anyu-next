@@ -10226,3 +10226,33 @@ Unresolved questions:
 - Run Staging Admin CLI Lookup Smoke v0 with `ADMIN_API_TOKEN` supplied explicitly through the shell.
 - Decide later whether to remove or keep legacy direct DB support lookup after Admin CLI usage is stable.
 - Decide whether production read-only Admin CLI smoke should be done before or after owner acceptance of the staging gate.
+
+## 2026-06-06 Staging Admin CLI Lookup Smoke + Suite Integration v0
+
+### Completed Changes
+
+- saved the Staging Admin CLI Lookup Smoke + Suite Integration v0 handoff
+- replaced the rough root Admin CLI command wiring with workspace package script delegation
+- ran live Preview(staging) Admin CLI lookup in pretty and JSON modes using explicit shell `ADMIN_API_TOKEN`
+- verified safe CLI errors:
+  - missing token -> `admin_token_missing`
+  - wrong token -> `admin_auth_failed`
+  - missing `--env` -> `env_required`
+  - missing `--id` -> `result_id_missing`
+- integrated `adminCliLookup` into `qa:module01:staging`
+- reran validation:
+  - `qa:module01:local`: pass
+  - `qa:module01:staging`: pass with `adminApiLookup=pass` and `adminCliLookup=pass`
+  - `qa:module01:production-preflight`: pass
+
+### Learnings
+
+- The Admin CLI can be exercised live against Preview(staging) without DB, Vercel env, Neon, or app env mirror loading.
+- Suite summaries can track Admin API route smoke and Admin CLI smoke separately without exposing result IDs or private values.
+- Workspace script delegation removes the previous rough `--dir exec tsx` root command, though pnpm still appends lifecycle context on nonzero CLI exits.
+
+### Unresolved Questions
+
+- Decide whether to add a built `bin` package later if pnpm lifecycle context on expected CLI errors becomes noisy for operators.
+- Decide when, if ever, to run a production read-only Admin CLI lookup smoke.
+- Owner acceptance is still required before any production readiness task resumes.
