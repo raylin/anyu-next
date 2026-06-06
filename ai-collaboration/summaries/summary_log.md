@@ -10381,3 +10381,30 @@ Unresolved questions:
 - Recover exact approved production values for the blocked protected keys or explicitly approve regeneration only for keys safe to regenerate.
 - Do not resume Controlled Production Payment Smoke v1 until `qa:module01:production-preflight` returns `pass_ready_for_controlled_smoke`.
 - Theme Architecture implementation remains deferred and preserved.
+
+## 2026-06-06 Staging + Production Env Mirror Reconciliation v1
+
+### Completed Changes
+
+- saved the Staging + Production Env Mirror Reconciliation v1 handoff
+- compared ignored `apps/web/.env.staging` and `apps/web/.env.production` against Vercel Preview(staging) and Vercel Production key-name inventories
+- reorganized both ignored env mirrors into consistent commented sections without committing them
+- generated and synced Codex-safe internal auth keys:
+  - Preview(staging): `CRON_SECRET`, `INTERNAL_JOB_SECRET`
+  - Production: `CRON_SECRET`, `INTERNAL_JOB_SECRET`
+- synced visible Vercel values back to local mirrors by key name only
+- left non-generatable protected/provider/stateful values blank under owner-fill sections
+- reran Module 01 gates
+
+### Learnings
+
+- Preview(staging) internal auth values are branch-scoped as `Preview (staging)`; plain Preview sync failed by target scope, while `preview staging` sync succeeded.
+- Production preflight now passes processor auth name/shape for generated internal auth but remains correctly blocked on stateful/access-link/LINE provider local mirror blanks.
+- `qa:module01:local` and `qa:module01:staging` pass; `qa:module01:production-preflight` blocks with `blocked_empty_local_mirror_secret`.
+- Production stayed fail-closed; no runtime, checkout, payment, Email, or LINE message was run.
+
+### Unresolved Questions
+
+- Owner must fill the listed `.env.production` owner-fill-required critical values before the next production smoke.
+- Rerun `qa:module01:production-preflight` after owner fill; do not bypass the hardened mirror-shape gate.
+- Theme Architecture implementation remains preserved and deferred.
