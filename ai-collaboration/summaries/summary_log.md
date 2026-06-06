@@ -10305,3 +10305,29 @@ Unresolved questions:
 - Owner must decide whether to resume Controlled Production Payment Smoke v1 or address selected non-blocking tech debt first.
 - Production preflight empty-secret hardening and Vercel deploy guard hardening remain strong candidates before the next production smoke.
 - Decide later whether to implement explicit `qa:module01:staging:channels` for owner-approved real Email/LINE validation.
+
+## 2026-06-06 Archive Theme Architecture Design Assets v0
+
+### Completed Changes
+
+- saved the Archive Theme Architecture Design Assets v0 handoff
+- verified owner-provided design files under `ai-collaboration/design/theme-architecture-v0/`
+- added `README.md` with source-of-truth boundaries and checkout-start override rules
+- documented adopted decisions:
+  - Hybrid Theme Park Model
+  - Core Shell = neutral editorial
+  - Module 01 = Riso-only
+  - Shared Flow Templates = shared structure, module-themed
+  - Module 02 Radar preview as extensibility proof
+- created the execution report and updated dashboard status
+
+### Learnings
+
+- The design archive is useful as visual architecture reference, but it must not override current payment/access-link source-of-truth.
+- Checkout-start v2 is the accepted visual reference when older checkout-start sections conflict.
+- No screenshots are required for this archive because code/memo files are sufficient.
+
+### Unresolved Questions
+
+- Decide whether the next task is Module Theme Architecture Implementation Plan v0 or a return to production readiness.
+- Future implementation must inventory runtime surfaces before applying Riso/Core Shell visuals.

@@ -331,8 +331,8 @@
       <h1>暗語 ANYU / anyu-next</h1>
       <p class="lead">Module 01「曖昧溫度計」safe staging gate is documented as PASS / ready for owner acceptance. Production public content is live but payment runtime and checkout are frozen/fail-closed. Preview(staging) enforces access-link save before payment: desktop shows Email only, while mobile/in-app browsers show LINE first above Email fallback. Automated staging no-card/access-link QA passes, previous real staging Email/LINE messages were owner-verified, and the release validation suite passes with Admin API and Admin CLI smoke included.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-06 01:25 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Safe staging gate acceptance snapshot</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-06 13:24 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Theme architecture archived</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Owner acceptance before production readiness</span></div>
       </div>
@@ -361,7 +361,7 @@
         <article class="card"><span class="badge waiting">Owner decision</span><h3>Launch readiness</h3><p>Launch plan exists; the safe Module 01 staging gate is documented as pass / ready for owner acceptance with Admin API and Admin CLI smoke included. Real channel checks remain owner-approved/manual and production remains frozen until explicit production approval. No ads.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
-        <article class="card"><span class="badge progress">Planning</span><h3>Multi-module direction</h3><p>Recommended review-wait path: specify Module 02「職場暗流雷達」first, then add lightweight homepage cross-linking only when approved.</p></article>
+        <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
         <article class="card"><span class="badge progress">Tracked</span><h3>Tech debt / cleanup</h3><p>Known cleanup is documented: queue audit persistence, domain/project ambiguity, optional provider fields, future production smoke tooling, and deferred recovery-named env/module cleanup. New NewebPay generation jobs now use <code>newebpay_notify</code>; legacy <code>payment_success_future</code> remains accepted. Entitlement/payment-intent uniqueness and clean access-link schemas are applied and verified on staging and production. Production access-link crypto and Email/LINE provider-send env names are present and activated by redeploy.</p></article>
       </div>
     </section>
@@ -444,6 +444,7 @@
       <div class="panel">
         <p><strong>Direction:</strong> ANYU should remain warm, premium, emotionally resonant, and insight-native, not a SaaS-like test directory. Module 01 stays the launch anchor while future mini-tests become cross-linked experiences.</p>
         <p><strong>Core grammar:</strong> every future module should specify its hook, interaction type, knowledge skills, extracted traits, free artifact, paid artifact, share object, safety boundaries, and cross-link target before implementation.</p>
+        <p><strong>Theme architecture archive:</strong> <code>ai-collaboration/design/theme-architecture-v0/</code> is accepted as visual architecture reference only. Product flow/copy source-of-truth remains the current app and PM decisions. Checkout-start v2 is the visual reference for the mandatory save gate; do not copy older direct-payment, manual LINE ID, no-charge, 30-day retention, or training-consent assumptions.</p>
         <p><strong>Low-risk next move:</strong> write Module 02 concept/spec for「職場暗流雷達」first, then add a small homepage “更多暗語測驗 / 即將推出” section only after the concept is selected. Do not hide Module 01 price/refund/support evidence during merchant review.</p>
         <p><strong>Candidate directions:</strong> 職場暗流雷達, 金錢安全感測驗, Drama / 旁觀者人格, 人生小劇場, 答案壓力計.</p>
       </div>
@@ -551,6 +552,7 @@
           <tr><td>Production preflight empty-secret hardening</td><td>P0</td><td>Code / Ops</td><td>Could miss empty configured secrets before the next production smoke.</td><td>Production Preflight Empty Secret Hardening v0</td></tr>
           <tr><td>Vercel deploy guard hardening</td><td>P0</td><td>Code / Ops</td><td>Could regress canonical deploy/source alignment.</td><td>Vercel Deploy Guard Hardening v0</td></tr>
           <tr><td>qa:module01:staging:channels command</td><td>P1</td><td>Code / Ops</td><td>Real Email/LINE checks remain manual/owner-approved.</td><td>Module 01 Staging Channels Gate v0</td></tr>
+          <tr><td>Theme architecture implementation plan</td><td>P1</td><td>Code / Design</td><td>Visual architecture is archived but not implemented; direct implementation without inventory risks breaking current payment/access-link rules.</td><td>Module Theme Architecture Implementation Plan v0</td></tr>
         </tbody>
       </table>
     </section>
@@ -558,7 +560,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> owner accepts the documented safe Module 01 staging gate or chooses selected non-blocking tech debt before production readiness resumes. Future Module 01 handoffs should run <code>qa:module01:staging</code> or <code>qa:module01:release</code> and include the gate result in the same completion summary.</p>
+        <p><strong>Current recommendation:</strong> run Module Theme Architecture Implementation Plan v0 if the next priority is visual architecture adoption; otherwise owner accepts the documented safe Module 01 staging gate or chooses selected non-blocking production hardening before production readiness resumes.</p>
         <p>If fresh real channel evidence is needed, implement or run an explicit owner-approved <code>qa:module01:staging:channels</code> path instead of folding real Email/LINE sends into the default suite.</p>
         <p>Production controlled smoke cannot start from a one-off Codex next step. It requires release-suite pass or owner acceptance, production preflight pass, and explicit owner approval.</p>
       </div>
@@ -673,6 +675,7 @@
           <li><a href="../reports/2026-06-05-module-01-qa-coverage-release-validation-plan-v0.md">Module 01 QA Coverage & Release Validation Plan v0</a></li>
           <li><a href="../reports/2026-06-05-module-01-release-validation-suite-v0.md">Module 01 Release Validation Suite v0</a></li>
           <li><a href="../reports/2026-06-06-module-01-safe-staging-gate-acceptance-snapshot-v0.md">Module 01 Safe Staging Gate Acceptance Snapshot v0</a></li>
+          <li><a href="../reports/2026-06-06-archive-theme-architecture-design-assets-v0.md">Archive Theme Architecture Design Assets v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

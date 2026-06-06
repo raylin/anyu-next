@@ -1,0 +1,501 @@
+/* ============================================================
+ *  暗語 ANYU · Design Tokens · v2.0 (Riso Editorial)
+ *  Module 01 · 曖昧溫度計
+ *
+ *  v2.0 vs v1.1 — MAJOR BUMP
+ *
+ *  Reason for major: v1.1 → v2.0 changes visual language wholesale:
+ *    · radius: soft 14–20px  →  sharp 2–4px
+ *    · borders: 1px hairline →  1.5–2px ink (high opacity)
+ *    · shadow: soft css blur →  4/4 offset solid-ink (riso drop)
+ *    · accent: warm camel    →  ultramarine purple #5b3aa3
+ *    · accent2: lavender     →  riso magenta #ec4e8c
+ *    · rose: terracotta dust →  riso vermilion #f08c5a
+ *    · type: Cormorant       →  Fraunces (Latin display)
+ *    · type: JetBrains Mono  →  Space Mono (label / micro)
+ *    · NEW: halftone grain overlay, off-canvas bleed blocks
+ *    · NEW: signal row uses numbered Fraunces-italic prefix
+ *
+ *  v1.1 → v2.0 token names are mostly STABLE (same anyu-* prefix).
+ *  Only added / re-tinted; no removed names. See MIGRATION_v1.1_to_v2.md.
+ *
+ *  PAIRING IS STILL MANDATORY.
+ *  Every background token pairs with exactly one ink set. §2.2 of
+ *  DESIGN_SYSTEM_v2.md is the authoritative pairing table.
+ *
+ *  Activation: add data-design-system="v2" on <html> or any wrapper.
+ *  ============================================================ */
+
+:root[data-design-system="v2"],
+.anyu-v2 {
+
+  /* ----------------------------------------------------------
+   * 1 · font families
+   * ---------------------------------------------------------- */
+  --anyu-font-serif: "Noto Serif TC", "Songti TC", "Source Han Serif TC", serif;
+  --anyu-font-sans:  "Noto Sans TC", "PingFang TC", "Inter", system-ui, -apple-system, sans-serif;
+  --anyu-font-latin: "Fraunces", "Cormorant Garamond", "Noto Serif TC", serif;
+  --anyu-font-mono:  "Space Mono", "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* ----------------------------------------------------------
+   * 2 · letter-spacing
+   * ---------------------------------------------------------- */
+  --anyu-track-tight:    -0.4px;
+  --anyu-track-normal:    0;
+  --anyu-track-wide:      0.3px;
+  --anyu-track-mono:      1.6px;   /* mono label baseline */
+  --anyu-track-mono-lg:   1.8px;   /* mono label > 12px */
+  --anyu-track-wordmark:  2.5px;
+
+  /* ----------------------------------------------------------
+   * 3 · type scale (mobile baseline, 360–390pt wide)
+   * ---------------------------------------------------------- */
+  --anyu-type-display-size: 34px;   --anyu-type-display-lh:  1.2;
+  --anyu-type-h1-size:      24px;   --anyu-type-h1-lh:       1.4;
+  --anyu-type-h2-size:      19px;   --anyu-type-h2-lh:       1.45;
+  --anyu-type-h3-size:      17px;   --anyu-type-h3-lh:       1.5;
+  --anyu-type-quote-size:   16px;   --anyu-type-quote-lh:    1.65;
+  --anyu-type-body-lg-size: 15px;   --anyu-type-body-lg-lh:  1.7;
+  --anyu-type-body-size:    14px;   --anyu-type-body-lh:     1.7;
+  --anyu-type-caption-size: 13px;   --anyu-type-caption-lh:  1.65;
+  --anyu-type-label-size:   11px;   --anyu-type-label-lh:    1;
+  --anyu-type-label-sm-size: 9.5px; --anyu-type-label-sm-lh: 1;
+  --anyu-type-num-xl-size:  64px;   --anyu-type-num-xl-lh:   1;
+  --anyu-type-num-lg-size:  32px;   --anyu-type-num-lg-lh:   1;
+  --anyu-type-num-md-size:  24px;   --anyu-type-num-md-lh:   1;
+  --anyu-type-num-sm-size:  18px;   --anyu-type-num-sm-lh:   1;  /* signal value */
+
+  /* ----------------------------------------------------------
+   * 4 · spacing (4pt base)
+   * ---------------------------------------------------------- */
+  --anyu-space-1:   4px;
+  --anyu-space-2:   8px;
+  --anyu-space-3:  12px;
+  --anyu-space-4:  16px;
+  --anyu-space-5:  20px;
+  --anyu-space-6:  24px;
+  --anyu-space-8:  32px;
+  --anyu-space-10: 40px;
+  --anyu-space-14: 56px;
+  --anyu-space-18: 72px;
+
+  /* gutters / containers */
+  --anyu-gutter:        24px;
+  --anyu-max-content:  440px;
+  --anyu-stack-card:    16px;       /* between sibling cards */
+  --anyu-stack-section: 28px;       /* between titled sections */
+
+  /* ----------------------------------------------------------
+   * 5 · radius (★ all sharp; pill only for true pills)
+   * ---------------------------------------------------------- */
+  --anyu-radius-sm:    2px;
+  --anyu-radius-md:    2px;
+  --anyu-radius-lg:    2px;     /* buttons, cards default */
+  --anyu-radius-xl:    3px;
+  --anyu-radius-2xl:   4px;     /* signature card */
+  --anyu-radius-3xl:   4px;
+  --anyu-radius-pill:  999px;   /* preserved for true pills if ever needed; v2 does NOT use pills for chips */
+
+  /* ----------------------------------------------------------
+   * 6 · borders (★ v2 thick ink)
+   * ---------------------------------------------------------- */
+  --anyu-border-thin:  1px;
+  --anyu-border-base:  1.5px;   /* default ink stroke */
+  --anyu-border-heavy: 2px;     /* heavy emphasis (rare) */
+  --anyu-border-cta:   1.5px;
+
+  /* ----------------------------------------------------------
+   * 7 · motion
+   * ---------------------------------------------------------- */
+  --anyu-motion-fast: 120ms;
+  --anyu-motion-base: 240ms;
+  --anyu-motion-bar:  700ms;
+  --anyu-motion-page: 600ms;
+
+  /* ----------------------------------------------------------
+   * 8 · brand mark sizes (carry from v1.1; mark itself re-cut)
+   * ---------------------------------------------------------- */
+  --anyu-mark-min:           12px;
+  --anyu-mark-favicon:       16px;
+  --anyu-mark-favicon-hires: 32px;
+  --anyu-mark-app-icon:     180px;
+  --anyu-mark-inline:      0.85em;
+  --anyu-mark-divider:       20px;
+  --anyu-mark-unread:        20px;
+  --anyu-mark-loading:       48px;
+  --anyu-mark-loading-size:  92px;
+  --anyu-mark-stamp:         52px;     /* +4px vs v1.1 to balance 1.5px ink ring */
+  --anyu-mark-cycle:         1.6s;
+  --anyu-mark-stagger:       0.2s;
+}
+
+@media (min-width: 768px) {
+  :root[data-design-system="v2"],
+  .anyu-v2 {
+    --anyu-type-display-size: 40px;
+    --anyu-type-num-xl-size:  76px;
+    --anyu-gutter: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-design-system="v2"],
+  .anyu-v2 {
+    --anyu-motion-fast: 0ms;
+    --anyu-motion-base: 0ms;
+    --anyu-motion-bar:  0ms;
+    --anyu-motion-page: 0ms;
+  }
+}
+
+/* ============================================================
+ *  Base palette · light (default — riso paper)
+ * ============================================================ */
+
+:root[data-design-system="v2"],
+:root[data-design-system="v2"][data-theme="light"],
+.anyu-v2 {
+  --anyu-bg:       #faf6ee;          /* riso cream paper */
+  --anyu-surface:  #f5eee0;          /* tinted paper (input bed) */
+  --anyu-card:     #ffffff;          /* white card */
+  --anyu-mist:     #ece2cf;          /* hint / track */
+
+  --anyu-ink:      #1a1626;          /* ink black-violet (riso K plate) */
+  --anyu-dim:      rgba(26, 22, 38, .78);  /* ★ +.03 vs v1.1 for safer body */
+  --anyu-faint:    rgba(26, 22, 38, .55);
+  --anyu-line:     rgba(26, 22, 38, .85);  /* ★ THICK BLACK LINE — borders use ink, not hairline */
+  --anyu-line-soft: rgba(26, 22, 38, .12); /* fallback hairline for dashed inner dividers */
+
+  /* dark surface pair (paid sample A · CTA · share dark variant) */
+  --anyu-ink-dark:      #15111f;            /* slightly deeper than ink, riso "double-pass black" */
+  --anyu-ink-onDark:    #f5ecdd;
+  --anyu-dim-onDark:    rgba(245, 236, 221, .82);
+  --anyu-faint-onDark:  rgba(245, 236, 221, .55);
+  --anyu-line-onDark:   rgba(245, 236, 221, .22);
+
+  /* semantic */
+  --anyu-success: #4f7d56;
+  --anyu-warning: #c9904a;
+  --anyu-danger:  #b8454a;
+
+  /* ★ v2: shadows are SOLID OFFSET (no blur).
+     Only the focus ring uses a soft-ish glow. */
+  --anyu-shadow-xs:    1px 1px 0 var(--anyu-ink);
+  --anyu-shadow-sm:    2px 2px 0 var(--anyu-ink);
+  --anyu-shadow-md:    3px 3px 0 var(--anyu-ink);
+  --anyu-shadow-lg:    4px 4px 0 var(--anyu-ink);
+  --anyu-shadow-xl:    6px 6px 0 var(--anyu-ink);
+
+  /* riso "second-pass" colored shadows — used as drop accents on cards */
+  --anyu-shadow-acc:   4px 4px 0 var(--anyu-accent);
+  --anyu-shadow-acc2:  4px 4px 0 var(--anyu-accent2);
+  --anyu-shadow-rose:  4px 4px 0 var(--anyu-rose);
+}
+
+/* ============================================================
+ *  Module accents — Module 01 · 曖昧溫度計
+ *  v2: ultramarine + riso magenta + vermilion
+ * ============================================================ */
+
+:root[data-design-system="v2"],
+:root[data-design-system="v2"][data-module="ai-temperature"],
+.anyu-v2 {
+  --anyu-accent:      #5b3aa3;        /* ultramarine purple (K1 ink) */
+  --anyu-accent-12:   rgba(91, 58, 163, .12);
+  --anyu-accent-20:   rgba(91, 58, 163, .22);
+  --anyu-accent-45:   rgba(91, 58, 163, .50);
+
+  --anyu-accent2:     #ec4e8c;        /* riso magenta (K2 ink, rationed) */
+  --anyu-accent2-15:  rgba(236, 78, 140, .18);
+  --anyu-accent2-30:  rgba(236, 78, 140, .40);
+
+  --anyu-rose:        #f08c5a;        /* vermilion (warm bleed only) */
+  --anyu-rose-20:     rgba(240, 140, 90, .25);
+}
+
+/* focus ring + glow (★ v2 keeps the focus glow soft — accessibility, not riso) */
+:root[data-design-system="v2"],
+.anyu-v2 {
+  --anyu-shadow-focus: 0 0 0 3px var(--anyu-accent-20);
+}
+
+/* ============================================================
+ *  Halftone & stripe pattern utilities
+ *  (the only "fills" allowed besides solid color)
+ * ============================================================ */
+
+:root[data-design-system="v2"],
+.anyu-v2 {
+  /* halftone grain — multiply over page bg */
+  --anyu-grain:
+    radial-gradient(rgba(26,22,38,.35) 0.6px, transparent 0.6px) 0 0 / 3px 3px;
+  /* 45° two-color stripe — Temperature card only */
+  --anyu-stripe-temp:
+    repeating-linear-gradient(45deg,
+      var(--anyu-accent) 0 4px,
+      var(--anyu-accent2) 4px 8px);
+  /* 90° single-color stripe — signal & generic progress */
+  --anyu-stripe-signal:
+    repeating-linear-gradient(90deg,
+      var(--anyu-accent) 0 3px,
+      transparent 3px 6px);
+  /* 45° single-color stripe — analyzing button */
+  --anyu-stripe-loading:
+    repeating-linear-gradient(45deg,
+      var(--anyu-accent) 0 6px,
+      transparent 6px 12px);
+}
+
+/* ============================================================
+ *  Utility classes (mandatory · keep code free of inline style)
+ * ============================================================ */
+
+.anyu-v2 {
+  background: var(--anyu-bg);
+  color: var(--anyu-ink);
+  font: 400 var(--anyu-type-body-size)/var(--anyu-type-body-lh) var(--anyu-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+.anyu-v2 :focus-visible {
+  outline: none;
+  box-shadow: var(--anyu-shadow-focus);
+  transition: box-shadow var(--anyu-motion-fast) ease-out;
+}
+
+/* type utilities */
+.anyu-v2 .t-display { font: 500 var(--anyu-type-display-size)/var(--anyu-type-display-lh) var(--anyu-font-serif); letter-spacing: var(--anyu-track-tight); color: var(--anyu-ink); }
+.anyu-v2 .t-h1      { font: 500 var(--anyu-type-h1-size)/var(--anyu-type-h1-lh)           var(--anyu-font-serif); letter-spacing: -0.2px; color: var(--anyu-ink); }
+.anyu-v2 .t-h2      { font: 500 var(--anyu-type-h2-size)/var(--anyu-type-h2-lh)           var(--anyu-font-serif); color: var(--anyu-ink); }
+.anyu-v2 .t-h3      { font: 500 var(--anyu-type-h3-size)/var(--anyu-type-h3-lh)           var(--anyu-font-serif); color: var(--anyu-ink); }
+.anyu-v2 .t-quote   { font: italic 400 var(--anyu-type-quote-size)/var(--anyu-type-quote-lh) var(--anyu-font-serif); color: var(--anyu-ink); }
+.anyu-v2 .t-body-lg { font: 400 var(--anyu-type-body-lg-size)/var(--anyu-type-body-lg-lh) var(--anyu-font-sans);   color: var(--anyu-ink); }
+.anyu-v2 .t-body    { font: 400 var(--anyu-type-body-size)/var(--anyu-type-body-lh)       var(--anyu-font-sans);   color: var(--anyu-ink); }
+.anyu-v2 .t-caption { font: 400 var(--anyu-type-caption-size)/var(--anyu-type-caption-lh) var(--anyu-font-sans);   color: var(--anyu-dim); }
+.anyu-v2 .t-label   { font: 700 var(--anyu-type-label-size)/var(--anyu-type-label-lh)     var(--anyu-font-mono);   letter-spacing: var(--anyu-track-mono); text-transform: uppercase; color: var(--anyu-accent); }
+.anyu-v2 .t-label-dim   { font: 700 var(--anyu-type-label-size)/var(--anyu-type-label-lh) var(--anyu-font-mono);   letter-spacing: var(--anyu-track-mono); text-transform: uppercase; color: var(--anyu-dim); }
+.anyu-v2 .t-num-xl  { font: italic 700 var(--anyu-type-num-xl-size)/var(--anyu-type-num-xl-lh) var(--anyu-font-latin); color: var(--anyu-accent); }
+.anyu-v2 .t-num-lg  { font: italic 700 var(--anyu-type-num-lg-size)/var(--anyu-type-num-lg-lh) var(--anyu-font-latin); color: var(--anyu-accent); }
+.anyu-v2 .t-num-md  { font: italic 700 var(--anyu-type-num-md-size)/var(--anyu-type-num-md-lh) var(--anyu-font-latin); color: var(--anyu-accent); }
+.anyu-v2 .t-num-sm  { font: italic 700 var(--anyu-type-num-sm-size)/var(--anyu-type-num-sm-lh) var(--anyu-font-latin); color: var(--anyu-accent); }
+
+/* on-dark surface modifiers */
+.anyu-v2 .on-dark               { color: var(--anyu-ink-onDark); }
+.anyu-v2 .on-dark .t-body,
+.anyu-v2 .on-dark .t-body-lg,
+.anyu-v2 .on-dark .t-h3,
+.anyu-v2 .on-dark .t-h2,
+.anyu-v2 .on-dark .t-h1         { color: var(--anyu-ink-onDark); }
+.anyu-v2 .on-dark .t-caption    { color: var(--anyu-dim-onDark); }
+.anyu-v2 .on-dark .t-label-dim  { color: var(--anyu-dim-onDark); }
+
+/* surface utilities */
+.anyu-v2 .bg-page    { background: var(--anyu-bg); }
+.anyu-v2 .bg-surface { background: var(--anyu-surface); }
+.anyu-v2 .bg-card    { background: var(--anyu-card); }
+.anyu-v2 .bg-mist    { background: var(--anyu-mist); }
+.anyu-v2 .bg-dark    { background: var(--anyu-ink-dark); color: var(--anyu-ink-onDark); }
+
+/* ----------------------------------------------------------
+ * card scaffolds — ALWAYS thick ink border + offset shadow
+ * ---------------------------------------------------------- */
+
+.anyu-v2 .card {
+  position: relative;
+  background: var(--anyu-card);
+  border: var(--anyu-border-base) solid var(--anyu-ink);
+  border-radius: var(--anyu-radius-lg);
+  box-shadow: var(--anyu-shadow-acc);            /* default: accent drop */
+  padding: 20px 22px;
+}
+.anyu-v2 .card--acc2     { box-shadow: var(--anyu-shadow-acc2); }
+.anyu-v2 .card--rose     { box-shadow: var(--anyu-shadow-rose); }
+.anyu-v2 .card--ink      { box-shadow: var(--anyu-shadow-lg); }
+.anyu-v2 .card--flat     { box-shadow: none; }
+.anyu-v2 .card--dark     { background: var(--anyu-ink-dark); color: var(--anyu-ink-onDark); }
+.anyu-v2 .card--dashed   { border-style: dashed; box-shadow: none; }
+
+/* ----------------------------------------------------------
+ * buttons
+ * ---------------------------------------------------------- */
+
+.anyu-v2 .btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 50px;
+  padding: 0 18px;
+  border: var(--anyu-border-cta) solid var(--anyu-ink);
+  border-radius: var(--anyu-radius-lg);
+  font: 500 var(--anyu-type-body-lg-size)/1 var(--anyu-font-serif);
+  letter-spacing: var(--anyu-track-wide);
+  cursor: pointer;
+  transition: transform var(--anyu-motion-fast) ease-out;
+}
+.anyu-v2 .btn-primary {
+  background: var(--anyu-ink);
+  color: var(--anyu-ink-onDark);
+  box-shadow: var(--anyu-shadow-acc2);
+}
+.anyu-v2 .btn-accent {
+  background: var(--anyu-accent);
+  color: var(--anyu-ink-onDark);
+  box-shadow: var(--anyu-shadow-md);
+}
+.anyu-v2 .btn-ghost {
+  background: var(--anyu-card);
+  color: var(--anyu-ink);
+  box-shadow: var(--anyu-shadow-sm);
+}
+.anyu-v2 .btn:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--anyu-accent2);     /* shrinks the drop to look "pressed" */
+}
+.anyu-v2 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ----------------------------------------------------------
+ * chip — v2: sharp corners, hover-only shadow (★ change from prototype)
+ * ---------------------------------------------------------- */
+
+.anyu-v2 .chip {
+  display: inline-flex; align-items: center;
+  padding: 7px 13px; min-height: 34px;
+  background: var(--anyu-card);
+  color: var(--anyu-ink);
+  border: var(--anyu-border-base) solid var(--anyu-ink);
+  border-radius: var(--anyu-radius-md);
+  font: 500 var(--anyu-type-caption-size)/1 var(--anyu-font-sans);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;                                /* ★ no always-on shadow */
+  transition: box-shadow var(--anyu-motion-fast),
+              transform  var(--anyu-motion-fast),
+              background var(--anyu-motion-fast);
+}
+.anyu-v2 .chip:hover:not([aria-pressed="true"]) {
+  box-shadow: 2px 2px 0 var(--anyu-ink);
+  transform: translate(-1px, -1px);
+}
+.anyu-v2 .chip[aria-pressed="true"],
+.anyu-v2 .chip.is-active {
+  background: var(--anyu-ink);
+  color: var(--anyu-ink-onDark);
+  box-shadow: 3px 3px 0 var(--anyu-accent2);
+}
+
+/* ----------------------------------------------------------
+ * signal row — v2: numbered Fraunces prefix, single-direction stripe bar
+ * ---------------------------------------------------------- */
+
+.anyu-v2 .signal {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto auto auto;
+  column-gap: 14px;
+  row-gap: 6px;
+  align-items: baseline;
+  margin-bottom: 18px;
+}
+.anyu-v2 .signal-num {
+  grid-column: 1; grid-row: 1 / span 3;
+  font: italic 700 26px/1 var(--anyu-font-latin);
+  color: var(--anyu-accent);
+  align-self: start;
+  margin-top: 2px;
+}
+.anyu-v2 .signal-label {
+  grid-column: 2; grid-row: 1;
+  font: 500 var(--anyu-type-body-size)/1.3 var(--anyu-font-sans);
+  color: var(--anyu-ink);
+}
+.anyu-v2 .signal-value {
+  grid-column: 3; grid-row: 1;
+  display: inline-flex; align-items: baseline; gap: 2px;
+  color: var(--anyu-accent2);
+}
+.anyu-v2 .signal-value .num {
+  font: italic 700 var(--anyu-type-num-sm-size)/1 var(--anyu-font-latin);
+}
+.anyu-v2 .signal-value .deg {
+  font: 700 9px/1 var(--anyu-font-mono);          /* ★ v2: mono ° not Fraunces ° */
+  transform: translateY(-7px);
+}
+.anyu-v2 .signal-bar {
+  grid-column: 2 / span 2; grid-row: 2;
+  height: 7px;
+  border: var(--anyu-border-base) solid var(--anyu-ink);
+  background: var(--anyu-bg);
+  overflow: hidden;
+}
+.anyu-v2 .signal-bar > i {
+  display: block; height: 100%;
+  background: var(--anyu-stripe-signal);
+  border-right: var(--anyu-border-base) solid var(--anyu-ink);
+  transition: width var(--anyu-motion-bar) cubic-bezier(.2,.7,.3,1);
+}
+.anyu-v2 .signal-bar > i.is-full { border-right: none; }
+.anyu-v2 .signal-hint {
+  grid-column: 2 / span 2; grid-row: 3;
+  font: italic 400 var(--anyu-type-caption-size)/1.55 var(--anyu-font-serif);
+  color: var(--anyu-dim);
+}
+
+/* ----------------------------------------------------------
+ * ornament rule — section divider
+ * ---------------------------------------------------------- */
+
+.anyu-v2 .ornament-rule {
+  display: flex; align-items: center; gap: 12px;
+  margin: 28px 0 14px;
+}
+.anyu-v2 .ornament-rule .or-label {
+  font: 700 10px/1 var(--anyu-font-mono);
+  letter-spacing: var(--anyu-track-mono);
+  color: var(--anyu-accent);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.anyu-v2 .ornament-rule .or-line {
+  flex: 1; height: var(--anyu-border-base);
+  background: var(--anyu-ink);
+}
+.anyu-v2 .ornament-rule .or-mark {
+  font-size: 14px; color: var(--anyu-accent2);
+  flex: 0 0 auto;
+}
+.anyu-v2 .ornament-rule .or-zh {
+  font: 400 11.5px/1 var(--anyu-font-serif);
+  color: var(--anyu-dim);
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------
+ * page scaffolding
+ * ---------------------------------------------------------- */
+
+.anyu-v2 .page {
+  position: relative;
+  background: var(--anyu-bg);
+  overflow: hidden;
+  isolation: isolate;
+}
+.anyu-v2 .page-grain {
+  position: absolute; inset: 0;
+  background-image: var(--anyu-grain);
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+}
+.anyu-v2 .page > *:not(.page-grain):not(.bleed) {
+  position: relative;
+  z-index: 2;
+}
+.anyu-v2 .bleed {
+  position: absolute;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 0;
+}

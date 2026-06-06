@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-Hant" data-design-system="v2" data-module="ai-temperature" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>暗語 ANYU · Theme Architecture + Module 01 Riso 統一</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..900,0..100;1,9..144,400..900,0..100&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="anyu-tokens-v2.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+</style>
+</head>
+<body>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ui-v2-atoms.jsx"></script>
+<script type="text/babel" src="pay-shell-atoms.jsx"></script>
+<script type="text/babel" src="riso-screens.jsx"></script>
+<script type="text/babel" src="checkout-v2.jsx"></script>
+<script type="text/babel" src="core-shell-screens.jsx"></script>
+<script type="text/babel" src="module02-radar.jsx"></script>
+<script type="text/babel" src="diagrams.jsx"></script>
+
+<div id="root"></div>
+
+<template id="__bundler_thumbnail" data-bg-color="#faf6ee">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#faf6ee"/>
+    <rect x="250" y="250" width="300" height="300" rx="8" fill="#fff" stroke="#1a1626" stroke-width="6"/>
+    <circle cx="400" cy="380" r="58" fill="#5b3aa3" stroke="#1a1626" stroke-width="6"/>
+    <rect x="300" y="470" width="200" height="18" fill="#1a1626"/>
+    <rect x="650" y="250" width="300" height="300" rx="8" fill="#fff" stroke="#1a1626" stroke-width="6"/>
+    <circle cx="800" cy="380" r="58" fill="none" stroke="#2b5e86" stroke-width="6"/>
+    <line x1="800" y1="380" x2="800" y2="328" stroke="#2b5e86" stroke-width="6"/>
+    <rect x="700" y="470" width="200" height="18" fill="#1a1626"/>
+  </svg>
+</template>
+
+<script type="text/babel">
+const { DesignCanvas, DCSection, DCArtboard, DCPostIt } = window;
+
+// helpers return DCArtboard ELEMENTS (not wrapper components) so DCSection's
+// type check (c.type === DCArtboard) still recognizes them as direct children.
+function phone(id, label, node) {
+  return (
+    <DCArtboard id={id} label={label} width={390} height={844} key={id}
+      style={{ background: 'transparent', boxShadow: '0 1px 3px rgba(0,0,0,.08),0 14px 40px rgba(20,15,5,.14)' }}>
+      {node}
+    </DCArtboard>
+  );
+}
+function board(id, label, w, h, node) {
+  return (
+    <DCArtboard id={id} label={label} width={w + 26} height={h} key={id}
+      style={{ background: 'transparent', boxShadow: 'none', overflow: 'hidden' }}>
+      <div style={{ padding: '2px 0 0 2px' }}>{node}</div>
+    </DCArtboard>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="philosophy" title="01 · 理念 — 主題園區模型" subtitle="主站＝統一園區入口；每個模組＝沉浸式主題園區。一旦進入，整段旅程都待在那個世界。">
+        {board('mental', 'Theme Park · 心智模型', 1080, 720, <window.MentalModel />)}
+      </DCSection>
+
+      <DCSection id="routes" title="02 · 路由分類" subtitle="把每一條 ANYU 路由歸進 A 主站殼 / B 模組旅程 / C 外部供應商。">
+        {board('routeclasses', 'Route / Surface Classification', 1180, 690, <window.RouteClasses />)}
+      </DCSection>
+
+      <DCSection id="arch" title="03 · 四層 Theme 架構" subtitle="Core Shell → Module Shell → Module Theme Pack → Shared Flow Templates。越外層越穩定，越內層越可換。">
+        {board('layers', 'Theme Architecture · 四層', 1080, 660, <window.ArchLayers />)}
+      </DCSection>
+
+      <DCSection id="riso" title="04 · Module 01 — Riso 統一流程 ★" subtitle="優先展示：checkout-start、ReturnURL 等待、報告交付、/r/ 連結返回、LINE 綁定、Email 保存、過期，全部待在同一個 Riso 世界。藍新前後不斷裂。">
+        {phone('r-checkout', '① checkout-start', <window.RisoCheckoutStart />)}
+        {phone('r-waiting', '② ReturnURL 等待', <window.RisoReturnWaiting />)}
+        {phone('r-paid', '③ paid result · 報告交付', <window.RisoPaidResult />)}
+        {phone('r-return', '④ /r/ 連結返回', <window.RisoAccessReturn />)}
+        {phone('r-line', '⑤ LINE 綁定', <window.RisoLineBind />)}
+        {phone('r-email', '⑥ Email 連結保存', <window.RisoEmailSave />)}
+        {phone('r-expired', '⑦ 連結過期（themeable）', <window.RisoExpiredLink />)}
+      </DCSection>
+
+      <DCSection id="checkout-v2" title="04✦ · Checkout-start v2 — 強制保存查看連結" subtitle="產品流程修正：付款前必須先完成「保存專屬查看連結」才解鎖付款。Desktop 只用 Email；Mobile 以 LINE 為主、Email 為 fallback。天數 / 文案以 product source-of-truth 為準。">
+        {board('co-desktop', 'Desktop · Email-only 保存門檻（未保存 · 付款鎖住）', 1000, 700, <window.DesktopCheckout />)}
+        {phone('co-mobile', 'Mobile · LINE 在上 / Email fallback', <window.MobileCheckout />)}
+        {board('co-gate', 'Saved → Unlocked 對照', 720, 380, <window.SavedUnlockedCompare />)}
+      </DCSection>
+
+      <DCSection id="templates" title="05 · 共用流程模板" subtitle="七個 Shared Flow Templates：結構共用、主題上色、信任 / 無障礙不動。">
+        {board('sharedtpl', 'Shared Flow Templates', 1180, 600, <window.SharedTemplates />)}
+      </DCSection>
+
+      <DCSection id="core" title="06 · Core Shell — 主站（中性 editorial）" subtitle="共用暗語 DNA（奶油紙、襯線、wordmark），但用 hairline + 留白 + 安靜，讓模組 accent 去發色。">
+        {phone('c-home', '首頁 Homepage', <window.CoreHomepage />)}
+        {phone('c-gallery', '模組總覽 Gallery', <window.CoreModuleGallery />)}
+        {phone('c-legal', '隱私 / 支援 Legal', <window.CoreLegal />)}
+      </DCSection>
+
+      <DCSection id="module02" title="07 · Module 02 — 雷達主題延展" subtitle="同一段殼，換成鋼藍 / 訊號綠 + 雷達掃描 motif。最左是 Module 01 對照：同模板、不同皮。transition 不是 rupture。">
+        {phone('m2-ref', '對照 · Module 01 checkout', <window.RisoCheckoutStart />)}
+        {phone('m2-checkout', 'Module 02 checkout（同模板）', <window.Module02Checkout />)}
+        {phone('m2-waiting', 'Module 02 等待（掃描語言）', <window.Module02Waiting />)}
+        {phone('m2-result', 'Module 02 報告交付', <window.Module02Result />)}
+      </DCSection>
+
+      <DCSection id="tokens" title="08 · Design Tokens" subtitle="Core tokens 跨模組穩定；Module tokens 換膚。">
+        {board('tokensys', 'Core vs Module tokens', 920, 560, <window.TokenSystem />)}
+      </DCSection>
+
+      <DCSection id="directions" title="09 · 三個方向比較" subtitle="A 強模組沉浸 / B Core Shell 主導 / C Hybrid Theme Park（推薦）。">
+        {board('dirs', 'Direction A / B / C', 1180, 470, <window.Directions />)}
+      </DCSection>
+
+      <DCSection id="final" title="10 · 最終建議與交付" subtitle="採用 Hybrid Theme Park，並給出實作順序與驗收標準。">
+        {board('reco', 'Recommended Direction', 1080, 520, <window.Recommendation />)}
+        {board('handoff', 'Handoff & Acceptance', 1180, 690, <window.HandoffAcceptance />)}
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>
