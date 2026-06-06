@@ -10878,10 +10878,10 @@ Unresolved questions:
 - `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
 - `cd apps/web && corepack pnpm run qa:module01:ui`: pass after sandbox-escalated browser rerun.
 - `cd apps/web && corepack pnpm run qa:module01:local`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:staging`: exit 0; required staging checks passed on pushed commit, with suite summary `partial` only because optional Admin API/CLI lookup was skipped without explicit `ADMIN_API_TOKEN`.
 
 ### Unresolved Questions
 
-- `qa:module01:staging` is pending after push because deployed client/link behavior changed.
 - `qa:module01:production-preflight` was intentionally skipped because production/env/preflight behavior did not change.
 - No production runtime, payment, Email, LINE, Vercel env, or DB mutation occurred.
 - Next mainline task after staging verification: Production Runtime Window + Vercel Alias Guard v0.

@@ -7,10 +7,10 @@ Date: 2026-06-07
 - Model used: GPT-5 Codex
 - Reasoning effort used: high
 - taskStartedAt: `2026-06-06T16:52:16Z`
-- taskCompletedAt: `2026-06-06T23:39:29Z`
-- totalWallClockDuration: about 6 hours 47 minutes
+- taskCompletedAt: `2026-06-06T23:45:04Z`
+- totalWallClockDuration: about 6 hours 53 minutes
 - humanWaitDuration: about 0 minutes
-- netCodexWorkDuration: about 6 hours 47 minutes
+- netCodexWorkDuration: about 6 hours 53 minutes
 
 ## Scope
 
@@ -145,10 +145,7 @@ Run:
 | `cd apps/web && corepack pnpm run qa:module01:mock-flow` | pass, 15 files / 125 tests |
 | `cd apps/web && corepack pnpm run qa:module01:ui` | pass after sandbox-escalated browser rerun |
 | `cd apps/web && corepack pnpm run qa:module01:local` | pass |
-
-Pending after push:
-
-- `qa:module01:staging`, because deployed client/link behavior changed and should be verified after Preview(staging) serves the fix.
+| `cd apps/web && corepack pnpm run qa:module01:staging` | exit 0; required staging checks pass on pushed commit, suite summary `partial` only because optional Admin API/CLI lookup was skipped without explicit `ADMIN_API_TOKEN` |
 
 Skipped:
 
@@ -182,12 +179,24 @@ If staging or the next production runtime window still fails LINE bind, the next
 
 Theme Architecture remains archived and preserved. This task does not implement theme UI and does not alter the Hybrid Theme Park / Module 01 Riso-only future track.
 
+## Staging Verification
+
+Preview(staging) served the pushed fix during `qa:module01:staging`:
+
+- staging health observed pushed commit `cfd4658`
+- staging env mirror check passed
+- access-link smoke passed
+- no-card checkout/result path passed
+- production fail-closed read-only checks passed
+- no real Email or LINE channel sends occurred
+
+The staging suite summary was `partial` only because optional Admin API and Admin CLI checks were skipped without an explicit shell `ADMIN_API_TOKEN`. This was non-blocking under the current suite policy and did not affect the deployed LINE redirect-state verification.
+
 ## Remaining Blockers
 
-- Preview(staging) must serve this commit and pass `qa:module01:staging` before returning to a production runtime window.
-- Production runtime window and alias guard remains the next mainline step after staging verification.
+- No code-level blocker remains from this task.
+- Production Runtime Window + Vercel Alias Guard remains the next mainline step before any production smoke retry.
 
 ## Final Status
 
-LINE Production Bind Root-Cause Narrowing + Fix v0 is code-complete locally. The fix targets the production LINE login redirect failure by removing the query-state collision and making LIFF login redirect state deterministic.
-
+LINE Production Bind Root-Cause Narrowing + Fix v0 is complete. The fix targets the production LINE login redirect failure by removing the query-state collision and making LIFF login redirect state deterministic, with local/mock/UI/staging validation completed.
