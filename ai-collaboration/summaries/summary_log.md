@@ -10358,3 +10358,26 @@ Unresolved questions:
 - Reconcile `apps/web/.env.production` with critical production mirror keys, without printing or committing values.
 - Rerun `qa:module01:production-preflight` and require `pass_ready_for_controlled_smoke` before production runtime enablement.
 - Decide later whether to add an Admin-authenticated runtime config-shape endpoint or Vercel alias inspection helper.
+
+## 2026-06-06 Production Env Mirror Reconciliation v0
+
+### Completed Changes
+
+- saved the Production Env Mirror Reconciliation v0 handoff
+- confirmed `apps/web/.env.production` is ignored by git
+- pulled Vercel Production env into a private temp file and inspected key names only
+- added missing critical key names from the private pull into ignored `apps/web/.env.production`
+- reran hardened production preflight
+- documented that the mirror is still blocked because protected values are empty/unusable by local mirror shape checks
+
+### Learnings
+
+- Vercel Production has the required host env key names for the payment flow, but the safe pull path did not recover usable values for protected/encrypted secrets.
+- Hardened production preflight now blocks with `blocked_empty_local_mirror_secret`, which is the correct safe outcome.
+- Local and staging Module 01 gates still pass; production remains frozen/fail-closed.
+
+### Unresolved Questions
+
+- Recover exact approved production values for the blocked protected keys or explicitly approve regeneration only for keys safe to regenerate.
+- Do not resume Controlled Production Payment Smoke v1 until `qa:module01:production-preflight` returns `pass_ready_for_controlled_smoke`.
+- Theme Architecture implementation remains deferred and preserved.
