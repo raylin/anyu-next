@@ -10750,6 +10750,30 @@ Unresolved questions:
 - Add Vercel alias target inspection later to close the remaining canonical deploy/source guard gap.
 - Theme Architecture remains archived and preserved; runtime theme work remains deferred behind production-gate foundation.
 
+## 2026-06-07 Module 01 Fixture + Smoke Prep Foundation v0
+
+### Completed Changes
+
+- saved the Module 01 Fixture + Smoke Prep Foundation v0 handoff
+- created shared Module 01 fixtures under `apps/web/src/tests/fixtures/module01/`
+- added `qa:module01:smoke-fixture` to emit sanitized `.qa` request/summary artifacts before any controlled smoke runtime window
+- migrated no-card, fake-paid, access-link, and NewebPay sandbox QA helpers to use the shared analyze request fixture
+- updated mock-flow summary to record the fixture name/source
+- updated production gate and QA validation policies to require tracked fixture prep before production runtime enablement
+
+### Learnings
+
+- The active high-risk QA scripts had four separate copies of Module 01 analyze text/context.
+- The canonical fixture now passes current analyze validation, visible-length rules, and allowed context chips.
+- Smoke fixture output prints metadata only; the ignored `.qa` request artifact contains only generic fictional fixture content.
+- Local validation passed: targeted fixture/helper tests, lint, full tests, build, mock-flow, UI, and `qa:module01:local`.
+
+### Unresolved Questions
+
+- `qa:module01:staging` was intentionally skipped because no deployed behavior changed.
+- `qa:module01:production-preflight` was intentionally skipped because no production/env/preflight behavior changed.
+- Next mainline task remains LINE / LIFF Bind Diagnostic Harness v0.
+
 ## 2026-06-06 Codex Approval Policy Deprecation Warning Fix v0
 
 ### Completed Changes

@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { loadModule01ValidAnalyzeFixture } from "./lib/module01-smoke-fixture.mjs";
 
 const MODULE = "ai-temperature";
 const OUTPUT_DIR = ".qa";
@@ -100,6 +101,7 @@ const TOKEN_LIKE_PATTERNS = [
 
 function buildMockFlowSummary(input) {
   const status = input.exitStatus === 0 ? "pass" : "blocked";
+  const fixture = loadModule01ValidAnalyzeFixture();
   const scenarios = Object.fromEntries(
     SCENARIOS.map((scenario) => [
       scenario.id,
@@ -121,6 +123,8 @@ function buildMockFlowSummary(input) {
     command: "qa:module01:mock-flow",
     status,
     generatedAt: input.generatedAt ?? new Date().toISOString(),
+    fixtureName: fixture.fixtureName,
+    fixtureSource: "src/tests/fixtures/module01/valid-analyze-request.json",
     scenarios,
     checks: Object.fromEntries(SCENARIOS.map((scenario) => [scenario.id, status])),
     targetedTests: TARGETED_TESTS,

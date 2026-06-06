@@ -40,6 +40,8 @@ describe("Module 01 mock-flow QA helper", () => {
       environment: "local",
       command: "qa:module01:mock-flow",
       status: "pass",
+      fixtureName: "module01_valid_smoke_analyze_request_v0",
+      fixtureSource: "src/tests/fixtures/module01/valid-analyze-request.json",
       sendsRealEmail: false,
       sendsRealLine: false,
       mutatesData: false,

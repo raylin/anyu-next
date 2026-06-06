@@ -88,6 +88,18 @@ cd apps/web && corepack pnpm run qa:module01:wait-result -- --env staging --resu
 
 Do not use heredoc scripts, random temp-file handoffs, or repeated full-suite polling.
 
+## Smoke Fixtures
+
+Production and staging smoke prep must use tracked Module 01 fixtures instead of invented request bodies.
+
+Use:
+
+```bash
+cd apps/web && corepack pnpm run qa:module01:smoke-fixture
+```
+
+The command writes sanitized `.qa` artifacts for the canonical valid analyze request. If this fixture is invalid or unavailable, stop before any runtime enablement and classify the issue as `production_smoke_fixture_unprepared`.
+
 ## Real Provider Checks
 
 Real Email, LINE, and credit-card payment require explicit owner approval.

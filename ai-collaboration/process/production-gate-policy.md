@@ -25,6 +25,14 @@ cd apps/web && corepack pnpm run qa:module01:production-preflight
 
 All must pass or be explicitly owner-accepted partials.
 
+Production smoke must also prepare a tracked Module 01 fixture before runtime enablement:
+
+```bash
+cd apps/web && corepack pnpm run qa:module01:smoke-fixture
+```
+
+Use the generated `.qa/module01-valid-analyze-request.json` request or the shared fixture helpers as the smoke input source. Do not dynamically invent analyze request bodies during a production runtime window. If the fixture command or fixture validation fails, stop and classify the first failure as `production_smoke_fixture_unprepared`.
+
 Codex must also assert:
 
 - environment: production

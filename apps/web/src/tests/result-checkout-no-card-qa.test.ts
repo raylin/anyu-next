@@ -24,6 +24,17 @@ describe("result checkout no-card QA helpers", () => {
     expect(source).not.toContain("for (let attempt = 1; attempt <= 24; attempt += 1)");
   });
 
+  it("uses the shared Module 01 smoke fixture instead of embedded analyze input", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/result-checkout-no-card-qa.mjs"),
+      "utf8",
+    );
+
+    expect(source).toContain('import { createModule01AnalyzeRequest }');
+    expect(source).toContain("createModule01AnalyzeRequest({");
+    expect(source).not.toContain("const SYNTHETIC_INPUT");
+  });
+
   it("rejects production targets", () => {
     expect(assertSafeQaBaseUrl("https://anyu.tw")).toEqual({
       ok: false,

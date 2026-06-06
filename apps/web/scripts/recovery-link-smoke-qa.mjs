@@ -3,6 +3,7 @@
 import crypto from "node:crypto";
 import { neon } from "@neondatabase/serverless";
 import { loadLocalEnv } from "./lib/load-local-env.mjs";
+import { createModule01AnalyzeRequest } from "./lib/module01-smoke-fixture.mjs";
 import {
   assertSafeQaBaseUrl,
   extractCheckoutHref,
@@ -35,8 +36,6 @@ const ROUTE_BUNDLE_VERSION = "payment-foundation-2026-05-29";
 const PAYMENT_STATUS_READY = new Set(["completed"]);
 const PAYMENT_STATUS_WAITING = new Set(["pending", "processing"]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
-const SYNTHETIC_INPUT =
-  "這是一段無卡 QA 用的曖昧情境：對方最近回覆變慢，但仍會主動分享生活片段，也會看限動。我想確認自己不要太急，也想用有界線但不冷的方式回覆。這段內容只用於驗證結果頁到結帳橋接頁與付費交付流程。";
 
 const baseUrl = normalizeBaseUrl(process.env.QA_RECOVERY_LINK_BASE_URL, DEFAULT_BASE_URL);
 const operatorSecret = process.env.OPERATOR_TEST_SECRET?.trim() ?? "";
@@ -135,23 +134,17 @@ async function healthPreflight() {
 }
 
 async function createSourceResult() {
+  const analyzeRequest = createModule01AnalyzeRequest({
+    sessionPrefix: "recovery-link-smoke",
+    suffix: inputSuffix,
+  });
   const result = await requestJson(`${baseUrl}/api/modules/${MODULE_SLUG}/analyze`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       "x-operator-test-secret": operatorSecret,
     },
-    body: JSON.stringify({
-      text: `${SYNTHETIC_INPUT}\n\n${inputSuffix}`,
-      situation: "回訊變慢但看限動",
-      anonymousSessionId: `recovery-link-smoke-${crypto.randomUUID()}`,
-      userContext: {
-        relationshipStage: "曖昧中",
-        userGoal: "我該怎麼回",
-        primaryPain: "回覆變慢",
-        replyTone: "有界線但不冷",
-      },
-    }),
+    body: JSON.stringify(analyzeRequest),
   });
   const resultId = result.json?.resultId ?? null;
   const pass = result.status === 200 && result.json?.ok === true && isUuid(resultId);

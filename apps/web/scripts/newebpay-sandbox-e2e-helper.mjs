@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import { loadLocalEnv } from "./lib/load-local-env.mjs";
+import { createModule01AnalyzeRequest } from "./lib/module01-smoke-fixture.mjs";
 
 loadLocalEnv();
 
@@ -15,8 +16,6 @@ const TMP_DIR = "/private/tmp/anyu-newebpay-smoke";
 const STATE_FILE_NAME = "latest-sandbox-e2e-state.json";
 const PAYMENT_STATUSES_READY = new Set(["paid_ready"]);
 const PAYMENT_STATUSES_WAITING = new Set(["waiting_for_payment", "paid_processing"]);
-const SANDBOX_INPUT =
-  "這是一段沙盒測試用的曖昧情境：對方最近回訊息變慢，但仍會主動分享生活片段，也會看限動。測試目標是確認付款沙盒流程，不代表真實使用者內容。";
 
 const operatorSecret = process.env.OPERATOR_TEST_SECRET?.trim() ?? "";
 const baseUrl = (process.env.QA_NEWEBPAY_BASE_URL?.trim() || DEFAULT_BASE_URL).replace(/\/$/u, "");
@@ -104,20 +103,14 @@ async function healthPreflight() {
 }
 
 async function createSourceResult() {
+  const analyzeRequest = createModule01AnalyzeRequest({
+    sessionPrefix: "secret-safe-newebpay-sandbox",
+    suffix: qaSuffix,
+  });
   const result = await requestJson(`${baseUrl}/api/modules/${MODULE_SLUG}/analyze`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      text: `${SANDBOX_INPUT}\n\n${qaSuffix}`,
-      situation: "ambiguous_temperature",
-      anonymousSessionId: `secret-safe-newebpay-sandbox-${crypto.randomUUID()}`,
-      userContext: {
-        relationshipStage: "曖昧中",
-        userGoal: "我該怎麼回",
-        primaryPain: "沙盒付款流程驗證",
-        replyTone: "有界線但不冷",
-      },
-    }),
+    body: JSON.stringify(analyzeRequest),
   });
   const resultId = result.json?.resultId ?? null;
   const pass = result.status === 200 && result.json?.ok === true && typeof resultId === "string";

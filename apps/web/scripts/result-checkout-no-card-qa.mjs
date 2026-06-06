@@ -14,6 +14,7 @@ import {
   summarizeResultPageHtml,
 } from "./lib/result-checkout-no-card-qa.mjs";
 import { waitForCondition } from "./lib/module01-wait.mjs";
+import { createModule01AnalyzeRequest } from "./lib/module01-smoke-fixture.mjs";
 
 if (process.env.QA_NO_CARD_DISABLE_LOCAL_ENV !== "1") {
   loadLocalEnv();
@@ -27,8 +28,6 @@ const OUTPUT_DIR = ".qa";
 const STAGING_ARTIFACT_FILE = "module01-staging-artifact.json";
 const PAYMENT_STATUS_READY = new Set(["completed"]);
 const PAYMENT_STATUS_WAITING = new Set(["pending", "processing"]);
-const SYNTHETIC_INPUT =
-  "這是一段無卡 QA 用的曖昧情境：對方最近回覆變慢，但仍會主動分享生活片段，也會看限動。我想確認自己不要太急，也想用有界線但不冷的方式回覆。這段內容只用於驗證結果頁到結帳橋接頁與付費交付流程。";
 
 const baseUrl = normalizeBaseUrl(process.env.QA_NO_CARD_BASE_URL, DEFAULT_BASE_URL);
 const processorMode = process.env.QA_NO_CARD_PROCESSOR_MODE?.trim().toLowerCase() ?? "queue";
@@ -106,23 +105,17 @@ async function healthPreflight() {
 }
 
 async function createSourceResult() {
+  const analyzeRequest = createModule01AnalyzeRequest({
+    sessionPrefix: "no-card-result-checkout",
+    suffix: inputSuffix,
+  });
   const result = await requestJson(`${baseUrl}/api/modules/${MODULE_SLUG}/analyze`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       "x-operator-test-secret": operatorSecret,
     },
-    body: JSON.stringify({
-      text: `${SYNTHETIC_INPUT}\n\n${inputSuffix}`,
-      situation: "回訊變慢但看限動",
-      anonymousSessionId: `no-card-result-checkout-${crypto.randomUUID()}`,
-      userContext: {
-        relationshipStage: "曖昧中",
-        userGoal: "我該怎麼回",
-        primaryPain: "回覆變慢",
-        replyTone: "有界線但不冷",
-      },
-    }),
+    body: JSON.stringify(analyzeRequest),
   });
   const resultId = result.json?.resultId ?? null;
   const pass = result.status === 200 && result.json?.ok === true && typeof resultId === "string";

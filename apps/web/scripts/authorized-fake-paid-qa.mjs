@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { loadLocalEnv } from "./lib/load-local-env.mjs";
+import { createModule01AnalyzeRequest } from "./lib/module01-smoke-fixture.mjs";
 
 loadLocalEnv();
 
@@ -9,8 +10,6 @@ const MODULE_SLUG = "ambiguous-temperature";
 const ROUTE_BUNDLE_VERSION = "payment-foundation-2026-05-29";
 const INVALID_OPERATOR_SECRET = "invalid-test-secret";
 const SYNTHETIC_PA_TOKEN = ["pa", "invalid_synthetic_token_for_qa"].join("_");
-const SYNTHETIC_INPUT =
-  "我們上週末見面時聊得很自然，他也說下次可以再約。那天他會主動問我工作近況，還記得我之前提過的小事，所以我本來覺得關係有在靠近。可是這幾天訊息明顯變慢，常常隔半天才回，有時候只回一兩句，沒有像之前那樣延伸話題。奇怪的是，他還是會看我的限動，也偶爾傳一些生活小事給我，例如午餐或路上看到的東西。我不知道他是真的忙、需要空間，還是其實熱度在變低。我想回得有界線但不要太冷，也不想一直追問讓自己看起來很焦慮。";
 
 const operatorSecret = process.env.OPERATOR_TEST_SECRET?.trim() ?? "";
 const internalJobSecret = process.env.INTERNAL_JOB_SECRET?.trim() ?? "";
@@ -160,20 +159,14 @@ async function invalidPaidAccessRegression() {
 }
 
 async function createSourceResult() {
+  const analyzeRequest = createModule01AnalyzeRequest({
+    sessionPrefix: "secret-safe-fake-paid",
+    suffix: inputSuffix,
+  });
   const result = await requestJson(`${STAGING_BASE_URL}/api/modules/${MODULE_SLUG}/analyze`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      text: inputSuffix ? `${SYNTHETIC_INPUT}\n\n${inputSuffix}` : SYNTHETIC_INPUT,
-      situation: "ambiguous_temperature",
-      anonymousSessionId: `secret-safe-fake-paid-${crypto.randomUUID()}`,
-      userContext: {
-        relationshipStage: "曖昧中",
-        userGoal: "我該怎麼回",
-        primaryPain: "回覆變慢",
-        replyTone: "有界線但不冷",
-      },
-    }),
+    body: JSON.stringify(analyzeRequest),
   });
   const resultId = result.json?.resultId ?? null;
   const pass = result.status === 200 && result.json?.ok === true && typeof resultId === "string";
