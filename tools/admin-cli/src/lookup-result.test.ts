@@ -42,6 +42,7 @@ function safeResponse(overrides: Record<string, unknown> = {}) {
     accessLinks: {
       email: {
         contactSaved: true,
+        deliverable: true,
         sent: true,
         active: true,
         used: false,
@@ -55,6 +56,7 @@ function safeResponse(overrides: Record<string, unknown> = {}) {
       line: {
         contactSaved: true,
         recipientSecretExists: true,
+        deliverable: true,
         sent: true,
         active: true,
         used: false,
@@ -185,6 +187,50 @@ describe("admin CLI lookup-result", () => {
     expect(pretty).not.toContain("provider-message-id");
     expect(pretty).not.toContain("ANYU-PRIVATE-ORDER");
     expect(pretty).not.toContain("@");
+  });
+
+  it("accepts partial LINE bind summaries and displays not-deliverable state", () => {
+    const response = validateAdminLookupResponse(
+      safeResponse({
+        accessLinks: {
+          email: {
+            contactSaved: false,
+            deliverable: false,
+            sent: false,
+            active: false,
+            used: false,
+            revoked: false,
+            expired: false,
+            sendAttemptCount: 0,
+            lastProviderStatus: null,
+            lastFailureCategory: null,
+            providerMessageIdPresent: false,
+          },
+          line: {
+            contactSaved: true,
+            recipientSecretExists: false,
+            deliverable: false,
+            sent: false,
+            active: false,
+            used: false,
+            revoked: false,
+            expired: false,
+            sendAttemptCount: 0,
+            lastProviderStatus: null,
+            lastFailureCategory: null,
+            providerMessageIdPresent: false,
+          },
+        },
+        diagnosis: ["paid_result_ready", "line_bind_incomplete"],
+        recommendedActions: ["retry_line_bind_or_use_email"],
+      }),
+    );
+    const pretty = formatPretty("production", response);
+
+    expect(pretty).toContain("LINE: saved, not-deliverable");
+    expect(pretty).toContain("line_bind_incomplete");
+    expect(pretty).toContain("retry_line_bind_or_use_email");
+    expect(pretty).not.toContain("line-user");
   });
 
   it("prints sanitized JSON output", async () => {

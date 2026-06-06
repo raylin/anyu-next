@@ -6,12 +6,14 @@ const {
   mockIsDbConfigured,
   mockCreateNewebPayCheckout,
   mockGetPaymentRecoveryContactsByResultId,
+  mockGetActiveLineRecoveryRecipientSecretByContactId,
   mockHeaders,
 } = vi.hoisted(() => ({
   mockCanStartNewebPayCheckoutFromResult: vi.fn(),
   mockIsDbConfigured: vi.fn(),
   mockCreateNewebPayCheckout: vi.fn(),
   mockGetPaymentRecoveryContactsByResultId: vi.fn(),
+  mockGetActiveLineRecoveryRecipientSecretByContactId: vi.fn(),
   mockHeaders: vi.fn(),
 }));
 
@@ -29,6 +31,11 @@ vi.mock("@/lib/payments/newebpay/checkout-service", () => ({
 
 vi.mock("@/lib/db/payment-recovery-contacts", () => ({
   getPaymentRecoveryContactsByResultId: mockGetPaymentRecoveryContactsByResultId,
+}));
+
+vi.mock("@/lib/db/payment-recovery-contact-secrets", () => ({
+  getActiveLineRecoveryRecipientSecretByContactId:
+    mockGetActiveLineRecoveryRecipientSecretByContactId,
 }));
 
 vi.mock("next/headers", () => ({
@@ -54,6 +61,7 @@ describe("NewebPay checkout-start page", () => {
     mockCanStartNewebPayCheckoutFromResult.mockReturnValue(true);
     mockIsDbConfigured.mockReturnValue(true);
     mockGetPaymentRecoveryContactsByResultId.mockResolvedValue([]);
+    mockGetActiveLineRecoveryRecipientSecretByContactId.mockResolvedValue(null);
     mockCreateNewebPayCheckout.mockResolvedValue({
       ok: true,
       paymentIntent: { id: "payment-1", status: "checkout_started" },
@@ -187,7 +195,8 @@ describe("NewebPay checkout-start page", () => {
       {
         id: "contact-1",
         contactType: "email",
-        status: "pending",
+        status: "verified",
+        transactionalConsentAt: new Date("2026-06-06T00:00:00.000Z"),
       },
     ]);
 
@@ -204,6 +213,62 @@ describe("NewebPay checkout-start page", () => {
     expect(html).toContain("繼續付款");
     expect(html).not.toContain("我了解尚未保存查看連結，仍要繼續付款");
     expect(html).not.toContain("owner@example.com");
+  });
+
+  it("does not unlock mobile payment for LINE contact-only state", async () => {
+    mockHeaders.mockResolvedValue(new Headers({ "user-agent": "Mozilla/5.0 iPhone Mobile" }));
+    mockGetPaymentRecoveryContactsByResultId.mockResolvedValue([
+      {
+        id: "line-contact-1",
+        contactType: "line",
+        status: "bound",
+        transactionalConsentAt: new Date("2026-06-06T00:00:00.000Z"),
+      },
+    ]);
+    mockGetActiveLineRecoveryRecipientSecretByContactId.mockResolvedValue(null);
+
+    const page = await CheckoutStartPage({
+      ...params,
+      searchParams: Promise.resolve({ lineRecovery: "line_saved" }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("LINE 保存沒有完成");
+    expect(html).toContain("重試 LINE");
+    expect(html).toContain("改用 Email 保存查看連結");
+    expect(html).toContain("請先完成 LINE 或 Email 查看連結保存，付款按鈕就會開啟");
+    expect(html).not.toContain("已保存到 LINE");
+    expect(html).not.toContain('action="https://ccore.newebpay.com/MPG/mpg_gateway"');
+    expect(html).not.toContain('name="TradeInfo"');
+  });
+
+  it("unlocks mobile payment for LINE contact with active recipient secret", async () => {
+    mockHeaders.mockResolvedValue(new Headers({ "user-agent": "Mozilla/5.0 iPhone Mobile" }));
+    mockGetPaymentRecoveryContactsByResultId.mockResolvedValue([
+      {
+        id: "line-contact-1",
+        contactType: "line",
+        status: "bound",
+        transactionalConsentAt: new Date("2026-06-06T00:00:00.000Z"),
+      },
+    ]);
+    mockGetActiveLineRecoveryRecipientSecretByContactId.mockResolvedValue({
+      recoveryContactId: "line-contact-1",
+      channel: "line",
+      purpose: "access_link_delivery",
+      status: "active",
+      encryptedRecipient: "encrypted",
+      recipientHash: "hash",
+    });
+
+    const page = await CheckoutStartPage(params);
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain("已保存到 LINE");
+    expect(html).toContain("已保存查看連結");
+    expect(html).toContain('action="https://ccore.newebpay.com/MPG/mpg_gateway"');
+    expect(html).toContain('name="TradeInfo"');
+    expect(html).not.toContain("LINE 保存沒有完成");
   });
 
   it("shows a safe email save error and keeps payment locked", async () => {

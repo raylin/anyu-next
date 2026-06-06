@@ -67,17 +67,24 @@ function recoveryContact(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function createDbMock(input?: { selectRows?: unknown[]; insertRows?: unknown[]; updateRows?: unknown[] }) {
+function createDbMock(input?: {
+  selectRows?: unknown[];
+  selectRowsQueue?: unknown[][];
+  insertRows?: unknown[];
+  updateRows?: unknown[];
+}) {
   const capture: {
     insertValues?: Record<string, unknown>;
     updateValues?: Record<string, unknown>;
   } = {};
+  const selectRowsQueue = [...(input?.selectRowsQueue ?? [])];
+  const nextSelectRows = () => selectRowsQueue.shift() ?? input?.selectRows ?? [];
   const selectChain = {
     from: vi.fn(() => selectChain),
     where: vi.fn(() => selectChain),
-    limit: vi.fn(async () => input?.selectRows ?? []),
+    limit: vi.fn(async () => nextSelectRows()),
     then: vi.fn((resolve, reject) =>
-      Promise.resolve(input?.selectRows ?? []).then(resolve, reject),
+      Promise.resolve(nextSelectRows()).then(resolve, reject),
     ),
   };
   const insertChain = {
@@ -544,32 +551,35 @@ describe("payment recovery contacts", () => {
       source: "completed_result",
     });
     const dbMock = createDbMock({
-      selectRows: [
-        eligible,
-        recoveryContact({ id: "email-contact" }),
-        recoveryContact({
-          id: "missing-line-hash",
-          contactType: "line",
-          contactEncrypted: null,
-          lineUserHash: null,
-          emailHash: null,
-        }),
-        recoveryContact({
-          id: "missing-consent",
-          contactType: "line",
-          contactEncrypted: null,
-          lineUserHash: "redacted-line-hash",
-          emailHash: null,
-          transactionalConsentAt: null,
-        }),
-        recoveryContact({
-          id: "revoked-line",
-          contactType: "line",
-          contactEncrypted: null,
-          lineUserHash: "redacted-line-hash",
-          emailHash: null,
-          status: "revoked",
-        }),
+      selectRowsQueue: [
+        [
+          eligible,
+          recoveryContact({ id: "email-contact" }),
+          recoveryContact({
+            id: "missing-line-hash",
+            contactType: "line",
+            contactEncrypted: null,
+            lineUserHash: null,
+            emailHash: null,
+          }),
+          recoveryContact({
+            id: "missing-consent",
+            contactType: "line",
+            contactEncrypted: null,
+            lineUserHash: "redacted-line-hash",
+            emailHash: null,
+            transactionalConsentAt: null,
+          }),
+          recoveryContact({
+            id: "revoked-line",
+            contactType: "line",
+            contactEncrypted: null,
+            lineUserHash: "redacted-line-hash",
+            emailHash: null,
+            status: "revoked",
+          }),
+        ],
+        [{ recoveryContactId: eligible.id }],
       ],
     });
     mockRequireDb.mockReturnValue(dbMock.db);
@@ -582,6 +592,29 @@ describe("payment recovery contacts", () => {
       }),
     ).resolves.toEqual([eligible]);
     expect(JSON.stringify(eligible)).not.toContain("line-user");
+  });
+
+  it("excludes LINE contacts without an active recipient secret from paid delivery eligibility", async () => {
+    const lineContact = recoveryContact({
+      id: "line-contact-no-secret",
+      contactType: "line",
+      contactEncrypted: null,
+      lineUserHash: "redacted-line-hash",
+      emailHash: null,
+      source: "checkout_start",
+    });
+    const dbMock = createDbMock({
+      selectRowsQueue: [[lineContact], []],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+
+    await expect(
+      getEligibleLineRecoveryContactsForCompletedPaidResult({
+        moduleSlug: "ambiguous-temperature",
+        analysisResultId: RESULT_ID,
+        entitlementId: ENTITLEMENT_ID,
+      }),
+    ).resolves.toEqual([]);
   });
 
   it("rejects raw paid access or checkout session bearer tokens as contact values", async () => {

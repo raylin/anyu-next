@@ -50,6 +50,7 @@ type AdminLookupResponse = {
 type AccessLinkChannelSummary = {
   contactSaved: boolean;
   recipientSecretExists?: boolean;
+  deliverable?: boolean;
   sent: boolean;
   active: boolean;
   used: boolean;
@@ -284,6 +285,10 @@ function validateAccessLinkChannel(value: unknown): AccessLinkChannelSummary {
     assertBoolean(value["recipientSecretExists"]);
   }
 
+  if (value["deliverable"] !== undefined) {
+    assertBoolean(value["deliverable"]);
+  }
+
   return value as AccessLinkChannelSummary;
 }
 
@@ -343,6 +348,7 @@ function formatChannel(summary: AccessLinkChannelSummary) {
 
   if (summary.contactSaved) states.push("saved");
   if (summary.recipientSecretExists) states.push("recipient-secret");
+  if (summary.deliverable === false && summary.contactSaved) states.push("not-deliverable");
   if (summary.sent) states.push("sent");
   if (summary.active) states.push("active");
   if (summary.used) states.push("used");

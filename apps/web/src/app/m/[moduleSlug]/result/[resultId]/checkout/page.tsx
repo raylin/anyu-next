@@ -9,6 +9,7 @@ import { Wordmark } from "@/components/anyu/Wordmark";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 import { isDbConfigured } from "@/lib/db/client";
+import { getActiveLineRecoveryRecipientSecretByContactId } from "@/lib/db/payment-recovery-contact-secrets";
 import { getPaymentRecoveryContactsByResultId } from "@/lib/db/payment-recovery-contacts";
 import { createLineRecoveryBindHref } from "@/lib/line/recovery-bind-link";
 import { getModuleBySlug } from "@/lib/modules/registry";
@@ -132,17 +133,48 @@ function CheckoutTrustBridge() {
 async function getExistingRecoveryState(resultId: string) {
   try {
     const contacts = await getPaymentRecoveryContactsByResultId(resultId);
-    const activeContacts = contacts.filter((contact) => contact.status !== "revoked");
+    const activeContacts = contacts.filter(
+      (contact) =>
+        contact.status !== "revoked" &&
+        contact.status !== "failed" &&
+        Boolean(contact.transactionalConsentAt),
+    );
+    const activeEmailContacts = activeContacts.filter((contact) => contact.contactType === "email");
+    const activeLineContacts = activeContacts.filter((contact) => contact.contactType === "line");
+    const lineSecretChecks = await Promise.all(
+      activeLineContacts.map(async (contact) => ({
+        contactId: contact.id,
+        secret: await getActiveLineRecoveryRecipientSecretByContactId(contact.id),
+      })),
+    );
+    const lineContactIdsWithActiveSecret = new Set(
+      lineSecretChecks
+        .filter(({ secret }) =>
+          Boolean(
+            secret &&
+              secret.channel === "line" &&
+              secret.status === "active" &&
+              secret.encryptedRecipient &&
+              secret.recipientHash,
+          ),
+        )
+        .map(({ contactId }) => contactId),
+    );
+    const deliverableLineContacts = activeLineContacts.filter((contact) =>
+      lineContactIdsWithActiveSecret.has(contact.id),
+    );
 
     return {
-      hasEmail: activeContacts.some((contact) => contact.contactType === "email"),
-      hasLine: activeContacts.some((contact) => contact.contactType === "line"),
-      hasAny: activeContacts.length > 0,
+      hasEmail: activeEmailContacts.length > 0,
+      hasLine: deliverableLineContacts.length > 0,
+      hasLineContactOnly: activeLineContacts.length > 0 && deliverableLineContacts.length === 0,
+      hasAny: activeEmailContacts.length > 0 || deliverableLineContacts.length > 0,
     };
   } catch {
     return {
       hasEmail: false,
       hasLine: false,
+      hasLineContactOnly: false,
       hasAny: false,
     };
   }
@@ -181,8 +213,8 @@ function RecoverySoftGate({
 }) {
   const emailSaved = recovery === "email_saved" || existingRecovery.hasEmail;
   const emailError = recovery === "email_error";
-  const lineSaved = lineRecovery === "line_saved" || existingRecovery.hasLine;
-  const lineError = lineRecovery === "line_error";
+  const lineSaved = existingRecovery.hasLine;
+  const lineError = lineRecovery === "line_error" || existingRecovery.hasLineContactOnly;
   const lineBind = createLineRecoveryBindHref({
     moduleSlug,
     resultId,
@@ -246,7 +278,7 @@ function RecoverySoftGate({
         </p>
         {lineError ? (
           <p className="anyu-recovery-error" role="status">
-            LINE 保存沒有完成。你可以重試 LINE，或改用 Email 保存查看連結。
+            LINE 保存沒有完成，這個 LINE 查看連結還不能用來接收付款後的查看連結。你可以重試 LINE，或改用 Email 保存查看連結。
           </p>
         ) : null}
       </div>
@@ -381,7 +413,6 @@ export default async function CheckoutStartPage({ params, searchParams }: Checko
   const existingRecovery = await getExistingRecoveryState(resultId);
   const recoverySaved =
     query?.recovery === "email_saved" ||
-    query?.lineRecovery === "line_saved" ||
     existingRecovery.hasAny;
   const requestHeaders = await headers();
   const deviceContext = detectCheckoutDeviceContext(requestHeaders.get("user-agent"));

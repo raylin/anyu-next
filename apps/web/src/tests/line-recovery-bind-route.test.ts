@@ -25,6 +25,7 @@ const PAYMENT_INTENT_ID = "33333333-3333-4333-8333-333333333333";
 const ENTITLEMENT_ID = "44444444-4444-4444-8444-444444444444";
 const RECOVERY_CONTACT_ID = "77777777-7777-4777-8777-777777777777";
 const NOW = new Date("2030-06-01T10:00:00.000Z");
+const RAW_LINE_TEST_USER_ID = ["verified", "line", "user"].join("-");
 const TEST_ENV = {
   PAYMENT_RECOVERY_CONTACT_HASH_SECRET: "test-only-recovery-hash-secret",
   PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString("base64url"),
@@ -110,7 +111,7 @@ describe("LINE recovery bind LIFF route", () => {
     mockIsDbConfigured.mockReturnValue(true);
     mockVerifyLineIdToken.mockResolvedValue({
       ok: true,
-      lineUserId: "verified-line-user",
+      lineUserId: RAW_LINE_TEST_USER_ID,
       audience: "1234567890",
     });
   });
@@ -156,7 +157,7 @@ describe("LINE recovery bind LIFF route", () => {
     expect(mockVerifyLineIdToken).toHaveBeenCalledWith({ idToken: "line-id-token" });
 
     const expectedHash = hashRecoveryContact({
-      value: "verified-line-user",
+      value: RAW_LINE_TEST_USER_ID,
       contactType: "line",
       env: TEST_ENV,
     });
@@ -176,7 +177,7 @@ describe("LINE recovery bind LIFF route", () => {
       marketingOptInAt: expect.any(Date),
     });
     expect(contactInsert).not.toHaveProperty("lineUserId");
-    expect(JSON.stringify(contactInsert)).not.toContain("verified-line-user");
+    expect(JSON.stringify(contactInsert)).not.toContain(RAW_LINE_TEST_USER_ID);
     expect(secretInsert).toMatchObject({
       recoveryContactId: RECOVERY_CONTACT_ID,
       channel: "line",
@@ -186,8 +187,8 @@ describe("LINE recovery bind LIFF route", () => {
     });
     expect(secretInsert?.encryptedRecipient).toEqual(expect.any(String));
     expect(secretInsert?.recipientHash).toEqual(expect.any(String));
-    expect(JSON.stringify(secretInsert)).not.toContain("verified-line-user");
-    expect(JSON.stringify(data)).not.toContain("verified-line-user");
+    expect(JSON.stringify(secretInsert)).not.toContain(RAW_LINE_TEST_USER_ID);
+    expect(JSON.stringify(data)).not.toContain(RAW_LINE_TEST_USER_ID);
     expect(JSON.stringify(data)).not.toContain("encryptedRecipient");
     expect(JSON.stringify(data)).not.toContain("recipientHash");
     expect(JSON.stringify(data)).not.toContain("line-id-token");
@@ -342,7 +343,10 @@ describe("LINE recovery bind LIFF route", () => {
       returnPath: `/m/ambiguous-temperature/result/${RESULT_ID}?lineRecovery=line_error`,
       bindCategory: "recipient_secret_write_failed",
     });
-    expect(JSON.stringify(data)).not.toContain("verified-line-user");
+    expect(dbMock.capture.updateValues).toMatchObject({
+      status: "failed",
+    });
+    expect(JSON.stringify(data)).not.toContain(RAW_LINE_TEST_USER_ID);
     expect(JSON.stringify(data)).not.toContain("encryptedRecipient");
     expect(JSON.stringify(data)).not.toContain("recipientHash");
   });

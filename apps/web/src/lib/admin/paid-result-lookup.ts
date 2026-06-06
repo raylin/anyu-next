@@ -37,6 +37,8 @@ type DiagnosisCategory =
   | "no_saved_contact"
   | "email_contact_saved"
   | "line_contact_saved"
+  | "line_bind_incomplete"
+  | "line_recipient_secret_missing"
   | "email_access_link_sent"
   | "line_access_link_sent"
   | "email_access_link_failed"
@@ -51,6 +53,7 @@ type RecommendedAction =
   | "support_review_required"
   | "refund_review_needed"
   | "retry_processor_if_safe"
+  | "retry_line_bind_or_use_email"
   | "no_action_needed";
 
 type LookupRows = {
@@ -153,6 +156,7 @@ export type AdminPaidResultLookupResponse = {
 export type AccessLinkChannelSummary = {
   contactSaved: boolean;
   recipientSecretExists?: boolean;
+  deliverable: boolean;
   sent: boolean;
   active: boolean;
   used: boolean;
@@ -209,6 +213,7 @@ function buildChannelSummary(input: {
   const failedLink = channelLinks.find((link) => link.status === "failed" || link.lastFailureCategory);
   const summary: AccessLinkChannelSummary = {
     contactSaved: contacts.length > 0,
+    deliverable: contacts.length > 0,
     sent,
     active,
     used,
@@ -231,6 +236,7 @@ function buildChannelSummary(input: {
         !secret.revokedAt &&
         contactIds.has(secret.recoveryContactId),
     );
+    summary.deliverable = contacts.length > 0 && summary.recipientSecretExists;
   }
 
   return summary;
@@ -312,6 +318,12 @@ function buildDiagnosisAndActions(input: {
     diagnosis.push("line_contact_saved");
   }
 
+  if (input.line.contactSaved && !input.line.recipientSecretExists) {
+    diagnosis.push("line_bind_incomplete");
+    diagnosis.push("line_recipient_secret_missing");
+    actions.push("retry_line_bind_or_use_email");
+  }
+
   if (input.email.sent) {
     diagnosis.push("email_access_link_sent");
     actions.push("ask_user_check_email_inbox");
@@ -323,7 +335,11 @@ function buildDiagnosisAndActions(input: {
   if (input.line.sent) {
     diagnosis.push("line_access_link_sent");
     actions.push("ask_user_check_line_message");
-  } else if (input.line.contactSaved && input.line.lastFailureCategory) {
+  } else if (
+    input.line.contactSaved &&
+    input.line.recipientSecretExists &&
+    input.line.lastFailureCategory
+  ) {
     diagnosis.push("line_access_link_failed");
     actions.push("support_review_required");
   }

@@ -158,6 +158,7 @@ describe("admin paid result lookup summary", () => {
     expect(summary.accessLinks.line).toMatchObject({
       contactSaved: true,
       recipientSecretExists: true,
+      deliverable: true,
       sent: true,
       active: true,
       providerMessageIdPresent: false,
@@ -261,6 +262,78 @@ describe("admin paid result lookup summary", () => {
       expect.arrayContaining(["paid_result_ready", "email_contact_saved", "access_link_missing"]),
     );
     expect(summary.recommendedActions).toContain("retry_processor_if_safe");
+  });
+
+  it("diagnoses partial LINE bind without recipient secret as not deliverable", () => {
+    const summary = buildAdminPaidResultLookupSummary(
+      baseRows({
+        payments: [
+          {
+            provider: "newebpay",
+            moduleSlug: "ambiguous-temperature",
+            status: "paid",
+            paidAt: NOW,
+            merchantOrderNo: "PRIVATE-ORDER",
+            createdAt: NOW,
+          },
+        ],
+        entitlements: [
+          {
+            status: "active",
+            activatedAt: NOW,
+            revokedAt: null,
+            refundedAt: null,
+            expiresAt: FUTURE,
+            createdAt: NOW,
+          },
+        ],
+        generationJobs: [
+          {
+            status: "completed",
+            lastErrorCategory: null,
+            createdAt: NOW,
+          },
+        ],
+        paidResults: [
+          {
+            status: "completed",
+            completedAt: NOW,
+            failedAt: null,
+            errorCode: null,
+            createdAt: NOW,
+          },
+        ],
+        contacts: [
+          {
+            id: LINE_CONTACT_ID,
+            contactType: "line",
+            status: "bound",
+            transactionalConsentAt: NOW,
+            createdAt: NOW,
+          },
+        ],
+      }),
+      { resultId: RESULT_ID, now: NOW },
+    );
+
+    expect(summary.accessLinks.line).toMatchObject({
+      contactSaved: true,
+      recipientSecretExists: false,
+      deliverable: false,
+      sent: false,
+      active: false,
+    });
+    expect(summary.diagnosis).toEqual(
+      expect.arrayContaining([
+        "paid_result_ready",
+        "line_contact_saved",
+        "line_bind_incomplete",
+        "line_recipient_secret_missing",
+        "access_link_missing",
+      ]),
+    );
+    expect(summary.recommendedActions).toContain("retry_line_bind_or_use_email");
+    expect(() => assertAdminPaidResultLookupResponseIsSafe(summary)).not.toThrow();
   });
 
   it("rejects unsafe response shapes", () => {

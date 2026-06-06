@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { createOrUpdateLineRecoveryRecipientSecret } from "@/lib/db/payment-recovery-contact-secrets";
 import {
   createOrUpdateLineRecoveryContact,
+  markPaymentRecoveryContactStatus,
   type PaymentRecoveryContactSource,
 } from "@/lib/db/payment-recovery-contacts";
 import { RecoveryContactConfigError } from "@/lib/payments/recovery-contact-crypto";
@@ -324,9 +325,19 @@ export async function bindVerifiedLineUserToRecoveryContact(input: {
       });
 
       if (!secret) {
+        await markPaymentRecoveryContactStatus({
+          recoveryContactId,
+          status: "failed",
+        }).catch(() => null);
+
         return { ok: false, category: "recipient_secret_write_failed" };
       }
     } catch (error) {
+      await markPaymentRecoveryContactStatus({
+        recoveryContactId,
+        status: "failed",
+      }).catch(() => null);
+
       if (error instanceof LineRecoveryRecipientConfigError) {
         return { ok: false, category: "recipient_secret_write_failed" };
       }

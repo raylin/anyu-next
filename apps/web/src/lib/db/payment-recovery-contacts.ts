@@ -439,8 +439,7 @@ export async function getEligibleLineRecoveryContactsForCompletedPaidResult(inpu
   entitlementId: string;
 }) {
   const records = await getPaymentRecoveryContactsByEntitlementId(input.entitlementId);
-
-  return records.filter((record) => {
+  const eligibleContacts = records.filter((record) => {
     if (record.moduleSlug !== input.moduleSlug) {
       return false;
     }
@@ -468,6 +467,34 @@ export async function getEligibleLineRecoveryContactsForCompletedPaidResult(inpu
       record.source === "completed_result"
     );
   });
+  const eligibleContactIds = eligibleContacts.map((record) => record.id);
+
+  if (eligibleContactIds.length === 0) {
+    return [];
+  }
+
+  const db = requireDb();
+  const activeSecrets = await db
+    .select({
+      recoveryContactId: paymentAccessLinkContactSecrets.recoveryContactId,
+    })
+    .from(paymentAccessLinkContactSecrets)
+    .where(
+      and(
+        inArray(paymentAccessLinkContactSecrets.recoveryContactId, eligibleContactIds),
+        eq(paymentAccessLinkContactSecrets.channel, "line"),
+        inArray(
+          paymentAccessLinkContactSecrets.purpose,
+          PAYMENT_ACCESS_LINK_CONTACT_SECRET_COMPATIBLE_PURPOSES,
+        ),
+        eq(paymentAccessLinkContactSecrets.status, "active"),
+      ),
+    );
+  const deliverableContactIds = new Set(
+    activeSecrets.map((secret) => secret.recoveryContactId),
+  );
+
+  return eligibleContacts.filter((record) => deliverableContactIds.has(record.id));
 }
 
 export async function getPaymentRecoveryContactsByResultId(analysisResultId: string) {

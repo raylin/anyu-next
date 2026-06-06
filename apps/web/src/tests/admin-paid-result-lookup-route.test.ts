@@ -89,6 +89,7 @@ describe("admin paid result lookup route", () => {
       accessLinks: {
         email: {
           contactSaved: true,
+          deliverable: true,
           sent: true,
           active: true,
           used: false,
@@ -102,6 +103,7 @@ describe("admin paid result lookup route", () => {
         line: {
           contactSaved: false,
           recipientSecretExists: false,
+          deliverable: false,
           sent: false,
           active: false,
           used: false,

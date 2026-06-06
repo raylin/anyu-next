@@ -10602,3 +10602,27 @@ Unresolved questions:
 - Convert no-card polling to shared wait-helper internals later if it remains a time sink.
 - Bind the Playwright UI suite to a mocked local app route when stable fixtures are available.
 - Keep production frozen and return to LINE recipient-secret bind invariant fix before another production payment smoke.
+
+## 2026-06-06 LINE Recipient Secret Bind Invariant Fix v0
+
+### Completed Changes
+
+- saved the LINE Recipient Secret Bind Invariant Fix v0 handoff
+- fixed LINE bind failure compensation so recipient-secret write failure marks the contact failed
+- updated checkout-start so LINE save/unlock requires an active recipient secret with encrypted recipient and recipient hash
+- updated paid delivery eligibility so LINE contacts without active recipient secret are skipped before access-link creation
+- updated Admin API summary with `deliverable`, `line_bind_incomplete`, `line_recipient_secret_missing`, and `retry_line_bind_or_use_email`
+- updated Admin CLI validation/pretty output to accept and display `not-deliverable` LINE state
+- added targeted tests for partial bind failure, checkout contact-only lock, deliverable LINE unlock, send eligibility, Admin summary, and CLI output
+
+### Learnings
+
+- The original production failure path is now blocked at three layers: bind compensation, checkout unlock, and send eligibility.
+- Contact-only LINE state remains visible to Admin API/CLI as partial support state but no longer counts as deliverable.
+- Local/mock/UI gates passed without production runtime, payment, Email, LINE, Vercel env, DB migration, or staging smoke.
+
+### Unresolved Questions
+
+- Deployed staging proof was intentionally skipped in this task because local/mock coverage proved the invariant and no staging deployment had occurred before validation.
+- If owner wants deployed proof before another production smoke, run LINE Recipient Secret Bind Invariant Staging Verification v0.
+- Production must remain frozen until a future owner-approved production smoke retry.
