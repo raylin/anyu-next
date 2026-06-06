@@ -10279,3 +10279,29 @@ Unresolved questions:
 
 - Owner acceptance is still required before any production readiness task resumes.
 - Decide later whether to add a concise Admin CLI ops runbook after operator usage stabilizes.
+
+## 2026-06-06 Module 01 Safe Staging Gate Acceptance Snapshot v0
+
+### Completed Changes
+
+- saved the Module 01 Safe Staging Gate Acceptance Snapshot v0 handoff
+- reran the safe Module 01 gates:
+  - `qa:module01:local`: pass
+  - `qa:module01:staging`: pass
+  - `qa:module01:production-preflight`: pass
+- documented accepted staging behavior for desktop Email-only mandatory save, mobile LINE-first above Email fallback, `/r/` access links, delivery artifact, and report reference
+- documented the active Admin Ops boundary: Admin API + `pnpm ops lookup-result`
+- documented that direct DB support lookup, `SUPPORT_OPS_DATABASE_URL`, and local `DATABASE_URL` support lookup are not active ops paths
+- updated the dashboard to show the safe staging gate as pass / ready for owner acceptance
+
+### Learnings
+
+- The reusable Module 01 gate can now produce a same-task validation snapshot without creating another one-off smoke-test handoff.
+- The default safe gate intentionally does not send real Email/LINE; previous owner-verified channel evidence remains valid manual evidence.
+- Production preflight remains read-only/fail-closed and does not enable payment runtime.
+
+### Unresolved Questions
+
+- Owner must decide whether to resume Controlled Production Payment Smoke v1 or address selected non-blocking tech debt first.
+- Production preflight empty-secret hardening and Vercel deploy guard hardening remain strong candidates before the next production smoke.
+- Decide later whether to implement explicit `qa:module01:staging:channels` for owner-approved real Email/LINE validation.
