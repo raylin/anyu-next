@@ -10626,3 +10626,29 @@ Unresolved questions:
 - Deployed staging proof was intentionally skipped in this task because local/mock coverage proved the invariant and no staging deployment had occurred before validation.
 - If owner wants deployed proof before another production smoke, run LINE Recipient Secret Bind Invariant Staging Verification v0.
 - Production must remain frozen until a future owner-approved production smoke retry.
+
+## 2026-06-06 LINE Recipient Secret Bind Invariant Staging Verification v0
+
+### Completed Changes
+
+- saved the LINE Recipient Secret Bind Invariant Staging Verification v0 handoff
+- confirmed Preview(staging) serves commit `4263dbeea82d`, branch `staging`, environment `preview`, and route bundle `payment-foundation-2026-05-29`
+- ran `qa:module01:staging` once through the structured validation suite
+- verified `stagingEnvMirror`, `stagingHealth`, `adminApiLookup`, and `adminCliLookup` all passed
+- ran `pnpm ops lookup-result --env staging` pretty and JSON lookups against the suite-produced safe staging result artifact
+- documented that deployed partial-bind proof was not forced because it would require real LINE flow manipulation or DB mutation
+
+### Learnings
+
+- The LINE invariant fix is deployed to Preview(staging) at commit `4263dbeea82d`.
+- The structured staging gate passed with no real Email or LINE sends.
+- The safe no-card staging artifact is categorized as `staging_runtime_no_card` and contains no tokenized URL.
+- Admin CLI returned a sanitized completed paid-result summary with no saved Email/LINE contacts, which is expected for the safe no-card path.
+- Partial bind remains covered by targeted tests, mock-flow, and UI checks from the fix task rather than unsafe staging state fabrication.
+- The staging suite still performs read-only production fail-closed checks as part of its default safety coverage; no production runtime/env/payment/message/data changed.
+
+### Unresolved Questions
+
+- If owner wants live user-channel proof later, implement or run an explicit owner-approved staging channels gate.
+- Production smoke retry remains owner-gated and should not proceed until the owner explicitly approves it.
+- Theme Architecture remains preserved and deferred.
