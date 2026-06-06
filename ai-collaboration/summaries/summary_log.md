@@ -10574,3 +10574,31 @@ Unresolved questions:
 - Enhance Admin API/CLI to surface sanitized partial-bind categories without DB debugging.
 - Reproduce/fix on staging before another production payment smoke.
 - Theme Architecture remains preserved and deferred.
+
+## 2026-06-06 Module 01 Test Efficiency + Structured QA Foundation v0
+
+### Completed Changes
+
+- saved the Module 01 Test Efficiency + Structured QA Foundation v0 handoff
+- added a structured `.qa/module01-staging-artifact.json` handoff from `qa:result-checkout:no-card`
+- updated `qa:module01:staging` so Admin API and Admin CLI checks can use the suite-produced staging artifact instead of temp files or external snippets
+- added `qa:module01:wait-result` for explicit Admin API status polling by staging result ID
+- added `qa:module01:mock-flow` as a fast local no-provider backend/access-link regression tier
+- added `qa:module01:ui` as a fast Playwright checkout-start UI foundation
+- added tests for helper command registration, known-result artifact resolution, wait summaries, mock-flow summaries, and output safety
+- updated the dashboard with the validation tier policy and new commands
+
+### Learnings
+
+- Active normal Module 01 validation no longer needs `/private/tmp` result ID handoffs.
+- Historical reports still contain heredoc/temp-file snippets and should remain historical, not copied into future workflow.
+- The existing staging no-card command still has internal paid-status polling; future standalone status waits should use `qa:module01:wait-result` instead of rerunning the full staging suite.
+- `qa:module01:mock-flow` passed with mocked route/helper coverage and no real providers.
+- `qa:module01:ui` passed with a fixture/no-server Playwright foundation for checkout-start layout/copy rules.
+- `qa:module01:staging` passed once after suite artifact integration; no real Email/LINE sends occurred.
+
+### Unresolved Questions
+
+- Convert no-card polling to shared wait-helper internals later if it remains a time sink.
+- Bind the Playwright UI suite to a mocked local app route when stable fixtures are available.
+- Keep production frozen and return to LINE recipient-secret bind invariant fix before another production payment smoke.

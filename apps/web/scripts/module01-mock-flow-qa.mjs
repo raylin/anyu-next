@@ -1,0 +1,112 @@
+#!/usr/bin/env node
+
+import fs from "node:fs";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+
+const MODULE = "ai-temperature";
+const OUTPUT_DIR = ".qa";
+const OUTPUT_PATH = path.join(OUTPUT_DIR, "module01-mock-flow-summary.json");
+const TARGETED_TESTS = [
+  "src/tests/admin-paid-result-lookup.test.ts",
+  "src/tests/admin-paid-result-lookup-route.test.ts",
+  "src/tests/newebpay-checkout-start-page.test.tsx",
+  "src/tests/payment-recovery-email-route.test.ts",
+  "src/tests/line-recovery-bind-route.test.ts",
+  "src/tests/payment-recovery-contact-secrets.test.ts",
+  "src/tests/email-recovery-link.test.ts",
+  "src/tests/line-recovery-link.test.ts",
+  "src/tests/paid-result-recovery-links.test.ts",
+  "src/tests/paid-generation-service.test.ts",
+  "src/tests/paid-generation-processor.test.ts",
+];
+const TOKEN_LIKE_PATTERNS = [
+  /pa_[A-Za-z0-9_-]{8,}/u,
+  /pcs_[A-Za-z0-9_-]{8,}/u,
+  /pal_[A-Za-z0-9_-]{8,}/u,
+  /prl_[A-Za-z0-9_-]{8,}/u,
+  /\/r\/[A-Za-z0-9_-]{12,}/u,
+  /token_hash/iu,
+  /contact_hash/iu,
+  /recipient_hash/iu,
+  /encrypted_recipient/iu,
+  /provider_payload/iu,
+  /tradeinfo/iu,
+  /tradesha/iu,
+  /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/iu,
+];
+
+function buildMockFlowSummary(input) {
+  const status = input.exitStatus === 0 ? "pass" : "blocked";
+
+  return {
+    module: MODULE,
+    environment: "local",
+    command: "qa:module01:mock-flow",
+    status,
+    generatedAt: input.generatedAt ?? new Date().toISOString(),
+    checks: {
+      mockedEmailSave: status,
+      mockedLineBindRecipientSecret: status,
+      mockedPaymentNotifyEquivalent: status,
+      mockedPaidGeneration: status,
+      mockedAccessLinkCreationSend: status,
+      mockedAdminApiSummary: status,
+    },
+    targetedTests: TARGETED_TESTS,
+    blockers: status === "pass" ? [] : ["module01_mock_flow_tests_failed"],
+    warnings: [
+      "no_real_newebpay",
+      "no_real_email",
+      "no_real_line",
+      "no_vercel_runtime",
+      "first_slice_mock_flow_foundation",
+    ],
+    sendsRealEmail: false,
+    sendsRealLine: false,
+    mutatesData: false,
+    productionTouched: false,
+    nextRequiredAction: status === "pass" ? "use_for_backend_flow_regression" : "fix_mock_flow_tests",
+  };
+}
+
+function assertSafeSummary(summary) {
+  const serialized = JSON.stringify(summary);
+
+  for (const pattern of TOKEN_LIKE_PATTERNS) {
+    if (pattern.test(serialized)) {
+      throw new Error("module01_mock_flow_summary_not_sanitized");
+    }
+  }
+
+  return summary;
+}
+
+function writeSummary(summary, outputPath = path.resolve(process.cwd(), OUTPUT_PATH)) {
+  const safeSummary = assertSafeSummary(summary);
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, `${JSON.stringify(safeSummary, null, 2)}\n`);
+  return outputPath;
+}
+
+function main() {
+  const result = spawnSync("corepack", ["pnpm", "exec", "vitest", "run", ...TARGETED_TESTS], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      MODULE01_MOCK_FLOW_QA: "1",
+    },
+    stdio: "inherit",
+  });
+  const summary = buildMockFlowSummary({ exitStatus: result.status ?? 1 });
+  const outputPath = writeSummary(summary);
+
+  console.log(JSON.stringify({ step: "module01_mock_flow_summary", outputPath, ...summary }));
+  process.exitCode = summary.status === "pass" ? 0 : 1;
+}
+
+if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).href) {
+  main();
+}
+
+export { TARGETED_TESTS, assertSafeSummary, buildMockFlowSummary, writeSummary };

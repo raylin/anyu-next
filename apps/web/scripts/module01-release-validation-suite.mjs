@@ -8,7 +8,10 @@ import { fileURLToPath } from "node:url";
 const MODULE = "ai-temperature";
 const STAGING_BASE_URL = "https://staging.anyu.tw";
 const OUTPUT_DIR = ".qa";
+const STAGING_ARTIFACT_PATH = path.join(OUTPUT_DIR, "module01-staging-artifact.json");
 const STAGING_ENV_MIRROR_PATH = ".env.staging";
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const STATUS_ORDER = {
   pass: 0,
   skipped: 1,
@@ -306,6 +309,59 @@ function outputPathForMode(mode) {
   );
 }
 
+function parseSuiteKnownResultArtifact(raw) {
+  try {
+    const artifact = JSON.parse(raw);
+    const resultId = typeof artifact.resultId === "string" ? artifact.resultId.trim() : "";
+    const sourceCategory =
+      typeof artifact.resultIdSourceCategory === "string"
+        ? artifact.resultIdSourceCategory.trim()
+        : "";
+    const environment = typeof artifact.environment === "string" ? artifact.environment.trim() : "";
+
+    if (!UUID_PATTERN.test(resultId)) {
+      return null;
+    }
+
+    if (environment !== "staging" || sourceCategory !== "staging_runtime_no_card") {
+      return null;
+    }
+
+    return {
+      resultId,
+      sourceCategory,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function resolveKnownResultId(input = {}) {
+  const env = input.env ?? process.env;
+  const explicit =
+    env.MODULE01_ADMIN_LOOKUP_RESULT_ID?.trim() ?? env.QA_MODULE01_ADMIN_RESULT_ID?.trim() ?? "";
+
+  if (explicit) {
+    if (!UUID_PATTERN.test(explicit)) {
+      return null;
+    }
+
+    return {
+      resultId: explicit,
+      sourceCategory: "explicit_env_known_result_id",
+    };
+  }
+
+  const artifactPath =
+    input.artifactPath ?? path.resolve(process.cwd(), STAGING_ARTIFACT_PATH);
+
+  if (!fs.existsSync(artifactPath)) {
+    return null;
+  }
+
+  return parseSuiteKnownResultArtifact(fs.readFileSync(artifactPath, "utf8"));
+}
+
 function writeSummary(mode, summary) {
   const safeSummary = assertSanitizedSummary(summary);
   const outputPath = outputPathForMode(mode);
@@ -334,7 +390,13 @@ function runCommand(id, command, args, options = {}) {
 }
 
 function runCommandCapture(id, command, args, options = {}) {
-  console.log(JSON.stringify({ step: "module01_suite_check_start", id, command: [command, ...args] }));
+  console.log(
+    JSON.stringify({
+      step: "module01_suite_check_start",
+      id,
+      command: options.logArgs ? [command, ...options.logArgs] : [command, ...args],
+    }),
+  );
   const result = spawnSync(command, args, {
     cwd: options.cwd ?? process.cwd(),
     env: { ...process.env, ...(options.env ?? {}) },
@@ -399,10 +461,7 @@ function safeAdminApiResponse(json) {
 
 async function adminApiStagingCheck() {
   const token = process.env.ADMIN_API_TOKEN?.trim() ?? "";
-  const resultId =
-    process.env.MODULE01_ADMIN_LOOKUP_RESULT_ID?.trim() ??
-    process.env.QA_MODULE01_ADMIN_RESULT_ID?.trim() ??
-    "";
+  const knownResult = resolveKnownResultId();
 
   if (!token) {
     return makeCheck("admin_api_lookup", "partial", {
@@ -426,7 +485,7 @@ async function adminApiStagingCheck() {
     });
   }
 
-  if (!resultId) {
+  if (!knownResult) {
     return makeCheck("admin_api_lookup", "partial", {
       required: false,
       warnings: ["skipped_missing_known_result_id"],
@@ -435,7 +494,7 @@ async function adminApiStagingCheck() {
   }
 
   const valid = await requestJson(
-    `${STAGING_BASE_URL}/api/admin/paid-results/${encodeURIComponent(resultId)}`,
+    `${STAGING_BASE_URL}/api/admin/paid-results/${encodeURIComponent(knownResult.resultId)}`,
     { headers: { "x-admin-api-token": token } },
   );
   const pass = valid.response.status === 200 && safeAdminApiResponse(valid.json);
@@ -443,6 +502,7 @@ async function adminApiStagingCheck() {
   return makeCheck("admin_api_lookup", pass ? "pass" : "blocked", {
     required: true,
     httpStatus: valid.response.status,
+    knownResultIdSourceCategory: knownResult.sourceCategory,
     responseSanitized: pass,
     blockers: pass ? [] : ["admin_api_lookup_failed_or_unsafe"],
   });
@@ -477,10 +537,7 @@ function safeAdminCliOutput(stdout) {
 
 function adminCliStagingCheck() {
   const token = process.env.ADMIN_API_TOKEN?.trim() ?? "";
-  const resultId =
-    process.env.MODULE01_ADMIN_LOOKUP_RESULT_ID?.trim() ??
-    process.env.QA_MODULE01_ADMIN_RESULT_ID?.trim() ??
-    "";
+  const knownResult = resolveKnownResultId();
 
   if (!token) {
     return makeCheck("admin_cli_lookup", "partial", {
@@ -492,7 +549,7 @@ function adminCliStagingCheck() {
     });
   }
 
-  if (!resultId) {
+  if (!knownResult) {
     return makeCheck("admin_cli_lookup", "partial", {
       required: false,
       adminCliLookupStatus: "skipped_missing_known_result_id",
@@ -506,12 +563,33 @@ function adminCliStagingCheck() {
   const result = runCommandCapture(
     "admin_cli_lookup",
     "corepack",
-    ["pnpm", "--silent", "ops", "lookup-result", "--env", "staging", "--id", resultId, "--json"],
+    [
+      "pnpm",
+      "--silent",
+      "ops",
+      "lookup-result",
+      "--env",
+      "staging",
+      "--id",
+      knownResult.resultId,
+      "--json",
+    ],
     {
       cwd: rootDir,
       env: {
         ADMIN_API_TOKEN: token,
       },
+      logArgs: [
+        "pnpm",
+        "--silent",
+        "ops",
+        "lookup-result",
+        "--env",
+        "staging",
+        "--id",
+        "[REDACTED]",
+        "--json",
+      ],
     },
   );
   const pass = result.status === 0 && safeAdminCliOutput(result.stdout);
@@ -520,6 +598,7 @@ function adminCliStagingCheck() {
     required: true,
     adminCliLookupCommand: "pnpm ops lookup-result --env staging --id [REDACTED] --json",
     adminCliLookupStatus: pass ? "pass" : "blocked",
+    knownResultIdSourceCategory: knownResult.sourceCategory,
     responseSanitized: pass,
     blockers: pass ? [] : ["admin_cli_lookup_failed_or_unsafe"],
   });
@@ -712,6 +791,8 @@ export {
   makeCheck,
   parseAdminCliJsonOutput,
   parseEnvMirrorContent,
+  parseSuiteKnownResultArtifact,
+  resolveKnownResultId,
   stagingEnvMirrorCheck,
   verifyEnvMirrorShape,
   worstStatus,

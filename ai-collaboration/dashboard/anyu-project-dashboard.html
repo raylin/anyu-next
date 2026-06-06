@@ -329,10 +329,10 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」safe staging gate is documented as PASS. Controlled Production Payment Smoke v1 Clean Retry reached real payment truth, active entitlement, completed paid generation, and a completed paid result, then returned Production fail-closed. Follow-up diagnosis found the delivery blocker: the production LINE bind left a bound contact without an active recipient secret, so the payment gate could unlock but LINE access-link delivery could not send.</p>
+      <p class="lead">Module 01「曖昧溫度計」safe staging gate is documented as PASS. Controlled Production Payment Smoke v1 Clean Retry reached real payment truth, active entitlement, completed paid generation, and a completed paid result, then returned Production fail-closed. Follow-up diagnosis found the delivery blocker: the production LINE bind left a bound contact without an active recipient secret. Module 01 QA is now being structured so the fix can be validated through local/mock/UI tiers before another production smoke.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-06 21:20 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Production smoke partial</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-06 22:30 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Structured QA foundation</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">LINE partial bind invariant</span></div>
       </div>
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge progress">Partial</span><h3>Launch readiness</h3><p>Safe Module 01 staging gate passes and Env Mirror Strategy v2 final verification is complete. Production smoke v1 clean retry reached paid result completion but failed production LINE delivery. Production is frozen again, hardened production preflight passes, and no ads or broad traffic are enabled.</p></article>
+        <article class="card"><span class="badge progress">Partial</span><h3>Launch readiness</h3><p>Safe Module 01 staging gate passes and Env Mirror Strategy v2 final verification is complete. Production smoke v1 clean retry reached paid result completion but failed production LINE delivery. Production is frozen again, hardened production preflight passes, and no ads or broad traffic are enabled. Current work reduces validation latency before the LINE invariant fix.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
@@ -388,7 +388,7 @@
         <div class="progressbar"><span style="width: 90%"></span></div>
         <p><strong>Production launch readiness</strong></p>
         <div class="progressbar"><span style="width: 70%"></span></div>
-        <p>The current gap is not the mandatory-save checkout UX, automated staging access-link/no-card regression path, real staging Email/LINE channel delivery, or Admin ops lookup. The safe staging gate is now documented as pass / ready for owner acceptance before any further production smoke.</p>
+        <p>The current gap is not the mandatory-save checkout UX, automated staging access-link/no-card regression path, real staging Email/LINE channel delivery, or Admin ops lookup. The immediate engineering need is faster structured QA so the LINE recipient-secret invariant fix can be validated without repeated staging smoke or ad hoc polling snippets.</p>
       </div>
     </section>
 
@@ -410,7 +410,7 @@
           <li><span class="time">Sandbox preflight</span><span>Sandbox checkout preflight passed with ccore gateway, MPG 2.0, NT$49, and pcs_ handoff.</span></li>
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
-          <li><span class="time">Current</span><span>Production is frozen. Module 01 safe staging gate remains healthy. Production smoke v1 clean retry completed real payment, entitlement, processor recovery, and paid result generation, but failed production LINE access-link delivery because recipient secret was missing and no LINE message was sent.</span></li>
+          <li><span class="time">Current</span><span>Production is frozen. Module 01 safe staging gate remains healthy. Production smoke v1 clean retry completed real payment, entitlement, processor recovery, and paid result generation, but failed production LINE access-link delivery because recipient secret was missing and no LINE message was sent. Structured QA foundation now reduces rerun/polling overhead before the fix.</span></li>
           <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned; checkout-start wiring, visual bridge polish and staging smoke, and ReturnURL polling implemented; result-page checkout staging sandbox QA passed end-to-end.</span></li>
         </ol>
       </div>
@@ -480,7 +480,9 @@
         <p><strong>Production payment preflight:</strong> <code>corepack pnpm run qa:production:payment-preflight -- --source vercel-production --mode dry-run</code> checks payment provider, runtime flags, checkout session, paid access, queue, processor, access-link, Email, LINE, DB env-name presence, and live fail-closed route behavior before any controlled production smoke.</p>
         <p><strong>No-card result checkout QA:</strong> <code>corepack pnpm run qa:result-checkout:no-card</code> validates result page CTA, checkout-start, operator fake-paid downstream delivery, queue completion, paid access render, and production fail-closed behavior without submitting provider payment.</p>
         <p><strong>Access-link smoke QA:</strong> use <code>corepack pnpm run qa:access-link:smoke</code>. Legacy recovery-named smoke script aliases were removed during the clean access-link schema reset.</p>
-        <p><strong>Module 01 release validation suite:</strong> use <code>corepack pnpm run qa:module01:local</code>, <code>corepack pnpm run qa:module01:staging</code>, <code>corepack pnpm run qa:module01:production-preflight</code>, and <code>corepack pnpm run qa:module01:release</code>. Summaries are written under ignored <code>apps/web/.qa/</code>. Admin API staging smoke now runs inside <code>qa:module01:staging</code> when <code>ADMIN_API_TOKEN</code> and a known result ID are supplied. Real Email/LINE channel validation remains a future owner-approved <code>qa:module01:staging:channels</code> command.</p>
+        <p><strong>Module 01 release validation suite:</strong> use <code>corepack pnpm run qa:module01:local</code>, <code>corepack pnpm run qa:module01:staging</code>, <code>corepack pnpm run qa:module01:production-preflight</code>, and <code>corepack pnpm run qa:module01:release</code>. Summaries are written under ignored <code>apps/web/.qa/</code>. The no-card staging flow now writes a structured known-result artifact under <code>apps/web/.qa/</code>, and Admin API/CLI staging checks consume that artifact instead of temp files or external snippets. Real Email/LINE channel validation remains a future owner-approved <code>qa:module01:staging:channels</code> command.</p>
+        <p><strong>Fast Module 01 tiers:</strong> use <code>corepack pnpm run qa:module01:mock-flow</code> for no-provider backend/access-link regression, <code>corepack pnpm run qa:module01:ui</code> for checkout-start layout/copy regression, and <code>corepack pnpm run qa:module01:wait-result -- --env staging --result-id &lt;resultId&gt;</code> for explicit Admin API polling. Do not rerun <code>qa:module01:staging</code> merely to wait for async status.</p>
+        <p><strong>Validation tier policy:</strong> code changes run lint, targeted tests, and build when runtime code changed. UI flow changes add the Playwright UI tier. Payment/access-link backend changes add mock-flow and only run staging if deployed behavior changed. Env/Vercel/production-gate changes run preflight gates. Real provider checks remain owner-approved and are never default.</p>
         <p><strong>Local env autoload:</strong> staging QA scripts load <code>apps/web/.env.staging</code> when shell env is absent; production preflight local mode uses <code>apps/web/.env.production</code>. Exported shell env wins over local file values; values are never printed. The Admin CLI does not load these mirror files.</p>
         <p><strong>Admin CLI:</strong> use <code>pnpm ops lookup-result --env staging --id &lt;resultId&gt;</code> or <code>pnpm ops lookup-result --env production --id &lt;resultId&gt;</code> with <code>ADMIN_API_TOKEN</code> supplied by the current shell/process env. v0 has no <code>--base-url</code>, token flag, DB URL, Vercel env, or Neon access. Live Preview(staging) CLI lookup has passed in pretty and JSON modes.</p>
         <p><strong>Verification:</strong> <code>poll-status</code> and <code>verify-after-payment</code> read local state from the temporary directory and print only sanitized status categories and booleans.</p>
@@ -526,7 +528,7 @@
           <tr><td>P0</td><td>Module 01 safe staging gate</td><td>Owner</td><td>Acceptance snapshot complete. Latest safe gates: local pass and staging pass with Admin API + Admin CLI smoke. Production-preflight is separately blocked on owner-fill production mirror values.</td></tr>
           <tr><td>P0</td><td>Admin ops boundary</td><td>Code / Ops</td><td>Read-only Admin paid-result lookup API and pure Admin CLI are implemented. Preview(staging) CLI lookup smoke passed; production read-only CLI smoke requires explicit approval.</td></tr>
           <tr><td>P0</td><td>Production env mirror gate</td><td>Code / Ops</td><td>Final verification complete. Local mirrors pass shape checks, Vercel env is synced, and production preflight passes. Keep production frozen until owner approves controlled smoke.</td></tr>
-          <tr><td>P0</td><td>LINE recipient-secret bind invariant</td><td>Code / Ops</td><td>Diagnosis complete: production smoke contact was bound, linked, consented, and eligible, but no recipient-secret row or access-link row existed. Fix contact-without-secret partial state and require deliverable LINE state before payment unlock.</td></tr>
+          <tr><td>P0</td><td>LINE recipient-secret bind invariant</td><td>Code / Ops</td><td>Diagnosis complete: production smoke contact was bound, linked, consented, and eligible, but no recipient-secret row or access-link row existed. Use the structured local/mock/UI QA tiers first, then staging gate only when deployed behavior needs proof.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -553,6 +555,7 @@
           <tr><td>Production env mirror shape gate</td><td>P0</td><td>Code / Ops</td><td>Implemented for production preflight; staging mirror shape gate is now included in <code>qa:module01:staging</code>.</td><td>Monitor during production smoke</td></tr>
           <tr><td>Vercel deploy guard hardening</td><td>P0</td><td>Code / Ops</td><td>Implemented root canonical project checks; optional alias inspection can be added later if needed.</td><td>Optional Vercel Alias Inspection Helper v0</td></tr>
           <tr><td>qa:module01:staging:channels command</td><td>P1</td><td>Code / Ops</td><td>Real Email/LINE checks remain manual/owner-approved.</td><td>Module 01 Staging Channels Gate v0</td></tr>
+          <tr><td>Ad hoc QA snippets</td><td>P1</td><td>Code / Ops</td><td>Historical reports contain heredoc/temp-file patterns; active workflow should use committed helpers and <code>.qa</code> summaries instead.</td><td>Keep out of normal Codex workflow</td></tr>
           <tr><td>Theme architecture implementation plan</td><td>P1</td><td>Code / Design</td><td>Visual architecture is archived but not implemented; direct implementation without inventory risks breaking current payment/access-link rules.</td><td>Module Theme Architecture Implementation Plan v0</td></tr>
         </tbody>
       </table>
@@ -561,7 +564,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> LINE Recipient Secret Bind Invariant Fix v0, reproduced and validated on staging. Do not run another production payment smoke until the delivery failure is fixed, Module 01 gates pass, and owner approves the retry. Theme implementation remains deferred unless the owner chooses visual architecture work instead.</p>
+        <p><strong>Current recommendation:</strong> return to LINE Recipient Secret Bind Invariant Fix v0 using the new structured QA tier policy. Start with targeted tests, <code>qa:module01:mock-flow</code>, and <code>qa:module01:ui</code>; run staging only when the deployed access-link/payment behavior needs proof. Do not run another production payment smoke until the delivery failure is fixed, Module 01 gates pass, and owner approves the retry. Theme implementation remains deferred unless the owner chooses visual architecture work instead.</p>
         <p>If fresh real channel evidence is needed, implement or run an explicit owner-approved <code>qa:module01:staging:channels</code> path instead of folding real Email/LINE sends into the default suite.</p>
         <p>Production controlled smoke cannot start from a one-off Codex next step. It requires release-suite pass or owner acceptance, production preflight pass, and explicit owner approval.</p>
       </div>
@@ -684,6 +687,9 @@
           <li><a href="../reports/2026-06-06-env-mirror-strategy-v2-implementation-plan-v0.md">Env Mirror Strategy v2 Implementation Plan v0</a></li>
           <li><a href="../reports/2026-06-06-env-mirror-strategy-v2-apply-clean-reset-v0.md">Env Mirror Strategy v2 Apply / Clean Reset v0</a></li>
           <li><a href="../reports/2026-06-06-env-mirror-final-verification-cleanup-v0.md">Env Mirror Final Verification + Cleanup v0</a></li>
+          <li><a href="../reports/2026-06-06-controlled-production-payment-smoke-v1-clean-retry.md">Controlled Production Payment Smoke v1 Clean Retry</a></li>
+          <li><a href="../reports/2026-06-06-production-access-link-delivery-diagnosis-after-smoke-v1-v0.md">Production Access-Link Delivery Diagnosis After Smoke v1 v0</a></li>
+          <li><a href="../reports/2026-06-06-module-01-test-efficiency-structured-qa-foundation-v0.md">Module 01 Test Efficiency + Structured QA Foundation v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

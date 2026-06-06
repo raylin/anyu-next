@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -8,6 +9,8 @@ import {
   deriveGateStatus,
   makeCheck,
   parseAdminCliJsonOutput,
+  parseSuiteKnownResultArtifact,
+  resolveKnownResultId,
   verifyEnvMirrorShape,
   worstStatus,
 } from "../../scripts/module01-release-validation-suite.mjs";
@@ -24,8 +27,17 @@ describe("Module 01 release validation suite", () => {
     expect(packageJson.scripts["qa:module01:local"]).toBe(
       "node scripts/module01-release-validation-suite.mjs local",
     );
+    expect(packageJson.scripts["qa:module01:mock-flow"]).toBe(
+      "node scripts/module01-mock-flow-qa.mjs",
+    );
     expect(packageJson.scripts["qa:module01:staging"]).toBe(
       "node scripts/module01-release-validation-suite.mjs staging",
+    );
+    expect(packageJson.scripts["qa:module01:ui"]).toBe(
+      "PLAYWRIGHT_BROWSERS_PATH=../../.playwright-browsers playwright test --config=playwright.module01-ui.config.ts --project=chromium",
+    );
+    expect(packageJson.scripts["qa:module01:wait-result"]).toBe(
+      "node scripts/module01-staging-result-wait.mjs",
     );
     expect(packageJson.scripts["qa:module01:production-preflight"]).toBe(
       "node scripts/module01-release-validation-suite.mjs production-preflight",
@@ -131,6 +143,78 @@ $ tsx src/index.ts lookup-result --json
       lookup: { ok: true },
     });
     expect(parseAdminCliJsonOutput("ANYU ops error: admin_auth_failed\n")).toBeNull();
+  });
+
+  it("resolves known staging result IDs from explicit env before suite artifact", () => {
+    const artifactPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), "anyu-module01-artifact-")),
+      "artifact.json",
+    );
+    fs.writeFileSync(
+      artifactPath,
+      JSON.stringify({
+        environment: "staging",
+        resultId: "22222222-2222-4222-8222-222222222222",
+        resultIdSourceCategory: "staging_runtime_no_card",
+      }),
+    );
+
+    expect(
+      resolveKnownResultId({
+        env: {
+          MODULE01_ADMIN_LOOKUP_RESULT_ID: "11111111-1111-4111-8111-111111111111",
+        },
+        artifactPath,
+      }),
+    ).toEqual({
+      resultId: "11111111-1111-4111-8111-111111111111",
+      sourceCategory: "explicit_env_known_result_id",
+    });
+  });
+
+  it("resolves known staging result IDs from the no-card artifact", () => {
+    const artifact = JSON.stringify({
+      environment: "staging",
+      resultId: "22222222-2222-4222-8222-222222222222",
+      resultIdSourceCategory: "staging_runtime_no_card",
+      tokenizedUrlPresent: false,
+    });
+    const artifactPath = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), "anyu-module01-artifact-")),
+      "artifact.json",
+    );
+
+    fs.writeFileSync(artifactPath, artifact);
+
+    expect(parseSuiteKnownResultArtifact(artifact)).toEqual({
+      resultId: "22222222-2222-4222-8222-222222222222",
+      sourceCategory: "staging_runtime_no_card",
+    });
+    expect(resolveKnownResultId({ env: {}, artifactPath })).toEqual({
+      resultId: "22222222-2222-4222-8222-222222222222",
+      sourceCategory: "staging_runtime_no_card",
+    });
+  });
+
+  it("rejects unsafe or non-staging known result artifacts", () => {
+    expect(
+      parseSuiteKnownResultArtifact(
+        JSON.stringify({
+          environment: "production",
+          resultId: "22222222-2222-4222-8222-222222222222",
+          resultIdSourceCategory: "staging_runtime_no_card",
+        }),
+      ),
+    ).toBeNull();
+    expect(
+      parseSuiteKnownResultArtifact(
+        JSON.stringify({
+          environment: "staging",
+          resultId: ["/r/pal", "unsafe_token_value"].join("_"),
+          resultIdSourceCategory: "staging_runtime_no_card",
+        }),
+      ),
+    ).toBeNull();
   });
 
   it("verifies env mirror shape without exposing values", () => {

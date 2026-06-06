@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import { loadLocalEnv } from "./lib/load-local-env.mjs";
 import {
   assertSafeQaBaseUrl,
@@ -20,6 +22,8 @@ const DEFAULT_BASE_URL = "https://staging.anyu.tw";
 const PRODUCTION_BASE_URL = "https://anyu.tw";
 const MODULE_SLUG = "ambiguous-temperature";
 const ROUTE_BUNDLE_VERSION = "payment-foundation-2026-05-29";
+const OUTPUT_DIR = ".qa";
+const STAGING_ARTIFACT_FILE = "module01-staging-artifact.json";
 const PAYMENT_STATUS_READY = new Set(["completed"]);
 const PAYMENT_STATUS_WAITING = new Set(["pending", "processing"]);
 const SYNTHETIC_INPUT =
@@ -35,6 +39,25 @@ const inputSuffix =
 
 function record(step, outcome, details = {}) {
   console.log(JSON.stringify(sanitizeRecord({ step, outcome, ...details })));
+}
+
+function writeStagingArtifact({ resultId, status }) {
+  const outputPath = path.resolve(process.cwd(), OUTPUT_DIR, STAGING_ARTIFACT_FILE);
+  const artifact = sanitizeRecord({
+    module: "ai-temperature",
+    moduleSlug: MODULE_SLUG,
+    environment: "staging",
+    resultId,
+    resultIdSourceCategory: "staging_runtime_no_card",
+    status,
+    generatedAt: new Date().toISOString(),
+    tokenizedUrlPresent: false,
+  });
+
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, `${JSON.stringify(artifact, null, 2)}\n`);
+
+  return outputPath;
 }
 
 function hasJsonContentType(response) {
@@ -434,6 +457,17 @@ async function main() {
     productionDisabledPassed: productionOk,
     limitation: "operator_fake_paid_uses_operator_payment_intent_not_newebpay_checkout_intent",
   });
+
+  if (pass) {
+    const artifactPath = writeStagingArtifact({ resultId, status: "pass" });
+
+    record("staging_artifact_summary", "pass", {
+      artifactPath,
+      knownResultIdPresent: true,
+      resultIdSourceCategory: "staging_runtime_no_card",
+      tokenizedUrlPresent: false,
+    });
+  }
 
   process.exitCode = pass ? 0 : 5;
 }
