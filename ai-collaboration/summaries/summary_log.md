@@ -10433,3 +10433,28 @@ Unresolved questions:
 - Decide whether to implement the recommended Hybrid reset strategy.
 - Define exact staging/production tables to clear before regenerating app-owned stateful crypto.
 - Keep Theme Architecture preserved and deferred.
+
+## 2026-06-06 Env Mirror Strategy v2 Implementation Plan v0
+
+### Completed Changes
+
+- saved the Env Mirror Strategy v2 Implementation Plan v0 handoff
+- documented owner-selected clean reset strategy B assumptions
+- collected read-only aggregate table counts for staging and production
+- classified 15 runtime tables into clear / preserve / needs decision groups
+- defined provider/DB owner-fill keys, Codex-fill plain config/flags, and Codex-generated keys after reset
+- defined remove/deprecate candidates and a dependency-safe apply sequence
+- documented risk/rollback notes and validation gates
+
+### Learnings
+
+- Staging and production both have 15 public runtime tables.
+- Recommended direct clear scope is 10 tables; 5 tables need owner decision but are recommended clear for a full clean reset.
+- Clean reset should preserve schemas, migrations, provider credentials, DB branches, source, docs, and theme archive.
+- Old test `/r/`, `pa_`, `pcs_`, Admin lookup artifacts, and owner-test payment records will intentionally become invalid after reset.
+
+### Unresolved Questions
+
+- Owner should confirm whether the 5 decision tables are included in the full reset.
+- Apply task must not start until provider/DB credential preservation source is available.
+- Production remains frozen until v2 apply and production preflight pass.
