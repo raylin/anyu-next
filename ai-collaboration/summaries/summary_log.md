@@ -10331,3 +10331,30 @@ Unresolved questions:
 
 - Decide whether the next task is Module Theme Architecture Implementation Plan v0 or a return to production readiness.
 - Future implementation must inventory runtime surfaces before applying Riso/Core Shell visuals.
+
+## 2026-06-06 Production Gate Hardening v0
+
+### Completed Changes
+
+- saved the Production Gate Hardening v0 handoff
+- inspected production payment/runtime source dependencies
+- hardened `qa:production:payment-preflight` to check local production mirror secret shape:
+  - missing names
+  - empty values after trim
+  - obvious placeholders
+  - any-of LINE token and AI provider groups
+- added processor readiness requirements for `CRON_SECRET`, `INTERNAL_JOB_SECRET`, processor flag, and AI provider env
+- hardened Vercel project guard for canonical `anyu-next`, root directory `apps/web`, and unexpected `apps/web/.vercel/project.json`
+- added targeted tests for empty/placeholder secrets, missing processor auth, host value-shape-unverified reporting, and project mismatch blocking
+
+### Learnings
+
+- Hardened preflight now correctly blocks production smoke readiness because `apps/web/.env.production` is missing critical mirror entries even though Vercel Production has many host env names.
+- Vercel host sensitive values remain shape-unverified by design; the preflight reports `host_value_shape_unverified` rather than claiming host value-shape pass.
+- Production remains fail-closed; no env, runtime, payment, Email, or LINE mutation occurred.
+
+### Unresolved Questions
+
+- Reconcile `apps/web/.env.production` with critical production mirror keys, without printing or committing values.
+- Rerun `qa:module01:production-preflight` and require `pass_ready_for_controlled_smoke` before production runtime enablement.
+- Decide later whether to add an Admin-authenticated runtime config-shape endpoint or Vercel alias inspection helper.

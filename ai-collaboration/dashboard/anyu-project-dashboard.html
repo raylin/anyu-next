@@ -331,10 +331,10 @@
       <h1>暗語 ANYU / anyu-next</h1>
       <p class="lead">Module 01「曖昧溫度計」safe staging gate is documented as PASS / ready for owner acceptance. Production public content is live but payment runtime and checkout are frozen/fail-closed. Preview(staging) enforces access-link save before payment: desktop shows Email only, while mobile/in-app browsers show LINE first above Email fallback. Automated staging no-card/access-link QA passes, previous real staging Email/LINE messages were owner-verified, and the release validation suite passes with Admin API and Admin CLI smoke included.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-06 13:24 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Theme architecture archived</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-06 13:59 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Production gate hardening blocked</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Owner acceptance before production readiness</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">.env.production mirror incomplete</span></div>
       </div>
     </header>
 
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge waiting">Owner decision</span><h3>Launch readiness</h3><p>Launch plan exists; the safe Module 01 staging gate is documented as pass / ready for owner acceptance with Admin API and Admin CLI smoke included. Real channel checks remain owner-approved/manual and production remains frozen until explicit production approval. No ads.</p></article>
+        <article class="card"><span class="badge blocked">Blocked</span><h3>Launch readiness</h3><p>Safe Module 01 staging gate passes, but hardened production preflight now blocks Controlled Production Payment Smoke v1 until <code>apps/web/.env.production</code> mirrors critical production secrets by name and non-empty local shape. Production remains frozen. No ads.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
@@ -435,7 +435,7 @@
         <h2>NewebPay Status</h2>
         <p>Merchant review approval is complete. Production public pages are ready. Production NewebPay provider config dry-run, Production DB migration gate, unified ReturnURL, and one recovered controlled production payment smoke passed with runtime disabled again. Sandbox shop remains available for regression QA.</p>
         <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
-        <p>Next action: keep production disabled until owner decides whether to resume Controlled Production Payment Smoke v1 or address selected non-blocking tech debt first. Use <code>qa:module01:staging</code> or <code>qa:module01:release</code> for Module 01 validation and report the gate result.</p>
+        <p>Next action: keep production disabled. Reconcile <code>apps/web/.env.production</code> critical mirror keys, then rerun hardened <code>qa:module01:production-preflight</code>. Do not resume production smoke until it returns <code>pass_ready_for_controlled_smoke</code>.</p>
       </div>
     </section>
 
@@ -525,7 +525,8 @@
         <tbody>
           <tr><td>P0</td><td>Module 01 safe staging gate</td><td>Owner</td><td>Acceptance snapshot complete. Latest gate: local pass, staging pass with Admin API + Admin CLI smoke, production-preflight pass. Next: owner acceptance or selected non-blocking tech debt.</td></tr>
           <tr><td>P0</td><td>Admin ops boundary</td><td>Code / Ops</td><td>Read-only Admin paid-result lookup API and pure Admin CLI are implemented. Preview(staging) CLI lookup smoke passed; production read-only CLI smoke requires explicit approval.</td></tr>
-          <tr><td>P0</td><td>Controlled production payment smoke v1 final confirmation</td><td>Owner / ops</td><td>Resume only after owner accepts the safe staging gate plus explicit production approval. Production checkout remains disabled.</td></tr>
+          <tr><td>P0</td><td>Production gate hardening blocker</td><td>Owner / ops</td><td>Reconcile <code>apps/web/.env.production</code> with critical production mirror keys. Latest hardened production-preflight blocks with <code>blocked_missing_local_mirror_secret</code>.</td></tr>
+          <tr><td>P0</td><td>Controlled production payment smoke v1 final confirmation</td><td>Owner / ops</td><td>Resume only after hardened production-preflight passes plus explicit production approval. Production checkout remains disabled.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -549,8 +550,8 @@
           <tr><td>Old Vercel domain/project ambiguity</td><td>P1</td><td>Owner UI</td><td>Future deployment ownership confusion.</td><td>Vercel Domain Ownership Cleanup v0</td></tr>
           <tr><td>Main/staging drift after docs commits</td><td>P1</td><td>Ops</td><td>Production release branch may lag operational docs.</td><td>Release Branch Documentation Sync v0</td></tr>
           <tr><td>ClientBackURL / payment method restriction</td><td>P2</td><td>Code</td><td>Provider UX may remain broader than first smoke scope.</td><td>NewebPay Optional Checkout Fields Evaluation v0</td></tr>
-          <tr><td>Production preflight empty-secret hardening</td><td>P0</td><td>Code / Ops</td><td>Could miss empty configured secrets before the next production smoke.</td><td>Production Preflight Empty Secret Hardening v0</td></tr>
-          <tr><td>Vercel deploy guard hardening</td><td>P0</td><td>Code / Ops</td><td>Could regress canonical deploy/source alignment.</td><td>Vercel Deploy Guard Hardening v0</td></tr>
+          <tr><td>Production preflight empty-secret hardening</td><td>P0</td><td>Code / Ops</td><td>Implemented; currently blocks because the local production mirror is incomplete.</td><td>Production Env Mirror Reconciliation v0</td></tr>
+          <tr><td>Vercel deploy guard hardening</td><td>P0</td><td>Code / Ops</td><td>Implemented root canonical project checks; optional alias inspection can be added later if needed.</td><td>Optional Vercel Alias Inspection Helper v0</td></tr>
           <tr><td>qa:module01:staging:channels command</td><td>P1</td><td>Code / Ops</td><td>Real Email/LINE checks remain manual/owner-approved.</td><td>Module 01 Staging Channels Gate v0</td></tr>
           <tr><td>Theme architecture implementation plan</td><td>P1</td><td>Code / Design</td><td>Visual architecture is archived but not implemented; direct implementation without inventory risks breaking current payment/access-link rules.</td><td>Module Theme Architecture Implementation Plan v0</td></tr>
         </tbody>
@@ -560,7 +561,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> run Module Theme Architecture Implementation Plan v0 if the next priority is visual architecture adoption; otherwise owner accepts the documented safe Module 01 staging gate or chooses selected non-blocking production hardening before production readiness resumes.</p>
+        <p><strong>Current recommendation:</strong> resolve the production gate blocker by reconciling <code>apps/web/.env.production</code> with critical production mirror keys, then rerun <code>qa:module01:production-preflight</code>. Theme implementation remains deferred unless the owner chooses visual architecture work instead.</p>
         <p>If fresh real channel evidence is needed, implement or run an explicit owner-approved <code>qa:module01:staging:channels</code> path instead of folding real Email/LINE sends into the default suite.</p>
         <p>Production controlled smoke cannot start from a one-off Codex next step. It requires release-suite pass or owner acceptance, production preflight pass, and explicit owner approval.</p>
       </div>
@@ -676,6 +677,7 @@
           <li><a href="../reports/2026-06-05-module-01-release-validation-suite-v0.md">Module 01 Release Validation Suite v0</a></li>
           <li><a href="../reports/2026-06-06-module-01-safe-staging-gate-acceptance-snapshot-v0.md">Module 01 Safe Staging Gate Acceptance Snapshot v0</a></li>
           <li><a href="../reports/2026-06-06-archive-theme-architecture-design-assets-v0.md">Archive Theme Architecture Design Assets v0</a></li>
+          <li><a href="../reports/2026-06-06-production-gate-hardening-v0.md">Production Gate Hardening v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

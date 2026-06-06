@@ -49,7 +49,9 @@ const ENV_GROUPS = {
   checkoutSession: ["PAYMENT_CHECKOUT_SESSION_SECRET"],
   paidAccess: ["PAID_ACCESS_TOKEN_HASH_SECRET"],
   queue: ["PAID_JOB_QUEUE_PROVIDER", "PAID_JOB_QUEUE_TOPIC"],
-  processor: ["ENABLE_PAID_GENERATION_PROCESSOR"],
+  processor: ["ENABLE_PAID_GENERATION_PROCESSOR", "INTERNAL_JOB_SECRET", "CRON_SECRET"],
+  aiProviderAnyOf: ["ANTHROPIC_API_KEY", "OPENAI_API_KEY"],
+  adminApi: ["ADMIN_API_TOKEN"],
   accessLink: [
     "PAYMENT_RECOVERY_LINK_TOKEN_SECRET",
     "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
@@ -65,6 +67,39 @@ const ENV_GROUPS = {
   lineAnyOf: ["LINE_MESSAGING_CHANNEL_ACCESS_TOKEN", "LINE_CHANNEL_ACCESS_TOKEN"],
   database: ["DATABASE_URL"],
 };
+
+const LOCAL_MIRROR_CRITICAL_SECRET_NAMES = [
+  "NEWEBPAY_MERCHANT_ID",
+  "NEWEBPAY_HASH_KEY",
+  "NEWEBPAY_HASH_IV",
+  "PAYMENT_CHECKOUT_SESSION_SECRET",
+  "PAID_ACCESS_TOKEN_HASH_SECRET",
+  "INTERNAL_JOB_SECRET",
+  "CRON_SECRET",
+  "PAYMENT_RECOVERY_LINK_TOKEN_SECRET",
+  "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
+  "PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY",
+  "LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY",
+  "RESEND_API_KEY",
+  "DATABASE_URL",
+];
+
+const LOCAL_MIRROR_ANY_OF_SECRET_GROUPS = [
+  {
+    group: "line_channel_access_token",
+    names: ["LINE_MESSAGING_CHANNEL_ACCESS_TOKEN", "LINE_CHANNEL_ACCESS_TOKEN"],
+  },
+  {
+    group: "ai_provider",
+    names: ["ANTHROPIC_API_KEY", "OPENAI_API_KEY"],
+  },
+];
+
+const PLACEHOLDER_SECRET_PATTERN =
+  /^(?:todo|change_me|changeme|placeholder|dummy|example|test|your_.+|replace_me|xxx+|""|'')$/iu;
+
+const CANONICAL_VERCEL_PROJECT_NAME = "anyu-next";
+const CANONICAL_VERCEL_ROOT_DIRECTORY = "apps/web";
 
 const CHECKOUT_DISABLED_ERRORS = new Set(["not_found", "payment_disabled"]);
 
@@ -159,12 +194,16 @@ function readEnvFileKeys(envFile) {
     return {
       pathPresent: false,
       names: new Set(),
+      values: new Map(),
     };
   }
 
+  const entries = parseLocalEnvContent(fs.readFileSync(envFile, "utf8"));
+
   return {
     pathPresent: true,
-    names: new Set(parseLocalEnvContent(fs.readFileSync(envFile, "utf8")).map(([name]) => name)),
+    names: new Set(entries.map(([name]) => name)),
+    values: new Map(entries),
   };
 }
 
@@ -212,15 +251,42 @@ function getVercelProjectLinkingStatus() {
   const hasComparableIds = Boolean(rootProject.projectId && webAppProject.projectId);
   const projectIdMismatch =
     hasComparableIds && rootProject.projectId !== webAppProject.projectId;
+  const rootProjectNameMismatch =
+    rootProject.pathPresent && rootProject.projectName !== CANONICAL_VERCEL_PROJECT_NAME;
+  const rootDirectoryMismatch =
+    rootProject.pathPresent && rootProject.rootDirectory !== CANONICAL_VERCEL_ROOT_DIRECTORY;
+  const webAppProjectUnexpected = webAppProject.pathPresent && !projectIdMismatch;
+  const webAppProjectMismatch = webAppProject.pathPresent && projectIdMismatch;
 
   return {
     checked: true,
-    ok: !projectIdMismatch,
+    ok:
+      !projectIdMismatch &&
+      !rootProjectNameMismatch &&
+      !rootDirectoryMismatch &&
+      !webAppProjectUnexpected,
+    expectedProjectName: CANONICAL_VERCEL_PROJECT_NAME,
+    expectedRootDirectory: CANONICAL_VERCEL_ROOT_DIRECTORY,
     rootProject,
     webAppProject,
     projectIdMismatch,
-    recommendation: projectIdMismatch
-      ? "Run production deploy/preflight from the repository root or relink apps/web to the canonical project before enabling runtime."
+    rootProjectNameMismatch,
+    rootDirectoryMismatch,
+    webAppProjectUnexpected,
+    webAppProjectMismatch,
+    aliasTarget: {
+      checked: false,
+      ok: null,
+      category: "alias_target_not_checked_by_local_project_link_guard",
+    },
+    commitMetadata: {
+      checked: false,
+      category: "commit_metadata_checked_by_production_health_when_available",
+      unknownPolicy: "warning_if_other_deployment_evidence_is_consistent",
+    },
+    recommendation:
+      projectIdMismatch || webAppProjectUnexpected || rootProjectNameMismatch || rootDirectoryMismatch
+      ? "Run production deploy/preflight from the repository root with canonical anyu-next project linkage before enabling runtime."
       : "Vercel project links are aligned.",
   };
 }
@@ -256,6 +322,7 @@ function getLocalEnvPresence(options, env = process.env) {
   return {
     source: "local",
     names,
+    valueSource: keySource.values,
     valuesAvailableForFlagChecks: true,
     localEnv: {
       pathPresent: localEnv.envFilePresent,
@@ -274,6 +341,9 @@ function parseVercelEnvNames(output) {
   knownNames.add("DATABASE_URL");
   knownNames.add("INTERNAL_JOB_SECRET");
   knownNames.add("CRON_SECRET");
+  knownNames.add("ANTHROPIC_API_KEY");
+  knownNames.add("OPENAI_API_KEY");
+  knownNames.add("ADMIN_API_TOKEN");
   knownNames.add("ENABLE_OPERATOR_FAKE_PAID_SUCCESS");
   knownNames.add("ENABLE_OPERATOR_RECOVERY_LINK_SMOKE");
   knownNames.add("ENABLE_OPERATOR_LINE_RECOVERY_SMOKE");
@@ -294,6 +364,8 @@ function parseVercelEnvNames(output) {
 function getVercelProductionEnvPresence(options) {
   const webAppDir = findWebAppDir();
   const repoRoot = path.resolve(webAppDir, "..", "..");
+  const mirrorPath = path.join(webAppDir, DEFAULT_PRODUCTION_ENV_FILE_NAME);
+  const mirrorSource = readEnvFileKeys(mirrorPath);
   const output = execFileSync(
     "vercel",
     ["env", "ls", "production", "--scope", options.vercelScope],
@@ -307,11 +379,14 @@ function getVercelProductionEnvPresence(options) {
   return {
     source: "vercel-production",
     names: parseVercelEnvNames(output),
+    valueSource: mirrorSource.values,
     valuesAvailableForFlagChecks: false,
     localEnv: {
       pathPresent: false,
       valuesLoadedButNotPrinted: false,
       keyNamesOnly: true,
+      productionMirrorPathPresent: mirrorSource.pathPresent,
+      productionMirrorExpectedFileName: DEFAULT_PRODUCTION_ENV_FILE_NAME,
     },
   };
 }
@@ -336,6 +411,154 @@ function envAnyOfStatus(names, allowedNames) {
   };
 }
 
+function getSanitizedSecretShape(value) {
+  if (typeof value !== "string") {
+    return "missing_env_name";
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return "empty_local_mirror_secret";
+  }
+
+  if (PLACEHOLDER_SECRET_PATTERN.test(trimmed)) {
+    return "placeholder_local_mirror_secret";
+  }
+
+  return "pass_mirror_shape";
+}
+
+function buildLocalMirrorShapeStatus(valueSource) {
+  if (!(valueSource instanceof Map)) {
+    return {
+      checked: false,
+      category: "local_mirror_not_available",
+      passNames: [],
+      missingNames: [],
+      emptyNames: [],
+      placeholderNames: [],
+      valuesPrinted: false,
+      lengthsPrinted: false,
+      prefixesPrinted: false,
+      suffixesPrinted: false,
+      hashesPrinted: false,
+      checksumsPrinted: false,
+    };
+  }
+
+  const statuses = LOCAL_MIRROR_CRITICAL_SECRET_NAMES.map((name) => ({
+    name,
+    category: getSanitizedSecretShape(valueSource.get(name)),
+  }));
+  const anyOfStatuses = LOCAL_MIRROR_ANY_OF_SECRET_GROUPS.map((group) => {
+    const nameStatuses = group.names.map((name) => ({
+      name,
+      category: getSanitizedSecretShape(valueSource.get(name)),
+    }));
+    const passNames = nameStatuses
+      .filter((status) => status.category === "pass_mirror_shape")
+      .map((status) => status.name);
+    const emptyNames = nameStatuses
+      .filter((status) => status.category === "empty_local_mirror_secret")
+      .map((status) => status.name);
+    const placeholderNames = nameStatuses
+      .filter((status) => status.category === "placeholder_local_mirror_secret")
+      .map((status) => status.name);
+    let category = "pass_mirror_shape";
+
+    if (passNames.length === 0 && emptyNames.length > 0) {
+      category = "empty_local_mirror_secret";
+    } else if (passNames.length === 0 && placeholderNames.length > 0) {
+      category = "placeholder_local_mirror_secret";
+    } else if (passNames.length === 0) {
+      category = "missing_env_name";
+    }
+
+    return {
+      group: group.group,
+      anyOfNames: group.names,
+      category,
+      passNames,
+      emptyNames,
+      placeholderNames,
+    };
+  });
+  const missingNames = statuses
+    .filter((status) => status.category === "missing_env_name")
+    .map((status) => status.name);
+  const emptyNames = statuses
+    .filter((status) => status.category === "empty_local_mirror_secret")
+    .map((status) => status.name);
+  const placeholderNames = statuses
+    .filter((status) => status.category === "placeholder_local_mirror_secret")
+    .map((status) => status.name);
+  const passNames = statuses
+    .filter((status) => status.category === "pass_mirror_shape")
+    .map((status) => status.name);
+  const anyOfMissingGroups = anyOfStatuses
+    .filter((status) => status.category === "missing_env_name")
+    .map((status) => status.group);
+  const anyOfEmptyGroups = anyOfStatuses
+    .filter((status) => status.category === "empty_local_mirror_secret")
+    .map((status) => status.group);
+  const anyOfPlaceholderGroups = anyOfStatuses
+    .filter((status) => status.category === "placeholder_local_mirror_secret")
+    .map((status) => status.group);
+  let category = "pass_mirror_shape";
+
+  if (emptyNames.length > 0 || anyOfEmptyGroups.length > 0) {
+    category = "empty_local_mirror_secret";
+  } else if (placeholderNames.length > 0 || anyOfPlaceholderGroups.length > 0) {
+    category = "placeholder_local_mirror_secret";
+  } else if (missingNames.length > 0 || anyOfMissingGroups.length > 0) {
+    category = "missing_env_name";
+  }
+
+  return {
+    checked: true,
+    category,
+    passNames,
+    missingNames,
+    emptyNames,
+    placeholderNames,
+    anyOf: anyOfStatuses,
+    anyOfMissingGroups,
+    anyOfEmptyGroups,
+    anyOfPlaceholderGroups,
+    valuesPrinted: false,
+    lengthsPrinted: false,
+    prefixesPrinted: false,
+    suffixesPrinted: false,
+    hashesPrinted: false,
+    checksumsPrinted: false,
+  };
+}
+
+function buildHostValueShapeStatus(presence) {
+  if (presence.source !== "vercel-production") {
+    return {
+      checked: false,
+      category: "not_host_source",
+      hostValueShapeUnverifiedNames: [],
+    };
+  }
+
+  return {
+    checked: true,
+    category: "host_value_shape_unverified",
+    hostValueShapeUnverifiedNames: LOCAL_MIRROR_CRITICAL_SECRET_NAMES.filter((name) =>
+      presence.names.has(name),
+    ),
+    valuesPrinted: false,
+    lengthsPrinted: false,
+    prefixesPrinted: false,
+    suffixesPrinted: false,
+    hashesPrinted: false,
+    checksumsPrinted: false,
+  };
+}
+
 function isTruthyFlag(name, env = process.env) {
   return ["1", "true", "yes", "on"].includes(env[name]?.trim().toLowerCase() ?? "");
 }
@@ -348,6 +571,8 @@ function buildEnvChecklist(presence, options, env = process.env) {
     paidAccess: envGroupStatus(presence.names, ENV_GROUPS.paidAccess),
     queue: envGroupStatus(presence.names, ENV_GROUPS.queue),
     processor: envGroupStatus(presence.names, ENV_GROUPS.processor),
+    aiProvider: envAnyOfStatus(presence.names, ENV_GROUPS.aiProviderAnyOf),
+    adminApi: envGroupStatus(presence.names, ENV_GROUPS.adminApi),
     accessLink: envGroupStatus(presence.names, ENV_GROUPS.accessLink),
     email: envGroupStatus(presence.names, ENV_GROUPS.email),
     line: {
@@ -388,6 +613,21 @@ function buildEnvChecklist(presence, options, env = process.env) {
     },
     runtimeFlagValues,
     runtimeFlagsUnexpected,
+    localMirrorShape: buildLocalMirrorShapeStatus(presence.valueSource),
+    hostValueShape: buildHostValueShapeStatus(presence),
+    processorReadiness: {
+      cronSecretNamePresent: presence.names.has("CRON_SECRET"),
+      internalJobSecretNamePresent: presence.names.has("INTERNAL_JOB_SECRET"),
+      processorFlagNamePresent: presence.names.has("ENABLE_PAID_GENERATION_PROCESSOR"),
+      aiProviderNamePresent: ENV_GROUPS.aiProviderAnyOf.some((name) => presence.names.has(name)),
+      category:
+        presence.names.has("CRON_SECRET") &&
+        presence.names.has("INTERNAL_JOB_SECRET") &&
+        presence.names.has("ENABLE_PAID_GENERATION_PROCESSOR") &&
+        ENV_GROUPS.aiProviderAnyOf.some((name) => presence.names.has(name))
+          ? "processor_auth_env_names_present"
+          : "processor_auth_env_missing",
+    },
   };
 }
 
@@ -561,6 +801,18 @@ function classifyReadiness(input) {
     return "blocked_project_link_mismatch";
   }
 
+  if (envChecklist.localMirrorShape?.category === "empty_local_mirror_secret") {
+    return "blocked_empty_local_mirror_secret";
+  }
+
+  if (envChecklist.localMirrorShape?.category === "placeholder_local_mirror_secret") {
+    return "blocked_placeholder_local_mirror_secret";
+  }
+
+  if (envChecklist.localMirrorShape?.category === "missing_env_name") {
+    return "blocked_missing_local_mirror_secret";
+  }
+
   if (groups.paymentProvider.missingNames.length > 0) {
     return "blocked_missing_payment_env";
   }
@@ -579,6 +831,10 @@ function classifyReadiness(input) {
 
   if (groups.processor.missingNames.length > 0) {
     return "blocked_missing_processor_env";
+  }
+
+  if (groups.aiProvider.missing) {
+    return "blocked_missing_ai_provider_env";
   }
 
   if (groups.accessLink.missingNames.length > 0) {
