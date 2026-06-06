@@ -10545,3 +10545,32 @@ Unresolved questions:
 - Confirm whether the production smoke flow should require both Email and LINE pre-payment saves in the UI before card handoff, or whether owner used a narrower path during this run.
 - Add a smoke-window checklist item for `ENABLE_PAID_GENERATION_PROCESSOR=true` so paid generation does not remain queued during the payment window.
 - Theme Architecture remains preserved and deferred.
+
+## 2026-06-06 Production Access-Link Delivery Diagnosis After Smoke v1 v0
+
+### Completed Changes
+
+- saved the Production Access-Link Delivery Diagnosis handoff
+- asserted Production environment and fail-closed posture before diagnosis
+- used production Admin CLI first for the smoke result
+- used read-only direct DB debugging only after Admin CLI lacked source/linkage/eligibility detail
+- inspected LINE bind, recipient-secret, checkout gate, paid-generation send hook, Admin lookup, and Email save code paths
+- ran Module 01 local, staging, and production-preflight gates after diagnosis
+
+### Learnings
+
+- Admin CLI confirmed payment paid, entitlement active, generation completed, paid result completed, delivery artifact ready, LINE contact saved, no LINE recipient secret, no LINE send, and no Email saved/sent state.
+- Read-only DB evidence showed exactly one LINE contact for the production result; it was bound, linked to the paid payment and active entitlement, consented, and eligible for sending.
+- There were zero recipient-secret rows and zero paid-result access-link rows for the production result.
+- The LINE bind helper writes contact first and recipient secret second; if recipient-secret write fails, the contact can remain without a secret.
+- Checkout-start unlocks payment from active contact presence only (`existingRecovery.hasAny`), not LINE deliverability / recipient-secret presence.
+- Email had no contact row for this exact result, so it is not verified for this production run rather than proven provider-send failure.
+- First failure category: `line_bind_partial_contact_without_secret`.
+- `qa:module01:local` passed; `qa:module01:staging` passed when explicit staging Admin token and known staging result ID were supplied; `qa:module01:production-preflight` passed.
+
+### Unresolved Questions
+
+- Fix LINE bind invariant so contact-without-secret cannot unlock payment or appear as saved/deliverable.
+- Enhance Admin API/CLI to surface sanitized partial-bind categories without DB debugging.
+- Reproduce/fix on staging before another production payment smoke.
+- Theme Architecture remains preserved and deferred.

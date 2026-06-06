@@ -329,19 +329,19 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」safe staging gate is documented as PASS. Controlled Production Payment Smoke v1 Clean Retry reached real payment truth, active entitlement, completed paid generation, and a completed paid result, then returned Production fail-closed. The smoke did not clean-pass because production LINE access-link delivery failed: Admin CLI shows LINE contact saved but no recipient secret and no LINE message sent.</p>
+      <p class="lead">Module 01「曖昧溫度計」safe staging gate is documented as PASS. Controlled Production Payment Smoke v1 Clean Retry reached real payment truth, active entitlement, completed paid generation, and a completed paid result, then returned Production fail-closed. Follow-up diagnosis found the delivery blocker: the production LINE bind left a bound contact without an active recipient secret, so the payment gate could unlock but LINE access-link delivery could not send.</p>
       <div class="snapshot" aria-label="Project snapshot">
         <div><span class="label">Last updated</span><span class="value">2026-06-06 21:20 CST</span></div>
         <div><span class="label">Current phase</span><span class="value">Production smoke partial</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Production LINE recipient secret missing</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">LINE partial bind invariant</span></div>
       </div>
     </header>
 
     <section>
       <h2>Launch Gate Model</h2>
       <div class="grid">
-        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, canonical Vercel deploy alignment, real credit-card payment truth, entitlement creation, paid generation completion, and completed paid result rendering are proven. Gate 1 is still not clean-pass because production LINE access-link delivery failed with missing recipient secret and no LINE message.</p></article>
+        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, canonical Vercel deploy alignment, real credit-card payment truth, entitlement creation, paid generation completion, and completed paid result rendering are proven. Gate 1 is still not clean-pass because LINE bind can leave a contact without recipient secret, which blocks access-link delivery.</p></article>
         <article class="card"><span class="badge waiting">Gate 2</span><h3>Soft public availability</h3><p>Allows low/no-traffic production checkout only after controlled smoke, support/access-link readiness, monitoring, and rollback thresholds. No ads yet.</p></article>
         <article class="card"><span class="badge waiting">Gate 3</span><h3>Growth / ads launch</h3><p>Requires stable soft availability, conversion tracking, support cadence, stop-loss thresholds, channel readiness, and ad budget controls. NewebPay approval does not equal commercial launch.</p></article>
       </div>
@@ -435,7 +435,7 @@
         <h2>NewebPay Status</h2>
         <p>Merchant review approval is complete. Production public pages are ready. Production NewebPay provider config dry-run, Production DB migration gate, unified ReturnURL, and real production payment truth are proven. The latest controlled smoke reached completed paid result after processor recovery but failed LINE access-link message delivery. Sandbox shop remains available for regression QA.</p>
         <p>Sandbox checkout, browser return, NotifyURL transport, TradeInfo decrypt, paid readiness, queue completion, and session-bound access are proven by v5.</p>
-        <p>Next action: keep production disabled. Diagnose production LINE recipient-secret creation, rerun gates, then retry only after owner approval.</p>
+        <p>Next action: keep production disabled. Fix the LINE recipient-secret bind invariant on staging, rerun gates, then retry production only after owner approval.</p>
       </div>
     </section>
 
@@ -526,7 +526,7 @@
           <tr><td>P0</td><td>Module 01 safe staging gate</td><td>Owner</td><td>Acceptance snapshot complete. Latest safe gates: local pass and staging pass with Admin API + Admin CLI smoke. Production-preflight is separately blocked on owner-fill production mirror values.</td></tr>
           <tr><td>P0</td><td>Admin ops boundary</td><td>Code / Ops</td><td>Read-only Admin paid-result lookup API and pure Admin CLI are implemented. Preview(staging) CLI lookup smoke passed; production read-only CLI smoke requires explicit approval.</td></tr>
           <tr><td>P0</td><td>Production env mirror gate</td><td>Code / Ops</td><td>Final verification complete. Local mirrors pass shape checks, Vercel env is synced, and production preflight passes. Keep production frozen until owner approves controlled smoke.</td></tr>
-          <tr><td>P0</td><td>Production LINE access-link delivery</td><td>Code / Ops</td><td>Latest production smoke paid and generated successfully, but Admin CLI shows LINE contact saved without recipient secret and no LINE message. Diagnose bind/recipient-secret creation before another production payment smoke.</td></tr>
+          <tr><td>P0</td><td>LINE recipient-secret bind invariant</td><td>Code / Ops</td><td>Diagnosis complete: production smoke contact was bound, linked, consented, and eligible, but no recipient-secret row or access-link row existed. Fix contact-without-secret partial state and require deliverable LINE state before payment unlock.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -561,7 +561,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> Resolve production LINE recipient-secret creation / access-link delivery, then rerun Module 01 gates. Do not run another production payment smoke until the delivery failure is fixed and owner approves the retry. Theme implementation remains deferred unless the owner chooses visual architecture work instead.</p>
+        <p><strong>Current recommendation:</strong> LINE Recipient Secret Bind Invariant Fix v0, reproduced and validated on staging. Do not run another production payment smoke until the delivery failure is fixed, Module 01 gates pass, and owner approves the retry. Theme implementation remains deferred unless the owner chooses visual architecture work instead.</p>
         <p>If fresh real channel evidence is needed, implement or run an explicit owner-approved <code>qa:module01:staging:channels</code> path instead of folding real Email/LINE sends into the default suite.</p>
         <p>Production controlled smoke cannot start from a one-off Codex next step. It requires release-suite pass or owner acceptance, production preflight pass, and explicit owner approval.</p>
       </div>
