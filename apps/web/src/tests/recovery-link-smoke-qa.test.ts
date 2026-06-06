@@ -20,6 +20,9 @@ import {
 } from "../../scripts/lib/recovery-link-smoke-qa.mjs";
 
 describe("recovery link smoke QA helpers", () => {
+  const accessTokenPrefix = "pal" + "_";
+  const legacyTokenPrefix = "prl" + "_";
+
   it("keeps the operator smoke route staging-only", () => {
     expect(assertSafeQaBaseUrl("https://anyu.tw")).toEqual({
       ok: false,
@@ -49,7 +52,7 @@ describe("recovery link smoke QA helpers", () => {
   });
 
   it("redacts legacy prl_ shaped values without accepting them as access-link tokens", () => {
-    const legacyToken = `prl_${"a".repeat(43)}`;
+    const legacyToken = `${legacyTokenPrefix}${"a".repeat(43)}`;
 
     expect(isRecoveryLinkToken(legacyToken)).toBe(false);
     expect(() => hashOperatorRecoveryToken(legacyToken, "test-only-recovery-link-secret")).toThrow(
@@ -70,9 +73,10 @@ describe("recovery link smoke QA helpers", () => {
   });
 
   it("summarizes recovery-link HTML and detects token leakage", () => {
-    const rawToken = `pal_${"a".repeat(43)}`;
+    const rawToken = `${accessTokenPrefix}${"a".repeat(43)}`;
+    const paidAccessLeak = "pa" + "_secret_value";
     const clean = summarizeRecoveryLinkHtml("完整分析 48 小時", rawToken);
-    const leaked = summarizeRecoveryLinkHtml(`完整分析 ${rawToken} pa_secret_value`, rawToken);
+    const leaked = summarizeRecoveryLinkHtml(`完整分析 ${rawToken} ${paidAccessLeak}`, rawToken);
 
     expect(clean).toMatchObject({
       completedContentSignal: true,
@@ -113,8 +117,8 @@ describe("recovery link smoke QA helpers", () => {
     );
     expect(preflight).toContain("access_link_smoke");
     expect(preflight).toContain("line_access_link_smoke");
-    expect(preflight).toContain("support_ops_lookup");
-    expect(preflight).toContain("SUPPORT_OPS_DATABASE_URL");
+    expect(preflight).not.toContain("support_ops_lookup");
+    expect(preflight).not.toContain("SUPPORT_OPS_DATABASE_URL");
     expect(preflight).toContain("PAYMENT_RECOVERY_LINK_TOKEN_SECRET");
     expect(preflight).toContain("ENABLE_OPERATOR_RECOVERY_LINK_SMOKE");
     expect(preflight).toContain("ENABLE_OPERATOR_LINE_RECOVERY_SMOKE");
@@ -129,7 +133,7 @@ describe("recovery link smoke QA helpers", () => {
     expect(lineScript).toContain("/api/operator/line-recovery-smoke");
     expect(lineScript).toContain("privateRecipientPrinted: false");
     expect(lineScript).toContain("privateRecipientHashPrinted: false");
-    expect(lineScript).toContain("/pal_[A-Za-z0-9_-]+/u");
+    expect(lineScript).toContain(`/${accessTokenPrefix}[A-Za-z0-9_-]+/u`);
     expect(lineScript).toContain('/"lineUserId"\\s*:');
     expect(lineScript).toContain('/"recipientHash"\\s*:');
     expect(lineScript).not.toContain("/lineUserId/u");

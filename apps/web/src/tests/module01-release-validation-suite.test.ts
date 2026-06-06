@@ -32,6 +32,7 @@ describe("Module 01 release validation suite", () => {
     expect(packageJson.scripts["qa:module01:release"]).toBe(
       "node scripts/module01-release-validation-suite.mjs release",
     );
+    expect(packageJson.scripts["ops:paid-result:lookup"]).toBeUndefined();
     expect(rootPackageJson.scripts["ops"]).toBe("corepack pnpm --filter @anyu/admin-cli ops");
     expect(rootPackageJson.scripts["ops"]).not.toContain("--dir");
     expect(rootPackageJson.scripts["ops"]).not.toContain("exec tsx");

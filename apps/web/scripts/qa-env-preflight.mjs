@@ -2,7 +2,6 @@
 
 import fs from "node:fs";
 import { loadLocalEnv } from "./lib/load-local-env.mjs";
-import { verifyDatabaseUrlCleanAccessLinkSchema } from "./support-paid-result-lookup.mjs";
 
 const MODE_ALIASES = new Map([
   ["all", "all"],
@@ -26,10 +25,6 @@ const MODE_ALIASES = new Map([
   ["line-access-link-smoke", "line_access_link_smoke"],
   ["line_access_link_message_smoke", "line_access_link_smoke"],
   ["line-access-link-message-smoke", "line_access_link_smoke"],
-  ["support_ops_lookup", "support_ops_lookup"],
-  ["support-ops-lookup", "support_ops_lookup"],
-  ["ops_paid_result_lookup", "support_ops_lookup"],
-  ["ops-paid-result-lookup", "support_ops_lookup"],
   ["manual_fallback", "manual_fallback"],
   ["manual-fallback", "manual_fallback"],
   ["vercel_env_alignment", "vercel_env_alignment"],
@@ -219,30 +214,6 @@ const MODE_DEFINITIONS = {
     ],
     missingBehavior: "blocks real LINE recovery message smoke or safely returns provider/config unavailable without printing LINE recipient data",
   },
-  support_ops_lookup: {
-    command: "corepack pnpm run ops:paid-result:lookup -- --no-local-env --result-id <id>",
-    requiredShell: [],
-    optionalShell: [
-      "SUPPORT_OPS_DATABASE_URL",
-      "DATABASE_URL",
-      "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
-      "SUPPORT_LOOKUP_TARGET",
-      "SUPPORT_LOOKUP_ALLOW_PRODUCTION_READONLY",
-      "SUPPORT_LOOKUP_DISABLE_LOCAL_ENV",
-      "SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK",
-    ],
-    previewStaging: [
-      "DATABASE_URL",
-      "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
-    ],
-    mustMatchPreviewStaging: ["SUPPORT_OPS_DATABASE_URL", "DATABASE_URL"],
-    neverProduction: [
-      "SUPPORT_OPS_DATABASE_URL",
-      "SUPPORT_OPS_ALLOW_DATABASE_URL_FALLBACK",
-      "PAYMENT_RECOVERY_CONTACT_HASH_SECRET",
-    ],
-    missingBehavior: "legacy direct DB helper blocks unless process env is explicit; target architecture is Admin API lookup",
-  },
   manual_fallback: {
     command: "manual processor path used by qa:fake-paid default mode",
     requiredShell: ["INTERNAL_JOB_SECRET"],
@@ -383,52 +354,6 @@ async function summarizeMode(mode, definition, envLocal) {
     },
     missingBehavior: definition.missingBehavior,
   };
-
-  if (mode === "support_ops_lookup") {
-    const supportOpsPresent = envPresence("SUPPORT_OPS_DATABASE_URL");
-    const databaseUrlPresent = envPresence("DATABASE_URL");
-    let databaseUrlSchemaProbe = {
-      checked: false,
-      category: databaseUrlPresent ? "not_needed" : "database_url_missing",
-      accessLinkTablesPresent: null,
-      oldRecoveryTablesAbsent: null,
-      valuesPrinted: false,
-    };
-
-    if (!supportOpsPresent && databaseUrlPresent) {
-      const probe = await verifyDatabaseUrlCleanAccessLinkSchema(process.env.DATABASE_URL).catch(() => ({
-        ok: false,
-        category: "database_url_schema_probe_failed",
-        accessLinkTablesPresent: false,
-        oldRecoveryTablesAbsent: false,
-        valuesPrinted: false,
-      }));
-      databaseUrlSchemaProbe = {
-        checked: true,
-        category: probe.category,
-        accessLinkTablesPresent: probe.accessLinkTablesPresent,
-        oldRecoveryTablesAbsent: probe.oldRecoveryTablesAbsent,
-        valuesPrinted: false,
-      };
-    }
-
-    summary.supportLookupSource = {
-      category: supportOpsPresent
-        ? "support_ops_database_url"
-        : databaseUrlSchemaProbe.category === "database_url_schema_verified"
-          ? "database_url_schema_verified"
-          : databaseUrlPresent
-            ? "blocked_database_url_schema_mismatch"
-            : "blocked_missing_db_url",
-      supportOpsDatabaseUrlPresent: supportOpsPresent,
-      databaseUrlPresent,
-      databaseUrlSchemaProbe,
-      valuesPrinted: false,
-    };
-    summary.ok =
-      summary.ok &&
-      (supportOpsPresent || summary.supportLookupSource.category === "database_url_schema_verified");
-  }
 
   return summary;
 }

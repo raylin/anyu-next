@@ -10256,3 +10256,26 @@ Unresolved questions:
 - Decide whether to add a built `bin` package later if pnpm lifecycle context on expected CLI errors becomes noisy for operators.
 - Decide when, if ever, to run a production read-only Admin CLI lookup smoke.
 - Owner acceptance is still required before any production readiness task resumes.
+
+## 2026-06-06 Admin Ops Boundary Cleanup v0
+
+### Completed Changes
+
+- saved the Admin Ops Boundary Cleanup v0 handoff
+- removed active `ops:paid-result:lookup` package script
+- removed `apps/web/scripts/support-paid-result-lookup.mjs`
+- removed `apps/web/src/tests/support-paid-result-lookup.test.ts`
+- removed `support-ops-lookup` aliases and mode from `qa:env:preflight`
+- removed active `SUPPORT_OPS_DATABASE_URL` reliance from app scripts
+- updated active dashboard/status docs so Admin API + `pnpm ops lookup-result` is the only supported ops lookup path
+
+### Learnings
+
+- The legacy direct DB support lookup was isolated enough to remove cleanly after Admin API + Admin CLI coverage passed.
+- Historical reports and summary entries still mention `SUPPORT_OPS_DATABASE_URL`, but these are history and should not be rewritten.
+- Keeping a runnable deprecated stub would preserve the confusion risk; clean removal is simpler and safer.
+
+### Unresolved Questions
+
+- Owner acceptance is still required before any production readiness task resumes.
+- Decide later whether to add a concise Admin CLI ops runbook after operator usage stabilizes.
