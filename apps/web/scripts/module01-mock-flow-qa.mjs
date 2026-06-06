@@ -11,9 +11,12 @@ const OUTPUT_PATH = path.join(OUTPUT_DIR, "module01-mock-flow-summary.json");
 const TARGETED_TESTS = [
   "src/tests/admin-paid-result-lookup.test.ts",
   "src/tests/admin-paid-result-lookup-route.test.ts",
+  "src/tests/admin-line-bind-diagnostics-route.test.ts",
   "src/tests/newebpay-checkout-start-page.test.tsx",
   "src/tests/payment-recovery-email-route.test.ts",
   "src/tests/line-recovery-bind-route.test.ts",
+  "src/tests/line-recovery-bind-diagnostics-route.test.ts",
+  "src/tests/line-bind-diagnostic-events.test.ts",
   "src/tests/payment-recovery-contact-secrets.test.ts",
   "src/tests/email-recovery-link.test.ts",
   "src/tests/line-recovery-link.test.ts",
@@ -54,9 +57,14 @@ const SCENARIOS = [
       "liff_state_valid",
       "id_token_present",
       "bind_api_success_category",
+      "server_bind_success_event_recorded",
       "no_private_diagnostic_output",
     ],
-    tests: ["src/tests/line-recovery-bind-diagnostics.test.ts"],
+    tests: [
+      "src/tests/line-recovery-bind-diagnostics.test.ts",
+      "src/tests/line-recovery-bind-route.test.ts",
+      "src/tests/line-bind-diagnostic-events.test.ts",
+    ],
   },
   {
     id: "line_liff_missing_state",
@@ -71,21 +79,40 @@ const SCENARIOS = [
     id: "line_liff_missing_id_token",
     validates: [
       "id_token_missing_after_login_category",
+      "client_diagnostic_event_recorded",
       "line_retry_or_email_fallback",
       "no_id_token_output",
     ],
-    tests: ["src/tests/line-recovery-bind-diagnostics.test.ts"],
+    tests: [
+      "src/tests/line-recovery-bind-diagnostics.test.ts",
+      "src/tests/line-recovery-bind-diagnostics-route.test.ts",
+      "src/tests/line-bind-diagnostic-events.test.ts",
+    ],
   },
   {
     id: "line_bind_recipient_secret_failure",
     validates: [
       "recipient_secret_failure_category",
+      "server_recipient_secret_failure_event_recorded",
       "line_bind_failure_safe_message",
       "no_raw_line_identity_output",
     ],
     tests: [
       "src/tests/line-recovery-bind-diagnostics.test.ts",
       "src/tests/line-recovery-bind-route.test.ts",
+      "src/tests/line-bind-diagnostic-events.test.ts",
+    ],
+  },
+  {
+    id: "line_bind_admin_diagnostics_summary",
+    validates: [
+      "admin_api_auth_first",
+      "admin_api_sanitized_line_bind_summary",
+      "ops_cli_line_bind_lookup_path",
+    ],
+    tests: [
+      "src/tests/admin-line-bind-diagnostics-route.test.ts",
+      "src/tests/line-bind-diagnostic-events.test.ts",
     ],
   },
   {

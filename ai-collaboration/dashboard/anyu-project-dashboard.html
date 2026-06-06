@@ -329,12 +329,12 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」safe staging gate remains PASS and Production is fail-closed. Fixture + Smoke Prep Foundation v0 and LINE / LIFF Bind Diagnostic Harness v0 are complete. The next decision is whether to add Admin API pre-payment bind diagnostics before implementing the production LINE bind fix.</p>
+      <p class="lead">Module 01「曖昧溫度計」safe staging gate remains PASS and Production is fail-closed. Fixture + Smoke Prep Foundation v0, LINE / LIFF Bind Diagnostic Harness v0, and Admin API pre-payment LINE bind diagnostics are complete. Next mainline task: LINE production bind fix with targeted/mock/UI/staging validation.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-07 00:22 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Pre-payment bind diagnostics decision</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-07 00:39 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">LINE production bind fix prep</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">LINE/LIFF bind path not reproducible enough</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Production LINE login redirect bind failure</span></div>
       </div>
     </header>
 
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge progress">Blocked</span><h3>Launch readiness</h3><p>Safe Module 01 staging gate passes and Env Mirror Strategy v2 final verification is complete. Shared Module 01 smoke fixtures and local LINE/LIFF bind diagnostic categories are now in place. The next gap is whether pre-payment bind attempts need Admin API visibility before the production LINE bind fix. Production is frozen and no ads or broad traffic are enabled.</p></article>
+        <article class="card"><span class="badge progress">Blocked</span><h3>Launch readiness</h3><p>Safe Module 01 staging gate passes and Env Mirror Strategy v2 final verification is complete. Shared Module 01 smoke fixtures, local LINE/LIFF bind categories, and Admin API/CLI pre-payment LINE bind diagnostics are now in place. Next gap is the production LINE login redirect bind fix. Production is frozen and no ads or broad traffic are enabled.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
@@ -532,8 +532,8 @@
           <tr><td>P0</td><td>Module 01 safe staging gate</td><td>Owner</td><td>Acceptance snapshot complete. Latest safe gates: local pass and staging pass with Admin API + Admin CLI smoke. Production-preflight is separately blocked on owner-fill production mirror values.</td></tr>
           <tr><td>P0</td><td>Admin ops boundary</td><td>Code / Ops</td><td>Read-only Admin paid-result lookup API and pure Admin CLI are implemented. Preview(staging) CLI lookup smoke passed; production read-only CLI smoke requires explicit approval.</td></tr>
           <tr><td>P0</td><td>Production env mirror gate</td><td>Code / Ops</td><td>Final verification complete. Local mirrors pass shape checks, Vercel env is synced, and production preflight passes. Keep production frozen until owner approves controlled smoke.</td></tr>
-          <tr><td>P0</td><td>Engineering foundation hardening</td><td>Code / Ops</td><td>Fixture + Smoke Prep Foundation v0 and LINE / LIFF Bind Diagnostic Harness v0 complete. Local diagnostics classify LIFF bridge outcomes; next decision is whether Admin API pre-payment bind diagnostics are needed.</td></tr>
-          <tr><td>P0</td><td>LINE recipient-secret bind invariant</td><td>Code / Ops</td><td>Local fix and staging verification are complete for contact/secret consistency. The remaining gap is the production LINE login redirect/LIFF bridge path, which is not yet reproducible enough outside owner manual action.</td></tr>
+          <tr><td>P0</td><td>Engineering foundation hardening</td><td>Code / Ops</td><td>Fixture + Smoke Prep Foundation v0, LINE / LIFF Bind Diagnostic Harness v0, and Admin API pre-payment LINE bind diagnostics are complete. New ops command: <code>pnpm ops lookup-line-bind --env staging|production --result-id &lt;resultId&gt;</code>.</td></tr>
+          <tr><td>P0</td><td>LINE recipient-secret bind invariant</td><td>Code / Ops</td><td>Local fix and staging verification are complete for contact/secret consistency. The remaining gap is the production LINE login redirect/LIFF bridge path; use persisted diagnostics and targeted/mock/UI/staging validation for the fix before another smoke.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -569,7 +569,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> run Admin API Pre-Payment Bind Diagnostics v0 if owner wants ops-visible bind attempts before the fix; otherwise proceed to LINE production bind fix with targeted/mock/UI/staging validation. Do not retry production payment smoke yet.</p>
+        <p><strong>Current recommendation:</strong> proceed to LINE production bind fix with targeted/mock/UI/staging validation, using persisted Admin API/CLI bind diagnostics. Do not retry production payment smoke yet.</p>
         <p>If fresh real channel evidence is needed later, implement the guarded <code>qa:module01:staging:channels</code> runner behind explicit owner approval instead of folding real Email/LINE sends into the default suite.</p>
         <p>Production controlled smoke should not be the next diagnostic tool. It requires the foundation blockers to be addressed, gates to pass, and explicit owner approval.</p>
       </div>

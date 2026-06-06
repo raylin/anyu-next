@@ -90,6 +90,11 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
           context,
           liffIdConfigured: false,
         });
+        void recordLineRecoveryBindDiagnostic({
+          state: context.state,
+          category: "liff_init_failed",
+          hasLiffState: true,
+        });
         setState("fallback");
         setDiagnosticCategory(fallback.category);
         setMessage(fallback.safeMessage);
@@ -106,6 +111,11 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
             context,
             sdkLoadStatus: "failed",
           });
+          void recordLineRecoveryBindDiagnostic({
+            state: context.state,
+            category: "liff_sdk_load_failed",
+            hasLiffState: true,
+          });
           setState("fallback");
           setDiagnosticCategory(fallback.category);
           setMessage(fallback.safeMessage);
@@ -120,6 +130,11 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
             sdkLoadStatus: "loaded",
             initStatus: "failed",
           });
+          void recordLineRecoveryBindDiagnostic({
+            state: context.state,
+            category: "liff_init_failed",
+            hasLiffState: true,
+          });
           setState("fallback");
           setDiagnosticCategory(fallback.category);
           setMessage(fallback.safeMessage);
@@ -132,6 +147,11 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
             sdkLoadStatus: "loaded",
             initStatus: "success",
             loggedIn: false,
+          });
+          void recordLineRecoveryBindDiagnostic({
+            state: context.state,
+            category: "liff_login_redirect_started",
+            hasLiffState: true,
           });
           setDiagnosticCategory(redirect.category);
           setMessage(redirect.safeMessage);
@@ -148,6 +168,12 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
             initStatus: "success",
             loggedIn: true,
             idTokenPresent: false,
+          });
+          void recordLineRecoveryBindDiagnostic({
+            state: context.state,
+            category: "id_token_missing_after_login",
+            hasLiffState: true,
+            hasIdToken: false,
           });
           setState("fallback");
           setDiagnosticCategory(fallback.category);
@@ -281,6 +307,35 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
       </section>
     </main>
   );
+}
+
+function recordLineRecoveryBindDiagnostic(input: {
+  state?: string | null;
+  category: LineRecoveryBindDiagnosticCategory;
+  hasLiffState?: boolean;
+  hasIdToken?: boolean;
+  bindApiReached?: boolean;
+  recipientSecretRequired?: boolean;
+  recipientSecretCreated?: boolean;
+}) {
+  if (!input.state) {
+    return Promise.resolve();
+  }
+
+  return fetch("/api/line/recovery/bind-diagnostics", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    keepalive: true,
+    body: JSON.stringify({
+      state: input.state,
+      category: input.category,
+      hasLiffState: input.hasLiffState,
+      hasIdToken: input.hasIdToken,
+      bindApiReached: input.bindApiReached,
+      recipientSecretRequired: input.recipientSecretRequired,
+      recipientSecretCreated: input.recipientSecretCreated,
+    }),
+  }).catch(() => null);
 }
 
 function loadLiffSdk() {

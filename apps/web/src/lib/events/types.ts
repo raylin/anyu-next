@@ -19,6 +19,7 @@ export const EVENT_NAMES = [
   "fulfillment_link_delivered",
   "fulfillment_failed",
   "line_webhook_received",
+  "line_bind_diagnostic",
   "email_fallback_opened",
   "contact_submitted",
   "share_card_clicked",

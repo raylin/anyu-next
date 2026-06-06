@@ -10814,3 +10814,39 @@ Unresolved questions:
 
 - None for this warning fix.
 - Return to the owner/PM mainline engineering foundation work.
+
+## 2026-06-07 Admin API Pre-Payment LINE Bind Diagnostics v0
+
+### Completed Changes
+
+- saved the Admin API Pre-Payment LINE Bind Diagnostics v0 handoff
+- added sanitized LINE bind diagnostic persistence through existing `events` records using `eventName=line_bind_diagnostic`
+- added `POST /api/line/recovery/bind-diagnostics` for safe client-side category recording when signed bind state verifies
+- instrumented `/api/line/recovery/bind-liff` to record server-side bind success/failure categories
+- added `GET /api/admin/line-bind-diagnostics?resultId=<resultId>` behind `x-admin-api-token`
+- added `pnpm ops lookup-line-bind --env staging|production --result-id <resultId>` with `--json`
+- extended `qa:module01:mock-flow` with persisted/queryable diagnostics scenarios
+
+### Learnings
+
+- The existing `events` table is sufficient for v0 sanitized bind diagnostics, so no schema migration was needed.
+- Client-side categories without a valid signed state remain intentionally unattributable and are not stored.
+- Admin API/CLI can now inspect pre-payment bind attempts by `resultId` without direct DB lookup or private values.
+
+### Validation
+
+- Admin CLI tests passed: 2 files / 23 tests.
+- Targeted app diagnostics tests passed: 4 files / 16 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 92 files / 631 tests.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass after sandbox-escalated browser rerun.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass.
+
+### Unresolved Questions
+
+- `qa:module01:staging` was intentionally skipped because no migration was applied and no deployed endpoint verification was required.
+- `qa:module01:production-preflight` was intentionally skipped because production schema/env/preflight behavior did not change.
+- Next mainline task: LINE production bind fix with targeted/mock/UI/staging validation, using the new diagnostics.

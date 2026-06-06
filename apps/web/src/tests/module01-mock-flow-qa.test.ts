@@ -16,6 +16,7 @@ describe("Module 01 mock-flow QA helper", () => {
       "line_liff_missing_state",
       "line_liff_missing_id_token",
       "line_bind_recipient_secret_failure",
+      "line_bind_admin_diagnostics_summary",
       "line_email_fallback_after_bind_failure",
       "line_partial_bind_without_recipient_secret",
       "email_fallback_after_line_incomplete",
@@ -24,9 +25,12 @@ describe("Module 01 mock-flow QA helper", () => {
     expect(TARGETED_TESTS).toEqual(
       expect.arrayContaining([
         "src/tests/admin-paid-result-lookup.test.ts",
+        "src/tests/admin-line-bind-diagnostics-route.test.ts",
         "src/tests/newebpay-checkout-start-page.test.tsx",
         "src/tests/payment-recovery-email-route.test.ts",
         "src/tests/line-recovery-bind-route.test.ts",
+        "src/tests/line-recovery-bind-diagnostics-route.test.ts",
+        "src/tests/line-bind-diagnostic-events.test.ts",
         "src/tests/payment-recovery-contact-secrets.test.ts",
         "src/tests/email-recovery-link.test.ts",
         "src/tests/line-recovery-link.test.ts",

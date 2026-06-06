@@ -1,10 +1,16 @@
 import { Buffer } from "node:buffer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockIsDbConfigured, mockRequireDb, mockVerifyLineIdToken } = vi.hoisted(() => ({
+const {
+  mockIsDbConfigured,
+  mockRequireDb,
+  mockVerifyLineIdToken,
+  mockRecordLineBindDiagnosticEvent,
+} = vi.hoisted(() => ({
   mockIsDbConfigured: vi.fn(),
   mockRequireDb: vi.fn(),
   mockVerifyLineIdToken: vi.fn(),
+  mockRecordLineBindDiagnosticEvent: vi.fn(),
 }));
 
 vi.mock("@/lib/db/client", () => ({
@@ -14,6 +20,10 @@ vi.mock("@/lib/db/client", () => ({
 
 vi.mock("@/lib/line/liff", () => ({
   verifyLineIdToken: mockVerifyLineIdToken,
+}));
+
+vi.mock("@/lib/line/recovery-bind-diagnostic-events", () => ({
+  recordLineBindDiagnosticEvent: mockRecordLineBindDiagnosticEvent,
 }));
 
 import { POST } from "@/app/api/line/recovery/bind-liff/route";
@@ -114,6 +124,7 @@ describe("LINE recovery bind LIFF route", () => {
       lineUserId: RAW_LINE_TEST_USER_ID,
       audience: "1234567890",
     });
+    mockRecordLineBindDiagnosticEvent.mockResolvedValue({});
   });
 
   it("binds verified LIFF identity to hash-only LINE recovery contact", async () => {
@@ -194,6 +205,17 @@ describe("LINE recovery bind LIFF route", () => {
     expect(JSON.stringify(data)).not.toContain("line-id-token");
     expect(JSON.stringify(data)).not.toContain("pa_");
     expect(JSON.stringify(data)).not.toContain("pcs_");
+    expect(mockRecordLineBindDiagnosticEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "server",
+        category: "bind_success",
+        hasLiffState: true,
+        hasIdToken: true,
+        bindApiReached: true,
+        recipientSecretRequired: true,
+        recipientSecretCreated: true,
+      }),
+    );
   });
 
   it("fails safely for missing or unverifiable LINE identity and keeps Email fallback return path", async () => {
@@ -214,6 +236,15 @@ describe("LINE recovery bind LIFF route", () => {
       returnPath: `/m/ambiguous-temperature/result/${RESULT_ID}?lineRecovery=line_error`,
     });
     expect(mockVerifyLineIdToken).not.toHaveBeenCalled();
+    expect(mockRecordLineBindDiagnosticEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "server",
+        category: "bind_api_line_identity_missing",
+        hasLiffState: true,
+        hasIdToken: false,
+        bindApiReached: true,
+      }),
+    );
 
     mockVerifyLineIdToken.mockResolvedValueOnce({ ok: false, error: "line_verify_failed" });
     const invalidResponse = await POST(
@@ -230,6 +261,13 @@ describe("LINE recovery bind LIFF route", () => {
       error: "line_user_missing",
       returnPath: `/m/ambiguous-temperature/result/${RESULT_ID}?lineRecovery=line_error`,
     });
+    expect(mockRecordLineBindDiagnosticEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "server",
+        category: "bind_api_line_identity_missing",
+        hasIdToken: true,
+      }),
+    );
   });
 
   it("rejects expired, tampered, and token-like recovery state safely", async () => {
@@ -346,6 +384,14 @@ describe("LINE recovery bind LIFF route", () => {
     expect(dbMock.capture.updateValues).toMatchObject({
       status: "failed",
     });
+    expect(mockRecordLineBindDiagnosticEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "server",
+        category: "bind_api_recipient_secret_failed",
+        recipientSecretRequired: true,
+        recipientSecretCreated: false,
+      }),
+    );
     expect(JSON.stringify(data)).not.toContain(RAW_LINE_TEST_USER_ID);
     expect(JSON.stringify(data)).not.toContain("encryptedRecipient");
     expect(JSON.stringify(data)).not.toContain("recipientHash");

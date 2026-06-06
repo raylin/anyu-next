@@ -5,6 +5,8 @@ import {
   isSafeLineRecoveryReturnPath,
   resolveLineRecoveryBindStateToken,
 } from "@/lib/line/recovery-bind-state";
+import { recordLineBindDiagnosticEvent } from "@/lib/line/recovery-bind-diagnostic-events";
+import { mapLineRecoveryBindApiFailure } from "@/lib/line/recovery-bind-diagnostics";
 import { verifyLineIdToken } from "@/lib/line/liff";
 
 type LineRecoveryBindPayload = {
@@ -73,6 +75,17 @@ export async function POST(request: Request) {
   const idToken = body.idToken?.trim();
 
   if (!idToken) {
+    await recordLineBindDiagnosticEvent({
+      state: stateResult.payload,
+      source: "server",
+      category: "bind_api_line_identity_missing",
+      hasLiffState: true,
+      hasIdToken: false,
+      bindApiReached: true,
+      recipientSecretRequired: true,
+      recipientSecretCreated: false,
+    }).catch(() => null);
+
     return jsonFailure({
       error: "line_user_missing",
       status: 400,
@@ -83,6 +96,17 @@ export async function POST(request: Request) {
   const identity = await verifyLineIdToken({ idToken });
 
   if (!identity.ok) {
+    await recordLineBindDiagnosticEvent({
+      state: stateResult.payload,
+      source: "server",
+      category: "bind_api_line_identity_missing",
+      hasLiffState: true,
+      hasIdToken: true,
+      bindApiReached: true,
+      recipientSecretRequired: true,
+      recipientSecretCreated: false,
+    }).catch(() => null);
+
     return jsonFailure({
       error: "line_user_missing",
       status: 401,
@@ -96,6 +120,20 @@ export async function POST(request: Request) {
   });
 
   if (!bindResult.ok) {
+    await recordLineBindDiagnosticEvent({
+      state: stateResult.payload,
+      source: "server",
+      category: mapLineRecoveryBindApiFailure({
+        error: "bind_failed",
+        bindCategory: bindResult.category,
+      }),
+      hasLiffState: true,
+      hasIdToken: true,
+      bindApiReached: true,
+      recipientSecretRequired: true,
+      recipientSecretCreated: false,
+    }).catch(() => null);
+
     return jsonFailure({
       error: "bind_failed",
       status: bindResult.category === "line_hash_failed" ? 503 : 500,
@@ -103,6 +141,17 @@ export async function POST(request: Request) {
       bindCategory: bindResult.category,
     });
   }
+
+  await recordLineBindDiagnosticEvent({
+    state: stateResult.payload,
+    source: "server",
+    category: "bind_success",
+    hasLiffState: true,
+    hasIdToken: true,
+    bindApiReached: true,
+    recipientSecretRequired: true,
+    recipientSecretCreated: true,
+  }).catch(() => null);
 
   return NextResponse.json({
     ok: true,
