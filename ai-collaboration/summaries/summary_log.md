@@ -10749,3 +10749,22 @@ Unresolved questions:
 - Decide whether to implement guarded Preview-only QA fixture endpoints after the fixture/test architecture is designed.
 - Add Vercel alias target inspection later to close the remaining canonical deploy/source guard gap.
 - Theme Architecture remains archived and preserved; runtime theme work remains deferred behind production-gate foundation.
+
+## 2026-06-06 Codex Approval Policy Deprecation Warning Fix v0
+
+### Completed Changes
+
+- Updated the user-level Codex config approval policy from `on-failure` to `on-request`.
+- Confirmed `/Users/raylin/.codex/config.toml` and `/Users/raylin/.Codex/config.toml` are the same config by inode.
+- Added the required handoff and execution report for the local tooling change.
+
+### Validation
+
+- Verified both active config paths report `approval_policy = "on-request"`.
+- Verified no active config path still uses `approval_policy = "on-failure"`.
+- Skipped app lint/test/build and staging/production QA because no app source, env mirror, Vercel, runtime, payment, Email, LINE, access-link, or Admin/Ops behavior changed.
+
+### Unresolved Questions
+
+- None for this warning fix.
+- Return to the owner/PM mainline engineering foundation work.
