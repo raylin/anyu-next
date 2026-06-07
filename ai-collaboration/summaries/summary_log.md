@@ -11492,3 +11492,37 @@ Unresolved questions:
 - Staging runtime config values were not verified because `ADMIN_API_TOKEN` was not present in the process environment.
 - No production runtime, payment, real Email, real LINE, Vercel env change, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
 - Next action: re-run the staging rebaseline with explicit `ADMIN_API_TOKEN` available to `pnpm ops`.
+
+## 2026-06-07 Staging Admin Token Injection + Email Rebaseline Resume v0
+
+### Completed Changes
+
+- added a safe staging QA Admin token resolver with precedence: process env first, then approved `.env.staging` mirror, else `staging_admin_token_unavailable_owner_action_required`
+- wired staging QA/Admin helpers to inject `ADMIN_API_TOKEN` into `pnpm ops` subprocess env without teaching the CLI to read app env mirrors
+- updated `qa:module01:wait-result` to use the same resolver and report only token source category
+- documented the staging QA token injection policy in QA/Admin/Ops process docs and handoff guidance
+- resumed focused staging evidence: fresh fixture, fresh staging result, Email save, checkout unlock, mock/no-card paid transition, access-link readiness, and paid result render all passed
+- ran full `qa:module01:staging` once with freshness target `9edcd43`; required checks passed and Admin API/CLI lookup checks passed using `staging_mirror` token injection
+
+### Validation
+
+- targeted token/runtime-config/wait/release-suite tests: pass, 4 files / 26 tests.
+- `qa:module01:staging-runtime-config`: pass, `payment.window.enabled=true`, `payment.global.disabled=false`, token source `staging_mirror`.
+- `qa:deploy:freshness -- --env staging --expected-commit 9edcd43`: pass, deployed start/end `9edcd431a91d`, `mixedDeploymentDetected=false`.
+- `qa:module01:smoke-fixture -- --json`: pass, fresh dimension present.
+- `qa:result-checkout:no-card`: pass, Email save and access-link readiness covered.
+- `qa:module01:wait-result -- --env staging --result-id <safe-result-id> --json`: pass, paid result/payment/generation completed, Email access link active.
+- `qa:module01:staging`: pass, `gateStatus=pass`, `requiredChecksStatus=pass`, `optionalChecksStatus=skipped` only because real channel checks remain owner-approved/manual.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 99 files / 681 tests.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `cd apps/web && corepack pnpm build`: pass.
+
+### Unresolved Questions
+
+- First failure category: not applicable.
+- The missing Preview Admin token blocker is resolved for staging QA runners when `.env.staging` contains the token.
+- LINE staging bind remains intentionally untested in this task.
+- No production runtime, production payment, real Email, real LINE, Vercel env change, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred. The full staging gate performed read-only production fail-closed checks only.
+- Next action: add LINE staging bind validation after Email/access-link stability is accepted, then consider production only after staging evidence is complete and owner approves.

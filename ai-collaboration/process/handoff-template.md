@@ -79,6 +79,8 @@ For deployed staging/production gates, include:
 - substantive gate command only after freshness passes
 - no repeated full-gate polling
 
+For staging QA tasks using Admin/Ops, include whether the runner should use approved `ADMIN_API_TOKEN` injection from process env or `.env.staging`. Do not ask `pnpm ops` itself to read app env mirrors.
+
 ## Reporting Requirements
 
 Report:

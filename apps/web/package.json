@@ -31,6 +31,7 @@
     "qa:module01:local": "node scripts/module01-release-validation-suite.mjs local",
     "qa:module01:mock-flow": "node scripts/module01-mock-flow-qa.mjs",
     "qa:module01:smoke-fixture": "node scripts/module01-smoke-fixture.mjs",
+    "qa:module01:staging-runtime-config": "node scripts/staging-runtime-config-qa.mjs",
     "qa:module01:staging": "node scripts/module01-release-validation-suite.mjs staging",
     "qa:module01:staging:channels": "node scripts/module01-staging-channels-qa.mjs",
     "qa:module01:ui": "PLAYWRIGHT_BROWSERS_PATH=../../.playwright-browsers playwright test --config=playwright.module01-ui.config.ts --project=chromium",

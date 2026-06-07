@@ -59,6 +59,8 @@ The CLI must not:
 - import `apps/web` DB helpers
 - expose raw Email, raw LINE ID, encrypted recipient, hashes, tokens, tokenized URLs, provider payloads, or card/payment-sensitive data
 
+Staging QA runners may resolve `ADMIN_API_TOKEN` from the approved local staging mirror and inject it into `pnpm ops` subprocess env. This is a QA runner responsibility only; the CLI itself still must not read app env mirrors.
+
 Runtime config CLI writes must:
 
 - use registered keys only

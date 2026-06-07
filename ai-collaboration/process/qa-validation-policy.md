@@ -146,6 +146,22 @@ cd apps/web && corepack pnpm run qa:module01:wait-result -- --env staging --resu
 
 Do not use heredoc scripts, random temp-file handoffs, or repeated full-suite polling.
 
+## Staging Admin Token Injection
+
+`pnpm ops` remains a pure Admin API client and must not read app env mirror files.
+
+For staging QA runners only, the runner may inject `ADMIN_API_TOKEN` into subprocess env before invoking `pnpm ops`:
+
+1. Use `process.env.ADMIN_API_TOKEN` if already present.
+2. Else load `ADMIN_API_TOKEN` from `apps/web/.env.staging` through the approved local env parsing path.
+3. If still missing, stop before E2E with `staging_admin_token_unavailable_owner_action_required`.
+
+Rules:
+
+- Never print token value, length, prefix, suffix, hash, or checksum.
+- Never load production token from `.env.production` for staging QA.
+- Missing Admin token should be caught before staging E2E actions that depend on Admin/Ops evidence.
+
 ## Deployed Gate Freshness
 
 Any deployed staging or production gate must assert the target deployment before substantive checks.

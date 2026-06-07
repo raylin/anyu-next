@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -112,5 +115,49 @@ describe("Module 01 staging result wait helper", () => {
         unsafe: ["pal", "unsafe_token_value"].join("_"),
       }),
     ).toThrow("module01_wait_summary_not_sanitized");
+  });
+
+  it("records only safe Admin token source metadata", () => {
+    const summary = buildWaitSummary({
+      environment: "staging",
+      resultId: "11111111-1111-4111-8111-111111111111",
+      status: "blocked",
+      blockers: ["staging_admin_token_unavailable_owner_action_required"],
+      adminToken: {
+        sourceCategory: "staging_mirror",
+        tokenPresent: true,
+        valuesPrinted: false,
+        lengthsPrinted: false,
+        prefixesPrinted: false,
+        suffixesPrinted: false,
+        hashesPrinted: false,
+        checksumsPrinted: false,
+      },
+    });
+
+    expect(summary.adminToken).toMatchObject({
+      sourceCategory: "staging_mirror",
+      tokenPresent: true,
+      valuesPrinted: false,
+      lengthsPrinted: false,
+      prefixesPrinted: false,
+      suffixesPrinted: false,
+      hashesPrinted: false,
+      checksumsPrinted: false,
+    });
+    expect(JSON.stringify(summary)).not.toContain("ADMIN_API_TOKEN");
+    expect(() => assertSafeSummary(summary)).not.toThrow();
+  });
+
+  it("uses the approved staging QA token resolver instead of raw shell-only token handling", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/module01-staging-result-wait.mjs"),
+      "utf8",
+    );
+
+    expect(source).toContain("resolveAdminTokenForQa");
+    expect(source).toContain("summarizeAdminTokenForQa");
+    expect(source).toContain("staging_admin_token_unavailable_owner_action_required");
+    expect(source).not.toContain("set_admin_api_token_in_process_env");
   });
 });

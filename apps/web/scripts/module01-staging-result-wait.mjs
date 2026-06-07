@@ -3,6 +3,11 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import {
+  resolveAdminTokenForQa,
+  summarizeAdminTokenForQa,
+} from "./lib/admin-token-for-qa.mjs";
+
 const MODULE = "ai-temperature";
 const OUTPUT_DIR = ".qa";
 const OUTPUT_PATH = path.join(OUTPUT_DIR, "module01-staging-result-wait-summary.json");
@@ -108,6 +113,7 @@ function buildWaitSummary(input) {
     attempts: input.attempts ?? 0,
     blockers: input.blockers ?? [],
     warnings: input.warnings ?? [],
+    adminToken: input.adminToken ?? null,
     nextAction,
     sendsRealEmail: false,
     sendsRealLine: false,
@@ -226,7 +232,8 @@ async function waitForResult({ env, resultId, timeoutMs, intervalMs, token }) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const token = process.env.ADMIN_API_TOKEN?.trim() ?? "";
+  const tokenResolution = resolveAdminTokenForQa({ targetEnv: args.env || "staging" });
+  const adminToken = summarizeAdminTokenForQa(tokenResolution);
 
   if (!args.env || !BASE_URL_BY_ENV[args.env]) {
     console.error(JSON.stringify({ ok: false, error: "env_required" }));
@@ -240,27 +247,38 @@ async function main() {
     return;
   }
 
-  if (!token) {
+  if (!tokenResolution.token) {
     const summary = buildWaitSummary({
       environment: args.env,
       resultId: args.resultId,
       status: "blocked",
-      blockers: ["admin_token_missing"],
-      nextAction: "set_admin_api_token_in_process_env",
+      blockers: ["staging_admin_token_unavailable_owner_action_required"],
+      adminToken,
+      nextAction: "provide_preview_admin_api_token_in_process_env_or_staging_mirror",
     });
     writeSummary(summary);
-    console.error(JSON.stringify({ ok: false, error: "admin_token_missing" }));
+    console.error(
+      JSON.stringify({
+        ok: false,
+        error: "staging_admin_token_unavailable_owner_action_required",
+        adminToken,
+      }),
+    );
     process.exitCode = 2;
     return;
   }
 
-  const summary = await waitForResult({
+  const waitSummary = await waitForResult({
     env: args.env,
     resultId: args.resultId,
     timeoutMs: Number.isFinite(args.timeoutMs) ? args.timeoutMs : 60_000,
     intervalMs: Number.isFinite(args.intervalMs) ? args.intervalMs : 3_000,
-    token,
+    token: tokenResolution.token,
   });
+  const summary = {
+    ...waitSummary,
+    adminToken,
+  };
   const outputPath = writeSummary(summary);
 
   if (args.json) {

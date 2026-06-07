@@ -36,6 +36,9 @@ describe("Module 01 release validation suite", () => {
     expect(packageJson.scripts["qa:module01:mock-flow"]).toBe(
       "node scripts/module01-mock-flow-qa.mjs",
     );
+    expect(packageJson.scripts["qa:module01:staging-runtime-config"]).toBe(
+      "node scripts/staging-runtime-config-qa.mjs",
+    );
     expect(packageJson.scripts["qa:module01:staging"]).toBe(
       "node scripts/module01-release-validation-suite.mjs staging",
     );
@@ -68,6 +71,24 @@ describe("Module 01 release validation suite", () => {
 
     expect(source).not.toContain("qa:module01:staging:channels");
     expect(source).not.toContain("module01-staging-channels-qa.mjs");
+  });
+
+  it("uses QA token injection for staging Admin/Ops without teaching pnpm ops to read env mirrors", () => {
+    const suiteSource = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/module01-release-validation-suite.mjs"),
+      "utf8",
+    );
+    const adminCliSource = fs.readFileSync(
+      path.resolve(process.cwd(), "../../tools/admin-cli/src/index.ts"),
+      "utf8",
+    );
+
+    expect(suiteSource).toContain("resolveAdminTokenForQa");
+    expect(suiteSource).toContain("ADMIN_API_TOKEN: token");
+    expect(suiteSource).toContain("staging_admin_token_unavailable_owner_action_required");
+    expect(adminCliSource).not.toContain(".env.staging");
+    expect(adminCliSource).not.toContain("loadLocalEnv");
+    expect(adminCliSource).not.toContain("dotenv");
   });
 
   it("derives pass, partial, and blocked gate statuses", () => {

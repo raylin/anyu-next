@@ -6,6 +6,10 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { checkDeployFreshness } from "./deploy-freshness-check.mjs";
+import {
+  resolveAdminTokenForQa,
+  summarizeAdminTokenForQa,
+} from "./lib/admin-token-for-qa.mjs";
 
 const MODULE = "ai-temperature";
 const STAGING_BASE_URL = "https://staging.anyu.tw";
@@ -538,15 +542,17 @@ function safeAdminApiResponse(json) {
 }
 
 async function adminApiStagingCheck() {
-  const token = process.env.ADMIN_API_TOKEN?.trim() ?? "";
+  const tokenResolution = resolveAdminTokenForQa({ targetEnv: "staging" });
+  const token = tokenResolution.token;
   const knownResult = resolveKnownResultId();
 
   if (!token) {
     return makeCheck("admin_api_lookup", "partial", {
       required: false,
+      adminToken: summarizeAdminTokenForQa(tokenResolution),
       blockers: [],
-      warnings: ["skipped_missing_admin_token"],
-      nextRequiredAction: "set_preview_admin_api_token_and_rerun",
+      warnings: ["staging_admin_token_unavailable_owner_action_required"],
+      nextRequiredAction: "set_preview_admin_api_token_or_local_staging_mirror_and_rerun",
     });
   }
 
@@ -579,6 +585,7 @@ async function adminApiStagingCheck() {
 
   return makeCheck("admin_api_lookup", pass ? "pass" : "blocked", {
     required: true,
+    adminToken: summarizeAdminTokenForQa(tokenResolution),
     httpStatus: valid.response.status,
     knownResultIdSourceCategory: knownResult.sourceCategory,
     responseSanitized: pass,
@@ -628,16 +635,18 @@ function parseJsonOutput(stdout) {
 }
 
 function adminCliStagingCheck() {
-  const token = process.env.ADMIN_API_TOKEN?.trim() ?? "";
+  const tokenResolution = resolveAdminTokenForQa({ targetEnv: "staging" });
+  const token = tokenResolution.token;
   const knownResult = resolveKnownResultId();
 
   if (!token) {
     return makeCheck("admin_cli_lookup", "partial", {
       required: false,
-      adminCliLookupStatus: "skipped_missing_admin_token",
+      adminToken: summarizeAdminTokenForQa(tokenResolution),
+      adminCliLookupStatus: "staging_admin_token_unavailable_owner_action_required",
       adminCliLookupCommand: "pnpm ops lookup-result --env staging --id [REDACTED] --json",
-      warnings: ["skipped_missing_admin_token"],
-      nextRequiredAction: "set_preview_admin_api_token_and_rerun",
+      warnings: ["staging_admin_token_unavailable_owner_action_required"],
+      nextRequiredAction: "set_preview_admin_api_token_or_local_staging_mirror_and_rerun",
     });
   }
 
@@ -688,6 +697,7 @@ function adminCliStagingCheck() {
 
   return makeCheck("admin_cli_lookup", pass ? "pass" : "blocked", {
     required: true,
+    adminToken: summarizeAdminTokenForQa(tokenResolution),
     adminCliLookupCommand: "pnpm ops lookup-result --env staging --id [REDACTED] --json",
     adminCliLookupStatus: pass ? "pass" : "blocked",
     knownResultIdSourceCategory: knownResult.sourceCategory,
