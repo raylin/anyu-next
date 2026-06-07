@@ -11280,3 +11280,37 @@ Unresolved questions:
 - Optional Admin/Ops lookup remains partial until an explicit Preview Admin token is supplied in process env.
 - No real Email/LINE, production runtime, production payment, Vercel env change, DB mutation, direct DB lookup, or private/tokenized output occurred.
 - Next action: Controlled Production Payment Smoke Retry with Scoped Runtime Config v1, if owner accepts the acceptable partial staging sanity result.
+
+## 2026-06-07 Controlled Production Payment Smoke Retry with Scoped Runtime Config v1
+
+### Completed Changes
+
+- ran required pre-open gates: local, mock-flow, UI, smoke fixture, runtime-window status, and production-preflight
+- opened production Module 01 payment window through scoped runtime config only
+- verified runtime-window open state as `runtime_config_open`
+- attempted production result creation using only the tracked fixture artifact
+- stopped before save/payment because the production analyze response returned `cacheHit=true` and reused previous result `800c88fa-04de-4172-b34a-3bc78cd4d0fa`
+- closed production payment window through scoped runtime config
+- verified final runtime-window status `fail_closed_ready` and production-preflight `gateStatus=pass`
+
+### Validation
+
+- `qa:module01:local`: pass.
+- `qa:module01:mock-flow`: pass.
+- `qa:module01:ui`: pass.
+- `qa:module01:smoke-fixture -- --json`: pass.
+- pre-open `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- pre-open `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+- runtime config open: pass, `stateCategory=runtime_config_open`.
+- result creation: failed freshness requirement because tracked fixture reused cached production result.
+- runtime config close: pass.
+- final `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- final `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+
+### Unresolved Questions
+
+- First failure category: `result_creation_failed`.
+- Specific cause: `tracked_fixture_cache_hit_reused_previous_result`.
+- Email save, LINE bind, NewebPay form generation, payment, NotifyURL, processor, paid result, Email delivery, and LINE delivery were not run.
+- No Vercel env change, redeploy, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
+- Next action: Module 01 Smoke Fixture Fresh Result Contract v0 before any additional production payment attempt.
