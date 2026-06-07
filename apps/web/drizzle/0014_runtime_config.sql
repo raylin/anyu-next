@@ -55,7 +55,7 @@ INSERT INTO "runtime_config_values" (
 )
 VALUES
   ('production', 'payment.window.enabled', 'module', 'ai-temperature', 'boolean', 'false'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('staging', 'payment.window.enabled', 'module', 'ai-temperature', 'boolean', 'false'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
+  ('staging', 'payment.window.enabled', 'module', 'ai-temperature', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
   ('production', 'payment.global.disabled', 'global', 'global', 'boolean', 'false'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
   ('staging', 'payment.global.disabled', 'global', 'global', 'boolean', 'false'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
   ('production', 'delivery.line.enabled', 'global', 'global', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
@@ -92,7 +92,7 @@ SELECT
 FROM (
   VALUES
     ('production', 'payment.window.enabled', 'module', 'ai-temperature', 'false'::jsonb),
-    ('staging', 'payment.window.enabled', 'module', 'ai-temperature', 'false'::jsonb),
+    ('staging', 'payment.window.enabled', 'module', 'ai-temperature', 'true'::jsonb),
     ('production', 'payment.global.disabled', 'global', 'global', 'false'::jsonb),
     ('staging', 'payment.global.disabled', 'global', 'global', 'false'::jsonb),
     ('production', 'delivery.line.enabled', 'global', 'global', 'true'::jsonb),

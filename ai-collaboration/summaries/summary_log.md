@@ -11108,9 +11108,12 @@ Unresolved questions:
 - Production fail-closed deploy from repo root completed for commit `68f7906`.
 - Post-deploy `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
 - Post-deploy `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+- Correction: the initial Preview(staging) runtime-config seed set module `payment.window.enabled=false`, which blocked the existing staging no-card checkout gate. Preview(staging) was corrected to `true` for the staging QA baseline with an audit event; Production remains `false`.
+- Final freshness-guarded `qa:module01:staging` tail run was not a clean pass: required no-card path passed, but access-link smoke hit a generic `fetch failed` and the suite reported `staging_freshness_timeout` at the end. The directly affected `qa:access-link:smoke` targeted rerun passed after QA scripts were patched to accept scoped runtime config `payment_disabled` as a valid production fail-closed checkout category.
 
 ### Unresolved Questions
 
 - Production remains fail-closed on scoped runtime config.
 - No payment, Email, LINE, Vercel env change, provider credential change, or secret exposure occurred.
+- Full staging gate remains recorded as blocked in the final tail run; production runtime-window status and production-preflight remain pass.
 - Next action: Production Smoke Runbook Update + Runtime Config Dry Run v0.

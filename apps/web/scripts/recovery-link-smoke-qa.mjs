@@ -544,11 +544,13 @@ async function productionDisabledCheck() {
       }),
     }),
   ]);
+  const checkoutFailClosed =
+    checkout.status === 404 &&
+    (checkout.json?.error === "not_found" || checkout.json?.error === "payment_disabled");
   const pass =
     health.status === 200 &&
     health.json?.environment === "production" &&
-    checkout.status === 404 &&
-    checkout.json?.error === "not_found" &&
+    checkoutFailClosed &&
     fakePaid.status === 404 &&
     fakePaid.json?.error === "not_found" &&
     recoveryLinkSmoke.status === 404;

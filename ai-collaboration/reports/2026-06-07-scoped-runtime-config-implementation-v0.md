@@ -5,14 +5,15 @@
 - task name: Scoped Runtime Config Implementation v0
 - date: 2026-06-07
 - report path: `ai-collaboration/reports/2026-06-07-scoped-runtime-config-implementation-v0.md`
-- commit: `68f7906`
-- branch / push status: pushed to `origin/staging`; deployed fail-closed to Production from repo root
+- code commit: `68f7906`
+- report / correction commits: `f00a76c` plus final follow-up correction commit
+- branch / push status: pushed to `origin/staging`; code commit `68f7906` deployed fail-closed to Production from repo root
 - model / effort: GPT-5 Codex, high
 - taskStartedAt: 2026-06-07T02:51:12Z
-- taskCompletedAt: 2026-06-07T03:18:58Z
-- totalWallClockDuration: 27m46s
+- taskCompletedAt: 2026-06-07T04:03:41Z
+- totalWallClockDuration: 1h12m29s
 - humanWaitDuration: 0m
-- netCodexWorkDuration: 27m46s
+- netCodexWorkDuration: 1h12m29s
 
 ## Context
 
@@ -38,6 +39,7 @@
 - Seeded Preview(staging) and Production with 12 non-secret fail-closed baseline values.
 - Preview(staging) aggregate verification: `runtime_config_values=12`, `runtime_config_events=12`.
 - Production aggregate verification: `runtime_config_values=12`, `runtime_config_events=12`.
+- Correction note: the initial Preview(staging) seed had `payment.window.enabled=false` for module `ai-temperature`, which preserved production fail-closed posture but blocked the existing staging no-card checkout gate. Preview(staging) was corrected to `payment.window.enabled=true` for the staging baseline, with an audit event. Production remains `payment.window.enabled=false`.
 - Production runtime remained disabled; no payment/Email/LINE occurred.
 
 ## Runtime Config v0 Keys
@@ -81,15 +83,19 @@
 - commands run: `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
 - commands run: `cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status`: pass after fail-closed production deploy, `stateCategory=fail_closed_ready`, `currentDeployCommit=68f790601029`.
 - commands run: `cd apps/web && corepack pnpm run qa:module01:production-preflight`: pass after fail-closed production deploy, `gateStatus=pass`, `commandExitCode=0`.
-- gateStatus: pass
-- commandExitCode: production-preflight commandExitCode=0
-- requiredChecksStatus: pass
-- optionalChecksStatus: not_applicable
+- commands run: `MODULE01_EXPECTED_DEPLOY_COMMIT=f00a76c corepack pnpm run qa:module01:staging`: blocked; freshness at start was clean on `f00a76c0b02e`, but the first clean run still reflected the incorrect staging closed baseline, and the follow-up run blocked on `access_link_smoke_failed` after a generic `fetch failed` plus `staging_freshness_timeout` at the suite end.
+- commands run: `cd apps/web && corepack pnpm run qa:access-link:smoke`: pass after QA fail-closed expectation patch; production closed check accepted `payment_disabled`, no raw token output, no Email/LINE send.
+- commands run: `cd apps/web && corepack pnpm lint`: pass after QA script patch.
+- gateStatus: production-preflight pass; runtime-window status pass; full `qa:module01:staging` blocked in final tail run.
+- commandExitCode: production-preflight commandExitCode=0; runtime-window commandExitCode=0; final `qa:module01:staging` commandExitCode=1.
+- requiredChecksStatus: production required checks pass; staging required checks blocked by `access_link_smoke_failed` / `staging_freshness_timeout`.
+- optionalChecksStatus: staging Admin API/CLI optional checks partial due missing Preview Admin token.
 - targetDeployCommit: `68f7906`
 - deployedCommitAtGateStart: `68f790601029`
 - deployedCommitAtGateEnd: `68f790601029`
 - freshnessStatus: pass_by_runtime_window_health
-- gates skipped and why: `qa:module01:staging` skipped so far because code is locally covered and Preview deploy verification will be a separate freshness-gated check if needed.
+- deployed staging targetDeployCommit: `f00a76c`; deployedCommitAtGateStart: `f00a76c0b02e`; deployedCommitAtGateEnd: null in the blocked suite summary; freshnessStatus: blocked by end-of-suite `staging_freshness_timeout`.
+- gates skipped and why: no production payment/channel gates were run because runtime config implementation does not authorize real payment, Email, or LINE.
 
 ## Safety
 
@@ -98,20 +104,20 @@
 - Email sent: no
 - LINE sent: no
 - Vercel env changed: no
-- DB mutated: yes, additive schema + non-secret baseline runtime config rows/events on Preview(staging) and Production
+- DB mutated: yes, additive schema + non-secret baseline runtime config rows/events on Preview(staging) and Production; Preview(staging) module payment window baseline corrected to true for staging QA with an audit event
 - secrets/private data exposed: no
 
 ## Result
 
-- result: pass
-- first failure category: not_applicable
-- blocker status: resolved
+- result: partial
+- first failure category: staging_access_link_smoke_fetch_failed
+- blocker status: production runtime-config/preflight path resolved; full staging gate requires a clean rerun after the targeted access-link smoke pass if owner wants staging gate recorded as pass for this commit tail.
 
 ## Tech Debt / Cleanup Notes
 
 - new technical debt introduced: none known.
 - existing technical debt observed: Drizzle meta journal remains older than current manual SQL migration set; manual SQL migrations are still the practical path.
-- opportunistic cleanup completed: removed obsolete payment runtime env flag references and mirror entries.
+- opportunistic cleanup completed: removed obsolete payment runtime env flag references and mirror entries; patched active QA production fail-closed checks to accept the scoped runtime config `payment_disabled` category.
 - deferred cleanup candidates: wire delivery.line/email runtime config into send services if owner wants live delivery kill switches in v1.
 
 ## Decisions Made
@@ -122,12 +128,13 @@
 
 ## Uncertainties / Blockers
 
-- No remaining implementation blocker. Production is deployed fail-closed on scoped runtime config.
+- Production is deployed fail-closed on scoped runtime config and production-preflight passes.
+- The full staging gate did not finish cleanly in the final tail run, although the directly affected access-link smoke passed after the QA expectation patch.
 
 ## Recommended Next Step
 
-Run Production Smoke Runbook Update + Runtime Config Dry Run v0 before another controlled production smoke.
+Run Production Smoke Runbook Update + Runtime Config Dry Run v0 before another controlled production smoke. If the owner requires a clean full staging gate after this report tail, rerun `qa:module01:staging` once with freshness guard after confirming Preview(staging) health.
 
 ## Paste-Back Context
 
-Scoped Runtime Config v0 is implemented, committed as `68f7906`, pushed to `origin/staging`, and deployed fail-closed to Production from the repo root. Additive runtime-config tables/seed values are applied to Preview(staging) and Production. Local tests, build, mock-flow, UI, local Module 01 gate, runtime-window status, and production-preflight pass. Production remains fail-closed with `payment.window.enabled=false`; no payment, Email, or LINE occurred.
+Scoped Runtime Config v0 is implemented, with code commit `68f7906` deployed fail-closed to Production from the repo root. Additive runtime-config tables/seed values are applied to Preview(staging) and Production. Production runtime-window status and production-preflight pass with `payment.window.enabled=false`. Preview(staging) baseline was corrected to keep staging checkout QA available, and the targeted access-link smoke passes; the final full staging gate remains recorded as blocked due a transient access-link/freshness-end failure. No payment, Email, or LINE occurred.
