@@ -11526,3 +11526,38 @@ Unresolved questions:
 - LINE staging bind remains intentionally untested in this task.
 - No production runtime, production payment, real Email, real LINE, Vercel env change, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred. The full staging gate performed read-only production fail-closed checks only.
 - Next action: add LINE staging bind validation after Email/access-link stability is accepted, then consider production only after staging evidence is complete and owner approves.
+
+## 2026-06-07 Staging LINE Bind Validation v0
+
+### Completed Changes
+
+- added focused staging LINE bind prepare and lookup QA helpers
+- verified Preview(staging) freshness before substantive checks
+- created fresh staging results from the tracked fixture and verified mobile checkout readiness with LINE above Email
+- owner completed staging mobile LINE bind successfully
+- found and fixed a diagnostics-only sanitizer issue where safe `hasIdToken` boolean metadata prevented server-side LINE bind diagnostic event persistence
+- deployed fix to staging, reran freshness cleanly, and repeated the focused LINE bind validation
+- final Admin/Ops diagnostics passed with `latestCategory=bind_success`, `latestStatus=succeeded`, `eventCount=7`, `recipientSecretExists=true`, and `deliverable=true`
+
+### Validation
+
+- targeted staging LINE/Admin token/runtime tests: pass.
+- targeted LINE diagnostic persistence/route tests: pass.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 101 files / 687 tests.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `cd apps/web && corepack pnpm build`: pass.
+- `qa:deploy:freshness -- --env staging --expected-commit 7c00180`: first wait observed mixed deployment and was invalid; rerun passed with deployed start/end `7c0018027b13`, `mixedDeploymentDetected=false`.
+- `qa:module01:staging-runtime-config`: pass.
+- `qa:module01:smoke-fixture -- --json`: pass.
+- `qa:module01:staging-line-bind:prepare`: pass, fresh result and mobile LINE checkout readiness.
+- owner staging LINE bind: pass.
+- `qa:module01:staging-line-bind:lookup -- --result-id <safe-result-id> --json`: pass.
+
+### Unresolved Questions
+
+- First failure category: not applicable for final validation; intermediate diagnostic gap was `line_bind_diagnostics_not_success` and was fixed.
+- No production runtime, production payment, production Email, production LINE, Vercel env change, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
+- Real channel delivery remains out of scope; this task validated staging LINE bind/save deliverability and diagnostics.
+- Next action: Controlled Production Payment Smoke Retry with Scoped Runtime Config v3, with owner approval.

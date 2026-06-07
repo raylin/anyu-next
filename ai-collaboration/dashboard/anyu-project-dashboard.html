@@ -329,12 +329,12 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」now uses scoped runtime config as the single primary payment runtime gate. Staging Email save, mock paid transition, and access-link readiness are now rebaselined; LINE staging bind remains the next validation gap before production smoke.</p>
+      <p class="lead">Module 01「曖昧溫度計」now uses scoped runtime config as the single primary payment runtime gate. Staging Email save, mock paid transition, access-link readiness, and LINE bind deliverability are now rebaselined before the next production smoke.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-07 19:13 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Staging LINE bind validation next</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-07 20:04 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Production smoke ready for owner approval</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">LINE staging bind not yet revalidated after Email/access-link path stabilized</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">No staging pre-payment save blocker remaining; production smoke requires owner approval</span></div>
       </div>
     </header>
 
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge progress">Progress</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, redirect-state fix, deployed freshness guard, runtime-window helper, Vercel alias proof, and Scoped Runtime Config v0 are in place. Staging Admin token injection now uses the approved Preview mirror source for QA runners, and focused staging evidence passed on <code>9edcd43</code>: fresh result, Email save, mock/no-card paid transition, access-link readiness, and Admin API/CLI lookup. Production remains closed; LINE staging bind remains unverified.</p></article>
+        <article class="card"><span class="badge done">Ready</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, redirect-state fix, deployed freshness guard, runtime-window helper, Vercel alias proof, and Scoped Runtime Config v0 are in place. Staging evidence now covers Email save, mock/no-card paid transition, access-link readiness, Admin API/CLI lookup, and LINE bind deliverability. Latest LINE bind validation passed on <code>7c00180</code> with <code>bind_success</code>, recipient secret present, and deliverable LINE contact. Production remains closed until owner-approved smoke.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
@@ -538,7 +538,7 @@
           <tr><td>P0</td><td>Deployed gate freshness</td><td>Code / Ops</td><td><code>qa:deploy:freshness</code> and <code>MODULE01_EXPECTED_DEPLOY_COMMIT</code> staging guard are implemented. Full deployed gates must not start until target commit is live; mixed-deployment evidence is invalid.</td></tr>
           <tr><td>P0</td><td>LINE recipient-secret bind invariant / redirect bridge</td><td>Code / Ops</td><td>Contact/secret consistency is fixed and staging-verified. The production LINE login redirect failure was narrowed to an OAuth <code>state</code> collision and fixed by using <code>rlb</code> plus deterministic LIFF login redirect state. Clean deployed staging rerun completed on target commit <code>29de59f</code>; proceed to the production runtime window guard before another smoke.</td></tr>
           <tr><td>P0</td><td>Scoped runtime config</td><td>Code / Ops</td><td>Stabilized and deployed fail-closed. Runtime config uses registry-first DB-backed values, Admin API, <code>pnpm ops config</code>, additive runtime config schema, and Module 01 module-scoped <code>payment.window.enabled</code>. Active v0 keys are only <code>payment.window.enabled</code> and <code>payment.global.disabled</code>; unwired delivery keys are inactive. Old Vercel runtime env flags were removed. The production smoke runbook now uses scoped config open/close; runtime config dry run passed and final runtime-window status is <code>fail_closed_ready</code>.</td></tr>
-          <tr><td>P0</td><td>Staging pre-payment save blocker</td><td>Code / Ops</td><td>Resolved for Email/access-link path. Staging QA runners now inject Preview <code>ADMIN_API_TOKEN</code> from the approved staging mirror when process env is absent, and <code>qa:module01:staging</code> passed on <code>9edcd43</code> with Admin API/CLI checks green. Next validation gap is LINE staging bind, not Email save.</td></tr>
+          <tr><td>P0</td><td>Staging pre-payment save blocker</td><td>Code / Ops</td><td>Resolved. Staging QA runners inject Preview <code>ADMIN_API_TOKEN</code> from the approved staging mirror when process env is absent. Email/access-link staging path passed on <code>9edcd43</code>; LINE bind staging validation passed on <code>7c00180</code> with <code>bind_success</code>, recipient secret present, and deliverable contact.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after a clean controlled production smoke passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -574,8 +574,8 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> add LINE staging bind validation after accepting the Email save + mock paid + <code>/r</code> staging pass. Do not return to production smoke until staging evidence covers the channel path that previously failed.</p>
-        <p><strong>Mainline:</strong> LINE staging bind validation, then production smoke only as final acceptance with owner approval, then QA Foundation Follow-up v2, then Module Theme Architecture Implementation Plan.</p>
+        <p><strong>Current recommendation:</strong> run Controlled Production Payment Smoke Retry with Scoped Runtime Config v3 only with owner approval and the standard pre-open gates.</p>
+        <p><strong>Mainline:</strong> production smoke as final acceptance with owner approval, then QA Foundation Follow-up v2, then Module Theme Architecture Implementation Plan.</p>
         <p>If fresh real channel evidence is needed later, use the guarded <code>qa:module01:staging:channels</code> runner behind explicit owner approval instead of folding real Email/LINE sends into the default suite.</p>
         <p>Production controlled smoke v3 should wait until staging Email save, LINE bind, no-card/fake-paid transition, access-link resolution, and Admin/Ops evidence are stable.</p>
       </div>
@@ -714,6 +714,7 @@
           <li><a href="../reports/2026-06-07-anyu-operating-policy-consolidation-v1.md">ANYU Operating Policy Consolidation v1</a></li>
           <li><a href="../reports/2026-06-07-staging-pre-payment-save-access-link-e2e-rebaseline-v1.md">Staging Pre-Payment Save + Access-Link E2E Rebaseline v1</a></li>
           <li><a href="../reports/2026-06-07-staging-admin-token-injection-email-rebaseline-resume-v0.md">Staging Admin Token Injection + Email Rebaseline Resume v0</a></li>
+          <li><a href="../reports/2026-06-07-staging-line-bind-validation-v0.md">Staging LINE Bind Validation v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>
