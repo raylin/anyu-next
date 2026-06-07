@@ -11656,3 +11656,33 @@ Unresolved questions:
 - First failure category for live production preflight remains `production_admin_token_missing_owner_action_required`.
 - No production runtime, payment, Email, LINE, Vercel env change, DB mutation, direct DB lookup, env mirror read by normal `pnpm ops`, or secret/private output occurred.
 - Next action: owner runs `pnpm ops auth set-token --env staging` and `pnpm ops auth set-token --env production`, then reruns only `cd apps/web && corepack pnpm run qa:production:admin-ops-preflight`. If it passes, proceed to Controlled Production Payment Smoke Retry with Scoped Runtime Config v4.
+
+## 2026-06-07 NewebPay ReturnURL Alignment Check v0
+
+### Completed Checks
+
+- confirmed the checkout service generates the canonical provider-level ReturnURL from `NEXT_PUBLIC_APP_URL` plus `/payment/newebpay/return`.
+- confirmed local mirrors derive the expected unified ReturnURL paths:
+  - staging: `https://staging.anyu.tw/payment/newebpay/return`
+  - production: `https://anyu.tw/payment/newebpay/return`
+- confirmed local mirrors have matching NotifyURL values:
+  - staging: `https://staging.anyu.tw/api/payments/newebpay/notify`
+  - production: `https://anyu.tw/api/payments/newebpay/notify`
+- checked Vercel Preview(staging) and Production envs read-only; the URL-bearing keys exist, but `vercel env pull` returned blank values for `NEXT_PUBLIC_APP_URL` and `NEWEBPAY_NOTIFY_URL` in both targets.
+- confirmed generated checkout contracts are tested not to use the legacy module path `/m/ambiguous-temperature/payment/return`.
+- confirmed the legacy module ReturnURL route still exists and renders the shared return experience; it is compatibility-only by generation contract, but it is not currently an HTTP redirect.
+- updated production gate policy to name the canonical ReturnURL/NotifyURL and block payment smoke on blank Vercel URL-bearing env values.
+
+### Validation
+
+- code/docs search for ReturnURL and NotifyURL references completed.
+- Vercel env metadata/value check completed without printing secret values.
+- temporary Vercel env pull files were deleted.
+- production runtime, payment, Email, LINE, Vercel env mutation, DB mutation, and direct DB lookup did not occur.
+
+### Unresolved Questions
+
+- First failure category: `vercel_returnurl_env_blank`.
+- Owner must verify/update NewebPay dashboard settings, especially staging ReturnURL, because Codex cannot inspect the provider dashboard.
+- Vercel Preview(staging) and Production env values for `NEXT_PUBLIC_APP_URL` and `NEWEBPAY_NOTIFY_URL` must be restored from the local mirrors before any payment smoke.
+- If strict compatibility redirect is required, convert the legacy module ReturnURL route to an explicit redirect preserving safe query params in a follow-up.

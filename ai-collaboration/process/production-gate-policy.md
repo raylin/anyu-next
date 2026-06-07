@@ -79,6 +79,9 @@ Codex must also assert:
 - deploy from repo root, not `apps/web`
 - production public pages are live
 - checkout/operator routes fail closed before enablement
+- NewebPay canonical ReturnURL path is `https://anyu.tw/payment/newebpay/return`
+- NewebPay NotifyURL is `https://anyu.tw/api/payments/newebpay/notify`
+- Vercel Production URL-bearing env values match the local `.env.production` mirror; blank `NEXT_PUBLIC_APP_URL` or `NEWEBPAY_NOTIFY_URL` blocks payment smoke
 - production Admin/Ops availability before runtime open:
 
 ```bash
@@ -178,6 +181,8 @@ cd apps/web && corepack pnpm run qa:module01:production-preflight
 Final close is mandatory for controlled smoke unless the owner explicitly chooses soft availability in the moment.
 
 Do not generate a NewebPay provider form, ask for owner payment, create a production result, open runtime, or ask for Email/LINE manual checks until the pre-open gates, runtime-window status, and production Admin/Ops preflight pass.
+
+For NewebPay provider setup, the active canonical ReturnURL is provider-level `/payment/newebpay/return`, derived from `NEXT_PUBLIC_APP_URL` by checkout service. Legacy module-scoped return routes must not be configured as active provider dashboard ReturnURL. If they exist in code, treat them as compatibility-only and verify they do not appear in generated checkout contracts.
 
 If any open/close operation fails, stop and classify the first failure as `runtime_config_open_failed` or `runtime_config_close_failed`.
 
