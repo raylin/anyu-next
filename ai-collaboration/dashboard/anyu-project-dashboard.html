@@ -329,12 +329,12 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」now uses scoped runtime config as the single primary payment runtime gate. The production smoke runbook now opens/closes runtime with <code>pnpm ops config</code>, the production dry run passed, and Production is back fail-closed with production-preflight passing.</p>
+      <p class="lead">Module 01「曖昧溫度計」now uses scoped runtime config as the single primary payment runtime gate. The controlled production smoke opened and closed runtime config correctly, but stopped before payment because pre-payment Email save and mobile LINE bind/save failed.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-07 15:56 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Ready for controlled production payment smoke retry</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-07 16:04 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Pre-payment access-link save failure diagnosis</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">No runtime-config dry-run blocker; production payment smoke still requires owner approval/action</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Production Email save failed and LINE bind returned contact-only/no-recipient-secret state before payment</span></div>
       </div>
     </header>
 
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge done">Ready for smoke retry</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, redirect-state fix, deployed freshness guard, runtime-window helper, Vercel alias proof, and Scoped Runtime Config v0 are in place. Production smoke runtime open/close now uses <code>pnpm ops config</code>; the dry run passed without payment, Email, LINE, Vercel env change, or redeploy, and Production is fail-closed again.</p></article>
+        <article class="card"><span class="badge blocked">Blocked before payment</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, redirect-state fix, deployed freshness guard, runtime-window helper, Vercel alias proof, and Scoped Runtime Config v0 are in place. The latest production smoke opened runtime config and created a production result from the tracked fixture, then stopped before payment because Email save failed and LINE bind/save returned contact-only without recipient secret. Production was closed again and production-preflight passes.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>

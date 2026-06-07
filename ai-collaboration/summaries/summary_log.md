@@ -11187,3 +11187,39 @@ Unresolved questions:
 - Production is fail-closed after the dry run.
 - No production payment, Email, LINE, Vercel env change, provider credential change, deployment, or secret exposure occurred.
 - Next action: Controlled Production Payment Smoke retry using scoped runtime config.
+
+## 2026-06-07 Controlled Production Payment Smoke Retry with Scoped Runtime Config v0
+
+### Completed Changes
+
+- ran required pre-open gates before touching production runtime config
+- opened production Module 01 payment window through scoped runtime config only
+- created a fresh production Module 01 result from the tracked smoke fixture
+- stopped before payment after owner verified both pre-payment save methods failed
+- closed production Module 01 payment window through scoped runtime config
+- verified final production fail-closed status and production-preflight pass
+
+### Validation
+
+- `qa:module01:local`: pass.
+- `qa:module01:mock-flow`: pass.
+- `qa:module01:ui`: initial sandbox browser launch failed due local Chromium permission; approved rerun passed, 5 tests.
+- `qa:module01:smoke-fixture -- --json`: pass.
+- pre-open `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- pre-open `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+- runtime config open: pass, `stateCategory=runtime_config_open`.
+- production result creation from fixture: pass, resultSourceCategory `production_runtime`.
+- Email save: failed with temporary save failure; Admin API shows Email contact not saved/sent.
+- LINE bind: failed after LINE login return; Admin API shows LINE contact saved but not deliverable, recipient secret missing, and no LINE send.
+- payment: not run.
+- final runtime config close: pass.
+- final `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- final `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+
+### Unresolved Questions
+
+- First failure category: `email_save_failed`.
+- Secondary failure category: `line_bind_failed`; line diagnostics only recorded `liff_login_redirect_started`, while Admin result summary showed contact-only/no-recipient-secret state.
+- No payment, NotifyURL, processor, paid generation, Email send, or LINE send occurred.
+- No Vercel env change or deployment occurred.
+- Next action: diagnose and fix pre-payment access-link save failures before any further production payment attempt.
