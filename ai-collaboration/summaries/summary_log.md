@@ -11798,3 +11798,35 @@ Unresolved questions:
 - Existing tech debt observed: paid generation stayed queued noticeably longer than prior runs and required the approved processor endpoint. Gate 1 assessment should decide whether this blocks soft availability or needs a targeted queue/processor latency follow-up.
 - No Vercel env change, direct DB mutation, broad traffic, ads, non-card payment, theme implementation, Module 02 work, or private/token output occurred.
 - Recommended next task: Controlled Production Payment Smoke Final Assessment / Gate 1 Decision v0, including processor latency as an explicit decision input.
+
+## 2026-06-07 Controlled Production Payment Smoke Final Assessment / Gate 1 Decision v0
+
+### Completed Changes
+
+- created the Gate 1 final assessment report separating:
+  - functional smoke acceptance
+  - soft public readiness
+  - processor latency / queue readiness risk
+  - next task sequencing
+- classified Gate 1 functional smoke as `pass`.
+- classified soft public readiness as `conditional`, not automatic launch approval.
+- recommended no ads, no broad traffic, and no default-open production runtime.
+- recommended owner-only controlled windows only if explicitly chosen and monitored.
+- kept production default posture as fail-closed.
+- set next mainline task to Processor Latency + Paid Generation Readiness v0.
+
+### Validation
+
+- reviewed the v4 smoke report, production gate policy, latest summary log, and dashboard state.
+- docs presence check: pass.
+- dashboard HTML sanity: pass.
+- secret/private scan: pass.
+- `git diff --check`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Functional smoke blocker is resolved.
+- Soft public remains conditional because automatic paid-generation queue drain was not proven in v4.
+- Exact queue latency was not captured as a metric and should be instrumented/reviewed in the processor readiness follow-up.
+- Theme route remains preserved and deferred.
