@@ -11916,3 +11916,36 @@ Unresolved questions:
 - Not classified as `ready_for_low_key_soft_public` because concurrency and repeated deployed samples remain unproven.
 - Production was not touched; no production runtime open, production payment, real Email, real LINE, Vercel env change, direct DB mutation, or broad traffic occurred.
 - Recommended next task: Gate 1 Runtime Availability Decision v0.
+
+## 2026-06-07 Gate 1 Runtime Availability Decision v0
+
+### Completed Changes
+
+- reviewed Controlled Production Payment Smoke v4, Gate 1 final assessment, deployed staging paid-generation automatic-drain benchmark, dashboard, summary log, and production gate policy.
+- recorded runtime availability decision as `owner_controlled_short_window_allowed`.
+- kept production fail-closed by default.
+- documented owner-controlled short window rules:
+  - runtime-window status must be `fail_closed_ready` before opening.
+  - production-preflight must pass.
+  - production Admin/Ops preflight must pass.
+  - open only module-scoped `payment.window.enabled` for `ai-temperature`.
+  - no Vercel env toggles or redeploys for runtime open/close.
+  - close after the specific monitored use/test.
+- documented that low-key soft public is not approved yet.
+- documented ads and broad traffic remain blocked.
+- updated dashboard to show owner-controlled short windows allowed while soft public waits for repeated/concurrency queue evidence.
+
+### Validation
+
+- decision/reporting task only.
+- docs presence check: pass.
+- dashboard HTML sanity: pass.
+- secret/private scan: pass; matches were historical safety/redaction terminology in dashboard/summary, not new private values.
+- `git diff --check`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Owner-controlled short payment windows are now allowed if owner explicitly chooses them and required pre-open gates pass.
+- Soft public still requires repeated deployed staging automatic-drain evidence and small concurrency or repeated sequential benchmark evidence.
+- Recommended next task: QA Foundation Follow-up v2 by default, or Repeated / Concurrency Paid-Generation Benchmark v0 if owner wants to move toward soft public immediately.
