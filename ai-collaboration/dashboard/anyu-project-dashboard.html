@@ -329,19 +329,19 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」now uses scoped runtime config as the single primary payment runtime gate. The smoke fixture fresh-result contract is now implemented locally, so the next production smoke must assert <code>cacheHit=false</code> before save/payment steps.</p>
+      <p class="lead">Module 01「曖昧溫度計」now uses scoped runtime config as the single primary payment runtime gate. Production smoke v2 proved the fresh fixture creates <code>cacheHit=false</code> results, but pre-payment Email save and LINE bind still failed on production before payment.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-07 17:11 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Fresh smoke fixture contract complete locally</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-07 17:53 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Production pre-payment save blocked</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Next production smoke must prove cacheHit=false before save/payment</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Production deploy freshness for pre-payment save fix must be resolved before v3 smoke</span></div>
       </div>
     </header>
 
     <section>
       <h2>Launch Gate Model</h2>
       <div class="grid">
-        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, canonical Vercel deploy alignment, real credit-card payment truth, entitlement creation, paid generation completion, and completed paid result rendering are proven from the earlier smoke. The latest clean retry stopped before payment at mobile LINE bind, and the audit recommends foundation work before another production attempt.</p></article>
+        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, canonical Vercel deploy alignment, real credit-card payment truth, entitlement creation, paid generation completion, and completed paid result rendering are proven from the earlier smoke. The latest scoped-runtime smoke created a fresh result but stopped before payment because Email save and LINE bind failed on production.</p></article>
         <article class="card"><span class="badge waiting">Gate 2</span><h3>Soft public availability</h3><p>Allows low/no-traffic production checkout only after controlled smoke, support/access-link readiness, monitoring, and rollback thresholds. No ads yet.</p></article>
         <article class="card"><span class="badge waiting">Gate 3</span><h3>Growth / ads launch</h3><p>Requires stable soft availability, conversion tracking, support cadence, stop-loss thresholds, channel readiness, and ad budget controls. NewebPay approval does not equal commercial launch.</p></article>
       </div>
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge progress">Ready for retry</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, redirect-state fix, deployed freshness guard, runtime-window helper, Vercel alias proof, and Scoped Runtime Config v0 are in place. Pre-payment save diagnostics/fix v0 is deployed to Preview(staging) and required staging sanity checks pass. The smoke fixture fresh-result contract now adds a safe <code>smokeRunId</code> text marker and summary fields <code>freshDimensionPresent=true</code> / <code>expectedFreshResult=true</code>. The next production smoke must stop if result creation returns <code>cacheHit=true</code>. Production remains closed.</p></article>
+        <article class="card"><span class="badge blocked">Blocked</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, redirect-state fix, deployed freshness guard, runtime-window helper, Vercel alias proof, and Scoped Runtime Config v0 are in place. Production smoke v2 opened runtime through scoped config, created fresh result <code>e7c0e564-8fe9-4bdc-ace6-5e27867b0c95</code> with <code>cacheHit=false</code>, then stopped before payment because Email save failed and LINE bind returned contact-only / missing recipient secret. Runtime closed successfully. Production reported deployed commit <code>ece51709f4e3</code>, so production deploy freshness must be resolved before another smoke.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
@@ -530,14 +530,15 @@
       <table>
         <thead><tr><th>Priority</th><th>Item</th><th>Owner</th><th>Next action</th></tr></thead>
         <tbody>
-          <tr><td>P0</td><td>Module 01 safe staging gate</td><td>Owner</td><td>Acceptance snapshot complete. Latest safe gates: local pass and staging pass with Admin API + Admin CLI smoke. Production-preflight is separately blocked on owner-fill production mirror values.</td></tr>
+          <tr><td>P0</td><td>Module 01 safe staging gate</td><td>Owner</td><td>Acceptance snapshot complete. Latest safe gates: local pass, deployed staging required checks pass, and production-preflight passes. Production remains frozen until the deploy freshness/save blocker is resolved.</td></tr>
           <tr><td>P0</td><td>Admin ops boundary</td><td>Code / Ops</td><td>Read-only Admin paid-result lookup API and pure Admin CLI are implemented. Preview(staging) CLI lookup smoke passed; production read-only CLI smoke requires explicit approval.</td></tr>
           <tr><td>P0</td><td>Production env mirror gate</td><td>Code / Ops</td><td>Final verification complete. Local mirrors pass shape checks, Vercel env is synced, and production preflight passes. Keep production frozen until owner approves controlled smoke.</td></tr>
-          <tr><td>P0</td><td>Engineering foundation hardening</td><td>Code / Ops</td><td>Fixture + Smoke Prep Foundation v0, LINE / LIFF Bind Diagnostic Harness v0, Admin API pre-payment LINE bind diagnostics, and Pre-Payment Access-Link Save Diagnostics + Fix v0 are complete locally. Admin/Ops now surfaces Email save categories through <code>lookup-result</code> and LINE post-login bind milestones through <code>lookup-line-bind</code>.</td></tr>
+          <tr><td>P0</td><td>Engineering foundation hardening</td><td>Code / Ops</td><td>Fixture + Smoke Prep Foundation v0, LINE / LIFF Bind Diagnostic Harness v0, Admin API pre-payment LINE bind diagnostics, and Pre-Payment Access-Link Save Diagnostics + Fix v0 are complete locally/staging. Production smoke v2 did not expose the expected save diagnostics, likely because production served an older commit; resolve production deploy freshness before evaluating the fix again.</td></tr>
           <tr><td>P0</td><td>Deployed gate freshness</td><td>Code / Ops</td><td><code>qa:deploy:freshness</code> and <code>MODULE01_EXPECTED_DEPLOY_COMMIT</code> staging guard are implemented. Full deployed gates must not start until target commit is live; mixed-deployment evidence is invalid.</td></tr>
           <tr><td>P0</td><td>LINE recipient-secret bind invariant / redirect bridge</td><td>Code / Ops</td><td>Contact/secret consistency is fixed and staging-verified. The production LINE login redirect failure was narrowed to an OAuth <code>state</code> collision and fixed by using <code>rlb</code> plus deterministic LIFF login redirect state. Clean deployed staging rerun completed on target commit <code>29de59f</code>; proceed to the production runtime window guard before another smoke.</td></tr>
           <tr><td>P0</td><td>Scoped runtime config</td><td>Code / Ops</td><td>Stabilized and deployed fail-closed. Runtime config uses registry-first DB-backed values, Admin API, <code>pnpm ops config</code>, additive runtime config schema, and Module 01 module-scoped <code>payment.window.enabled</code>. Active v0 keys are only <code>payment.window.enabled</code> and <code>payment.global.disabled</code>; unwired delivery keys are inactive. Old Vercel runtime env flags were removed. The production smoke runbook now uses scoped config open/close; runtime config dry run passed and final runtime-window status is <code>fail_closed_ready</code>.</td></tr>
-          <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
+          <tr><td>P0</td><td>Production deploy freshness for save fix</td><td>Code / Ops</td><td>Production smoke v2 served commit <code>ece51709f4e3</code> and repeated the pre-payment Email/LINE save failure before payment. Promote or verify the latest accepted staging/source commit on production, assert production health reports the expected commit, and rerun production-preflight before another smoke.</td></tr>
+          <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after a clean controlled production smoke passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
           <tr><td>P1</td><td>Old Vercel project/domain ambiguity</td><td>Owner UI action</td><td>Verify anyu.tw belongs only to anyu-next project if old project is unused.</td></tr>
@@ -572,9 +573,9 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> update the production smoke runbook and run a runtime-config dry run before the next controlled production payment smoke.</p>
+        <p><strong>Current recommendation:</strong> run Production Deploy Freshness / Pre-Payment Save Fix Production Promotion v0 before another controlled production payment smoke.</p>
         <p>If fresh real channel evidence is needed later, use the guarded <code>qa:module01:staging:channels</code> runner behind explicit owner approval instead of folding real Email/LINE sends into the default suite.</p>
-        <p>Production controlled smoke should wait for the production smoke runbook update and runtime-config dry run.</p>
+        <p>Production controlled smoke v3 should wait until production serves the expected fix commit, runtime remains fail-closed, and production-preflight passes.</p>
       </div>
     </section>
 
@@ -705,6 +706,7 @@
           <li><a href="../reports/2026-06-06-anyu-engineering-foundation-audit-v0.md">ANYU Engineering Foundation Audit v0</a></li>
           <li><a href="../reports/2026-06-06-module-01-fixture-smoke-prep-foundation-v0.md">Module 01 Fixture + Smoke Prep Foundation v0</a></li>
           <li><a href="../reports/2026-06-06-line-liff-bind-diagnostic-harness-v0.md">LINE / LIFF Bind Diagnostic Harness v0</a></li>
+          <li><a href="../reports/2026-06-07-controlled-production-payment-smoke-scoped-runtime-config-v2.md">Controlled Production Payment Smoke Retry with Scoped Runtime Config v2</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

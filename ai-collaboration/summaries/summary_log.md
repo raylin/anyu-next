@@ -11343,3 +11343,41 @@ Unresolved questions:
 - Production smoke still must assert `cacheHit=false` after result creation before Email save, LINE bind, provider form, or payment.
 - No production runtime, payment, Email, LINE, Vercel env change, DB mutation, or secret exposure occurred.
 - Next action: Controlled Production Payment Smoke Retry with Scoped Runtime Config v2.
+
+## 2026-06-07 Controlled Production Payment Smoke Retry with Scoped Runtime Config v2
+
+### Completed Changes
+
+- ran required pre-open gates: local, mock-flow, UI, smoke fixture, runtime-window status, and production-preflight
+- confirmed smoke fixture freshness fields: `smokeRunIdPresent=true`, `freshDimensionPresent=true`, `expectedFreshResult=true`
+- opened production Module 01 payment window through scoped runtime config only
+- created a fresh production result from the tracked fixture with `cacheHit=false`
+- verified checkout route was reachable
+- stopped before provider form/payment because both pre-payment save methods failed
+- closed production payment window through scoped runtime config
+- verified final runtime-window status `fail_closed_ready` and production-preflight `gateStatus=pass`
+
+### Validation
+
+- `qa:module01:local`: pass.
+- `qa:module01:mock-flow`: pass.
+- `qa:module01:ui`: pass.
+- `qa:module01:smoke-fixture -- --json`: pass with fresh-result fields.
+- pre-open `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- pre-open `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+- runtime config open: pass, `stateCategory=runtime_config_open`.
+- result creation: pass, fresh production result `e7c0e564-8fe9-4bdc-ace6-5e27867b0c95`, `cacheHit=false`.
+- Email save: failed with temporary save failure; Admin/Ops showed Email not saved/deliverable.
+- LINE bind: failed after LINE login return; Admin/Ops showed contact-only state with missing recipient secret.
+- runtime config close: pass.
+- final `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- final `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+
+### Unresolved Questions
+
+- First failure category: `email_save_failed`.
+- Secondary failure category: `line_bind_failed`.
+- Payment, provider form, NotifyURL, processor, paid result, Email delivery, and LINE delivery were not run.
+- No Vercel env change, deploy, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
+- Critical blocker: production runtime-window reported deployed commit `ece51709f4e3`, while newer accepted pre-payment save diagnostic/fix code exists on staging/source. Production deploy freshness must be resolved before another production smoke.
+- Next action: Production Deploy Freshness / Pre-Payment Save Fix Production Promotion v0, then rerun production preflight before any v3 smoke.
