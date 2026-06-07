@@ -11381,3 +11381,36 @@ Unresolved questions:
 - No Vercel env change, deploy, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
 - Critical blocker: production runtime-window reported deployed commit `ece51709f4e3`, while newer accepted pre-payment save diagnostic/fix code exists on staging/source. Production deploy freshness must be resolved before another production smoke.
 - Next action: Production Deploy Freshness / Pre-Payment Save Fix Production Promotion v0, then rerun production preflight before any v3 smoke.
+
+## 2026-06-07 Staging Pre-Payment Save + Access-Link E2E Rebaseline v0
+
+### Completed Changes
+
+- returned to staging as the primary deployed diagnostic environment instead of continuing the production smoke loop
+- verified Preview(staging) freshness for target commit `66a0adb0abe885ce4955e22268202aa142d1c395`
+- verified staging scoped runtime config state through Admin CLI
+- generated a fresh tracked Module 01 fixture and created fresh staging result `7009b825-a4ed-4e98-a055-602aaada573d` with `cacheHit=false`
+- confirmed staging checkout route returned HTTP 200
+- owner attempted staging Email save and mobile LINE bind
+- stopped before no-card/fake-paid transition because pre-payment save failed
+- updated process docs to state production smoke is final acceptance, not the primary diagnostic environment when staging can mirror the flow
+
+### Validation
+
+- `qa:deploy:freshness -- --env staging --expected-commit 66a0adb0abe885ce4955e22268202aa142d1c395`: pass, deployed start/end `66a0adb0abe8`, no mixed deployment.
+- `pnpm ops config get --env staging payment.window.enabled --module ai-temperature --json`: pass, value `true`.
+- `pnpm ops config get --env staging payment.global.disabled --global --json`: pass, value `false`.
+- `qa:module01:smoke-fixture -- --json`: pass with fresh-result fields.
+- staging analyze with tracked fixture: pass, result `7009b825-a4ed-4e98-a055-602aaada573d`, `cacheHit=false`.
+- staging checkout route: pass, HTTP 200.
+- Admin/Ops baseline lookup: pass; no saved contacts before owner action.
+- Email save: failed; Admin/Ops shows `email_save_contact_write_failed`, contact saved false, saveAttemptCount 2.
+- LINE bind: failed; Admin/Ops shows LINE not deliverable, recipientSecretExists false, latest diagnostic `liff_login_redirect_started`, eventCount 2.
+
+### Unresolved Questions
+
+- First failure category: `staging_email_save_failed`.
+- Secondary failure category: `staging_line_bind_failed`.
+- no-card/fake-paid transition, `/r/` access-link resolution, real channel receipt, and `qa:module01:staging` were skipped because targeted staging E2E found a required pre-payment save blocker first.
+- No production runtime, production payment, production Email/LINE, Vercel env change, production deploy, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
+- Next action: Pre-Payment Save Root Cause Fix v1 using targeted local/staging diagnostics before any production deploy/promotion or smoke.

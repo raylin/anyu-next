@@ -15,6 +15,8 @@ Operator/fake-paid routes must remain fail-closed in production.
 
 ## Preconditions Before Runtime Enablement
 
+Production smoke is final acceptance, not the primary diagnostic environment. If staging can reasonably mirror the flow being validated, Codex must establish current staging evidence first. For payment/access-link changes this means a fresh staging result, checkout-start, pre-payment save behavior, no-card/fake-paid transition, access-link resolution, and Admin/Ops summaries where applicable. If staging E2E cannot prove the path, classify the staging blocker and do not proceed to production runtime enablement.
+
 Before enabling production runtime, Codex must run and report:
 
 ```bash

@@ -75,6 +75,8 @@ cd apps/web && MODULE01_EXPECTED_DEPLOY_COMMIT=<sha> corepack pnpm run qa:module
 
 If `MODULE01_EXPECTED_DEPLOY_COMMIT` is supplied and the target commit is not live, `qa:module01:staging` must block before access-link, no-card, Admin API, or Admin CLI checks. Do not use the full staging gate as a deploy polling mechanism.
 
+For flows that staging can reasonably mirror, use staging as the primary deployed diagnostic environment before production. Production smoke must not be used to discover issues that staging E2E can cover. If a fresh staging result cannot pass checkout-start, pre-payment save, no-card/fake-paid transition, access-link resolution, and Admin/Ops visibility, classify the staging failure and block production smoke until targeted fixes pass.
+
 ### Module 01 Production Preflight
 
 Run when production gate, env mirror, Vercel, fail-closed behavior, or production smoke readiness changes.
