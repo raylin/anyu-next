@@ -329,20 +329,20 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」now uses scoped runtime config as the single primary payment runtime gate. Staging Email save, mock paid transition, access-link readiness, and LINE bind deliverability are rebaselined; production smoke now has a required Admin/Ops token preflight and dedicated <code>~/.anyu/credentials.json</code> operator auth. NewebPay URL env alignment is restored and Admin/Ops preflight now passes; remaining pre-smoke blocker is owner dashboard verification.</p>
+      <p class="lead">Module 01「曖昧溫度計」uses scoped runtime config as the single primary payment runtime gate. Gate 1 functional production smoke passed end-to-end with Email and LINE access-link delivery confirmed. Production remains fail-closed by default; soft public readiness is conditional pending paid-generation processor latency and automatic-drain readiness.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-07 22:21 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Provider dashboard verification blocked</span></div>
-        <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Owner must verify NewebPay dashboard ReturnURL/NotifyURL</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-07 23:30 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Processor readiness assessment</span></div>
+        <div><span class="label">Production posture</span><span class="value">Fail-closed by default</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Paid-generation automatic drain latency unproven</span></div>
       </div>
     </header>
 
     <section>
       <h2>Launch Gate Model</h2>
       <div class="grid">
-        <article class="card"><span class="badge progress">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, Production provider env dry-run, Production DB migration gate, provider-level ReturnURL, production runtime preflight helper, canonical Vercel deploy alignment, real credit-card payment truth, entitlement creation, paid generation completion, and completed paid result rendering are proven from the earlier smoke. The latest scoped-runtime smoke promoted fresh production code, created a fresh result, and reached visible Email/LINE save success, but stopped before payment because mandatory Admin/Ops lookup failed with a missing production Admin token in process env.</p></article>
-        <article class="card"><span class="badge waiting">Gate 2</span><h3>Soft public availability</h3><p>Allows low/no-traffic production checkout only after controlled smoke, support/access-link readiness, monitoring, and rollback thresholds. No ads yet.</p></article>
+        <article class="card"><span class="badge done">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, provider-level ReturnURL/NotifyURL, scoped runtime config open/close, production deploy freshness, real NT$49 credit-card payment truth, entitlement creation, paid generation completion, completed paid result rendering, Email delivery, LINE delivery, and Admin/Ops verification are proven by controlled smoke v4.</p></article>
+        <article class="card"><span class="badge progress">Gate 2</span><h3>Soft public availability</h3><p>Conditional. Requires processor latency/readiness assessment, automatic queue drain evidence, support/runbook thresholds, and owner decision. No ads or broad traffic yet.</p></article>
         <article class="card"><span class="badge waiting">Gate 3</span><h3>Growth / ads launch</h3><p>Requires stable soft availability, conversion tracking, support cadence, stop-loss thresholds, channel readiness, and ad budget controls. NewebPay approval does not equal commercial launch.</p></article>
       </div>
     </section>
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge blocked">Blocked</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, redirect-state fix, deployed freshness guard, runtime-window helper, Vercel alias proof, Scoped Runtime Config v0, and ops credential auth are in place. Staging evidence covers Email save, mock/no-card paid transition, access-link readiness, Admin API/CLI lookup, and LINE bind deliverability. Production smoke v3 served target commit <code>fe300e8</code>, created a fresh result with <code>cacheHit=false</code>, and owner-visible Email/LINE saves succeeded; payment was not run because <code>pnpm ops</code> production lookup failed with <code>admin_token_missing</code>. NewebPay URL env alignment is now restored in Vercel Preview(staging) and Production, production remains fail-closed, production-preflight passes, and <code>qa:production:admin-ops-preflight</code> now passes from <code>credentials_file</code>. Remaining blocker is owner verification/update of NewebPay dashboard ReturnURL/NotifyURL.</p></article>
+        <article class="card"><span class="badge progress">Conditional</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, deployed freshness guard, runtime-window helper, Vercel alias proof, Scoped Runtime Config v0, ops credential auth, NewebPay URL env alignment, staging Email/access-link rebaseline, staging LINE bind, and controlled production smoke v4 are complete. Remaining blocker before soft public is processor latency and automatic queue drain readiness.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
@@ -388,7 +388,7 @@
         <div class="progressbar"><span style="width: 90%"></span></div>
         <p><strong>Production launch readiness</strong></p>
         <div class="progressbar"><span style="width: 70%"></span></div>
-        <p>The current gap is operator credential readiness: <code>qa:production:admin-ops-preflight</code> exists and currently blocks with <code>production_admin_token_missing_owner_action_required</code> until the production Admin token is stored via process env or <code>~/.anyu/credentials.json</code>. Runtime remains fail-closed.</p>
+        <p>The current gap is paid-generation readiness: controlled smoke v4 completed after one approved processor invocation, but automatic drain timing and queue latency were not instrumented enough for soft public. Runtime remains fail-closed.</p>
       </div>
     </section>
 
@@ -719,6 +719,7 @@
           <li><a href="../reports/2026-06-07-staging-line-bind-validation-v0.md">Staging LINE Bind Validation v0</a></li>
           <li><a href="../reports/2026-06-07-controlled-production-payment-smoke-scoped-runtime-config-v4.md">Controlled Production Payment Smoke Retry with Scoped Runtime Config v4</a></li>
           <li><a href="../reports/2026-06-07-controlled-production-payment-smoke-final-assessment-gate-1-decision-v0.md">Controlled Production Payment Smoke Final Assessment / Gate 1 Decision v0</a></li>
+          <li><a href="../reports/2026-06-07-processor-latency-paid-generation-readiness-v0.md">Processor Latency + Paid Generation Readiness v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

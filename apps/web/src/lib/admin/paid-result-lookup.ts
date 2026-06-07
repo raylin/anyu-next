@@ -14,6 +14,12 @@ import {
 } from "@/lib/db/schema";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import {
+  buildPaidGenerationReadinessSummary,
+  type PaidGenerationLatencyMetrics,
+  type PaidGenerationQueueStateCategory,
+  type PaidGenerationRecommendedAction,
+} from "@/lib/modules/paid-generation-readiness";
+import {
   ACCESS_LINK_SAVE_DIAGNOSTIC_EVENT_NAME,
   type AccessLinkSaveDiagnosticSummary,
   summarizeAccessLinkSaveDiagnosticEvents,
@@ -88,9 +94,16 @@ type LookupRows = {
     status: string;
     lastErrorCategory: string | null;
     createdAt: Date;
+    updatedAt: Date;
+    nextRunAt: Date;
+    lockedAt: Date | null;
+    lastErrorAt: Date | null;
+    attemptCount: number;
+    maxAttempts: number;
   }>;
   paidResults: Array<{
     status: string;
+    startedAt: Date | null;
     completedAt: Date | null;
     failedAt: Date | null;
     errorCode: string | null;
@@ -154,6 +167,17 @@ export type AdminPaidResultLookupResponse = {
     jobExists: boolean;
     status: string | null;
     failureCategory: string | null;
+    jobCreatedAtPresent: boolean;
+    jobStartedAtPresent: boolean;
+    jobCompletedAtPresent: boolean;
+    jobUpdatedAtPresent: boolean;
+    paidResultCompletedAtPresent: boolean;
+    attemptCount: number | null;
+    maxAttempts: number | null;
+    lastErrorAtPresent: boolean;
+    queueStateCategory: PaidGenerationQueueStateCategory;
+    recommendedAction: PaidGenerationRecommendedAction;
+    latency: PaidGenerationLatencyMetrics;
   };
   accessLinks: Record<AccessChannel, AccessLinkChannelSummary>;
   diagnosis: DiagnosisCategory[];
@@ -267,6 +291,14 @@ function buildChannelSummary(input: {
 
 function unique<T extends string>(items: T[]): T[] {
   return [...new Set(items)];
+}
+
+function earliestDate(dates: Array<Date | null | undefined>) {
+  return (
+    dates
+      .filter((date): date is Date => date instanceof Date && Number.isFinite(date.getTime()))
+      .sort((left, right) => left.getTime() - right.getTime())[0] ?? null
+  );
 }
 
 function buildDiagnosisAndActions(input: {
@@ -428,6 +460,26 @@ export function buildAdminPaidResultLookupSummary(
     email,
     line,
   });
+  const accessLinkReadyAt = earliestDate(
+    rows.accessLinks
+      .filter((link) => link.status === "sent" || link.status === "used" || link.status === "active")
+      .map((link) => link.sentAt ?? link.createdAt),
+  );
+  const generationReadiness = buildPaidGenerationReadinessSummary({
+    paidAt: payment?.paidAt ?? null,
+    entitlementActivatedAt: entitlement?.activatedAt ?? null,
+    jobCreatedAt: generationJob?.createdAt ?? null,
+    jobNextRunAt: generationJob?.nextRunAt ?? null,
+    jobLockedAt: generationJob?.lockedAt ?? null,
+    jobUpdatedAt: generationJob?.updatedAt ?? null,
+    jobStatus: generationJob?.status ?? null,
+    attemptCount: generationJob?.attemptCount ?? null,
+    maxAttempts: generationJob?.maxAttempts ?? null,
+    paidResultStartedAt: paidResult?.startedAt ?? null,
+    paidResultCompletedAt: paidResult?.completedAt ?? null,
+    accessLinkReadyAt,
+    now: input.now,
+  });
 
   return {
     ok: true,
@@ -456,6 +508,17 @@ export function buildAdminPaidResultLookupSummary(
       jobExists: Boolean(generationJob),
       status: generationJob?.status ?? null,
       failureCategory: generationJob?.lastErrorCategory ?? null,
+      jobCreatedAtPresent: generationReadiness.jobCreatedAtPresent,
+      jobStartedAtPresent: generationReadiness.jobStartedAtPresent,
+      jobCompletedAtPresent: generationReadiness.jobCompletedAtPresent,
+      jobUpdatedAtPresent: generationReadiness.jobUpdatedAtPresent,
+      paidResultCompletedAtPresent: generationReadiness.paidResultCompletedAtPresent,
+      attemptCount: generationReadiness.attemptCount,
+      maxAttempts: generationReadiness.maxAttempts,
+      lastErrorAtPresent: Boolean(generationJob?.lastErrorAt),
+      queueStateCategory: generationReadiness.queueStateCategory,
+      recommendedAction: generationReadiness.recommendedAction,
+      latency: generationReadiness.latency,
     },
     accessLinks: { email, line },
     diagnosis,
@@ -523,6 +586,12 @@ export async function lookupAdminPaidResultById(
         status: generationJobs.status,
         lastErrorCategory: generationJobs.lastErrorCategory,
         createdAt: generationJobs.createdAt,
+        updatedAt: generationJobs.updatedAt,
+        nextRunAt: generationJobs.nextRunAt,
+        lockedAt: generationJobs.lockedAt,
+        lastErrorAt: generationJobs.lastErrorAt,
+        attemptCount: generationJobs.attemptCount,
+        maxAttempts: generationJobs.maxAttempts,
       })
       .from(generationJobs)
       .where(or(eq(generationJobs.inputRefId, resultId), eq(generationJobs.outputRefId, resultId)))
@@ -531,6 +600,7 @@ export async function lookupAdminPaidResultById(
     db
       .select({
         status: analysisPaidResults.status,
+        startedAt: analysisPaidResults.startedAt,
         completedAt: analysisPaidResults.completedAt,
         failedAt: analysisPaidResults.failedAt,
         errorCode: analysisPaidResults.errorCode,

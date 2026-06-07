@@ -42,6 +42,25 @@ function safeResponse(overrides: Record<string, unknown> = {}) {
       jobExists: true,
       status: "completed",
       failureCategory: null,
+      jobCreatedAtPresent: true,
+      jobStartedAtPresent: true,
+      jobCompletedAtPresent: true,
+      jobUpdatedAtPresent: true,
+      paidResultCompletedAtPresent: true,
+      attemptCount: 1,
+      maxAttempts: 3,
+      lastErrorAtPresent: false,
+      queueStateCategory: "completed",
+      recommendedAction: "no_action_needed",
+      latency: {
+        enqueueLatencyMs: 800,
+        queueWaitMs: 2_000,
+        processorPickupLatencyMs: 2_000,
+        processingDurationMs: 18_000,
+        totalPaidReadyMs: 20_800,
+        deliveryReadyMs: 1_200,
+        queueStuckThresholdMs: 300_000,
+      },
     },
     accessLinks: {
       email: {
@@ -219,6 +238,8 @@ describe("admin CLI lookup-result", () => {
     expect(pretty).toContain("ANYU ops: paid result lookup");
     expect(pretty).toContain("Env: staging");
     expect(pretty).toContain("Diagnosis: paid_result_ready");
+    expect(pretty).toContain("Queue state: completed");
+    expect(pretty).toContain("Total paid ready ms: 20800");
     expect(pretty).toContain("Email: saved, sent, active");
     expect(pretty).toContain("LINE: saved, recipient-secret, sent, active");
     expect(pretty).not.toContain("provider-message-id");

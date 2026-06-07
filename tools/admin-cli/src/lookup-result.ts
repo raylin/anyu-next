@@ -40,6 +40,25 @@ type AdminLookupResponse = {
     jobExists: boolean;
     status: string | null;
     failureCategory: string | null;
+    jobCreatedAtPresent?: boolean;
+    jobStartedAtPresent?: boolean;
+    jobCompletedAtPresent?: boolean;
+    jobUpdatedAtPresent?: boolean;
+    paidResultCompletedAtPresent?: boolean;
+    attemptCount?: number | null;
+    maxAttempts?: number | null;
+    lastErrorAtPresent?: boolean;
+    queueStateCategory?: string;
+    recommendedAction?: string;
+    latency?: {
+      enqueueLatencyMs: number | null;
+      queueWaitMs: number | null;
+      processorPickupLatencyMs: number | null;
+      processingDurationMs: number | null;
+      totalPaidReadyMs: number | null;
+      deliveryReadyMs: number | null;
+      queueStuckThresholdMs: number;
+    };
   };
   accessLinks: {
     email: AccessLinkChannelSummary;
@@ -211,6 +230,12 @@ function assertNumber(value: unknown, code = "unsafe_response_shape"): asserts v
   }
 }
 
+function assertNullableNumber(value: unknown, code = "unsafe_response_shape"): asserts value is number | null {
+  if (value !== null && (typeof value !== "number" || !Number.isFinite(value))) {
+    throw new CliError(code);
+  }
+}
+
 function assertStringArray(value: unknown, code = "unsafe_response_shape"): asserts value is string[] {
   if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
     throw new CliError(code);
@@ -333,6 +358,29 @@ function validateAdminLookupResponse(value: unknown): AdminLookupResponse {
   assertBoolean(generation["jobExists"]);
   assertNullableString(generation["status"]);
   assertNullableString(generation["failureCategory"]);
+  if (generation["jobCreatedAtPresent"] !== undefined) assertBoolean(generation["jobCreatedAtPresent"]);
+  if (generation["jobStartedAtPresent"] !== undefined) assertBoolean(generation["jobStartedAtPresent"]);
+  if (generation["jobCompletedAtPresent"] !== undefined) assertBoolean(generation["jobCompletedAtPresent"]);
+  if (generation["jobUpdatedAtPresent"] !== undefined) assertBoolean(generation["jobUpdatedAtPresent"]);
+  if (generation["paidResultCompletedAtPresent"] !== undefined) {
+    assertBoolean(generation["paidResultCompletedAtPresent"]);
+  }
+  if (generation["attemptCount"] !== undefined) assertNullableNumber(generation["attemptCount"]);
+  if (generation["maxAttempts"] !== undefined) assertNullableNumber(generation["maxAttempts"]);
+  if (generation["lastErrorAtPresent"] !== undefined) assertBoolean(generation["lastErrorAtPresent"]);
+  if (generation["queueStateCategory"] !== undefined) assertString(generation["queueStateCategory"]);
+  if (generation["recommendedAction"] !== undefined) assertString(generation["recommendedAction"]);
+  if (generation["latency"] !== undefined) {
+    const latency = generation["latency"];
+    assertPlainObject(latency);
+    assertNullableNumber(latency["enqueueLatencyMs"]);
+    assertNullableNumber(latency["queueWaitMs"]);
+    assertNullableNumber(latency["processorPickupLatencyMs"]);
+    assertNullableNumber(latency["processingDurationMs"]);
+    assertNullableNumber(latency["totalPaidReadyMs"]);
+    assertNullableNumber(latency["deliveryReadyMs"]);
+    assertNumber(latency["queueStuckThresholdMs"]);
+  }
 
   const accessLinks = value["accessLinks"];
   assertPlainObject(accessLinks);
@@ -362,6 +410,10 @@ function formatChannel(summary: AccessLinkChannelSummary) {
   return states.length > 0 ? states.join(", ") : "not saved";
 }
 
+function formatMs(value: number | null | undefined) {
+  return typeof value === "number" ? `${value}` : "unknown";
+}
+
 function formatPretty(env: OpsEnv, response: AdminLookupResponse) {
   return [
     "ANYU ops: paid result lookup",
@@ -381,6 +433,16 @@ function formatPretty(env: OpsEnv, response: AdminLookupResponse) {
     "Generation",
     `- Status: ${response.generation.status ?? "missing"}`,
     `- Failure category: ${response.generation.failureCategory ?? "none"}`,
+    `- Queue state: ${response.generation.queueStateCategory ?? "unknown"}`,
+    `- Recommended action: ${response.generation.recommendedAction ?? "support_review_required"}`,
+    `- Job created at present: ${response.generation.jobCreatedAtPresent ? "yes" : "no"}`,
+    `- Job started at present: ${response.generation.jobStartedAtPresent ? "yes" : "no"}`,
+    `- Job completed at present: ${response.generation.jobCompletedAtPresent ? "yes" : "no"}`,
+    `- Paid result completed at present: ${response.generation.paidResultCompletedAtPresent ? "yes" : "no"}`,
+    `- Attempt count: ${response.generation.attemptCount ?? "unknown"}`,
+    `- Queue wait ms: ${formatMs(response.generation.latency?.queueWaitMs)}`,
+    `- Processing duration ms: ${formatMs(response.generation.latency?.processingDurationMs)}`,
+    `- Total paid ready ms: ${formatMs(response.generation.latency?.totalPaidReadyMs)}`,
     "",
     "Paid result",
     `- Exists: ${response.result.paidResultExists ? "yes" : "no"}`,

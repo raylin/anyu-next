@@ -254,6 +254,45 @@ Default after controlled smoke:
 
 Leave runtime enabled only if owner explicitly chooses soft public availability.
 
+## Paid Generation Processor Readiness
+
+Gate 1 functional smoke can pass while soft-public readiness remains conditional. Before any owner-only availability window or low-key soft public window, Codex must assess paid-generation queue readiness instead of relying on manual smoke impressions.
+
+Track these metrics where available:
+
+- `enqueueLatencyMs`: payment paid / entitlement active to generation job creation
+- `queueWaitMs`: generation job creation to processor start/lock
+- `processorPickupLatencyMs`: eligible queued job to processor pickup
+- `processingDurationMs`: processor start to paid result completion
+- `totalPaidReadyMs`: payment paid / entitlement active to paid result completion
+- `deliveryReadyMs`: paid result completion to Email/LINE access-link delivery readiness
+- `queueStuckThreshold`: v0 default threshold for operator attention
+
+Initial proposed SLOs are evidence-seeking targets, not permanent launch guarantees:
+
+- paid result ready p50 <= 60 seconds
+- paid result ready p95 <= 180 seconds
+- queue wait p95 <= 60 seconds
+- no queued job remains beyond 5 minutes without a safe Admin/Ops action
+- controlled small-sample processor failure rate = 0
+
+Use the structured benchmark helper before availability decisions:
+
+```bash
+cd apps/web && corepack pnpm run qa:paid-generation:benchmark -- --mode mock --jobs 1 --json
+cd apps/web && corepack pnpm run qa:paid-generation:benchmark -- --mode mock --jobs 3 --concurrency 2 --json
+```
+
+Mock benchmark output does not prove deployed cron or Vercel Queue automatic drain behavior. If deployed drain behavior is the question, use a bounded staging-safe no-card/fake-paid path with freshness guard and Admin/Ops evidence. Do not use production as the primary processor benchmark environment.
+
+If a paid result remains queued:
+
+- run `pnpm ops lookup-result --env <env> --id <resultId>` and inspect the sanitized generation queue state
+- if the queue state is within threshold, wait using structured result wait helpers
+- if the queue state is stuck or retry-scheduled, use only the approved processor endpoint/path when authorized
+- stop accepting production payments if queue readiness is unknown or jobs require repeated manual processor action
+- never mutate DB rows manually to mark generation complete
+
 ## Reporting
 
 Production reports must include:

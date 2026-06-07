@@ -11830,3 +11830,47 @@ Unresolved questions:
 - Soft public remains conditional because automatic paid-generation queue drain was not proven in v4.
 - Exact queue latency was not captured as a metric and should be instrumented/reviewed in the processor readiness follow-up.
 - Theme route remains preserved and deferred.
+
+## 2026-06-07 Processor Latency + Paid Generation Readiness v0
+
+### Completed Changes
+
+- added a paid-generation readiness helper that calculates:
+  - `enqueueLatencyMs`
+  - `queueWaitMs`
+  - `processorPickupLatencyMs`
+  - `processingDurationMs`
+  - `totalPaidReadyMs`
+  - `deliveryReadyMs`
+  - `queueStuckThresholdMs`
+- extended Admin paid-result lookup with sanitized processor visibility:
+  - job timestamp presence booleans
+  - attempt counts
+  - last-error presence
+  - queue state category
+  - recommended action
+  - millisecond latency metrics
+- updated `pnpm ops lookup-result` validation and pretty output for safe processor queue state / latency.
+- added `qa:paid-generation:benchmark` with bounded mock mode, `--jobs`, `--concurrency`, `--json`, and `maxJobs=5`.
+- updated production gate policy with processor readiness metrics, initial SLO proposal, and stuck-queue runbook guidance.
+- corrected dashboard state: Gate 1 functional smoke passed, production remains fail-closed, and current blocker is paid-generation automatic-drain readiness.
+
+### Validation
+
+- targeted readiness / benchmark / Admin lookup tests: pass.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 104 files / 702 tests.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass, 5 files / 49 tests.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `cd apps/web && corepack pnpm build`: pass.
+- `qa:paid-generation:benchmark -- --mode mock --jobs 1 --json`: pass.
+- `qa:paid-generation:benchmark -- --mode mock --jobs 3 --concurrency 2 --json`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Functional Gate 1 remains accepted as pass.
+- Soft public readiness remains `blocked_needs_automatic_drain`.
+- Mock benchmark output is structured and fast, but explicitly does not prove deployed Vercel Queue / cron pickup latency.
+- Production was not touched; no payment, runtime open, Email, LINE, DB mutation, or Vercel env change occurred.
+- Recommended next task: deployed staging paid-generation automatic-drain benchmark using no-card/fake-paid, freshness guard, and Admin/Ops latency fields.

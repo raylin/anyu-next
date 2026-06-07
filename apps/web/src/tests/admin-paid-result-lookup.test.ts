@@ -63,11 +63,18 @@ describe("admin paid result lookup summary", () => {
             status: "completed",
             lastErrorCategory: null,
             createdAt: NOW,
+            updatedAt: new Date("2026-06-05T00:00:40.000Z"),
+            nextRunAt: new Date("2026-06-05T00:00:05.000Z"),
+            lockedAt: new Date("2026-06-05T00:00:10.000Z"),
+            lastErrorAt: null,
+            attemptCount: 1,
+            maxAttempts: 3,
           },
         ],
         paidResults: [
           {
             status: "completed",
+            startedAt: new Date("2026-06-05T00:00:10.000Z"),
             completedAt: NOW,
             failedAt: null,
             errorCode: null,
@@ -148,6 +155,19 @@ describe("admin paid result lookup summary", () => {
       paidAtPresent: true,
       merchantOrderNoPresent: true,
     });
+    expect(summary.generation).toMatchObject({
+      jobExists: true,
+      status: "completed",
+      jobCreatedAtPresent: true,
+      jobStartedAtPresent: true,
+      jobCompletedAtPresent: true,
+      paidResultCompletedAtPresent: true,
+      attemptCount: 1,
+      maxAttempts: 3,
+      queueStateCategory: "completed",
+      recommendedAction: "no_action_needed",
+    });
+    expect(summary.generation.latency.totalPaidReadyMs).toBe(0);
     expect(summary.accessLinks.email).toMatchObject({
       contactSaved: true,
       sent: true,
@@ -193,7 +213,13 @@ describe("admin paid result lookup summary", () => {
           {
             status: "queued",
             lastErrorCategory: null,
-            createdAt: NOW,
+            createdAt: new Date("2026-06-04T23:50:00.000Z"),
+            updatedAt: new Date("2026-06-04T23:50:00.000Z"),
+            nextRunAt: new Date("2026-06-04T23:50:00.000Z"),
+            lockedAt: null,
+            lastErrorAt: null,
+            attemptCount: 0,
+            maxAttempts: 3,
           },
         ],
       }),
@@ -211,6 +237,11 @@ describe("admin paid result lookup summary", () => {
     expect(summary.recommendedActions).toEqual(
       expect.arrayContaining(["wait_for_processing", "retry_processor_if_safe"]),
     );
+    expect(summary.generation).toMatchObject({
+      queueStateCategory: "queued_stuck",
+      recommendedAction: "invoke_processor_if_approved",
+      attemptCount: 0,
+    });
   });
 
   it("diagnoses saved contact with missing access link", () => {
