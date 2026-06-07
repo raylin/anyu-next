@@ -11017,3 +11017,37 @@ Unresolved questions:
 - Historical reports remain in older formats by design; broad rewriting is out of scope.
 - No production runtime, payment, Email, LINE, Vercel env, provider credential, or DB mutation occurred.
 - Next mainline task: Controlled Production Payment Smoke retry using the runtime-window helper, after explicit owner approval.
+
+## 2026-06-07 Controlled Production Payment Smoke Retry with Runtime-Window Helper v0
+
+### Completed Changes
+
+- saved the Controlled Production Payment Smoke Retry with Runtime-Window Helper v0 handoff
+- ran required pre-enable gates: local, mock-flow, UI, production-preflight, runtime-window status, and smoke fixture
+- temporarily enabled only `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT` through local-mirror-first / Vercel-sync-second fallback because runtime-window execute actions remain deferred
+- deployed Production from repo root to canonical `anyu-next`
+- stopped before production result creation/payment because runtime-window status could not classify the enabled state as `runtime_enabled_controlled_window`
+- restored the two runtime flags to false, redeployed Production fail-closed, and verified runtime-window status plus production-preflight pass
+
+### Learnings
+
+- Pre-enable readiness was healthy: `qa:module01:local`, `qa:module01:mock-flow`, sandbox-escalated `qa:module01:ui`, production-preflight, runtime-window fail-closed status, and smoke fixture all passed.
+- After intentional runtime enablement, runtime-window status still ran fail-closed production preflight and returned `preflight_blocked` because runtime flags were true.
+- With `--skip-preflight`, runtime-window still returned `unsafe_runtime_enabled` because its checkout probe uses a dummy result ID and treats `source_result_not_found` as fail-closed.
+- The helper needs a dedicated enabled-window proof path before another production smoke.
+
+### Validation
+
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: initial sandbox browser launch failed; sandbox-escalated rerun passed, 5 tests.
+- `cd apps/web && corepack pnpm run qa:module01:production-preflight`: pass before enablement and pass after shutdown.
+- `cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status`: pass before enablement and pass after shutdown, `stateCategory=fail_closed_ready`.
+- `cd apps/web && corepack pnpm run qa:module01:smoke-fixture -- --json`: pass.
+
+### Unresolved Questions
+
+- First failure category: `runtime_window_failed`.
+- Production smoke did not create a result, generate a provider form, run payment, send Email, or send LINE.
+- Production is fail-closed again; final runtime flags are disabled and production-preflight passes.
+- Next mainline task: fix runtime-window enabled-state classification before another production smoke attempt.
