@@ -2,6 +2,10 @@
 
 Date: 2026-06-07
 
+## Format Alignment Note
+
+This report introduced the gate-status/report-format correction that is now formalized in `ai-collaboration/process/report-template.md` and the canonical completion summary schema. Future reports should use those templates directly.
+
 ## Model / Effort
 
 - Model used: GPT-5 Codex
@@ -175,4 +179,3 @@ Deployed Gate Freshness + Report Format Guard v0 is complete.
 The LINE fix now has a clean deployed staging gate record for target commit `29de59f`, with `freshnessStatus=pass`, `mixedDeploymentDetected=false`, `requiredChecksStatus=pass`, `optionalChecksStatus=partial`, `gateStatus=partial`, and `commandExitCode=0`.
 
 Recommended next task: resume LINE production bind root-cause fix review using the corrected evidence, then proceed to Production Runtime Window + Vercel Alias Guard v0 when appropriate.
-

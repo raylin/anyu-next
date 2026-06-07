@@ -10987,3 +10987,33 @@ Unresolved questions:
 - `qa:module01:staging` was intentionally skipped because no staging/deployed behavior changed.
 - No production runtime, payment, Email, LINE, Vercel env, provider credential, or DB mutation occurred.
 - Next mainline task: Controlled Production Payment Smoke retry using the runtime-window helper, after explicit owner approval.
+
+## 2026-06-07 Report Format Alignment + Completion Summary Schema v0
+
+### Completed Changes
+
+- saved the Report Format Alignment + Completion Summary Schema v0 handoff
+- added `ai-collaboration/process/report-template.md` as the canonical report structure
+- updated `ai-collaboration/process/handoff-template.md` with the exact canonical Codex Completion Summary schema
+- updated `AGENTS.md`, Codex operating policy, QA validation policy, and production gate policy with report correctness rules
+- added lightweight format-alignment notes to the latest affected reports without rewriting historical facts
+- updated the dashboard to reference the canonical report and completion summary formats
+
+### Learnings
+
+- The existing handoff template already had a partial paste-back format, but it lacked the exact safety, gate-status, tech-debt, blocker, and review fields needed for comparable task summaries.
+- Report details and paste-back summaries should be separate: reports can be detailed; completion summaries should be concise, structured, and comparable.
+- `commandExitCode`, `gateStatus`, required checks, optional checks, and deployed freshness fields must remain separate in future gate reports.
+
+### Validation
+
+- Docs presence check: pass.
+- Dashboard HTML sanity: pass.
+- Secret/private scan: pass, with only policy labels and historical safe token-prefix references.
+- `git diff --check`: pass.
+
+### Unresolved Questions
+
+- Historical reports remain in older formats by design; broad rewriting is out of scope.
+- No production runtime, payment, Email, LINE, Vercel env, provider credential, or DB mutation occurred.
+- Next mainline task: Controlled Production Payment Smoke retry using the runtime-window helper, after explicit owner approval.

@@ -172,8 +172,16 @@ For each gate, report:
 - command
 - result
 - gateStatus and commandExitCode separately
+- requiredChecksStatus
+- optionalChecksStatus
 - whether it mutates staging data
 - whether it touches production read-only checks
 - whether it sends Email/LINE
 - whether production runtime/payment was enabled
 - why skipped, if skipped
+
+Rules:
+
+- `commandExitCode=0` does not equal `gateStatus=pass`.
+- If a gate summary says `partial`, the report and completion summary must say `partial`.
+- If a deployed gate is involved, include `targetDeployCommit`, `deployedCommitAtGateStart`, `deployedCommitAtGateEnd`, `freshnessStatus`, and `mixedDeploymentDetected`.

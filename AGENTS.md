@@ -29,6 +29,8 @@ Every report and completion summary must include:
 - gates run/skipped and why
 - first failure category if failed
 
+Use `ai-collaboration/process/report-template.md` for reports and the canonical Codex Completion Summary schema in `ai-collaboration/process/handoff-template.md`. Report `commandExitCode`, `gateStatus`, `requiredChecksStatus`, and `optionalChecksStatus` separately when gates are involved.
+
 ## Env Governance
 
 - `apps/web/.env.staging` is the local server mirror/source for Vercel Preview(staging).

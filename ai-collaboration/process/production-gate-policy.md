@@ -154,3 +154,7 @@ Production reports must include:
 - final runtime status
 - whether ads/broad traffic were enabled
 - first failure category if failed
+
+Use the canonical report template in `ai-collaboration/process/report-template.md` and the canonical completion summary schema in `ai-collaboration/process/handoff-template.md`.
+
+Do not collapse production smoke or preflight results into informal prose. Report `commandExitCode`, `gateStatus`, `requiredChecksStatus`, and `optionalChecksStatus` separately. If any gate is partial or invalid because of freshness/source evidence, the production report must say so explicitly.

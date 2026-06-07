@@ -101,6 +101,34 @@ Every completion summary must include:
 - first failure category if failed
 - recommended next step aligned with owner/PM mainline
 
+Completion summaries must be concise but structured. Do not use informal “Implemented and pushed …” prose as the only completion summary.
+
+## Report Format Requirements
+
+Use `ai-collaboration/process/report-template.md` for new reports.
+
+Reports must support audit and comparison across tasks. Include:
+
+- metadata and timing fields
+- context and scope
+- implementation summary
+- validation commands and results
+- `commandExitCode`, `gateStatus`, `requiredChecksStatus`, and `optionalChecksStatus` where relevant
+- deployed freshness fields when applicable
+- safety side-effect fields
+- result, blocker status, and first failure category if failed
+- tech debt / cleanup notes
+- decisions made
+- uncertainties / blockers
+- recommended next step
+- paste-back context
+
+If a gate is partial, do not summarize it as pass. If `commandExitCode=0` but optional checks are skipped or partial, report the gate as partial where the suite summary says partial.
+
+If a report corrects a prior report, add a `Correction Note` section instead of rewriting history.
+
+Historical reports do not need broad rewriting.
+
 ## Handoff Style
 
 Low/medium-risk tasks may say:

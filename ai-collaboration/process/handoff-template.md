@@ -113,17 +113,11 @@ For production runtime-window tasks, also report:
 - whether runtime was enabled
 - whether provider credentials/env values were touched
 
+Use the canonical report format in `ai-collaboration/process/report-template.md`.
+
 ## Completion Summary Requirements
 
-Final response must include:
-
-- files changed
-- commit hash
-- staging push status
-- validation results
-- gateStatus and commandExitCode separately for deployed gates
-- whether runtime/payment/Email/LINE occurred
-- recommended next task aligned with owner/PM mainline
+Final response must use the canonical Codex Completion Summary schema below. Do not use informal “Implemented and pushed …” prose as the only completion summary.
 
 ## Recommended Next Task
 
@@ -164,52 +158,72 @@ Env sync must repeat:
 ```markdown
 ## Codex Completion Summary
 
-Task:
-<task name>
+Task: <task name>
 
-Report:
-<report file path>
+Report: <path>
 
-Summary Log:
-<summary log path updated>
-
-Commit:
-<commit hash or blocker>
+Commit: <hash>
 
 Staging Push:
-<pushed to origin/staging or skipped / failed — reason>
+<pushed / not pushed / not applicable>
+
+Model / Effort: <model>, <effort>
+
+Timing:
+
+* taskStartedAt:
+* taskCompletedAt:
+* totalWallClockDuration:
+* humanWaitDuration:
+* netCodexWorkDuration:
 
 Files Changed:
-- <file 1>
-- <file 2>
-- <file 3>
+
+* <file 1>
+* <file 2>
 
 What Changed:
-- <key change 1>
-- <key change 2>
-- <key change 3>
+
+* <key change 1>
+* <key change 2>
 
 Validation:
-- <validation result 1>
-- <validation result 2>
-- deployed gate freshness: <targetDeployCommit / deployedCommitAtGateStart / deployedCommitAtGateEnd / freshnessStatus / mixedDeploymentDetected / gateStatus / commandExitCode>
+
+* <validation result 1>
+* <validation result 2>
+
+Gate Status:
+
+* gateStatus:
+* commandExitCode:
+* requiredChecksStatus:
+* optionalChecksStatus:
+* freshnessStatus / deployed commit fields if applicable:
+
+Safety:
+
+* Production runtime enabled:
+* Payment run:
+* Email sent:
+* LINE sent:
+* Vercel env changed:
+* DB mutated:
+* Secrets/private data exposed:
 
 Tech Debt / Cleanup Notes:
-- New technical debt introduced: <note or none>
-- Existing technical debt observed: <note or none beyond previously documented items>
-- Opportunistic cleanup completed: <note or none>
-- Deferred cleanup candidates: <note or none>
-- Recommended follow-up: <note or none>
+
+* New technical debt introduced:
+* Existing technical debt observed:
+* Opportunistic cleanup completed:
+* Deferred cleanup candidates:
 
 Decisions Made:
-- <execution-level decision 1>
-- <execution-level decision 2>
-- None
+
+* <decision>
 
 Uncertainties / Blockers:
-- <uncertainty or blocker 1>
-- <uncertainty or blocker 2>
-- None
+
+* <uncertainty or blocker>
 
 Recommended Next Step:
 <recommended next step>
@@ -218,5 +232,5 @@ Needs ChatGPT Review:
 Yes / No
 
 Paste-Back Context:
-<5-10 lines of context that allow ChatGPT Web to continue without reading the full repo>
+<short paragraph, no secrets/private values>
 ```

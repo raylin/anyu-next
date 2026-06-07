@@ -2,6 +2,10 @@
 
 Date: 2026-06-07
 
+## Format Alignment Note
+
+This report predates the formal canonical report template. The later Deployed Gate Freshness + Report Format Guard v0 report corrected the staging-gate evidence issue for this task. Future reports should use `ai-collaboration/process/report-template.md` and the canonical completion summary schema.
+
 ## Model / Effort
 
 - Model used: GPT-5 Codex

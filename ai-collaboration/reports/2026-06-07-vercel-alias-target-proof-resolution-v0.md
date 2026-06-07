@@ -1,5 +1,9 @@
 # Vercel Alias Target Proof Resolution v0
 
+## Format Alignment Note
+
+This report predates the formal canonical report template but includes the required timing, validation, safety, result, blocker, and next-step fields. Future reports should use `ai-collaboration/process/report-template.md`.
+
 ## Timing / Execution
 
 - Model used: GPT-5 Codex
