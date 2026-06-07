@@ -78,6 +78,11 @@ node tools/admin-cli/scripts/migrate-admin-token-from-env-mirrors.mjs --confirm-
 
 This helper is outside the normal `pnpm ops` command surface. It may read only `ADMIN_API_TOKEN` from `apps/web/.env.staging` and `apps/web/.env.production`, may write only the corresponding `~/.anyu/credentials.json` profiles, and must not print token values or token-derived metadata. Do not add a permanent `pnpm ops auth import-token` command.
 
+Post-Gate 1 lifecycle decision: keep this helper as an owner-approved one-time/local recovery tool
+only. It is not a normal setup path, not a scheduled task, not a `pnpm ops` subcommand, and not a
+general env import mechanism. If it becomes confusing after ops credentials are stable, archive or
+remove it in a focused cleanup task.
+
 Staging QA runners may resolve `ADMIN_API_TOKEN` from the approved local staging mirror and inject it into `pnpm ops` subprocess env. This is a QA runner responsibility only; it is separate from normal `pnpm ops` auth resolution.
 
 Production smoke must prove Admin/Ops availability before runtime open:
@@ -143,6 +148,37 @@ Admin API must not include:
 - provider payload
 - `TradeInfo` / `TradeSha`
 - card/payment-sensitive data
+
+## Diagnostic / Event Lifecycle
+
+Permanent ops surfaces after Gate 1:
+
+- `pnpm ops lookup-result` sanitized payment, entitlement, generation, access-link, delivery, and latency state
+- `pnpm ops lookup-line-bind` sanitized LINE bind categories and recipient-secret presence booleans
+- runtime config registry/list/get/history for active scoped runtime controls
+- production/staging Admin/Ops preflight categories
+
+Temporary through Gate 2 / soft-public hardening:
+
+- detailed Email save diagnostic categories
+- detailed LINE bind milestone categories
+- paid-generation benchmark summaries and queue recommendation categories
+- staging channel plan/dry-run summaries
+
+Allowed diagnostic data:
+
+- booleans, enums, status categories, timestamp-presence booleans, sanitized latency metrics, attempt counts, and recommended action enums
+
+Forbidden diagnostic data:
+
+- raw Email, raw LINE ID, idToken, LIFF raw state, encrypted recipient, hashes, access tokens,
+  tokenized URLs, provider payloads, prompt/source text, `TradeInfo`, `TradeSha`, or card data
+
+Retention decision:
+
+- Do not add a deletion job as part of Gate 1 cleanup.
+- Keep existing diagnostic events until Gate 2 readiness review so production/staging failures remain explainable.
+- Add a future retention/pruning task if event growth or privacy review requires bounded retention. That task must preserve aggregate categories needed for Admin/Ops support.
 
 ## Reporting
 

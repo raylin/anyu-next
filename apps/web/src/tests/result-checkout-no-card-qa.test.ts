@@ -14,7 +14,7 @@ import {
 } from "../../scripts/lib/result-checkout-no-card-qa.mjs";
 
 describe("result checkout no-card QA helpers", () => {
-  it("uses the shared Module 01 wait helper for paid-status polling", () => {
+  it("uses the shared Module 01 wait helper for bounded paid-status fallback polling", () => {
     const source = fs.readFileSync(
       path.resolve(process.cwd(), "scripts/result-checkout-no-card-qa.mjs"),
       "utf8",
@@ -23,6 +23,32 @@ describe("result checkout no-card QA helpers", () => {
     expect(source).toContain('import { waitForCondition } from "./lib/module01-wait.mjs";');
     expect(source).toContain("const waitResult = await waitForCondition");
     expect(source).not.toContain("for (let attempt = 1; attempt <= 24; attempt += 1)");
+  });
+
+  it("uses Admin API result wait as the primary no-card readiness source on staging", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/result-checkout-no-card-qa.mjs"),
+      "utf8",
+    );
+
+    expect(source).toContain('import { waitForResult as waitForResultViaAdminApi }');
+    expect(source).toContain('const waitSource = process.env.QA_NO_CARD_WAIT_SOURCE?.trim().toLowerCase() || "admin_api";');
+    expect(source).toContain("async function waitForPaidCompletedViaAdminApi");
+    expect(source).toContain('record("admin_paid_result_wait"');
+    expect(source).toContain("adminApiWaitPrimary: waitResult.waitSource === \"admin_api\"");
+    expect(source).toContain("fallbackTokenStatusUsed: waitResult.fallbackTokenStatusUsed");
+  });
+
+  it("keeps paid access token use isolated to final fallback/render verification", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/result-checkout-no-card-qa.mjs"),
+      "utf8",
+    );
+
+    expect(source).toContain("async function waitForPaidCompleted(paidAccessToken)");
+    expect(source).toContain("async function verifyPaidAccessRender(unlockPath)");
+    expect(source).not.toContain("paidAccessTokenPrinted: true");
+    expect(source).not.toContain("unlockPathPrinted: true");
   });
 
   it("uses the shared Module 01 smoke fixture instead of embedded analyze input", () => {

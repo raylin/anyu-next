@@ -5,6 +5,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { loadLocalEnv } from "./lib/load-local-env.mjs";
 import {
+  resolveAdminTokenForQa,
+  summarizeAdminTokenForQa,
+} from "./lib/admin-token-for-qa.mjs";
+import {
   assertSafeQaBaseUrl,
   containsTokenLikeValue,
   extractCheckoutHref,
@@ -16,6 +20,7 @@ import {
   summarizeResultPageHtml,
 } from "./lib/result-checkout-no-card-qa.mjs";
 import { waitForCondition } from "./lib/module01-wait.mjs";
+import { waitForResult as waitForResultViaAdminApi } from "./module01-staging-result-wait.mjs";
 import { createModule01AnalyzeRequest } from "./lib/module01-smoke-fixture.mjs";
 
 if (process.env.QA_NO_CARD_DISABLE_LOCAL_ENV !== "1") {
@@ -33,6 +38,7 @@ const PAYMENT_STATUS_WAITING = new Set(["pending", "processing"]);
 
 const baseUrl = normalizeBaseUrl(process.env.QA_NO_CARD_BASE_URL, DEFAULT_BASE_URL);
 const processorMode = process.env.QA_NO_CARD_PROCESSOR_MODE?.trim().toLowerCase() ?? "queue";
+const waitSource = process.env.QA_NO_CARD_WAIT_SOURCE?.trim().toLowerCase() || "admin_api";
 const operatorSecret = process.env.OPERATOR_TEST_SECRET?.trim() ?? "";
 const internalJobSecret = process.env.INTERNAL_JOB_SECRET?.trim() ?? "";
 const inputSuffix =
@@ -368,6 +374,84 @@ async function waitForPaidCompleted(paidAccessToken) {
   return waitResult.status === "pass";
 }
 
+function isStagingTarget() {
+  try {
+    return new URL(baseUrl).hostname === "staging.anyu.tw";
+  } catch {
+    return false;
+  }
+}
+
+async function waitForPaidCompletedViaAdminApi(resultId) {
+  const tokenResolution = resolveAdminTokenForQa({ targetEnv: "staging" });
+  const adminToken = summarizeAdminTokenForQa(tokenResolution);
+
+  record("admin_wait_preflight", tokenResolution.token ? "pass" : "blocked", {
+    waitSource: "admin_api",
+    adminToken,
+  });
+
+  if (!tokenResolution.token) {
+    return {
+      completed: false,
+      summary: {
+        status: "blocked",
+        blockers: ["staging_admin_token_unavailable_owner_action_required"],
+        adminToken,
+      },
+    };
+  }
+
+  const summary = await waitForResultViaAdminApi({
+    env: "staging",
+    resultId,
+    timeoutMs: 72_000,
+    intervalMs: 3_000,
+    token: tokenResolution.token,
+  });
+
+  record("admin_paid_result_wait", summary.status === "pass" ? "pass" : summary.status, {
+    waitSource: "admin_api",
+    paidResultStatus: summary.paidResultStatus,
+    paymentStatus: summary.paymentStatus,
+    generationStatus: summary.generationStatus,
+    attempts: summary.attempts,
+    nextAction: summary.nextAction,
+    blockers: summary.blockers,
+    adminToken,
+  });
+
+  return {
+    completed: summary.status === "pass",
+    summary: {
+      ...summary,
+      adminToken,
+    },
+  };
+}
+
+async function waitForPaidCompletedPrimary({ resultId, paidAccessToken }) {
+  if (waitSource === "admin_api" && isStagingTarget()) {
+    const adminWait = await waitForPaidCompletedViaAdminApi(resultId);
+
+    return {
+      completed: adminWait.completed,
+      waitSource: "admin_api",
+      adminWaitSummary: adminWait.summary,
+      fallbackTokenStatusUsed: false,
+    };
+  }
+
+  const completed = await waitForPaidCompleted(paidAccessToken);
+
+  return {
+    completed,
+    waitSource: "paid_access_status",
+    adminWaitSummary: null,
+    fallbackTokenStatusUsed: true,
+  };
+}
+
 async function processPaidGenerationJob() {
   const result = await requestJson(`${baseUrl}/api/internal/jobs/process`, {
     method: "POST",
@@ -510,7 +594,11 @@ async function main() {
     await processPaidGenerationJob();
   }
 
-  const completed = await waitForPaidCompleted(fakePaid.paidAccessToken);
+  const waitResult = await waitForPaidCompletedPrimary({
+    resultId,
+    paidAccessToken: fakePaid.paidAccessToken,
+  });
+  const completed = waitResult.completed;
   const accessRendered = completed ? await verifyPaidAccessRender(fakePaid.unlockPath) : false;
   const productionOk = await productionDisabledCheck();
   const queueProof =
@@ -527,6 +615,9 @@ async function main() {
     emailRecoverySaveCovered: true,
     checkoutUnlockAfterEmailSaveCovered: true,
     downstreamFakePaidCovered: true,
+    readinessWaitSource: waitResult.waitSource,
+    adminApiWaitPrimary: waitResult.waitSource === "admin_api",
+    fallbackTokenStatusUsed: waitResult.fallbackTokenStatusUsed,
     paidStatusCompleted: completed,
     paidAccessRenderPassed: accessRendered,
     productionDisabledPassed: productionOk,

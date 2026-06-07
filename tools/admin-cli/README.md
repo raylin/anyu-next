@@ -51,6 +51,11 @@ node tools/admin-cli/scripts/migrate-admin-token-from-env-mirrors.mjs --confirm-
 
 This helper is not a `pnpm ops` command. It reads only `ADMIN_API_TOKEN` from `apps/web/.env.staging` and `apps/web/.env.production`, writes only the matching `~/.anyu/credentials.json` profiles, preserves existing credential fields, and prints only copy categories/permission status. It must not be used as a normal auth source or generalized env import.
 
+Lifecycle decision after Gate 1: keep the helper as an owner-approved one-time/local recovery tool
+only. Normal auth should use `pnpm ops auth set-token` or existing `~/.anyu/credentials.json`.
+If the helper creates confusion after ops credentials are stable, archive or remove it in a focused
+cleanup task rather than exposing it as a permanent CLI command.
+
 ## Runtime Config
 
 Runtime config is for non-secret operational values only. It is not for provider credentials, API keys, tokens, database URLs, or crypto secrets.

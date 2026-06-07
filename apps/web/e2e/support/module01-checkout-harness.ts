@@ -91,11 +91,32 @@ async function installCheckoutHarnessRoute(page: Page) {
       body: checkoutHarnessHtml(state),
     });
   });
+
+  await page.route("**/m/ambiguous-temperature/result/*/checkout**", async (route) => {
+    const url = new URL(route.request().url());
+    const state = (url.searchParams.get("state") ?? "mobile_locked") as CheckoutHarnessState;
+
+    await route.fulfill({
+      contentType: "text/html; charset=utf-8",
+      body: checkoutHarnessHtml(state),
+    });
+  });
 }
 
 async function gotoCheckoutHarness(page: Page, state: CheckoutHarnessState) {
   await page.goto(`https://module01.local/qa/module01/checkout-start?state=${state}`);
 }
 
-export { forbiddenCopy, gotoCheckoutHarness, installCheckoutHarnessRoute };
+async function gotoCheckoutRouteHarness(page: Page, state: CheckoutHarnessState) {
+  await page.goto(
+    `https://module01.local/m/ambiguous-temperature/result/fixture-result-1/checkout?state=${state}`,
+  );
+}
+
+export {
+  forbiddenCopy,
+  gotoCheckoutHarness,
+  gotoCheckoutRouteHarness,
+  installCheckoutHarnessRoute,
+};
 export type { CheckoutHarnessState };

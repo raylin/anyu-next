@@ -11949,3 +11949,57 @@ Unresolved questions:
 - Owner-controlled short payment windows are now allowed if owner explicitly chooses them and required pre-open gates pass.
 - Soft public still requires repeated deployed staging automatic-drain evidence and small concurrency or repeated sequential benchmark evidence.
 - Recommended next task: QA Foundation Follow-up v2 by default, or Repeated / Concurrency Paid-Generation Benchmark v0 if owner wants to move toward soft public immediately.
+
+## 2026-06-07 QA Foundation Follow-up v2
+
+### Completed Changes
+
+- saved handoff first with QA debt inventory and acceptance plan.
+- updated `qa:module01:staging:channels`:
+  - default real-send mode blocks with `owner_approval_required`.
+  - `--plan` / `--dry-run` emits a non-sending plan.
+  - real staging Email/LINE sends remain unimplemented until owner-approved recipient/account scope is defined.
+- improved Module 01 Playwright checkout UI harness:
+  - one critical Email-saved unlock test now uses the actual checkout route shape `/m/ambiguous-temperature/result/<fixture>/checkout`.
+  - remaining gap is documented: this is still harness-fulfilled, not full local Next route + DB/provider mocks.
+- updated no-card QA:
+  - staging readiness wait now prefers Admin API result state by `resultId`.
+  - tokenized paid-access path is isolated to final access/render verification.
+- documented one-time ops credential migration helper lifecycle:
+  - keep as owner-approved one-time/local recovery tool only.
+  - not normal auth path and not a `pnpm ops` command.
+- documented diagnostic/event lifecycle:
+  - permanent Admin/Ops summaries stay.
+  - detailed diagnostics remain through Gate 2 / soft-public hardening.
+  - pruning/deletion job deferred until evidence requires it.
+- reaffirmed delivery runtime config policy:
+  - `delivery.email.enabled` and `delivery.line.enabled` remain inactive until sender code reads them with tests.
+- reviewed legacy module ReturnURL route:
+  - active canonical path remains `/payment/newebpay/return`.
+  - old module route remains compatibility-only; strict redirect cleanup deferred unless owner wants a focused cleanup.
+- updated dashboard active state and process docs.
+
+### Validation
+
+- targeted QA/channel/no-card/process tests: pass after one brittle doc-string assertion fix.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 104 files / 711 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:result-checkout:no-card`: pass; `readinessWaitSource=admin_api`, `adminApiWaitPrimary=true`, `fallbackTokenStatusUsed=false`.
+- `cd apps/web && corepack pnpm run qa:module01:staging:channels`: expected blocked with `owner_approval_required`, no sends.
+- `cd apps/web && corepack pnpm run qa:module01:staging:channels -- --plan --json`: pass, no sends.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass.
+- runtime-config targeted tests: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, real Email/LINE, Vercel env change, production DB mutation, or direct DB use.
+- `qa:module01:staging` skipped because deployed app behavior was not changed; staging-safe no-card runner was executed instead.
+- Real staging channel sends remain deferred until owner-approved recipient/account scope is defined.
+- Soft public remains blocked on repeated/concurrency paid-generation evidence.
+- Recommended next task: owner chooses Repeated / Concurrency Paid-Generation Benchmark v0 or Module Theme Architecture Implementation Plan.

@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import {
   forbiddenCopy,
   gotoCheckoutHarness,
+  gotoCheckoutRouteHarness,
   installCheckoutHarnessRoute,
 } from "./support/module01-checkout-harness";
 
@@ -42,10 +43,11 @@ test.describe("Module 01 checkout-start UI foundation", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await gotoCheckoutHarness(page, "email_saved");
+    await gotoCheckoutRouteHarness(page, "email_saved");
 
     await expect(page.getByRole("button", { name: "已保存到 Email" })).toBeVisible();
     await expect(page.getByLabel("continue-payment")).toBeEnabled();
+    await expect(page).toHaveURL(/\/m\/ambiguous-temperature\/result\/fixture-result-1\/checkout/u);
 
     for (const copy of forbiddenCopy) {
       await expect(page.getByText(copy, { exact: false })).toHaveCount(0);

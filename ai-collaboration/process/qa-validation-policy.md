@@ -52,6 +52,11 @@ cd apps/web && corepack pnpm run qa:module01:ui
 
 This tier should use local mocked harnesses where possible.
 
+The Module 01 checkout UI harness should prefer real route shapes such as
+`/m/ambiguous-temperature/result/<fixture-result-id>/checkout` when it can do so safely. If the
+backend/provider state is mocked, report that remaining gap rather than calling it full local Next
+route coverage.
+
 ### Module 01 Local Gate
 
 Run for broad Module 01 changes or before important handoff completion.
@@ -164,6 +169,10 @@ cd apps/web && corepack pnpm run qa:module01:wait-result -- --env staging --resu
 
 Do not use heredoc scripts, random temp-file handoffs, or repeated full-suite polling.
 
+For no-card/fake-paid staging QA, readiness polling should prefer Admin API result state by
+`resultId`. Tokenized paid-access paths may be used for the final `/r` or paid-access render check,
+but they should not be the primary readiness wait source when Admin/Ops is available.
+
 ## Staging Admin Token Injection
 
 `pnpm ops` remains a pure Admin API client and must not read app env mirror files.
@@ -225,6 +234,10 @@ Production result creation must assert `cacheHit=false`. If `cacheHit=true`, sto
 Real Email, LINE, and credit-card payment require explicit owner approval.
 
 - `qa:module01:staging:channels` is owner-approved only.
+- `qa:module01:staging:channels -- --plan` is allowed as a non-sending plan/dry-run. It must not be
+  mistaken for real channel receipt.
+- Real staging channel sends remain unimplemented until owner-approved staging recipients/accounts
+  and exact send scope are defined.
 - Production payment smoke is owner-approved only.
 - Provider accepted / DB row exists is not user-channel pass.
 - User-channel pass requires owner receipt and successful `/r/` open.

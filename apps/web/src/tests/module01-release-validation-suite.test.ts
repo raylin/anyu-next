@@ -76,6 +76,35 @@ describe("Module 01 release validation suite", () => {
     expect(source).not.toContain("module01-staging-channels-qa.mjs");
   });
 
+  it("keeps the staging channels command guarded and plan-only until real sends are owner-scoped", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/module01-staging-channels-qa.mjs"),
+      "utf8",
+    );
+
+    expect(source).toContain("--confirm-owner-approved");
+    expect(source).toContain("--plan");
+    expect(source).toContain("owner_approval_required");
+    expect(source).toContain("staging_real_channel_runner_not_implemented");
+    expect(source).toContain("sendsRealEmail: false");
+    expect(source).toContain("sendsRealLine: false");
+  });
+
+  it("uses an actual checkout route shape in the Module 01 Playwright harness", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "e2e/support/module01-checkout-harness.ts"),
+      "utf8",
+    );
+    const specSource = fs.readFileSync(
+      path.resolve(process.cwd(), "e2e/module-01-checkout-ui.spec.ts"),
+      "utf8",
+    );
+
+    expect(source).toContain("**/m/ambiguous-temperature/result/*/checkout**");
+    expect(source).toContain("gotoCheckoutRouteHarness");
+    expect(specSource).toContain("gotoCheckoutRouteHarness(page, \"email_saved\")");
+  });
+
   it("uses QA token injection for staging Admin/Ops without teaching pnpm ops to read env mirrors", () => {
     const suiteSource = fs.readFileSync(
       path.resolve(process.cwd(), "scripts/module01-release-validation-suite.mjs"),
@@ -106,6 +135,61 @@ describe("Module 01 release validation suite", () => {
     expect(openIndex).toBeGreaterThan(-1);
     expect(adminOpsIndex).toBeLessThan(openIndex);
     expect(policy).toContain("production_admin_token_missing_owner_action_required");
+  });
+
+  it("documents Gate 1 owner-controlled windows without allowing soft public by default", () => {
+    const policy = fs.readFileSync(
+      path.resolve(process.cwd(), "../../ai-collaboration/process/production-gate-policy.md"),
+      "utf8",
+    );
+
+    expect(policy).toContain("owner_controlled_short_window_allowed");
+    expect(policy).toContain("Production remains fail-closed by default");
+    expect(policy).toContain("Low-key soft public remains blocked");
+    expect(policy).toContain("Ads and broad traffic remain blocked");
+  });
+
+  it("documents no-card Admin API wait and guarded staging channel plan policy", () => {
+    const policy = fs.readFileSync(
+      path.resolve(process.cwd(), "../../ai-collaboration/process/qa-validation-policy.md"),
+      "utf8",
+    );
+
+    expect(policy).toContain("readiness polling should prefer Admin API result state");
+    expect(policy).toContain("qa:module01:staging:channels -- --plan");
+    expect(policy).toContain("mistaken for real channel receipt");
+  });
+
+  it("keeps inactive delivery runtime config and diagnostic lifecycle decisions explicit", () => {
+    const adminOps = fs.readFileSync(
+      path.resolve(process.cwd(), "../../ai-collaboration/process/admin-ops-boundary.md"),
+      "utf8",
+    );
+    const productionGate = fs.readFileSync(
+      path.resolve(process.cwd(), "../../ai-collaboration/process/production-gate-policy.md"),
+      "utf8",
+    );
+
+    expect(adminOps).toContain("Diagnostic / Event Lifecycle");
+    expect(adminOps).toContain("Keep existing diagnostic events until Gate 2 readiness review");
+    expect(productionGate).toContain("delivery.email.enabled");
+    expect(productionGate).toContain("must remain inactive until sender code actually reads them");
+  });
+
+  it("documents one-time ops credential migration helper lifecycle", () => {
+    const readme = fs.readFileSync(
+      path.resolve(process.cwd(), "../../tools/admin-cli/README.md"),
+      "utf8",
+    );
+    const adminOps = fs.readFileSync(
+      path.resolve(process.cwd(), "../../ai-collaboration/process/admin-ops-boundary.md"),
+      "utf8",
+    );
+
+    expect(readme).toContain("Lifecycle decision after Gate 1");
+    expect(readme).toContain("owner-approved one-time/local recovery tool");
+    expect(adminOps).toContain("Post-Gate 1 lifecycle decision");
+    expect(adminOps).toContain("not a normal setup path");
   });
 
   it("derives pass, partial, and blocked gate statuses", () => {

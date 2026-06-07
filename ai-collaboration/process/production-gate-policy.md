@@ -13,6 +13,14 @@ Default scoped runtime config:
 
 Operator/fake-paid routes must remain fail-closed in production.
 
+Gate 1 runtime availability decision:
+
+- Runtime availability status is `owner_controlled_short_window_allowed`.
+- Production remains fail-closed by default.
+- Owner-controlled short windows may be opened only after the pre-open gates pass and Admin/Ops monitoring is available.
+- Low-key soft public remains blocked until repeated or small-concurrency paid-generation evidence exists.
+- Ads and broad traffic remain blocked.
+
 ## Production Smoke Validity
 
 Production smoke requires:
@@ -136,6 +144,8 @@ Active Scoped Runtime Config v0 payment controls:
 
 Reserved delivery config names are not live sender controls in v0 and must not be used as proof that Email or LINE delivery is enabled/disabled.
 
+`delivery.email.enabled` and `delivery.line.enabled` must remain inactive until sender code actually reads them and tests prove they control live sender behavior. Do not re-enable them as operational controls merely for documentation or CLI symmetry.
+
 ## Controlled Smoke Ops Runbook
 
 Before opening:
@@ -183,6 +193,8 @@ Final close is mandatory for controlled smoke unless the owner explicitly choose
 Do not generate a NewebPay provider form, ask for owner payment, create a production result, open runtime, or ask for Email/LINE manual checks until the pre-open gates, runtime-window status, and production Admin/Ops preflight pass.
 
 For NewebPay provider setup, the active canonical ReturnURL is provider-level `/payment/newebpay/return`, derived from `NEXT_PUBLIC_APP_URL` by checkout service. Legacy module-scoped return routes must not be configured as active provider dashboard ReturnURL. If they exist in code, treat them as compatibility-only and verify they do not appear in generated checkout contracts.
+
+Strict cleanup of the legacy module ReturnURL compatibility route is not a Gate 1 blocker when active code, env mirrors, Vercel env, provider dashboard settings, and runbooks all point to `/payment/newebpay/return`. If strict redirect invariants are desired later, handle that in a focused route-compatibility cleanup with tests.
 
 If any open/close operation fails, stop and classify the first failure as `runtime_config_open_failed` or `runtime_config_close_failed`.
 
