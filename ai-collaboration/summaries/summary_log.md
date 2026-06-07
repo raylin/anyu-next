@@ -11561,3 +11561,39 @@ Unresolved questions:
 - No production runtime, production payment, production Email, production LINE, Vercel env change, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
 - Real channel delivery remains out of scope; this task validated staging LINE bind/save deliverability and diagnostics.
 - Next action: Controlled Production Payment Smoke Retry with Scoped Runtime Config v3, with owner approval.
+
+## 2026-06-07 Controlled Production Payment Smoke Retry with Scoped Runtime Config v3
+
+### Completed Changes
+
+- promoted latest accepted code to Production while fail-closed after initial production freshness showed stale commit `ece51709f4e3`.
+- verified Production freshness on target commit `fe300e8` after deploy; deployed start/end commit was `fe300e84f3a3` and `mixedDeploymentDetected=false`.
+- pre-open gates passed: local, mock-flow, UI, smoke fixture, runtime-window fail-closed status, and production-preflight.
+- opened Module 01 payment window through scoped runtime config only; no Vercel env change or runtime redeploy was used for open/close.
+- created fresh production result `451bdc2a-a690-4b27-b9c2-41de5ffba8ab` from tracked fixture with `cacheHit=false`.
+- owner-visible Email save succeeded.
+- owner-visible mobile LINE save succeeded.
+- stopped before NewebPay form/payment because mandatory production Admin/Ops lookup failed with `admin_token_missing`.
+- closed `payment.window.enabled` immediately and verified final runtime-window `fail_closed_ready` plus production-preflight `gateStatus=pass`.
+
+### Validation
+
+- `qa:deploy:freshness -- --env production --expected-commit fe300e8`: pass after fail-closed production promotion.
+- `qa:module01:local`: pass.
+- `qa:module01:mock-flow`: pass.
+- `qa:module01:ui`: pass.
+- `qa:module01:smoke-fixture -- --json`: pass with fresh fixture fields present.
+- `qa:production:runtime-window -- --action status`: pre-open pass, open-state pass, final fail-closed pass.
+- `qa:module01:production-preflight`: pre-open pass and final pass.
+- production analyze with tracked fixture: pass, `cacheHit=false`.
+- checkout route: HTTP 200.
+- `pnpm ops lookup-result --env production --id <safe-result-id>` and JSON mode: blocked, `admin_token_missing`.
+- `pnpm ops lookup-line-bind --env production --result-id <safe-result-id>` and JSON mode: blocked, `admin_token_missing`.
+
+### Unresolved Questions
+
+- First failure category: `admin_lookup_failed`.
+- Payment, provider form, NotifyURL, processor, paid result, Email delivery, and LINE delivery were not run.
+- Production runtime was briefly enabled through scoped config for the controlled window, then closed successfully.
+- No Vercel env values changed, no direct DB lookup occurred, no manual DB mutation occurred, no provider payload/token/private data was exposed, and no production payment was run.
+- Next action: add a Production Admin/Ops Token Preflight + Smoke Resume Guard before any further production smoke. The gate must prove production `pnpm ops` can authenticate with explicit process-env `ADMIN_API_TOKEN` before runtime open/result creation.
