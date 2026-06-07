@@ -329,12 +329,12 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」safe staging gate remains healthy and Production is fail-closed. The production runtime-window helper is implemented and read-only by default. Current blocker: alias target proof for <code>anyu.tw</code> / <code>www.anyu.tw</code> is unverified, so production-preflight now blocks before any runtime enablement.</p>
+      <p class="lead">Module 01「曖昧溫度計」safe staging gate remains healthy and Production is fail-closed. The production runtime-window helper is implemented and read-only by default. Alias target proof now passes for <code>anyu.tw</code> and <code>www.anyu.tw</code> against canonical Vercel project <code>anyu-next</code>, and production-preflight passes again.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-07 08:22 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Alias proof blocker</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-07 08:32 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Production smoke ready, owner-gated</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">production_runtime_window_alias_target_unverified</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">None; owner approval required for smoke</span></div>
       </div>
     </header>
 
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge progress">Blocked</span><h3>Launch readiness</h3><p>Safe Module 01 staging gate remains healthy and Env Mirror Strategy v2 final verification is complete. Shared Module 01 smoke fixtures, local LINE/LIFF bind categories, Admin API/CLI pre-payment LINE bind diagnostics, redirect-state collision fix, deployed freshness guard, and runtime-window helper are in place. Production remains fail-closed and payment preflight passes, but runtime-window readiness is blocked by <code>alias_target_unverified</code>. No ads or broad traffic are enabled.</p></article>
+        <article class="card"><span class="badge progress">Owner-gated</span><h3>Launch readiness</h3><p>Safe Module 01 staging gate remains healthy and Env Mirror Strategy v2 final verification is complete. Shared Module 01 smoke fixtures, local LINE/LIFF bind categories, Admin API/CLI pre-payment LINE bind diagnostics, redirect-state collision fix, deployed freshness guard, runtime-window helper, and Vercel alias proof are in place. Production remains fail-closed, alias proof passes, and production preflight passes. No ads or broad traffic are enabled.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
@@ -535,7 +535,7 @@
           <tr><td>P0</td><td>Engineering foundation hardening</td><td>Code / Ops</td><td>Fixture + Smoke Prep Foundation v0, LINE / LIFF Bind Diagnostic Harness v0, and Admin API pre-payment LINE bind diagnostics are complete. New ops command: <code>pnpm ops lookup-line-bind --env staging|production --result-id &lt;resultId&gt;</code>.</td></tr>
           <tr><td>P0</td><td>Deployed gate freshness</td><td>Code / Ops</td><td><code>qa:deploy:freshness</code> and <code>MODULE01_EXPECTED_DEPLOY_COMMIT</code> staging guard are implemented. Full deployed gates must not start until target commit is live; mixed-deployment evidence is invalid.</td></tr>
           <tr><td>P0</td><td>LINE recipient-secret bind invariant / redirect bridge</td><td>Code / Ops</td><td>Contact/secret consistency is fixed and staging-verified. The production LINE login redirect failure was narrowed to an OAuth <code>state</code> collision and fixed by using <code>rlb</code> plus deterministic LIFF login redirect state. Clean deployed staging rerun completed on target commit <code>29de59f</code>; proceed to the production runtime window guard before another smoke.</td></tr>
-          <tr><td>P0</td><td>Production runtime-window alias guard</td><td>Code / Ops</td><td><code>qa:production:runtime-window</code> is implemented. Production is fail-closed and payment preflight passes, but <code>qa:module01:production-preflight</code> now blocks on <code>production_runtime_window_alias_target_unverified</code>. Resolve alias proof before smoke.</td></tr>
+          <tr><td>P0</td><td>Production runtime-window alias guard</td><td>Code / Ops</td><td><code>qa:production:runtime-window</code> is implemented. Production is fail-closed, <code>vercel inspect</code> alias proof links <code>anyu.tw</code> and <code>www.anyu.tw</code> to canonical project <code>anyu-next</code>, and <code>qa:module01:production-preflight</code> passes. Next smoke still requires explicit owner approval.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -560,7 +560,7 @@
           <tr><td>Main/staging drift after docs commits</td><td>P1</td><td>Ops</td><td>Production release branch may lag operational docs.</td><td>Release Branch Documentation Sync v0</td></tr>
           <tr><td>ClientBackURL / payment method restriction</td><td>P2</td><td>Code</td><td>Provider UX may remain broader than first smoke scope.</td><td>NewebPay Optional Checkout Fields Evaluation v0</td></tr>
           <tr><td>Production env mirror shape gate</td><td>P0</td><td>Code / Ops</td><td>Implemented for production preflight; staging mirror shape gate is now included in <code>qa:module01:staging</code>.</td><td>Monitor during production smoke</td></tr>
-          <tr><td>Vercel deploy guard hardening</td><td>P0</td><td>Code / Ops</td><td>Implemented root canonical project checks; optional alias inspection can be added later if needed.</td><td>Optional Vercel Alias Inspection Helper v0</td></tr>
+          <tr><td>Vercel deploy guard hardening</td><td>P0</td><td>Code / Ops</td><td>Implemented root canonical project checks and Vercel alias inspection proof for production aliases.</td><td>Monitor during controlled smoke</td></tr>
           <tr><td>qa:module01:staging:channels command</td><td>P1</td><td>Code / Ops</td><td>Real Email/LINE checks remain manual/owner-approved.</td><td>Module 01 Staging Channels Gate v0</td></tr>
           <tr><td>Ad hoc QA snippets</td><td>P1</td><td>Code / Ops</td><td>Historical reports contain heredoc/temp-file patterns; active workflow should use committed helpers and <code>.qa</code> summaries instead.</td><td>Keep out of normal Codex workflow</td></tr>
           <tr><td>Theme architecture implementation plan</td><td>P1</td><td>Code / Design</td><td>Visual architecture is archived but not implemented; direct implementation without inventory risks breaking current payment/access-link rules.</td><td>Module Theme Architecture Implementation Plan v0</td></tr>
@@ -571,9 +571,9 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> resolve <code>alias_target_unverified</code> before any production runtime enablement. Do not retry production payment smoke until runtime-window alias proof passes and owner approves.</p>
+        <p><strong>Current recommendation:</strong> proceed to Controlled Production Payment Smoke retry only after explicit owner approval, using the runtime-window helper. Keep production fail-closed until that task starts.</p>
         <p>If fresh real channel evidence is needed later, use the guarded <code>qa:module01:staging:channels</code> runner behind explicit owner approval instead of folding real Email/LINE sends into the default suite.</p>
-        <p>Production controlled smoke should not be the next diagnostic tool. It requires alias proof, runtime-window guard pass, gates to pass, and explicit owner approval.</p>
+        <p>Production controlled smoke is now the next mainline gate, not a diagnostic shortcut. It requires runtime-window guard pass, production preflight pass, and explicit owner approval before runtime enablement.</p>
       </div>
     </section>
 

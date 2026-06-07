@@ -6,6 +6,7 @@ import {
   buildAliasGuard,
   buildPlan,
   classifyRuntimeWindowState,
+  parseVercelInspectOutput,
   parseArgs,
   runProductionRuntimeWindow,
 } from "../../scripts/production-runtime-window.mjs";
@@ -83,16 +84,160 @@ describe("production runtime-window helper", () => {
             hostname: "anyu.tw",
             aliasTargetDetected: false,
             aliasProjectMatchesCanonical: "unknown",
+            aliasHealthEnvironment: "production",
+            aliasHealthGitCommitPresent: true,
           },
         ],
         projectLinking: { ok: true },
-        productionHealth: { environment: "production", gitCommit: "abcdef123456" },
       }),
     ).toMatchObject({
       status: "alias_target_unverified",
       blocker: true,
       aliasTargetDetected: false,
       aliasProjectMatchesCanonical: "unknown",
+    });
+  });
+
+  it("passes alias proof when inspect links both aliases to canonical production deployment", () => {
+    expect(
+      buildAliasGuard({
+        aliases: [
+          {
+            hostname: "anyu.tw",
+            aliasTargetDetected: true,
+            aliasProjectMatchesCanonical: true,
+            aliasTargetDeploymentIdPresent: true,
+            aliasTargetProjectNameOrIdPresent: true,
+            aliasHealthEnvironment: "production",
+            aliasHealthGitCommitPresent: true,
+          },
+          {
+            hostname: "www.anyu.tw",
+            aliasTargetDetected: true,
+            aliasProjectMatchesCanonical: true,
+            aliasTargetDeploymentIdPresent: true,
+            aliasTargetProjectNameOrIdPresent: true,
+            aliasHealthEnvironment: "production",
+            aliasHealthGitCommitPresent: true,
+          },
+        ],
+        projectLinking: { ok: true },
+      }),
+    ).toMatchObject({
+      status: "pass",
+      blocker: false,
+      aliasProjectMatchesCanonical: true,
+      aliasTargetDeploymentIdPresent: true,
+      aliasTargetProjectNameOrIdPresent: true,
+      aliasHealthEnvironment: "production",
+    });
+  });
+
+  it("blocks alias project mismatch", () => {
+    expect(
+      buildAliasGuard({
+        aliases: [
+          {
+            hostname: "anyu.tw",
+            aliasTargetDetected: true,
+            aliasProjectMatchesCanonical: false,
+            aliasTargetDeploymentIdPresent: true,
+            aliasTargetProjectNameOrIdPresent: true,
+            aliasHealthEnvironment: "production",
+            aliasHealthGitCommitPresent: true,
+          },
+        ],
+        projectLinking: { ok: true },
+      }),
+    ).toMatchObject({
+      status: "alias_project_mismatch",
+      blocker: true,
+      aliasProjectMatchesCanonical: false,
+    });
+  });
+
+  it("blocks health-only evidence", () => {
+    expect(
+      buildAliasGuard({
+        aliases: [
+          {
+            hostname: "anyu.tw",
+            aliasTargetDetected: false,
+            aliasProjectMatchesCanonical: "unknown",
+            aliasTargetDeploymentIdPresent: false,
+            aliasTargetProjectNameOrIdPresent: false,
+            aliasHealthEnvironment: "production",
+            aliasHealthGitCommitPresent: true,
+          },
+          {
+            hostname: "www.anyu.tw",
+            aliasTargetDetected: false,
+            aliasProjectMatchesCanonical: "unknown",
+            aliasTargetDeploymentIdPresent: false,
+            aliasTargetProjectNameOrIdPresent: false,
+            aliasHealthEnvironment: "production",
+            aliasHealthGitCommitPresent: true,
+          },
+        ],
+        projectLinking: { ok: true },
+      }),
+    ).toMatchObject({
+      status: "alias_target_unverified",
+      blocker: true,
+    });
+  });
+
+  it("categorizes alias inspection failure", () => {
+    expect(
+      buildAliasGuard({
+        aliases: [
+          {
+            hostname: "anyu.tw",
+            aliasTargetDetected: false,
+            aliasProjectMatchesCanonical: "unknown",
+            aliasTargetDeploymentIdPresent: false,
+            aliasTargetProjectNameOrIdPresent: false,
+            aliasInspectionStatus: "alias_inspection_failed",
+            aliasHealthEnvironment: "production",
+            aliasHealthGitCommitPresent: true,
+          },
+        ],
+        projectLinking: { ok: true },
+      }),
+    ).toMatchObject({
+      status: "alias_inspection_failed",
+      blocker: true,
+    });
+  });
+
+  it("parses safe Vercel inspect fields without requiring secret output", () => {
+    expect(
+      parseVercelInspectOutput(
+        "anyu.tw",
+        `
+  General
+
+    id          dpl_abc123DEF
+    name        anyu-next
+    target      production
+    status      ● Ready
+    url         https://anyu-next-example.vercel.app
+
+  Aliases
+
+    ╶ https://anyu.tw
+`,
+      ),
+    ).toMatchObject({
+      hostname: "anyu.tw",
+      aliasTargetDetected: true,
+      aliasProjectMatchesCanonical: true,
+      aliasTargetDeploymentIdPresent: true,
+      aliasTargetProjectNameOrIdPresent: true,
+      aliasDeploymentTarget: "production",
+      aliasDeploymentReady: true,
+      aliasListedOnDeployment: true,
+      valuesPrinted: false,
     });
   });
 

@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -14,6 +14,8 @@ import { findWebAppDir, parseLocalEnvContent } from "./lib/load-local-env.mjs";
 
 const PRODUCTION_BASE_URL = "https://anyu.tw";
 const CANONICAL_PROJECT = "anyu-next";
+const DEFAULT_VERCEL_SCOPE = "studioanyu-1488s-projects";
+const REQUIRED_PRODUCTION_ALIASES = ["anyu.tw", "www.anyu.tw"];
 const RUNTIME_FLAGS = ["ENABLE_PAYMENT_RUNTIME", "ENABLE_NEWEBPAY_CHECKOUT"];
 const EXECUTE_NOT_IMPLEMENTED =
   "execute_actions_deferred_to_v1_status_and_plan_only";
@@ -163,61 +165,146 @@ async function getProductionRouteStatus(fetchImpl = fetch) {
   };
 }
 
+function parseVercelInspectOutput(hostname, output) {
+  const deploymentId = /^\s*id\s+(dpl_[A-Za-z0-9]+)/imu.exec(output)?.[1] ?? null;
+  const projectName = /^\s*name\s+([^\n\r]+)/imu.exec(output)?.[1]?.trim() ?? null;
+  const target = /^\s*target\s+([^\n\r]+)/imu.exec(output)?.[1]?.trim() ?? null;
+  const ready = /^\s*status\s+.*Ready\b/imu.test(output);
+  const aliasListed = new RegExp(`https://${hostname.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\b`, "iu").test(
+    output,
+  );
+  const projectMatches =
+    projectName === CANONICAL_PROJECT ? true : projectName ? false : "unknown";
+
+  return {
+    hostname,
+    aliasTargetDetected: Boolean(deploymentId && projectName),
+    aliasProjectMatchesCanonical: projectMatches,
+    aliasTargetDeploymentIdPresent: Boolean(deploymentId),
+    aliasTargetProjectNameOrIdPresent: Boolean(projectName),
+    aliasDeploymentTarget: target ?? "unknown",
+    aliasDeploymentReady: ready,
+    aliasListedOnDeployment: aliasListed,
+    valuesPrinted: false,
+  };
+}
+
 function inspectAliasWithVercelCli(hostname, options = {}) {
   const repoRoot = path.resolve(findWebAppDir(), "..", "..");
+  const inspectUrl = `https://${hostname}`;
 
   try {
-    const output = execFileSync(
+    const result = spawnSync(
       "vercel",
-      ["alias", "inspect", hostname, "--scope", options.vercelScope ?? "studioanyu-1488s-projects"],
+      ["inspect", inspectUrl, "--scope", options.vercelScope ?? DEFAULT_VERCEL_SCOPE],
       {
         cwd: repoRoot,
         encoding: "utf8",
         stdio: ["ignore", "pipe", "pipe"],
       },
     );
-    const projectMatches = output.includes(CANONICAL_PROJECT);
+    const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+
+    if (result.status !== 0 || !output.trim()) {
+      throw new Error("vercel_inspect_failed");
+    }
 
     return {
-      hostname,
-      aliasTargetDetected: true,
-      aliasProjectMatchesCanonical: projectMatches ? "yes" : "unknown",
-      deploymentIdPresent: /\bdpl_[A-Za-z0-9]+/u.test(output),
-      gitCommitPresent: /[0-9a-f]{7,40}/iu.test(output),
-      valuesPrinted: false,
+      ...parseVercelInspectOutput(hostname, output),
+      aliasInspectionStatus: "pass",
     };
   } catch {
     return {
       hostname,
       aliasTargetDetected: false,
       aliasProjectMatchesCanonical: "unknown",
-      deploymentIdPresent: false,
-      gitCommitPresent: false,
+      aliasTargetDeploymentIdPresent: false,
+      aliasTargetProjectNameOrIdPresent: false,
+      aliasDeploymentTarget: "unknown",
+      aliasDeploymentReady: false,
+      aliasListedOnDeployment: false,
+      aliasInspectionStatus: "alias_inspection_failed",
       valuesPrinted: false,
     };
   }
 }
 
+async function getAliasHealthStatus(hostname, fetchImpl = fetch) {
+  try {
+    const response = await fetchImpl(`https://${hostname}/api/health`);
+    let json = null;
+
+    try {
+      json = await response.clone().json();
+    } catch {
+      json = null;
+    }
+
+    return {
+      aliasHealthEnvironment: json?.environment === "production" ? "production" : "unknown",
+      aliasHealthGitCommitPresent: typeof json?.gitCommit === "string" && json.gitCommit.length > 0,
+      aliasHealthStatus: response.status,
+    };
+  } catch {
+    return {
+      aliasHealthEnvironment: "unknown",
+      aliasHealthGitCommitPresent: false,
+      aliasHealthStatus: null,
+    };
+  }
+}
+
+async function inspectProductionAlias(hostname, options = {}) {
+  const [inspection, health] = await Promise.all([
+    Promise.resolve(inspectAliasWithVercelCli(hostname, options)),
+    getAliasHealthStatus(hostname, options.fetchImpl ?? fetch),
+  ]);
+
+  return {
+    ...inspection,
+    ...health,
+  };
+}
+
 function buildAliasGuard(input) {
   const aliases = input.aliases ?? [];
   const projectLinking = input.projectLinking;
-  const productionHealth = input.productionHealth;
-  const aliasTargetDetected = aliases.some((alias) => alias.aliasTargetDetected);
+  const aliasTargetDetected = aliases.length > 0 && aliases.every((alias) => alias.aliasTargetDetected);
   const allAliasesCanonical =
-    aliases.length > 0 && aliases.every((alias) => alias.aliasProjectMatchesCanonical === "yes");
-  const healthConsistent =
-    productionHealth?.environment === "production" && Boolean(productionHealth?.gitCommit);
+    aliases.length > 0 && aliases.every((alias) => alias.aliasProjectMatchesCanonical === true);
+  const allAliasHealthProduction =
+    aliases.length > 0 &&
+    aliases.every(
+      (alias) =>
+        alias.aliasHealthEnvironment === "production" && alias.aliasHealthGitCommitPresent === true,
+    );
+  const anyInspectionFailed = aliases.some(
+    (alias) => alias.aliasInspectionStatus === "alias_inspection_failed",
+  );
+  const anyProjectMismatch = aliases.some(
+    (alias) => alias.aliasProjectMatchesCanonical === false,
+  );
+  const anyHealthMismatch = aliases.some(
+    (alias) =>
+      alias.aliasHealthEnvironment !== "production" || alias.aliasHealthGitCommitPresent !== true,
+  );
   let status = "alias_target_unverified";
   let blocker = true;
 
-  if (aliasTargetDetected && allAliasesCanonical && projectLinking?.ok && healthConsistent) {
+  if (!projectLinking?.ok) {
+    status = "project_mismatch";
+    blocker = true;
+  } else if (anyProjectMismatch) {
+    status = "alias_project_mismatch";
+    blocker = true;
+  } else if (aliasTargetDetected && allAliasesCanonical && allAliasHealthProduction) {
     status = "pass";
     blocker = false;
-  } else if (!aliasTargetDetected && projectLinking?.ok && healthConsistent) {
-    status = "alias_target_unverified";
+  } else if (anyInspectionFailed) {
+    status = "alias_inspection_failed";
     blocker = true;
-  } else if (!projectLinking?.ok) {
-    status = "project_mismatch";
+  } else if (anyHealthMismatch) {
+    status = "alias_health_mismatch";
     blocker = true;
   }
 
@@ -226,9 +313,13 @@ function buildAliasGuard(input) {
     blocker,
     aliases,
     aliasTargetDetected,
-    aliasProjectMatchesCanonical: allAliasesCanonical ? "yes" : "unknown",
-    productionHealthEnvironment: productionHealth?.environment ?? null,
-    productionHealthGitCommitPresent: Boolean(productionHealth?.gitCommit),
+    aliasProjectMatchesCanonical: allAliasesCanonical ? true : anyProjectMismatch ? false : "unknown",
+    aliasTargetDeploymentIdPresent: aliases.every((alias) => alias.aliasTargetDeploymentIdPresent),
+    aliasTargetProjectNameOrIdPresent: aliases.every(
+      (alias) => alias.aliasTargetProjectNameOrIdPresent,
+    ),
+    aliasHealthEnvironment: allAliasHealthProduction ? "production" : "unknown",
+    aliasHealthGitCommitPresent: aliases.every((alias) => alias.aliasHealthGitCommitPresent),
   };
 }
 
@@ -341,14 +432,14 @@ async function runProductionRuntimeWindow(argv = process.argv.slice(2), env = pr
         ),
   ]);
   const projectLinking = getVercelProjectLinkingStatus();
-  const aliases = [
-    inspectAliasWithVercelCli("anyu.tw"),
-    inspectAliasWithVercelCli("www.anyu.tw"),
-  ];
+  const aliases = await Promise.all(
+    REQUIRED_PRODUCTION_ALIASES.map((hostname) =>
+      inspectProductionAlias(hostname, { fetchImpl: env.fetchImpl ?? fetch }),
+    ),
+  );
   const aliasGuard = buildAliasGuard({
     aliases,
     projectLinking,
-    productionHealth: routeStatus,
   });
   const flags = loadProductionMirrorFlags();
   const stateCategory = classifyRuntimeWindowState({
@@ -466,6 +557,8 @@ export {
   buildAliasGuard,
   buildPlan,
   classifyRuntimeWindowState,
+  inspectAliasWithVercelCli,
+  parseVercelInspectOutput,
   parseArgs,
   runProductionRuntimeWindow,
 };

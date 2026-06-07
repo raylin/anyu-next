@@ -10954,3 +10954,36 @@ Unresolved questions:
 - `qa:module01:local` was skipped because lint, targeted tests, full tests, and build covered the changed code.
 - `qa:module01:staging` was skipped because staging/deployed behavior did not change.
 - No production runtime, payment, Email, LINE, Vercel env, provider credential, or DB mutation occurred.
+
+## 2026-06-07 Vercel Alias Target Proof Resolution v0
+
+### Completed Changes
+
+- saved the Vercel Alias Target Proof Resolution v0 handoff
+- replaced the brittle alias proof path with `vercel inspect https://<alias>` evidence for both `anyu.tw` and `www.anyu.tw`
+- kept `/api/health` as supporting evidence only; health-only proof still cannot pass alias ownership
+- updated `qa:production:runtime-window` to report deployment/project ownership booleans, alias health category, and `aliasGuardStatus=pass`
+- preserved read-only runtime-window behavior and did not enable runtime
+- updated dashboard status from alias-proof blocked to owner-gated smoke readiness
+
+### Learnings
+
+- `vercel inspect https://anyu.tw` and `vercel inspect https://www.anyu.tw` both safely expose enough metadata to prove target deployment ownership: deployment ID presence, project name `anyu-next`, production target, ready status, and alias listing.
+- The Vercel CLI writes the useful formatted inspect metadata to its output stream in a way that required capturing stdout and stderr together.
+- Health endpoint evidence confirms production environment and git commit presence but remains insufficient alone because it does not prove Vercel project ownership.
+
+### Validation
+
+- Targeted runtime-window/preflight/module01 tests passed: 3 files / 43 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 94 files / 652 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`, `aliasGuardStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:production-preflight`: pass, `gateStatus=pass`, `requiredChecksStatus=pass`.
+
+### Unresolved Questions
+
+- `qa:module01:local` was intentionally skipped because no Module 01 runtime behavior changed.
+- `qa:module01:staging` was intentionally skipped because no staging/deployed behavior changed.
+- No production runtime, payment, Email, LINE, Vercel env, provider credential, or DB mutation occurred.
+- Next mainline task: Controlled Production Payment Smoke retry using the runtime-window helper, after explicit owner approval.
