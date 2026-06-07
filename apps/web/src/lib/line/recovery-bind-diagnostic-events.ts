@@ -78,7 +78,9 @@ const LINE_BIND_DIAGNOSTIC_CATEGORIES = [
 const PRIVATE_VALUE_PATTERNS = [
   /\b(?:pa|pcs|pal|prl|rlb)_[A-Za-z0-9_-]{8,}\b/u,
   /\/r\/[A-Za-z0-9_-]{12,}/u,
-  /lineUserId|idToken|encryptedRecipient|recipientHash|contactHash|TradeInfo|TradeSha/iu,
+  /lineUserId|encryptedRecipient|recipientHash|contactHash|TradeInfo|TradeSha/iu,
+  /"idToken"\s*:/iu,
+  /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/u,
 ];
 
 export function isLineBindDiagnosticCategory(
