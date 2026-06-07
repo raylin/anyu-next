@@ -11117,3 +11117,40 @@ Unresolved questions:
 - No payment, Email, LINE, Vercel env change, provider credential change, or secret exposure occurred.
 - Full staging gate remains recorded as blocked in the final tail run; production runtime-window status and production-preflight remain pass.
 - Next action: Production Smoke Runbook Update + Runtime Config Dry Run v0.
+
+## 2026-06-07 Scoped Runtime Config Stabilization + Gate Closure v0
+
+### Completed Changes
+
+- removed `delivery.email.enabled` and `delivery.line.enabled` from the active runtime config registry because sender code does not read them yet
+- added `0015_deactivate_unwired_delivery_runtime_config.sql` and applied it to Preview(staging) and Production so prior delivery rows are inactive
+- updated `0014_runtime_config.sql` so fresh migration baselines seed only active payment runtime config keys
+- reconciled Drizzle migration metadata by journaling all checked-in SQL migrations through `0015`
+- added runtime config migration documentation and metadata tests
+- removed obsolete `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT` from Vercel Production and Preview(staging)
+- fixed `pnpm ops config --help`
+
+### Validation
+
+- `cd apps/web && corepack pnpm lint`: pass.
+- targeted runtime-config/Admin API/schema/preflight/runtime-window tests: pass.
+- `cd apps/web && corepack pnpm test`: pass, 97 files / 659 tests.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `corepack pnpm --filter @anyu/admin-cli ops config --help`: pass.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass.
+- Preview(staging) freshness for `ece5170`: pass, start/end `ece51709f4e3`, no mixed deployment.
+- `qa:module01:staging`: commandExitCode=0, required checks pass, optional checks partial due missing Preview Admin token, gateStatus partial.
+- Production freshness for `ece5170`: pass, start/end `ece51709f4e3`, no mixed deployment.
+- `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+
+### Unresolved Questions
+
+- No required blocker remains for scoped runtime config stabilization.
+- Optional staging Admin API/CLI checks remain partial unless run with explicit Preview `ADMIN_API_TOKEN` in process env.
+- No production payment, Email, or LINE occurred.
+- Next action: Production Smoke Runbook Update + Runtime Config Dry Run v0.

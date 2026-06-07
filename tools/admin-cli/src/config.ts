@@ -74,7 +74,9 @@ function parseArgs(argv: string[]): CliArgs {
     throw new CliError(command ? "unknown_command" : "command_required");
   }
 
-  const subcommand = (subcommandRaw ?? "help") as ConfigCommand;
+  const subcommand = (
+    subcommandRaw === "--help" || subcommandRaw === "-h" ? "help" : subcommandRaw ?? "help"
+  ) as ConfigCommand;
   if (!["registry", "list", "get", "set", "unset", "history", "help"].includes(subcommand)) {
     throw new CliError("unknown_config_command");
   }

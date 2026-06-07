@@ -34,13 +34,16 @@ function createContext(input: {
 describe("admin CLI config", () => {
   it("prints useful help without requiring token", async () => {
     const run = createContext({ token: "" });
-    const exitCode = await main(["config", "help"], run.context);
+    const exitCode = await main(["config", "--help"], run.context);
 
     expect(exitCode).toBe(0);
     expect(run.stdout).toContain("pnpm ops config set --env production payment.window.enabled true --module ai-temperature");
     expect(run.stdout).not.toContain("delivery.line.enabled");
     expect(run.stdout).not.toContain("delivery.email.enabled");
     expect(helpText()).toContain("ADMIN_API_TOKEN");
+
+    const helpRun = createContext({ token: "" });
+    await expect(main(["config", "help"], helpRun.context)).resolves.toBe(0);
   });
 
   it("parses required scopes and rejects unsupported token/base-url flags", () => {
