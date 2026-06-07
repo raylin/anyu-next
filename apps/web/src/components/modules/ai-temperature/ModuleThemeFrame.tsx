@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
-import { trackClientEvent } from "@/lib/events/client";
+import type { ReactNode } from "react";
 import {
-  getModuleThemeEventMetadata,
-  readModuleThemeState,
-  writeManualModuleThemeVariant,
+  resolveModuleThemeState,
   type ModuleThemeSource,
   type ModuleThemeState,
   type ModuleThemeVariant,
 } from "@/lib/modules/module-theme";
-import { getClientAnonymousSessionId } from "@/lib/modules/ai-temperature-ui";
+import { resolveThemeForModule } from "@/lib/modules/theme-registry";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 
 type ModuleThemeFrameProps = {
@@ -23,76 +20,20 @@ type ModuleThemeFrameProps = {
   }) => ReactNode;
 };
 
-const DEFAULT_THEME: ModuleThemeState = {
-  variant: "classic",
-  source: "ab_assigned",
-  hydrated: false,
-};
-
 export function useModuleThemeController(
   moduleConfig: ProductModuleConfig,
   initialTheme?: ModuleThemeState | null,
 ) {
-  const [theme, setTheme] = useState<ModuleThemeState>(
-    initialTheme ? { ...initialTheme, hydrated: true } : DEFAULT_THEME,
-  );
+  const theme = resolveModuleThemeState(moduleConfig, initialTheme);
 
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      try {
-        if (initialTheme?.variant) {
-          setTheme({ ...initialTheme, hydrated: true });
-          return;
-        }
-
-        setTheme(readModuleThemeState(window.localStorage));
-      } catch {
-        setTheme({ ...DEFAULT_THEME, hydrated: true });
-      }
-    }, 0);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [initialTheme]);
-
-  function switchTheme(nextVariant: ModuleThemeVariant) {
-    setTheme((current) => {
-      if (current.variant === nextVariant && current.source === "manual_override") {
-        return current;
-      }
-
-      let nextTheme: ModuleThemeState = {
-        variant: nextVariant,
-        source: "manual_override",
-        hydrated: true,
-      };
-
-      try {
-        nextTheme = writeManualModuleThemeVariant(window.localStorage, nextVariant);
-      } catch {
-        // Theme switching should remain UI-only and never block the funnel.
-      }
-
-      void trackClientEvent({
-        eventName: "theme_switch_clicked",
-        moduleConfig,
-        anonymousSessionId: getClientAnonymousSessionId(),
-        metadata: getModuleThemeEventMetadata(nextTheme),
-      });
-
-      return nextTheme;
-    });
-  }
-
-  return { theme, switchTheme };
+  return { theme };
 }
 
 export function ModuleThemeFrame({ moduleConfig, surface, children }: ModuleThemeFrameProps) {
-  const { theme, switchTheme } = useModuleThemeController(moduleConfig);
+  const { theme } = useModuleThemeController(moduleConfig);
 
   return (
-    <ModuleThemeShell surface={surface} theme={theme} onSwitchTheme={switchTheme}>
+    <ModuleThemeShell moduleConfig={moduleConfig} surface={surface} theme={theme}>
       {children(theme)}
     </ModuleThemeShell>
   );
@@ -102,7 +43,6 @@ export function ModuleThemeBoundary({
   moduleConfig,
   surface,
   initialTheme,
-  showThemeToggle = true,
   children,
 }: {
   moduleConfig: ProductModuleConfig;
@@ -111,93 +51,49 @@ export function ModuleThemeBoundary({
   showThemeToggle?: boolean;
   children: ReactNode;
 }) {
-  const { theme, switchTheme } = useModuleThemeController(moduleConfig, initialTheme);
+  const { theme } = useModuleThemeController(moduleConfig, initialTheme);
 
   return (
-    <ModuleThemeShell
-      surface={surface}
-      theme={theme}
-      onSwitchTheme={switchTheme}
-      showThemeToggle={showThemeToggle}
-    >
+    <ModuleThemeShell moduleConfig={moduleConfig} surface={surface} theme={theme}>
       {children}
     </ModuleThemeShell>
   );
 }
 
 type ModuleThemeShellProps = {
+  moduleConfig: ProductModuleConfig;
   surface: ModuleThemeFrameProps["surface"];
   theme: ModuleThemeState;
-  onSwitchTheme: (variant: ModuleThemeVariant) => void;
-  showThemeToggle?: boolean;
   children: ReactNode;
 };
 
 export function ModuleThemeShell({
+  moduleConfig,
   surface,
   theme,
-  onSwitchTheme,
-  showThemeToggle = true,
   children,
 }: ModuleThemeShellProps) {
+  const themeDefinition = resolveThemeForModule(moduleConfig);
+
   return (
     <section
       className={[
         "anyu-module-theme",
-        theme.variant === "riso" ? "anyu-v2" : "",
+        "anyu-module-shell",
+        themeDefinition.cssClassName,
         `anyu-module-theme-${surface}`,
       ]
         .filter(Boolean)
         .join(" ")}
+      data-shell="module"
+      data-theme={themeDefinition.id}
+      data-module-slug={moduleConfig.slug}
+      data-module-id={moduleConfig.moduleId}
       data-module-theme={theme.variant}
       data-module-theme-source={theme.source}
       data-module-theme-ready={theme.hydrated ? "true" : "false"}
     >
-      {showThemeToggle ? (
-        <ModuleThemeToggle
-          activeVariant={theme.variant}
-          onSwitch={onSwitchTheme}
-        />
-      ) : null}
       {children}
     </section>
-  );
-}
-
-type ModuleThemeToggleProps = {
-  activeVariant: ModuleThemeVariant;
-  onSwitch: (variant: ModuleThemeVariant) => void;
-};
-
-function ModuleThemeToggle({ activeVariant, onSwitch }: ModuleThemeToggleProps) {
-  return (
-    <div className="anyu-theme-toggle" aria-label="主題切換">
-      <button
-        type="button"
-        className={[
-          "anyu-theme-toggle-option",
-          "anyu-theme-toggle-option-classic",
-          activeVariant === "classic" ? "is-active" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        aria-pressed={activeVariant === "classic"}
-        aria-label="切換為柔和主題"
-        onClick={() => onSwitch("classic")}
-      />
-      <button
-        type="button"
-        className={[
-          "anyu-theme-toggle-option",
-          "anyu-theme-toggle-option-riso",
-          activeVariant === "riso" ? "is-active" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        aria-pressed={activeVariant === "riso"}
-        aria-label="切換為鮮明主題"
-        onClick={() => onSwitch("riso")}
-      />
-    </div>
   );
 }

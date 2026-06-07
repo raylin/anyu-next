@@ -1993,58 +1993,13 @@ textarea {
 }
 
 /* ============================================================
- * Module 01 dual theme controls
+ * Module shell
  * ============================================================ */
 
 .anyu-module-theme {
   position: relative;
   display: grid;
   gap: var(--anyu-space-5);
-}
-
-.anyu-theme-toggle {
-  justify-self: end;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem;
-  border: 1px solid var(--anyu-line);
-  border-radius: var(--anyu-radius-pill);
-  background: var(--anyu-card);
-  box-shadow: var(--anyu-shadow-xs);
-  color: var(--anyu-dim);
-  font-size: 11px;
-  line-height: 1;
-}
-
-.anyu-theme-toggle-option {
-  position: relative;
-  width: 1.35rem;
-  height: 1.35rem;
-  min-height: 1.35rem;
-  border: 1px solid var(--anyu-line);
-  border-radius: var(--anyu-radius-pill);
-  background: var(--anyu-surface);
-  color: transparent;
-  padding: 0;
-  font: inherit;
-}
-
-.anyu-theme-toggle-option-classic {
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.92) 0 22%, transparent 24%),
-    var(--anyu-surface);
-}
-
-.anyu-theme-toggle-option-riso {
-  background:
-    linear-gradient(135deg, var(--anyu-accent) 0 48%, var(--anyu-accent2) 50% 100%);
-}
-
-.anyu-theme-toggle-option.is-active {
-  box-shadow:
-    0 0 0 2px var(--anyu-card),
-    0 0 0 4px var(--anyu-accent-45);
 }
 
 /* ============================================================
@@ -2692,29 +2647,9 @@ textarea {
   box-shadow: var(--anyu-shadow-acc2);
 }
 
-.anyu-v2 .anyu-theme-toggle {
-  border-radius: var(--anyu-radius-lg);
-  background: var(--anyu-surface);
-  box-shadow: var(--anyu-shadow-sm);
-}
-
-.anyu-v2 .anyu-theme-toggle-option {
-  border-radius: 999px;
-}
-
-.anyu-v2 .anyu-theme-toggle-option.is-active {
-  box-shadow:
-    0 0 0 2px var(--anyu-bg),
-    2px 2px 0 var(--anyu-ink);
-}
-
 @media (max-width: 640px) {
   .anyu-v2 {
     margin-inline: calc(var(--anyu-space-4) * -1);
     padding-inline: var(--anyu-space-4);
-  }
-
-  .anyu-v2 .anyu-theme-toggle {
-    justify-self: end;
   }
 }

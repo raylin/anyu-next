@@ -205,13 +205,13 @@ describe("LINE route hardening", () => {
     await expect(response.json()).resolves.toMatchObject({
       ok: true,
       unlockedPath:
-        "/m/ambiguous-temperature/unlock/unlock-token-1.r?themeVariant=riso&themeSource=manual_override",
+        "/m/ambiguous-temperature/unlock/unlock-token-1.r?themeVariant=riso&themeSource=legacy_hint",
     });
     expect(mockInsertEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         metadata: expect.objectContaining({
           themeVariant: "riso",
-          themeSource: "manual_override",
+          themeSource: "legacy_hint",
           themeCarryoverSource: "unlock_intent",
         }),
       }),

@@ -99,7 +99,7 @@ export function AiTemperatureLanding({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const loadingRef = useRef<HTMLDivElement | null>(null);
   const pollTimeoutRef = useRef<number | null>(null);
-  const { theme, switchTheme } = useModuleThemeController(moduleConfig);
+  const { theme } = useModuleThemeController(moduleConfig);
   const themeMetadata = useMemo(() => getModuleThemeEventMetadata(theme), [theme]);
   const isSubmitting = submitPhase !== "idle";
 
@@ -419,7 +419,7 @@ export function AiTemperatureLanding({
         : "";
 
   return (
-    <ModuleThemeShell surface="landing" theme={theme} onSwitchTheme={switchTheme}>
+    <ModuleThemeShell moduleConfig={moduleConfig} surface="landing" theme={theme}>
       <section className="anyu-module-page">
         <header className="anyu-topbar anyu-topbar-landing">
           <span aria-hidden="true" />

@@ -4,6 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { LineRecoveryBindBridge } from "@/components/line/LineRecoveryBindBridge";
+import LineRecoveryBindPage from "@/app/line/recovery/bind/page";
 import GlobalLineFulfillPage from "@/app/line/fulfill/page";
 import ModuleLineFulfillPage from "@/app/m/[moduleSlug]/line/fulfill/page";
 import {
@@ -11,6 +12,22 @@ import {
 } from "@/lib/line/recovery-liff-context";
 
 describe("LINE recovery LIFF page", () => {
+  it("wraps the recovery bind page in the Module 01 Riso shell", async () => {
+    const page = await LineRecoveryBindPage({
+      searchParams: Promise.resolve({
+        state: "rlb_safeState",
+        returnPath: "/m/ambiguous-temperature/result/result-1/checkout",
+      }),
+    });
+    const html = renderToStaticMarkup(page);
+
+    expect(html).toContain('data-shell="module"');
+    expect(html).toContain('data-theme="ai-temperature-riso"');
+    expect(html).toContain('data-module-theme="riso"');
+    expect(html).toContain("anyu-v2");
+    expect(html).not.toContain('aria-label="主題切換"');
+  });
+
   it("server-renders recovery semantics without LINE paid delivery promises", () => {
     const html = renderToStaticMarkup(
       createElement(LineRecoveryBindBridge, {

@@ -1,6 +1,7 @@
 import {
   getModuleThemeFromSearchParams,
   getModuleThemeFromUnlockToken,
+  MODULE_01_RISO_THEME_STATE,
   normalizeModuleThemeSource,
   normalizeModuleThemeVariant,
   type ModuleThemeState,
@@ -65,6 +66,7 @@ export function getModuleThemeFromLineFulfillmentContext(
   }
 
   return {
+    ...MODULE_01_RISO_THEME_STATE,
     variant: context.themeVariant,
     source: normalizeModuleThemeSource(context.themeSource),
     hydrated: true,

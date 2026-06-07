@@ -41,7 +41,7 @@ export function AiTemperatureResult({
 }: AiTemperatureResultProps) {
   const hasTrackedPageView = useRef(false);
   const paidPreviewRef = useRef<HTMLDivElement | null>(null);
-  const { theme, switchTheme } = useModuleThemeController(moduleConfig);
+  const { theme } = useModuleThemeController(moduleConfig);
   const themeMetadata = useMemo(() => getModuleThemeEventMetadata(theme), [theme]);
 
   useEffect(() => {
@@ -139,7 +139,7 @@ export function AiTemperatureResult({
   }
 
   return (
-    <ModuleThemeShell surface="result" theme={theme} onSwitchTheme={switchTheme}>
+    <ModuleThemeShell moduleConfig={moduleConfig} surface="result" theme={theme}>
       <section className="anyu-result-stack">
       <div className="anyu-result-topbar">
         <Link href={`/m/${moduleConfig.slug}`} className="anyu-back-link">

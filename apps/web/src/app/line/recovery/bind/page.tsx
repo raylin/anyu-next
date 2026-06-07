@@ -1,4 +1,6 @@
 import { LineRecoveryBindBridge } from "@/components/line/LineRecoveryBindBridge";
+import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
+import { getModuleBySlug } from "@/lib/modules/registry";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -8,8 +10,19 @@ export default async function LineRecoveryBindPage({
   searchParams: SearchParams;
 }) {
   const resolvedSearchParams = await searchParams;
+  const moduleConfig = getModuleBySlug("ambiguous-temperature");
 
-  return <LineRecoveryBindBridge initialSearch={toSearchString(resolvedSearchParams)} />;
+  if (!moduleConfig) {
+    return <LineRecoveryBindBridge initialSearch={toSearchString(resolvedSearchParams)} />;
+  }
+
+  return (
+    <main className="anyu-shell">
+      <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock" showThemeToggle={false}>
+        <LineRecoveryBindBridge initialSearch={toSearchString(resolvedSearchParams)} />
+      </ModuleThemeBoundary>
+    </main>
+  );
 }
 
 function toSearchString(input: Record<string, string | string[] | undefined>) {

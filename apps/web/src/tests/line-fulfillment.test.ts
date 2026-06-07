@@ -113,7 +113,7 @@ describe("LINE fulfillment helpers", () => {
         themeSource: "manual_override",
       }),
     ).toBe(
-      "https://liff.line.me/123-abc?moduleSlug=ambiguous-temperature&themeVariant=riso&themeSource=manual_override&unlockIntentId=intent-1&unlockToken=token-1.r&code=A7K2Q9",
+      "https://liff.line.me/123-abc?moduleSlug=ambiguous-temperature&themeVariant=riso&themeSource=legacy_hint&unlockIntentId=intent-1&unlockToken=token-1.r&code=A7K2Q9",
     );
     expect(
       buildModuleUnlockPath({
@@ -122,7 +122,7 @@ describe("LINE fulfillment helpers", () => {
         themeVariant: "riso",
         themeSource: "manual_override",
       }),
-    ).toBe("/m/ambiguous-temperature/unlock/token-1.r?themeVariant=riso&themeSource=manual_override");
+    ).toBe("/m/ambiguous-temperature/unlock/token-1.r?themeVariant=riso&themeSource=legacy_hint");
   });
 
   it("builds global bridge URLs for non-LIFF base URLs too", () => {
@@ -219,7 +219,7 @@ describe("LINE fulfillment helpers", () => {
       ),
     ).toMatchObject({
       themeVariant: "riso",
-      themeSource: "manual_override",
+      themeSource: "legacy_hint",
     });
 
     const state = encodeURIComponent(
@@ -227,7 +227,7 @@ describe("LINE fulfillment helpers", () => {
     );
 
     expect(parseLineFulfillmentContext(`?liff.state=${state}`)).toMatchObject({
-      themeVariant: "classic",
+      themeVariant: "riso",
       themeSource: "query_hint",
     });
   });
@@ -259,7 +259,7 @@ describe("LINE fulfillment helpers", () => {
       const html = renderToStaticMarkup(createElement(LineFulfillBridge));
 
       expect(html).toContain('data-module-theme="riso"');
-      expect(html).toContain('data-module-theme-source="manual_override"');
+      expect(html).toContain('data-module-theme-source="legacy_hint"');
       expect(html).toContain("anyu-v2");
       expect(html).not.toContain('aria-label="主題切換"');
       expect(html).not.toContain('aria-label="切換為柔和主題"');
@@ -295,7 +295,7 @@ describe("LINE fulfillment helpers", () => {
     }
   });
 
-  it("applies classic theme on the LIFF bridge from token suffix context", () => {
+  it("maps legacy classic token suffix context to the Riso module shell", () => {
     const originalWindow = globalThis.window;
 
     vi.stubGlobal("window", {
@@ -309,9 +309,10 @@ describe("LINE fulfillment helpers", () => {
     try {
       const html = renderToStaticMarkup(createElement(LineFulfillBridge));
 
-      expect(html).toContain('data-module-theme="classic"');
-      expect(html).toContain('data-module-theme-source="query_hint"');
-      expect(html).not.toContain("anyu-v2");
+      expect(html).toContain('data-module-theme="riso"');
+      expect(html).toContain('data-module-theme-source="legacy_hint"');
+      expect(html).toContain('data-theme="ai-temperature-riso"');
+      expect(html).toContain("anyu-v2");
       expect(html).not.toContain('aria-label="主題切換"');
     } finally {
       vi.stubGlobal("window", originalWindow);

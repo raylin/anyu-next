@@ -379,10 +379,12 @@ describe("ai-temperature UI helpers", () => {
     expect(layoutSource).toContain("Instrument+Serif:ital@0;1");
     expect(layoutSource).toContain("family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400");
     expect(layoutSource).toContain("https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css");
+    expect(layoutSource).toContain('<html lang="zh-Hant" data-theme="core">');
+    expect(layoutSource).not.toContain('data-module="ai-temperature"');
     expect(layoutSource).not.toContain("Cormorant");
   });
 
-  it("keeps the dual-theme fidelity fixes in shared and scoped CSS", () => {
+  it("keeps the Module 01 Riso fidelity fixes in shared and scoped CSS", () => {
     const globals = readFileSync(resolve(process.cwd(), "src/styles/globals.css"), "utf8");
 
     expect(globals).toContain(".anyu-share-preview {\n  width: 100%;\n  max-width: none;");

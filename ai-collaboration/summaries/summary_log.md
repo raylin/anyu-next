@@ -12033,3 +12033,43 @@ Unresolved questions:
 - Production untouched: no runtime open, production payment, Email/LINE send, Vercel env change, DB mutation, or runtime UI implementation.
 - Owner should review the plan before implementation.
 - Recommended next task: Module Theme Architecture Infrastructure v0 after owner approval.
+
+## 2026-06-07 Module Theme Architecture Infrastructure v0
+
+### Completed Changes
+
+- implemented the first safe theme architecture infrastructure slice.
+- added a small theme registry with Core and Module 01 Riso definitions.
+- removed active Module 01 classic/Riso runtime A/B switching:
+  - no random assignment.
+  - no active localStorage-controlled theme.
+  - no manual toggle UI.
+  - no active classic display path.
+- kept old `classic` query/token hints as compatibility-only inputs that resolve to Riso with `legacy_hint`.
+- formalized module shell markers:
+  - `data-shell="module"`
+  - `data-theme="ai-temperature-riso"`
+  - `data-module-theme="riso"`
+- changed root layout from global Module 01 marker to Core marker.
+- added a small `CoreShell` primitive for future Core route migration.
+- wrapped the LINE recovery bind page in the Module 01 Riso shell.
+- removed obsolete theme-toggle CSS.
+- updated Vitest and Playwright tests to enforce Riso-only Module 01 behavior.
+
+### Validation
+
+- `cd apps/web && corepack pnpm lint`: pass.
+- targeted theme/resolver/layout tests: pass through Vitest run, 104 files / 713 tests.
+- `cd apps/web && corepack pnpm test`: pass, 104 files / 713 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:result-checkout:no-card`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, Email/LINE send, Vercel env change, DB mutation, or provider logic change.
+- Full visual polish is intentionally deferred.
+- Recommended next task: owner visual review of Module 01 flow, then Module 01 Riso Flow Surface Polish v0 or the next prioritized theme/product slice.
