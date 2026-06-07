@@ -5,8 +5,8 @@
 - task name: Module 01 Riso Flow Surface Polish v0
 - date: 2026-06-07
 - report path: `ai-collaboration/reports/2026-06-07-module-01-riso-flow-surface-polish-v0.md`
-- commit: pending final commit
-- branch / push status: pending
+- commit: b5d8493 (implementation/report commit; metadata finalized in follow-up docs commit)
+- branch / push status: pushed to `origin/staging`
 - model / effort: GPT-5 Codex, high effort
 - taskStartedAt: 2026-06-07T23:12:24Z
 - taskCompletedAt: 2026-06-07T23:22:16Z
