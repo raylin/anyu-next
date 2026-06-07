@@ -10885,3 +10885,36 @@ Unresolved questions:
 - `qa:module01:production-preflight` was intentionally skipped because production/env/preflight behavior did not change.
 - No production runtime, payment, Email, LINE, Vercel env, or DB mutation occurred.
 - Next mainline task after staging verification: Production Runtime Window + Vercel Alias Guard v0.
+
+## 2026-06-07 Deployed Gate Freshness + Report Format Guard v0
+
+### Completed Changes
+
+- saved the Deployed Gate Freshness + Report Format Guard v0 handoff
+- added `qa:deploy:freshness` as a lightweight `/api/health` commit freshness helper
+- integrated `MODULE01_EXPECTED_DEPLOY_COMMIT=<sha>` into `qa:module01:staging`
+- updated Module 01 staging summaries with `targetDeployCommit`, deployed start/end commits, `freshnessStatus`, `mixedDeploymentDetected`, `gateStatus`, `commandExitCode`, `requiredChecksStatus`, and `optionalChecksStatus`
+- updated `AGENTS.md`, QA policy, production gate policy, and handoff template with deployed freshness/reporting rules
+- corrected the prior LINE bind fix report to mark the first staging run as `mixed_deployment_gate_invalid`
+
+### Learnings
+
+- The prior staging run started stale on `42e9c2d` and changed during the same full gate run, so it was not clean validation for `cfd4658`.
+- A lightweight freshness wait can safely wait for Preview(staging) without using the full staging gate as polling.
+- Clean rerun evidence must distinguish command exit code from gate status; exit code `0` can still mean `gateStatus=partial`.
+
+### Validation
+
+- Targeted freshness/module01 suite tests passed: 2 files / 20 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 93 files / 639 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:deploy:freshness -- --env staging --expected-commit 29de59f --timeout 180000 --interval 5000`: pass; helper wait started on `6226d2e4bc96` and ended on `29de59fa4d10`.
+- `cd apps/web && MODULE01_EXPECTED_DEPLOY_COMMIT=29de59f corepack pnpm run qa:module01:staging`: exit 0, `gateStatus=partial`, `freshnessStatus=pass`, `mixedDeploymentDetected=false`, `requiredChecksStatus=pass`, `optionalChecksStatus=partial`.
+
+### Unresolved Questions
+
+- Optional Admin API/CLI staging checks remain partial unless an explicit shell `ADMIN_API_TOKEN` is provided.
+- `qa:module01:production-preflight` was intentionally skipped because production runtime/env/preflight behavior did not change.
+- No production runtime, payment, Email, LINE, Vercel env, or DB mutation occurred.
+- Next mainline task: resume LINE production bind root-cause fix review using corrected evidence, then proceed to Production Runtime Window + Vercel Alias Guard v0 when appropriate.

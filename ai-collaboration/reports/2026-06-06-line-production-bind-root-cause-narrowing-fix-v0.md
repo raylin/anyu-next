@@ -147,6 +147,28 @@ Run:
 | `cd apps/web && corepack pnpm run qa:module01:local` | pass |
 | `cd apps/web && corepack pnpm run qa:module01:staging` | exit 0; required staging checks pass on pushed commit, suite summary `partial` only because optional Admin API/CLI lookup was skipped without explicit `ADMIN_API_TOKEN` |
 
+## Correction: Deployed Gate Freshness
+
+Correction added 2026-06-07:
+
+The first `qa:module01:staging` run for this fix is not clean validation of commit `cfd4658`. It started while Preview(staging) still served old commit `42e9c2d`, and the deployment changed during the same full gate run. That run should be classified as `mixed_deployment_gate_invalid` for target-fix evidence.
+
+Follow-up guard:
+
+- `qa:deploy:freshness` was added in Deployed Gate Freshness + Report Format Guard v0.
+- The clean rerun used targetDeployCommit `29de59f`, which includes the LINE redirect-state fix plus freshness guard.
+- The lightweight freshness wait started on `6226d2e4bc96` and ended on `29de59fa4d10`.
+- The substantive `qa:module01:staging` run then started and ended on `29de59fa4d10`.
+- Clean rerun fields:
+  - `freshnessStatus=pass`
+  - `mixedDeploymentDetected=false`
+  - `requiredChecksStatus=pass`
+  - `optionalChecksStatus=partial`
+  - `gateStatus=partial`
+  - `commandExitCode=0`
+
+The `partial` status is due to optional Admin API/CLI lookup checks being skipped without explicit shell `ADMIN_API_TOKEN`; required staging checks passed and no real Email/LINE was sent.
+
 Skipped:
 
 - `qa:module01:production-preflight`: skipped because production/env/preflight behavior did not change and production was not deployed or enabled.
