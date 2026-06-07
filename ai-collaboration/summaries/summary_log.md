@@ -11256,3 +11256,27 @@ Unresolved questions:
 - `qa:module01:staging` was skipped because local/mock/UI/Admin/CLI coverage exercises the changed behavior and no real channel send is approved.
 - No production runtime, payment, Email, LINE, Vercel env change, DB mutation, or secret exposure occurred.
 - Next action: Controlled Production Payment Smoke Retry with Scoped Runtime Config v1 after owner review.
+
+## 2026-06-07 Pre-Payment Save Fix Staging Sanity v0
+
+### Completed Changes
+
+- verified Preview(staging) freshness for Pre-Payment Access-Link Save Diagnostics + Fix v0 before running substantive staging checks
+- confirmed target deploy commit `b5f6d9a4bc019d23fd90cc98290b67a9f8da13e7` was live at gate start and end
+- ran `qa:module01:staging` exactly once with `MODULE01_EXPECTED_DEPLOY_COMMIT`
+- confirmed required staging checks passed without mixed deployment
+- preserved the distinction between `commandExitCode=0` and `gateStatus=partial`
+
+### Validation
+
+- `qa:deploy:freshness -- --env staging --expected-commit b5f6d9a4bc019d23fd90cc98290b67a9f8da13e7`: pass, attempts 1, no mixed deployment.
+- `qa:module01:staging`: commandExitCode `0`, gateStatus `partial`, requiredChecksStatus `pass`, optionalChecksStatus `partial`, freshnessStatus `pass`, deployedCommitAtGateStart/End `b5f6d9a4bc01`.
+- Required checks passed: staging env mirror, deployed freshness, staging health, access-link smoke, result checkout no-card, and read-only production fail-closed checks.
+- Optional Admin API/CLI lookup was skipped/partial because no Preview `ADMIN_API_TOKEN` was present in process env.
+
+### Unresolved Questions
+
+- No required staging sanity blocker remains.
+- Optional Admin/Ops lookup remains partial until an explicit Preview Admin token is supplied in process env.
+- No real Email/LINE, production runtime, production payment, Vercel env change, DB mutation, direct DB lookup, or private/tokenized output occurred.
+- Next action: Controlled Production Payment Smoke Retry with Scoped Runtime Config v1, if owner accepts the acceptable partial staging sanity result.
