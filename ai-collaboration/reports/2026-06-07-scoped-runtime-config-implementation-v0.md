@@ -5,14 +5,14 @@
 - task name: Scoped Runtime Config Implementation v0
 - date: 2026-06-07
 - report path: `ai-collaboration/reports/2026-06-07-scoped-runtime-config-implementation-v0.md`
-- commit: pending
-- branch / push status: pending
+- commit: `68f7906`
+- branch / push status: pushed to `origin/staging`; deployed fail-closed to Production from repo root
 - model / effort: GPT-5 Codex, high
 - taskStartedAt: 2026-06-07T02:51:12Z
-- taskCompletedAt: pending
-- totalWallClockDuration: pending
+- taskCompletedAt: 2026-06-07T03:18:58Z
+- totalWallClockDuration: 27m46s
 - humanWaitDuration: 0m
-- netCodexWorkDuration: pending
+- netCodexWorkDuration: 27m46s
 
 ## Context
 
@@ -79,16 +79,16 @@
 - commands run: `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
 - commands run: `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 tests.
 - commands run: `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
-- commands run: `cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status`: blocked before code deploy; Production still served old commit and Admin API runtime-config routes were not live.
-- commands run: `cd apps/web && corepack pnpm run qa:module01:production-preflight`: blocked before code deploy due runtime-window config lookup not live.
-- gateStatus: partial before deployment
-- commandExitCode: production-preflight pre-deploy commandExitCode=1
-- requiredChecksStatus: local required checks pass; production live gate pending deploy
+- commands run: `cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status`: pass after fail-closed production deploy, `stateCategory=fail_closed_ready`, `currentDeployCommit=68f790601029`.
+- commands run: `cd apps/web && corepack pnpm run qa:module01:production-preflight`: pass after fail-closed production deploy, `gateStatus=pass`, `commandExitCode=0`.
+- gateStatus: pass
+- commandExitCode: production-preflight commandExitCode=0
+- requiredChecksStatus: pass
 - optionalChecksStatus: not_applicable
-- targetDeployCommit: pending
-- deployedCommitAtGateStart: production pre-deploy commit `f8b2b1f9ac4c`
-- deployedCommitAtGateEnd: pending
-- freshnessStatus: pending
+- targetDeployCommit: `68f7906`
+- deployedCommitAtGateStart: `68f790601029`
+- deployedCommitAtGateEnd: `68f790601029`
+- freshnessStatus: pass_by_runtime_window_health
 - gates skipped and why: `qa:module01:staging` skipped so far because code is locally covered and Preview deploy verification will be a separate freshness-gated check if needed.
 
 ## Safety
@@ -103,9 +103,9 @@
 
 ## Result
 
-- result: partial before production code deploy
-- first failure category: production_runtime_config_api_not_deployed
-- blocker status: production runtime-window status remains blocked until the new fail-closed code is deployed
+- result: pass
+- first failure category: not_applicable
+- blocker status: resolved
 
 ## Tech Debt / Cleanup Notes
 
@@ -122,12 +122,12 @@
 
 ## Uncertainties / Blockers
 
-- Production needs a fail-closed code deploy for the new Admin API routes and checkout gate before live production-preflight can pass.
+- No remaining implementation blocker. Production is deployed fail-closed on scoped runtime config.
 
 ## Recommended Next Step
 
-Complete fail-closed production deployment of this implementation, rerun runtime-window status and production-preflight, then run Production Smoke Runbook Update + Runtime Config Dry Run v0.
+Run Production Smoke Runbook Update + Runtime Config Dry Run v0 before another controlled production smoke.
 
 ## Paste-Back Context
 
-Scoped Runtime Config v0 is implemented locally and additive runtime-config tables/seed values are applied to Preview(staging) and Production. Local tests, build, mock-flow, UI, and local Module 01 gate pass. Production remains fail-closed; live runtime-window/preflight are blocked until the new code is deployed fail-closed because current Production still serves an older commit without runtime-config Admin API routes.
+Scoped Runtime Config v0 is implemented, committed as `68f7906`, pushed to `origin/staging`, and deployed fail-closed to Production from the repo root. Additive runtime-config tables/seed values are applied to Preview(staging) and Production. Local tests, build, mock-flow, UI, local Module 01 gate, runtime-window status, and production-preflight pass. Production remains fail-closed with `payment.window.enabled=false`; no payment, Email, or LINE occurred.

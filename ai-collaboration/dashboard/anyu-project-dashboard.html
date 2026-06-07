@@ -332,7 +332,7 @@
       <p class="lead">Module 01「曖昧溫度計」safe staging gate remains healthy and Production is fail-closed. Alias target proof passes for <code>anyu.tw</code> and <code>www.anyu.tw</code>. The next foundation step is Scoped Runtime Config so production smoke windows use Admin API + <code>pnpm ops</code> instead of Vercel env toggles and redeploys.</p>
       <div class="snapshot" aria-label="Project snapshot">
         <div><span class="label">Last updated</span><span class="value">2026-06-07 10:41 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Scoped runtime config implementation</span></div>
+        <div><span class="label">Current phase</span><span class="value">Scoped runtime config dry run / smoke runbook update</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
         <div><span class="label">Latest blocker</span><span class="value">Vercel env runtime-window model is too brittle</span></div>
       </div>
@@ -536,7 +536,7 @@
           <tr><td>P0</td><td>Engineering foundation hardening</td><td>Code / Ops</td><td>Fixture + Smoke Prep Foundation v0, LINE / LIFF Bind Diagnostic Harness v0, and Admin API pre-payment LINE bind diagnostics are complete. New ops command: <code>pnpm ops lookup-line-bind --env staging|production --result-id &lt;resultId&gt;</code>.</td></tr>
           <tr><td>P0</td><td>Deployed gate freshness</td><td>Code / Ops</td><td><code>qa:deploy:freshness</code> and <code>MODULE01_EXPECTED_DEPLOY_COMMIT</code> staging guard are implemented. Full deployed gates must not start until target commit is live; mixed-deployment evidence is invalid.</td></tr>
           <tr><td>P0</td><td>LINE recipient-secret bind invariant / redirect bridge</td><td>Code / Ops</td><td>Contact/secret consistency is fixed and staging-verified. The production LINE login redirect failure was narrowed to an OAuth <code>state</code> collision and fixed by using <code>rlb</code> plus deterministic LIFF login redirect state. Clean deployed staging rerun completed on target commit <code>29de59f</code>; proceed to the production runtime window guard before another smoke.</td></tr>
-          <tr><td>P0</td><td>Scoped runtime config</td><td>Code / Ops</td><td>Implementation in progress: registry-first DB-backed runtime config, Admin API, <code>pnpm ops config</code>, additive runtime config schema, and Module 01 payment gate migration are implemented locally. Production remains fail-closed; live preflight requires fail-closed deployment of the new code.</td></tr>
+          <tr><td>P0</td><td>Scoped runtime config</td><td>Code / Ops</td><td>Implemented and deployed fail-closed. Runtime config uses registry-first DB-backed values, Admin API, <code>pnpm ops config</code>, additive runtime config schema, and Module 01 module-scoped <code>payment.window.enabled</code>. Runtime-window status and production-preflight pass with production fail-closed.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -572,7 +572,7 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> finish Scoped Runtime Config v0 validation by deploying the new fail-closed code, then use Admin API + <code>pnpm ops config</code> for payment windows instead of Vercel env toggles.</p>
+        <p><strong>Current recommendation:</strong> update the production smoke runbook and run a runtime-config dry run before the next controlled production payment smoke.</p>
         <p>If fresh real channel evidence is needed later, use the guarded <code>qa:module01:staging:channels</code> runner behind explicit owner approval instead of folding real Email/LINE sends into the default suite.</p>
         <p>Production controlled smoke remains blocked until scoped runtime config replaces the brittle env-toggle runtime-window path.</p>
       </div>

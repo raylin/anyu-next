@@ -11104,10 +11104,13 @@ Unresolved questions:
 - `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
 - `cd apps/web && corepack pnpm run qa:module01:ui`: pass.
 - `cd apps/web && corepack pnpm run qa:module01:local`: pass.
-- Pre-deploy production runtime-window/preflight: blocked because Production still served old commit without runtime-config Admin API routes.
+- Pre-deploy production runtime-window/preflight: initially blocked because Production still served old commit without runtime-config Admin API routes.
+- Production fail-closed deploy from repo root completed for commit `68f7906`.
+- Post-deploy `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- Post-deploy `qa:module01:production-preflight`: pass, `gateStatus=pass`.
 
 ### Unresolved Questions
 
-- Production remains fail-closed.
+- Production remains fail-closed on scoped runtime config.
 - No payment, Email, LINE, Vercel env change, provider credential change, or secret exposure occurred.
-- Next action: deploy this code fail-closed, rerun runtime-window status and production-preflight, then continue to Production Smoke Runbook Update + Runtime Config Dry Run v0.
+- Next action: Production Smoke Runbook Update + Runtime Config Dry Run v0.
