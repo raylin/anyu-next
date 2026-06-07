@@ -136,6 +136,24 @@ No redeploy is required for normal scoped runtime config open/close.
 
 `qa:production:runtime-window -- --action status` must be run before open and after close.
 
+### Production Admin/Ops Preflight
+
+For controlled production smoke, prove Admin/Ops authentication before runtime open, production result creation, or owner manual action:
+
+```bash
+cd apps/web && corepack pnpm run qa:production:admin-ops-preflight
+```
+
+This check is read-only. It requires `ADMIN_API_TOKEN` from the shell/process environment and verifies production runtime-config get/history calls through `pnpm ops`.
+
+If it fails:
+
+- `production_admin_token_missing_owner_action_required`: stop before runtime open; owner must export `ADMIN_API_TOKEN`.
+- `production_admin_auth_failed`: stop before runtime open; token is present but not authorized.
+- `production_admin_config_lookup_failed`: stop before runtime open; Admin/Ops lookup is unavailable or unsafe.
+
+Do not load `.env.production` into `pnpm ops`, and do not use direct DB as a fallback for a missing Admin token.
+
 ## Structured Waits
 
 Use:

@@ -11597,3 +11597,32 @@ Unresolved questions:
 - Production runtime was briefly enabled through scoped config for the controlled window, then closed successfully.
 - No Vercel env values changed, no direct DB lookup occurred, no manual DB mutation occurred, no provider payload/token/private data was exposed, and no production payment was run.
 - Next action: add a Production Admin/Ops Token Preflight + Smoke Resume Guard before any further production smoke. The gate must prove production `pnpm ops` can authenticate with explicit process-env `ADMIN_API_TOKEN` before runtime open/result creation.
+
+## 2026-06-07 Production Admin/Ops Token Preflight + Smoke Resume Guard v0
+
+### Completed Changes
+
+- added read-only `qa:production:admin-ops-preflight`.
+- kept `pnpm ops` pure: production Admin token must come from explicit shell/process env, not `.env.production`.
+- preflight checks production runtime-config get/history calls through `pnpm ops` before runtime open/result creation/owner manual action.
+- added clear categories: `production_admin_token_missing_owner_action_required`, `production_admin_auth_failed`, `production_admin_config_lookup_failed`, and `production_admin_ops_ready`.
+- updated production gate, QA, Admin/Ops, and handoff docs so controlled production smoke requires Admin/Ops preflight before runtime open.
+- added a v3 smoke follow-up classification note: v3 was blocked by production Admin/Ops token availability after owner-visible Email/LINE save success.
+
+### Validation
+
+- targeted production Admin/Ops preflight / release-suite / token tests: pass, 3 files / 24 tests.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass, 3 files / 29 tests.
+- `cd apps/web && corepack pnpm run qa:production:admin-ops-preflight`: blocked as expected with `production_admin_token_missing_owner_action_required` because this shell has no production `ADMIN_API_TOKEN`.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 102 files / 694 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- `cd apps/web && corepack pnpm run qa:module01:production-preflight`: pass, `gateStatus=pass`.
+
+### Unresolved Questions
+
+- First failure category for the live preflight: `production_admin_token_missing_owner_action_required`.
+- No production runtime open, payment, Email send, LINE send, Vercel env change, DB mutation, direct DB lookup, provider payload exposure, or token/private output occurred.
+- Next action: owner exports production `ADMIN_API_TOKEN` into process env, then rerun only `cd apps/web && corepack pnpm run qa:production:admin-ops-preflight`. If it passes, proceed to Controlled Production Payment Smoke Retry with Scoped Runtime Config v4 from full pre-open gates.

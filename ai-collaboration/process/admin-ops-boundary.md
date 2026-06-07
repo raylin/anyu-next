@@ -61,6 +61,21 @@ The CLI must not:
 
 Staging QA runners may resolve `ADMIN_API_TOKEN` from the approved local staging mirror and inject it into `pnpm ops` subprocess env. This is a QA runner responsibility only; the CLI itself still must not read app env mirrors.
 
+Production smoke must prove Admin/Ops availability before runtime open:
+
+```bash
+cd apps/web && corepack pnpm run qa:production:admin-ops-preflight
+```
+
+Production Admin/Ops preflight rules:
+
+- `ADMIN_API_TOKEN` must already be present in the shell/process environment.
+- `pnpm ops` remains pure and must not read `apps/web/.env.production`.
+- Missing token fails before runtime open with `production_admin_token_missing_owner_action_required`.
+- Wrong/unauthorized token fails with `production_admin_auth_failed`.
+- Do not use direct DB as a fallback for missing Admin token.
+- Do not print token values, lengths, prefixes, suffixes, hashes, or checksums.
+
 Runtime config CLI writes must:
 
 - use registered keys only

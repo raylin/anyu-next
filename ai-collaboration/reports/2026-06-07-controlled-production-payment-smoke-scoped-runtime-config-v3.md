@@ -20,6 +20,12 @@
 - upstream blocker / mainline context: prior production attempts failed before payment because production was stale, pre-payment save failed, or a fresh fixture was not guaranteed. This run promoted the latest accepted code fail-closed, asserted production freshness, and used the fresh fixture contract.
 - out-of-scope items: product implementation, theme UI, Module 02, broad traffic, ads, non-card payment methods, Vercel env changes, direct DB mutation, and ad hoc scripts.
 
+## Follow-Up Classification Note
+
+- 2026-06-07 follow-up classification: the v3 smoke blocker is `production_admin_token_missing_owner_action_required` / `admin_lookup_failed`.
+- Email and LINE saves were owner-visible successes, but Admin/Ops proof was unavailable because production `pnpm ops` did not have `ADMIN_API_TOKEN` in process env.
+- This note does not rewrite historical facts; it clarifies that v3 should not be treated as an Email/LINE product failure.
+
 ## Scope
 
 - what changed: production was promoted to the accepted staging commit while fail-closed, scoped runtime config was opened and closed for one controlled smoke window, and one fresh production result was created from the tracked fixture.

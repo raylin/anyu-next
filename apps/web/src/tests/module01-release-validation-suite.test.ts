@@ -30,6 +30,9 @@ describe("Module 01 release validation suite", () => {
     expect(packageJson.scripts["qa:deploy:freshness"]).toBe(
       "node scripts/deploy-freshness-check.mjs",
     );
+    expect(packageJson.scripts["qa:production:admin-ops-preflight"]).toBe(
+      "node scripts/production-admin-ops-preflight.mjs",
+    );
     expect(packageJson.scripts["qa:module01:local"]).toBe(
       "node scripts/module01-release-validation-suite.mjs local",
     );
@@ -89,6 +92,20 @@ describe("Module 01 release validation suite", () => {
     expect(adminCliSource).not.toContain(".env.staging");
     expect(adminCliSource).not.toContain("loadLocalEnv");
     expect(adminCliSource).not.toContain("dotenv");
+  });
+
+  it("requires production Admin/Ops preflight before production smoke runtime open", () => {
+    const policy = fs.readFileSync(
+      path.resolve(process.cwd(), "../../ai-collaboration/process/production-gate-policy.md"),
+      "utf8",
+    );
+    const adminOpsIndex = policy.indexOf("qa:production:admin-ops-preflight");
+    const openIndex = policy.indexOf("pnpm ops config set --env production payment.window.enabled true");
+
+    expect(adminOpsIndex).toBeGreaterThan(-1);
+    expect(openIndex).toBeGreaterThan(-1);
+    expect(adminOpsIndex).toBeLessThan(openIndex);
+    expect(policy).toContain("production_admin_token_missing_owner_action_required");
   });
 
   it("derives pass, partial, and blocked gate statuses", () => {

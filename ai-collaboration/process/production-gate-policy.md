@@ -20,6 +20,7 @@ Production smoke requires:
 - local/staging evidence for flows staging can mirror
 - production deploy freshness and known target commit
 - scoped runtime config readiness or dry-run evidence
+- production Admin/Ops auth preflight using explicit process-env `ADMIN_API_TOKEN`
 - tracked fresh Module 01 fixture
 - Admin/Ops diagnostics available for result, access-link, and LINE bind failures
 - explicit owner approval for payment and real channel checks
@@ -31,6 +32,7 @@ Production smoke is invalid if:
 - `commandExitCode` is used as a substitute for `gateStatus`
 - runtime window open/close cannot be proven
 - fixture result creation returns `cacheHit=true`
+- production `pnpm ops` lookup cannot authenticate before runtime open
 
 ## Preconditions Before Runtime Enablement
 
@@ -77,6 +79,13 @@ Codex must also assert:
 - deploy from repo root, not `apps/web`
 - production public pages are live
 - checkout/operator routes fail closed before enablement
+- production Admin/Ops availability before runtime open:
+
+```bash
+cd apps/web && corepack pnpm run qa:production:admin-ops-preflight
+```
+
+This preflight is read-only and requires `ADMIN_API_TOKEN` to be present in the shell/process environment. If it fails with `production_admin_token_missing_owner_action_required`, stop before runtime open, result creation, or owner manual action. Do not load `.env.production` into `pnpm ops` and do not use direct DB as a fallback for a missing Admin token.
 
 ## Runtime Enablement
 
@@ -134,6 +143,7 @@ cd apps/web && corepack pnpm run qa:module01:staging
 cd apps/web && corepack pnpm run qa:module01:production-preflight
 cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status
 cd apps/web && corepack pnpm run qa:module01:smoke-fixture -- --json
+cd apps/web && corepack pnpm run qa:production:admin-ops-preflight
 ```
 
 Open:
@@ -167,7 +177,7 @@ cd apps/web && corepack pnpm run qa:module01:production-preflight
 
 Final close is mandatory for controlled smoke unless the owner explicitly chooses soft availability in the moment.
 
-Do not generate a NewebPay provider form, ask for owner payment, or ask for Email/LINE manual checks until the pre-open gates and runtime-window status pass.
+Do not generate a NewebPay provider form, ask for owner payment, create a production result, open runtime, or ask for Email/LINE manual checks until the pre-open gates, runtime-window status, and production Admin/Ops preflight pass.
 
 If any open/close operation fails, stop and classify the first failure as `runtime_config_open_failed` or `runtime_config_close_failed`.
 
