@@ -11051,3 +11051,33 @@ Unresolved questions:
 - Production smoke did not create a result, generate a provider form, run payment, send Email, or send LINE.
 - Production is fail-closed again; final runtime flags are disabled and production-preflight passes.
 - Next mainline task: fix runtime-window enabled-state classification before another production smoke attempt.
+
+## 2026-06-07 Scoped Runtime Config Architecture Plan v0
+
+### Completed Changes
+
+- saved the Scoped Runtime Config Architecture Plan v0 handoff
+- created the architecture plan for a lightweight registry-first DB-backed scoped runtime config system
+- defined design principles: registry-first, lightweight primitive values, scoped global/module identity, no implicit override, no TTL, critical fail-closed resolver behavior, and no secrets
+- proposed registry schema, DB tables, Admin API routes, CLI grammar/help, resolver APIs, v0 key list, tests, docs, and migration away from frequent Vercel env runtime toggles
+- updated dashboard to shift the mainline from fixing the old env-toggle runtime window toward implementing scoped runtime config
+
+### Learnings
+
+- The current Vercel env runtime-window model is too brittle for short production smoke windows because it requires env sync and redeploys.
+- The safest v0 payment gate is module-scoped `payment.window.enabled`; a global payment open flag would risk affecting future Module 02.
+- Resolver fallback should be explicit in service code, not implicit in the config resolver.
+- Runtime config must not store secrets; provider credentials and crypto remain in env/secrets systems.
+
+### Validation
+
+- Docs presence check: pass.
+- Dashboard HTML sanity: pass.
+- Secret/private scan: pass, with only policy labels and historical safe token-prefix references.
+- `git diff --check`: pass.
+
+### Unresolved Questions
+
+- Owner should confirm the v0 key list and static env upper-bound recommendation before implementation.
+- No production runtime, payment, Email, LINE, Vercel env, provider credential, DB mutation, migration, or code implementation occurred.
+- Next mainline task: Scoped Runtime Config Implementation v0, if owner accepts the architecture plan.

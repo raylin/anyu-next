@@ -329,12 +329,12 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」safe staging gate remains healthy and Production is fail-closed. Alias target proof passes for <code>anyu.tw</code> and <code>www.anyu.tw</code>, but the controlled smoke retry stopped before owner manual action because the runtime-window helper cannot yet classify the enabled-window state cleanly.</p>
+      <p class="lead">Module 01「曖昧溫度計」safe staging gate remains healthy and Production is fail-closed. Alias target proof passes for <code>anyu.tw</code> and <code>www.anyu.tw</code>. The next foundation step is Scoped Runtime Config so production smoke windows use Admin API + <code>pnpm ops</code> instead of Vercel env toggles and redeploys.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-07 08:53 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Runtime-window helper fix required</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-07 10:41 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Scoped runtime config planning</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">runtime_window_failed</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Vercel env runtime-window model is too brittle</span></div>
       </div>
     </header>
 
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge progress">Blocked</span><h3>Launch readiness</h3><p>Safe Module 01 staging gate remains healthy and Env Mirror Strategy v2 final verification is complete. Shared Module 01 smoke fixtures, local LINE/LIFF bind categories, Admin API/CLI pre-payment LINE bind diagnostics, redirect-state collision fix, deployed freshness guard, runtime-window helper, and Vercel alias proof are in place. Production remains fail-closed, alias proof passes, and production preflight passes. The latest controlled smoke stopped before payment because the runtime-window helper classified the enabled state as unsafe/preflight-blocked instead of proving <code>runtime_enabled_controlled_window</code>.</p></article>
+        <article class="card"><span class="badge progress">Planned</span><h3>Launch readiness</h3><p>Safe Module 01 staging gate remains healthy and Env Mirror Strategy v2 final verification is complete. Shared Module 01 smoke fixtures, local LINE/LIFF bind categories, Admin API/CLI pre-payment LINE bind diagnostics, redirect-state collision fix, deployed freshness guard, runtime-window helper, and Vercel alias proof are in place. Production remains fail-closed. Scoped Runtime Config v0 is now planned to replace frequent Vercel env runtime toggling with Admin API + <code>pnpm ops</code> managed module-scoped runtime gates.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
@@ -536,7 +536,7 @@
           <tr><td>P0</td><td>Engineering foundation hardening</td><td>Code / Ops</td><td>Fixture + Smoke Prep Foundation v0, LINE / LIFF Bind Diagnostic Harness v0, and Admin API pre-payment LINE bind diagnostics are complete. New ops command: <code>pnpm ops lookup-line-bind --env staging|production --result-id &lt;resultId&gt;</code>.</td></tr>
           <tr><td>P0</td><td>Deployed gate freshness</td><td>Code / Ops</td><td><code>qa:deploy:freshness</code> and <code>MODULE01_EXPECTED_DEPLOY_COMMIT</code> staging guard are implemented. Full deployed gates must not start until target commit is live; mixed-deployment evidence is invalid.</td></tr>
           <tr><td>P0</td><td>LINE recipient-secret bind invariant / redirect bridge</td><td>Code / Ops</td><td>Contact/secret consistency is fixed and staging-verified. The production LINE login redirect failure was narrowed to an OAuth <code>state</code> collision and fixed by using <code>rlb</code> plus deterministic LIFF login redirect state. Clean deployed staging rerun completed on target commit <code>29de59f</code>; proceed to the production runtime window guard before another smoke.</td></tr>
-          <tr><td>P0</td><td>Production runtime-window enabled-state classification</td><td>Code / Ops</td><td><code>qa:production:runtime-window</code> correctly proves fail-closed readiness and alias ownership, but after enabling runtime it still runs fail-closed preflight and probes checkout with a dummy result, causing <code>preflight_blocked</code> / <code>unsafe_runtime_enabled</code>. Fix helper enabled-window semantics before another production smoke.</td></tr>
+          <tr><td>P0</td><td>Scoped runtime config</td><td>Code / Ops</td><td>Architecture plan complete. Implement registry-first DB-backed runtime config with exact <code>environment + scopeType + scopeKey + key</code> identity, no global/module override, Admin API + <code>pnpm ops</code> read/write boundary, reason-required writes, audit history, and module-scoped <code>payment.window.enabled</code> for smoke windows.</td></tr>
           <tr><td>P0</td><td>Soft availability decision</td><td>Owner</td><td>Only decide whether to leave checkout enabled after v1 passes; keep no ads and no growth launch until a separate decision.</td></tr>
           <tr><td>P1</td><td>Refund/support response window</td><td>Owner decision</td><td>Confirm whether public/SOP window should be 3-7 business days or another value.</td></tr>
           <tr><td>P1</td><td>Main/staging/docs sync policy</td><td>Ops</td><td>Promote docs/source-of-truth commits when main is release branch.</td></tr>
@@ -572,9 +572,9 @@
     <section>
       <h2>Next Recommended Task</h2>
       <div class="panel">
-        <p><strong>Current recommendation:</strong> fix the runtime-window helper enabled-state classification before another production smoke. Keep production fail-closed until the helper can prove the controlled window cleanly.</p>
+        <p><strong>Current recommendation:</strong> implement Scoped Runtime Config v0 before another production smoke. Keep production fail-closed until payment windows can be opened through Admin API + <code>pnpm ops</code> without Vercel env toggles/redeploys.</p>
         <p>If fresh real channel evidence is needed later, use the guarded <code>qa:module01:staging:channels</code> runner behind explicit owner approval instead of folding real Email/LINE sends into the default suite.</p>
-        <p>Production controlled smoke remains blocked until runtime-window status can distinguish fail-closed preflight from an intentionally enabled controlled window.</p>
+        <p>Production controlled smoke remains blocked until scoped runtime config replaces the brittle env-toggle runtime-window path.</p>
       </div>
     </section>
 
