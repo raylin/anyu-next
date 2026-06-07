@@ -329,12 +329,12 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」uses scoped runtime config as the single primary payment runtime gate. Gate 1 functional production smoke passed end-to-end with Email and LINE access-link delivery confirmed. Production remains fail-closed by default; soft public readiness is conditional pending paid-generation processor latency and automatic-drain readiness.</p>
+      <p class="lead">Module 01「曖昧溫度計」uses scoped runtime config as the single primary payment runtime gate. Gate 1 functional production smoke passed end-to-end with Email and LINE access-link delivery confirmed. Deployed staging now proves one automatic no-card paid-generation drain without manual processor invocation; production remains fail-closed by default.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-07 23:30 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Processor readiness assessment</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-07 23:35 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Runtime availability decision</span></div>
         <div><span class="label">Production posture</span><span class="value">Fail-closed by default</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Paid-generation automatic drain latency unproven</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Concurrency / repeated-sample evidence before soft public</span></div>
       </div>
     </header>
 
@@ -342,7 +342,7 @@
       <h2>Launch Gate Model</h2>
       <div class="grid">
         <article class="card"><span class="badge done">Gate 1</span><h3>Payment capability</h3><p>NewebPay approval, provider-level ReturnURL/NotifyURL, scoped runtime config open/close, production deploy freshness, real NT$49 credit-card payment truth, entitlement creation, paid generation completion, completed paid result rendering, Email delivery, LINE delivery, and Admin/Ops verification are proven by controlled smoke v4.</p></article>
-        <article class="card"><span class="badge progress">Gate 2</span><h3>Soft public availability</h3><p>Conditional. Requires processor latency/readiness assessment, automatic queue drain evidence, support/runbook thresholds, and owner decision. No ads or broad traffic yet.</p></article>
+        <article class="card"><span class="badge progress">Gate 2</span><h3>Soft public availability</h3><p>Conditional. Single-job deployed staging automatic drain is verified and supports an owner-only controlled window decision. Low-key soft public still needs concurrency/repeated-sample evidence and owner decision. No ads or broad traffic yet.</p></article>
         <article class="card"><span class="badge waiting">Gate 3</span><h3>Growth / ads launch</h3><p>Requires stable soft availability, conversion tracking, support cadence, stop-loss thresholds, channel readiness, and ad budget controls. NewebPay approval does not equal commercial launch.</p></article>
       </div>
     </section>
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge progress">Conditional</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, deployed freshness guard, runtime-window helper, Vercel alias proof, Scoped Runtime Config v0, ops credential auth, NewebPay URL env alignment, staging Email/access-link rebaseline, staging LINE bind, and controlled production smoke v4 are complete. Remaining blocker before soft public is processor latency and automatic queue drain readiness.</p></article>
+        <article class="card"><span class="badge progress">Conditional</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, deployed freshness guard, runtime-window helper, Vercel alias proof, Scoped Runtime Config v0, ops credential auth, NewebPay URL env alignment, staging Email/access-link rebaseline, staging LINE bind, controlled production smoke v4, and one deployed staging automatic-drain benchmark are complete. Remaining blocker before soft public is concurrency/repeated deployed processor evidence.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
@@ -388,7 +388,7 @@
         <div class="progressbar"><span style="width: 90%"></span></div>
         <p><strong>Production launch readiness</strong></p>
         <div class="progressbar"><span style="width: 70%"></span></div>
-        <p>The current gap is paid-generation readiness: controlled smoke v4 completed after one approved processor invocation, but automatic drain timing and queue latency were not instrumented enough for soft public. Runtime remains fail-closed.</p>
+        <p>The current gap is launch-scope decisioning: a single deployed staging automatic drain passed with low queue latency, but concurrency and repeated-sample evidence are still missing for soft public. Runtime remains fail-closed.</p>
       </div>
     </section>
 
@@ -410,7 +410,7 @@
           <li><span class="time">Sandbox preflight</span><span>Sandbox checkout preflight passed with ccore gateway, MPG 2.0, NT$49, and pcs_ handoff.</span></li>
           <li><span class="time">Sandbox v2</span><span>NotifyURL reached staging with HTTP 200 but no paid transition.</span></li>
           <li><span class="time">Diagnostics</span><span>Safe NotifyURL category diagnostics deployed.</span></li>
-          <li><span class="time">Current</span><span>Gate 1 functional smoke is accepted as pass. Production remains fail-closed; soft public readiness is conditional pending processor latency / paid generation readiness assessment.</span></li>
+          <li><span class="time">Current</span><span>Gate 1 functional smoke is accepted as pass. One deployed staging automatic-drain benchmark passed. Production remains fail-closed; next decision is whether to allow owner-only controlled windows while soft public waits for more queue evidence.</span></li>
           <li><span class="time">Review wait</span><span>Module 01 multi-state paid CTA copy aligned; checkout-start wiring, visual bridge polish and staging smoke, and ReturnURL polling implemented; result-page checkout staging sandbox QA passed end-to-end.</span></li>
         </ol>
       </div>
@@ -720,6 +720,7 @@
           <li><a href="../reports/2026-06-07-controlled-production-payment-smoke-scoped-runtime-config-v4.md">Controlled Production Payment Smoke Retry with Scoped Runtime Config v4</a></li>
           <li><a href="../reports/2026-06-07-controlled-production-payment-smoke-final-assessment-gate-1-decision-v0.md">Controlled Production Payment Smoke Final Assessment / Gate 1 Decision v0</a></li>
           <li><a href="../reports/2026-06-07-processor-latency-paid-generation-readiness-v0.md">Processor Latency + Paid Generation Readiness v0</a></li>
+          <li><a href="../reports/2026-06-07-deployed-staging-paid-generation-automatic-drain-benchmark-v0.md">Deployed Staging Paid-Generation Automatic-Drain Benchmark v0</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

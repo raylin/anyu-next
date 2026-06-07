@@ -11874,3 +11874,45 @@ Unresolved questions:
 - Mock benchmark output is structured and fast, but explicitly does not prove deployed Vercel Queue / cron pickup latency.
 - Production was not touched; no payment, runtime open, Email, LINE, DB mutation, or Vercel env change occurred.
 - Recommended next task: deployed staging paid-generation automatic-drain benchmark using no-card/fake-paid, freshness guard, and Admin/Ops latency fields.
+
+## 2026-06-07 Deployed Staging Paid-Generation Automatic-Drain Benchmark v0
+
+### Completed Changes
+
+- confirmed Preview(staging) freshness for target commit `83dc54fff2ec`.
+- verified staging scoped runtime config:
+  - `payment.window.enabled=true` for Module 01 QA
+  - `payment.global.disabled=false`
+- verified staging Admin/Ops auth works through credentials.
+- generated a fresh Module 01 smoke fixture with `smokeRunIdPresent=true`, `freshDimensionPresent=true`, and `expectedFreshResult=true`.
+- ran `qa:result-checkout:no-card` in queue mode.
+- created fresh staging result `7a4ca853-abcc-417e-9e64-cb747fff4a9a` with `cacheHit=false`.
+- completed checkout-start, Email save, checkout unlock, operator no-card/fake-paid transition, Vercel Queue trigger, automatic paid-generation completion, paid access render, and production fail-closed check.
+- did not invoke the manual processor endpoint before or after measurement.
+- Admin/Ops lookup confirmed generation `completed`, `attemptCount=1`, `queueStateCategory=completed`, and `recommendedAction=no_action_needed`.
+- measured:
+  - `enqueueLatencyMs=1064`
+  - `queueWaitMs=2685`
+  - `processorPickupLatencyMs=2797`
+  - `processingDurationMs=0`
+  - `totalPaidReadyMs=3749`
+  - `deliveryReadyMs=52164`
+
+### Validation
+
+- staging freshness: pass.
+- staging runtime config QA: pass.
+- smoke fixture: pass.
+- mock benchmark: pass.
+- deployed no-card automatic drain: pass.
+- Admin/Ops lookup-result pretty and JSON: pass.
+- wait-result after completion: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Automatic drain is verified for one deployed staging no-card/fake-paid job.
+- Readiness classification: `ready_for_owner_controlled_window`.
+- Not classified as `ready_for_low_key_soft_public` because concurrency and repeated deployed samples remain unproven.
+- Production was not touched; no production runtime open, production payment, real Email, real LINE, Vercel env change, direct DB mutation, or broad traffic occurred.
+- Recommended next task: Gate 1 Runtime Availability Decision v0.

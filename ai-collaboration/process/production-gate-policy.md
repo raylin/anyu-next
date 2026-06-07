@@ -293,6 +293,13 @@ If a paid result remains queued:
 - stop accepting production payments if queue readiness is unknown or jobs require repeated manual processor action
 - never mutate DB rows manually to mark generation complete
 
+Current Gate 1 processor-readiness posture:
+
+- A deployed staging single-job no-card/fake-paid queue-mode run on commit `83dc54f` verified automatic drain without manual processor invocation.
+- That run measured `queueWaitMs=2685`, `processorPickupLatencyMs=2797`, `processingDurationMs=0`, `totalPaidReadyMs=3749`, and `deliveryReadyMs=52164`.
+- This is enough to support owner-only controlled windows if the owner explicitly chooses them and Admin/Ops monitoring remains available.
+- It is not enough for low-key soft public or ads because concurrency and repeated deployed samples remain unproven.
+
 ## Reporting
 
 Production reports must include:
