@@ -4,9 +4,44 @@ The Admin CLI is a client for the Admin API. It must not read app env mirrors, D
 
 ## Auth
 
-Set `ADMIN_API_TOKEN` in the shell/process environment before running commands.
+`pnpm ops` authenticates only as an Admin API client. It does not read app service env mirrors, DB URLs, Vercel env, Neon, provider credentials, or secrets.
+
+Token resolution order:
+
+1. `ADMIN_API_TOKEN` in the shell/process environment
+2. `~/.anyu/credentials.json` for the selected `--env`
+3. missing -> `admin_token_missing`
+
+Credentials file schema:
+
+```json
+{
+  "version": 1,
+  "profiles": {
+    "staging": {
+      "adminApiToken": "..."
+    },
+    "production": {
+      "adminApiToken": "..."
+    }
+  }
+}
+```
+
+Use:
+
+```bash
+pnpm ops auth set-token --env staging
+pnpm ops auth set-token --env production
+pnpm ops auth status --env production
+pnpm ops auth logout --env production
+```
+
+`auth set-token` prompts for the token and writes `~/.anyu/credentials.json` with restrictive file permissions when the platform supports it. It does not accept a token as a positional argument.
 
 Do not pass tokens by CLI flag. `--token` and `--base-url` are intentionally unsupported.
+
+Normal `pnpm ops` commands do not read `apps/web/.env.staging` or `apps/web/.env.production`. No permanent import-token command exists. If tokens need to be moved from service env mirrors, do it as a one-time owner-approved local action outside the normal CLI surface.
 
 ## Runtime Config
 

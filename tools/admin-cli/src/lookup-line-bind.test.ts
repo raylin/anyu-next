@@ -1,4 +1,8 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import { writeCredentials } from "./auth.js";
 import {
   formatPretty,
   main,
@@ -28,7 +32,8 @@ function safeResponse(overrides: Record<string, unknown> = {}) {
 function makeContext(fetchImpl: typeof fetch, token = "admin-token") {
   return {
     env: {
-      ADMIN_API_TOKEN: token,
+      ...(token ? { ADMIN_API_TOKEN: token } : {}),
+      ANYU_OPS_CREDENTIALS_PATH: path.join(tmpdir(), "missing-anyu-line-bind-creds.json"),
       DATABASE_URL: "should-not-be-read",
       VERCEL_TOKEN: "should-not-be-read",
     },
@@ -104,6 +109,38 @@ describe("admin CLI lookup-line-bind", () => {
       `https://anyu.tw/api/admin/line-bind-diagnostics?resultId=${RESULT_ID}`,
       expect.any(Object),
     );
+  });
+
+  it("uses credentials file when process env token is absent", async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "anyu-line-bind-creds-"));
+    const credentialsPath = path.join(dir, "credentials.json");
+
+    try {
+      writeCredentials(
+        { version: 1, profiles: { production: { adminApiToken: "file-token" } } },
+        { ANYU_OPS_CREDENTIALS_PATH: credentialsPath },
+      );
+      const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse(200, safeResponse()));
+      const context = {
+        ...makeContext(fetchImpl, ""),
+        env: {
+          ANYU_OPS_CREDENTIALS_PATH: credentialsPath,
+        },
+      };
+
+      const exitCode = await main(["lookup-line-bind", "--env", "production", "--result-id", RESULT_ID], context);
+
+      expect(exitCode).toBe(0);
+      expect(fetchImpl).toHaveBeenCalledWith(
+        `https://anyu.tw/api/admin/line-bind-diagnostics?resultId=${RESULT_ID}`,
+        expect.objectContaining({
+          headers: expect.objectContaining({ "x-admin-api-token": "file-token" }),
+        }),
+      );
+      expect(String(vi.mocked(context.stdout.write).mock.calls[0]?.[0])).not.toContain("file-token");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it("handles 401 and no-events without stack traces", async () => {

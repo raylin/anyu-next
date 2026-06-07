@@ -1,4 +1,6 @@
 import { inspect } from "node:util";
+import { requireAdminToken } from "./auth.js";
+import { CliError } from "./cli-error.js";
 
 type OpsEnv = "staging" | "production";
 
@@ -110,16 +112,6 @@ const FORBIDDEN_VALUE_PATTERNS = [
   /\bTradeSha\b/iu,
 ] as const;
 
-class CliError extends Error {
-  constructor(
-    readonly code: string,
-    readonly exitCode = 1,
-    message = code,
-  ) {
-    super(message);
-  }
-}
-
 function normalizeKey(key: string) {
   return key.replace(/[^a-z0-9]/giu, "").toLowerCase();
 }
@@ -187,16 +179,6 @@ function parseArgs(argv: string[]): CliArgs {
     resultId,
     outputMode,
   };
-}
-
-function requireAdminToken(env: NodeJS.ProcessEnv) {
-  const token = env["ADMIN_API_TOKEN"];
-
-  if (!token) {
-    throw new CliError("admin_token_missing");
-  }
-
-  return token;
 }
 
 function assertPlainObject(value: unknown, code = "unsafe_response_shape"): asserts value is Record<string, unknown> {
@@ -416,7 +398,7 @@ function formatPretty(env: OpsEnv, response: AdminLookupResponse) {
 }
 
 async function lookupResult(args: CliArgs, context: RunContext) {
-  const token = requireAdminToken(context.env);
+  const token = requireAdminToken(args.env, context.env).token;
   const baseUrl = BASE_URLS[args.env];
   const url = `${baseUrl}/api/admin/paid-results/${encodeURIComponent(args.resultId)}`;
 

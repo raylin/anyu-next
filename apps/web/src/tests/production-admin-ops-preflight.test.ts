@@ -33,7 +33,14 @@ describe("production Admin/Ops preflight", () => {
       env: {},
       runCommand: (command) => {
         calls.push(command.id);
-        return successResult();
+        return successResult({
+          ok: true,
+          auth: {
+            env: "production",
+            tokenAvailable: false,
+            tokenSourceCategory: "missing",
+          },
+        });
       },
     });
 
@@ -46,18 +53,28 @@ describe("production Admin/Ops preflight", () => {
       tokenPresent: false,
       commandExitCode: 1,
     });
-    expect(calls).toEqual([]);
+    expect(calls).toEqual(["auth_status"]);
     expect(JSON.stringify(summary)).not.toContain("secret");
   });
 
   it("reports production_admin_auth_failed for unauthorized ops responses", () => {
     const summary = buildSummary({
       env: { ADMIN_API_TOKEN: "redacted-test-token" },
-      runCommand: () => ({
-        status: 1,
-        stdout: "",
-        stderr: "admin_auth_failed",
-      }),
+      runCommand: (command) =>
+        command.id === "auth_status"
+          ? successResult({
+              ok: true,
+              auth: {
+                env: "production",
+                tokenAvailable: true,
+                tokenSourceCategory: "process_env",
+              },
+            })
+          : {
+              status: 1,
+              stdout: "",
+              stderr: "admin_auth_failed",
+            },
     });
 
     expect(summary).toMatchObject({
@@ -75,11 +92,22 @@ describe("production Admin/Ops preflight", () => {
       env: { ADMIN_API_TOKEN: "redacted-test-token" },
       runCommand: (command) => {
         called.push(command.id);
+        if (command.id === "auth_status") {
+          return successResult({
+            ok: true,
+            auth: {
+              env: "production",
+              tokenAvailable: true,
+              tokenSourceCategory: "credentials_file",
+            },
+          });
+        }
         return successResult({ ok: true, config: { value: command.id === "payment_global_disabled_get" ? false : true } });
       },
     });
 
     expect(called).toEqual([
+      "auth_status",
       "payment_window_get",
       "payment_global_disabled_get",
       "payment_window_history",
@@ -92,6 +120,8 @@ describe("production Admin/Ops preflight", () => {
       commandExitCode: 0,
       mutatesData: false,
       productionTouched: true,
+      tokenSourceCategory: "credentials_file",
+      tokenPresent: true,
     });
   });
 
@@ -125,6 +155,12 @@ describe("production Admin/Ops preflight", () => {
 
     expect(adminCliSource).not.toContain(".env.production");
     expect(configCliSource).not.toContain(".env.production");
-    expect(configCliSource).toContain("ADMIN_API_TOKEN must be present in the shell/process environment.");
+    expect(configCliSource).toContain("ADMIN_API_TOKEN in process env wins; otherwise ~/.anyu/credentials.json is used.");
+  });
+
+  it("keeps repo-local ANYU credentials ignored", () => {
+    const gitignore = fs.readFileSync(path.resolve(process.cwd(), "../../.gitignore"), "utf8");
+
+    expect(gitignore).toContain(".anyu/");
   });
 });

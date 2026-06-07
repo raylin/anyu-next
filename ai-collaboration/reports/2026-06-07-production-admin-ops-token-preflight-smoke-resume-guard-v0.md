@@ -20,6 +20,12 @@
 - upstream blocker / mainline context: production Admin/Ops authentication was not checked before runtime open/result creation/owner manual action. The next smoke must catch this before any production mutation or owner standby.
 - out-of-scope items: production runtime open, payment, real Email/LINE sends, Vercel env changes, DB migrations, direct DB fallback, theme UI, and Module 02.
 
+## Follow-Up Auth Config Note
+
+- 2026-06-07 follow-up: ANYU Ops CLI Auth Config v0 added `~/.anyu/credentials.json` as a normal `pnpm ops` auth source after process env.
+- Where this report says owner must export `ADMIN_API_TOKEN`, the current accepted path is either process env or `pnpm ops auth set-token --env production`.
+- This note does not rewrite the original blocked result; it updates the remediation path.
+
 ## Scope
 
 - what changed: added a read-only production Admin/Ops preflight helper, package command, tests, process docs, handoff, report/dashboard/summary updates, and a v3 report classification note.

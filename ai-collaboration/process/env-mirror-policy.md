@@ -87,4 +87,9 @@ Admin CLI / `pnpm ops` must not read:
 - `apps/web/.env.local`
 - `apps/web/.env`
 
-`ADMIN_API_TOKEN` for CLI usage comes from explicit shell/process env only.
+Operator credentials are separate from service env mirrors. Normal `pnpm ops` auth sources are:
+
+1. explicit shell/process `ADMIN_API_TOKEN`
+2. `~/.anyu/credentials.json`
+
+`pnpm ops` must not read app service env mirrors during normal operation. The credentials file is not an env mirror and must not be committed.

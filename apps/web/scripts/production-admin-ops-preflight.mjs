@@ -5,6 +5,19 @@ import path from "node:path";
 
 const COMMANDS = [
   {
+    id: "auth_status",
+    args: [
+      "pnpm",
+      "--silent",
+      "ops",
+      "auth",
+      "status",
+      "--env",
+      "production",
+      "--json",
+    ],
+  },
+  {
     id: "payment_window_get",
     args: [
       "pnpm",
@@ -138,7 +151,47 @@ function classifyCommandResult(result) {
   return "production_admin_ops_ready";
 }
 
+function authStatusFromResult(result) {
+  const parsed = parseJsonOutput(result.stdout ?? "");
+  const auth = parsed?.auth;
+
+  if (!parsed?.ok || !auth || typeof auth !== "object") {
+    return {
+      ok: false,
+      tokenAvailable: false,
+      tokenSourceCategory: "missing",
+      category: "production_admin_token_missing",
+    };
+  }
+
+  const tokenAvailable = auth.tokenAvailable === true;
+  const tokenSourceCategory =
+    auth.tokenSourceCategory === "process_env" || auth.tokenSourceCategory === "credentials_file"
+      ? auth.tokenSourceCategory
+      : "missing";
+
+  return {
+    ok: tokenAvailable,
+    tokenAvailable,
+    tokenSourceCategory,
+    category: tokenAvailable ? "production_admin_ops_ready" : "production_admin_token_missing",
+  };
+}
+
 function buildCommandCheck(command, result) {
+  if (command.id === "auth_status") {
+    const auth = authStatusFromResult(result);
+    return {
+      id: command.id,
+      status: auth.ok ? "pass" : "blocked",
+      category: auth.category,
+      commandExitCode: result.status ?? 1,
+      responseSanitized: !containsUnsafeOutput(`${result.stdout ?? ""}\n${result.stderr ?? ""}`),
+      tokenSourceCategory: auth.tokenSourceCategory,
+      tokenAvailable: auth.tokenAvailable,
+    };
+  }
+
   const category = classifyCommandResult(result);
   const pass = category === "production_admin_ops_ready";
 
@@ -151,37 +204,24 @@ function buildCommandCheck(command, result) {
   };
 }
 
-function buildSummary({ env = process.env, runCommand = defaultRunCommand } = {}) {
-  const tokenPresent = Boolean(env.ADMIN_API_TOKEN?.trim());
+function buildSummary({ runCommand = defaultRunCommand } = {}) {
+  const checks = [];
 
-  if (!tokenPresent) {
-    return {
-      step: "production_admin_ops_preflight",
-      environment: "production",
-      status: "blocked",
-      gateStatus: "blocked",
-      commandExitCode: 1,
-      adminOpsStatus: "production_admin_token_missing",
-      category: "production_admin_token_missing_owner_action_required",
-      checks: [],
-      tokenSourceCategory: "missing",
-      tokenPresent: false,
-      valuesPrinted: false,
-      lengthsPrinted: false,
-      prefixesPrinted: false,
-      suffixesPrinted: false,
-      hashesPrinted: false,
-      checksumsPrinted: false,
-      productionTouched: true,
-      mutatesData: false,
-      recommendedNextAction: "owner_exports_admin_api_token_then_rerun_admin_ops_preflight",
-    };
+  for (const command of COMMANDS) {
+    const check = buildCommandCheck(command, runCommand(command));
+    checks.push(check);
+
+    if (check.status !== "pass") {
+      break;
+    }
   }
 
-  const checks = COMMANDS.map((command) => buildCommandCheck(command, runCommand(command)));
   const firstBlocked = checks.find((check) => check.status !== "pass");
   const adminOpsStatus = firstBlocked?.category ?? "production_admin_ops_ready";
   const pass = adminOpsStatus === "production_admin_ops_ready";
+  const authCheck = checks.find((check) => check.id === "auth_status");
+  const tokenSourceCategory = authCheck?.tokenSourceCategory ?? "missing";
+  const tokenPresent = authCheck?.tokenAvailable === true;
 
   return {
     step: "production_admin_ops_preflight",
@@ -190,10 +230,13 @@ function buildSummary({ env = process.env, runCommand = defaultRunCommand } = {}
     gateStatus: pass ? "pass" : "blocked",
     commandExitCode: pass ? 0 : 1,
     adminOpsStatus,
-    category: adminOpsStatus,
+    category:
+      adminOpsStatus === "production_admin_token_missing"
+        ? "production_admin_token_missing_owner_action_required"
+        : adminOpsStatus,
     checks,
-    tokenSourceCategory: "process_env",
-    tokenPresent: true,
+    tokenSourceCategory,
+    tokenPresent,
     valuesPrinted: false,
     lengthsPrinted: false,
     prefixesPrinted: false,

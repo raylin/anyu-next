@@ -11626,3 +11626,33 @@ Unresolved questions:
 - First failure category for the live preflight: `production_admin_token_missing_owner_action_required`.
 - No production runtime open, payment, Email send, LINE send, Vercel env change, DB mutation, direct DB lookup, provider payload exposure, or token/private output occurred.
 - Next action: owner exports production `ADMIN_API_TOKEN` into process env, then rerun only `cd apps/web && corepack pnpm run qa:production:admin-ops-preflight`. If it passes, proceed to Controlled Production Payment Smoke Retry with Scoped Runtime Config v4 from full pre-open gates.
+
+## 2026-06-07 ANYU Ops CLI Auth Config v0
+
+### Completed Changes
+
+- added dedicated `~/.anyu/credentials.json` operator credential support for `pnpm ops`.
+- token resolution order is now process env `ADMIN_API_TOKEN`, then credentials file profile for `--env`, then missing.
+- added `pnpm ops auth status --env <env>`, `pnpm ops auth set-token --env <env>`, and `pnpm ops auth logout --env <env>`.
+- updated `lookup-result`, `lookup-line-bind`, and runtime-config commands to use the shared auth resolver.
+- updated `qa:production:admin-ops-preflight` to call `pnpm ops auth status --env production --json` first, so credentials-file auth can satisfy the smoke guard.
+- skipped one-time env mirror migration helper in v0; manual `pnpm ops auth set-token` is the accepted setup path.
+- updated Admin/Ops, production gate, QA, env mirror, handoff, and AGENTS docs to separate service env mirrors from operator credentials.
+- added `.anyu/` to `.gitignore`.
+
+### Validation
+
+- `corepack pnpm --filter @anyu/admin-cli test`: pass, 4 files / 40 tests.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- targeted app preflight/release tests: pass, 2 files / 23 tests.
+- `corepack pnpm --silent ops auth status --env production --json`: pass, token unavailable, source `missing`.
+- `cd apps/web && corepack pnpm run qa:production:admin-ops-preflight`: blocked as expected with `production_admin_token_missing_owner_action_required`.
+- `cd apps/web && corepack pnpm lint`: pass after removing an unused helper argument.
+- `cd apps/web && corepack pnpm test`: pass, 102 files / 695 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+
+### Unresolved Questions
+
+- First failure category for live production preflight remains `production_admin_token_missing_owner_action_required`.
+- No production runtime, payment, Email, LINE, Vercel env change, DB mutation, direct DB lookup, env mirror read by normal `pnpm ops`, or secret/private output occurred.
+- Next action: owner runs `pnpm ops auth set-token --env staging` and `pnpm ops auth set-token --env production`, then reruns only `cd apps/web && corepack pnpm run qa:production:admin-ops-preflight`. If it passes, proceed to Controlled Production Payment Smoke Retry with Scoped Runtime Config v4.

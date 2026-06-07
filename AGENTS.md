@@ -92,7 +92,8 @@ Use `ai-collaboration/process/report-template.md` for reports and the canonical 
 - Supported lookup:
   - `pnpm ops lookup-result --env staging --id <resultId>`
   - `pnpm ops lookup-result --env production --id <resultId>`
-- `ADMIN_API_TOKEN` comes from explicit shell/process env.
+- `ADMIN_API_TOKEN` for `pnpm ops` comes from explicit shell/process env first, then `~/.anyu/credentials.json`.
+- `pnpm ops` / Admin CLI must not read app env mirror files.
 - Do not use direct DB support lookup except for migrations, schema verification, aggregate preflights, or explicitly approved root-cause debugging.
 - If direct DB is used, report why Admin API/CLI was insufficient.
 

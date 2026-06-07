@@ -5,6 +5,7 @@
 !**/.env.example
 *.local
 .local/
+.anyu/
 
 # Node / Next / Vercel
 node_modules/

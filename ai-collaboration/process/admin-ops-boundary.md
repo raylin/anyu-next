@@ -40,8 +40,12 @@ Delivery keys such as `delivery.email.enabled` and `delivery.line.enabled` are r
 
 Auth:
 
-- `ADMIN_API_TOKEN` from explicit shell/process env
+- `ADMIN_API_TOKEN` from explicit shell/process env, or from `~/.anyu/credentials.json` when process env is absent
 - header: `x-admin-api-token`
+- token source precedence: process env, then credentials file, then missing
+- `pnpm ops auth status --env <staging|production>` reports token source category only
+- `pnpm ops auth set-token --env <staging|production>` prompts for an operator token and writes `~/.anyu/credentials.json`
+- `pnpm ops auth logout --env <staging|production>` removes one stored operator token
 
 Environment mapping:
 
@@ -59,7 +63,14 @@ The CLI must not:
 - import `apps/web` DB helpers
 - expose raw Email, raw LINE ID, encrypted recipient, hashes, tokens, tokenized URLs, provider payloads, or card/payment-sensitive data
 
-Staging QA runners may resolve `ADMIN_API_TOKEN` from the approved local staging mirror and inject it into `pnpm ops` subprocess env. This is a QA runner responsibility only; the CLI itself still must not read app env mirrors.
+Operator credentials are stored separately from service env mirrors:
+
+- service env mirrors: `apps/web/.env.staging` and `apps/web/.env.production`
+- operator credentials: `~/.anyu/credentials.json`
+
+Normal `pnpm ops` commands may read `~/.anyu/credentials.json`, but must not read app service env mirror files. No `--token` flag is allowed.
+
+Staging QA runners may resolve `ADMIN_API_TOKEN` from the approved local staging mirror and inject it into `pnpm ops` subprocess env. This is a QA runner responsibility only; it is separate from normal `pnpm ops` auth resolution.
 
 Production smoke must prove Admin/Ops availability before runtime open:
 
@@ -69,7 +80,7 @@ cd apps/web && corepack pnpm run qa:production:admin-ops-preflight
 
 Production Admin/Ops preflight rules:
 
-- `ADMIN_API_TOKEN` must already be present in the shell/process environment.
+- `ADMIN_API_TOKEN` may come from shell/process env or `~/.anyu/credentials.json`.
 - `pnpm ops` remains pure and must not read `apps/web/.env.production`.
 - Missing token fails before runtime open with `production_admin_token_missing_owner_action_required`.
 - Wrong/unauthorized token fails with `production_admin_auth_failed`.

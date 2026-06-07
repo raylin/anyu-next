@@ -144,7 +144,7 @@ Reference shared policies and repeat critical task rules inline.
 Production smoke must repeat:
 
 - runtime disabled until preflight pass
-- production `pnpm ops` Admin/Ops preflight passes with explicit process-env `ADMIN_API_TOKEN`
+- production `pnpm ops` Admin/Ops preflight passes with process-env `ADMIN_API_TOKEN` or `~/.anyu/credentials.json`
 - no owner manual action before environment prepared
 - use `pnpm ops` before direct DB
 - report timing/model/effort

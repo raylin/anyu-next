@@ -1,10 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { writeCredentials } from "./auth.js";
 import { helpText, main, parseArgs } from "./config.js";
 
 function createContext(input: {
   status?: number;
   body?: unknown;
   token?: string;
+  credentialsPath?: string;
 } = {}) {
   let stdout = "";
   let stderr = "";
@@ -20,7 +25,10 @@ function createContext(input: {
 
   return {
     context: {
-      env: input.token === undefined ? { ADMIN_API_TOKEN: "token" } : { ADMIN_API_TOKEN: input.token },
+      env: {
+        ...(input.token === undefined ? { ADMIN_API_TOKEN: "token" } : input.token ? { ADMIN_API_TOKEN: input.token } : {}),
+        ANYU_OPS_CREDENTIALS_PATH: input.credentialsPath ?? path.join(tmpdir(), "missing-anyu-config-creds.json"),
+      },
       fetchImpl,
       stdout: { write: vi.fn((chunk: string) => { stdout += chunk; return true; }) },
       stderr: { write: vi.fn((chunk: string) => { stderr += chunk; return true; }) },
@@ -122,5 +130,47 @@ describe("admin CLI config", () => {
     const wrong = createContext({ status: 401, body: { ok: false, error: "admin_auth_failed" } });
     await expect(main(["config", "list", "--env", "production"], wrong.context)).resolves.toBe(1);
     expect(wrong.stderr).toContain("admin_auth_failed");
+  });
+
+  it("uses credentials file when process env token is absent", async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "anyu-config-creds-"));
+    const credentialsPath = path.join(dir, "credentials.json");
+
+    try {
+      writeCredentials(
+        { version: 1, profiles: { production: { adminApiToken: "file-token" } } },
+        { ANYU_OPS_CREDENTIALS_PATH: credentialsPath },
+      );
+      const run = createContext({
+        token: "",
+        credentialsPath,
+        body: {
+          ok: true,
+          config: {
+            key: "payment.window.enabled",
+            active: true,
+            value: false,
+            valueType: "boolean",
+            riskLevel: "high",
+          },
+        },
+      });
+
+      const exitCode = await main(
+        ["config", "get", "--env", "production", "payment.window.enabled", "--module", "ai-temperature", "--json"],
+        run.context,
+      );
+
+      expect(exitCode).toBe(0);
+      expect(run.fetchImpl).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({ "x-admin-api-token": "file-token" }),
+        }),
+      );
+      expect(run.stdout).not.toContain("file-token");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

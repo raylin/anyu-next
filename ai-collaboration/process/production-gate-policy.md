@@ -20,7 +20,7 @@ Production smoke requires:
 - local/staging evidence for flows staging can mirror
 - production deploy freshness and known target commit
 - scoped runtime config readiness or dry-run evidence
-- production Admin/Ops auth preflight using explicit process-env `ADMIN_API_TOKEN`
+- production Admin/Ops auth preflight using process-env `ADMIN_API_TOKEN` or `~/.anyu/credentials.json`
 - tracked fresh Module 01 fixture
 - Admin/Ops diagnostics available for result, access-link, and LINE bind failures
 - explicit owner approval for payment and real channel checks
@@ -85,7 +85,7 @@ Codex must also assert:
 cd apps/web && corepack pnpm run qa:production:admin-ops-preflight
 ```
 
-This preflight is read-only and requires `ADMIN_API_TOKEN` to be present in the shell/process environment. If it fails with `production_admin_token_missing_owner_action_required`, stop before runtime open, result creation, or owner manual action. Do not load `.env.production` into `pnpm ops` and do not use direct DB as a fallback for a missing Admin token.
+This preflight is read-only. `pnpm ops` resolves Admin auth from shell/process `ADMIN_API_TOKEN` first, then `~/.anyu/credentials.json`. If it fails with `production_admin_token_missing_owner_action_required`, stop before runtime open, result creation, or owner manual action. Do not load `.env.production` into `pnpm ops` and do not use direct DB as a fallback for a missing Admin token.
 
 ## Runtime Enablement
 

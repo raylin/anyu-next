@@ -1,4 +1,5 @@
 import { inspect } from "node:util";
+import { requireAdminToken } from "./auth.js";
 import { BASE_URLS, CliError, assertSafePayload } from "./lookup-result.js";
 
 type OpsEnv = "staging" | "production";
@@ -100,16 +101,6 @@ function parseArgs(argv: string[]): CliArgs {
   };
 }
 
-function requireAdminToken(env: NodeJS.ProcessEnv) {
-  const token = env["ADMIN_API_TOKEN"];
-
-  if (!token) {
-    throw new CliError("admin_token_missing");
-  }
-
-  return token;
-}
-
 function assertPlainObject(value: unknown, code = "unsafe_response_shape"): asserts value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new CliError(code);
@@ -196,7 +187,7 @@ function formatPretty(env: OpsEnv, response: LineBindDiagnosticLookupResponse) {
 }
 
 async function lookupLineBind(args: CliArgs, context: RunContext) {
-  const token = requireAdminToken(context.env);
+  const token = requireAdminToken(args.env, context.env).token;
   const baseUrl = BASE_URLS[args.env];
   const url = `${baseUrl}/api/admin/line-bind-diagnostics?resultId=${encodeURIComponent(args.resultId)}`;
 

@@ -1,4 +1,5 @@
 import { inspect } from "node:util";
+import { requireAdminToken } from "./auth.js";
 import { BASE_URLS, CliError, assertSafePayload } from "./lookup-result.js";
 
 type OpsEnv = "staging" | "production";
@@ -62,7 +63,8 @@ function helpText() {
     "  Values are sent only to Admin API; this CLI does not access DB, Vercel, Neon, or app env mirror files.",
     "",
     "Environment/auth notes",
-    "  ADMIN_API_TOKEN must be present in the shell/process environment.",
+    "  ADMIN_API_TOKEN in process env wins; otherwise ~/.anyu/credentials.json is used.",
+    "  Use pnpm ops auth set-token --env <env> to store operator credentials.",
     "  --base-url and --token flags are intentionally unsupported.",
   ].join("\n");
 }
@@ -190,16 +192,6 @@ function parseArgs(argv: string[]): CliArgs {
   return args;
 }
 
-function requireAdminToken(env: NodeJS.ProcessEnv) {
-  const token = env["ADMIN_API_TOKEN"];
-
-  if (!token) {
-    throw new CliError("admin_token_missing");
-  }
-
-  return token;
-}
-
 function parseConfigValue(value: string) {
   if (value === "true") return true;
   if (value === "false") return false;
@@ -224,7 +216,7 @@ async function requestAdmin(args: CliArgs, context: RunContext) {
     return { help: helpText() };
   }
 
-  const token = requireAdminToken(context.env);
+  const token = requireAdminToken(args.env as OpsEnv, context.env).token;
   const baseUrl = BASE_URLS[args.env as OpsEnv];
   let path = "/api/admin/runtime-config/registry";
   let init: RequestInit = {

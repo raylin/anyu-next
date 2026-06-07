@@ -144,11 +144,11 @@ For controlled production smoke, prove Admin/Ops authentication before runtime o
 cd apps/web && corepack pnpm run qa:production:admin-ops-preflight
 ```
 
-This check is read-only. It requires `ADMIN_API_TOKEN` from the shell/process environment and verifies production runtime-config get/history calls through `pnpm ops`.
+This check is read-only. It uses normal `pnpm ops` auth resolution: shell/process `ADMIN_API_TOKEN` first, then `~/.anyu/credentials.json`. It verifies production runtime-config get/history calls through `pnpm ops`.
 
 If it fails:
 
-- `production_admin_token_missing_owner_action_required`: stop before runtime open; owner must export `ADMIN_API_TOKEN`.
+- `production_admin_token_missing_owner_action_required`: stop before runtime open; owner must set an ops token through process env or `pnpm ops auth set-token --env production`.
 - `production_admin_auth_failed`: stop before runtime open; token is present but not authorized.
 - `production_admin_config_lookup_failed`: stop before runtime open; Admin/Ops lookup is unavailable or unsafe.
 
