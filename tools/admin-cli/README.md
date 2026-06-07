@@ -43,6 +43,14 @@ Do not pass tokens by CLI flag. `--token` and `--base-url` are intentionally uns
 
 Normal `pnpm ops` commands do not read `apps/web/.env.staging` or `apps/web/.env.production`. No permanent import-token command exists. If tokens need to be moved from service env mirrors, do it as a one-time owner-approved local action outside the normal CLI surface.
 
+One-time owner-approved migration helper:
+
+```bash
+node tools/admin-cli/scripts/migrate-admin-token-from-env-mirrors.mjs --confirm-owner-approved
+```
+
+This helper is not a `pnpm ops` command. It reads only `ADMIN_API_TOKEN` from `apps/web/.env.staging` and `apps/web/.env.production`, writes only the matching `~/.anyu/credentials.json` profiles, preserves existing credential fields, and prints only copy categories/permission status. It must not be used as a normal auth source or generalized env import.
+
 ## Runtime Config
 
 Runtime config is for non-secret operational values only. It is not for provider credentials, API keys, tokens, database URLs, or crypto secrets.

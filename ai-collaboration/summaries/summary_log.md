@@ -11720,3 +11720,33 @@ Unresolved questions:
 - Owner must verify production dashboard ReturnURL and both NotifyURL settings.
 - Production Admin/Ops preflight remains skipped/blocked until owner configures ops credentials via `pnpm ops auth set-token`.
 - No production runtime open, payment, Email, LINE, provider secret change, DB mutation, or secret/private output occurred.
+
+## 2026-06-07 One-Time Ops Credentials Migration Helper v0
+
+### Completed Changes
+
+- added `tools/admin-cli/scripts/migrate-admin-token-from-env-mirrors.mjs` as a one-time owner-approved local helper.
+- helper requires `--confirm-owner-approved`.
+- helper copies only `ADMIN_API_TOKEN` from:
+  - `apps/web/.env.staging`
+  - `apps/web/.env.production`
+- helper writes only corresponding `~/.anyu/credentials.json` profiles.
+- added targeted migration tests covering confirmation requirement, copy-only behavior, missing profile categories, preservation of existing credential fields, redaction, and proof normal auth resolver does not read app env mirrors.
+- updated Admin CLI and process docs to clarify this is not a permanent `pnpm ops auth import-token` command.
+
+### Validation
+
+- targeted migration/auth tests: pass.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- migration helper run with owner confirmation: pass.
+- staging ops auth status: token available from `credentials_file`.
+- production ops auth status: token available from `credentials_file`.
+- `qa:production:admin-ops-preflight`: pass, `production_admin_ops_ready`, token source `credentials_file`.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production Admin/Ops credential blocker is resolved locally.
+- Remaining blocker before payment smoke: owner must verify/update NewebPay dashboard ReturnURL/NotifyURL alignment.
+- No production runtime open, payment, Email, LINE, Vercel env change, DB mutation, or secret/private output occurred.

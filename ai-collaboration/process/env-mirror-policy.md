@@ -93,3 +93,11 @@ Operator credentials are separate from service env mirrors. Normal `pnpm ops` au
 2. `~/.anyu/credentials.json`
 
 `pnpm ops` must not read app service env mirrors during normal operation. The credentials file is not an env mirror and must not be committed.
+
+Owner-approved one-time migration exception:
+
+- `tools/admin-cli/scripts/migrate-admin-token-from-env-mirrors.mjs` may read only `ADMIN_API_TOKEN` from `apps/web/.env.staging` and `apps/web/.env.production`.
+- it may write only `~/.anyu/credentials.json` operator credential profiles.
+- it requires `--confirm-owner-approved`.
+- it is not a normal `pnpm ops` command and must not be generalized into env mirror import behavior.
+- no service env values other than `ADMIN_API_TOKEN` may be copied.

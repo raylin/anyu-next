@@ -70,6 +70,14 @@ Operator credentials are stored separately from service env mirrors:
 
 Normal `pnpm ops` commands may read `~/.anyu/credentials.json`, but must not read app service env mirror files. No `--token` flag is allowed.
 
+One-time owner-approved credential migration may use:
+
+```bash
+node tools/admin-cli/scripts/migrate-admin-token-from-env-mirrors.mjs --confirm-owner-approved
+```
+
+This helper is outside the normal `pnpm ops` command surface. It may read only `ADMIN_API_TOKEN` from `apps/web/.env.staging` and `apps/web/.env.production`, may write only the corresponding `~/.anyu/credentials.json` profiles, and must not print token values or token-derived metadata. Do not add a permanent `pnpm ops auth import-token` command.
+
 Staging QA runners may resolve `ADMIN_API_TOKEN` from the approved local staging mirror and inject it into `pnpm ops` subprocess env. This is a QA runner responsibility only; it is separate from normal `pnpm ops` auth resolution.
 
 Production smoke must prove Admin/Ops availability before runtime open:
