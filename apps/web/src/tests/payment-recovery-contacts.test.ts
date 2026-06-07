@@ -151,6 +151,26 @@ describe("payment recovery contacts", () => {
     ).toBe("owner@example.com");
   });
 
+  it("derives a stable AES key from high-entropy encoded contact secrets", () => {
+    const derivedKeyEnv = {
+      ...TEST_ENV,
+      PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY: Buffer.alloc(48, 11).toString("base64url"),
+    } as NodeJS.ProcessEnv;
+    const encrypted = encryptRecoveryContactValue({
+      value: "owner@example.com",
+      env: derivedKeyEnv,
+    });
+
+    expect(encrypted).toMatch(/^v1\./u);
+    expect(encrypted).not.toContain("owner@example.com");
+    expect(
+      decryptRecoveryContactValue({
+        encryptedValue: encrypted,
+        env: derivedKeyEnv,
+      }),
+    ).toBe("owner@example.com");
+  });
+
   it("fails closed when email encryption key is missing", async () => {
     const dbMock = createDbMock();
     mockRequireDb.mockReturnValue(dbMock.db);
@@ -202,6 +222,36 @@ describe("payment recovery contacts", () => {
       }),
     );
     expect(dbMock.capture.insertValues?.contactHash).toEqual(dbMock.capture.insertValues?.emailHash);
+    expect(dbMock.capture.insertValues?.contactEncrypted).not.toContain("Owner@Example.com");
+    expect(dbMock.capture.insertValues).not.toHaveProperty("email");
+  });
+
+  it("creates pre-payment email recovery contacts when configured secret needs key derivation", async () => {
+    const derivedKeyEnv = {
+      ...TEST_ENV,
+      PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY: Buffer.alloc(48, 13).toString("base64url"),
+    } as NodeJS.ProcessEnv;
+    const dbMock = createDbMock({
+      insertRows: [{ id: RECOVERY_CONTACT_ID }],
+    });
+    mockRequireDb.mockReturnValue(dbMock.db);
+
+    await createOrUpdateEmailRecoveryContact({
+      moduleSlug: "ambiguous-temperature",
+      analysisResultId: RESULT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      email: "Owner@Example.com ",
+      source: "checkout_start",
+      env: derivedKeyEnv,
+    });
+
+    expect(dbMock.capture.insertValues).toMatchObject({
+      analysisResultId: RESULT_ID,
+      paymentIntentId: PAYMENT_INTENT_ID,
+      contactType: "email",
+      source: "checkout_start",
+      status: "pending",
+    });
     expect(dbMock.capture.insertValues?.contactEncrypted).not.toContain("Owner@Example.com");
     expect(dbMock.capture.insertValues).not.toHaveProperty("email");
   });

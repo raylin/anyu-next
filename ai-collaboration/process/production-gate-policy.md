@@ -17,6 +17,10 @@ Operator/fake-paid routes must remain fail-closed in production.
 
 Production smoke is final acceptance, not the primary diagnostic environment. If staging can reasonably mirror the flow being validated, Codex must establish current staging evidence first. For payment/access-link changes this means a fresh staging result, checkout-start, pre-payment save behavior, no-card/fake-paid transition, access-link resolution, and Admin/Ops summaries where applicable. If staging E2E cannot prove the path, classify the staging blocker and do not proceed to production runtime enablement.
 
+If a failure appears production-only, verify the target production deploy commit and whether the latest expected fix is live before drawing product conclusions. Then decide whether staging can mirror the same class of flow. If staging can mirror it, reproduce and fix through staging or local automation before another production smoke.
+
+If Email save and LINE bind/save both fail before payment, do not split them into independent channel failures first. Treat the shared access-link save/contact/linkage layer as the primary suspect, use Email save as the smallest automated reproduction, and block production smoke until Email save plus no-card/fake-paid access-link readiness is automated and passing.
+
 Before enabling production runtime, Codex must run and report:
 
 ```bash

@@ -14,6 +14,7 @@ const TARGETED_TESTS = [
   "src/tests/admin-line-bind-diagnostics-route.test.ts",
   "src/tests/newebpay-checkout-start-page.test.tsx",
   "src/tests/payment-recovery-email-route.test.ts",
+  "src/tests/result-checkout-no-card-qa.test.ts",
   "src/tests/line-recovery-bind-route.test.ts",
   "src/tests/line-recovery-bind-diagnostics-route.test.ts",
   "src/tests/line-bind-diagnostic-events.test.ts",
@@ -24,6 +25,8 @@ const TARGETED_TESTS = [
   "src/tests/paid-result-recovery-links.test.ts",
   "src/tests/paid-generation-service.test.ts",
   "src/tests/paid-generation-processor.test.ts",
+  "src/tests/operator-fake-paid-success.test.ts",
+  "src/tests/operator-fake-paid-success-route.test.ts",
 ];
 const SCENARIOS = [
   {
@@ -35,6 +38,24 @@ const SCENARIOS = [
       "paid_ready_email_auto_send",
     ],
     tests: ["src/tests/payment-recovery-email-route.test.ts", "src/tests/email-recovery-link.test.ts"],
+  },
+  {
+    id: "email_save_to_mock_paid_access_link",
+    validates: [
+      "pre_payment_email_save_success",
+      "checkout_unlock_after_email_save",
+      "mock_paid_transition_uses_saved_email_contact",
+      "paid_access_link_ready",
+      "r_link_resolves_completed_paid_result",
+      "no_real_email",
+    ],
+    tests: [
+      "src/tests/payment-recovery-email-route.test.ts",
+      "src/tests/result-checkout-no-card-qa.test.ts",
+      "src/tests/operator-fake-paid-success.test.ts",
+      "src/tests/operator-fake-paid-success-route.test.ts",
+      "src/tests/paid-result-recovery-links.test.ts",
+    ],
   },
   {
     id: "line_happy_path_with_recipient_secret",

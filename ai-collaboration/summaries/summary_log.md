@@ -11414,3 +11414,34 @@ Unresolved questions:
 - no-card/fake-paid transition, `/r/` access-link resolution, real channel receipt, and `qa:module01:staging` were skipped because targeted staging E2E found a required pre-payment save blocker first.
 - No production runtime, production payment, production Email/LINE, Vercel env change, production deploy, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
 - Next action: Pre-Payment Save Root Cause Fix v1 using targeted local/staging diagnostics before any production deploy/promotion or smoke.
+
+## 2026-06-07 Pre-Payment Email Save + Mock Paid Access-Link Automation v0
+
+### Completed Changes
+
+- diagnosed the shared Email/LINE pre-payment save blocker through the Email contact write path first
+- fixed shared recovery contact encryption handling so configured high-entropy encoded key material can derive a stable AES key while exact raw key material remains compatible
+- applied the same derivation hardening to LINE recipient-secret encryption
+- extended the operator fake-paid route to accept an optional recovery Email for automation while returning only sanitized booleans
+- extended `qa:result-checkout:no-card` to submit Email save, verify checkout unlock, then run fake-paid/access-link checks
+- added the `email_save_to_mock_paid_access_link` scenario to `qa:module01:mock-flow`
+- updated process docs with the shared-failure rule and production-only failure rule
+
+### Validation
+
+- `cd apps/web && corepack pnpm lint`: pass.
+- focused Email/access-link/mock-paid tests: pass.
+- `cd apps/web && corepack pnpm test`: pass, 97 files / 672 tests.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass, 3 files / 29 tests.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass, includes `email_save_to_mock_paid_access_link`.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass after escalated rerun due local Chromium sandbox launch restriction.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+
+### Unresolved Questions
+
+- Staging was not run because the fix is not deployed yet.
+- First failure category: not applicable for this task.
+- No production runtime, payment, real Email, real LINE, Vercel env change, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
+- Next action: Staging Pre-Payment Save + Access-Link E2E Rebaseline v1, focused first on Email save + mock paid + `/r`, then LINE only after Email path is stable.

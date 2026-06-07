@@ -134,6 +134,26 @@ describe("payment recovery contact secrets", () => {
     ).toBe(RAW_LINE_USER_ID);
   });
 
+  it("derives a stable AES key from high-entropy encoded LINE recipient secrets", () => {
+    const derivedKeyEnv = {
+      ...TEST_ENV,
+      LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY: Buffer.alloc(48, 12).toString("base64url"),
+    } as NodeJS.ProcessEnv;
+    const encrypted = encryptLineRecoveryRecipient({
+      lineUserId: RAW_LINE_USER_ID,
+      env: derivedKeyEnv,
+    });
+
+    expect(encrypted).toMatch(/^v1\./u);
+    expect(encrypted).not.toContain(RAW_LINE_USER_ID);
+    expect(
+      decryptLineRecoveryRecipient({
+        encryptedRecipient: encrypted,
+        env: derivedKeyEnv,
+      }),
+    ).toBe(RAW_LINE_USER_ID);
+  });
+
   it("hashes LINE recipients deterministically without exposing raw values", () => {
     const first = hashLineRecoveryRecipient({
       lineUserId: RAW_LINE_USER_ID,

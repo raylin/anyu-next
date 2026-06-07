@@ -105,6 +105,26 @@ function extractCheckoutHref(html, moduleSlug = "ambiguous-temperature") {
   return match?.[1]?.replaceAll("&amp;", "&") ?? null;
 }
 
+function extractEmailRecoveryForm(html, moduleSlug = "ambiguous-temperature") {
+  const escapedModuleSlug = moduleSlug.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const actionMatch = html.match(
+    new RegExp(
+      `action=["']([^"']*/api/modules/${escapedModuleSlug}/result/[^"']+/recovery/email)["']`,
+      "u",
+    ),
+  );
+  const paymentIntentMatch = html.match(
+    /name=["']paymentIntentId["']\s+value=["']([^"']+)["']/iu,
+  );
+
+  return {
+    action: actionMatch?.[1]?.replaceAll("&amp;", "&") ?? null,
+    actionShape: redactRouteShape(actionMatch?.[1]?.replaceAll("&amp;", "&") ?? null),
+    paymentIntentIdPresent: Boolean(paymentIntentMatch?.[1]),
+    paymentIntentId: paymentIntentMatch?.[1] ?? null,
+  };
+}
+
 function summarizeResultPageHtml(html, moduleSlug = "ambiguous-temperature") {
   const checkoutHref = extractCheckoutHref(html, moduleSlug);
 
@@ -186,6 +206,7 @@ export {
   assertSafeQaBaseUrl,
   containsTokenLikeValue,
   extractCheckoutHref,
+  extractEmailRecoveryForm,
   findForbiddenCopy,
   findSecretNameLeaks,
   normalizeBaseUrl,

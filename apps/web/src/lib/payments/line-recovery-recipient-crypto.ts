@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, createHmac, randomBytes } from "node:crypto";
+import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes } from "node:crypto";
 
 const RECIPIENT_ENCRYPTION_KEY_ENV = "LINE_RECOVERY_RECIPIENT_ENCRYPTION_KEY";
 const CONTACT_HASH_SECRET_ENV = "PAYMENT_RECOVERY_CONTACT_HASH_SECRET";
@@ -47,13 +47,19 @@ function decodeEncryptionKey(value: string) {
 
   const key = candidates.find((candidate) => candidate.length === 32);
 
-  if (!key) {
+  if (key) {
+    return key;
+  }
+
+  const derivationCandidate = candidates.find((candidate) => candidate.length >= 32);
+
+  if (!derivationCandidate) {
     throw new LineRecoveryRecipientConfigError(
       "line_recovery_recipient_encryption_key_invalid",
     );
   }
 
-  return key;
+  return createHash("sha256").update(derivationCandidate).digest();
 }
 
 function normalizeLineRecipient(lineUserId: string) {

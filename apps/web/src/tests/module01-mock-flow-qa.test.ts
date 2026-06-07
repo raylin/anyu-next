@@ -11,6 +11,7 @@ describe("Module 01 mock-flow QA helper", () => {
   it("covers the expected no-provider test surface", () => {
     expect(SCENARIOS.map((scenario) => scenario.id)).toEqual([
       "email_happy_path",
+      "email_save_to_mock_paid_access_link",
       "line_happy_path_with_recipient_secret",
       "line_liff_bind_success",
       "line_liff_missing_state",
@@ -28,6 +29,7 @@ describe("Module 01 mock-flow QA helper", () => {
         "src/tests/admin-line-bind-diagnostics-route.test.ts",
         "src/tests/newebpay-checkout-start-page.test.tsx",
         "src/tests/payment-recovery-email-route.test.ts",
+        "src/tests/result-checkout-no-card-qa.test.ts",
         "src/tests/line-recovery-bind-route.test.ts",
         "src/tests/line-recovery-bind-diagnostics-route.test.ts",
         "src/tests/line-bind-diagnostic-events.test.ts",
@@ -35,6 +37,8 @@ describe("Module 01 mock-flow QA helper", () => {
         "src/tests/email-recovery-link.test.ts",
         "src/tests/line-recovery-link.test.ts",
         "src/tests/line-recovery-bind-diagnostics.test.ts",
+        "src/tests/operator-fake-paid-success.test.ts",
+        "src/tests/operator-fake-paid-success-route.test.ts",
       ]),
     );
   });
@@ -64,6 +68,19 @@ describe("Module 01 mock-flow QA helper", () => {
         "contact_only_not_deliverable",
         "contact_only_does_not_unlock_checkout",
         "recipient_secret_missing_diagnosis",
+      ]),
+      sendsRealEmail: false,
+      sendsRealLine: false,
+      productionTouched: false,
+    });
+    expect(summary.scenarios.email_save_to_mock_paid_access_link).toMatchObject({
+      status: "pass",
+      validates: expect.arrayContaining([
+        "pre_payment_email_save_success",
+        "checkout_unlock_after_email_save",
+        "mock_paid_transition_uses_saved_email_contact",
+        "paid_access_link_ready",
+        "r_link_resolves_completed_paid_result",
       ]),
       sendsRealEmail: false,
       sendsRealLine: false,

@@ -6,6 +6,7 @@ import {
   assertSafeQaBaseUrl,
   containsTokenLikeValue,
   extractCheckoutHref,
+  extractEmailRecoveryForm,
   redactRouteShape,
   sanitizeRecord,
   summarizeCheckoutStartHtml,
@@ -33,6 +34,19 @@ describe("result checkout no-card QA helpers", () => {
     expect(source).toContain('import { createModule01AnalyzeRequest }');
     expect(source).toContain("createModule01AnalyzeRequest({");
     expect(source).not.toContain("const SYNTHETIC_INPUT");
+  });
+
+  it("automates Email save before mock paid access-link readiness", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "scripts/result-checkout-no-card-qa.mjs"),
+      "utf8",
+    );
+
+    expect(source).toContain("async function saveEmailRecoveryContact");
+    expect(source).toContain("async function verifyCheckoutUnlockedAfterEmailSave");
+    expect(source).toContain("recoveryEmailPrinted: false");
+    expect(source).toContain("emailRecoverySaveCovered: true");
+    expect(source).toContain("checkoutUnlockAfterEmailSaveCovered: true");
   });
 
   it("rejects production targets", () => {
@@ -113,6 +127,22 @@ describe("result checkout no-card QA helpers", () => {
       },
       forbiddenCopyFound: [],
       secretNameLeaksFound: [],
+    });
+  });
+
+  it("extracts Email recovery form state without requiring private values in output", () => {
+    const html = `
+      <form method="POST" action="/api/modules/ambiguous-temperature/result/result-1/recovery/email">
+        <input type="hidden" name="paymentIntentId" value="payment-intent-1" />
+        <button>用 Email 保存查看連結</button>
+      </form>
+    `;
+
+    expect(extractEmailRecoveryForm(html)).toEqual({
+      action: "/api/modules/ambiguous-temperature/result/result-1/recovery/email",
+      actionShape: "/api/modules/ambiguous-temperature/result/[REDACTED]/recovery/email",
+      paymentIntentIdPresent: true,
+      paymentIntentId: "payment-intent-1",
     });
   });
 

@@ -13,6 +13,7 @@ type FakePaidSuccessPayload = {
   moduleSlug?: string;
   resultId?: string;
   idempotencyKey?: string;
+  recoveryEmail?: string;
 };
 
 function errorResponse(status: number, error: string, message: string) {
@@ -31,6 +32,8 @@ function parsePayload(body: unknown): FakePaidSuccessPayload {
     resultId: typeof candidate.resultId === "string" ? candidate.resultId : undefined,
     idempotencyKey:
       typeof candidate.idempotencyKey === "string" ? candidate.idempotencyKey : undefined,
+    recoveryEmail:
+      typeof candidate.recoveryEmail === "string" ? candidate.recoveryEmail : undefined,
   };
 }
 
@@ -69,6 +72,7 @@ export async function POST(request: Request) {
     moduleSlug: payload.moduleSlug,
     resultId: payload.resultId,
     idempotencyKey: payload.idempotencyKey,
+    recoveryEmail: payload.recoveryEmail,
   });
 
   if (!result.ok) {
@@ -93,6 +97,7 @@ export async function POST(request: Request) {
     paidAccessToken: result.paidAccessToken,
     paidAccessTokenReturned: result.paidAccessTokenReturned,
     unlockPath: result.unlockPath,
+    recoveryContactIdPresent: Boolean(result.recoveryContactId),
     queueTrigger: {
       ok: result.queueTrigger.ok,
       category: result.queueTrigger.category,

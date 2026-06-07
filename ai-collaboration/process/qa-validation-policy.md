@@ -77,6 +77,22 @@ If `MODULE01_EXPECTED_DEPLOY_COMMIT` is supplied and the target commit is not li
 
 For flows that staging can reasonably mirror, use staging as the primary deployed diagnostic environment before production. Production smoke must not be used to discover issues that staging E2E can cover. If a fresh staging result cannot pass checkout-start, pre-payment save, no-card/fake-paid transition, access-link resolution, and Admin/Ops visibility, classify the staging failure and block production smoke until targeted fixes pass.
 
+### Shared Access-Link Save Failures
+
+If Email save and LINE bind/save both fail in the same checkout flow, investigate the shared access-link save/contact/linkage layer first.
+
+Use Email save as the minimal automated reproduction before debugging LINE-specific LIFF, mobile browser, or provider behavior. Email save must not require LINE login, real channel delivery, paid entitlement, or owner manual action before it can prove the shared pre-payment contact path.
+
+For Module 01, the minimum automated path before another production attempt is:
+
+- fresh tracked fixture result
+- checkout-start save gate visible
+- Email save succeeds pre-payment
+- checkout unlocks from saved Email
+- no-card/fake-paid transition consumes saved contact
+- access-link readiness and `/r` resolution are verified
+- Admin/Ops summary is sanitized
+
 ### Module 01 Production Preflight
 
 Run when production gate, env mirror, Vercel, fail-closed behavior, or production smoke readiness changes.

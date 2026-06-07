@@ -61,6 +61,7 @@ describe("operator fake paid success route", () => {
       paidAccessToken: "pa_test-token",
       paidAccessTokenReturned: true,
       unlockPath: "/m/ambiguous-temperature/unlock/pa_test-token",
+      recoveryContactId: null,
       queueTrigger: {
         ok: true,
         category: "enqueued",
@@ -109,6 +110,7 @@ describe("operator fake paid success route", () => {
       paidAccessToken: "pa_test-token",
       paidAccessTokenReturned: true,
       unlockPath: "/m/ambiguous-temperature/unlock/pa_test-token",
+      recoveryContactIdPresent: false,
       queueTrigger: {
         ok: true,
         category: "enqueued",
@@ -120,6 +122,55 @@ describe("operator fake paid success route", () => {
       moduleSlug: "ambiguous-temperature",
       resultId: "result-1",
       idempotencyKey: undefined,
+      recoveryEmail: undefined,
+    });
+  });
+
+  it("accepts an optional recovery Email for mock paid access-link automation without exposing it", async () => {
+    const recoveryEmail = ["module01-qa", "example.invalid"].join("@");
+    mockCreateOperatorFakePaidSuccess.mockResolvedValueOnce({
+      ok: true,
+      moduleSlug: "ambiguous-temperature",
+      resultId: "result-1",
+      paymentIntent: { id: "payment-1", status: "paid" },
+      paymentIntentCreated: false,
+      entitlement: { id: "entitlement-1", status: "active" },
+      entitlementCreated: false,
+      generationJob: { id: "job-1", status: "queued" },
+      generationJobCreated: false,
+      accessState: "pending",
+      paidAccessToken: "pa_test-token",
+      paidAccessTokenReturned: true,
+      unlockPath: "/m/ambiguous-temperature/unlock/pa_test-token",
+      recoveryContactId: "contact-1",
+      queueTrigger: {
+        ok: true,
+        category: "enqueued",
+        provider: "vercel_queue",
+      },
+    });
+
+    const response = await POST(request({
+      secret: "operator-secret",
+      body: {
+        moduleSlug: "ambiguous-temperature",
+        resultId: "result-1",
+        recoveryEmail,
+      },
+    }));
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toMatchObject({
+      ok: true,
+      recoveryContactIdPresent: true,
+    });
+    expect(JSON.stringify(data)).not.toContain(recoveryEmail);
+    expect(mockCreateOperatorFakePaidSuccess).toHaveBeenCalledWith({
+      moduleSlug: "ambiguous-temperature",
+      resultId: "result-1",
+      idempotencyKey: undefined,
+      recoveryEmail,
     });
   });
 

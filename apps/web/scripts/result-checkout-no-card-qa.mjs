@@ -6,7 +6,9 @@ import path from "node:path";
 import { loadLocalEnv } from "./lib/load-local-env.mjs";
 import {
   assertSafeQaBaseUrl,
+  containsTokenLikeValue,
   extractCheckoutHref,
+  extractEmailRecoveryForm,
   normalizeBaseUrl,
   redactRouteShape,
   sanitizeRecord,
@@ -36,6 +38,7 @@ const internalJobSecret = process.env.INTERNAL_JOB_SECRET?.trim() ?? "";
 const inputSuffix =
   process.env.QA_NO_CARD_INPUT_SUFFIX?.trim() ||
   `no-card-result-checkout-${new Date().toISOString()}-${crypto.randomUUID()}`;
+const recoveryEmail = process.env.QA_NO_CARD_RECOVERY_EMAIL?.trim() || ["module01-qa", "example.invalid"].join("@");
 
 function record(step, outcome, details = {}) {
   console.log(JSON.stringify(sanitizeRecord({ step, outcome, ...details })));
@@ -163,6 +166,7 @@ async function verifyCheckoutStart(checkoutHref) {
   const response = await fetch(checkoutUrl);
   const html = await response.text();
   const summary = summarizeCheckoutStartHtml(html);
+  const emailRecoveryForm = extractEmailRecoveryForm(html, MODULE_SLUG);
   const providerFieldsHidden = Object.values(summary.providerFieldNamesPresent).every(
     (present) => !present,
   );
@@ -187,6 +191,8 @@ async function verifyCheckoutStart(checkoutHref) {
     summary.submitButtonPresent &&
     !summary.sandboxCcoreTargetPresent &&
     summary.formMethodPostPresent &&
+    Boolean(emailRecoveryForm.action) &&
+    emailRecoveryForm.paymentIntentIdPresent &&
     providerFieldsHidden &&
     summary.forbiddenCopyFound.length === 0 &&
     summary.secretNameLeaksFound.length === 0;
@@ -194,12 +200,82 @@ async function verifyCheckoutStart(checkoutHref) {
   record("checkout_start_page", pass ? "pass" : "fail", {
     httpStatus: response.status,
     checkoutHrefShape: redactRouteShape(checkoutUrl.pathname),
+    emailRecoveryActionShape: emailRecoveryForm.actionShape,
+    emailRecoveryPaymentIntentIdPresent: emailRecoveryForm.paymentIntentIdPresent,
     ...summary,
     providerFieldValuesPrinted: false,
   });
 
   if (!pass) {
     throw new Error("checkout_start_page_failed");
+  }
+  return {
+    checkoutUrl,
+    emailRecoveryForm,
+  };
+}
+
+async function saveEmailRecoveryContact(input) {
+  const saveUrl = new URL(input.emailRecoveryForm.action, baseUrl);
+  const body = new URLSearchParams();
+
+  body.set("email", recoveryEmail);
+  body.set("paymentIntentId", input.emailRecoveryForm.paymentIntentId);
+
+  const response = await fetch(saveUrl, {
+    method: "POST",
+    body,
+    redirect: "manual",
+  });
+  const location = response.headers.get("location");
+  const locationUrl = location ? new URL(location, baseUrl) : null;
+  const pass =
+    response.status === 303 &&
+    locationUrl?.searchParams.get("recovery") === "email_saved" &&
+    !containsTokenLikeValue(location ?? "");
+
+  record("email_recovery_save", pass ? "pass" : "fail", {
+    httpStatus: response.status,
+    recovery: locationUrl?.searchParams.get("recovery") ?? null,
+    recoveryError: locationUrl?.searchParams.get("recoveryError") ?? null,
+    redirectPathShape: redactRouteShape(locationUrl?.pathname ?? null),
+    emailPrinted: false,
+    paymentIntentIdPrinted: false,
+  });
+
+  if (!pass) {
+    throw new Error("email_recovery_save_failed");
+  }
+
+  return locationUrl;
+}
+
+async function verifyCheckoutUnlockedAfterEmailSave(locationUrl) {
+  const response = await fetch(locationUrl);
+  const html = await response.text();
+  const summary = summarizeCheckoutStartHtml(html);
+  const providerFieldsPresent = Object.values(summary.providerFieldNamesPresent).every(Boolean);
+  const pass =
+    response.status === 200 &&
+    html.includes("已保存查看連結") &&
+    html.includes("繼續付款") &&
+    providerFieldsPresent &&
+    summary.forbiddenCopyFound.length === 0 &&
+    summary.secretNameLeaksFound.length === 0;
+
+  record("checkout_unlocked_after_email_save", pass ? "pass" : "fail", {
+    httpStatus: response.status,
+    redirectPathShape: redactRouteShape(locationUrl.pathname),
+    savedConfirmationPresent: html.includes("已保存查看連結"),
+    continuePaymentPresent: html.includes("繼續付款"),
+    providerFieldsPresent,
+    providerFieldValuesPrinted: false,
+    forbiddenCopyFound: summary.forbiddenCopyFound,
+    secretNameLeaksFound: summary.secretNameLeaksFound,
+  });
+
+  if (!pass) {
+    throw new Error("checkout_unlocked_after_email_save_failed");
   }
 }
 
@@ -214,6 +290,7 @@ async function fakePaidSuccess(resultId) {
       moduleSlug: MODULE_SLUG,
       resultId,
       idempotencyKey: `no-card-result-checkout-${crypto.randomUUID()}`,
+      recoveryEmail,
     }),
   });
   const body = result.json ?? {};
@@ -239,6 +316,8 @@ async function fakePaidSuccess(resultId) {
     paidAccessTokenPresent: Boolean(body.paidAccessToken),
     unlockPathPresent: Boolean(body.unlockPath),
     unlockPathShape: redactRouteShape(body.unlockPath),
+    recoveryContactIdPresent: Boolean(body.recoveryContactIdPresent),
+    recoveryEmailPrinted: false,
     queueTriggerOk: body.queueTrigger?.ok ?? null,
     queueTriggerCategory: body.queueTrigger?.category ?? null,
     queueTriggerProvider: body.queueTrigger?.provider ?? null,
@@ -413,7 +492,9 @@ async function main() {
 
   const resultId = await createSourceResult();
   const checkoutHref = await verifyResultPage(resultId);
-  await verifyCheckoutStart(checkoutHref);
+  const checkoutStart = await verifyCheckoutStart(checkoutHref);
+  const emailSavedLocation = await saveEmailRecoveryContact(checkoutStart);
+  await verifyCheckoutUnlockedAfterEmailSave(emailSavedLocation);
   const fakePaid = await fakePaidSuccess(resultId);
 
   if (processorMode === "manual") {
@@ -443,6 +524,8 @@ async function main() {
     browserOperatorSecretExposure: false,
     resultPageCheckoutPathCovered: true,
     checkoutStartCovered: true,
+    emailRecoverySaveCovered: true,
+    checkoutUnlockAfterEmailSaveCovered: true,
     downstreamFakePaidCovered: true,
     paidStatusCompleted: completed,
     paidAccessRenderPassed: accessRendered,
