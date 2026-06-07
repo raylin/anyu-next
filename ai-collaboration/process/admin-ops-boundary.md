@@ -25,6 +25,7 @@ Runtime config operations also use Admin API through `pnpm ops`:
 pnpm ops config registry --env production
 pnpm ops config list --env production
 pnpm ops config get --env production payment.window.enabled --module ai-temperature
+pnpm ops config get --env production payment.global.disabled --global
 pnpm ops config set --env production payment.window.enabled true --module ai-temperature --reason "controlled production smoke"
 pnpm ops config set --env production payment.window.enabled false --module ai-temperature --reason "smoke complete"
 pnpm ops config history --env production payment.window.enabled --module ai-temperature

@@ -109,7 +109,7 @@ For production runtime-window tasks, also report:
 - runtimeWindowAction
 - runtimeWindowStateCategory
 - aliasGuardStatus
-- runtime flags planned or changed, names only
+- runtime config keys planned or changed, names only
 - whether runtime was enabled
 - whether provider credentials/env values were touched
 

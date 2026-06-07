@@ -60,6 +60,7 @@ Before runtime enablement planning, run:
 ```bash
 cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status
 cd apps/web && corepack pnpm run qa:production:runtime-window -- --action plan-enable
+cd apps/web && corepack pnpm run qa:module01:smoke-fixture -- --json
 ```
 
 Normal controlled smoke open/close uses scoped runtime config:
@@ -68,6 +69,13 @@ Normal controlled smoke open/close uses scoped runtime config:
 pnpm ops config set --env production payment.window.enabled true --module ai-temperature --reason "controlled production smoke"
 pnpm ops config set --env production payment.window.enabled false --module ai-temperature --reason "smoke complete"
 ```
+
+Do not use:
+
+- Vercel env toggles
+- redeploys for runtime open/close
+- `ENABLE_PAYMENT_RUNTIME`
+- `ENABLE_NEWEBPAY_CHECKOUT`
 
 The runtime-window helper must:
 
@@ -88,6 +96,61 @@ Active Scoped Runtime Config v0 payment controls:
 - `payment.global.disabled`
 
 Reserved delivery config names are not live sender controls in v0 and must not be used as proof that Email or LINE delivery is enabled/disabled.
+
+## Controlled Smoke Ops Runbook
+
+Before opening:
+
+```bash
+cd apps/web && corepack pnpm run qa:module01:local
+cd apps/web && corepack pnpm run qa:module01:staging
+cd apps/web && corepack pnpm run qa:module01:production-preflight
+cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status
+cd apps/web && corepack pnpm run qa:module01:smoke-fixture -- --json
+```
+
+Open:
+
+```bash
+pnpm ops config set --env production payment.window.enabled true --module ai-temperature --reason "controlled production smoke"
+cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status
+```
+
+If LINE bind fails before payment:
+
+```bash
+pnpm ops lookup-line-bind --env production --result-id <resultId>
+pnpm ops lookup-line-bind --env production --result-id <resultId> --json
+```
+
+After payment/result completion:
+
+```bash
+pnpm ops lookup-result --env production --id <resultId>
+pnpm ops lookup-result --env production --id <resultId> --json
+```
+
+Close, unless the owner explicitly chooses soft availability:
+
+```bash
+pnpm ops config set --env production payment.window.enabled false --module ai-temperature --reason "smoke complete"
+cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status
+cd apps/web && corepack pnpm run qa:module01:production-preflight
+```
+
+Final close is mandatory for controlled smoke unless the owner explicitly chooses soft availability in the moment.
+
+Do not generate a NewebPay provider form, ask for owner payment, or ask for Email/LINE manual checks until the pre-open gates and runtime-window status pass.
+
+If any open/close operation fails, stop and classify the first failure as `runtime_config_open_failed` or `runtime_config_close_failed`.
+
+Runtime config open/close is intentionally independent of Vercel deployment. A redeploy is not required for normal smoke window open/close.
+
+Operator/fake-paid routes must remain fail-closed during and after the smoke window.
+
+No ads or non-card payment methods are enabled by runtime config.
+
+Use tracked fixture input only; do not dynamically invent analyze request bodies during the runtime window.
 
 Do not enable:
 

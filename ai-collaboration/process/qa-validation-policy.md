@@ -97,7 +97,18 @@ cd apps/web && corepack pnpm run qa:production:runtime-window -- --action plan-e
 cd apps/web && corepack pnpm run qa:production:runtime-window -- --action plan-disable
 ```
 
-The helper is read-only/status-and-plan in v0. It must not enable runtime unless a future task explicitly implements guarded execute actions. It reports production fail-closed state, canonical project status, alias guard status, and runtime flag plan without printing env values.
+The helper reports production fail-closed state, controlled-window state, canonical project status, alias guard status, and scoped runtime config state without printing env values.
+
+Runtime open/close for controlled smoke is performed through Admin API / `pnpm ops config`, not Vercel env changes:
+
+```bash
+pnpm ops config set --env production payment.window.enabled true --module ai-temperature --reason "controlled production smoke"
+pnpm ops config set --env production payment.window.enabled false --module ai-temperature --reason "smoke complete"
+```
+
+No redeploy is required for normal scoped runtime config open/close.
+
+`qa:production:runtime-window -- --action status` must be run before open and after close.
 
 ## Structured Waits
 

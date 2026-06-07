@@ -260,7 +260,7 @@ describe("production runtime-window helper", () => {
   });
 
 
-  it("classifies fail-closed, runtime-enabled, project, alias, and preflight states", () => {
+  it("classifies fail-closed, runtime-config-open, project, alias, and preflight states", () => {
     const routeStatus = {
       publicPagesStatus: { ok: true },
       checkoutRouteStatus: { failClosed: true },
@@ -285,7 +285,29 @@ describe("production runtime-window helper", () => {
           checkoutRouteStatus: { failClosed: false },
         },
       }),
-    ).toBe("runtime_enabled_controlled_window");
+    ).toBe("runtime_config_open");
+    expect(
+      classifyRuntimeWindowState({
+        ...base,
+        preflight: { ok: false, readiness: "blocked_production_not_fail_closed" },
+        runtimeConfig: { ok: true, paymentGlobalDisabled: false, paymentWindowEnabled: true },
+        routeStatus: {
+          ...routeStatus,
+          checkoutRouteStatus: { failClosed: false },
+        },
+      }),
+    ).toBe("runtime_config_open");
+    expect(
+      classifyRuntimeWindowState({
+        ...base,
+        preflight: { ok: false, readiness: "blocked_production_not_fail_closed" },
+        runtimeConfig: { ok: true, paymentGlobalDisabled: false, paymentWindowEnabled: true },
+        routeStatus: {
+          ...routeStatus,
+          fakePaidRouteStatus: { failClosed: false },
+        },
+      }),
+    ).toBe("unsafe_runtime_enabled");
     expect(classifyRuntimeWindowState({ ...base, projectLinking: { ok: false } })).toBe(
       "project_mismatch",
     );

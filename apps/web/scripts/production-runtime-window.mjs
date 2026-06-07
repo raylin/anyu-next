@@ -431,10 +431,6 @@ function classifyRuntimeWindowState(input) {
     return input.aliasGuard.status === "project_mismatch" ? "project_mismatch" : "alias_mismatch";
   }
 
-  if (input.preflight?.ok === false) {
-    return "preflight_blocked";
-  }
-
   if (!input.runtimeConfig?.ok) {
     return "env_mirror_blocked";
   }
@@ -444,11 +440,19 @@ function classifyRuntimeWindowState(input) {
   }
 
   if (input.runtimeConfig.paymentWindowEnabled === true) {
-    if (input.routeStatus.checkoutRouteStatus?.failClosed === false) {
-      return "runtime_enabled_controlled_window";
+    if (
+      input.routeStatus.publicPagesStatus?.ok &&
+      input.routeStatus.fakePaidRouteStatus?.failClosed &&
+      input.routeStatus.operatorRouteStatus?.failClosed
+    ) {
+      return "runtime_config_open";
     }
 
     return "unsafe_runtime_enabled";
+  }
+
+  if (input.preflight?.ok === false) {
+    return "preflight_blocked";
   }
 
   if (
@@ -602,7 +606,7 @@ async function runProductionRuntimeWindow(argv = process.argv.slice(2), env = pr
       : stateCategory;
   const ok =
     options.action === "status"
-      ? stateCategory === "fail_closed_ready"
+      ? stateCategory === "fail_closed_ready" || stateCategory === "runtime_config_open"
       : options.action === "disable"
         ? executeResult?.ok === true && finalRuntimeConfig.paymentWindowEnabled === false
         : options.action === "enable"
@@ -660,6 +664,10 @@ async function runProductionRuntimeWindow(argv = process.argv.slice(2), env = pr
 function recommendNextAction(input) {
   if (input.aliasGuard?.blocker) {
     return "resolve_alias_guard_before_runtime_enablement";
+  }
+
+  if (input.stateCategory === "runtime_config_open") {
+    return "close_runtime_window_when_smoke_or_dry_run_completes";
   }
 
   if (input.preflight?.ok === false) {

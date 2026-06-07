@@ -11154,3 +11154,36 @@ Unresolved questions:
 - Optional staging Admin API/CLI checks remain partial unless run with explicit Preview `ADMIN_API_TOKEN` in process env.
 - No production payment, Email, or LINE occurred.
 - Next action: Production Smoke Runbook Update + Runtime Config Dry Run v0.
+
+## 2026-06-07 Production Smoke Runbook Update + Runtime Config Dry Run v0
+
+### Completed Changes
+
+- updated active production smoke runbook/process docs to open and close Module 01 payment runtime through scoped runtime config, not Vercel env toggles or redeploys
+- added explicit active-smoke commands for `pnpm ops config set --env production payment.window.enabled true|false --module ai-temperature`
+- preserved Admin API / `pnpm ops` as the ops boundary for runtime config, LINE bind diagnostics, and paid-result lookup
+- audited active references to `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT`; only obsolete/do-not-use process notes remain in searched active paths
+- performed the owner-approved production scoped runtime config dry run and restored final fail-closed state
+- fixed `qa:production:runtime-window -- --action status` to classify an intentionally open scoped-config window as `runtime_config_open` when public pages are OK and fake-paid/operator routes remain fail-closed
+
+### Validation
+
+- initial `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- initial `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+- scoped runtime config open dry run: pass; no result, provider form, payment, Email, or LINE event created.
+- scoped runtime config close dry run: pass; final `payment.window.enabled=false`.
+- final `qa:production:runtime-window -- --action status`: pass, `stateCategory=fail_closed_ready`.
+- final `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm lint`: pass.
+- targeted runtime-window tests: pass, 12 tests.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 97 files / 659 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+
+### Unresolved Questions
+
+- No runtime config dry-run blocker remains.
+- Production is fail-closed after the dry run.
+- No production payment, Email, LINE, Vercel env change, provider credential change, deployment, or secret exposure occurred.
+- Next action: Controlled Production Payment Smoke retry using scoped runtime config.
