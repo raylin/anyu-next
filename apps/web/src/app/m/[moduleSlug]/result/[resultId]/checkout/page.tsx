@@ -234,7 +234,8 @@ function RecoverySoftGate({
       action={`/api/modules/${encodeURIComponent(moduleSlug)}/result/${encodeURIComponent(
         resultId,
       )}/recovery/email`}
-      className="anyu-recovery-email-form"
+      className="anyu-recovery-email-form anyu-riso-save-option anyu-riso-save-option-email"
+      data-save-option="email"
     >
       <input type="hidden" name="paymentIntentId" value={paymentIntentId} />
       <label className="anyu-recovery-label" htmlFor="recovery-email">
@@ -251,7 +252,7 @@ function RecoverySoftGate({
           aria-describedby="recovery-email-help"
           required
         />
-        <Button type="submit">
+        <Button type="submit" className="anyu-riso-save-cta">
           {showLineOption ? "改用 Email 保存查看連結" : "用 Email 保存查看連結"}
         </Button>
       </div>
@@ -270,7 +271,11 @@ function RecoverySoftGate({
     </form>
   );
   const lineOption = showLineOption ? (
-    <div className="anyu-recovery-line-option" aria-label="LINE 查看連結選項">
+    <div
+      className="anyu-recovery-line-option anyu-riso-save-option anyu-riso-save-option-line"
+      aria-label="LINE 查看連結選項"
+      data-save-option="line"
+    >
       <div>
         <p className="anyu-recovery-label">建議用 LINE 保存查看連結</p>
         <p className="anyu-subtle-note">
@@ -283,7 +288,7 @@ function RecoverySoftGate({
         ) : null}
       </div>
       {lineBind.ok ? (
-        <Link href={lineBind.href} className="anyu-storefront-link">
+        <Link href={lineBind.href} className="anyu-button anyu-riso-save-cta">
           用 LINE 保存查看連結
         </Link>
       ) : (
@@ -293,7 +298,11 @@ function RecoverySoftGate({
   ) : null;
 
   return (
-    <div className="anyu-recovery-soft-gate" aria-labelledby="payment-recovery-title">
+    <div
+      className="anyu-recovery-soft-gate anyu-riso-save-gate"
+      aria-labelledby="payment-recovery-title"
+      data-riso-flow="checkout-save"
+    >
       <div className="anyu-recovery-soft-gate-header">
         <div>
           <p className="anyu-kicker t-label-dim">report access link</p>
@@ -301,7 +310,11 @@ function RecoverySoftGate({
             先保存查看連結
           </h2>
         </div>
-        {savedLabel ? <span className="anyu-recovery-saved-badge">{savedLabel}</span> : null}
+        {savedLabel ? (
+          <span className="anyu-recovery-saved-badge anyu-riso-status-badge">
+            {savedLabel}
+          </span>
+        ) : null}
       </div>
       <p className="anyu-copy">
         {showLineOption
@@ -315,11 +328,17 @@ function RecoverySoftGate({
       </div>
 
       {existingRecovery.hasAny || emailSaved || lineSaved ? (
-        <p className="anyu-recovery-confirmation" role="status">
+        <p
+          className="anyu-recovery-confirmation anyu-riso-status-box anyu-riso-status-box-success"
+          role="status"
+        >
           已保存查看連結。你可以繼續前往藍新安全付款頁。
         </p>
       ) : (
-        <div className="anyu-recovery-required-warning" role="status">
+        <div
+          className="anyu-recovery-required-warning anyu-riso-status-box anyu-riso-status-box-warning"
+          role="status"
+        >
           <p className="anyu-kicker t-label-dim">required before payment</p>
           <p>
             付款前請先保存查看連結。若未保存，關閉頁面或更換裝置後，可能需要聯絡客服協助查詢。

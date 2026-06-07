@@ -102,6 +102,8 @@ describe("NewebPay checkout-start page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("先保存查看連結");
+    expect(html).toContain('data-riso-flow="checkout-save"');
+    expect(html).toContain('data-save-option="email"');
     expect(html).toContain("請先用 Email 保存查看連結");
     expect(html).toContain("先保存查看連結");
     expect(html).toContain("Email 查看連結");
@@ -177,6 +179,10 @@ describe("NewebPay checkout-start page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("建議用 LINE 保存查看連結");
+    expect(html).toContain('data-riso-flow="checkout-save"');
+    expect(html).toContain('data-save-option="line"');
+    expect(html).toContain('data-save-option="email"');
+    expect(html).toContain("anyu-riso-save-cta");
     expect(html).toContain("用 LINE 保存查看連結");
     expect(html).toContain("改用 Email 保存查看連結");
     expect(html).toContain("/line/recovery/bind?rlb=rlb_");
@@ -205,6 +211,8 @@ describe("NewebPay checkout-start page", () => {
 
     expect(html).toContain("已保存到 Email");
     expect(html).toContain("已保存查看連結");
+    expect(html).toContain("anyu-riso-status-badge");
+    expect(html).toContain("anyu-riso-status-box-success");
     expect(html).toContain('action="https://ccore.newebpay.com/MPG/mpg_gateway"');
     expect(html).toContain('name="MerchantID"');
     expect(html).toContain('name="TradeInfo"');
@@ -234,6 +242,8 @@ describe("NewebPay checkout-start page", () => {
     const html = renderToStaticMarkup(page);
 
     expect(html).toContain("LINE 保存沒有完成");
+    expect(html).toContain('data-save-option="line"');
+    expect(html).toContain("anyu-riso-save-option-line");
     expect(html).toContain("重試 LINE");
     expect(html).toContain("改用 Email 保存查看連結");
     expect(html).toContain("請先完成 LINE 或 Email 查看連結保存，付款按鈕就會開啟");

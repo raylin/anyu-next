@@ -37,19 +37,19 @@ function checkoutHarnessHtml(state: CheckoutHarnessState) {
           <h1>曖昧溫度計完整分析</h1>
           <p>NT$49 一次性付款</p>
           <p>付款完成後，完整報告會在 ANYU 網頁中生成。</p>
-          <section aria-label="access-link-gate">
+          <section aria-label="access-link-gate" data-riso-flow="checkout-save">
             <h2>先保存查看連結</h2>
             ${
               desktopOnly
                 ? `
-                  <form aria-label="email-save">
+                  <form aria-label="email-save" data-save-option="email">
                     <h3>Email 查看連結</h3>
                     <p>Email 只會收到 /r/ 查看連結，不包含報告內容。</p>
                     <button type="button">用 Email 保存查看連結</button>
                   </form>
                 `
                 : `
-                  <section aria-label="line-save">
+                  <section aria-label="line-save" data-save-option="line">
                     <h3>建議用 LINE 保存查看連結</h3>
                     <p>LINE 只會收到 /r/ 查看連結，不包含報告內容。</p>
                     <button type="button">${
@@ -61,7 +61,7 @@ function checkoutHarnessHtml(state: CheckoutHarnessState) {
                         : ""
                     }
                   </section>
-                  <form aria-label="email-fallback">
+                  <form aria-label="email-fallback" data-save-option="email">
                     <h3>Email 備用查看連結</h3>
                     <p>改用 Email 保存查看連結。</p>
                     <button type="button">${

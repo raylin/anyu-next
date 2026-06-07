@@ -12073,3 +12073,36 @@ Unresolved questions:
 - Production untouched: no runtime open, production payment, Email/LINE send, Vercel env change, DB mutation, or provider logic change.
 - Full visual polish is intentionally deferred.
 - Recommended next task: owner visual review of Module 01 flow, then Module 01 Riso Flow Surface Polish v0 or the next prioritized theme/product slice.
+
+## 2026-06-07 Module 01 Riso Flow Surface Polish v0
+
+### Completed Changes
+
+- polished the first set of Module 01 owned Riso flow surfaces without changing payment/access-link behavior.
+- updated LINE recovery bind loading/success/fallback states to use a Module-shell-contained Riso flow card, shared status boxes, and matching return CTA.
+- removed nested generic shell markup from the LINE bind bridge.
+- aligned checkout-start LINE and Email save options around shared Riso save-card, CTA, badge, and status classes.
+- added stable markers:
+  - `data-riso-flow="line-bind"`
+  - `data-riso-flow="checkout-save"`
+  - `data-save-option="line"`
+  - `data-save-option="email"`
+- updated server-render and Playwright tests to assert the new visual contract while preserving mandatory save gating.
+
+### Validation
+
+- `cd apps/web && corepack pnpm lint`: pass.
+- targeted LINE bind / checkout-start tests: pass, 2 files / 17 tests.
+- `cd apps/web && corepack pnpm test`: pass, 104 files / 713 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests after installing the missing repo-pinned Chromium browser cache.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:result-checkout:no-card`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, production DB mutation, or provider logic change.
+- Owner visual review is still needed for spacing, accent strength, texture density, and remaining Module 01 flow pages.
+- Recommended next task: owner visual review on staging, then decide between more Riso visual polish, CoreShell migration, or Repeated / Concurrency Paid-Generation Benchmark v0.

@@ -237,8 +237,11 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
   }, [context]);
 
   return (
-    <main className="anyu-shell">
-      <section className="anyu-result-stack">
+    <section
+      className="anyu-line-bind-flow anyu-result-stack"
+      data-riso-flow="line-bind"
+      data-riso-flow-state={state}
+    >
         <div className="anyu-result-topbar">
           <Link href="/m/ambiguous-temperature" className="anyu-back-link">
             ← 回到測驗
@@ -246,7 +249,7 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
           <Wordmark showMark />
         </div>
 
-        <Card>
+        <Card className="anyu-riso-flow-card anyu-line-bind-card">
           <p className="anyu-kicker">LINE access link</p>
           <h1 className="anyu-section-title">用 LINE 保存查看連結</h1>
           {diagnosticCategory ? (
@@ -264,28 +267,40 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
           </p>
 
           {state === "loading" ? (
-            <p className="anyu-status-message" role="status">
+            <p
+              className="anyu-status-message anyu-riso-status-box anyu-riso-status-box-pending"
+              role="status"
+            >
               正在確認 LINE 身分…
             </p>
           ) : null}
 
           {state === "success" ? (
-            <p className="anyu-recovery-confirmation" role="status">
+            <p
+              className="anyu-recovery-confirmation anyu-riso-status-box anyu-riso-status-box-success"
+              role="status"
+            >
               LINE 保存成功。正在回到原本的報告頁。
             </p>
           ) : null}
 
           {state === "fallback" ? (
-            <div className="anyu-contact-code-box">
+            <div className="anyu-contact-code-box anyu-riso-status-box anyu-riso-status-box-warning">
               <p className="anyu-subtle-note">
                 請在 LINE 中開啟此頁，或回到原頁改用 Email 保存。LINE 綁定失敗也不影響付款或查看報告。
               </p>
               {returnPath ? (
-                <Link href={returnPath} className="anyu-button anyu-button-block">
+                <Link
+                  href={returnPath}
+                  className="anyu-button anyu-button-block anyu-riso-flow-cta"
+                >
                   回到原本頁面
                 </Link>
               ) : (
-                <Link href="/m/ambiguous-temperature" className="anyu-button anyu-button-block">
+                <Link
+                  href="/m/ambiguous-temperature"
+                  className="anyu-button anyu-button-block anyu-riso-flow-cta"
+                >
                   回到曖昧溫度計
                 </Link>
               )}
@@ -295,7 +310,7 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
           {state === "success" && returnPath ? (
             <Button
               type="button"
-              className="anyu-button-block"
+              className="anyu-button-block anyu-riso-flow-cta"
               onClick={() => {
                 window.location.assign(returnPath);
               }}
@@ -304,8 +319,7 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
             </Button>
           ) : null}
         </Card>
-      </section>
-    </main>
+    </section>
   );
 }
 

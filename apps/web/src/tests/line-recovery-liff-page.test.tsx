@@ -37,6 +37,9 @@ describe("LINE recovery LIFF page", () => {
     );
 
     expect(html).toContain("用 LINE 保存查看連結");
+    expect(html).toContain('data-riso-flow="line-bind"');
+    expect(html).toContain('data-riso-flow-state="idle"');
+    expect(html).toContain("anyu-riso-flow-card");
     expect(html).toContain("從 LINE 回到 ANYU 查看完整報告");
     expect(html).toContain("完整報告仍以網頁查看為準");
     expect(html).not.toContain("LINE 領取完整分析");
@@ -55,6 +58,9 @@ describe("LINE recovery LIFF page", () => {
     );
 
     expect(html).toContain("缺少 LINE 保存狀態");
+    expect(html).toContain('data-riso-flow="line-bind"');
+    expect(html).toContain('data-riso-flow-state="fallback"');
+    expect(html).toContain("anyu-riso-status-box-warning");
     expect(html).toContain("data-line-diagnostic-category=\"liff_state_missing\"");
     expect(html).toContain("請在 LINE 中開啟此頁，或回到原頁改用 Email 保存");
     expect(html).toContain("LINE 綁定失敗也不影響付款或查看報告");
