@@ -11470,3 +11470,25 @@ Unresolved questions:
 - No runtime/product code changed.
 - No production runtime, payment, real Email, real LINE, Vercel env change, DB mutation, migration, or secret exposure occurred.
 - Current mainline remains: finish pre-payment Email save / mock paid / access-link automation review; run staging rebaseline; use production smoke only as final acceptance; then QA Foundation Follow-up v2; then Module Theme Architecture Implementation Plan.
+
+## 2026-06-07 Staging Pre-Payment Save + Access-Link E2E Rebaseline v1
+
+### Completed Changes
+
+- verified Preview(staging) freshness for target commit `e7a9165434824dc2b9fb61b1c1effa1fd92a048c`
+- stopped before result creation because Admin/Ops runtime config reads failed with `admin_token_missing`
+- did not bypass Admin/Ops with direct DB
+- did not run Email save, LINE bind, no-card/fake-paid, `/r` resolution, or full staging gate
+
+### Validation
+
+- `qa:deploy:freshness -- --env staging --expected-commit e7a9165434824dc2b9fb61b1c1effa1fd92a048c`: pass, deployed start/end `e7a916543482`, `mixedDeploymentDetected=false`.
+- `corepack pnpm ops config get --env staging payment.window.enabled --module ai-temperature`: blocked, `admin_token_missing`.
+- `corepack pnpm ops config get --env staging payment.global.disabled --global`: blocked, `admin_token_missing`.
+
+### Unresolved Questions
+
+- First failure category: `staging_runtime_config_failed`.
+- Staging runtime config values were not verified because `ADMIN_API_TOKEN` was not present in the process environment.
+- No production runtime, payment, real Email, real LINE, Vercel env change, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
+- Next action: re-run the staging rebaseline with explicit `ADMIN_API_TOKEN` available to `pnpm ops`.
