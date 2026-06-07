@@ -11445,3 +11445,28 @@ Unresolved questions:
 - First failure category: not applicable for this task.
 - No production runtime, payment, real Email, real LINE, Vercel env change, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
 - Next action: Staging Pre-Payment Save + Access-Link E2E Rebaseline v1, focused first on Email save + mock paid + `/r`, then LINE only after Email path is stable.
+
+## 2026-06-07 ANYU Operating Policy Consolidation v1
+
+### Completed Changes
+
+- consolidated ANYU operating policy into six top-level AGENTS.md principles:
+  quality before apparent progress; production is acceptance not diagnosis; structured target-correct validation; Admin/Ops and runtime config ownership; tests reduce manual standby; tech debt needs lifecycle
+- added explicit rule precedence:
+  safety/correctness over speed, owner mainline over Codex recommendations, safer interpretation on conflicts, no production diagnosis when staging/local can test, target/gate clarity required, cleanup must be included/deferred/asked
+- updated process docs to reference the top-level principles instead of repeating long overlapping rationale
+- updated handoff template with a shorter shared-policy block and guidance to repeat only 5-10 task-critical rules for high-risk work
+- clarified QA and production gate wording while preserving hard requirements for freshness, scoped runtime config, Admin/Ops, no ad hoc scripts, owner approval for real providers, and canonical reporting
+
+### Validation
+
+- docs presence check: pass.
+- dashboard HTML sanity: pass.
+- secret/private scan: pass.
+- `git diff --check`: pass.
+
+### Unresolved Questions
+
+- No runtime/product code changed.
+- No production runtime, payment, real Email, real LINE, Vercel env change, DB mutation, migration, or secret exposure occurred.
+- Current mainline remains: finish pre-payment Email save / mock paid / access-link automation review; run staging rebaseline; use production smoke only as final acceptance; then QA Foundation Follow-up v2; then Module Theme Architecture Implementation Plan.

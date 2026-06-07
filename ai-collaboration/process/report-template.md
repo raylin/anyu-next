@@ -1,6 +1,6 @@
 # ANYU Canonical Report Template
 
-Use this template for new Codex reports. Historical reports do not need broad rewriting.
+Use this template for new Codex reports. Historical reports do not need broad rewriting. Reports should cite task-relevant outcomes and validation evidence; do not re-copy every shared policy unless it is directly relevant to the result.
 
 ```markdown
 # <Task Name>

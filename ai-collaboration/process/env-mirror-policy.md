@@ -2,6 +2,8 @@
 
 Date: 2026-06-06
 
+This policy supports the AGENTS.md principle that runtime gates belong to scoped DB-backed runtime config, while env mirrors own static/server config and secrets.
+
 ## Source Model
 
 - `apps/web/.env.staging` is the local server env mirror/source-of-record for Vercel Preview(staging).

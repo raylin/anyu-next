@@ -496,8 +496,9 @@
       <div class="panel">
         <p><strong>Shared operating policy:</strong> future handoffs should reference root <code>AGENTS.md</code> plus detailed process docs under <code>ai-collaboration/process/</code> instead of repeating every common rule.</p>
         <p><strong>Process docs:</strong> <code>codex-operating-policy.md</code>, <code>qa-validation-policy.md</code>, <code>env-mirror-policy.md</code>, <code>admin-ops-boundary.md</code>, <code>production-gate-policy.md</code>, <code>report-template.md</code>, and <code>handoff-template.md</code> are the canonical reusable rules.</p>
+        <p><strong>Operating policy:</strong> ANYU policy is consolidated to six top-level principles in <code>AGENTS.md</code>: quality before apparent progress; production is acceptance not diagnosis; validation must be structured and target-correct; Admin/Ops and scoped runtime config own operational state; tests reduce manual standby; tech debt needs lifecycle.</p>
         <p><strong>Report / completion format:</strong> future reports must use the canonical report template, and final Codex paste-back must use the structured Codex Completion Summary schema. Gate reports must separate <code>commandExitCode</code>, <code>gateStatus</code>, required checks, optional checks, and deployed freshness fields when applicable.</p>
-        <p><strong>Handoff style:</strong> low-risk tasks can reference shared policies and include only task-specific validation. High-risk production/payment/env tasks must still repeat the 5-10 task-critical hard rules inline.</p>
+        <p><strong>Handoff style:</strong> future handoffs should be lighter: use the shared-policy block and include only task-specific validation for low-risk work. High-risk production/payment/env/LINE/Admin tasks must still repeat the 5-10 task-critical hard rules inline.</p>
         <p>SOP is created for owner/operator use. Public support channel: <a href="mailto:hello@anyu.tw">hello@anyu.tw</a>.</p>
         <p>Playbooks cover duplicate payment, paid but no result, result stuck processing, ReturnURL/access issue, generation failure, refund after delivered report, and suspicious/abusive request.</p>
         <p><strong>Owner confirmations still needed:</strong> refund response window and daily support monitoring cadence during launch week.</p>
@@ -574,6 +575,7 @@
       <h2>Next Recommended Task</h2>
       <div class="panel">
         <p><strong>Current recommendation:</strong> run Staging Pre-Payment Save + Access-Link E2E Rebaseline v1 against the pushed fix, focused first on Email save + mock paid + <code>/r</code>, before any production deploy/promotion or controlled payment smoke.</p>
+        <p><strong>Mainline:</strong> finish pre-payment Email save / mock paid / access-link automation review, then staging rebaseline, then production smoke only as final acceptance, then QA Foundation Follow-up v2, then Module Theme Architecture Implementation Plan.</p>
         <p>If fresh real channel evidence is needed later, use the guarded <code>qa:module01:staging:channels</code> runner behind explicit owner approval instead of folding real Email/LINE sends into the default suite.</p>
         <p>Production controlled smoke v3 should wait until staging Email save, LINE bind, no-card/fake-paid transition, access-link resolution, and Admin/Ops evidence are stable.</p>
       </div>
@@ -709,6 +711,7 @@
           <li><a href="../reports/2026-06-07-controlled-production-payment-smoke-scoped-runtime-config-v2.md">Controlled Production Payment Smoke Retry with Scoped Runtime Config v2</a></li>
           <li><a href="../reports/2026-06-07-staging-pre-payment-save-access-link-e2e-rebaseline-v0.md">Staging Pre-Payment Save + Access-Link E2E Rebaseline v0</a></li>
           <li><a href="../reports/2026-06-07-pre-payment-email-save-mock-paid-access-link-automation-v0.md">Pre-Payment Email Save + Mock Paid Access-Link Automation v0</a></li>
+          <li><a href="../reports/2026-06-07-anyu-operating-policy-consolidation-v1.md">ANYU Operating Policy Consolidation v1</a></li>
           <li><a href="../reports/2026-05-30-queue-trigger-integration-phase-4b1-vercel-queues-adapter-v0.md">Queue Trigger Integration Phase 4B.1</a></li>
           <li><a href="../reports/2026-05-30-targeted-paid-generation-processor-path-queue-consumer-v0.md">Targeted Paid Generation Processor Path</a></li>
           <li><a href="../reports/2026-05-30-vercel-queues-staging-smoke-phase-4b2-v0.md">Vercel Queues Staging Smoke / Phase 4B.2</a></li>

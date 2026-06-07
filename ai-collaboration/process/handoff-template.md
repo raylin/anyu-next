@@ -1,6 +1,23 @@
 # ANYU Handoff Template
 
-Use this template for future Codex tasks. Keep low-risk handoffs short by referencing shared policies. Repeat task-critical hard rules inline for high-risk work.
+Use this template for future Codex tasks. Keep low-risk handoffs short by referencing shared policies. Repeat only task-critical hard rules inline for high-risk work.
+
+## Standard Shared-Policy Block
+
+Use this block unless the task has a reason to name only a subset of policies:
+
+```markdown
+Shared policy:
+Follow `AGENTS.md` and `ai-collaboration/process/*.md`.
+
+This task-specific handoff only repeats high-risk rules that are directly relevant.
+```
+
+Guidance:
+
+- Low-risk docs/code tasks can reference shared policy and only list task-specific validation.
+- High-risk production/env/payment/LINE/Admin tasks must still repeat the 5-10 task-critical hard rules inline.
+- Do not copy every shared rule into every handoff.
 
 ```markdown
 # <Task Name> Handoff
@@ -17,25 +34,11 @@ Date: YYYY-MM-DD
 - <Relevant owner decision>
 - <Known blocker or prior result>
 
-## Shared Policy References
+## Shared Policy
 
-Follow:
+Follow `AGENTS.md` and `ai-collaboration/process/*.md`.
 
-- `AGENTS.md`
-- `ai-collaboration/process/codex-operating-policy.md`
-- `ai-collaboration/process/qa-validation-policy.md`
-
-If env/Vercel is involved, also follow:
-
-- `ai-collaboration/process/env-mirror-policy.md`
-
-If Admin/Ops is involved, also follow:
-
-- `ai-collaboration/process/admin-ops-boundary.md`
-
-If production is involved, also follow:
-
-- `ai-collaboration/process/production-gate-policy.md`
+This task-specific handoff only repeats high-risk rules that are directly relevant.
 
 ## Scope
 
@@ -128,7 +131,7 @@ Final response must use the canonical Codex Completion Summary schema below. Do 
 
 Use:
 
-> Follow `AGENTS.md` and `ai-collaboration/process/codex-operating-policy.md`.
+> Follow `AGENTS.md` and `ai-collaboration/process/*.md`.
 
 Then include only task-specific validation and hard constraints.
 

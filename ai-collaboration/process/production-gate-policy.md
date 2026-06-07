@@ -13,9 +13,28 @@ Default scoped runtime config:
 
 Operator/fake-paid routes must remain fail-closed in production.
 
+## Production Smoke Validity
+
+Production smoke requires:
+
+- local/staging evidence for flows staging can mirror
+- production deploy freshness and known target commit
+- scoped runtime config readiness or dry-run evidence
+- tracked fresh Module 01 fixture
+- Admin/Ops diagnostics available for result, access-link, and LINE bind failures
+- explicit owner approval for payment and real channel checks
+
+Production smoke is invalid if:
+
+- target deploy commit is stale, unknown, or mixed during the gate
+- staging/local could reasonably test the path but was skipped
+- `commandExitCode` is used as a substitute for `gateStatus`
+- runtime window open/close cannot be proven
+- fixture result creation returns `cacheHit=true`
+
 ## Preconditions Before Runtime Enablement
 
-Production smoke is final acceptance, not the primary diagnostic environment. If staging can reasonably mirror the flow being validated, Codex must establish current staging evidence first. For payment/access-link changes this means a fresh staging result, checkout-start, pre-payment save behavior, no-card/fake-paid transition, access-link resolution, and Admin/Ops summaries where applicable. If staging E2E cannot prove the path, classify the staging blocker and do not proceed to production runtime enablement.
+Production smoke is final acceptance, not the primary diagnostic environment. If staging can reasonably mirror the flow being validated, Codex must establish current staging evidence first. For payment/access-link changes this means a fresh staging result, checkout-start, pre-payment save behavior, no-card/fake-paid transition, access-link resolution, and Admin/Ops summaries where applicable.
 
 If a failure appears production-only, verify the target production deploy commit and whether the latest expected fix is live before drawing product conclusions. Then decide whether staging can mirror the same class of flow. If staging can mirror it, reproduce and fix through staging or local automation before another production smoke.
 

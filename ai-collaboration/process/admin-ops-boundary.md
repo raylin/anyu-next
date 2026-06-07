@@ -4,7 +4,7 @@ Date: 2026-06-06
 
 ## Principle
 
-Admin API is the single normal operations boundary.
+Admin API is the single normal operations boundary. This supports the AGENTS.md principle that operational state goes through Admin API + `pnpm ops`, not direct DB/Vercel/provider access.
 
 - Local CLI is an Admin API client.
 - Future Admin UI should also be an Admin API client.

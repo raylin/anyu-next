@@ -4,7 +4,7 @@ Date: 2026-06-06
 
 ## Purpose
 
-This document stores shared operating rules for Codex work on ANYU so future handoffs can reference common policy instead of repeating it in full.
+This document stores shared operating rules for Codex work on ANYU so future handoffs can reference common policy instead of repeating it in full. The six top-level principles and rule precedence in `AGENTS.md` are the highest-level operating source; this file provides execution detail.
 
 ## Role Split
 
@@ -20,11 +20,19 @@ This document stores shared operating rules for Codex work on ANYU so future han
 - Preserve existing owner decisions and current product source-of-truth.
 - Escalate uncertainty when guessing could affect production, env, payment, LINE, Email, data, security, or launch gates.
 
-## Instruction Conflict / Safe Interpretation
+## Rule Precedence / Safe Interpretation
 
-- If a task goal and process rule conflict, stop and ask or choose the safer interpretation.
-- Correctness and safety override speed.
-- Validating target deployment freshness overrides avoiding wait time.
+Follow the precedence in `AGENTS.md`:
+
+1. Safety and correctness override speed.
+2. Owner/PM mainline overrides Codex recommended next step.
+3. If task goal conflicts with process rule, stop and ask or choose the safer interpretation.
+4. Production smoke cannot diagnose a path staging/local can reasonably test.
+5. A validation result requires clear target environment, target commit, and gate status.
+6. Optional cleanup must be included, explicitly deferred, or raised to owner.
+
+Operational consequences:
+
 - “Do not poll with full suite” means use a lightweight freshness wait, not running a full suite against stale deployment.
 - A deployed gate is valid only if `targetDeployCommit` is live before substantive checks start.
 - A gate that starts on stale deployment and switches mid-run is invalid evidence: `mixed_deployment_gate_invalid`.
@@ -131,9 +139,9 @@ Historical reports do not need broad rewriting.
 
 ## Handoff Style
 
-Low/medium-risk tasks may say:
+Low/medium-risk tasks should use the shared-policy block from `handoff-template.md` and avoid copying every shared rule:
 
-> Follow `AGENTS.md` and `ai-collaboration/process/codex-operating-policy.md`.
+> Follow `AGENTS.md` and `ai-collaboration/process/*.md`.
 
 Then include only task-specific scope and validation.
 

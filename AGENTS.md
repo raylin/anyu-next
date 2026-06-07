@@ -2,6 +2,52 @@
 
 These rules apply to all Codex work in this repository. Detailed policies live in `ai-collaboration/process/`.
 
+## Top-Level Operating Principles
+
+### 1. Quality before apparent progress
+
+- Prioritize foundation quality, predictable validation, and maintainability over apparent progress.
+- If a task exposes foundation weakness, pause feature work or production smoke and fix the foundation instead of continuing trial-and-error.
+
+### 2. Production is acceptance, not diagnosis
+
+- Production smoke is final acceptance only.
+- If staging/local/mock can reasonably reproduce a payment, access-link, LINE, or Email path, validate there first.
+- Stale production deploy evidence is invalid.
+
+### 3. Validation must be structured and target-correct
+
+- Deployed gates must assert target commit freshness before substantive checks.
+- Report `commandExitCode`, `gateStatus`, `requiredChecksStatus`, `optionalChecksStatus`, and deploy commit fields separately.
+- Full suites must not be used as deployment polling.
+
+### 4. Ops boundary and runtime config ownership
+
+- Operational state should go through Admin API + `pnpm ops`.
+- Runtime gates use scoped DB-backed runtime config, not Vercel env toggles.
+- Env mirrors are for static/server config and secrets, not frequent runtime switching.
+
+### 5. Tests must reduce manual standby
+
+- Prefer fixtures, mock-flow, Playwright, route/integration tests, and Admin/Ops diagnostics.
+- Avoid dynamic scripts, temp-file polling, manual owner feedback, or real provider checks unless explicitly owner-approved and necessary.
+
+### 6. Tech debt must have lifecycle
+
+- Optional/deferred cleanup must be explicit.
+- If unsure whether to include cleanup, ask owner before implementation.
+- Safe directly-related tech debt may be fixed during the task.
+- Diagnostic tools and compatibility paths need lifecycle/cleanup plans.
+
+## Rule Precedence
+
+1. Safety and correctness override speed.
+2. Owner/PM mainline overrides Codex recommended next step.
+3. If task goal conflicts with process rule, stop and ask or choose the safer interpretation.
+4. Production smoke cannot be used to diagnose a path that staging/local can reasonably test.
+5. A validation result is not accepted unless its target environment, target commit, and gate status are clear.
+6. Optional cleanup is not vague: either include it, explicitly defer it, or ask owner.
+
 ## Role Split
 
 - Owner/ChatGPT holds PM direction, product baseline, task priority, and gate criteria.
@@ -63,7 +109,6 @@ Use `ai-collaboration/process/report-template.md` for reports and the canonical 
 ## Production Gate Rules
 
 - Production runtime stays disabled unless the task explicitly authorizes controlled smoke.
-- If task speed conflicts with gate validity or safety, choose the safe interpretation or ask before proceeding.
 - Before production runtime enablement, run and report:
   - `qa:module01:local`
   - `qa:module01:staging`

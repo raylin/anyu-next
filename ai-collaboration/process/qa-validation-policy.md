@@ -4,7 +4,17 @@ Date: 2026-06-06
 
 ## Purpose
 
-Use the lightest reliable validation tier for the changed surface. Do not run heavier staging or production gates by habit.
+Use the lightest reliable validation tier for the changed surface. This policy implements the AGENTS.md principles: quality before apparent progress, production as acceptance not diagnosis, structured target-correct validation, and tests that reduce manual standby.
+
+## Core Selection Rules
+
+- Start with targeted tests for changed helpers, routes, scripts, components, Admin/Ops, payment, access-link, LINE, or Email surfaces.
+- Use `qa:module01:mock-flow` and `qa:module01:ui` before staging when local/mocked coverage can prove the behavior.
+- Use `qa:module01:staging` for deployed integration or release-candidate evidence, not as default smoke.
+- Use production only for final acceptance after local/staging evidence when the path can be mirrored.
+- Real Email, LINE, and payment require explicit owner approval.
+- Do not use ad hoc heredoc scripts, random temp-file polling, or repeated full-suite polling.
+- If Email and LINE save both fail, inspect shared access-link save/contact logic first and use Email as the minimal automated reproduction.
 
 ## Validation Tiers
 
@@ -75,13 +85,11 @@ cd apps/web && MODULE01_EXPECTED_DEPLOY_COMMIT=<sha> corepack pnpm run qa:module
 
 If `MODULE01_EXPECTED_DEPLOY_COMMIT` is supplied and the target commit is not live, `qa:module01:staging` must block before access-link, no-card, Admin API, or Admin CLI checks. Do not use the full staging gate as a deploy polling mechanism.
 
-For flows that staging can reasonably mirror, use staging as the primary deployed diagnostic environment before production. Production smoke must not be used to discover issues that staging E2E can cover. If a fresh staging result cannot pass checkout-start, pre-payment save, no-card/fake-paid transition, access-link resolution, and Admin/Ops visibility, classify the staging failure and block production smoke until targeted fixes pass.
+For flows that staging can reasonably mirror, use staging as the deployed diagnostic environment before production. If a fresh staging result cannot pass checkout-start, pre-payment save, no-card/fake-paid transition, access-link resolution, and Admin/Ops visibility, classify the staging failure and block production smoke until targeted fixes pass.
 
 ### Shared Access-Link Save Failures
 
-If Email save and LINE bind/save both fail in the same checkout flow, investigate the shared access-link save/contact/linkage layer first.
-
-Use Email save as the minimal automated reproduction before debugging LINE-specific LIFF, mobile browser, or provider behavior. Email save must not require LINE login, real channel delivery, paid entitlement, or owner manual action before it can prove the shared pre-payment contact path.
+If Email save and LINE bind/save both fail in the same checkout flow, investigate the shared access-link save/contact/linkage layer first. Use Email save as the minimal automated reproduction before debugging LINE-specific LIFF, mobile browser, or provider behavior.
 
 For Module 01, the minimum automated path before another production attempt is:
 
