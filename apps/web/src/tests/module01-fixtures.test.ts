@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
+import { buildAnalyzeCacheKey } from "@/lib/ai/result-cache";
 import {
   getVisibleAnalyzeLength,
   MIN_ANALYZE_LENGTH,
@@ -9,6 +10,8 @@ import {
 import {
   createModule01AdminPartialLineBindSummaryFixture,
   createModule01AdminReadySummaryFixture,
+  createFreshModule01SmokeAnalyzeRequest,
+  createModule01SmokeRunId,
   createValidModule01AnalyzeRequest,
   createValidModule01AnalyzeText,
   MODULE01_CHECKOUT_HARNESS_STATES,
@@ -45,6 +48,70 @@ describe("Module 01 shared fixtures", () => {
       expect(result.userContextProvided).toBe(true);
       expect(result.userContextFieldCount).toBe(4);
     }
+  });
+
+  it("creates fresh smoke requests that remain valid and change cache-relevant text", () => {
+    const first = createFreshModule01SmokeAnalyzeRequest({
+      smokeRunId: "module01-smoke-20260607T090000Z-1234abcd",
+    });
+    const second = createFreshModule01SmokeAnalyzeRequest({
+      smokeRunId: "module01-smoke-20260607T090001Z-5678abcd",
+    });
+
+    expect(first.smokeRunId).toBe("module01-smoke-20260607T090000Z-1234abcd");
+    expect(second.smokeRunId).toBe("module01-smoke-20260607T090001Z-5678abcd");
+    expect(first.text).not.toBe(second.text);
+    expect(first.anonymousSessionId).not.toBe(second.anonymousSessionId);
+    expect(first.text).toContain("【系統測試批次：module01-smoke-20260607T090000Z-1234abcd】");
+    expect(second.text).toContain("【系統測試批次：module01-smoke-20260607T090001Z-5678abcd】");
+
+    for (const request of [first, second]) {
+      const result = validateAnalyzeInput({
+        ...request,
+        allowedChips: aiTemperatureModule.chips,
+      });
+
+      expect(result.ok).toBe(true);
+      expect(JSON.stringify(request)).not.toMatch(/pa_|pcs_|pal_|\/r\/|@/iu);
+    }
+  });
+
+  it("proves smokeRunId changes the analysis cache key while anonymousSessionId alone is not assumed sufficient", () => {
+    const base = createValidModule01AnalyzeRequest({
+      anonymousSessionId: "module01-session-a",
+    });
+    const sameTextDifferentSession = createValidModule01AnalyzeRequest({
+      anonymousSessionId: "module01-session-b",
+    });
+    const fresh = createFreshModule01SmokeAnalyzeRequest({
+      smokeRunId: "module01-smoke-20260607T090002Z-90abcdef",
+    });
+    const cacheInput = {
+      moduleSlug: "ambiguous-temperature",
+      situation: base.situation,
+      userContext: base.userContext,
+      promptVersion: "product_result_prompt_v0.4",
+      schemaVersion: "product_result_schema_v2",
+      modelStrategy: "sonnet_default" as const,
+      provider: "anthropic" as const,
+      primaryModel: "claude-sonnet-4-20250514",
+    };
+    const env = { NODE_ENV: "test" } as NodeJS.ProcessEnv;
+    const baseKey = buildAnalyzeCacheKey({ ...cacheInput, redactedText: base.text }, env);
+    const sessionOnlyKey = buildAnalyzeCacheKey(
+      { ...cacheInput, redactedText: sameTextDifferentSession.text },
+      env,
+    );
+    const freshKey = buildAnalyzeCacheKey({ ...cacheInput, redactedText: fresh.text }, env);
+
+    expect(sessionOnlyKey?.cacheKeyHash).toBe(baseKey?.cacheKeyHash);
+    expect(freshKey?.cacheKeyHash).not.toBe(baseKey?.cacheKeyHash);
+  });
+
+  it("generates smokeRunIds with a stable non-private format", () => {
+    const smokeRunId = createModule01SmokeRunId();
+
+    expect(smokeRunId).toMatch(/^module01-smoke-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$/u);
   });
 
   it("creates safe smoke text variants without private or tokenized values", () => {

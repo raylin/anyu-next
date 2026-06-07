@@ -156,7 +156,9 @@ Use:
 cd apps/web && corepack pnpm run qa:module01:smoke-fixture
 ```
 
-The command writes sanitized `.qa` artifacts for the canonical valid analyze request. If this fixture is invalid or unavailable, stop before any runtime enablement and classify the issue as `production_smoke_fixture_unprepared`.
+The command writes sanitized `.qa` artifacts for the canonical valid analyze request. For production smoke prep, the default artifact must include a controlled fresh dimension and the summary must report `smokeRunIdPresent=true`, `freshDimensionPresent=true`, and `expectedFreshResult=true`. If this fixture is invalid, unavailable, or not fresh-capable, stop before any runtime enablement and classify the issue as `production_smoke_fixture_unprepared`.
+
+Production result creation must assert `cacheHit=false`. If `cacheHit=true`, stop with `result_creation_failed / tracked_fixture_cache_hit_reused_previous_result`; do not continue with the reused result and do not invent another request body.
 
 ## Real Provider Checks
 

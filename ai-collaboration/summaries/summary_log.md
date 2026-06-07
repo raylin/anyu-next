@@ -11314,3 +11314,32 @@ Unresolved questions:
 - Email save, LINE bind, NewebPay form generation, payment, NotifyURL, processor, paid result, Email delivery, and LINE delivery were not run.
 - No Vercel env change, redeploy, direct DB lookup, manual DB mutation, provider payload exposure, or tokenized/private output occurred.
 - Next action: Module 01 Smoke Fixture Fresh Result Contract v0 before any additional production payment attempt.
+
+## 2026-06-07 Module 01 Smoke Fixture Fresh Result Contract v0
+
+### Completed Changes
+
+- inspected analyze cache behavior and confirmed cache key includes normalized text, situation, userContext, prompt/schema/model/provider fields, but not anonymousSessionId
+- added `smokeRunId` helpers and a neutral fresh text marker for production smoke fixture generation
+- updated `qa:module01:smoke-fixture` default output so `.qa/module01-valid-analyze-request.json` is fresh by contract
+- summary now reports `smokeRunIdPresent=true`, `freshDimensionPresent=true`, and `expectedFreshResult=true`
+- added tests proving anonymousSessionId alone does not change the cache key, while the smokeRunId text marker does
+- updated production gate / QA policy docs to require `cacheHit=false` after result creation and stop on `tracked_fixture_cache_hit_reused_previous_result`
+
+### Validation
+
+- targeted fixture/cache/smoke-fixture tests: pass, 3 files / 16 tests
+- `cd apps/web && corepack pnpm lint`: pass
+- `cd apps/web && corepack pnpm test`: pass, 97 files / 666 tests
+- `cd apps/web && corepack pnpm build`: pass
+- `cd apps/web && corepack pnpm run qa:module01:smoke-fixture -- --json`: pass
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, gateStatus `pass`
+
+### Unresolved Questions
+
+- No local fixture freshness blocker remains.
+- Production smoke still must assert `cacheHit=false` after result creation before Email save, LINE bind, provider form, or payment.
+- No production runtime, payment, Email, LINE, Vercel env change, DB mutation, or secret exposure occurred.
+- Next action: Controlled Production Payment Smoke Retry with Scoped Runtime Config v2.

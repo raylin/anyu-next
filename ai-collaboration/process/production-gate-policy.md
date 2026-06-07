@@ -40,7 +40,9 @@ Production smoke must also prepare a tracked Module 01 fixture before runtime en
 cd apps/web && corepack pnpm run qa:module01:smoke-fixture
 ```
 
-Use the generated `.qa/module01-valid-analyze-request.json` request or the shared fixture helpers as the smoke input source. Do not dynamically invent analyze request bodies during a production runtime window. If the fixture command or fixture validation fails, stop and classify the first failure as `production_smoke_fixture_unprepared`.
+Use the generated `.qa/module01-valid-analyze-request.json` request or the shared fixture helpers as the smoke input source. The smoke fixture summary must report `validationStatus=pass`, `smokeRunIdPresent=true`, `freshDimensionPresent=true`, and `expectedFreshResult=true` before production runtime is opened. Do not dynamically invent analyze request bodies during a production runtime window. If the fixture command or fixture validation fails, stop and classify the first failure as `production_smoke_fixture_unprepared`.
+
+After production result creation, assert `cacheHit=false`. If `cacheHit=true`, stop immediately, close runtime config, and classify the first failure as `result_creation_failed / tracked_fixture_cache_hit_reused_previous_result`. Do not continue with a reused result and do not dynamically invent another body; rerun `qa:module01:smoke-fixture` to generate a new tracked fresh fixture.
 
 Codex must also assert:
 
@@ -150,7 +152,7 @@ Operator/fake-paid routes must remain fail-closed during and after the smoke win
 
 No ads or non-card payment methods are enabled by runtime config.
 
-Use tracked fixture input only; do not dynamically invent analyze request bodies during the runtime window.
+Use tracked fixture input only; do not dynamically invent analyze request bodies during the runtime window. Result creation must return `cacheHit=false`; otherwise close runtime config and stop before Email save, LINE bind, provider form, or payment.
 
 Do not enable:
 

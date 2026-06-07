@@ -39,6 +39,7 @@ const TOKEN_LIKE_PATTERNS = [
   /provider_payload/iu,
   /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/iu,
 ];
+const SMOKE_RUN_ID_PATTERN = /^module01-smoke-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$/u;
 
 function getVisibleAnalyzeLength(input) {
   return String(input ?? "").trim().replace(/\s+/gu, "").length;
@@ -48,15 +49,32 @@ function loadModule01ValidAnalyzeFixture() {
   return JSON.parse(fs.readFileSync(FIXTURE_PATH, "utf8"));
 }
 
-function createModule01AnalyzeRequest(options = {}) {
+function createModule01SmokeRunId(prefix = "module01-smoke") {
+  const timestamp = new Date().toISOString().replace(/[-:]/gu, "").replace(/\.\d{3}Z$/u, "Z");
+  const randomPart = crypto.randomUUID().replace(/-/gu, "").slice(0, 8);
+
+  return `${prefix}-${timestamp}-${randomPart}`;
+}
+
+function createModule01SmokeRunMarker(smokeRunId) {
+  if (!SMOKE_RUN_ID_PATTERN.test(smokeRunId)) {
+    throw new Error("invalid_module01_smoke_run_id");
+  }
+
+  return `【系統測試批次：${smokeRunId}】`;
+}
+
+function buildModule01AnalyzeRequestWithMetadata(options = {}) {
   const fixture = loadModule01ValidAnalyzeFixture();
-  const suffix = options.suffix?.trim();
+  const smokeRunId = options.smokeRunId?.trim() || (options.fresh === false ? null : createModule01SmokeRunId());
+  const freshSuffix = smokeRunId ? createModule01SmokeRunMarker(smokeRunId) : "";
+  const suffix = [freshSuffix, options.suffix?.trim()].filter(Boolean).join("\n");
   const sessionPrefix = options.sessionPrefix?.trim() || "module01-smoke-fixture";
   const request = structuredClone(fixture.request);
 
   request.text = suffix ? `${request.text}\n\n${suffix}` : request.text;
   request.anonymousSessionId =
-    options.anonymousSessionId?.trim() || `${sessionPrefix}-${crypto.randomUUID()}`;
+    options.anonymousSessionId?.trim() || (smokeRunId ? `${sessionPrefix}-${smokeRunId}` : `${sessionPrefix}-${crypto.randomUUID()}`);
 
   if (options.userContext && typeof options.userContext === "object") {
     request.userContext = {
@@ -65,7 +83,15 @@ function createModule01AnalyzeRequest(options = {}) {
     };
   }
 
-  return request;
+  return {
+    request,
+    smokeRunId,
+    freshDimensionPresent: Boolean(smokeRunId),
+  };
+}
+
+function createModule01AnalyzeRequest(options = {}) {
+  return buildModule01AnalyzeRequestWithMetadata(options).request;
 }
 
 function validateModule01AnalyzeRequest(request) {
@@ -122,11 +148,14 @@ function assertSafeModule01SmokeFixtureOutput(value) {
 function buildModule01SmokeFixtureArtifacts(options = {}) {
   const generatedAt = options.generatedAt ?? new Date().toISOString();
   const fixture = loadModule01ValidAnalyzeFixture();
-  const request = createModule01AnalyzeRequest({
+  const freshFixture = buildModule01AnalyzeRequestWithMetadata({
     sessionPrefix: options.sessionPrefix,
     suffix: options.suffix,
     anonymousSessionId: options.anonymousSessionId,
+    smokeRunId: options.smokeRunId,
+    fresh: options.fresh,
   });
+  const { request } = freshFixture;
   const validation = validateModule01AnalyzeRequest(request);
   const summary = {
     module: MODULE,
@@ -135,6 +164,10 @@ function buildModule01SmokeFixtureArtifacts(options = {}) {
     status: validation.validationStatus,
     generatedAt,
     fixtureName: fixture.fixtureName,
+    smokeRunId: freshFixture.smokeRunId,
+    smokeRunIdPresent: Boolean(freshFixture.smokeRunId),
+    freshDimensionPresent: freshFixture.freshDimensionPresent,
+    expectedFreshResult: freshFixture.freshDimensionPresent && validation.validationStatus === "pass",
     validationStatus: validation.validationStatus,
     visibleLengthPass: validation.visibleLengthPass,
     visibleLengthCategory: validation.visibleLengthCategory,
@@ -196,6 +229,8 @@ export {
   assertSafeModule01SmokeFixtureOutput,
   buildModule01SmokeFixtureArtifacts,
   createModule01AnalyzeRequest,
+  createModule01SmokeRunId,
+  createModule01SmokeRunMarker,
   getVisibleAnalyzeLength,
   loadModule01ValidAnalyzeFixture,
   validateModule01AnalyzeRequest,

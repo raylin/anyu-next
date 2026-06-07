@@ -23,6 +23,7 @@ describe("Module 01 smoke fixture helper", () => {
     const artifacts = buildModule01SmokeFixtureArtifacts({
       generatedAt: "2026-06-07T00:00:00.000Z",
       anonymousSessionId: "module01-smoke-fixture-test-session",
+      smokeRunId: "module01-smoke-20260607T000000Z-1234abcd",
     });
 
     expect(artifacts.summary).toMatchObject({
@@ -30,6 +31,10 @@ describe("Module 01 smoke fixture helper", () => {
       moduleSlug: "ambiguous-temperature",
       command: "qa:module01:smoke-fixture",
       status: "pass",
+      smokeRunId: "module01-smoke-20260607T000000Z-1234abcd",
+      smokeRunIdPresent: true,
+      freshDimensionPresent: true,
+      expectedFreshResult: true,
       validationStatus: "pass",
       visibleLengthPass: true,
       containsPrivateData: false,
@@ -49,8 +54,26 @@ describe("Module 01 smoke fixture helper", () => {
       situation: "回訊變慢但看限動",
       anonymousSessionId: "module01-smoke-fixture-test-session",
     });
+    expect(artifacts.request.text).toContain("module01-smoke-20260607T000000Z-1234abcd");
     expect(() => assertSafeModule01SmokeFixtureOutput(artifacts.summary)).not.toThrow();
     expect(() => assertSafeModule01SmokeFixtureOutput(artifacts.request)).not.toThrow();
+  });
+
+  it("uses a fresh smokeRunId by default and keeps suffix additive", () => {
+    const artifacts = buildModule01SmokeFixtureArtifacts({
+      generatedAt: "2026-06-07T00:00:00.000Z",
+      smokeRunId: "module01-smoke-20260607T000001Z-5678abcd",
+      suffix: "固定 QA 註記",
+    });
+
+    expect(artifacts.summary).toMatchObject({
+      smokeRunId: "module01-smoke-20260607T000001Z-5678abcd",
+      smokeRunIdPresent: true,
+      freshDimensionPresent: true,
+      expectedFreshResult: true,
+    });
+    expect(artifacts.request.text).toContain("module01-smoke-20260607T000001Z-5678abcd");
+    expect(artifacts.request.text).toContain("固定 QA 註記");
   });
 
   it("writes structured .qa artifacts without tokenized URLs or provider payloads", () => {
@@ -58,12 +81,16 @@ describe("Module 01 smoke fixture helper", () => {
     const result = writeModule01SmokeFixtureArtifacts({
       outputDir,
       anonymousSessionId: "module01-smoke-fixture-write-test",
+      smokeRunId: "module01-smoke-20260607T000002Z-90abcdef",
     });
     const request = JSON.parse(fs.readFileSync(result.requestPath, "utf8"));
     const summary = JSON.parse(fs.readFileSync(result.summaryPath, "utf8"));
 
     expect(request.anonymousSessionId).toBe("module01-smoke-fixture-write-test");
     expect(summary.status).toBe("pass");
+    expect(summary.smokeRunIdPresent).toBe(true);
+    expect(summary.freshDimensionPresent).toBe(true);
+    expect(summary.expectedFreshResult).toBe(true);
     expect(summary.requestArtifact).toContain("module01-valid-analyze-request.json");
     expect(JSON.stringify(summary)).not.toMatch(/TradeInfo|TradeSha|provider_payload/iu);
     expect(JSON.stringify(summary)).not.toMatch(/\/r\/[A-Za-z0-9_-]{12,}/u);

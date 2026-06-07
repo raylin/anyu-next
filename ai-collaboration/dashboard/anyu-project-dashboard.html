@@ -329,12 +329,12 @@
     <header>
       <p class="eyebrow">Owner Dashboard · Static HTML</p>
       <h1>暗語 ANYU / anyu-next</h1>
-      <p class="lead">Module 01「曖昧溫度計」now uses scoped runtime config as the single primary payment runtime gate. The latest production smoke retry stopped before payment because the tracked smoke fixture reused a cached production result instead of creating a fresh result.</p>
+      <p class="lead">Module 01「曖昧溫度計」now uses scoped runtime config as the single primary payment runtime gate. The smoke fixture fresh-result contract is now implemented locally, so the next production smoke must assert <code>cacheHit=false</code> before save/payment steps.</p>
       <div class="snapshot" aria-label="Project snapshot">
-        <div><span class="label">Last updated</span><span class="value">2026-06-07 17:00 CST</span></div>
-        <div><span class="label">Current phase</span><span class="value">Smoke fixture fresh-result contract blocker</span></div>
+        <div><span class="label">Last updated</span><span class="value">2026-06-07 17:11 CST</span></div>
+        <div><span class="label">Current phase</span><span class="value">Fresh smoke fixture contract complete locally</span></div>
         <div><span class="label">Production posture</span><span class="value">Frozen; payment disabled</span></div>
-        <div><span class="label">Latest blocker</span><span class="value">Tracked smoke fixture returned cacheHit=true and reused prior production result</span></div>
+        <div><span class="label">Latest blocker</span><span class="value">Next production smoke must prove cacheHit=false before save/payment</span></div>
       </div>
     </header>
 
@@ -358,7 +358,7 @@
         <article class="card"><span class="badge done">Sandbox-validated</span><h3>Paid delivery pipeline</h3><p>Real sandbox payment v5 reached paid readiness, delivery artifacts, queue completion, and session-bound paid access.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Vercel Queues</h3><p>Adapter, targeted processor, staging queue smoke, dashboard observation, and manual fallback are proven.</p></article>
         <article class="card"><span class="badge done">Done</span><h3>Support/refund SOP</h3><p>Owner playbooks and email templates exist. Public legal/refund/support and legacy contact copy are launch-aligned around web delivery and 3-7 business day handling.</p></article>
-        <article class="card"><span class="badge blocked">Blocked before save</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, redirect-state fix, deployed freshness guard, runtime-window helper, Vercel alias proof, and Scoped Runtime Config v0 are in place. Pre-payment save diagnostics/fix v0 is deployed to Preview(staging) and required staging sanity checks pass. The latest production smoke v1 opened scoped runtime config successfully but stopped before Email save, LINE bind, or payment because the tracked fixture returned <code>cacheHit=true</code> and reused prior production result <code>800c88fa-04de-4172-b34a-3bc78cd4d0fa</code>. Production was closed again and production-preflight passes.</p></article>
+        <article class="card"><span class="badge progress">Ready for retry</span><h3>Launch readiness</h3><p>Env Mirror Strategy v2, smoke fixtures, LINE/LIFF diagnostics, Admin API/CLI diagnostics, redirect-state fix, deployed freshness guard, runtime-window helper, Vercel alias proof, and Scoped Runtime Config v0 are in place. Pre-payment save diagnostics/fix v0 is deployed to Preview(staging) and required staging sanity checks pass. The smoke fixture fresh-result contract now adds a safe <code>smokeRunId</code> text marker and summary fields <code>freshDimensionPresent=true</code> / <code>expectedFreshResult=true</code>. The next production smoke must stop if result creation returns <code>cacheHit=true</code>. Production remains closed.</p></article>
         <article class="card"><span class="badge done">Defined</span><h3>Core engine grammar</h3><p>ANYU now has a v0 grammar for modules, interactions, skills, traits, artifacts, monetization, safety, and cross-links.</p></article>
         <article class="card"><span class="badge progress">Planned</span><h3>LINE owned channel</h3><p>LINE is repositioned as consent-based save-for-later, paid result recovery, completion notification, support, new-module, early-access, and future insight channel. It is not canonical paid report delivery.</p></article>
         <article class="card"><span class="badge done">Archived</span><h3>Theme architecture</h3><p>Claude Design Theme Architecture assets are archived as visual architecture reference. Adopted direction: Hybrid Theme Park Model, neutral editorial Core Shell, Module 01 Riso-only, shared flow templates, and Module 02 Radar preview as extensibility proof. No runtime implementation has started.</p></article>
