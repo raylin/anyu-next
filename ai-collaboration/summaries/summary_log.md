@@ -12003,3 +12003,33 @@ Unresolved questions:
 - Real staging channel sends remain deferred until owner-approved recipient/account scope is defined.
 - Soft public remains blocked on repeated/concurrency paid-generation evidence.
 - Recommended next task: owner chooses Repeated / Concurrency Paid-Generation Benchmark v0 or Module Theme Architecture Implementation Plan.
+
+## 2026-06-07 Module Theme Architecture Implementation Plan v0
+
+### Completed Changes
+
+- created the Module Theme Architecture implementation plan without changing runtime UI.
+- inventoried Core Shell, Module 01, shared payment/access-link, provider return, `/r`, LINE bind, legal, global CSS/token, and archived design surfaces.
+- defined the implementation boundary:
+  - Core Shell = neutral editorial ANYU entrance.
+  - Module Shell = module-owned immersive world.
+  - Module 01 = Riso-only.
+  - Shared Flow Templates = payment/access-link/status surfaces that accept module theme tokens.
+  - Module 02 Radar = compatibility proof only, not implementation target.
+- identified a concrete first-slice cleanup: current Module 01 classic/Riso A/B machinery conflicts with the accepted Riso-only direction and should be removed or compatibility-contained in the infrastructure phase.
+- documented migration phases, testing plan, product/copy guardrails, and design/theme tech debt.
+- updated dashboard so the current theme track is plan-ready and waiting for owner review.
+
+### Validation
+
+- docs presence check: pass.
+- dashboard HTML sanity: pass.
+- secret/private scan: pass.
+- `git diff --check`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, Email/LINE send, Vercel env change, DB mutation, or runtime UI implementation.
+- Owner should review the plan before implementation.
+- Recommended next task: Module Theme Architecture Infrastructure v0 after owner approval.
