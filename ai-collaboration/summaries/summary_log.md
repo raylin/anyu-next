@@ -11686,3 +11686,37 @@ Unresolved questions:
 - Owner must verify/update NewebPay dashboard settings, especially staging ReturnURL, because Codex cannot inspect the provider dashboard.
 - Vercel Preview(staging) and Production env values for `NEXT_PUBLIC_APP_URL` and `NEWEBPAY_NOTIFY_URL` must be restored from the local mirrors before any payment smoke.
 - If strict compatibility redirect is required, convert the legacy module ReturnURL route to an explicit redirect preserving safe query params in a follow-up.
+
+## 2026-06-07 NewebPay URL Env Alignment Restore v0
+
+### Completed Changes
+
+- restored Vercel Preview(staging) and Production URL-bearing env values from local mirrors for:
+  - `NEXT_PUBLIC_APP_URL`
+  - `NEWEBPAY_NOTIFY_URL`
+- used `vercel env add --force --no-sensitive` because these are public/non-secret URLs and future alignment checks need deterministic readable values.
+- verified `vercel env pull` now returns non-blank aligned URL values for both targets.
+- redeployed Preview(staging) and Production fail-closed so runtime picks up the restored values.
+- confirmed Preview(staging) alias `staging.anyu.tw` is ready and fresh at `84e2a4af116d`.
+- confirmed Production alias `anyu.tw` / `www.anyu.tw` is ready and fresh at `fe300e84f3a3`.
+- confirmed production runtime-window status remains `fail_closed_ready`.
+- confirmed `qa:module01:production-preflight` passes.
+
+### Validation
+
+- local mirror URL key check: pass.
+- Vercel env sync and pull verification: pass.
+- Preview(staging) deploy freshness: pass.
+- Production deploy freshness: pass.
+- `qa:production:runtime-window -- --action status`: pass, fail-closed.
+- `qa:module01:production-preflight`: pass, `gateStatus=pass`.
+- `pnpm ops auth status --env staging`: token unavailable, source `missing`.
+- `pnpm ops auth status --env production`: token unavailable, source `missing`.
+
+### Unresolved Questions
+
+- First failure category: none for URL/env alignment.
+- Owner must verify/update NewebPay dashboard staging ReturnURL to `https://staging.anyu.tw/payment/newebpay/return`; owner context suggests it may still use the old module route.
+- Owner must verify production dashboard ReturnURL and both NotifyURL settings.
+- Production Admin/Ops preflight remains skipped/blocked until owner configures ops credentials via `pnpm ops auth set-token`.
+- No production runtime open, payment, Email, LINE, provider secret change, DB mutation, or secret/private output occurred.
