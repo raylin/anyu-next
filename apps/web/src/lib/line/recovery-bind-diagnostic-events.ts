@@ -60,10 +60,17 @@ const LINE_BIND_DIAGNOSTIC_CATEGORIES = [
   "liff_state_invalid",
   "liff_state_expired",
   "id_token_missing_after_login",
+  "bind_api_reached",
+  "bind_api_state_valid",
   "bind_api_state_missing",
   "bind_api_state_invalid",
   "bind_api_line_identity_missing",
+  "bind_api_id_token_verified",
+  "bind_api_contact_saved",
+  "bind_api_recipient_secret_write_started",
   "bind_api_recipient_secret_failed",
+  "bind_api_contact_marked_failed_after_secret_failure",
+  "bind_api_recipient_secret_created",
   "bind_api_failed",
   "bind_success",
 ] as const satisfies readonly LineRecoveryBindDiagnosticCategory[];
@@ -98,12 +105,19 @@ export function getLineBindDiagnosticStage(
     case "liff_state_expired":
     case "bind_api_state_missing":
     case "bind_api_state_invalid":
+    case "bind_api_state_valid":
       return "liff_state";
     case "id_token_missing_after_login":
     case "bind_api_line_identity_missing":
+    case "bind_api_id_token_verified":
       return "id_token";
+    case "bind_api_recipient_secret_write_started":
     case "bind_api_recipient_secret_failed":
+    case "bind_api_contact_marked_failed_after_secret_failure":
+    case "bind_api_recipient_secret_created":
       return "recipient_secret";
+    case "bind_api_reached":
+    case "bind_api_contact_saved":
     case "bind_api_failed":
     case "bind_success":
     default:
@@ -118,8 +132,19 @@ export function getLineBindDiagnosticStatus(
     return "succeeded";
   }
 
-  if (category === "liff_login_redirect_started") {
+  if (
+    category === "liff_login_redirect_started" ||
+    category === "bind_api_reached" ||
+    category === "bind_api_state_valid" ||
+    category === "bind_api_id_token_verified" ||
+    category === "bind_api_contact_saved" ||
+    category === "bind_api_recipient_secret_write_started"
+  ) {
     return "observed";
+  }
+
+  if (category === "bind_api_recipient_secret_created") {
+    return "succeeded";
   }
 
   return "failed";
@@ -290,6 +315,14 @@ export function getLineBindDiagnosticRecommendedActions(
   switch (category) {
     case "bind_success":
       return ["no_action_needed"];
+    case "bind_api_reached":
+    case "bind_api_state_valid":
+    case "bind_api_id_token_verified":
+    case "bind_api_contact_saved":
+    case "bind_api_recipient_secret_write_started":
+      return ["wait_for_line_bind_completion"];
+    case "bind_api_recipient_secret_created":
+      return ["wait_for_bind_success"];
     case "liff_sdk_load_failed":
     case "liff_init_failed":
       return ["check_liff_channel_config", "retry_line_bind", "use_email_fallback"];
@@ -305,6 +338,7 @@ export function getLineBindDiagnosticRecommendedActions(
     case "bind_api_line_identity_missing":
       return ["retry_line_bind", "use_email_fallback", "check_liff_channel_config"];
     case "bind_api_recipient_secret_failed":
+    case "bind_api_contact_marked_failed_after_secret_failure":
     case "bind_api_failed":
     default:
       return ["retry_line_bind", "use_email_fallback", "support_review_required"];

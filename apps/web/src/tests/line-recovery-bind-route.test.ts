@@ -216,6 +216,27 @@ describe("LINE recovery bind LIFF route", () => {
         recipientSecretCreated: true,
       }),
     );
+    expect(mockRecordLineBindDiagnosticEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "server",
+        category: "bind_api_state_valid",
+        bindApiReached: true,
+      }),
+    );
+    expect(mockRecordLineBindDiagnosticEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "server",
+        category: "bind_api_id_token_verified",
+        hasIdToken: true,
+      }),
+    );
+    expect(mockRecordLineBindDiagnosticEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "server",
+        category: "bind_api_recipient_secret_created",
+        recipientSecretCreated: true,
+      }),
+    );
   });
 
   it("fails safely for missing or unverifiable LINE identity and keeps Email fallback return path", async () => {
@@ -389,6 +410,20 @@ describe("LINE recovery bind LIFF route", () => {
         source: "server",
         category: "bind_api_recipient_secret_failed",
         recipientSecretRequired: true,
+        recipientSecretCreated: false,
+      }),
+    );
+    expect(mockRecordLineBindDiagnosticEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "server",
+        category: "bind_api_contact_saved",
+        recipientSecretCreated: false,
+      }),
+    );
+    expect(mockRecordLineBindDiagnosticEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "server",
+        category: "bind_api_contact_marked_failed_after_secret_failure",
         recipientSecretCreated: false,
       }),
     );

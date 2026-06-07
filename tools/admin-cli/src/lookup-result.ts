@@ -51,6 +51,10 @@ type AccessLinkChannelSummary = {
   contactSaved: boolean;
   recipientSecretExists?: boolean;
   deliverable?: boolean;
+  latestContactStatus?: string | null;
+  latestSaveCategory?: string | null;
+  latestSaveStatus?: string | null;
+  saveAttemptCount?: number;
   sent: boolean;
   active: boolean;
   used: boolean;
@@ -289,6 +293,22 @@ function validateAccessLinkChannel(value: unknown): AccessLinkChannelSummary {
     assertBoolean(value["deliverable"]);
   }
 
+  if (value["latestContactStatus"] !== undefined) {
+    assertNullableString(value["latestContactStatus"]);
+  }
+
+  if (value["latestSaveCategory"] !== undefined) {
+    assertNullableString(value["latestSaveCategory"]);
+  }
+
+  if (value["latestSaveStatus"] !== undefined) {
+    assertNullableString(value["latestSaveStatus"]);
+  }
+
+  if (value["saveAttemptCount"] !== undefined) {
+    assertNumber(value["saveAttemptCount"]);
+  }
+
   return value as AccessLinkChannelSummary;
 }
 
@@ -355,6 +375,7 @@ function formatChannel(summary: AccessLinkChannelSummary) {
   if (summary.revoked) states.push("revoked");
   if (summary.expired) states.push("expired");
   if (summary.lastFailureCategory) states.push(`failed:${summary.lastFailureCategory}`);
+  if (summary.latestSaveCategory) states.push(`save:${summary.latestSaveCategory}`);
 
   return states.length > 0 ? states.join(", ") : "not saved";
 }

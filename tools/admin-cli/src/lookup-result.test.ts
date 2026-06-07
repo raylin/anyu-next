@@ -189,6 +189,55 @@ describe("admin CLI lookup-result", () => {
     expect(pretty).not.toContain("@");
   });
 
+  it("accepts sanitized save diagnostics and displays latest category", () => {
+    const response = validateAdminLookupResponse(
+      safeResponse({
+        accessLinks: {
+          email: {
+            contactSaved: false,
+            deliverable: false,
+            latestContactStatus: null,
+            latestSaveCategory: "email_save_contact_write_failed",
+            latestSaveStatus: "failed",
+            saveAttemptCount: 2,
+            sent: false,
+            active: false,
+            used: false,
+            revoked: false,
+            expired: false,
+            sendAttemptCount: 0,
+            lastProviderStatus: null,
+            lastFailureCategory: null,
+            providerMessageIdPresent: false,
+          },
+          line: {
+            contactSaved: false,
+            recipientSecretExists: false,
+            deliverable: false,
+            latestContactStatus: "failed",
+            latestSaveCategory: null,
+            latestSaveStatus: null,
+            saveAttemptCount: 0,
+            sent: false,
+            active: false,
+            used: false,
+            revoked: false,
+            expired: false,
+            sendAttemptCount: 0,
+            lastProviderStatus: null,
+            lastFailureCategory: null,
+            providerMessageIdPresent: false,
+          },
+        },
+      }),
+    );
+    const pretty = formatPretty("production", response);
+
+    expect(pretty).toContain("Email: save:email_save_contact_write_failed");
+    expect(pretty).toContain("LINE: not saved");
+    expect(pretty).not.toContain("@");
+  });
+
   it("accepts partial LINE bind summaries and displays not-deliverable state", () => {
     const response = validateAdminLookupResponse(
       safeResponse({

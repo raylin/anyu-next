@@ -57,6 +57,8 @@ export type LineRecoveryBindResult =
         | "line_hash_failed"
         | "recovery_contact_write_failed"
         | "recipient_secret_write_failed";
+      recoveryContactId?: string | null;
+      contactMarkedFailed?: boolean;
     };
 
 function getRecoveryBindStateSecret(env: NodeJS.ProcessEnv = process.env) {
@@ -330,7 +332,12 @@ export async function bindVerifiedLineUserToRecoveryContact(input: {
           status: "failed",
         }).catch(() => null);
 
-        return { ok: false, category: "recipient_secret_write_failed" };
+        return {
+          ok: false,
+          category: "recipient_secret_write_failed",
+          recoveryContactId,
+          contactMarkedFailed: true,
+        };
       }
     } catch (error) {
       await markPaymentRecoveryContactStatus({
@@ -339,10 +346,20 @@ export async function bindVerifiedLineUserToRecoveryContact(input: {
       }).catch(() => null);
 
       if (error instanceof LineRecoveryRecipientConfigError) {
-        return { ok: false, category: "recipient_secret_write_failed" };
+        return {
+          ok: false,
+          category: "recipient_secret_write_failed",
+          recoveryContactId,
+          contactMarkedFailed: true,
+        };
       }
 
-      return { ok: false, category: "recipient_secret_write_failed" };
+      return {
+        ok: false,
+        category: "recipient_secret_write_failed",
+        recoveryContactId,
+        contactMarkedFailed: true,
+      };
     }
 
     return {

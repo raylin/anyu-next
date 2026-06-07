@@ -13,9 +13,16 @@ describe("LINE bind diagnostic event helpers", () => {
   it("maps diagnostic categories to safe stages and statuses", () => {
     expect(getLineBindDiagnosticStage("liff_sdk_load_failed")).toBe("liff_sdk");
     expect(getLineBindDiagnosticStage("id_token_missing_after_login")).toBe("id_token");
+    expect(getLineBindDiagnosticStage("bind_api_state_valid")).toBe("liff_state");
+    expect(getLineBindDiagnosticStage("bind_api_id_token_verified")).toBe("id_token");
     expect(getLineBindDiagnosticStage("bind_api_recipient_secret_failed")).toBe("recipient_secret");
+    expect(getLineBindDiagnosticStage("bind_api_contact_marked_failed_after_secret_failure")).toBe(
+      "recipient_secret",
+    );
     expect(getLineBindDiagnosticStatus("bind_success")).toBe("succeeded");
     expect(getLineBindDiagnosticStatus("liff_login_redirect_started")).toBe("observed");
+    expect(getLineBindDiagnosticStatus("bind_api_contact_saved")).toBe("observed");
+    expect(getLineBindDiagnosticStatus("bind_api_recipient_secret_created")).toBe("succeeded");
     expect(getLineBindDiagnosticStatus("bind_api_failed")).toBe("failed");
   });
 
@@ -78,5 +85,8 @@ describe("LINE bind diagnostic event helpers", () => {
 
   it("recommends no action for success", () => {
     expect(getLineBindDiagnosticRecommendedActions("bind_success")).toEqual(["no_action_needed"]);
+    expect(getLineBindDiagnosticRecommendedActions("bind_api_contact_saved")).toEqual([
+      "wait_for_line_bind_completion",
+    ]);
   });
 });

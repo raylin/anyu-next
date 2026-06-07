@@ -380,18 +380,24 @@ describe("LINE recovery bind state helpers", () => {
         insertRows: [{ id: RECOVERY_CONTACT_ID }],
       }).db,
     );
-    await expect(
-      bindVerifiedLineUserToRecoveryContact({
-        state: resolved.ok ? resolved.payload : ({} as never),
-        lineUserId: "line-user-1",
-        env: {
-          PAYMENT_RECOVERY_CONTACT_HASH_SECRET:
-            TEST_ENV.PAYMENT_RECOVERY_CONTACT_HASH_SECRET,
-          PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY:
-            TEST_ENV.PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY,
-        } as NodeJS.ProcessEnv,
-      }),
-    ).resolves.toEqual({ ok: false, category: "recipient_secret_write_failed" });
+    const bindFailure = await bindVerifiedLineUserToRecoveryContact({
+      state: resolved.ok ? resolved.payload : ({} as never),
+      lineUserId: "line-user-1",
+      env: {
+        PAYMENT_RECOVERY_CONTACT_HASH_SECRET:
+          TEST_ENV.PAYMENT_RECOVERY_CONTACT_HASH_SECRET,
+        PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY:
+          TEST_ENV.PAYMENT_RECOVERY_CONTACT_ENCRYPTION_KEY,
+      } as NodeJS.ProcessEnv,
+    });
+
+    expect(bindFailure).toMatchObject({
+      ok: false,
+      category: "recipient_secret_write_failed",
+      contactMarkedFailed: true,
+      recoveryContactId: RECOVERY_CONTACT_ID,
+    });
+    expect(JSON.stringify(bindFailure)).not.toContain("line-user-1");
   });
 
   it("leaves Email recovery helpers unaffected", async () => {

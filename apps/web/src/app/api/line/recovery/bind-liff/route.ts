@@ -8,6 +8,7 @@ import {
 import { recordLineBindDiagnosticEvent } from "@/lib/line/recovery-bind-diagnostic-events";
 import { mapLineRecoveryBindApiFailure } from "@/lib/line/recovery-bind-diagnostics";
 import { verifyLineIdToken } from "@/lib/line/liff";
+import type { LineRecoveryBindStatePayload } from "@/lib/line/recovery-bind-state";
 
 type LineRecoveryBindPayload = {
   state?: string;
@@ -49,6 +50,28 @@ function jsonFailure(input: {
   );
 }
 
+async function recordServerBindDiagnostic(input: {
+  state: LineRecoveryBindStatePayload;
+  category: Parameters<typeof recordLineBindDiagnosticEvent>[0]["category"];
+  hasIdToken?: boolean;
+  recipientSecretCreated?: boolean;
+}) {
+  try {
+    await recordLineBindDiagnosticEvent({
+      state: input.state,
+      source: "server",
+      category: input.category,
+      hasLiffState: true,
+      hasIdToken: input.hasIdToken,
+      bindApiReached: true,
+      recipientSecretRequired: true,
+      recipientSecretCreated: input.recipientSecretCreated,
+    });
+  } catch {
+    // Diagnostics are best-effort and must not change bind behavior.
+  }
+}
+
 export async function POST(request: Request) {
   if (!isDbConfigured()) {
     return jsonFailure({ error: "config_error", status: 503 });
@@ -74,17 +97,26 @@ export async function POST(request: Request) {
   const fallbackReturnPath = lineRecoveryReturnPath(stateResult.payload.returnPath, "line_error");
   const idToken = body.idToken?.trim();
 
+  await recordServerBindDiagnostic({
+    state: stateResult.payload,
+    category: "bind_api_reached",
+    hasIdToken: Boolean(idToken),
+    recipientSecretCreated: false,
+  });
+  await recordServerBindDiagnostic({
+    state: stateResult.payload,
+    category: "bind_api_state_valid",
+    hasIdToken: Boolean(idToken),
+    recipientSecretCreated: false,
+  });
+
   if (!idToken) {
-    await recordLineBindDiagnosticEvent({
+    await recordServerBindDiagnostic({
       state: stateResult.payload,
-      source: "server",
       category: "bind_api_line_identity_missing",
-      hasLiffState: true,
       hasIdToken: false,
-      bindApiReached: true,
-      recipientSecretRequired: true,
       recipientSecretCreated: false,
-    }).catch(() => null);
+    });
 
     return jsonFailure({
       error: "line_user_missing",
@@ -96,16 +128,12 @@ export async function POST(request: Request) {
   const identity = await verifyLineIdToken({ idToken });
 
   if (!identity.ok) {
-    await recordLineBindDiagnosticEvent({
+    await recordServerBindDiagnostic({
       state: stateResult.payload,
-      source: "server",
       category: "bind_api_line_identity_missing",
-      hasLiffState: true,
       hasIdToken: true,
-      bindApiReached: true,
-      recipientSecretRequired: true,
       recipientSecretCreated: false,
-    }).catch(() => null);
+    });
 
     return jsonFailure({
       error: "line_user_missing",
@@ -114,25 +142,51 @@ export async function POST(request: Request) {
     });
   }
 
+  await recordServerBindDiagnostic({
+    state: stateResult.payload,
+    category: "bind_api_id_token_verified",
+    hasIdToken: true,
+    recipientSecretCreated: false,
+  });
   const bindResult = await bindVerifiedLineUserToRecoveryContact({
     state: stateResult.payload,
     lineUserId: identity.lineUserId,
   });
 
   if (!bindResult.ok) {
-    await recordLineBindDiagnosticEvent({
+    if (bindResult.recoveryContactId) {
+      await recordServerBindDiagnostic({
+        state: stateResult.payload,
+        category: "bind_api_contact_saved",
+        hasIdToken: true,
+        recipientSecretCreated: false,
+      });
+      await recordServerBindDiagnostic({
+        state: stateResult.payload,
+        category: "bind_api_recipient_secret_write_started",
+        hasIdToken: true,
+        recipientSecretCreated: false,
+      });
+    }
+
+    await recordServerBindDiagnostic({
       state: stateResult.payload,
-      source: "server",
       category: mapLineRecoveryBindApiFailure({
         error: "bind_failed",
         bindCategory: bindResult.category,
       }),
-      hasLiffState: true,
       hasIdToken: true,
-      bindApiReached: true,
-      recipientSecretRequired: true,
       recipientSecretCreated: false,
-    }).catch(() => null);
+    });
+
+    if (bindResult.contactMarkedFailed) {
+      await recordServerBindDiagnostic({
+        state: stateResult.payload,
+        category: "bind_api_contact_marked_failed_after_secret_failure",
+        hasIdToken: true,
+        recipientSecretCreated: false,
+      });
+    }
 
     return jsonFailure({
       error: "bind_failed",
@@ -142,16 +196,30 @@ export async function POST(request: Request) {
     });
   }
 
-  await recordLineBindDiagnosticEvent({
+  await recordServerBindDiagnostic({
     state: stateResult.payload,
-    source: "server",
-    category: "bind_success",
-    hasLiffState: true,
+    category: "bind_api_contact_saved",
     hasIdToken: true,
-    bindApiReached: true,
-    recipientSecretRequired: true,
+    recipientSecretCreated: false,
+  });
+  await recordServerBindDiagnostic({
+    state: stateResult.payload,
+    category: "bind_api_recipient_secret_write_started",
+    hasIdToken: true,
+    recipientSecretCreated: false,
+  });
+  await recordServerBindDiagnostic({
+    state: stateResult.payload,
+    category: "bind_api_recipient_secret_created",
+    hasIdToken: true,
     recipientSecretCreated: true,
-  }).catch(() => null);
+  });
+  await recordServerBindDiagnostic({
+    state: stateResult.payload,
+    category: "bind_success",
+    hasIdToken: true,
+    recipientSecretCreated: true,
+  });
 
   return NextResponse.json({
     ok: true,

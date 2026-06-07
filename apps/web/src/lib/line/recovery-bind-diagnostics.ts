@@ -8,10 +8,17 @@ export type LineRecoveryBindDiagnosticCategory =
   | "liff_state_invalid"
   | "liff_state_expired"
   | "id_token_missing_after_login"
+  | "bind_api_reached"
+  | "bind_api_state_valid"
   | "bind_api_state_missing"
   | "bind_api_state_invalid"
   | "bind_api_line_identity_missing"
+  | "bind_api_id_token_verified"
+  | "bind_api_contact_saved"
+  | "bind_api_recipient_secret_write_started"
   | "bind_api_recipient_secret_failed"
+  | "bind_api_contact_marked_failed_after_secret_failure"
+  | "bind_api_recipient_secret_created"
   | "bind_api_failed"
   | "bind_success";
 
@@ -170,6 +177,13 @@ export function getLineRecoveryBindDiagnosticMessage(
   switch (category) {
     case "bind_success":
       return "已用 LINE 保存專屬查看連結。之後可以從 LINE 回到 ANYU 查看完整報告。";
+    case "bind_api_reached":
+    case "bind_api_state_valid":
+    case "bind_api_id_token_verified":
+    case "bind_api_contact_saved":
+    case "bind_api_recipient_secret_write_started":
+    case "bind_api_recipient_secret_created":
+      return "正在確認 LINE 保存狀態。";
     case "liff_login_redirect_started":
       return "正在前往 LINE 完成身分確認。";
     case "liff_state_missing":

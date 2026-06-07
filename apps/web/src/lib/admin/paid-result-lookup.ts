@@ -1,10 +1,11 @@
-import { desc, eq, or } from "drizzle-orm";
+import { desc, eq, or, sql } from "drizzle-orm";
 import type { AppDatabase } from "@/lib/db/client";
 import { requireDb } from "@/lib/db/client";
 import {
   analysisPaidResults,
   analysisResults,
   entitlements,
+  events,
   generationJobs,
   paidResultAccessLinks,
   paymentAccessLinkContactSecrets,
@@ -12,6 +13,11 @@ import {
   paymentIntents,
 } from "@/lib/db/schema";
 import { getModuleBySlug } from "@/lib/modules/registry";
+import {
+  ACCESS_LINK_SAVE_DIAGNOSTIC_EVENT_NAME,
+  type AccessLinkSaveDiagnosticSummary,
+  summarizeAccessLinkSaveDiagnosticEvents,
+} from "@/lib/payments/access-link-save-diagnostic-events";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -118,6 +124,7 @@ type LookupRows = {
     providerMessageId: string | null;
     createdAt: Date;
   }>;
+  saveDiagnostics?: Partial<Record<AccessChannel, AccessLinkSaveDiagnosticSummary>>;
 };
 
 export type AdminPaidResultLookupResponse = {
@@ -157,6 +164,10 @@ export type AccessLinkChannelSummary = {
   contactSaved: boolean;
   recipientSecretExists?: boolean;
   deliverable: boolean;
+  latestContactStatus: string | null;
+  latestSaveCategory: string | null;
+  latestSaveStatus: string | null;
+  saveAttemptCount: number;
   sent: boolean;
   active: boolean;
   used: boolean;
@@ -196,11 +207,19 @@ function buildChannelSummary(input: {
   contacts: LookupRows["contacts"];
   contactSecrets: LookupRows["contactSecrets"];
   accessLinks: LookupRows["accessLinks"];
+  saveDiagnostic?: AccessLinkSaveDiagnosticSummary;
   now?: Date;
 }): AccessLinkChannelSummary {
   const now = input.now ?? new Date();
-  const contacts = input.contacts.filter(
-    (contact) => contact.contactType === input.channel && contact.status !== "revoked",
+  const allChannelContacts = input.contacts.filter(
+    (contact) => contact.contactType === input.channel,
+  );
+  const latestContact = allChannelContacts[0] ?? null;
+  const contacts = allChannelContacts.filter(
+    (contact) =>
+      contact.status !== "revoked" &&
+      contact.status !== "failed" &&
+      Boolean(contact.transactionalConsentAt),
   );
   const contactIds = new Set(contacts.map((contact) => contact.id));
   const channelLinks = input.accessLinks.filter((link) => link.channel === input.channel);
@@ -214,6 +233,10 @@ function buildChannelSummary(input: {
   const summary: AccessLinkChannelSummary = {
     contactSaved: contacts.length > 0,
     deliverable: contacts.length > 0,
+    latestContactStatus: latestContact?.status ?? null,
+    latestSaveCategory: input.saveDiagnostic?.latestCategory ?? null,
+    latestSaveStatus: input.saveDiagnostic?.latestStatus ?? null,
+    saveAttemptCount: input.saveDiagnostic?.eventCount ?? 0,
     sent,
     active,
     used,
@@ -385,6 +408,7 @@ export function buildAdminPaidResultLookupSummary(
     contacts: rows.contacts,
     contactSecrets: rows.contactSecrets,
     accessLinks: rows.accessLinks,
+    saveDiagnostic: rows.saveDiagnostics?.email,
     now: input.now,
   });
   const line = buildChannelSummary({
@@ -392,6 +416,7 @@ export function buildAdminPaidResultLookupSummary(
     contacts: rows.contacts,
     contactSecrets: rows.contactSecrets,
     accessLinks: rows.accessLinks,
+    saveDiagnostic: rows.saveDiagnostics?.line,
     now: input.now,
   });
   const { diagnosis, recommendedActions } = buildDiagnosisAndActions({
@@ -465,6 +490,7 @@ export async function lookupAdminPaidResultById(
     contactRows,
     secretRows,
     accessLinkRows,
+    accessLinkSaveDiagnosticRows,
   ] = await Promise.all([
     db
       .select({
@@ -561,6 +587,17 @@ export async function lookupAdminPaidResultById(
       .where(eq(paidResultAccessLinks.analysisResultId, resultId))
       .orderBy(desc(paidResultAccessLinks.createdAt))
       .limit(30),
+    db
+      .select({
+        metadataJson: events.metadataJson,
+        createdAt: events.createdAt,
+      })
+      .from(events)
+      .where(
+        sql`${events.eventName} = ${ACCESS_LINK_SAVE_DIAGNOSTIC_EVENT_NAME} AND ${events.metadataJson}->>'resultId' = ${resultId}`,
+      )
+      .orderBy(desc(events.createdAt))
+      .limit(50),
   ]);
 
   return buildAdminPaidResultLookupSummary(
@@ -573,6 +610,7 @@ export async function lookupAdminPaidResultById(
       contacts: contactRows,
       contactSecrets: secretRows,
       accessLinks: accessLinkRows,
+      saveDiagnostics: summarizeAccessLinkSaveDiagnosticEvents(accessLinkSaveDiagnosticRows),
     },
     { resultId, now: options.now },
   );

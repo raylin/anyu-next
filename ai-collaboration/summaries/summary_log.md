@@ -11223,3 +11223,36 @@ Unresolved questions:
 - No payment, NotifyURL, processor, paid generation, Email send, or LINE send occurred.
 - No Vercel env change or deployment occurred.
 - Next action: diagnose and fix pre-payment access-link save failures before any further production payment attempt.
+
+## 2026-06-07 Pre-Payment Access-Link Save Diagnostics + Fix v0
+
+### Completed Changes
+
+- reconstructed the expected pre-payment Email and LINE save chains and defined what should unlock payment
+- diagnosed latest production failure through Admin/Ops first for result `800c88fa-04de-4172-b34a-3bc78cd4d0fa`
+- confirmed Email historical root cause was not recoverable because no safe Email save attempt category was persisted before this task
+- added sanitized Email save diagnostics through existing event infrastructure and Admin paid-result lookup
+- expanded LINE server-side post-login bind milestones so recipient-secret failures can be classified after LINE login returns
+- updated Admin paid-result summary so failed/contact-only LINE state is visible but does not count as saved/deliverable
+- updated Admin CLI schema/pretty output for latest save category/status/count
+- kept diagnostic tooling as permanent Admin/Ops surface through existing `lookup-result` and `lookup-line-bind`; no standalone diagnostic-only command was added
+
+### Validation
+
+- targeted Email save / LINE bind / Admin lookup / diagnostic event tests: pass, 4 files / 22 tests
+- `corepack pnpm --filter @anyu/admin-cli test`: pass, 3 files / 29 tests
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass
+- `cd apps/web && corepack pnpm lint`: pass
+- `cd apps/web && corepack pnpm test`: pass, 97 files / 662 tests
+- `cd apps/web && corepack pnpm build`: pass
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, gateStatus `pass`
+
+### Unresolved Questions
+
+- No local save-gate blocker remains.
+- The exact historical production Email write failure remains unrecoverable because the prior route did not persist a safe category.
+- `qa:module01:staging` was skipped because local/mock/UI/Admin/CLI coverage exercises the changed behavior and no real channel send is approved.
+- No production runtime, payment, Email, LINE, Vercel env change, DB mutation, or secret exposure occurred.
+- Next action: Controlled Production Payment Smoke Retry with Scoped Runtime Config v1 after owner review.

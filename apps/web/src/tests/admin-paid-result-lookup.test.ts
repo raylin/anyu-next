@@ -336,6 +336,72 @@ describe("admin paid result lookup summary", () => {
     expect(() => assertAdminPaidResultLookupResponseIsSafe(summary)).not.toThrow();
   });
 
+  it("does not report failed contact-only LINE state as saved", () => {
+    const summary = buildAdminPaidResultLookupSummary(
+      baseRows({
+        payments: [
+          {
+            provider: "newebpay",
+            moduleSlug: "ambiguous-temperature",
+            status: "checkout_started",
+            paidAt: null,
+            merchantOrderNo: "PRIVATE-ORDER",
+            createdAt: NOW,
+          },
+        ],
+        contacts: [
+          {
+            id: LINE_CONTACT_ID,
+            contactType: "line",
+            status: "failed",
+            transactionalConsentAt: NOW,
+            createdAt: NOW,
+          },
+        ],
+      }),
+      { resultId: RESULT_ID, now: NOW },
+    );
+
+    expect(summary.accessLinks.line).toMatchObject({
+      contactSaved: false,
+      latestContactStatus: "failed",
+      recipientSecretExists: false,
+      deliverable: false,
+    });
+    expect(summary.diagnosis).toEqual(
+      expect.arrayContaining(["payment_waiting", "no_saved_contact"]),
+    );
+    expect(summary.diagnosis).not.toContain("line_contact_saved");
+    expect(summary.diagnosis).not.toContain("line_bind_incomplete");
+    expect(() => assertAdminPaidResultLookupResponseIsSafe(summary)).not.toThrow();
+  });
+
+  it("surfaces sanitized save diagnostics without contact values", () => {
+    const summary = buildAdminPaidResultLookupSummary(
+      baseRows({
+        saveDiagnostics: {
+          email: {
+            channel: "email",
+            latestCategory: "email_save_contact_write_failed",
+            latestStatus: "failed",
+            eventCount: 2,
+            latestCreatedAtPresent: true,
+          },
+        },
+      }),
+      { resultId: RESULT_ID, now: NOW },
+    );
+
+    expect(summary.accessLinks.email).toMatchObject({
+      contactSaved: false,
+      latestSaveCategory: "email_save_contact_write_failed",
+      latestSaveStatus: "failed",
+      saveAttemptCount: 2,
+    });
+    expect(JSON.stringify(summary)).not.toContain("owner@example.com");
+    expect(() => assertAdminPaidResultLookupResponseIsSafe(summary)).not.toThrow();
+  });
+
   it("rejects unsafe response shapes", () => {
     expect(() =>
       assertAdminPaidResultLookupResponseIsSafe({
