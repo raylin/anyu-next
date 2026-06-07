@@ -81,7 +81,16 @@ describe("admin runtime config routes", () => {
 
   it("returns registry and sanitized values", async () => {
     process.env.ADMIN_API_TOKEN = "correct-token";
-    listRuntimeConfigValues.mockResolvedValue([record]);
+    listRuntimeConfigValues.mockResolvedValue([
+      record,
+      {
+        ...record,
+        key: "delivery.line.enabled",
+        scopeType: "global",
+        scopeKey: "global",
+        active: false,
+      },
+    ]);
     getRuntimeConfigValue.mockResolvedValue(record);
 
     const registry = await registryRoute.GET(
@@ -98,7 +107,9 @@ describe("admin runtime config routes", () => {
     );
 
     expect(registry.status).toBe(200);
-    expect(await values.json()).toMatchObject({ ok: true, values: [{ key: "payment.window.enabled" }] });
+    const valuesBody = await values.json();
+    expect(valuesBody).toMatchObject({ ok: true, values: [{ key: "payment.window.enabled" }] });
+    expect(JSON.stringify(valuesBody)).not.toContain("delivery.line.enabled");
     expect(await single.json()).toMatchObject({ ok: true, config: { active: true, valueType: "boolean" } });
   });
 

@@ -5,9 +5,7 @@ export type RuntimeConfigRiskLevel = "low" | "medium" | "high";
 
 export type RuntimeConfigKey =
   | "payment.window.enabled"
-  | "payment.global.disabled"
-  | "delivery.line.enabled"
-  | "delivery.email.enabled";
+  | "payment.global.disabled";
 
 export type RuntimeConfigDefinition = {
   key: RuntimeConfigKey;
@@ -58,36 +56,6 @@ export const RUNTIME_CONFIG_REGISTRY = [
     requiresReason: true,
     globalWriteRequiresConfirm: true,
     notes: "When true, payment must fail closed even if module windows are enabled.",
-    createdAt: "2026-06-07",
-  },
-  {
-    key: "delivery.line.enabled",
-    description: "Allows LINE access-link delivery for an explicitly read scope.",
-    valueType: "boolean",
-    allowedScopes: ["global", "module"],
-    moduleAllowlist: ["ai-temperature"],
-    active: true,
-    critical: true,
-    owner: "ops",
-    riskLevel: "medium",
-    requiresReason: true,
-    globalWriteRequiresConfirm: true,
-    notes: "Resolver does not merge global and module values; services must read scopes explicitly.",
-    createdAt: "2026-06-07",
-  },
-  {
-    key: "delivery.email.enabled",
-    description: "Allows Email access-link delivery for an explicitly read scope.",
-    valueType: "boolean",
-    allowedScopes: ["global", "module"],
-    moduleAllowlist: ["ai-temperature"],
-    active: true,
-    critical: true,
-    owner: "ops",
-    riskLevel: "medium",
-    requiresReason: true,
-    globalWriteRequiresConfirm: true,
-    notes: "Resolver does not merge global and module values; services must read scopes explicitly.",
     createdAt: "2026-06-07",
   },
 ] as const satisfies readonly RuntimeConfigDefinition[];

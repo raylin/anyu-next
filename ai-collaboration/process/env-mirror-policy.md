@@ -60,6 +60,7 @@ Production defaults:
 - Frequent payment runtime windows are controlled by scoped runtime config, not Vercel env toggles.
 - `payment.window.enabled` is module-scoped and must be opened/closed through Admin API / `pnpm ops`.
 - `payment.global.disabled` is the global emergency kill switch and requires explicit global-impact confirmation.
+- `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT` are obsolete as normal runtime-window controls and must not be restored to env mirrors unless a future owner-approved static upper-bound is implemented, documented, and tested.
 - Operator/fake-paid routes remain disabled in production.
 
 Runtime config is not an env mirror concern and must not store provider credentials, API keys, tokens, database URLs, or crypto secrets. Env mirrors continue to own secrets/provider credentials; scoped runtime config owns non-secret operational runtime gates.

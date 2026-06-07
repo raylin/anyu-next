@@ -38,6 +38,8 @@ describe("admin CLI config", () => {
 
     expect(exitCode).toBe(0);
     expect(run.stdout).toContain("pnpm ops config set --env production payment.window.enabled true --module ai-temperature");
+    expect(run.stdout).not.toContain("delivery.line.enabled");
+    expect(run.stdout).not.toContain("delivery.email.enabled");
     expect(helpText()).toContain("ADMIN_API_TOKEN");
   });
 

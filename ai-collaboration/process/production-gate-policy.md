@@ -80,6 +80,15 @@ The runtime-window helper must:
 
 The old Vercel env flags `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT` are no longer primary runtime gates.
 
+They must not be used to open or close normal production smoke windows. If the names are encountered in historical reports or old handoffs, treat them as historical context unless a current task explicitly reintroduces a tested static upper-bound with owner approval.
+
+Active Scoped Runtime Config v0 payment controls:
+
+- `payment.window.enabled`
+- `payment.global.disabled`
+
+Reserved delivery config names are not live sender controls in v0 and must not be used as proof that Email or LINE delivery is enabled/disabled.
+
 Do not enable:
 
 - ads

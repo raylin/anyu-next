@@ -30,6 +30,13 @@ pnpm ops config set --env production payment.window.enabled false --module ai-te
 pnpm ops config history --env production payment.window.enabled --module ai-temperature
 ```
 
+Active v0 runtime config keys:
+
+- `payment.window.enabled`
+- `payment.global.disabled`
+
+Delivery keys such as `delivery.email.enabled` and `delivery.line.enabled` are reserved for a future sender-gate implementation and must not be exposed as active controls until sender code reads them.
+
 Auth:
 
 - `ADMIN_API_TOKEN` from explicit shell/process env
@@ -58,6 +65,7 @@ Runtime config CLI writes must:
 - require `--reason` for writes
 - require `--confirm-global-impact` for global writes
 - reject secrets/provider credentials/DB URLs as runtime config
+- reject unknown or inactive keys; active controls must map to actual runtime behavior
 
 ## Direct DB Use
 

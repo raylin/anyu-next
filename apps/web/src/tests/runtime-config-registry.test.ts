@@ -15,9 +15,12 @@ describe("runtime config registry", () => {
     expect(listRuntimeConfigDefinitions().map((entry) => entry.key)).toEqual([
       "payment.window.enabled",
       "payment.global.disabled",
-      "delivery.line.enabled",
-      "delivery.email.enabled",
     ]);
+  });
+
+  it("does not expose unwired delivery controls as active runtime config keys", () => {
+    expect(getRuntimeConfigDefinition("delivery.line.enabled")).toBeNull();
+    expect(getRuntimeConfigDefinition("delivery.email.enabled")).toBeNull();
   });
 
   it("defines payment.window.enabled as module-scoped and high-risk", () => {

@@ -25,7 +25,6 @@ Global writes require explicit confirmation:
 
 ```bash
 pnpm ops config set --env production payment.global.disabled true --global --reason "emergency payment shutdown" --confirm-global-impact
-pnpm ops config set --env production delivery.line.enabled false --global --reason "LINE emergency disable" --confirm-global-impact
 ```
 
 ## Support Lookups

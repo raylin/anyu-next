@@ -57,15 +57,7 @@ VALUES
   ('production', 'payment.window.enabled', 'module', 'ai-temperature', 'boolean', 'false'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
   ('staging', 'payment.window.enabled', 'module', 'ai-temperature', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
   ('production', 'payment.global.disabled', 'global', 'global', 'boolean', 'false'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('staging', 'payment.global.disabled', 'global', 'global', 'boolean', 'false'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('production', 'delivery.line.enabled', 'global', 'global', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('staging', 'delivery.line.enabled', 'global', 'global', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('production', 'delivery.line.enabled', 'module', 'ai-temperature', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('staging', 'delivery.line.enabled', 'module', 'ai-temperature', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('production', 'delivery.email.enabled', 'global', 'global', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('staging', 'delivery.email.enabled', 'global', 'global', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('production', 'delivery.email.enabled', 'module', 'ai-temperature', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration'),
-  ('staging', 'delivery.email.enabled', 'module', 'ai-temperature', 'boolean', 'true'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration')
+  ('staging', 'payment.global.disabled', 'global', 'global', 'boolean', 'false'::jsonb, true, 'baseline_seed_scoped_runtime_config_v0', 'migration')
 ON CONFLICT ("environment", "key", "scope_type", "scope_key") DO NOTHING;
 --> statement-breakpoint
 INSERT INTO "runtime_config_events" (
@@ -94,15 +86,7 @@ FROM (
     ('production', 'payment.window.enabled', 'module', 'ai-temperature', 'false'::jsonb),
     ('staging', 'payment.window.enabled', 'module', 'ai-temperature', 'true'::jsonb),
     ('production', 'payment.global.disabled', 'global', 'global', 'false'::jsonb),
-    ('staging', 'payment.global.disabled', 'global', 'global', 'false'::jsonb),
-    ('production', 'delivery.line.enabled', 'global', 'global', 'true'::jsonb),
-    ('staging', 'delivery.line.enabled', 'global', 'global', 'true'::jsonb),
-    ('production', 'delivery.line.enabled', 'module', 'ai-temperature', 'true'::jsonb),
-    ('staging', 'delivery.line.enabled', 'module', 'ai-temperature', 'true'::jsonb),
-    ('production', 'delivery.email.enabled', 'global', 'global', 'true'::jsonb),
-    ('staging', 'delivery.email.enabled', 'global', 'global', 'true'::jsonb),
-    ('production', 'delivery.email.enabled', 'module', 'ai-temperature', 'true'::jsonb),
-    ('staging', 'delivery.email.enabled', 'module', 'ai-temperature', 'true'::jsonb)
+    ('staging', 'payment.global.disabled', 'global', 'global', 'false'::jsonb)
 ) AS values_seed(environment, key, scope_type, scope_key, value_json)
 WHERE NOT EXISTS (
   SELECT 1

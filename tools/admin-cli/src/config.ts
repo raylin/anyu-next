@@ -52,7 +52,6 @@ function helpText() {
     "  pnpm ops config get --env production payment.window.enabled --module ai-temperature",
     "  pnpm ops config set --env production payment.window.enabled true --module ai-temperature --reason \"controlled production smoke\"",
     "  pnpm ops config set --env production payment.global.disabled true --global --reason \"emergency payment shutdown\" --confirm-global-impact",
-    "  pnpm ops config set --env production delivery.line.enabled false --global --reason \"LINE emergency disable\" --confirm-global-impact",
     "  pnpm ops config set --env production payment.window.enabled false --module ai-temperature --reason \"smoke complete\"",
     "  pnpm ops config history --env production payment.window.enabled --module ai-temperature",
     "",

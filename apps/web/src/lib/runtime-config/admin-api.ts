@@ -123,7 +123,9 @@ export async function listRuntimeConfigAdminValues(url: URL) {
   const environment = url.searchParams.get("environment")?.trim() ?? "production";
   const records = await listRuntimeConfigValues({ environment });
 
-  return records.map(serializeRuntimeConfigRecord);
+  return records
+    .filter((record) => getRuntimeConfigDefinition(record.key)?.active === true)
+    .map(serializeRuntimeConfigRecord);
 }
 
 export async function getRuntimeConfigAdminHistory(url: URL) {
