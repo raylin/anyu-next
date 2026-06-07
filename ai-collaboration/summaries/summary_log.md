@@ -11750,3 +11750,51 @@ Unresolved questions:
 - Production Admin/Ops credential blocker is resolved locally.
 - Remaining blocker before payment smoke: owner must verify/update NewebPay dashboard ReturnURL/NotifyURL alignment.
 - No production runtime open, payment, Email, LINE, Vercel env change, DB mutation, or secret/private output occurred.
+
+## 2026-06-07 Controlled Production Payment Smoke Retry with Scoped Runtime Config v4
+
+### Completed Changes
+
+- promoted/asserted Production on accepted target commit `3423c98e08f9` while fail-closed.
+- passed pre-open gates:
+  - `qa:module01:local`
+  - `qa:module01:mock-flow`
+  - `qa:module01:ui` after approved Chromium sandbox escalation
+  - `qa:module01:smoke-fixture -- --json`
+  - `qa:production:runtime-window -- --action status`
+  - `qa:module01:production-preflight`
+  - `qa:production:admin-ops-preflight`
+- opened `payment.window.enabled` through scoped runtime config only.
+- created fresh production result `245be67b-a229-4cd9-b9d6-1f5c2b98e3bf` from the tracked fixture with `cacheHit=false`.
+- verified checkout-start readiness, mandatory save gate, mobile LINE-before-Email layout, NT$49 one-time copy, and no token/provider leakage.
+- owner saved Email successfully; Admin/Ops confirmed Email saved/deliverable with `email_save_success`.
+- owner completed mobile LINE bind successfully; Admin/Ops confirmed `bind_success`, `recipientSecretExists=true`, and deliverable LINE state.
+- owner completed one NT$49 credit-card one-time payment.
+- Admin/Ops confirmed payment `paid`, entitlement `active`, and later paid result `completed`.
+- the paid generation job initially stayed `queued`; the approved internal processor endpoint was invoked once after Admin/Ops recommended `retry_processor_if_safe`, and it completed one job successfully.
+- Admin/Ops confirmed Email and LINE access links were sent and active.
+- owner confirmed both Email and LINE `/r/` links opened the completed paid result.
+- closed `payment.window.enabled`; final runtime-window status is `fail_closed_ready` and production-preflight passes.
+
+### Validation
+
+- production freshness: pass, deployed commit `3423c98e08f9`, no mixed deployment.
+- pre-open gates: pass.
+- Admin/Ops preflight: pass, token source `credentials_file`.
+- runtime config open: pass, `stateCategory=runtime_config_open`.
+- fresh result assertion: pass, `cacheHit=false`.
+- Email save: pass.
+- LINE bind: pass.
+- payment/NotifyURL truth: pass via Admin/Ops payment `paid`.
+- processor/generation: pass after approved processor invocation; observed queue latency requires follow-up.
+- Email/LINE delivery: pass.
+- runtime config close: pass.
+- final runtime-window: pass, `fail_closed_ready`.
+- final production-preflight: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Existing tech debt observed: paid generation stayed queued noticeably longer than prior runs and required the approved processor endpoint. Gate 1 assessment should decide whether this blocks soft availability or needs a targeted queue/processor latency follow-up.
+- No Vercel env change, direct DB mutation, broad traffic, ads, non-card payment, theme implementation, Module 02 work, or private/token output occurred.
+- Recommended next task: Controlled Production Payment Smoke Final Assessment / Gate 1 Decision v0, including processor latency as an explicit decision input.
