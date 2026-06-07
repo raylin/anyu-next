@@ -42,34 +42,6 @@ export function isOperatorLineRecoverySmokeEnabled(env: NodeJS.ProcessEnv = proc
   );
 }
 
-export function isPaymentRuntimeEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return getBooleanEnvFlag("ENABLE_PAYMENT_RUNTIME", env);
-}
-
-export function isNewebPayCheckoutEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return getBooleanEnvFlag("ENABLE_NEWEBPAY_CHECKOUT", env);
-}
-
-export function isStagingOperatorCheckoutStartEnabled(
-  env: NodeJS.ProcessEnv = process.env,
-): boolean {
-  return (
-    env.VERCEL_ENV === "preview" &&
-    env.VERCEL_GIT_COMMIT_REF === "staging" &&
-    isNewebPayCheckoutEnabled(env) &&
-    Boolean(env.OPERATOR_TEST_SECRET?.trim())
-  );
-}
-
-export function canStartNewebPayCheckoutFromResult(
-  env: NodeJS.ProcessEnv = process.env,
-): boolean {
-  return (
-    isNewebPayCheckoutEnabled(env) &&
-    (isPaymentRuntimeEnabled(env) || isStagingOperatorCheckoutStartEnabled(env))
-  );
-}
-
 export function isPaidJobQueueTriggerEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return getBooleanEnvFlag("ENABLE_PAID_JOB_QUEUE_TRIGGER", env);
 }

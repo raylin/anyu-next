@@ -20,6 +20,8 @@ const REQUIRED_TABLES = [
   "payment_access_link_contacts",
   "paid_result_access_links",
   "payment_access_link_contact_secrets",
+  "runtime_config_values",
+  "runtime_config_events",
 ];
 
 const REQUIRED_ACCESS_LINK_AUDIT_COLUMNS = [
@@ -41,8 +43,6 @@ const ENV_GROUPS = {
     "NEXT_PUBLIC_APP_URL",
   ],
   runtimeFlags: [
-    "ENABLE_PAYMENT_RUNTIME",
-    "ENABLE_NEWEBPAY_CHECKOUT",
     "ENABLE_PAID_JOB_QUEUE_TRIGGER",
     "ENABLE_PAID_GENERATION_PROCESSOR",
   ],
@@ -559,11 +559,7 @@ function buildHostValueShapeStatus(presence) {
   };
 }
 
-function isTruthyFlag(name, env = process.env) {
-  return ["1", "true", "yes", "on"].includes(env[name]?.trim().toLowerCase() ?? "");
-}
-
-function buildEnvChecklist(presence, options, env = process.env) {
+function buildEnvChecklist(presence) {
   const groups = {
     paymentProvider: envGroupStatus(presence.names, ENV_GROUPS.paymentProvider),
     runtimeFlags: envGroupStatus(presence.names, ENV_GROUPS.runtimeFlags),
@@ -588,31 +584,15 @@ function buildEnvChecklist(presence, options, env = process.env) {
     "ENABLE_OPERATOR_EMAIL_RECOVERY_SMOKE",
   ];
   const presentOperatorNames = operatorNames.filter((name) => presence.names.has(name));
-  const runtimeFlagValues =
-    presence.valuesAvailableForFlagChecks
-      ? {
-          ENABLE_PAYMENT_RUNTIME: isTruthyFlag("ENABLE_PAYMENT_RUNTIME", env),
-          ENABLE_NEWEBPAY_CHECKOUT: isTruthyFlag("ENABLE_NEWEBPAY_CHECKOUT", env),
-          ENABLE_PAID_JOB_QUEUE_TRIGGER: isTruthyFlag("ENABLE_PAID_JOB_QUEUE_TRIGGER", env),
-          ENABLE_PAID_GENERATION_PROCESSOR: isTruthyFlag("ENABLE_PAID_GENERATION_PROCESSOR", env),
-        }
-      : null;
-  const runtimeFlagsUnexpected =
-    options.mode === "dry-run" && runtimeFlagValues
-      ? Object.entries(runtimeFlagValues)
-          .filter(([, enabled]) => enabled)
-          .map(([name]) => name)
-      : [];
-
   return {
     groups,
     operatorRouteEnv: {
       presentNames: presentOperatorNames,
       expectedForProductionSmoke: "absent_or_false",
-      valuesChecked: Boolean(runtimeFlagValues),
+      valuesChecked: false,
     },
-    runtimeFlagValues,
-    runtimeFlagsUnexpected,
+    runtimeFlagValues: null,
+    runtimeFlagsUnexpected: [],
     localMirrorShape: buildLocalMirrorShapeStatus(presence.valueSource),
     hostValueShape: buildHostValueShapeStatus(presence),
     processorReadiness: {
@@ -853,12 +833,8 @@ function classifyReadiness(input) {
     return "blocked_db_schema";
   }
 
-  if (envChecklist.runtimeFlagsUnexpected.length > 0) {
-    return "blocked_runtime_flags_not_expected";
-  }
-
   if (productionSafety.checked && productionSafety.ok === false) {
-    return "blocked_runtime_flags_not_expected";
+    return "blocked_production_not_fail_closed";
   }
 
   return "pass_ready_for_controlled_smoke";

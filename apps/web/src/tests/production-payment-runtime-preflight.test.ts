@@ -21,8 +21,6 @@ const ALL_REQUIRED_NAMES = [
   "NEWEBPAY_NOTIFY_URL",
   "NEWEBPAY_ENVIRONMENT",
   "NEXT_PUBLIC_APP_URL",
-  "ENABLE_PAYMENT_RUNTIME",
-  "ENABLE_NEWEBPAY_CHECKOUT",
   "ENABLE_PAID_JOB_QUEUE_TRIGGER",
   "ENABLE_PAID_GENERATION_PROCESSOR",
   "INTERNAL_JOB_SECRET",
@@ -225,14 +223,6 @@ describe("production payment runtime preflight", () => {
     ).toBe("blocked_missing_line_env");
   });
 
-  it("blocks dry-run mode when local runtime flags are already enabled", () => {
-    expect(
-      classifyFromNames(ALL_REQUIRED_NAMES, {
-        ENABLE_PAYMENT_RUNTIME: "true",
-      } as NodeJS.ProcessEnv),
-    ).toBe("blocked_runtime_flags_not_expected");
-  });
-
   it("blocks when root and app Vercel project links are mismatched", () => {
     const envChecklist = buildEnvChecklist(
       presence(ALL_REQUIRED_NAMES),
@@ -286,13 +276,13 @@ describe("production payment runtime preflight", () => {
   it("parses Vercel production env names without values", () => {
     const names = parseVercelEnvNames(`
       Retrieving project…
-      ENABLE_PAYMENT_RUNTIME                    Encrypted           Production
+      ENABLE_PAID_GENERATION_PROCESSOR         Encrypted           Production
       PAYMENT_CHECKOUT_SESSION_SECRET           Encrypted           Production
       PAID_ACCESS_TOKEN_HASH_SECRET             Encrypted           Production
       RESEND_API_KEY                            Encrypted           Production
     `);
 
-    expect(names.has("ENABLE_PAYMENT_RUNTIME")).toBe(true);
+    expect(names.has("ENABLE_PAID_GENERATION_PROCESSOR")).toBe(true);
     expect(names.has("PAYMENT_CHECKOUT_SESSION_SECRET")).toBe(true);
     expect(names.has("PAID_ACCESS_TOKEN_HASH_SECRET")).toBe(true);
     expect(names.has("RESEND_API_KEY")).toBe(true);

@@ -34,45 +34,46 @@ describe("production runtime-window helper", () => {
     expect(() => parseArgs(["--action", "rotate-secret"])).toThrow("invalid_action");
   });
 
-  it("refuses execute actions even with confirmation in v0", async () => {
+  it("refuses execute actions without confirmation", async () => {
     await expect(
       runProductionRuntimeWindow(["--action", "enable"]),
     ).resolves.toMatchObject({
       ok: false,
       blocker: "missing_confirm_controlled_smoke",
-      executeImplemented: false,
-    });
-    await expect(
-      runProductionRuntimeWindow(["--action", "enable", "--confirm-controlled-smoke"]),
-    ).resolves.toMatchObject({
-      ok: false,
-      action: "enable",
-      executeImplemented: false,
-      plannedFlagsOnly: ["ENABLE_PAYMENT_RUNTIME", "ENABLE_NEWEBPAY_CHECKOUT"],
+      executeImplemented: true,
     });
     await expect(
       runProductionRuntimeWindow(["--action", "disable"]),
     ).resolves.toMatchObject({
       ok: false,
       blocker: "missing_confirm_shutdown",
-      executeImplemented: false,
+      executeImplemented: true,
     });
   });
 
-  it("plans only the two runtime-window flags", () => {
+  it("plans only scoped runtime config keys", () => {
     expect(buildPlan("plan-enable")).toMatchObject({
       plannedAction: "enable_controlled_smoke_window",
-      syncKeys: ["ENABLE_PAYMENT_RUNTIME", "ENABLE_NEWEBPAY_CHECKOUT"],
-      localMirrorFirst: true,
-      vercelSyncSecond: true,
-      deployFromRepoRootOnly: true,
+      configKeys: ["payment.global.disabled", "payment.window.enabled"],
+      targetConfig: {
+        key: "payment.window.enabled",
+        scopeType: "module",
+        scopeKey: "ai-temperature",
+        value: true,
+      },
+      redeployRequired: false,
       valuesPrinted: false,
     });
     expect(buildPlan("plan-disable")).toMatchObject({
       plannedAction: "disable_controlled_smoke_window",
-      syncKeys: ["ENABLE_PAYMENT_RUNTIME", "ENABLE_NEWEBPAY_CHECKOUT"],
-      localMirrorFirst: true,
-      vercelSyncSecond: true,
+      configKeys: ["payment.global.disabled", "payment.window.enabled"],
+      targetConfig: {
+        key: "payment.window.enabled",
+        scopeType: "module",
+        scopeKey: "ai-temperature",
+        value: false,
+      },
+      redeployRequired: false,
     });
   });
 
@@ -247,7 +248,7 @@ describe("production runtime-window helper", () => {
         projectLinking: { ok: true },
         aliasGuard: { blocker: true, status: "alias_target_unverified" },
         preflight: { ok: true },
-        flags: { runtimeEnabled: false, checkoutEnabled: false },
+        runtimeConfig: { ok: true, paymentGlobalDisabled: false, paymentWindowEnabled: false },
         routeStatus: {
           publicPagesStatus: { ok: true },
           checkoutRouteStatus: { failClosed: true },
@@ -270,7 +271,7 @@ describe("production runtime-window helper", () => {
       projectLinking: { ok: true },
       aliasGuard: { blocker: false, status: "pass" },
       preflight: { ok: true },
-      flags: { runtimeEnabled: false, checkoutEnabled: false },
+        runtimeConfig: { ok: true, paymentGlobalDisabled: false, paymentWindowEnabled: false },
       routeStatus,
     };
 
@@ -278,7 +279,7 @@ describe("production runtime-window helper", () => {
     expect(
       classifyRuntimeWindowState({
         ...base,
-        flags: { runtimeEnabled: true, checkoutEnabled: true },
+        runtimeConfig: { ok: true, paymentGlobalDisabled: false, paymentWindowEnabled: true },
         routeStatus: {
           ...routeStatus,
           checkoutRouteStatus: { failClosed: false },
@@ -297,5 +298,11 @@ describe("production runtime-window helper", () => {
     expect(classifyRuntimeWindowState({ ...base, preflight: { ok: false } })).toBe(
       "preflight_blocked",
     );
+    expect(
+      classifyRuntimeWindowState({
+        ...base,
+        runtimeConfig: { ok: false },
+      }),
+    ).toBe("env_mirror_blocked");
   });
 });

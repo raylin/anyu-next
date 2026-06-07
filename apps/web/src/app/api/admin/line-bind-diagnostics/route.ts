@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
+import { authorizeAdminRequest } from "@/lib/admin/auth";
 import { isValidAdminResultId } from "@/lib/admin/paid-result-lookup";
 import { lookupLineBindDiagnosticsByResultId } from "@/lib/line/recovery-bind-diagnostic-events";
-import { authorizeAdminRequest } from "@/app/api/admin/paid-results/[resultId]/route";
 
 function jsonError(status: number, error: string) {
   return NextResponse.json({ ok: false, error }, { status });

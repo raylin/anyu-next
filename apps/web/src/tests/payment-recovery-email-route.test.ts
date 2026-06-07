@@ -1,17 +1,17 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const {
-  mockCanStartNewebPayCheckoutFromResult,
+  mockCanStartNewebPayCheckoutForModule,
   mockIsDbConfigured,
   mockCreateOrUpdateEmailRecoveryContact,
 } = vi.hoisted(() => ({
-  mockCanStartNewebPayCheckoutFromResult: vi.fn(),
+  mockCanStartNewebPayCheckoutForModule: vi.fn(),
   mockIsDbConfigured: vi.fn(),
   mockCreateOrUpdateEmailRecoveryContact: vi.fn(),
 }));
 
-vi.mock("@/lib/runtime/feature-flags", () => ({
-  canStartNewebPayCheckoutFromResult: mockCanStartNewebPayCheckoutFromResult,
+vi.mock("@/lib/runtime-config/payment", () => ({
+  canStartNewebPayCheckoutForModule: mockCanStartNewebPayCheckoutForModule,
 }));
 
 vi.mock("@/lib/db/client", () => ({
@@ -63,7 +63,7 @@ function createFormRequest(input: {
 describe("payment recovery email route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCanStartNewebPayCheckoutFromResult.mockReturnValue(true);
+    mockCanStartNewebPayCheckoutForModule.mockResolvedValue(true);
     mockIsDbConfigured.mockReturnValue(true);
     mockCreateOrUpdateEmailRecoveryContact.mockResolvedValue({ id: "contact-1" });
   });
@@ -116,7 +116,7 @@ describe("payment recovery email route", () => {
   });
 
   it("does not capture recovery contact when checkout gates are closed", async () => {
-    mockCanStartNewebPayCheckoutFromResult.mockReturnValue(false);
+    mockCanStartNewebPayCheckoutForModule.mockResolvedValue(false);
 
     const response = await POST(
       createFormRequest({

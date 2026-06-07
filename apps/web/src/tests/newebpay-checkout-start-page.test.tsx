@@ -2,14 +2,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
-  mockCanStartNewebPayCheckoutFromResult,
+  mockCanStartNewebPayCheckoutForModule,
   mockIsDbConfigured,
   mockCreateNewebPayCheckout,
   mockGetPaymentRecoveryContactsByResultId,
   mockGetActiveLineRecoveryRecipientSecretByContactId,
   mockHeaders,
 } = vi.hoisted(() => ({
-  mockCanStartNewebPayCheckoutFromResult: vi.fn(),
+  mockCanStartNewebPayCheckoutForModule: vi.fn(),
   mockIsDbConfigured: vi.fn(),
   mockCreateNewebPayCheckout: vi.fn(),
   mockGetPaymentRecoveryContactsByResultId: vi.fn(),
@@ -17,8 +17,8 @@ const {
   mockHeaders: vi.fn(),
 }));
 
-vi.mock("@/lib/runtime/feature-flags", () => ({
-  canStartNewebPayCheckoutFromResult: mockCanStartNewebPayCheckoutFromResult,
+vi.mock("@/lib/runtime-config/payment", () => ({
+  canStartNewebPayCheckoutForModule: mockCanStartNewebPayCheckoutForModule,
 }));
 
 vi.mock("@/lib/db/client", () => ({
@@ -58,7 +58,7 @@ describe("NewebPay checkout-start page", () => {
     process.env.PAYMENT_RECOVERY_CONTACT_HASH_SECRET = "test-only-recovery-hash-secret";
     delete process.env.NEXT_PUBLIC_LINE_LIFF_URL;
     mockHeaders.mockResolvedValue(new Headers({ "user-agent": "Mozilla/5.0 Macintosh" }));
-    mockCanStartNewebPayCheckoutFromResult.mockReturnValue(true);
+    mockCanStartNewebPayCheckoutForModule.mockResolvedValue(true);
     mockIsDbConfigured.mockReturnValue(true);
     mockGetPaymentRecoveryContactsByResultId.mockResolvedValue([]);
     mockGetActiveLineRecoveryRecipientSecretByContactId.mockResolvedValue(null);
@@ -83,7 +83,7 @@ describe("NewebPay checkout-start page", () => {
   });
 
   it("does not create checkout when production-disabled gates are closed", async () => {
-    mockCanStartNewebPayCheckoutFromResult.mockReturnValue(false);
+    mockCanStartNewebPayCheckoutForModule.mockResolvedValue(false);
 
     const page = await CheckoutStartPage(params);
     const html = renderToStaticMarkup(page);

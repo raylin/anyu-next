@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  canStartNewebPayCheckoutFromResult,
   isOperatorEmailRecoverySmokeEnabled,
   isOperatorFakePaidSuccessEnabled,
   isOperatorRecoveryLinkSmokeEnabled,
   isPaidJobQueueTriggerEnabled,
   isPaidGenerationJobsEnabled,
   isPaidGenerationProcessorEnabled,
-  isStagingOperatorCheckoutStartEnabled,
 } from "@/lib/runtime/feature-flags";
 
 describe("runtime feature flags", () => {
@@ -107,57 +105,6 @@ describe("runtime feature flags", () => {
     ).toBe(true);
     expect(
       isPaidJobQueueTriggerEnabled({ ENABLE_PAID_JOB_QUEUE_TRIGGER: "false" } as NodeJS.ProcessEnv),
-    ).toBe(false);
-  });
-
-  it("allows staging operator checkout start only on Preview(staging) with checkout enabled and server secret present", () => {
-    expect(isStagingOperatorCheckoutStartEnabled({} as NodeJS.ProcessEnv)).toBe(false);
-    expect(
-      isStagingOperatorCheckoutStartEnabled({
-        VERCEL_ENV: "preview",
-        VERCEL_GIT_COMMIT_REF: "staging",
-        ENABLE_NEWEBPAY_CHECKOUT: "true",
-        OPERATOR_TEST_SECRET: "configured",
-      } as NodeJS.ProcessEnv),
-    ).toBe(true);
-    expect(
-      isStagingOperatorCheckoutStartEnabled({
-        VERCEL_ENV: "production",
-        VERCEL_GIT_COMMIT_REF: "staging",
-        ENABLE_NEWEBPAY_CHECKOUT: "true",
-        OPERATOR_TEST_SECRET: "configured",
-      } as NodeJS.ProcessEnv),
-    ).toBe(false);
-    expect(
-      isStagingOperatorCheckoutStartEnabled({
-        VERCEL_ENV: "preview",
-        VERCEL_GIT_COMMIT_REF: "feature",
-        ENABLE_NEWEBPAY_CHECKOUT: "true",
-        OPERATOR_TEST_SECRET: "configured",
-      } as NodeJS.ProcessEnv),
-    ).toBe(false);
-  });
-
-  it("allows result checkout only through payment runtime or the staging operator gate", () => {
-    expect(
-      canStartNewebPayCheckoutFromResult({
-        ENABLE_NEWEBPAY_CHECKOUT: "true",
-        ENABLE_PAYMENT_RUNTIME: "true",
-      } as NodeJS.ProcessEnv),
-    ).toBe(true);
-    expect(
-      canStartNewebPayCheckoutFromResult({
-        VERCEL_ENV: "preview",
-        VERCEL_GIT_COMMIT_REF: "staging",
-        ENABLE_NEWEBPAY_CHECKOUT: "true",
-        OPERATOR_TEST_SECRET: "configured",
-      } as NodeJS.ProcessEnv),
-    ).toBe(true);
-    expect(
-      canStartNewebPayCheckoutFromResult({
-        ENABLE_NEWEBPAY_CHECKOUT: "true",
-        ENABLE_PAYMENT_RUNTIME: "false",
-      } as NodeJS.ProcessEnv),
     ).toBe(false);
   });
 });

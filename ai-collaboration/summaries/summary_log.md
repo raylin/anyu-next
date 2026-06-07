@@ -11081,3 +11081,33 @@ Unresolved questions:
 - Owner should confirm the v0 key list and static env upper-bound recommendation before implementation.
 - No production runtime, payment, Email, LINE, Vercel env, provider credential, DB mutation, migration, or code implementation occurred.
 - Next mainline task: Scoped Runtime Config Implementation v0, if owner accepts the architecture plan.
+
+## 2026-06-07 Scoped Runtime Config Implementation v0
+
+### Completed Changes
+
+- implemented registry-first DB-backed scoped runtime config with exact `environment + scopeType + scopeKey + key` identity
+- added runtime config DB tables, resolver, Admin API routes, `pnpm ops config`, CLI help/docs, and tests
+- migrated Module 01 payment checkout gating to `payment.global.disabled=false` plus module-scoped `payment.window.enabled=true`
+- updated runtime-window/preflight helpers to use scoped runtime config instead of frequent Vercel env runtime toggles
+- removed active references to `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT` from runtime code, QA scripts, env example, process docs, and ignored local mirrors
+- applied additive runtime config schema and non-secret fail-closed baseline values to Preview(staging) and Production
+
+### Validation
+
+- `cd apps/web && corepack pnpm lint`: pass.
+- targeted runtime-config/Admin API/checkout/preflight tests: pass.
+- `cd apps/web && corepack pnpm test`: pass, 96 files / 656 tests.
+- `corepack pnpm --filter @anyu/admin-cli test`: pass, 3 files / 28 tests.
+- `corepack pnpm --filter @anyu/admin-cli typecheck`: pass.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass.
+- Pre-deploy production runtime-window/preflight: blocked because Production still served old commit without runtime-config Admin API routes.
+
+### Unresolved Questions
+
+- Production remains fail-closed.
+- No payment, Email, LINE, Vercel env change, provider credential change, or secret exposure occurred.
+- Next action: deploy this code fail-closed, rerun runtime-window status and production-preflight, then continue to Production Smoke Runbook Update + Runtime Config Dry Run v0.

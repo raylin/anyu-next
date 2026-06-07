@@ -19,6 +19,17 @@ pnpm ops lookup-result --env staging --id <resultId>
 pnpm ops lookup-result --env production --id <resultId>
 ```
 
+Runtime config operations also use Admin API through `pnpm ops`:
+
+```bash
+pnpm ops config registry --env production
+pnpm ops config list --env production
+pnpm ops config get --env production payment.window.enabled --module ai-temperature
+pnpm ops config set --env production payment.window.enabled true --module ai-temperature --reason "controlled production smoke"
+pnpm ops config set --env production payment.window.enabled false --module ai-temperature --reason "smoke complete"
+pnpm ops config history --env production payment.window.enabled --module ai-temperature
+```
+
 Auth:
 
 - `ADMIN_API_TOKEN` from explicit shell/process env
@@ -39,6 +50,14 @@ The CLI must not:
 - access Neon directly
 - import `apps/web` DB helpers
 - expose raw Email, raw LINE ID, encrypted recipient, hashes, tokens, tokenized URLs, provider payloads, or card/payment-sensitive data
+
+Runtime config CLI writes must:
+
+- use registered keys only
+- require explicit scope (`--module <moduleSlug>` or `--global`)
+- require `--reason` for writes
+- require `--confirm-global-impact` for global writes
+- reject secrets/provider credentials/DB URLs as runtime config
 
 ## Direct DB Use
 

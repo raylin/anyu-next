@@ -6,10 +6,10 @@ Date: 2026-06-06
 
 Production runtime stays fail-closed unless a task explicitly authorizes controlled smoke.
 
-Default flags:
+Default scoped runtime config:
 
-- `ENABLE_PAYMENT_RUNTIME=false`
-- `ENABLE_NEWEBPAY_CHECKOUT=false`
+- `payment.window.enabled=false` for Module 01 unless a controlled smoke explicitly opens it
+- `payment.global.disabled=false` unless an emergency kill switch is intentionally active
 
 Operator/fake-paid routes must remain fail-closed in production.
 
@@ -53,7 +53,7 @@ Codex must also assert:
 
 ## Runtime Enablement
 
-Only enable the minimum required flags for the controlled smoke.
+Only open the minimum required scoped runtime config for the controlled smoke.
 
 Before runtime enablement planning, run:
 
@@ -62,14 +62,23 @@ cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status
 cd apps/web && corepack pnpm run qa:production:runtime-window -- --action plan-enable
 ```
 
+Normal controlled smoke open/close uses scoped runtime config:
+
+```bash
+pnpm ops config set --env production payment.window.enabled true --module ai-temperature --reason "controlled production smoke"
+pnpm ops config set --env production payment.window.enabled false --module ai-temperature --reason "smoke complete"
+```
+
 The runtime-window helper must:
 
 - default to read-only status
-- require explicit confirmation for any future execute action
-- only plan/sync `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT`
-- keep local mirror first, Vercel sync second
-- deploy from repo root only if execute actions are implemented later
-- never touch provider credentials or unrelated env values
+- require explicit confirmation for execute action
+- only set `payment.window.enabled` for module `ai-temperature`
+- use Admin API / `pnpm ops` runtime config boundary
+- require no redeploy for normal runtime-window open/close
+- never touch provider credentials or unrelated config values
+
+The old Vercel env flags `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT` are no longer primary runtime gates.
 
 Do not enable:
 
@@ -124,9 +133,9 @@ Keep runtime conservative.
 
 Default after controlled smoke:
 
-- disable `ENABLE_PAYMENT_RUNTIME`
-- disable `ENABLE_NEWEBPAY_CHECKOUT`
-- redeploy production fail-closed if needed
+- set `payment.window.enabled=false` for module `ai-temperature`
+- leave `payment.global.disabled=false` unless emergency shutdown is intentionally active
+- no redeploy is required for normal scoped runtime-window close
 - confirm checkout/operator routes fail closed
 
 Leave runtime enabled only if owner explicitly chooses soft public availability.

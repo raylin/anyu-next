@@ -1,9 +1,15 @@
+import { main as config } from "./config.js";
 import { main as lookupLineBind } from "./lookup-line-bind.js";
 import { main as lookupResult } from "./lookup-result.js";
 
 const argv = process.argv.slice(2);
 const command = argv[0];
-const main = command === "lookup-line-bind" ? lookupLineBind : lookupResult;
+const main =
+  command === "config"
+    ? config
+    : command === "lookup-line-bind"
+      ? lookupLineBind
+      : lookupResult;
 
 main(argv, {
   env: process.env,

@@ -3,7 +3,7 @@ import { isDbConfigured } from "@/lib/db/client";
 import { createOrUpdateEmailRecoveryContact } from "@/lib/db/payment-recovery-contacts";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { RecoveryContactConfigError } from "@/lib/payments/recovery-contact-crypto";
-import { canStartNewebPayCheckoutFromResult } from "@/lib/runtime/feature-flags";
+import { canStartNewebPayCheckoutForModule } from "@/lib/runtime-config/payment";
 
 type RouteProps = {
   params: Promise<{
@@ -34,7 +34,7 @@ export async function POST(request: Request, { params }: RouteProps) {
   const { moduleSlug, resultId } = await params;
   const moduleConfig = getModuleBySlug(moduleSlug);
 
-  if (!moduleConfig || !canStartNewebPayCheckoutFromResult() || !isDbConfigured()) {
+  if (!moduleConfig || !(await canStartNewebPayCheckoutForModule(moduleConfig)) || !isDbConfigured()) {
     return buildCheckoutRedirect(request, {
       moduleSlug,
       resultId,

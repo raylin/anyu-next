@@ -15,7 +15,7 @@ import { createLineRecoveryBindHref } from "@/lib/line/recovery-bind-link";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import type { ProductModuleConfig } from "@/lib/modules/types";
 import { createNewebPayCheckout } from "@/lib/payments/newebpay/checkout-service";
-import { canStartNewebPayCheckoutFromResult } from "@/lib/runtime/feature-flags";
+import { canStartNewebPayCheckoutForModule } from "@/lib/runtime-config/payment";
 
 export const dynamic = "force-dynamic";
 
@@ -372,7 +372,7 @@ export default async function CheckoutStartPage({ params, searchParams }: Checko
     notFound();
   }
 
-  if (!canStartNewebPayCheckoutFromResult()) {
+  if (!(await canStartNewebPayCheckoutForModule(moduleConfig))) {
     return <CheckoutUnavailable moduleConfig={moduleConfig} />;
   }
 

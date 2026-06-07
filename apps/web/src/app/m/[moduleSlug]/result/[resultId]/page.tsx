@@ -10,9 +10,7 @@ import {
   mapProductResultToViewModel,
 } from "@/lib/modules/ai-temperature-ui";
 import { getModuleBySlug } from "@/lib/modules/registry";
-import {
-  canStartNewebPayCheckoutFromResult,
-} from "@/lib/runtime/feature-flags";
+import { canStartNewebPayCheckoutForModule } from "@/lib/runtime-config/payment";
 
 type ResultPageProps = {
   params: Promise<{
@@ -81,7 +79,7 @@ export default async function ResultPage({ params }: ResultPageProps) {
 
   const normalizedResult = normalizeProductResultForDisplay(record.normalizedResultJson);
   const checkoutStartPath = `/m/${moduleConfig.slug}/result/${record.id}/checkout`;
-  const paidCtaAvailability = canStartNewebPayCheckoutFromResult()
+  const paidCtaAvailability = await canStartNewebPayCheckoutForModule(moduleConfig)
     ? "checkout_available"
     : "review_pending";
 

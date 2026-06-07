@@ -2,13 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockIsDbConfigured,
-  mockIsNewebPayCheckoutEnabled,
-  mockIsPaymentRuntimeEnabled,
+  mockGetPaymentRuntimeStateForModule,
   mockCreateNewebPayCheckout,
 } = vi.hoisted(() => ({
   mockIsDbConfigured: vi.fn(),
-  mockIsNewebPayCheckoutEnabled: vi.fn(),
-  mockIsPaymentRuntimeEnabled: vi.fn(),
+  mockGetPaymentRuntimeStateForModule: vi.fn(),
   mockCreateNewebPayCheckout: vi.fn(),
 }));
 
@@ -16,9 +14,8 @@ vi.mock("@/lib/db/client", () => ({
   isDbConfigured: mockIsDbConfigured,
 }));
 
-vi.mock("@/lib/runtime/feature-flags", () => ({
-  isNewebPayCheckoutEnabled: mockIsNewebPayCheckoutEnabled,
-  isPaymentRuntimeEnabled: mockIsPaymentRuntimeEnabled,
+vi.mock("@/lib/runtime-config/payment", () => ({
+  getPaymentRuntimeStateForModule: mockGetPaymentRuntimeStateForModule,
 }));
 
 vi.mock("@/lib/payments/newebpay/checkout-service", () => ({
@@ -45,8 +42,11 @@ describe("NewebPay checkout route", () => {
     vi.clearAllMocks();
     process.env.OPERATOR_TEST_SECRET = "operator-secret";
     mockIsDbConfigured.mockReturnValue(true);
-    mockIsNewebPayCheckoutEnabled.mockReturnValue(true);
-    mockIsPaymentRuntimeEnabled.mockReturnValue(false);
+    mockGetPaymentRuntimeStateForModule.mockResolvedValue({
+      ok: true,
+      category: "checkout_available",
+      errorCategory: null,
+    });
     mockCreateNewebPayCheckout.mockResolvedValue({
       ok: true,
       paymentIntent: { id: "payment-1", status: "checkout_started" },
@@ -67,8 +67,12 @@ describe("NewebPay checkout route", () => {
     });
   });
 
-  it("is disabled when checkout flag is off", async () => {
-    mockIsNewebPayCheckoutEnabled.mockReturnValue(false);
+  it("is disabled when scoped runtime config window is closed", async () => {
+    mockGetPaymentRuntimeStateForModule.mockResolvedValue({
+      ok: false,
+      category: "payment_window_closed",
+      errorCategory: null,
+    });
 
     const response = await POST(request({ secret: "operator-secret" }), params);
 
@@ -76,10 +80,15 @@ describe("NewebPay checkout route", () => {
     expect(mockCreateNewebPayCheckout).not.toHaveBeenCalled();
   });
 
-  it("requires operator secret while payment runtime is off", async () => {
-    await expect(POST(request(), params)).resolves.toMatchObject({ status: 401 });
-    await expect(POST(request({ secret: "wrong-secret" }), params)).resolves.toMatchObject({
-      status: 401,
+  it("does not allow operator secret to bypass runtime config", async () => {
+    mockGetPaymentRuntimeStateForModule.mockResolvedValue({
+      ok: false,
+      category: "payment_global_disabled",
+      errorCategory: null,
+    });
+
+    await expect(POST(request({ secret: "operator-secret" }), params)).resolves.toMatchObject({
+      status: 404,
     });
     expect(mockCreateNewebPayCheckout).not.toHaveBeenCalled();
   });

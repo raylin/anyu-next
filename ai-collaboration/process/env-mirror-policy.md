@@ -53,13 +53,16 @@ Rotation requires documenting affected data and reset/migration plan.
 
 ## Plain Config / Flags
 
-Codex may set plain config and runtime flags when policy is clear.
+Codex may set plain config when policy is clear.
 
 Production defaults:
 
-- `ENABLE_PAYMENT_RUNTIME=false` unless controlled smoke explicitly authorizes enablement.
-- `ENABLE_NEWEBPAY_CHECKOUT=false` unless controlled smoke explicitly authorizes enablement.
+- Frequent payment runtime windows are controlled by scoped runtime config, not Vercel env toggles.
+- `payment.window.enabled` is module-scoped and must be opened/closed through Admin API / `pnpm ops`.
+- `payment.global.disabled` is the global emergency kill switch and requires explicit global-impact confirmation.
 - Operator/fake-paid routes remain disabled in production.
+
+Runtime config is not an env mirror concern and must not store provider credentials, API keys, tokens, database URLs, or crypto secrets. Env mirrors continue to own secrets/provider credentials; scoped runtime config owns non-secret operational runtime gates.
 
 ## Vercel Sync
 

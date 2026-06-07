@@ -16,9 +16,8 @@ const PRODUCTION_BASE_URL = "https://anyu.tw";
 const CANONICAL_PROJECT = "anyu-next";
 const DEFAULT_VERCEL_SCOPE = "studioanyu-1488s-projects";
 const REQUIRED_PRODUCTION_ALIASES = ["anyu.tw", "www.anyu.tw"];
-const RUNTIME_FLAGS = ["ENABLE_PAYMENT_RUNTIME", "ENABLE_NEWEBPAY_CHECKOUT"];
-const EXECUTE_NOT_IMPLEMENTED =
-  "execute_actions_deferred_to_v1_status_and_plan_only";
+const RUNTIME_CONFIG_KEYS = ["payment.global.disabled", "payment.window.enabled"];
+const RUNTIME_CONFIG_MODULE_SCOPE_KEY = "ai-temperature";
 
 class RuntimeWindowInputError extends Error {
   constructor(code, details = {}) {
@@ -34,6 +33,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     confirmControlledSmoke: false,
     confirmShutdown: false,
     skipPreflight: false,
+    reason: "",
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -55,6 +55,10 @@ function parseArgs(argv = process.argv.slice(2)) {
         break;
       case "--skip-preflight":
         options.skipPreflight = true;
+        break;
+      case "--reason":
+        options.reason = requireValue(arg, next);
+        index += 1;
         break;
       default:
         throw new RuntimeWindowInputError("unsupported_arg", { arg });
@@ -79,31 +83,126 @@ function requireValue(arg, value) {
   return value.trim();
 }
 
-function loadProductionMirrorFlags() {
+function loadProductionAdminApiToken(env = process.env) {
+  if (env.ADMIN_API_TOKEN?.trim()) {
+    return {
+      token: env.ADMIN_API_TOKEN.trim(),
+      sourceCategory: "process_env",
+      valuesPrinted: false,
+    };
+  }
+
   const webAppDir = findWebAppDir();
   const mirrorPath = path.join(webAppDir, ".env.production");
 
   if (!fs.existsSync(mirrorPath)) {
     return {
       mirrorPathPresent: false,
-      runtimeEnabled: null,
-      checkoutEnabled: null,
+      token: null,
+      sourceCategory: "missing_production_mirror",
       valuesPrinted: false,
     };
   }
 
   const entries = new Map(parseLocalEnvContent(fs.readFileSync(mirrorPath, "utf8")));
+  const token = entries.get("ADMIN_API_TOKEN")?.trim() ?? "";
 
   return {
     mirrorPathPresent: true,
-    runtimeEnabled: isTruthy(entries.get("ENABLE_PAYMENT_RUNTIME")),
-    checkoutEnabled: isTruthy(entries.get("ENABLE_NEWEBPAY_CHECKOUT")),
+    token: token || null,
+    sourceCategory: token ? "production_mirror_admin_api_token" : "missing_admin_api_token",
     valuesPrinted: false,
   };
 }
 
-function isTruthy(value) {
-  return ["1", "true", "yes", "on"].includes(String(value ?? "").trim().toLowerCase());
+async function fetchAdminJson(pathname, options = {}) {
+  const tokenSource = loadProductionAdminApiToken(options.env ?? process.env);
+
+  if (!tokenSource.token) {
+    return {
+      ok: false,
+      error: "admin_api_token_missing",
+      tokenSourceCategory: tokenSource.sourceCategory,
+      valuesPrinted: false,
+    };
+  }
+
+  const response = await (options.fetchImpl ?? fetch)(`${PRODUCTION_BASE_URL}${pathname}`, {
+    method: options.method ?? "GET",
+    headers: {
+      "x-admin-api-token": tokenSource.token,
+      accept: "application/json",
+      ...(options.body ? { "content-type": "application/json" } : {}),
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  let json = null;
+
+  try {
+    json = await response.clone().json();
+  } catch {
+    json = null;
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    json,
+    error: json && typeof json === "object" && "error" in json ? json.error : null,
+    tokenSourceCategory: tokenSource.sourceCategory,
+    valuesPrinted: false,
+  };
+}
+
+function configGetPath(key, scopeType, scopeKey) {
+  const params = new URLSearchParams({
+    environment: "production",
+    key,
+    scopeType,
+    scopeKey,
+  });
+
+  return `/api/admin/runtime-config/get?${params.toString()}`;
+}
+
+async function getProductionRuntimeConfigStatus(options = {}) {
+  const [globalDisabled, moduleWindow] = await Promise.all([
+    fetchAdminJson(configGetPath("payment.global.disabled", "global", "global"), options),
+    fetchAdminJson(
+      configGetPath("payment.window.enabled", "module", RUNTIME_CONFIG_MODULE_SCOPE_KEY),
+      options,
+    ),
+  ]);
+  const globalValue = globalDisabled.json?.config?.value;
+  const moduleValue = moduleWindow.json?.config?.value;
+
+  return {
+    checked: true,
+    ok: globalDisabled.ok && moduleWindow.ok,
+    paymentGlobalDisabled: typeof globalValue === "boolean" ? globalValue : null,
+    paymentWindowEnabled: typeof moduleValue === "boolean" ? moduleValue : null,
+    globalLookupStatus: globalDisabled.status ?? null,
+    moduleLookupStatus: moduleWindow.status ?? null,
+    tokenSourceCategory: globalDisabled.tokenSourceCategory ?? moduleWindow.tokenSourceCategory,
+    error: globalDisabled.error ?? moduleWindow.error ?? null,
+    valuesPrinted: false,
+  };
+}
+
+async function setProductionPaymentWindow(enabled, options = {}) {
+  return fetchAdminJson("/api/admin/runtime-config/set", {
+    ...options,
+    method: "POST",
+    body: {
+      environment: "production",
+      key: "payment.window.enabled",
+      scopeType: "module",
+      scopeKey: RUNTIME_CONFIG_MODULE_SCOPE_KEY,
+      value: enabled,
+      reason: options.reason,
+      actor: "runtime-window-helper",
+    },
+  });
 }
 
 async function getProductionRouteStatus(fetchImpl = fetch) {
@@ -336,7 +435,15 @@ function classifyRuntimeWindowState(input) {
     return "preflight_blocked";
   }
 
-  if (input.flags.runtimeEnabled || input.flags.checkoutEnabled) {
+  if (!input.runtimeConfig?.ok) {
+    return "env_mirror_blocked";
+  }
+
+  if (input.runtimeConfig.paymentGlobalDisabled === true) {
+    return "fail_closed_ready";
+  }
+
+  if (input.runtimeConfig.paymentWindowEnabled === true) {
     if (input.routeStatus.checkoutRouteStatus?.failClosed === false) {
       return "runtime_enabled_controlled_window";
     }
@@ -360,10 +467,15 @@ function buildPlan(action) {
   if (action === "plan-enable" || action === "enable") {
     return {
       plannedAction: "enable_controlled_smoke_window",
-      syncKeys: RUNTIME_FLAGS,
-      localMirrorFirst: true,
-      vercelSyncSecond: true,
-      deployFromRepoRootOnly: true,
+      configKeys: RUNTIME_CONFIG_KEYS,
+      targetConfig: {
+        key: "payment.window.enabled",
+        scopeType: "module",
+        scopeKey: RUNTIME_CONFIG_MODULE_SCOPE_KEY,
+        value: true,
+      },
+      adminApiBoundary: true,
+      redeployRequired: false,
       valuesPrinted: false,
     };
   }
@@ -371,17 +483,22 @@ function buildPlan(action) {
   if (action === "plan-disable" || action === "disable") {
     return {
       plannedAction: "disable_controlled_smoke_window",
-      syncKeys: RUNTIME_FLAGS,
-      localMirrorFirst: true,
-      vercelSyncSecond: true,
-      deployFromRepoRootOnly: true,
+      configKeys: RUNTIME_CONFIG_KEYS,
+      targetConfig: {
+        key: "payment.window.enabled",
+        scopeType: "module",
+        scopeKey: RUNTIME_CONFIG_MODULE_SCOPE_KEY,
+        value: false,
+      },
+      adminApiBoundary: true,
+      redeployRequired: false,
       valuesPrinted: false,
     };
   }
 
   return {
     plannedAction: "status_only",
-    syncKeys: [],
+    configKeys: RUNTIME_CONFIG_KEYS,
     valuesPrinted: false,
   };
 }
@@ -395,8 +512,8 @@ async function runProductionRuntimeWindow(argv = process.argv.slice(2), env = pr
       action: options.action,
       stateCategory: "preflight_blocked",
       blocker: "missing_confirm_controlled_smoke",
-      executeImplemented: false,
-      reason: EXECUTE_NOT_IMPLEMENTED,
+      executeImplemented: true,
+      reason: "missing_confirmation",
     });
   }
 
@@ -406,23 +523,12 @@ async function runProductionRuntimeWindow(argv = process.argv.slice(2), env = pr
       action: options.action,
       stateCategory: "preflight_blocked",
       blocker: "missing_confirm_shutdown",
-      executeImplemented: false,
-      reason: EXECUTE_NOT_IMPLEMENTED,
+      executeImplemented: true,
+      reason: "missing_confirmation",
     });
   }
 
-  if (options.action === "enable" || options.action === "disable") {
-    return sanitized({
-      ok: false,
-      action: options.action,
-      stateCategory: "preflight_blocked",
-      executeImplemented: false,
-      reason: EXECUTE_NOT_IMPLEMENTED,
-      plannedFlagsOnly: RUNTIME_FLAGS,
-    });
-  }
-
-  const [routeStatus, preflight] = await Promise.all([
+  const [routeStatus, preflight, runtimeConfig] = await Promise.all([
     getProductionRouteStatus(env.fetchImpl ?? fetch),
     options.skipPreflight
       ? Promise.resolve({ ok: null, readiness: "skipped" })
@@ -430,6 +536,7 @@ async function runProductionRuntimeWindow(argv = process.argv.slice(2), env = pr
           ["--source", "vercel-production", "--mode", "dry-run"],
           env,
         ),
+    getProductionRuntimeConfigStatus({ fetchImpl: env.fetchImpl ?? fetch, env }),
   ]);
   const projectLinking = getVercelProjectLinkingStatus();
   const aliases = await Promise.all(
@@ -441,28 +548,76 @@ async function runProductionRuntimeWindow(argv = process.argv.slice(2), env = pr
     aliases,
     projectLinking,
   });
-  const flags = loadProductionMirrorFlags();
   const stateCategory = classifyRuntimeWindowState({
     projectLinking,
     aliasGuard,
     preflight,
-    flags,
+    runtimeConfig,
     routeStatus,
   });
   const plan = buildPlan(options.action);
+  let executeResult = null;
+  let finalRuntimeConfig = runtimeConfig;
+
+  if (options.action === "enable") {
+    if (stateCategory !== "fail_closed_ready" || preflight.ok !== true || aliasGuard.blocker) {
+      return sanitized({
+        ok: false,
+        action: options.action,
+        stateCategory,
+        blocker: "runtime_window_not_ready_for_enable",
+        runtimeConfig,
+        aliasGuardStatus: aliasGuard.status,
+        preflight: { ok: preflight.ok, readiness: preflight.readiness },
+        plan,
+      });
+    }
+
+    executeResult = await setProductionPaymentWindow(true, {
+      fetchImpl: env.fetchImpl ?? fetch,
+      env,
+      reason: options.reason || "controlled production smoke",
+    });
+    finalRuntimeConfig = await getProductionRuntimeConfigStatus({ fetchImpl: env.fetchImpl ?? fetch, env });
+  }
+
+  if (options.action === "disable") {
+    executeResult = await setProductionPaymentWindow(false, {
+      fetchImpl: env.fetchImpl ?? fetch,
+      env,
+      reason: options.reason || "controlled production smoke shutdown",
+    });
+    finalRuntimeConfig = await getProductionRuntimeConfigStatus({ fetchImpl: env.fetchImpl ?? fetch, env });
+  }
+
+  const finalStateCategory =
+    options.action === "enable" || options.action === "disable"
+      ? classifyRuntimeWindowState({
+          projectLinking,
+          aliasGuard,
+          preflight,
+          runtimeConfig: finalRuntimeConfig,
+          routeStatus: await getProductionRouteStatus(env.fetchImpl ?? fetch),
+        })
+      : stateCategory;
   const ok =
     options.action === "status"
       ? stateCategory === "fail_closed_ready"
-      : stateCategory === "fail_closed_ready" && preflight.ok === true && !aliasGuard.blocker;
+      : options.action === "disable"
+        ? executeResult?.ok === true && finalRuntimeConfig.paymentWindowEnabled === false
+        : options.action === "enable"
+          ? executeResult?.ok === true && finalRuntimeConfig.paymentWindowEnabled === true
+          : stateCategory === "fail_closed_ready" && preflight.ok === true && !aliasGuard.blocker;
 
   return sanitized({
     ok,
     action: options.action,
     environment: "production",
     productionBaseUrl: PRODUCTION_BASE_URL,
-    stateCategory,
-    runtimeEnabled: flags.runtimeEnabled,
-    checkoutEnabled: flags.checkoutEnabled,
+    stateCategory: finalStateCategory,
+    runtimeEnabled: finalRuntimeConfig.paymentWindowEnabled === true && finalRuntimeConfig.paymentGlobalDisabled === false,
+    checkoutEnabled: finalRuntimeConfig.paymentWindowEnabled === true && finalRuntimeConfig.paymentGlobalDisabled === false,
+    runtimeConfig: finalRuntimeConfig,
     publicPagesStatus: routeStatus.publicPagesStatus,
     checkoutRouteStatus: routeStatus.checkoutRouteStatus,
     fakePaidRouteStatus: routeStatus.fakePaidRouteStatus,
@@ -477,6 +632,14 @@ async function runProductionRuntimeWindow(argv = process.argv.slice(2), env = pr
       readiness: preflight.readiness,
     },
     plan,
+    executeResult: executeResult
+      ? {
+          ok: executeResult.ok,
+          status: executeResult.status,
+          error: executeResult.error,
+          valuesPrinted: false,
+        }
+      : null,
     recommendedNextAction: recommendNextAction({
       action: options.action,
       stateCategory,
@@ -508,7 +671,7 @@ function recommendNextAction(input) {
   }
 
   if (input.action === "plan-disable") {
-    return "disable_runtime_flags_and_redeploy_fail_closed_when_window_ends";
+    return "set_module_payment_window_false_when_window_ends";
   }
 
   return "keep_production_fail_closed_until_controlled_smoke_task";

@@ -2,14 +2,7 @@ import { NextResponse } from "next/server";
 import { isDbConfigured } from "@/lib/db/client";
 import { getModuleBySlug } from "@/lib/modules/registry";
 import { createNewebPayCheckout } from "@/lib/payments/newebpay/checkout-service";
-import {
-  isNewebPayCheckoutEnabled,
-  isPaymentRuntimeEnabled,
-} from "@/lib/runtime/feature-flags";
-import {
-  getOperatorTestMode,
-  OPERATOR_TEST_SECRET_HEADER,
-} from "@/lib/runtime/abuse-guard";
+import { getPaymentRuntimeStateForModule } from "@/lib/runtime-config/payment";
 
 type RouteProps = {
   params: Promise<{
@@ -48,18 +41,13 @@ export async function POST(request: Request, { params }: RouteProps) {
     return errorResponse(404, "module_not_found", "找不到這個模組。");
   }
 
-  if (!isNewebPayCheckoutEnabled()) {
-    return errorResponse(404, "not_found", "Not found.");
-  }
+  const runtimeState = await getPaymentRuntimeStateForModule(moduleConfig);
 
-  const operatorMode = getOperatorTestMode(request.headers);
-
-  if (!isPaymentRuntimeEnabled() && !operatorMode.enabled) {
-    return errorResponse(
-      401,
-      "unauthorized",
-      `Missing or invalid ${OPERATOR_TEST_SECRET_HEADER}.`,
-    );
+  if (!runtimeState.ok) {
+    return errorResponse(404, "payment_disabled", "Not found.", {
+      category: runtimeState.category,
+      errorCategory: runtimeState.errorCategory,
+    });
   }
 
   if (!isDbConfigured()) {

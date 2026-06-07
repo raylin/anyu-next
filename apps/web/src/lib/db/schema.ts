@@ -559,6 +559,65 @@ export const contactSubmissions = pgTable(
   }),
 );
 
+export const runtimeConfigValues = pgTable(
+  "runtime_config_values",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    environment: text("environment").notNull(),
+    key: text("key").notNull(),
+    scopeType: text("scope_type").notNull(),
+    scopeKey: text("scope_key").notNull(),
+    valueType: text("value_type").notNull(),
+    valueJson: jsonb("value_json").$type<boolean | string | number>().notNull(),
+    active: boolean("active").default(true).notNull(),
+    reason: text("reason").notNull(),
+    updatedBy: text("updated_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    identityIdx: uniqueIndex("runtime_config_values_identity_idx").on(
+      table.environment,
+      table.key,
+      table.scopeType,
+      table.scopeKey,
+    ),
+    environmentIdx: index("runtime_config_values_environment_idx").on(table.environment),
+    keyScopeIdx: index("runtime_config_values_key_scope_idx").on(
+      table.key,
+      table.scopeType,
+      table.scopeKey,
+    ),
+  }),
+);
+
+export const runtimeConfigEvents = pgTable(
+  "runtime_config_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    environment: text("environment").notNull(),
+    key: text("key").notNull(),
+    scopeType: text("scope_type").notNull(),
+    scopeKey: text("scope_key").notNull(),
+    action: text("action").notNull(),
+    valueBeforeJson: jsonb("value_before_json").$type<boolean | string | number | null>(),
+    valueAfterJson: jsonb("value_after_json").$type<boolean | string | number | null>(),
+    reason: text("reason").notNull(),
+    actor: text("actor").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    identityCreatedIdx: index("runtime_config_events_identity_created_idx").on(
+      table.environment,
+      table.key,
+      table.scopeType,
+      table.scopeKey,
+      table.createdAt,
+    ),
+    actionIdx: index("runtime_config_events_action_idx").on(table.action, table.createdAt),
+  }),
+);
+
 export const analysisRequestRelations = relations(analysisRequests, ({ one }) => ({
   result: one(analysisResults, {
     fields: [analysisRequests.id],
