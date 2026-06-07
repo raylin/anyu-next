@@ -87,6 +87,18 @@ cd apps/web && corepack pnpm run qa:module01:production-preflight
 
 Production preflight must not enable runtime or submit payment.
 
+### Production Runtime Window
+
+Use before any controlled production smoke runtime enablement:
+
+```bash
+cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status
+cd apps/web && corepack pnpm run qa:production:runtime-window -- --action plan-enable
+cd apps/web && corepack pnpm run qa:production:runtime-window -- --action plan-disable
+```
+
+The helper is read-only/status-and-plan in v0. It must not enable runtime unless a future task explicitly implements guarded execute actions. It reports production fail-closed state, canonical project status, alias guard status, and runtime flag plan without printing env values.
+
 ## Structured Waits
 
 Use:

@@ -10918,3 +10918,39 @@ Unresolved questions:
 - `qa:module01:production-preflight` was intentionally skipped because production runtime/env/preflight behavior did not change.
 - No production runtime, payment, Email, LINE, Vercel env, or DB mutation occurred.
 - Next mainline task: resume LINE production bind root-cause fix review using corrected evidence, then proceed to Production Runtime Window + Vercel Alias Guard v0 when appropriate.
+
+## 2026-06-07 Production Runtime Window + Vercel Alias Guard v0
+
+### Completed Changes
+
+- saved the Production Runtime Window + Vercel Alias Guard v0 handoff
+- added `qa:production:runtime-window` with read-only `status`, `plan-enable`, and `plan-disable` actions
+- kept execute actions deferred to v1; `enable` / `disable` refuse without confirmation and still do not mutate in v0
+- runtime-window plans only `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT`
+- added alias guard classification for `anyu.tw` and `www.anyu.tw`
+- integrated runtime-window status into `qa:module01:production-preflight`
+- updated shared process docs with instruction-conflict / safe-interpretation and runtime-window rules
+
+### Learnings
+
+- Production is fail-closed: public pages return 200; checkout, fake-paid, and operator routes fail closed; runtime flags are false in the local mirror.
+- Production payment preflight still returns `pass_ready_for_controlled_smoke`.
+- Runtime-window readiness is blocked because alias target ownership could not be proven by the available alias inspection path.
+- The blocker is now explicit: `production_runtime_window_alias_target_unverified`.
+
+### Validation
+
+- Targeted runtime-window/preflight/module01 tests passed: 3 files / 38 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 94 files / 647 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status`: read-only, blocked on `alias_target_unverified`.
+- `cd apps/web && corepack pnpm run qa:production:runtime-window -- --action plan-enable`: read-only plan, blocked on `alias_target_unverified`.
+- `cd apps/web && corepack pnpm run qa:module01:production-preflight`: blocked on `production_runtime_window_alias_target_unverified`.
+
+### Unresolved Questions
+
+- Resolve alias target proof for `anyu.tw` and `www.anyu.tw` before any production runtime enablement.
+- `qa:module01:local` was skipped because lint, targeted tests, full tests, and build covered the changed code.
+- `qa:module01:staging` was skipped because staging/deployed behavior did not change.
+- No production runtime, payment, Email, LINE, Vercel env, provider credential, or DB mutation occurred.

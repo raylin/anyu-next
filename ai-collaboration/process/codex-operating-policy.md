@@ -20,6 +20,16 @@ This document stores shared operating rules for Codex work on ANYU so future han
 - Preserve existing owner decisions and current product source-of-truth.
 - Escalate uncertainty when guessing could affect production, env, payment, LINE, Email, data, security, or launch gates.
 
+## Instruction Conflict / Safe Interpretation
+
+- If a task goal and process rule conflict, stop and ask or choose the safer interpretation.
+- Correctness and safety override speed.
+- Validating target deployment freshness overrides avoiding wait time.
+- “Do not poll with full suite” means use a lightweight freshness wait, not running a full suite against stale deployment.
+- A deployed gate is valid only if `targetDeployCommit` is live before substantive checks start.
+- A gate that starts on stale deployment and switches mid-run is invalid evidence: `mixed_deployment_gate_invalid`.
+- `commandExitCode` is not `gateStatus`; report both.
+
 ## Model / Effort
 
 - Use high effort by default for ANYU.
@@ -39,6 +49,7 @@ Every report and final completion summary must include:
 - reasoning/effort level used
 - environment asserted when applicable
 - source/deploy target when applicable
+- deployed gate fields when applicable: `targetDeployCommit`, `deployedCommitAtGateStart`, `deployedCommitAtGateEnd`, `freshnessStatus`, `mixedDeploymentDetected`, `commandExitCode`, `gateStatus`, `requiredChecksStatus`, `optionalChecksStatus`
 - gates run and result
 - gates skipped and why
 - first failure category if failed

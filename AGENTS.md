@@ -61,10 +61,12 @@ Every report and completion summary must include:
 ## Production Gate Rules
 
 - Production runtime stays disabled unless the task explicitly authorizes controlled smoke.
+- If task speed conflicts with gate validity or safety, choose the safe interpretation or ask before proceeding.
 - Before production runtime enablement, run and report:
   - `qa:module01:local`
   - `qa:module01:staging`
   - `qa:module01:production-preflight`
+- Use the production runtime-window helper for status/plan before runtime enablement; do not manually toggle flags without the guarded process.
 - Assert production environment/source before reporting production result IDs.
 - Production result IDs must include `resultSourceCategory=production_runtime` unless explicitly stated otherwise.
 - Default final posture after smoke is fail-closed unless owner explicitly chooses soft public availability.

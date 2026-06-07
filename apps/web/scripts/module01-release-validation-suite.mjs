@@ -615,6 +615,20 @@ function safeAdminCliOutput(stdout) {
   return !TOKEN_LIKE_PATTERNS.some((pattern) => pattern.test(serialized));
 }
 
+function parseJsonOutput(stdout) {
+  const jsonStart = stdout.indexOf("{");
+
+  if (jsonStart === -1) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(stdout.slice(jsonStart));
+  } catch {
+    return null;
+  }
+}
+
 function adminCliStagingCheck() {
   const token = process.env.ADMIN_API_TOKEN?.trim() ?? "";
   const knownResult = resolveKnownResultId();
@@ -681,6 +695,42 @@ function adminCliStagingCheck() {
     knownResultIdSourceCategory: knownResult.sourceCategory,
     responseSanitized: pass,
     blockers: pass ? [] : ["admin_cli_lookup_failed_or_unsafe"],
+  });
+}
+
+function productionRuntimeWindowStatusCheck() {
+  const result = runCommandCapture(
+    "production_runtime_window_status",
+    "corepack",
+    ["pnpm", "run", "qa:production:runtime-window", "--", "--action", "status"],
+  );
+  const parsed = parseJsonOutput(result.stdout);
+  const responseSanitized =
+    parsed !== null && !TOKEN_LIKE_PATTERNS.some((pattern) => pattern.test(JSON.stringify(parsed)));
+  const commandOk = result.status === 0 && responseSanitized;
+  const aliasGuardStatus =
+    parsed && typeof parsed.aliasGuardStatus === "string" ? parsed.aliasGuardStatus : "unknown";
+  const stateCategory =
+    parsed && typeof parsed.stateCategory === "string" ? parsed.stateCategory : "unknown";
+  const gateOk = commandOk && aliasGuardStatus === "pass" && stateCategory === "fail_closed_ready";
+  const warnings = [];
+
+  if (aliasGuardStatus !== "pass") {
+    warnings.push(aliasGuardStatus);
+  }
+
+  if (stateCategory !== "fail_closed_ready") {
+    warnings.push(stateCategory);
+  }
+
+  return makeCheck("production_runtime_window_status", gateOk ? "pass" : "blocked", {
+    required: true,
+    productionTouched: true,
+    runtimeWindowStatus: stateCategory,
+    aliasGuardStatus,
+    responseSanitized,
+    warnings,
+    blockers: gateOk ? [] : [`production_runtime_window_${aliasGuardStatus}`],
   });
 }
 
@@ -830,6 +880,7 @@ async function runStagingSuite() {
 
 async function runProductionPreflightSuite() {
   const checks = {
+    productionRuntimeWindowStatus: productionRuntimeWindowStatusCheck(),
     productionPaymentPreflight: runCommand(
       "production_payment_preflight",
       "corepack",

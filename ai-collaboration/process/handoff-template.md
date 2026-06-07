@@ -104,6 +104,15 @@ For deployed gates, also report:
 - requiredChecksStatus
 - optionalChecksStatus
 
+For production runtime-window tasks, also report:
+
+- runtimeWindowAction
+- runtimeWindowStateCategory
+- aliasGuardStatus
+- runtime flags planned or changed, names only
+- whether runtime was enabled
+- whether provider credentials/env values were touched
+
 ## Completion Summary Requirements
 
 Final response must include:
@@ -140,6 +149,7 @@ Production smoke must repeat:
 - use `pnpm ops` before direct DB
 - report timing/model/effort
 - final runtime status
+- runtime-window helper status/plan result
 
 Env sync must repeat:
 

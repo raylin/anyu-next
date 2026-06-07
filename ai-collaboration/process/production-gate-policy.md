@@ -55,6 +55,22 @@ Codex must also assert:
 
 Only enable the minimum required flags for the controlled smoke.
 
+Before runtime enablement planning, run:
+
+```bash
+cd apps/web && corepack pnpm run qa:production:runtime-window -- --action status
+cd apps/web && corepack pnpm run qa:production:runtime-window -- --action plan-enable
+```
+
+The runtime-window helper must:
+
+- default to read-only status
+- require explicit confirmation for any future execute action
+- only plan/sync `ENABLE_PAYMENT_RUNTIME` and `ENABLE_NEWEBPAY_CHECKOUT`
+- keep local mirror first, Vercel sync second
+- deploy from repo root only if execute actions are implemented later
+- never touch provider credentials or unrelated env values
+
 Do not enable:
 
 - ads
@@ -124,6 +140,8 @@ Production reports must include:
 - freshnessStatus and mixedDeploymentDetected for deployed gates
 - gateStatus and commandExitCode separately
 - requiredChecksStatus and optionalChecksStatus
+- runtime-window helper action/status
+- aliasGuardStatus and whether alias target was proven, mismatched, or unverified
 - preflight results
 - runtime enablement window
 - payment method
