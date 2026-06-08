@@ -5,8 +5,8 @@
 - task name: CoreShell Static Pages Reference Rebuild v2
 - date: 2026-06-08
 - report path: `ai-collaboration/reports/2026-06-08-coreshell-static-pages-reference-rebuild-v2.md`
-- commit: pending final commit
-- branch / push status: pending
+- commit: `05307b6` (`rebuild coreshell static reference pages`)
+- branch / push status: pending push to `origin/staging`
 - model / effort: GPT-5 Codex, high effort
 - taskStartedAt: 2026-06-08T04:01:00Z
 - taskCompletedAt: 2026-06-08T04:05:09Z
@@ -142,4 +142,3 @@
 ## Next Recommendation
 
 Owner visual review with screenshots, then targeted visual defect fixes across CoreShell and Module 01 flow.
-
