@@ -6,7 +6,7 @@
 - date: 2026-06-08
 - report path: `ai-collaboration/reports/2026-06-08-coreshell-static-pages-reference-rebuild-v2.md`
 - commit: `05307b6` (`rebuild coreshell static reference pages`)
-- branch / push status: pending push to `origin/staging`
+- branch / push status: pushed to `origin/staging` through `e182179`
 - model / effort: GPT-5 Codex, high effort
 - taskStartedAt: 2026-06-08T04:01:00Z
 - taskCompletedAt: 2026-06-08T04:05:09Z
