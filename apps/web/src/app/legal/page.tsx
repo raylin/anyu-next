@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { CoreShell } from "@/components/anyu/CoreShell";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { LEGAL_CONTACT_EMAIL, legalLinks } from "@/content/legal";
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function LegalIndexPage() {
   return (
-    <main className="anyu-shell anyu-legal-shell">
+    <CoreShell className="anyu-legal-shell">
       <section className="anyu-legal-page">
         <header className="anyu-legal-header">
           <div className="anyu-legal-header-top">
@@ -41,6 +42,6 @@ export default function LegalIndexPage() {
           ))}
         </nav>
       </section>
-    </main>
+    </CoreShell>
   );
 }

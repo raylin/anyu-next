@@ -12,7 +12,9 @@ export function CoreShell({
     <main
       className={["anyu-shell", CORE_THEME.cssClassName, className].filter(Boolean).join(" ")}
       data-shell="core"
+      data-core-shell="true"
       data-theme={CORE_THEME.id}
+      data-theme-owner={CORE_THEME.owner}
     >
       {children}
     </main>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { Button } from "@/components/anyu/Button";
 import { Card } from "@/components/anyu/Card";
+import { CoreShell } from "@/components/anyu/CoreShell";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 
@@ -28,7 +29,7 @@ const refundItems = [
 
 export default function Home() {
   return (
-    <main className="anyu-shell anyu-storefront-shell">
+    <CoreShell className="anyu-storefront-shell">
       <section className="anyu-storefront">
         <header className="anyu-storefront-topbar">
           <Wordmark />
@@ -141,6 +142,6 @@ export default function Home() {
 
         <LegalFooter />
       </section>
-    </main>
+    </CoreShell>
   );
 }

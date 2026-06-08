@@ -12180,3 +12180,38 @@ Unresolved questions:
 - `qa:result-checkout:no-card` skipped because checkout/access-link behavior code was not touched.
 - Owner staging visual review is required to confirm the LINE transition page now hits the Riso route context.
 - Recommended next task: owner visual review of LINE bind transition page on staging, then continue reference-aligned fixes using owner comparison screenshots.
+
+## 2026-06-08 CoreShell Baseline Migration v0
+
+### Completed Changes
+
+- implemented the first scoped CoreShell baseline for main ANYU site surfaces.
+- migrated the homepage, legal index, and shared legal page shell to `CoreShell`.
+- added stable CoreShell markers:
+  - `data-shell="core"`
+  - `data-core-shell="true"`
+  - `data-theme="core"`
+  - `data-theme-owner="core"`
+- added a quiet neutral editorial Core visual frame:
+  - warm paper field using existing tokens
+  - subtle top brand rule
+  - refined Core card border/background/shadow
+- preserved the ModuleShell/Riso boundary for Module 01.
+- added CoreShell boundary tests covering homepage, legal routes, and Module 01 Riso shell separation.
+
+### Validation
+
+- targeted CoreShell/theme boundary tests: pass, 3 files / 11 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 105 files / 716 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: first sandbox attempt failed at Chromium launch due macOS Mach port permission; escalated rerun passed, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, DB mutation, or provider logic change.
+- `qa:module01:mock-flow` and `qa:result-checkout:no-card` skipped because Module 01 payment/access-link behavior was not touched.
+- Remaining visual review backlog: CoreShell holistic review, Module 01 Riso Visual Alignment v2, ReturnURL / paid result / `/r` / pending / expired / invalid surfaces.
+- Recommended next task: owner holistic visual review, then choose Module 01 Riso Visual Alignment v2, ReturnURL/paid result/`/r` Riso surfaces, or Repeated / Concurrency Paid-Generation Benchmark v0.
