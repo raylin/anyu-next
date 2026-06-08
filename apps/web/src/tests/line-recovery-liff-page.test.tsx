@@ -186,6 +186,11 @@ describe("LINE recovery LIFF page", () => {
     });
     const html = renderToStaticMarkup(page);
 
+    expect(html).toContain('data-shell="module"');
+    expect(html).toContain('data-theme="ai-temperature-riso"');
+    expect(html).toContain('data-module-theme="riso"');
+    expect(html).toContain('data-riso-flow="line-bind"');
+    expect(html).toContain("anyu-riso-reference-panel");
     expect(html).toContain("用 LINE 保存查看連結");
     expect(html).toContain("從 LINE 回到 ANYU 查看完整報告");
     expect(html).not.toContain("LINE 短碼連結缺少有效測驗資料");
@@ -203,6 +208,11 @@ describe("LINE recovery LIFF page", () => {
     });
     const html = renderToStaticMarkup(page);
 
+    expect(html).toContain('data-shell="module"');
+    expect(html).toContain('data-theme="ai-temperature-riso"');
+    expect(html).toContain('data-module-theme="riso"');
+    expect(html).toContain('data-riso-flow="line-bind"');
+    expect(html).toContain("anyu-riso-reference-panel");
     expect(html).toContain("用 LINE 保存查看連結");
     expect(html).toContain("完整報告仍以網頁查看為準");
     expect(html).not.toContain("LINE 短碼連結缺少有效測驗資料");

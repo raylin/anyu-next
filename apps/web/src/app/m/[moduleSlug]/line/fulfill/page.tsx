@@ -1,6 +1,8 @@
 import { LineFulfillBridge } from "@/components/line/LineFulfillBridge";
 import { LineFulfillServerDiagnostic } from "@/components/line/LineFulfillServerDiagnostic";
 import { LineRecoveryBindBridge } from "@/components/line/LineRecoveryBindBridge";
+import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
+import { getModuleBySlug } from "@/lib/modules/registry";
 import { parseLineRecoveryBindContext } from "@/lib/line/recovery-liff-context";
 
 type RouteParams = Promise<{ moduleSlug?: string }>;
@@ -19,7 +21,20 @@ export default async function ModuleLineFulfillPage({
   const recoveryContext = parseLineRecoveryBindContext(initialSearch);
 
   if (recoveryContext.state) {
-    return <LineRecoveryBindBridge initialSearch={initialSearch} />;
+    const moduleConfig =
+      getModuleBySlug(routeParams.moduleSlug ?? "") ?? getModuleBySlug("ambiguous-temperature");
+
+    if (!moduleConfig) {
+      return <LineRecoveryBindBridge initialSearch={initialSearch} />;
+    }
+
+    return (
+      <main className="anyu-shell">
+        <ModuleThemeBoundary moduleConfig={moduleConfig} surface="unlock" showThemeToggle={false}>
+          <LineRecoveryBindBridge initialSearch={initialSearch} />
+        </ModuleThemeBoundary>
+      </main>
+    );
   }
 
   return (

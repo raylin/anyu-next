@@ -12146,3 +12146,37 @@ Unresolved questions:
 - Browser screenshot capture was unavailable in this session; owner staging visual review remains the acceptance check.
 - Remaining Riso alignment surfaces: ReturnURL, paid result, `/r`, expired, invalid, and pending states.
 - Recommended next task: owner visual review on staging, then choose continued Riso flow alignment or CoreShell migration.
+
+## 2026-06-08 Module 01 LINE Bind Transition Riso Route Fix v0
+
+### Completed Changes
+
+- verified the actual LINE bind recovery route ownership before changing styling.
+- found that v1 improved `LineRecoveryBindBridge`, but two live legacy LIFF entry routes could still render the bridge outside the Module 01 Riso shell:
+  - `/line/fulfill` with recovery `liff.state`
+  - `/m/[moduleSlug]/line/fulfill` with recovery `liff.state`
+- updated both recovery branches to render:
+  - `main.anyu-shell`
+  - `ModuleThemeBoundary`
+  - `LineRecoveryBindBridge`
+- left `/line/recovery/bind` unchanged because it already used the Riso shell.
+- did not change LIFF bind logic, Email save, checkout save UI, payment/access-link behavior, or provider logic.
+- added route-level tests proving the legacy recovery LIFF entry routes now include Module 01 Riso markers and the Riso line-bind panel.
+
+### Validation
+
+- `cd apps/web && corepack pnpm lint`: pass.
+- targeted LINE recovery LIFF route test: pass, 1 file / 9 tests.
+- `cd apps/web && corepack pnpm test`: pass, 104 files / 713 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, DB mutation, or provider logic change.
+- `qa:result-checkout:no-card` skipped because checkout/access-link behavior code was not touched.
+- Owner staging visual review is required to confirm the LINE transition page now hits the Riso route context.
+- Recommended next task: owner visual review of LINE bind transition page on staging, then continue reference-aligned fixes using owner comparison screenshots.
