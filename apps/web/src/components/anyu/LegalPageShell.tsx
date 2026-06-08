@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { LegalPageContent } from "@/content/legal";
 import { LEGAL_CONTACT_EMAIL, legalLinks } from "@/content/legal";
 import { CoreShell } from "@/components/anyu/CoreShell";
+import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { Wordmark } from "@/components/anyu/Wordmark";
 
 type LegalPageShellProps = {
@@ -10,15 +11,21 @@ type LegalPageShellProps = {
 
 export function LegalPageShell({ page }: LegalPageShellProps) {
   return (
-    <CoreShell className="anyu-legal-shell">
-      <section className="anyu-legal-page">
-        <header className="anyu-legal-header">
-          <div className="anyu-legal-header-top">
-            <Link href="/m/ambiguous-temperature" className="anyu-back-link">
-              ← 回到曖昧溫度計
+    <CoreShell className="anyu-core-static-shell anyu-legal-shell">
+      <section className="anyu-core-static-page anyu-core-legal-page" data-core-static-page="legal-detail">
+        <header className="anyu-core-topbar anyu-legal-header-top" data-core-header="true">
+          <div className="anyu-core-nav-cluster">
+            <Link href="/" className="anyu-core-nav-link">
+              服務介紹
             </Link>
-            <Wordmark className="anyu-wordmark-quiet" />
+            <Link href="/m/ambiguous-temperature" className="anyu-core-nav-link">
+              曖昧溫度計
+            </Link>
           </div>
+          <Wordmark className="anyu-wordmark-quiet" />
+        </header>
+
+        <section className="anyu-core-hero anyu-core-legal-hero" data-core-hero="legal">
           <div className="anyu-legal-header-copy">
             <p className="anyu-kicker">{page.pageTitle}</p>
             <h1 className="anyu-title">{page.heading}</h1>
@@ -29,9 +36,9 @@ export function LegalPageShell({ page }: LegalPageShellProps) {
               <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
             </div>
           </div>
-        </header>
+        </section>
 
-        <nav className="anyu-legal-nav" aria-label="legal page links">
+        <nav className="anyu-core-legal-nav anyu-legal-nav" aria-label="legal page links">
           {legalLinks.map((link) => (
             <Link
               key={link.href}
@@ -48,9 +55,9 @@ export function LegalPageShell({ page }: LegalPageShellProps) {
           ))}
         </nav>
 
-        <article className="anyu-legal-article">
+        <article className="anyu-core-article anyu-legal-article" data-core-article="legal">
           {page.sections.map((section) => (
-            <section key={section.title} className="anyu-legal-section">
+            <section key={section.title} className="anyu-core-article-section anyu-legal-section">
               <h2 className="anyu-section-title">{section.title}</h2>
               {section.paragraphs?.map((paragraph) => (
                 <p key={paragraph} className="anyu-copy">
@@ -69,6 +76,10 @@ export function LegalPageShell({ page }: LegalPageShellProps) {
             </section>
           ))}
         </article>
+
+        <div data-core-footer="true">
+          <LegalFooter />
+        </div>
       </section>
     </CoreShell>
   );

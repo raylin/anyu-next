@@ -89,6 +89,174 @@ textarea {
     0 18px 46px rgba(42, 36, 25, 0.06);
 }
 
+.anyu-core-static-shell {
+  width: min(100%, 72rem);
+  padding-top: calc(var(--anyu-space-5) + env(safe-area-inset-top));
+}
+
+.anyu-core-static-page {
+  display: grid;
+  gap: var(--anyu-space-8);
+}
+
+.anyu-core-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--anyu-space-4);
+  padding-bottom: var(--anyu-space-5);
+  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
+}
+
+.anyu-core-nav-cluster,
+.anyu-storefront-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--anyu-space-3);
+  flex-wrap: wrap;
+}
+
+.anyu-core-nav-link {
+  color: var(--anyu-dim);
+  font-family: var(--anyu-font-mono);
+  font-size: var(--anyu-type-label-size);
+  line-height: 1.4;
+  letter-spacing: var(--anyu-track-mono);
+  text-transform: uppercase;
+}
+
+.anyu-core-nav-link:hover {
+  color: var(--anyu-ink);
+}
+
+.anyu-core-hero {
+  position: relative;
+  display: grid;
+  gap: var(--anyu-space-6);
+  padding:
+    clamp(var(--anyu-space-6), 6vw, var(--anyu-space-14))
+    0
+    var(--anyu-space-8);
+  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
+}
+
+.anyu-core-hero::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: var(--anyu-space-4);
+  width: clamp(5rem, 14vw, 10rem);
+  height: clamp(5rem, 14vw, 10rem);
+  border: 1px solid color-mix(in srgb, var(--anyu-ink) 12%, transparent);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--anyu-accent) 10%, transparent) 0 34%, transparent 35%),
+    radial-gradient(circle, color-mix(in srgb, var(--anyu-ink) 7%, transparent) 0 1px, transparent 1.2px);
+  background-size: auto, 6px 6px;
+  opacity: 0.62;
+  pointer-events: none;
+}
+
+.anyu-core-hero-home {
+  grid-template-columns: minmax(0, 1.05fr) minmax(19rem, 0.95fr);
+  align-items: stretch;
+}
+
+.anyu-core-hero-copy {
+  display: grid;
+  gap: var(--anyu-space-5);
+  align-content: center;
+  max-width: 39rem;
+}
+
+.anyu-core-hero .anyu-title {
+  max-width: 13em;
+  font-size: clamp(2.5rem, 6vw, 5.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.06em;
+}
+
+.anyu-core-hero .anyu-copy {
+  max-width: 43rem;
+  font-size: clamp(0.98rem, 1.4vw, 1.12rem);
+}
+
+.anyu-core-module-card {
+  align-content: space-between;
+  border-radius: var(--anyu-radius-md);
+}
+
+.anyu-core-section {
+  display: grid;
+  gap: var(--anyu-space-4);
+}
+
+.anyu-core-section-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--anyu-space-4);
+}
+
+.anyu-core-section-head span:last-child {
+  height: 1px;
+  background: color-mix(in srgb, var(--anyu-ink) 14%, transparent);
+}
+
+.anyu-core-info-card {
+  border-radius: var(--anyu-radius-md);
+}
+
+.anyu-core-support-card {
+  border-radius: var(--anyu-radius-md);
+  border-left: 4px solid color-mix(in srgb, var(--anyu-ink) 42%, transparent);
+}
+
+.anyu-core-legal-page {
+  width: min(100%, 54rem);
+  margin-inline: auto;
+}
+
+.anyu-core-legal-hero {
+  padding-bottom: var(--anyu-space-6);
+}
+
+.anyu-core-legal-hero::after {
+  width: clamp(4rem, 12vw, 7rem);
+  height: clamp(4rem, 12vw, 7rem);
+}
+
+.anyu-core-article {
+  display: grid;
+  gap: 0;
+  padding: clamp(var(--anyu-space-5), 4vw, var(--anyu-space-8));
+  border: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
+  border-radius: var(--anyu-radius-md);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--anyu-card) 92%, var(--anyu-surface)), var(--anyu-card));
+  box-shadow:
+    0 1px 0 rgba(42, 36, 25, 0.04),
+    0 22px 56px rgba(42, 36, 25, 0.07);
+}
+
+.anyu-core-article-section {
+  padding-block: var(--anyu-space-5);
+  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 11%, transparent);
+}
+
+.anyu-core-article-section:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.anyu-core-article-section:last-child {
+  padding-bottom: 0;
+}
+
+.anyu-core-legal-nav {
+  border-radius: var(--anyu-radius-md);
+}
+
 .anyu-storefront-shell {
   width: min(100%, 68rem);
 }
@@ -2005,6 +2173,7 @@ textarea {
   }
 
   .anyu-storefront-hero,
+  .anyu-core-hero-home,
   .anyu-storefront-grid,
   .anyu-product-preview-grid,
   .anyu-delivery-artifact-grid {

@@ -9,6 +9,9 @@ describe("homepage provider-review storefront content", () => {
     expect(html).toContain('data-shell="core"');
     expect(html).toContain('data-core-shell="true"');
     expect(html).toContain('data-theme="core"');
+    expect(html).toContain('data-core-static-page="home"');
+    expect(html).toContain('data-core-hero="home"');
+    expect(html).toContain('data-core-module-card="ai-temperature"');
     expect(html).not.toContain('data-shell="module"');
     expect(html).toContain("曖昧溫度計｜AI 關係互動分析報告");
     expect(html).toContain("數位 AI 輔助關係互動分析服務");

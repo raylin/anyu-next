@@ -12215,3 +12215,47 @@ Unresolved questions:
 - `qa:module01:mock-flow` and `qa:result-checkout:no-card` skipped because Module 01 payment/access-link behavior was not touched.
 - Remaining visual review backlog: CoreShell holistic review, Module 01 Riso Visual Alignment v2, ReturnURL / paid result / `/r` / pending / expired / invalid surfaces.
 - Recommended next task: owner holistic visual review, then choose Module 01 Riso Visual Alignment v2, ReturnURL/paid result/`/r` Riso surfaces, or Repeated / Concurrency Paid-Generation Benchmark v0.
+
+## 2026-06-08 CoreShell Static Pages Reference Implementation v1
+
+### Completed Changes
+
+- reworked static/Core pages using `core-shell-screens.jsx` as visual/layout reference while preserving current copy and routes.
+- visibly changed the homepage from a mostly unchanged storefront stack into a Core editorial entrance:
+  - Wordmark/nav hairline topbar
+  - larger editorial hero
+  - quiet module/product preview card
+  - structured Details section
+  - Core support card and footer marker
+- visibly changed legal/static pages:
+  - Core topbar
+  - legal hero section
+  - metadata block
+  - designed article card with section dividers
+  - legal nav and footer markers
+- added structural markers for route/visual regression:
+  - `data-core-static-page`
+  - `data-core-hero`
+  - `data-core-module-card`
+  - `data-core-article`
+  - `data-core-header`
+  - `data-core-footer`
+- preserved Module 01 ModuleShell/Riso boundary and did not touch Module 01 flow behavior.
+
+### Validation
+
+- targeted CoreShell/static/legal/theme tests: pass, 4 files / 18 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 105 files / 716 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: sandbox Chromium launch failed due macOS Mach port permission; escalated rerun passed, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- local screenshots generated under `/private/tmp/` for homepage, privacy, and refund.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, DB mutation, or provider logic change.
+- Current homepage and legal/static copy was preserved; archived reference copy was not copied.
+- `qa:module01:mock-flow` and `qa:result-checkout:no-card` skipped because Module 01 flow/payment/access-link behavior was not touched.
+- Recommended next task: owner holistic visual review comparing CoreShell and Module 01 surfaces, then continue targeted visual defect fixes.

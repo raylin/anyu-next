@@ -29,17 +29,21 @@ const refundItems = [
 
 export default function Home() {
   return (
-    <CoreShell className="anyu-storefront-shell">
-      <section className="anyu-storefront">
-        <header className="anyu-storefront-topbar">
+    <CoreShell className="anyu-core-static-shell anyu-storefront-shell">
+      <section className="anyu-core-static-page anyu-core-home" data-core-static-page="home">
+        <header className="anyu-core-topbar" data-core-header="true">
           <Wordmark />
-          <Link href="/legal" className="anyu-back-link">
+          <Link href="/legal" className="anyu-core-nav-link">
             法律與說明
           </Link>
         </header>
 
-        <section className="anyu-storefront-hero" aria-labelledby="storefront-title">
-          <div className="anyu-storefront-copy">
+        <section
+          className="anyu-core-hero anyu-core-hero-home"
+          aria-labelledby="storefront-title"
+          data-core-hero="home"
+        >
+          <div className="anyu-core-hero-copy anyu-storefront-copy">
             <p className="anyu-kicker">AI relationship report</p>
             <h1 id="storefront-title" className="anyu-title">
               曖昧溫度計｜AI 關係互動分析報告
@@ -58,7 +62,11 @@ export default function Home() {
             </div>
           </div>
 
-          <Card className="anyu-product-preview-card" aria-label="曖昧溫度計產品預覽">
+          <Card
+            className="anyu-core-module-card anyu-product-preview-card"
+            aria-label="曖昧溫度計產品預覽"
+            data-core-module-card="ai-temperature"
+          >
             <div className="anyu-product-preview-head">
               <span className="anyu-kicker">product preview</span>
               <span className="anyu-product-preview-price">NT$ 49</span>
@@ -82,8 +90,13 @@ export default function Home() {
           </Card>
         </section>
 
-        <section className="anyu-storefront-grid" aria-label="service details">
-          <Card>
+        <section className="anyu-core-section" aria-label="service details">
+          <div className="anyu-core-section-head">
+            <span className="anyu-kicker">Details</span>
+            <span aria-hidden="true" />
+          </div>
+          <div className="anyu-storefront-grid">
+            <Card className="anyu-core-info-card">
             <span className="anyu-kicker">service</span>
             <h2 className="anyu-section-title">服務內容</h2>
             <ul className="anyu-legal-list">
@@ -93,9 +106,9 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-          </Card>
+            </Card>
 
-          <Card>
+            <Card className="anyu-core-info-card">
             <span className="anyu-kicker">price</span>
             <h2 className="anyu-section-title">價格與收費方式</h2>
             <p className="anyu-copy">
@@ -104,17 +117,17 @@ export default function Home() {
             <p className="anyu-small-note">
               付款功能依審核與上線狀態開放；正式付款完成並確認後，完整報告會於網頁交付。
             </p>
-          </Card>
+            </Card>
 
-          <Card>
+            <Card className="anyu-core-info-card">
             <span className="anyu-kicker">delivery</span>
             <h2 className="anyu-section-title">交付方式</h2>
             <p className="anyu-copy">
               付款完成並確認後，系統會提供網頁完整報告；若 AI 產生內容需要處理時間，頁面會顯示處理中狀態，完成後即可查看。
             </p>
-          </Card>
+            </Card>
 
-          <Card>
+            <Card className="anyu-core-info-card">
             <span className="anyu-kicker">refund</span>
             <h2 className="anyu-section-title">退款與補發</h2>
             <ul className="anyu-legal-list">
@@ -127,10 +140,11 @@ export default function Home() {
             <Link href="/refund" className="anyu-storefront-link">
               查看完整退款政策
             </Link>
-          </Card>
+            </Card>
+          </div>
         </section>
 
-        <Card className="anyu-storefront-note">
+        <Card className="anyu-core-support-card anyu-storefront-note">
           <span className="anyu-kicker">support</span>
           <h2 className="anyu-section-title">聯絡與服務限制</h2>
           <p className="anyu-copy">
@@ -140,7 +154,9 @@ export default function Home() {
           </p>
         </Card>
 
-        <LegalFooter />
+        <div data-core-footer="true">
+          <LegalFooter />
+        </div>
       </section>
     </CoreShell>
   );

@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import LegalIndexPage from "@/app/legal/page";
+import PrivacyPage from "@/app/privacy/page";
 import RefundPage from "@/app/refund/page";
 import Home from "@/app/page";
 import { aiTemperatureModule } from "@/content/modules/ai-temperature";
@@ -13,22 +14,34 @@ describe("CoreShell route boundary", () => {
     expect(html).toContain('data-shell="core"');
     expect(html).toContain('data-core-shell="true"');
     expect(html).toContain('data-theme="core"');
+    expect(html).toContain('data-core-static-page="home"');
+    expect(html).toContain('data-core-hero="home"');
+    expect(html).toContain('data-core-module-card="ai-temperature"');
+    expect(html).toContain('data-core-footer="true"');
     expect(html).toContain("anyu-core-shell");
     expect(html).not.toContain('data-module-theme="riso"');
   });
 
   it("renders legal routes inside the neutral CoreShell", () => {
     const legalHtml = renderToStaticMarkup(<LegalIndexPage />);
+    const privacyHtml = renderToStaticMarkup(<PrivacyPage />);
     const refundHtml = renderToStaticMarkup(<RefundPage />);
 
-    for (const html of [legalHtml, refundHtml]) {
+    for (const html of [legalHtml, privacyHtml, refundHtml]) {
       expect(html).toContain('data-shell="core"');
       expect(html).toContain('data-core-shell="true"');
       expect(html).toContain('data-theme="core"');
+      expect(html).toContain('data-core-hero="legal"');
+      expect(html).toContain("anyu-core-article");
       expect(html).not.toContain('data-shell="module"');
     }
 
+    expect(legalHtml).toContain('data-core-static-page="legal-index"');
+    expect(privacyHtml).toContain('data-core-static-page="legal-detail"');
+    expect(privacyHtml).toContain('data-core-article="legal"');
+    expect(privacyHtml).toContain('data-core-footer="true"');
     expect(legalHtml).toContain("法律與說明");
+    expect(privacyHtml).toContain("隱私");
     expect(refundHtml).toContain("退款");
   });
 
