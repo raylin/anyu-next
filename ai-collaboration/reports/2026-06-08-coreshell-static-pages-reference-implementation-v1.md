@@ -6,7 +6,7 @@
 - date: 2026-06-08
 - report path: `ai-collaboration/reports/2026-06-08-coreshell-static-pages-reference-implementation-v1.md`
 - commit: 3ee7d06
-- branch / push status: committed locally; pending push to `origin/staging`
+- branch / push status: pushed to `origin/staging`
 - model / effort: GPT-5 Codex, high effort
 - taskStartedAt: 2026-06-08T03:40:38Z
 - taskCompletedAt: 2026-06-08T03:47:01Z
