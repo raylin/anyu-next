@@ -5,8 +5,8 @@
 - task name: Module 01 LINE Bind Transition Riso Route Fix v0
 - date: 2026-06-08
 - report path: `ai-collaboration/reports/2026-06-08-module-01-line-bind-transition-riso-route-fix-v0.md`
-- commit: pending final commit
-- branch / push status: pending
+- commit: cb5446f
+- branch / push status: committed locally; pending push to `origin/staging`
 - model / effort: GPT-5 Codex, high effort
 - taskStartedAt: 2026-06-08T02:31:33Z
 - taskCompletedAt: 2026-06-08T02:33:36Z
