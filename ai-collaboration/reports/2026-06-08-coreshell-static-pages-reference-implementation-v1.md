@@ -5,8 +5,8 @@
 - task name: CoreShell Static Pages Reference Implementation v1
 - date: 2026-06-08
 - report path: `ai-collaboration/reports/2026-06-08-coreshell-static-pages-reference-implementation-v1.md`
-- commit: pending final commit
-- branch / push status: pending
+- commit: 3ee7d06
+- branch / push status: committed locally; pending push to `origin/staging`
 - model / effort: GPT-5 Codex, high effort
 - taskStartedAt: 2026-06-08T03:40:38Z
 - taskCompletedAt: 2026-06-08T03:47:01Z
@@ -158,4 +158,3 @@ Owner holistic visual review comparing:
 8. `/r`
 
 Then continue with targeted visual defect fixes.
-
