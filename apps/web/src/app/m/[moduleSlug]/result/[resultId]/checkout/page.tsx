@@ -238,9 +238,19 @@ function RecoverySoftGate({
       data-save-option="email"
     >
       <input type="hidden" name="paymentIntentId" value={paymentIntentId} />
-      <label className="anyu-recovery-label" htmlFor="recovery-email">
-        {showLineOption ? "Email 備用查看連結" : "Email 查看連結"}
-      </label>
+      <div className="anyu-riso-save-option-topline">
+        <span className="anyu-riso-save-icon" aria-hidden="true">
+          @
+        </span>
+        <div>
+          <label className="anyu-recovery-label" htmlFor="recovery-email">
+            {showLineOption ? "Email 備用查看連結" : "Email 查看連結"}
+          </label>
+          <p id="recovery-email-help" className="anyu-subtle-note">
+            Email 只會收到回到 ANYU 查看完整報告的連結，不會包含完整報告內容。
+          </p>
+        </div>
+      </div>
       <div className="anyu-recovery-email-row">
         <input
           id="recovery-email"
@@ -256,9 +266,6 @@ function RecoverySoftGate({
           {showLineOption ? "改用 Email 保存查看連結" : "用 Email 保存查看連結"}
         </Button>
       </div>
-      <p id="recovery-email-help" className="anyu-subtle-note">
-        Email 只會收到回到 ANYU 查看完整報告的連結，不會包含完整報告內容。
-      </p>
       <label className="anyu-recovery-checkbox">
         <input type="checkbox" name="marketingOptIn" value="1" />
         <span>也想收到新測驗、早鳥或限時解鎖通知</span>
@@ -276,24 +283,31 @@ function RecoverySoftGate({
       aria-label="LINE 查看連結選項"
       data-save-option="line"
     >
-      <div>
-        <p className="anyu-recovery-label">建議用 LINE 保存查看連結</p>
-        <p className="anyu-subtle-note">
-          付款完成後，我們會把完整報告的專屬查看連結傳到 LINE。也可以改用 Email 保存。
-        </p>
+      <div className="anyu-riso-save-option-topline">
+        <span className="anyu-riso-save-icon" aria-hidden="true">
+          ✦
+        </span>
+        <div>
+          <p className="anyu-recovery-label">建議用 LINE 保存查看連結</p>
+          <p className="anyu-subtle-note">
+            付款完成後，我們會把完整報告的專屬查看連結傳到 LINE。也可以改用 Email 保存。
+          </p>
+        </div>
+      </div>
+      <div className="anyu-riso-save-option-action">
         {lineError ? (
           <p className="anyu-recovery-error" role="status">
             LINE 保存沒有完成，這個 LINE 查看連結還不能用來接收付款後的查看連結。你可以重試 LINE，或改用 Email 保存查看連結。
           </p>
         ) : null}
+        {lineBind.ok ? (
+          <Link href={lineBind.href} className="anyu-button anyu-riso-save-cta">
+            用 LINE 保存查看連結
+          </Link>
+        ) : (
+          <span className="anyu-recovery-soon-badge">暫時無法啟動</span>
+        )}
       </div>
-      {lineBind.ok ? (
-        <Link href={lineBind.href} className="anyu-button anyu-riso-save-cta">
-          用 LINE 保存查看連結
-        </Link>
-      ) : (
-        <span className="anyu-recovery-soon-badge">暫時無法啟動</span>
-      )}
     </div>
   ) : null;
 
@@ -304,8 +318,8 @@ function RecoverySoftGate({
       data-riso-flow="checkout-save"
     >
       <div className="anyu-recovery-soft-gate-header">
-        <div>
-          <p className="anyu-kicker t-label-dim">report access link</p>
+        <div className="anyu-riso-save-gate-heading">
+          <p className="anyu-riso-flow-eyebrow">STEP 1 · report access link</p>
           <h2 id="payment-recovery-title" className="anyu-recovery-title">
             先保存查看連結
           </h2>

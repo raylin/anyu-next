@@ -40,6 +40,10 @@ describe("LINE recovery LIFF page", () => {
     expect(html).toContain('data-riso-flow="line-bind"');
     expect(html).toContain('data-riso-flow-state="idle"');
     expect(html).toContain("anyu-riso-flow-card");
+    expect(html).toContain("anyu-riso-reference-panel");
+    expect(html).toContain("anyu-riso-flow-hero");
+    expect(html).toContain("anyu-riso-flow-stamp");
+    expect(html).toContain("// 連結保管");
     expect(html).toContain("從 LINE 回到 ANYU 查看完整報告");
     expect(html).toContain("完整報告仍以網頁查看為準");
     expect(html).not.toContain("LINE 領取完整分析");
@@ -60,6 +64,7 @@ describe("LINE recovery LIFF page", () => {
     expect(html).toContain("缺少 LINE 保存狀態");
     expect(html).toContain('data-riso-flow="line-bind"');
     expect(html).toContain('data-riso-flow-state="fallback"');
+    expect(html).toContain('data-riso-flow-state-card="fallback"');
     expect(html).toContain("anyu-riso-status-box-warning");
     expect(html).toContain("data-line-diagnostic-category=\"liff_state_missing\"");
     expect(html).toContain("請在 LINE 中開啟此頁，或回到原頁改用 Email 保存");
@@ -142,6 +147,9 @@ describe("LINE recovery LIFF page", () => {
     expect(source).toContain("browserContext.state ? browserContext : serverContext");
     expect(source).toContain("mapLineRecoveryBindApiFailure");
     expect(source).toContain("data-line-diagnostic-category");
+    expect(source).toContain('data-riso-flow-state-card="loading"');
+    expect(source).toContain('data-riso-flow-state-card="success"');
+    expect(source).toContain("anyu-riso-flow-state-card");
     expect(source).toContain("idToken");
     expect(source).not.toContain("lineUserId");
     expect(source).not.toContain("unlockIntentId");

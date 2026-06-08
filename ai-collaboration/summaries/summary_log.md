@@ -12106,3 +12106,43 @@ Unresolved questions:
 - Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, production DB mutation, or provider logic change.
 - Owner visual review is still needed for spacing, accent strength, texture density, and remaining Module 01 flow pages.
 - Recommended next task: owner visual review on staging, then decide between more Riso visual polish, CoreShell migration, or Repeated / Concurrency Paid-Generation Benchmark v0.
+
+## 2026-06-08 Module 01 Reference-Aligned Riso Save + LINE Bind Surfaces v1
+
+### Completed Changes
+
+- reworked Module 01 checkout save and LINE bind visual surfaces toward the accepted archived Riso reference, beyond v0 color/class polish.
+- added reference-style LINE bind flow anatomy:
+  - `// 連結保管` eyebrow
+  - hero/header block
+  - decorative Riso stamp
+  - dashed copy divider
+  - shared loading/success/fallback state-card markers
+- restructured checkout LINE and Email save options into one shared save-card grammar:
+  - icon tile
+  - label/copy top-line
+  - separated action area
+  - thick ink border
+  - offset accent/ink shadow
+  - shared full-width dark CTA
+- preserved current app copy semantics and all payment/access-link/Email/LINE behavior.
+- updated tests to assert structural Riso reference markers instead of only theme/color markers.
+
+### Validation
+
+- `cd apps/web && corepack pnpm lint`: pass.
+- targeted LINE bind / checkout-start tests: pass, 2 files / 17 tests.
+- `cd apps/web && corepack pnpm test`: pass, 104 files / 713 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:result-checkout:no-card`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, production DB mutation, or provider logic change.
+- Browser screenshot capture was unavailable in this session; owner staging visual review remains the acceptance check.
+- Remaining Riso alignment surfaces: ReturnURL, paid result, `/r`, expired, invalid, and pending states.
+- Recommended next task: owner visual review on staging, then choose continued Riso flow alignment or CoreShell migration.

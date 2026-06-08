@@ -249,9 +249,16 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
           <Wordmark showMark />
         </div>
 
-        <Card className="anyu-riso-flow-card anyu-line-bind-card">
-          <p className="anyu-kicker">LINE access link</p>
-          <h1 className="anyu-section-title">用 LINE 保存查看連結</h1>
+        <Card className="anyu-riso-flow-card anyu-riso-reference-panel anyu-line-bind-card">
+          <div className="anyu-riso-flow-hero">
+            <div className="anyu-riso-flow-hero-copy">
+              <p className="anyu-riso-flow-eyebrow">{"// 連結保管"}</p>
+              <h1 className="anyu-section-title anyu-riso-flow-title">用 LINE 保存查看連結</h1>
+            </div>
+            <span className="anyu-riso-flow-stamp" aria-hidden="true">
+              ✦
+            </span>
+          </div>
           {diagnosticCategory ? (
             <p
               hidden
@@ -261,15 +268,18 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
               狀態代碼：{diagnosticCategory}
             </p>
           ) : null}
-          <p className="anyu-copy">{message}</p>
-          <p className="anyu-subtle-note">
-            LINE 只會保存或傳送查看連結；完整報告仍以網頁查看為準。
-          </p>
+          <div className="anyu-riso-flow-copy-block">
+            <p className="anyu-copy">{message}</p>
+            <p className="anyu-subtle-note">
+              LINE 只會保存或傳送查看連結；完整報告仍以網頁查看為準。
+            </p>
+          </div>
 
           {state === "loading" ? (
             <p
-              className="anyu-status-message anyu-riso-status-box anyu-riso-status-box-pending"
+              className="anyu-status-message anyu-riso-status-box anyu-riso-status-box-pending anyu-riso-flow-state-card"
               role="status"
+              data-riso-flow-state-card="loading"
             >
               正在確認 LINE 身分…
             </p>
@@ -277,15 +287,19 @@ export function LineRecoveryBindBridge({ initialSearch }: { initialSearch?: stri
 
           {state === "success" ? (
             <p
-              className="anyu-recovery-confirmation anyu-riso-status-box anyu-riso-status-box-success"
+              className="anyu-recovery-confirmation anyu-riso-status-box anyu-riso-status-box-success anyu-riso-flow-state-card"
               role="status"
+              data-riso-flow-state-card="success"
             >
               LINE 保存成功。正在回到原本的報告頁。
             </p>
           ) : null}
 
           {state === "fallback" ? (
-            <div className="anyu-contact-code-box anyu-riso-status-box anyu-riso-status-box-warning">
+            <div
+              className="anyu-contact-code-box anyu-riso-status-box anyu-riso-status-box-warning anyu-riso-flow-state-card"
+              data-riso-flow-state-card="fallback"
+            >
               <p className="anyu-subtle-note">
                 請在 LINE 中開啟此頁，或回到原頁改用 Email 保存。LINE 綁定失敗也不影響付款或查看報告。
               </p>

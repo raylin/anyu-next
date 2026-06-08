@@ -104,6 +104,9 @@ describe("NewebPay checkout-start page", () => {
     expect(html).toContain("先保存查看連結");
     expect(html).toContain('data-riso-flow="checkout-save"');
     expect(html).toContain('data-save-option="email"');
+    expect(html).toContain("anyu-riso-save-gate-heading");
+    expect(html).toContain("anyu-riso-save-option-topline");
+    expect(html).toContain("anyu-riso-save-icon");
     expect(html).toContain("請先用 Email 保存查看連結");
     expect(html).toContain("先保存查看連結");
     expect(html).toContain("Email 查看連結");
@@ -182,6 +185,9 @@ describe("NewebPay checkout-start page", () => {
     expect(html).toContain('data-riso-flow="checkout-save"');
     expect(html).toContain('data-save-option="line"');
     expect(html).toContain('data-save-option="email"');
+    expect(html).toContain("anyu-riso-save-option-topline");
+    expect(html).toContain("anyu-riso-save-option-action");
+    expect(html).toContain("anyu-riso-save-icon");
     expect(html).toContain("anyu-riso-save-cta");
     expect(html).toContain("用 LINE 保存查看連結");
     expect(html).toContain("改用 Email 保存查看連結");
