@@ -6,7 +6,7 @@
 - date: 2026-06-08
 - report path: `ai-collaboration/reports/2026-06-08-coreshell-baseline-migration-v0.md`
 - commit: b12b35d
-- branch / push status: committed locally; pending push to `origin/staging`
+- branch / push status: pushed to `origin/staging`
 - model / effort: GPT-5 Codex, high effort
 - taskStartedAt: 2026-06-08T03:24:23Z
 - taskCompletedAt: 2026-06-08T03:30:19Z
