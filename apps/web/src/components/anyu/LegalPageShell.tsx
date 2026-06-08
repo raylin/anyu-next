@@ -57,7 +57,11 @@ export function LegalPageShell({ page }: LegalPageShellProps) {
 
         <article className="anyu-core-article anyu-legal-article" data-core-article="legal">
           {page.sections.map((section) => (
-            <section key={section.title} className="anyu-core-article-section anyu-legal-section">
+            <section
+              key={section.title}
+              className="anyu-core-article-section anyu-legal-section"
+              data-core-section="legal"
+            >
               <h2 className="anyu-section-title">{section.title}</h2>
               {section.paragraphs?.map((paragraph) => (
                 <p key={paragraph} className="anyu-copy">

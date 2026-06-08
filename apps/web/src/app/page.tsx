@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { Button } from "@/components/anyu/Button";
-import { Card } from "@/components/anyu/Card";
 import { CoreShell } from "@/components/anyu/CoreShell";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
@@ -62,7 +61,7 @@ export default function Home() {
             </div>
           </div>
 
-          <Card
+          <article
             className="anyu-core-module-card anyu-product-preview-card"
             aria-label="曖昧溫度計產品預覽"
             data-core-module-card="ai-temperature"
@@ -87,64 +86,64 @@ export default function Home() {
               <span>48 小時建議</span>
               <span>依據線索摘要</span>
             </div>
-          </Card>
+          </article>
         </section>
 
-        <section className="anyu-core-section" aria-label="service details">
+        <section className="anyu-core-section" aria-label="service details" data-core-section="details">
           <div className="anyu-core-section-head">
             <span className="anyu-kicker">Details</span>
             <span aria-hidden="true" />
           </div>
           <div className="anyu-storefront-grid">
-            <Card className="anyu-core-info-card">
-            <span className="anyu-kicker">service</span>
-            <h2 className="anyu-section-title">服務內容</h2>
-            <ul className="anyu-legal-list">
-              {includedItems.map((item) => (
-                <li key={item} className="anyu-copy">
-                  {item}
-                </li>
-              ))}
-            </ul>
-            </Card>
+            <article className="anyu-core-info-card" data-core-section="service">
+              <span className="anyu-kicker">service</span>
+              <h2 className="anyu-section-title">服務內容</h2>
+              <ul className="anyu-legal-list">
+                {includedItems.map((item) => (
+                  <li key={item} className="anyu-copy">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </article>
 
-            <Card className="anyu-core-info-card">
-            <span className="anyu-kicker">price</span>
-            <h2 className="anyu-section-title">價格與收費方式</h2>
-            <p className="anyu-copy">
-              單次完整報告解鎖：NT$ 49。採一次性付款，非訂閱制，不會產生週期性收費。
-            </p>
-            <p className="anyu-small-note">
-              付款功能依審核與上線狀態開放；正式付款完成並確認後，完整報告會於網頁交付。
-            </p>
-            </Card>
+            <article className="anyu-core-info-card" data-core-section="price">
+              <span className="anyu-kicker">price</span>
+              <h2 className="anyu-section-title">價格與收費方式</h2>
+              <p className="anyu-copy">
+                單次完整報告解鎖：NT$ 49。採一次性付款，非訂閱制，不會產生週期性收費。
+              </p>
+              <p className="anyu-small-note">
+                付款功能依審核與上線狀態開放；正式付款完成並確認後，完整報告會於網頁交付。
+              </p>
+            </article>
 
-            <Card className="anyu-core-info-card">
-            <span className="anyu-kicker">delivery</span>
-            <h2 className="anyu-section-title">交付方式</h2>
-            <p className="anyu-copy">
-              付款完成並確認後，系統會提供網頁完整報告；若 AI 產生內容需要處理時間，頁面會顯示處理中狀態，完成後即可查看。
-            </p>
-            </Card>
+            <article className="anyu-core-info-card" data-core-section="delivery">
+              <span className="anyu-kicker">delivery</span>
+              <h2 className="anyu-section-title">交付方式</h2>
+              <p className="anyu-copy">
+                付款完成並確認後，系統會提供網頁完整報告；若 AI 產生內容需要處理時間，頁面會顯示處理中狀態，完成後即可查看。
+              </p>
+            </article>
 
-            <Card className="anyu-core-info-card">
-            <span className="anyu-kicker">refund</span>
-            <h2 className="anyu-section-title">退款與補發</h2>
-            <ul className="anyu-legal-list">
-              {refundItems.map((item) => (
-                <li key={item} className="anyu-copy">
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <Link href="/refund" className="anyu-storefront-link">
-              查看完整退款政策
-            </Link>
-            </Card>
+            <article className="anyu-core-info-card" data-core-section="refund">
+              <span className="anyu-kicker">refund</span>
+              <h2 className="anyu-section-title">退款與補發</h2>
+              <ul className="anyu-legal-list">
+                {refundItems.map((item) => (
+                  <li key={item} className="anyu-copy">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/refund" className="anyu-storefront-link">
+                查看完整退款政策
+              </Link>
+            </article>
           </div>
         </section>
 
-        <Card className="anyu-core-support-card anyu-storefront-note">
+        <aside className="anyu-core-support-card anyu-storefront-note">
           <span className="anyu-kicker">support</span>
           <h2 className="anyu-section-title">聯絡與服務限制</h2>
           <p className="anyu-copy">
@@ -152,7 +151,7 @@ export default function Home() {
             <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>。暗語 ANYU 是文字情境整理與溝通建議，
             不是心理治療、諮商、命理或關係結果保證。
           </p>
-        </Card>
+        </aside>
 
         <div data-core-footer="true">
           <LegalFooter />

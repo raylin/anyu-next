@@ -67,36 +67,36 @@ textarea {
 .anyu-core-shell::before {
   content: "";
   position: absolute;
-  z-index: -1;
-  inset: 0 var(--anyu-space-4) auto;
-  height: 0.22rem;
-  border-radius: var(--anyu-radius-pill);
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--anyu-accent) 46%, transparent),
-    color-mix(in srgb, var(--anyu-rose) 30%, transparent),
-    color-mix(in srgb, var(--anyu-accent2) 34%, transparent)
-  );
-  opacity: 0.7;
+  z-index: -2;
+  inset: 0;
+  background-image: radial-gradient(color-mix(in srgb, var(--anyu-ink) 22%, transparent) 0.55px, transparent 0.7px);
+  background-size: 4px 4px;
+  opacity: 0.28;
+  pointer-events: none;
 }
 
-.anyu-core-shell .anyu-card {
-  border-color: color-mix(in srgb, var(--anyu-ink) 12%, transparent);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--anyu-card) 90%, var(--anyu-surface)), var(--anyu-card));
-  box-shadow:
-    0 1px 0 rgba(42, 36, 25, 0.04),
-    0 18px 46px rgba(42, 36, 25, 0.06);
+.anyu-core-shell::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 var(--anyu-space-6) auto;
+  height: 0.18rem;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--anyu-ink) 24%, transparent),
+    color-mix(in srgb, var(--anyu-accent) 20%, transparent),
+    color-mix(in srgb, var(--anyu-ink) 10%, transparent)
+  );
 }
 
 .anyu-core-static-shell {
-  width: min(100%, 72rem);
-  padding-top: calc(var(--anyu-space-5) + env(safe-area-inset-top));
+  width: min(100%, 66rem);
+  padding-top: calc(var(--anyu-space-4) + env(safe-area-inset-top));
 }
 
 .anyu-core-static-page {
   display: grid;
-  gap: var(--anyu-space-8);
+  gap: var(--anyu-space-7, 28px);
 }
 
 .anyu-core-topbar {
@@ -104,7 +104,8 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: var(--anyu-space-4);
-  padding-bottom: var(--anyu-space-5);
+  min-height: 3.4rem;
+  padding-bottom: var(--anyu-space-4);
   border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
 }
 
@@ -132,11 +133,11 @@ textarea {
 .anyu-core-hero {
   position: relative;
   display: grid;
-  gap: var(--anyu-space-6);
+  gap: var(--anyu-space-5);
   padding:
-    clamp(var(--anyu-space-6), 6vw, var(--anyu-space-14))
+    clamp(var(--anyu-space-8), 7vw, var(--anyu-space-18))
     0
-    var(--anyu-space-8);
+    clamp(var(--anyu-space-6), 5vw, var(--anyu-space-10));
   border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
 }
 
@@ -158,7 +159,7 @@ textarea {
 }
 
 .anyu-core-hero-home {
-  grid-template-columns: minmax(0, 1.05fr) minmax(19rem, 0.95fr);
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 0.78fr);
   align-items: stretch;
 }
 
@@ -170,10 +171,10 @@ textarea {
 }
 
 .anyu-core-hero .anyu-title {
-  max-width: 13em;
-  font-size: clamp(2.5rem, 6vw, 5.2rem);
-  line-height: 1.02;
-  letter-spacing: -0.06em;
+  max-width: 11.5em;
+  font-size: clamp(2.85rem, 7.4vw, 6.6rem);
+  line-height: 0.96;
+  letter-spacing: -0.075em;
 }
 
 .anyu-core-hero .anyu-copy {
@@ -182,13 +183,19 @@ textarea {
 }
 
 .anyu-core-module-card {
+  position: relative;
+  display: grid;
+  gap: var(--anyu-space-4);
   align-content: space-between;
-  border-radius: var(--anyu-radius-md);
+  padding: clamp(var(--anyu-space-5), 4vw, var(--anyu-space-8));
+  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 18%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 18%, transparent);
+  background: color-mix(in srgb, var(--anyu-card) 34%, transparent);
 }
 
 .anyu-core-section {
   display: grid;
-  gap: var(--anyu-space-4);
+  gap: var(--anyu-space-5);
 }
 
 .anyu-core-section-head {
@@ -204,16 +211,27 @@ textarea {
 }
 
 .anyu-core-info-card {
-  border-radius: var(--anyu-radius-md);
+  display: grid;
+  gap: var(--anyu-space-3);
+  padding-block: var(--anyu-space-5);
+  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 13%, transparent);
+  background: transparent;
 }
 
 .anyu-core-support-card {
-  border-radius: var(--anyu-radius-md);
-  border-left: 4px solid color-mix(in srgb, var(--anyu-ink) 42%, transparent);
+  display: grid;
+  gap: var(--anyu-space-3);
+  padding:
+    var(--anyu-space-5)
+    0
+    var(--anyu-space-6);
+  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 18%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 18%, transparent);
+  background: transparent;
 }
 
 .anyu-core-legal-page {
-  width: min(100%, 54rem);
+  width: min(100%, 42rem);
   margin-inline: auto;
 }
 
@@ -229,23 +247,33 @@ textarea {
 .anyu-core-article {
   display: grid;
   gap: 0;
-  padding: clamp(var(--anyu-space-5), 4vw, var(--anyu-space-8));
-  border: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
-  border-radius: var(--anyu-radius-md);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--anyu-card) 92%, var(--anyu-surface)), var(--anyu-card));
-  box-shadow:
-    0 1px 0 rgba(42, 36, 25, 0.04),
-    0 22px 56px rgba(42, 36, 25, 0.07);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  counter-reset: core-section;
 }
 
 .anyu-core-article-section {
-  padding-block: var(--anyu-space-5);
-  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 11%, transparent);
+  position: relative;
+  display: grid;
+  gap: var(--anyu-space-3);
+  padding-block: clamp(var(--anyu-space-6), 5vw, var(--anyu-space-10));
+  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 16%, transparent);
+  counter-increment: core-section;
+}
+
+.anyu-core-article-section::before {
+  content: counter(core-section, decimal-leading-zero);
+  color: color-mix(in srgb, var(--anyu-ink) 48%, transparent);
+  font-family: var(--anyu-font-mono);
+  font-size: var(--anyu-type-label-size);
+  line-height: 1;
+  letter-spacing: var(--anyu-track-mono);
 }
 
 .anyu-core-article-section:first-child {
-  padding-top: 0;
+  padding-top: var(--anyu-space-2);
   border-top: 0;
 }
 
@@ -254,7 +282,9 @@ textarea {
 }
 
 .anyu-core-legal-nav {
-  border-radius: var(--anyu-radius-md);
+  padding-block: var(--anyu-space-4);
+  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
 }
 
 .anyu-storefront-shell {

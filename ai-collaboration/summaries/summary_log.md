@@ -12259,3 +12259,46 @@ Unresolved questions:
 - Current homepage and legal/static copy was preserved; archived reference copy was not copied.
 - `qa:module01:mock-flow` and `qa:result-checkout:no-card` skipped because Module 01 flow/payment/access-link behavior was not touched.
 - Recommended next task: owner holistic visual review comparing CoreShell and Module 01 surfaces, then continue targeted visual defect fixes.
+
+## 2026-06-08 CoreShell Static Pages Reference Rebuild v2
+
+### Completed Changes
+
+- rebuilt CoreShell static pages more aggressively toward `core-shell-screens.jsx`.
+- removed generic `Card` component use from the Core static homepage.
+- changed homepage into a stronger Core editorial entrance:
+  - compact Wordmark/nav row
+  - paper/dot texture
+  - large serif hero
+  - Core module preview article
+  - section dividers
+  - transparent Core info/support blocks
+- rebuilt legal/static pages:
+  - no generic white article card shell
+  - compact topbar
+  - legal hero and metadata
+  - numbered article sections using CSS counters
+  - clean horizontal dividers on paper
+- preserved current copy, legal meaning, links, and routes.
+- preserved Module 01 ModuleShell/Riso boundary.
+
+### Validation
+
+- targeted CoreShell/static/legal/theme tests: pass, 4 files / 18 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 105 files / 716 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- local screenshots generated:
+  - `/private/tmp/anyu-coreshell-home-v2.png`
+  - `/private/tmp/anyu-coreshell-privacy-v2.png`
+  - `/private/tmp/anyu-coreshell-refund-v2.png`
+  - `/private/tmp/anyu-coreshell-terms-v2.png`
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, DB mutation, or provider logic change.
+- `qa:module01:mock-flow` and `qa:result-checkout:no-card` skipped because Module 01 flow/payment/access-link behavior was not touched.
+- Recommended next task: owner visual review with screenshots, then targeted visual defect fixes across CoreShell and Module 01 flow.

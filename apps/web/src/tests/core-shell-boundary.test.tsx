@@ -17,8 +17,11 @@ describe("CoreShell route boundary", () => {
     expect(html).toContain('data-core-static-page="home"');
     expect(html).toContain('data-core-hero="home"');
     expect(html).toContain('data-core-module-card="ai-temperature"');
+    expect(html).toContain('data-core-section="details"');
+    expect(html).toContain('data-core-section="service"');
     expect(html).toContain('data-core-footer="true"');
     expect(html).toContain("anyu-core-shell");
+    expect(html).not.toContain("anyu-card");
     expect(html).not.toContain('data-module-theme="riso"');
   });
 
@@ -33,12 +36,14 @@ describe("CoreShell route boundary", () => {
       expect(html).toContain('data-theme="core"');
       expect(html).toContain('data-core-hero="legal"');
       expect(html).toContain("anyu-core-article");
+      expect(html).not.toContain("anyu-card");
       expect(html).not.toContain('data-shell="module"');
     }
 
     expect(legalHtml).toContain('data-core-static-page="legal-index"');
     expect(privacyHtml).toContain('data-core-static-page="legal-detail"');
     expect(privacyHtml).toContain('data-core-article="legal"');
+    expect(privacyHtml).toContain('data-core-section="legal"');
     expect(privacyHtml).toContain('data-core-footer="true"');
     expect(legalHtml).toContain("法律與說明");
     expect(privacyHtml).toContain("隱私");
