@@ -12440,3 +12440,39 @@ Unresolved questions:
 - Preview(staging) was mutated only through the approved staging-safe no-card operator QA helper.
 - Local/mock repeated and lightweight concurrency evidence is complete; low-key soft public still needs deployed repeated/concurrency automatic-drain evidence if broader availability becomes the priority.
 - Recommended next task: owner chooses Payment Runtime Activation Prep v0, NewebPay NotifyURL / ReturnURL Dry-Run Matrix v0, or owner visual review / targeted paid-state visual fixes. If soft-public readiness is prioritized, run deployed repeated/concurrency automatic-drain evidence next.
+
+## 2026-06-09 NewebPay NotifyURL / ReturnURL Dry-Run Matrix v0
+
+### Completed Changes
+
+- added deterministic callback matrix coverage without real payment or production runtime.
+- confirmed and documented the active boundary:
+  - NotifyURL is payment truth.
+  - ReturnURL is UX/recovery only.
+  - Browser ReturnURL success does not create entitlement or generation jobs.
+- added/strengthened tests for:
+  - NotifyURL success followed by duplicate success.
+  - ReturnURL before NotifyURL with no entitlement/job side effects.
+  - ReturnURL recovery after verified NotifyURL truth exists.
+  - failed/cancelled/expired provider statuses creating no paid artifacts.
+  - unknown merchant order and wrong-provider merchant order rejection.
+  - generation job creation failure after payment has been marked paid.
+- no provider/runtime implementation change was required.
+
+### Validation
+
+- targeted NewebPay/payment callback tests: pass, 7 files / 55 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 106 files / 734 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no production runtime open, production payment, real Email/LINE send, Vercel env change, NewebPay config change, or DB mutation.
+- Current behavior safely rejects non-success provider callbacks without creating paid artifacts, but does not yet map provider failure/cancel/expired taxonomy into local terminal payment statuses. Keep as deferred unless support/Admin workflows require it.
+- No deployed staging simulated NotifyURL/ReturnURL matrix helper exists; local deterministic tests were sufficient for this dry-run.
+- Recommended next task: Payment Runtime Activation Prep v0, unless soft-public readiness becomes the priority, in which case run deployed repeated/concurrency automatic-drain evidence first.

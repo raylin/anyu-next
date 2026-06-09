@@ -217,6 +217,47 @@ describe("NewebPay NotifyURL service", () => {
     expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).toHaveBeenCalledTimes(1);
   });
 
+  it("handles success followed by duplicate success without duplicate paid transition", async () => {
+    const first = await processNewebPayNotify(notifyPayload(), env);
+
+    mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue({
+      ...paymentIntent,
+      status: "paid",
+    });
+    mockCreatePaidDeliveryArtifactsForPaymentIntent.mockResolvedValueOnce({
+      ok: true,
+      entitlement: { id: "entitlement-1" },
+      entitlementCreated: false,
+      generationJob: { id: "job-1", status: "queued" },
+      generationJobCreated: false,
+      accessState: "pending",
+      paidAccessToken: null,
+      paidAccessTokenReturned: false,
+      unlockPath: null,
+    });
+
+    const second = await processNewebPayNotify(notifyPayload(), env);
+
+    expect(first).toMatchObject({
+      ok: true,
+      category: "payment_marked_paid",
+      delivery: {
+        entitlementCreated: true,
+        generationJobCreated: true,
+      },
+    });
+    expect(second).toMatchObject({
+      ok: true,
+      category: "duplicate_notify",
+      delivery: {
+        entitlementCreated: false,
+        generationJobCreated: false,
+      },
+    });
+    expect(mockMarkPaymentPaid).toHaveBeenCalledTimes(1);
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).toHaveBeenCalledTimes(2);
+  });
+
   it("does not mark paid when amount mismatches", async () => {
     const result = await processNewebPayNotify(
       notifyPayload({ Result: { Amt: 50 } }),
@@ -245,6 +286,87 @@ describe("NewebPay NotifyURL service", () => {
     });
     expect(mockMarkPaymentPaid).not.toHaveBeenCalled();
     expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["MPG03009", "付款取消"],
+    ["MPG02012", "付款失敗"],
+    ["MPG01008", "付款逾時"],
+  ])(
+    "does not create paid artifacts for non-success provider status %s",
+    async (status, message) => {
+      const result = await processNewebPayNotify(
+        notifyPayload({ Status: status, Message: message }),
+        env,
+      );
+
+      expect(result).toMatchObject({
+        ok: false,
+        status: 409,
+        category: "payment_not_success",
+      });
+      expect(mockMarkPaymentPaid).not.toHaveBeenCalled();
+      expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).not.toHaveBeenCalled();
+    },
+  );
+
+  it("rejects unknown merchant orders without paid transition or delivery artifacts", async () => {
+    mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue(null);
+
+    const result = await processNewebPayNotify(notifyPayload(), env);
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 404,
+      category: "payment_intent_not_found",
+    });
+    expect(mockMarkPaymentPaid).not.toHaveBeenCalled();
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).not.toHaveBeenCalled();
+  });
+
+  it("rejects merchant orders that belong to a different provider", async () => {
+    mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue({
+      ...paymentIntent,
+      provider: "operator_fake",
+    });
+
+    const result = await processNewebPayNotify(notifyPayload(), env);
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 404,
+      category: "order_not_found",
+    });
+    expect(mockMarkPaymentPaid).not.toHaveBeenCalled();
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).not.toHaveBeenCalled();
+  });
+
+  it("keeps verified payment truth when generation job creation fails after payment is marked paid", async () => {
+    mockCreatePaidDeliveryArtifactsForPaymentIntent.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      error: "generation_job_create_failed",
+    });
+
+    const result = await processNewebPayNotify(notifyPayload(), env);
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 500,
+      category: "generation_job_create_failed",
+    });
+    expect(mockMarkPaymentPaid).toHaveBeenCalledWith(
+      expect.objectContaining({
+        paymentIntentId: paymentIntent.id,
+        providerStatus: "SUCCESS",
+      }),
+    );
+    expect(mockCreatePaidDeliveryArtifactsForPaymentIntent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        paymentIntent: expect.objectContaining({ id: "payment-1", status: "paid" }),
+        generationJobTriggerSource: "newebpay_notify",
+      }),
+    );
   });
 
   it("does not expose raw paid access tokens in the NotifyURL result", async () => {

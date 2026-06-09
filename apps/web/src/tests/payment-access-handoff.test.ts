@@ -128,6 +128,48 @@ describe("payment access handoff", () => {
       accessPath: null,
       retryable: true,
     });
+    expect(mockGetEntitlementByPaymentIntentId).not.toHaveBeenCalled();
+    expect(mockGetGenerationJobByDedupeKey).not.toHaveBeenCalled();
+    expect(mockGetPaidResultForAnalysisResult).not.toHaveBeenCalled();
+  });
+
+  it("keeps ReturnURL-before-NotifyURL as UX-only without paid side effects", async () => {
+    const firstReturn = await resolvePaymentAccessHandoff({
+      moduleSlug: "ambiguous-temperature",
+      checkoutToken: checkoutToken(),
+      env,
+    });
+
+    expect(firstReturn).toMatchObject({
+      ok: true,
+      state: "waiting_for_payment",
+      accessPath: null,
+      retryable: true,
+    });
+    expect(mockGetEntitlementByPaymentIntentId).not.toHaveBeenCalled();
+    expect(mockGetGenerationJobByDedupeKey).not.toHaveBeenCalled();
+
+    mockGetPaymentIntentByMerchantOrderNo.mockResolvedValue({
+      ...paymentIntent,
+      status: "paid",
+    });
+    mockGetEntitlementByPaymentIntentId.mockResolvedValue(entitlement);
+    mockGetGenerationJobByDedupeKey.mockResolvedValue({ id: "job-1", status: "queued" });
+
+    const afterNotifyTruth = await resolvePaymentAccessHandoff({
+      moduleSlug: "ambiguous-temperature",
+      checkoutToken: checkoutToken(),
+      env,
+    });
+
+    expect(afterNotifyTruth).toMatchObject({
+      ok: true,
+      state: "paid_processing",
+      accessPath: null,
+      retryable: true,
+    });
+    expect(mockGetEntitlementByPaymentIntentId).toHaveBeenCalledTimes(1);
+    expect(mockGetGenerationJobByDedupeKey).toHaveBeenCalledTimes(1);
   });
 
   it("returns paid_processing after verified payment before result is ready", async () => {
@@ -179,4 +221,3 @@ describe("payment access handoff", () => {
     expect(result.accessPath).not.toContain("pa_");
   });
 });
-
