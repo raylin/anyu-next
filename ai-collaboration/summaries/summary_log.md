@@ -12357,3 +12357,49 @@ Unresolved questions:
 - Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, DB mutation, or provider logic change.
 - Visual acceptance remains owner review against the archived reference; tests only protect structure/behavior/shared-token alignment.
 - Recommended next task: owner visual review against the archived reference, then choose CoreShell storefront pattern, Module 01 ReturnURL/paid result/`/r` state matrix, or checkout/save refinement using owner screenshots.
+
+## 2026-06-09 Module 01 Paid-State Surfaces Reference Alignment v0
+
+### Completed Changes
+
+- aligned paid-adjacent Module 01 state surfaces to the shared Riso/reference visual system before further runtime activation.
+- added `RisoPaidStatePanel` as the shared primitive for ReturnURL, paid result pending/error, and `/r` access-link error/processing states.
+- replaced generic paid-state cards on:
+  - provider-level ReturnURL `/payment/newebpay/return`
+  - legacy module ReturnURL compatibility route `/m/[moduleSlug]/payment/return`
+  - paid unlock pending/error route `/m/[moduleSlug]/unlock/[unlockToken]`
+  - `/r/[recoveryToken]` invalid/expired/processing states
+- added completed paid-result cover and delivery artifact markers for the paid-state visual matrix.
+- adopted reference patterns:
+  - thick ink bordered status cards
+  - paper/grid texture
+  - offset accent/shadow
+  - Riso stamp
+  - squared stripe loading bar
+  - ink-bordered step markers
+- documented missing Claude Design coverage for:
+  - long paid-generation queued/delayed states
+  - provider ReturnURL edge matrix
+  - `/r` expired/invalid/processing/access-denied matrix
+
+### Validation
+
+- targeted paid-state/reference tests: pass, 5 files / 27 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 106 files / 720 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- local screenshot artifacts generated:
+  - `/private/tmp/anyu-paid-state-return-invalid-v0.png`
+  - `/private/tmp/anyu-paid-state-access-link-invalid-v0.png`
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, DB mutation, or provider/LIFF/access-link logic change.
+- `qa:result-checkout:no-card` skipped because checkout/payment behavior and no-card logic were not touched.
+- Browser skill Node REPL tool was unavailable, so screenshots used local Playwright CLI.
+- Visual acceptance remains owner review; tests protect shared structure, behavior, and ModuleShell/Riso boundary, not pixel perfection.
+- Recommended next task: owner visual review of paid-adjacent surfaces, then Claude Design gap generation for missing paid-state matrices or further Module 01 Riso flow polish using the aligned primitives.

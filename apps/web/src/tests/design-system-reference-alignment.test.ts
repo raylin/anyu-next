@@ -13,6 +13,8 @@ const referenceCore = () =>
     resolve(process.cwd(), "../../ai-collaboration/design/theme-architecture-v0/core-shell-screens.jsx"),
     "utf8",
   );
+const paidStatePanel = () =>
+  readFileSync(resolve(process.cwd(), "src/components/modules/ai-temperature/RisoPaidStatePanel.tsx"), "utf8");
 
 function cssBlock(source: string, selector: string) {
   const start = source.indexOf(selector);
@@ -77,5 +79,24 @@ describe("reference-driven ANYU design-system alignment", () => {
     expect(globals).toContain("box-shadow: var(--anyu-shadow-acc);");
     expect(globals).toContain(".anyu-v2 .anyu-riso-save-option");
     expect(globals).toContain(".anyu-v2 .anyu-riso-save-cta");
+  });
+
+  it("keeps Module 01 paid-state surfaces on the shared Riso reference primitive", () => {
+    const globals = appGlobals();
+    const panel = paidStatePanel();
+
+    expect(panel).toContain("data-paid-state-surface");
+    expect(panel).toContain("data-paid-state-card");
+    expect(panel).toContain("data-access-link-state");
+    expect(panel).toContain("data-return-state");
+    expect(panel).toContain("data-generation-status");
+    expect(panel).toContain("anyu-riso-paid-state-panel");
+    expect(panel).toContain("anyu-riso-reference-panel");
+
+    expect(globals).toContain(".anyu-v2 .anyu-riso-paid-state-panel");
+    expect(globals).toContain(".anyu-v2 .anyu-riso-paid-state-panel::before");
+    expect(globals).toContain(".anyu-v2 .anyu-riso-paid-state-stamp");
+    expect(globals).toContain(".anyu-v2 .anyu-riso-paid-result-cover");
+    expect(globals).toContain("background: var(--anyu-stripe-loading);");
   });
 });

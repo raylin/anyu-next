@@ -5,6 +5,7 @@ import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { TemperatureCard } from "@/components/anyu/TemperatureCard";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { PaidResultPendingPoller } from "@/components/modules/ai-temperature/PaidResultPendingPoller";
+import { RisoPaidStatePanel } from "@/components/modules/ai-temperature/RisoPaidStatePanel";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
 import { LEGAL_CONTACT_EMAIL, uiNotices } from "@/content/legal";
 import {
@@ -348,7 +349,12 @@ export function UnlockCompleted({
             <Wordmark showMark />
           </div>
 
-          <Card className="anyu-quote-card">
+          <Card
+            className="anyu-quote-card anyu-riso-paid-result-cover anyu-riso-reference-panel"
+            data-paid-state-surface="paid-result"
+            data-paid-state-card="completed-cover"
+            data-generation-status="completed"
+          >
             <p className="anyu-kicker">完整分析</p>
             <h1 className="anyu-section-title">{result.paid_preview.headline}</h1>
             <p className="anyu-copy">
@@ -482,7 +488,13 @@ export function PaidResultDeliveryArtifactCard({
   summary: PaidResultDeliverySummary;
 }) {
   return (
-    <Card className="anyu-delivery-artifact" aria-labelledby="paid-result-delivery-title">
+    <Card
+      className="anyu-delivery-artifact"
+      aria-labelledby="paid-result-delivery-title"
+      data-paid-state-surface="paid-result"
+      data-paid-state-card="delivery-artifact"
+      data-generation-status="completed"
+    >
       <div className="anyu-delivery-artifact-header">
         <div>
           <p className="anyu-kicker t-label-accent">delivery artifact</p>
@@ -935,11 +947,14 @@ function UnlockError({
             </Link>
             <Wordmark showMark />
           </div>
-          <Card>
-            <p className="anyu-kicker">完整分析</p>
-            <h1 className="anyu-section-title">連結暫時不能使用</h1>
-            <p className="anyu-copy">{message}</p>
-          </Card>
+          <RisoPaidStatePanel
+            surface="paid-result"
+            state="unlock-error"
+            tone="error"
+            eyebrow="complete analysis"
+            title="連結暫時不能使用"
+            body={message}
+          />
           <LegalFooter />
         </section>
       </ModuleThemeBoundary>

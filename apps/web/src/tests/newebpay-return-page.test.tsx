@@ -70,9 +70,15 @@ describe("NewebPay ReturnURL pending page", () => {
     expect(html).toContain("瀏覽器回到此頁不代表付款已完成");
     expect(html).toContain("等候藍新正式付款通知");
     expect(html).toContain("3–7 個工作天內回覆處理結果");
+    expect(html).toContain('data-shell="module"');
+    expect(html).toContain('data-theme="ai-temperature-riso"');
+    expect(html).toContain('data-module-theme="riso"');
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="waiting_for_payment"');
     expect(html).not.toContain("paidAccessToken");
     expect(html).not.toContain("TradeInfo");
     expect(html).not.toContain("TradeSha");
+    expect(html).not.toContain('data-core-shell="true"');
     expect(mockResolvePaymentAccessHandoff).toHaveBeenCalledWith({
       moduleSlug: "ambiguous-temperature",
       checkoutToken: "pcs_redacted",
@@ -90,6 +96,10 @@ describe("NewebPay ReturnURL pending page", () => {
 
     expect(html).toContain("付款確認中");
     expect(html).toContain("瀏覽器回到此頁不代表付款已完成");
+    expect(html).toContain('data-shell="module"');
+    expect(html).toContain('data-theme="ai-temperature-riso"');
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="waiting_for_payment"');
     expect(html).not.toContain("TradeInfo");
     expect(html).not.toContain("TradeSha");
     expect(html).not.toContain("pal_");
@@ -115,6 +125,8 @@ describe("NewebPay ReturnURL pending page", () => {
 
     expect(html).toContain("這個付款狀態連結已失效");
     expect(html).toContain("保留付款時間與訂單資訊聯絡客服協助確認");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="expired_session"');
     expect(html).not.toContain("付款確認中");
     expect(html).not.toContain("等候藍新正式付款通知");
     expect(mockResolvePaymentAccessHandoff).not.toHaveBeenCalled();
@@ -133,6 +145,8 @@ describe("NewebPay ReturnURL pending page", () => {
 
     expect(html).toContain("付款確認中");
     expect(html).toContain("瀏覽器回到此頁不代表付款已完成");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="waiting_for_payment"');
     expect(mockResolvePaymentAccessHandoff).toHaveBeenCalledWith({
       moduleSlug: "ambiguous-temperature",
       checkoutToken: "pcs_redacted",
@@ -152,6 +166,8 @@ describe("NewebPay ReturnURL pending page", () => {
 
     expect(html).toContain("報告暫時無法完成");
     expect(html).toContain("hello@anyu.tw");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="paid_failed"');
     expect(html).not.toContain("付款確認中");
     expect(mockResolvePaymentAccessHandoff).not.toHaveBeenCalled();
   });
@@ -164,6 +180,8 @@ describe("NewebPay ReturnURL pending page", () => {
 
     expect(html).toContain("這個付款狀態連結已失效");
     expect(html).toContain("hello@anyu.tw");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="invalid_session"');
     expect(mockResolvePaymentAccessHandoff).not.toHaveBeenCalled();
   });
 
@@ -200,6 +218,8 @@ describe("NewebPay ReturnURL pending page", () => {
     expect(html).toContain("完整報告已準備好");
     expect(html).toContain("建議先保存這份報告的專屬查看連結");
     expect(html).toContain("查看完整報告");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="paid_ready"');
     expect(html).not.toContain("paidAccessToken");
     expect(html).not.toContain("generationJob");
     expect(html).not.toContain("pa_");
@@ -222,6 +242,9 @@ describe("NewebPay ReturnURL pending page", () => {
 
     expect(html).toContain("完整報告生成中");
     expect(html).toContain("正在重新整理你的互動訊號");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="paid_processing"');
+    expect(html).toContain('data-generation-status="processing"');
     expect(html).not.toContain("查看完整報告");
   });
 
@@ -244,6 +267,8 @@ describe("NewebPay ReturnURL pending page", () => {
     expect(html).toContain("hello@anyu.tw");
     expect(html).toContain("3–7 個工作天內回覆處理結果");
     expect(html).toContain("查看退款政策");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="paid_failed"');
   });
 
   it("handles invalid checkout sessions safely", async () => {
@@ -262,6 +287,8 @@ describe("NewebPay ReturnURL pending page", () => {
     expect(html).toContain("這個付款狀態連結已失效");
     expect(html).toContain("保留付款時間與訂單資訊聯絡客服協助確認");
     expect(html).toContain("查看退款政策");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="invalid_session"');
   });
 
   it("maps expired checkout sessions to the safe expired support state", async () => {
@@ -279,6 +306,8 @@ describe("NewebPay ReturnURL pending page", () => {
 
     expect(html).toContain("這個付款狀態連結已失效");
     expect(html).toContain("保留付款時間與訂單資訊聯絡客服協助確認");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="expired_session"');
     expect(html).not.toContain("付款確認中");
   });
 });

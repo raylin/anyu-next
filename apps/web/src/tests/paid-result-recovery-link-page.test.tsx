@@ -140,8 +140,17 @@ describe("paid result recovery link page", () => {
     expect(html).toContain("這個查看連結已超過可使用期限");
     expect(html).toContain("hello@anyu.tw");
     expect(html).toContain("3–7 個工作天內回覆處理結果");
+    expect(html).toContain('data-shell="module"');
+    expect(html).toContain('data-theme="ai-temperature-riso"');
+    expect(html).toContain('data-module-theme="riso"');
+    expect(html).toContain('data-paid-state-surface="access-link"');
+    expect(html).toContain('data-paid-state-card="error"');
+    expect(html).toContain('data-access-link-state="error"');
+    expect(html).toContain("anyu-riso-paid-state-panel");
+    expect(html).toContain("anyu-riso-paid-state-error");
     expect(html).not.toContain(rawRecoveryToken);
     expect(html).not.toContain("MOCK_RECOVERY_UNLOCK_COMPLETED");
+    expect(html).not.toContain('data-core-shell="true"');
   });
 
   it("shows a non-mutating processing state when paid result is not ready", async () => {
@@ -168,7 +177,15 @@ describe("paid result recovery link page", () => {
 
     expect(html).toContain("完整報告確認中");
     expect(html).toContain("瀏覽器開啟查看連結不代表付款狀態會被更改");
+    expect(html).toContain('data-shell="module"');
+    expect(html).toContain('data-theme="ai-temperature-riso"');
+    expect(html).toContain('data-paid-state-surface="access-link"');
+    expect(html).toContain('data-paid-state-card="processing"');
+    expect(html).toContain('data-access-link-state="processing"');
+    expect(html).toContain('data-generation-status="processing"');
+    expect(html).toContain("anyu-riso-paid-state-panel");
     expect(html).not.toContain(rawRecoveryToken);
     expect(html).not.toContain("MOCK_RECOVERY_UNLOCK_COMPLETED");
+    expect(html).not.toContain('data-core-shell="true"');
   });
 });

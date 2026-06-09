@@ -15,8 +15,13 @@ describe("PaymentReturnPoller", () => {
     expect(html).toContain("付款確認中");
     expect(html).toContain("瀏覽器回到此頁不代表付款已完成");
     expect(html).toContain("系統會在確認後自動更新");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-paid-state-card="waiting_for_payment"');
+    expect(html).toContain('data-return-state="waiting_for_payment"');
+    expect(html).toContain("anyu-riso-paid-state-panel");
     expect(html).not.toContain("完整報告已準備好");
     expect(html).not.toContain("查看完整報告");
+    expect(html).not.toContain('data-core-shell="true"');
   });
 
   it("renders ready state with a visible access CTA", () => {
@@ -32,6 +37,9 @@ describe("PaymentReturnPoller", () => {
     expect(html).toContain("完整報告已準備好");
     expect(html).toContain("查看完整報告");
     expect(html).toContain('href="/m/ambiguous-temperature/payment/access?checkoutToken=redacted"');
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-paid-state-card="paid_ready"');
+    expect(html).toContain('data-return-state="paid_ready"');
   });
 
   it("renders ready saved recovery confirmation without changing primary access CTA", () => {
@@ -99,5 +107,8 @@ describe("PaymentReturnPoller", () => {
     expect(html).toContain("hello@anyu.tw");
     expect(html).toContain("3–7 個工作天內回覆處理結果");
     expect(html).toContain("查看退款政策");
+    expect(html).toContain('data-paid-state-surface="return"');
+    expect(html).toContain('data-return-state="invalid_session"');
+    expect(html).toContain("anyu-riso-paid-state-error");
   });
 });

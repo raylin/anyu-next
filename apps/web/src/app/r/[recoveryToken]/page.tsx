@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Card } from "@/components/anyu/Card";
 import { LegalFooter } from "@/components/anyu/LegalFooter";
 import { Wordmark } from "@/components/anyu/Wordmark";
 import { ModuleThemeBoundary } from "@/components/modules/ai-temperature/ModuleThemeFrame";
+import { RisoPaidStatePanel } from "@/components/modules/ai-temperature/RisoPaidStatePanel";
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
 import { isDbConfigured } from "@/lib/db/client";
 import { getPaymentRecoveryStatusSummary } from "@/lib/db/payment-recovery-contacts";
@@ -117,16 +117,21 @@ function RecoveryLinkError({
             </Link>
             <Wordmark showMark />
           </div>
-          <Card>
-            <p className="anyu-kicker">report access link</p>
-            <h1 className="anyu-section-title">這個查看連結暫時不能使用</h1>
-            <p className="anyu-copy">{message}</p>
-            <p className="anyu-subtle-note">
+          <RisoPaidStatePanel
+            surface="access-link"
+            state="error"
+            tone="error"
+            eyebrow="report access link"
+            title="這個查看連結暫時不能使用"
+            body={message}
+            note={
+              <>
               若你已完成付款，請聯絡{" "}
               <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
               ，我們會於 3–7 個工作天內回覆處理結果。
-            </p>
-          </Card>
+              </>
+            }
+          />
           <LegalFooter />
         </section>
       </ModuleThemeBoundary>
@@ -161,14 +166,17 @@ function RecoveryLinkProcessing({
             </Link>
             <Wordmark showMark />
           </div>
-          <Card>
-            <p className="anyu-kicker">report access link</p>
-            <h1 className="anyu-section-title">完整報告確認中</h1>
-            <p className="anyu-copy">{message}</p>
-            <p className="anyu-subtle-note">
-              瀏覽器開啟查看連結不代表付款狀態會被更改；完整報告仍以付款確認與網頁狀態為準。
-            </p>
-          </Card>
+          <RisoPaidStatePanel
+            surface="access-link"
+            state="processing"
+            tone="pending"
+            eyebrow="report access link"
+            title="完整報告確認中"
+            body={message}
+            note="瀏覽器開啟查看連結不代表付款狀態會被更改；完整報告仍以付款確認與網頁狀態為準。"
+            animated
+            generationStatus="processing"
+          />
           <LegalFooter />
         </section>
       </ModuleThemeBoundary>

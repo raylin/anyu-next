@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnyuMark } from "@/components/anyu/AnyuMark";
 import { Button } from "@/components/anyu/Button";
-import { Card } from "@/components/anyu/Card";
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
+import { RisoPaidStatePanel } from "@/components/modules/ai-temperature/RisoPaidStatePanel";
 
 type PaidResultPendingPollerProps = {
   moduleSlug: string;
@@ -127,16 +126,16 @@ export function PaidResultPendingPoller({
   }, [moduleSlug, router, status, unlockToken]);
 
   return (
-    <Card className="anyu-paid-wait-card" aria-live="polite">
-      <div className="anyu-paid-wait-mark" aria-hidden="true">
-        <AnyuMark size={34} animated decorative />
-      </div>
-      <p className="anyu-kicker t-label-dim">complete analysis</p>
-      <h1 className="anyu-section-title">正在整理你的完整分析</h1>
-      <p className="anyu-copy">
-        我們正在把免費結果延伸成完整回覆策略，通常需要 30–60 秒。頁面會自動更新，不需要手動重新整理。
-      </p>
-
+    <RisoPaidStatePanel
+      surface="paid-result"
+      state={status}
+      tone={status === "failed" || status === "expired" ? "error" : "pending"}
+      eyebrow="complete analysis"
+      title="正在整理你的完整分析"
+      body="我們正在把免費結果延伸成完整回覆策略，通常需要 30–60 秒。頁面會自動更新，不需要手動重新整理。"
+      animated={status !== "failed" && status !== "expired"}
+      generationStatus={status}
+    >
       <div className="anyu-paid-wait-bar" aria-hidden="true">
         <span />
       </div>
@@ -164,6 +163,6 @@ export function PaidResultPendingPoller({
           重新檢查完整分析
         </Button>
       ) : null}
-    </Card>
+    </RisoPaidStatePanel>
   );
 }

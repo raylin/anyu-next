@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AnyuMark } from "@/components/anyu/AnyuMark";
-import { Card } from "@/components/anyu/Card";
 import { LEGAL_CONTACT_EMAIL } from "@/content/legal";
+import { RisoPaidStatePanel } from "@/components/modules/ai-temperature/RisoPaidStatePanel";
 
 export type PaymentReturnStatus =
   | "waiting_for_payment"
@@ -68,6 +67,22 @@ const PROCESS_STEPS = [
   "整理完整報告",
   "準備安全查看連結",
 ] as const;
+
+function getPanelTone(status: PaymentReturnStatus) {
+  switch (status) {
+    case "paid_ready":
+      return "success" as const;
+    case "paid_failed":
+    case "invalid_session":
+    case "expired_session":
+    case "timeout":
+      return "error" as const;
+    case "paid_processing":
+      return "warning" as const;
+    default:
+      return "pending" as const;
+  }
+}
 
 function normalizePaymentReturnStatus(status?: string | null): PaymentReturnStatus {
   switch (status) {
@@ -267,15 +282,17 @@ export function PaymentReturnPoller({
   }, [canPoll, checkoutToken, moduleSlug]);
 
   return (
-    <Card className="anyu-paid-wait-card" aria-live="polite">
-      <div className="anyu-paid-wait-mark" aria-hidden="true">
-        <AnyuMark size={34} animated={!isTerminalStatus(status)} decorative />
-      </div>
-      <p className="anyu-kicker t-label-dim">{stateCopy.kicker}</p>
-      <h1 className="anyu-section-title">{stateCopy.title}</h1>
-      <p className="anyu-copy">{stateCopy.body}</p>
-      <p className="anyu-subtle-note">{stateCopy.note}</p>
-
+    <RisoPaidStatePanel
+      surface="return"
+      state={status}
+      tone={getPanelTone(status)}
+      eyebrow={stateCopy.kicker}
+      title={stateCopy.title}
+      body={stateCopy.body}
+      note={stateCopy.note}
+      animated={!isTerminalStatus(status)}
+      generationStatus={status === "paid_processing" ? "processing" : undefined}
+    >
       {!isTerminalStatus(status) ? (
         <>
           <div className="anyu-paid-wait-bar" aria-hidden="true">
@@ -336,6 +353,6 @@ export function PaymentReturnPoller({
       <Link href={`/m/${moduleSlug}`} className="anyu-back-link">
         回到曖昧溫度計
       </Link>
-    </Card>
+    </RisoPaidStatePanel>
   );
 }

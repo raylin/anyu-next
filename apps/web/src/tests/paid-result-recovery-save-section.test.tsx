@@ -86,6 +86,14 @@ describe("paid result recovery save section", () => {
     expect(html).toContain("曖昧溫度計｜完整分析報告");
     expect(html).toContain("報告編號");
     expect(html).toContain("AT-20260601-");
+    expect(html).toContain('data-shell="module"');
+    expect(html).toContain('data-theme="ai-temperature-riso"');
+    expect(html).toContain('data-module-theme="riso"');
+    expect(html).toContain('data-paid-state-surface="paid-result"');
+    expect(html).toContain('data-paid-state-card="completed-cover"');
+    expect(html).toContain('data-paid-state-card="delivery-artifact"');
+    expect(html).toContain('data-generation-status="completed"');
+    expect(html).toContain("anyu-riso-paid-result-cover");
     expect(html).toContain("已保存查看連結：o***@e***.com");
     expect(html).toContain("新增 LINE 查看連結");
     expect(html).toContain("用 LINE 保存查看連結");
@@ -100,6 +108,7 @@ describe("paid result recovery save section", () => {
     expect(html).not.toContain("LINE 交付");
     expect(html).not.toContain("LINE 領取完整分析");
     expect(html).not.toContain("完整報告會傳到 LINE");
+    expect(html).not.toContain('data-core-shell="true"');
   });
 
   it("distinguishes an actual sent recovery link from saved-only state", () => {

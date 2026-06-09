@@ -1985,24 +1985,138 @@ textarea {
   overflow: hidden;
 }
 
+.anyu-v2 .anyu-riso-paid-state-panel {
+  position: relative;
+  display: grid;
+  gap: var(--anyu-space-4);
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--anyu-accent2) 12%, transparent) 0 8rem, transparent 8.1rem),
+    linear-gradient(180deg, var(--anyu-card), color-mix(in srgb, var(--anyu-card) 84%, var(--anyu-bg)));
+}
+
+.anyu-v2 .anyu-riso-paid-state-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--anyu-ink) 16%, transparent) 1px, transparent 0),
+    linear-gradient(color-mix(in srgb, var(--anyu-line) 11%, transparent) 1px, transparent 1px);
+  background-size: 13px 13px, 22px 22px;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.anyu-v2 .anyu-riso-paid-state-panel::after {
+  content: "";
+  position: absolute;
+  right: clamp(-1.9rem, -4vw, -1.2rem);
+  bottom: clamp(-1.5rem, -3vw, -0.7rem);
+  width: clamp(7.5rem, 28vw, 12rem);
+  height: clamp(4.5rem, 16vw, 7rem);
+  border: var(--anyu-border-heavy) solid color-mix(in srgb, var(--anyu-accent) 64%, var(--anyu-ink));
+  transform: rotate(-7deg);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.anyu-v2 .anyu-riso-paid-state-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.anyu-v2 .anyu-riso-paid-state-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--anyu-space-4);
+}
+
+.anyu-v2 .anyu-riso-paid-state-copy {
+  min-width: 0;
+}
+
+.anyu-v2 .anyu-riso-paid-state-title {
+  margin-top: var(--anyu-space-3);
+  max-width: 21rem;
+  font-family: var(--anyu-font-serif);
+  letter-spacing: var(--anyu-track-tight);
+}
+
+.anyu-v2 .anyu-riso-paid-state-stamp {
+  display: inline-grid;
+  width: clamp(3.2rem, 12vw, 4.15rem);
+  height: clamp(3.2rem, 12vw, 4.15rem);
+  flex: 0 0 auto;
+  place-items: center;
+  border: var(--anyu-border-base) solid var(--anyu-ink);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 57% 67%, var(--anyu-accent2) 0 0.18rem, transparent 0.2rem),
+    radial-gradient(circle at 34% 42%, var(--anyu-accent2) 0 0.14rem, transparent 0.16rem),
+    var(--anyu-card);
+  color: var(--anyu-accent);
+  transform: rotate(6deg);
+  box-shadow: 3px 3px 0 var(--anyu-accent);
+}
+
+.anyu-v2 .anyu-riso-paid-state-success {
+  box-shadow: var(--anyu-shadow-acc2);
+}
+
+.anyu-v2 .anyu-riso-paid-state-warning {
+  box-shadow: var(--anyu-shadow-acc);
+}
+
+.anyu-v2 .anyu-riso-paid-state-error {
+  box-shadow: var(--anyu-shadow-rose);
+}
+
+.anyu-v2 .anyu-riso-paid-result-cover {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(140deg, color-mix(in srgb, var(--anyu-accent2) 10%, transparent) 0 9rem, transparent 9.1rem),
+    linear-gradient(180deg, var(--anyu-card), color-mix(in srgb, var(--anyu-card) 88%, var(--anyu-surface)));
+  box-shadow: var(--anyu-shadow-acc2);
+}
+
+.anyu-v2 .anyu-riso-paid-result-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--anyu-line) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--anyu-line) 7%, transparent) 1px, transparent 1px);
+  background-size: 18px 18px;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.anyu-v2 .anyu-riso-paid-result-cover > * {
+  position: relative;
+  z-index: 1;
+}
+
 .anyu-paid-wait-mark {
   display: inline-flex;
   color: var(--anyu-accent);
 }
 
 .anyu-paid-wait-bar {
-  height: 0.45rem;
+  height: 0.62rem;
   overflow: hidden;
-  border-radius: 999px;
-  background: var(--anyu-line);
+  border: var(--anyu-border-base) solid var(--anyu-ink);
+  border-radius: var(--anyu-radius-sm);
+  background: var(--anyu-surface);
 }
 
 .anyu-paid-wait-bar span {
   display: block;
   width: 42%;
   height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--anyu-accent2) 0%, var(--anyu-rose) 52%, var(--anyu-accent) 100%);
+  border-radius: 0;
+  background: var(--anyu-stripe-loading);
   animation: anyuPaidWaitSlide 1.8s ease-in-out infinite;
 }
 
@@ -2027,8 +2141,10 @@ textarea {
   content: "";
   width: 0.55rem;
   height: 0.55rem;
-  border-radius: 999px;
-  background: var(--anyu-line);
+  border: var(--anyu-border-base) solid var(--anyu-ink);
+  border-radius: var(--anyu-radius-sm);
+  background: var(--anyu-card);
+  box-shadow: 1px 1px 0 var(--anyu-line);
 }
 
 .anyu-paid-wait-step-active {
@@ -2037,7 +2153,7 @@ textarea {
 
 .anyu-paid-wait-step-active::before {
   background: var(--anyu-accent2) !important;
-  box-shadow: 0 0 0 0.25rem var(--anyu-accent2-15);
+  box-shadow: 2px 2px 0 var(--anyu-accent) !important;
 }
 
 .anyu-status-message-error {
