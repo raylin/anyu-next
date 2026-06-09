@@ -12476,3 +12476,35 @@ Unresolved questions:
 - Current behavior safely rejects non-success provider callbacks without creating paid artifacts, but does not yet map provider failure/cancel/expired taxonomy into local terminal payment statuses. Keep as deferred unless support/Admin workflows require it.
 - No deployed staging simulated NotifyURL/ReturnURL matrix helper exists; local deterministic tests were sufficient for this dry-run.
 - Recommended next task: Payment Runtime Activation Prep v0, unless soft-public readiness becomes the priority, in which case run deployed repeated/concurrency automatic-drain evidence first.
+
+## 2026-06-09 Payment Runtime Activation Prep v0
+
+### Completed Changes
+
+- prepared a controlled payment runtime activation checklist/runbook without enabling production runtime or running payment.
+- inventoried active runtime gates:
+  - `payment.window.enabled` as the module-scoped Module 01 payment window.
+  - `payment.global.disabled` as the global emergency kill switch.
+  - old `ENABLE_PAYMENT_RUNTIME` / `ENABLE_NEWEBPAY_CHECKOUT` env toggles remain obsolete and must not be used.
+- documented production readiness across payment intents, entitlements, generation jobs, paid result storage, paid access token hashing, NotifyURL truth, ReturnURL UX recovery, status polling, `/r` access-link states, Admin/Ops lookup, and staging/operator no-card fallback.
+- drafted the owner-controlled activation runbook, rollback/close plan, and smoke/monitoring matrix for a future activation task.
+- classified remaining blockers:
+  - production Admin/Ops, deploy freshness, provider dashboard, and fail-closed posture must pass before any real payment.
+  - deployed repeated/concurrency automatic-drain evidence blocks low-key soft public, not owner-controlled short windows.
+  - ads and broad traffic remain blocked.
+
+### Validation
+
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 106 files / 734 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass, 12 named scenarios.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no production runtime open, production payment, real Email/LINE send, Vercel env change, NewebPay config change, or DB mutation.
+- Activation was intentionally not performed; owner approval is still required for a future runtime window.
+- Recommended next task: Payment Runtime Activation Owner-Controlled Window v0 if owner chooses real-payment activation, Deployed Repeated/Concurrency Automatic-Drain Benchmark v0 if soft-public readiness is the priority, or Payment Support/Recovery Playbook v0 if operational support hardening is preferred.
