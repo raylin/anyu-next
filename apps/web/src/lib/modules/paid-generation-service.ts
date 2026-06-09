@@ -248,6 +248,26 @@ async function markPaidGenerationJobFailedFinal(input: {
   }
 }
 
+function getReusedJobStatus(jobMirror: PaidGenerationJobMirror | null): PaidGenerationStatus | null {
+  if (!jobMirror || jobMirror.created) {
+    return null;
+  }
+
+  if (
+    jobMirror.job.status === "queued" ||
+    jobMirror.job.status === "processing" ||
+    jobMirror.job.status === "retry_scheduled"
+  ) {
+    return "processing";
+  }
+
+  if (jobMirror.job.status === "failed_final") {
+    return "failed";
+  }
+
+  return null;
+}
+
 export async function requestDeferredPaidGeneration(input: {
   moduleConfig: ProductModuleConfig;
   resultId: string;
@@ -367,6 +387,18 @@ export async function requestDeferredPaidGeneration(input: {
     modelProvider: providerInfo.provider,
     modelName: providerInfo.model,
   });
+  const reusedJobStatus = getReusedJobStatus(jobMirror);
+
+  if (reusedJobStatus) {
+    return {
+      ok: true as const,
+      status: reusedJobStatus,
+      paidResultId: current?.id,
+      errorCategory: reusedJobStatus === "failed" ? "paid_generation_failed" : undefined,
+      reused: true,
+    };
+  }
+
   const now = new Date();
   const paidRecord =
     current?.status === "failed" && current.retryCount < 2

@@ -12403,3 +12403,40 @@ Unresolved questions:
 - Browser skill Node REPL tool was unavailable, so screenshots used local Playwright CLI.
 - Visual acceptance remains owner review; tests protect shared structure, behavior, and ModuleShell/Riso boundary, not pixel perfection.
 - Recommended next task: owner visual review of paid-adjacent surfaces, then Claude Design gap generation for missing paid-state matrices or further Module 01 Riso flow polish using the aligned primitives.
+
+## 2026-06-09 Repeated / Concurrency Paid-Generation Benchmark v0
+
+### Completed Changes
+
+- benchmarked and hardened the paid-generation path under repeated polling, repeated generation triggers, targeted processor repeat calls, invalid token repeats, failed-final reuse, completed-state reuse, and lightweight local/mock concurrency.
+- fixed a real idempotency gap in `requestDeferredPaidGeneration`: reused queued / processing / retry-scheduled generation jobs now return a safe `processing` no-op with `reused=true`, and reused `failed_final` jobs return a safe failed category instead of continuing into paid-result/provider work.
+- added focused tests for:
+  - repeated paid access status polling as read-only/stable.
+  - repeated invalid paid access polling without side effects.
+  - reused queued/processing/final-failed generation jobs.
+  - concurrent targeted processor calls producing one effective job execution.
+- confirmed mock benchmark behavior:
+  - 1 job / concurrency 1: pass, `totalPaidReadyMs` max 20800, no failures, no stuck jobs.
+  - 3 jobs / concurrency 2: pass, `totalPaidReadyMs` max 23600, no failures, no stuck jobs.
+- ran the staging-safe no-card operator QA path with Admin API wait as primary; it passed with paid result completion and production-disabled checks, without real payment or real Email/LINE.
+
+### Validation
+
+- targeted paid-generation/idempotency/access tests: pass, 6 files / 80 tests.
+- `cd apps/web && corepack pnpm run qa:paid-generation:benchmark -- --mode mock --jobs 1 --json`: pass.
+- `cd apps/web && corepack pnpm run qa:paid-generation:benchmark -- --mode mock --jobs 3 --concurrency 2 --json`: pass.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 106 files / 726 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+- `cd apps/web && corepack pnpm run qa:result-checkout:no-card`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no production runtime open, production payment, real Email/LINE send, Vercel env change, NewebPay config change, or production DB mutation.
+- Preview(staging) was mutated only through the approved staging-safe no-card operator QA helper.
+- Local/mock repeated and lightweight concurrency evidence is complete; low-key soft public still needs deployed repeated/concurrency automatic-drain evidence if broader availability becomes the priority.
+- Recommended next task: owner chooses Payment Runtime Activation Prep v0, NewebPay NotifyURL / ReturnURL Dry-Run Matrix v0, or owner visual review / targeted paid-state visual fixes. If soft-public readiness is prioritized, run deployed repeated/concurrency automatic-drain evidence next.

@@ -342,7 +342,7 @@ describe("deferred paid generation service", () => {
         status: "queued",
         entitlementRefId: "entitlement-1",
       },
-      created: false,
+      created: true,
     });
     mockGeneratePaidResult.mockResolvedValue({
       paidResult,
@@ -368,7 +368,7 @@ describe("deferred paid generation service", () => {
     });
   });
 
-  it("does not fail direct paid generation when recovery Email auto-send fails", async () => {
+  it("treats a reused queued generation job as an idempotent processing no-op", async () => {
     process.env.ENABLE_PAID_GENERATION_JOBS = "true";
     mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
       job: {
@@ -377,6 +377,122 @@ describe("deferred paid generation service", () => {
         entitlementRefId: "entitlement-1",
       },
       created: false,
+    });
+
+    const result = await requestDeferredPaidGeneration({
+      moduleConfig: aiTemperatureModule,
+      resultId: "result-1",
+      unlockIntentId: "unlock-1",
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      status: "processing",
+      paidResultId: undefined,
+      errorCategory: undefined,
+      reused: true,
+    });
+    expect(mockCreatePaidResultRecord).not.toHaveBeenCalled();
+    expect(mockMarkPaidResultProcessing).not.toHaveBeenCalled();
+    expect(mockGeneratePaidResult).not.toHaveBeenCalled();
+    expect(mockMarkGenerationJobProcessing).not.toHaveBeenCalled();
+    expect(mockMarkGenerationJobCompleted).not.toHaveBeenCalled();
+    expect(mockSendRecoveryLinksForCompletedPaidResult).not.toHaveBeenCalled();
+  });
+
+  it("treats a reused processing generation job as idempotent under repeated triggers", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
+      job: {
+        id: "job-1",
+        status: "processing",
+        entitlementRefId: "entitlement-1",
+      },
+      created: false,
+    });
+
+    const results = await Promise.all([
+      requestDeferredPaidGeneration({
+        moduleConfig: aiTemperatureModule,
+        resultId: "result-1",
+        unlockIntentId: "unlock-1",
+      }),
+      requestDeferredPaidGeneration({
+        moduleConfig: aiTemperatureModule,
+        resultId: "result-1",
+        unlockIntentId: "unlock-1",
+      }),
+      requestDeferredPaidGeneration({
+        moduleConfig: aiTemperatureModule,
+        resultId: "result-1",
+        unlockIntentId: "unlock-1",
+      }),
+    ]);
+
+    expect(results).toEqual([
+      {
+        ok: true,
+        status: "processing",
+        paidResultId: undefined,
+        errorCategory: undefined,
+        reused: true,
+      },
+      {
+        ok: true,
+        status: "processing",
+        paidResultId: undefined,
+        errorCategory: undefined,
+        reused: true,
+      },
+      {
+        ok: true,
+        status: "processing",
+        paidResultId: undefined,
+        errorCategory: undefined,
+        reused: true,
+      },
+    ]);
+    expect(mockGeneratePaidResult).not.toHaveBeenCalled();
+    expect(mockCreatePaidResultRecord).not.toHaveBeenCalled();
+  });
+
+  it("returns a safe failed state for a reused failed-final generation job", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
+      job: {
+        id: "job-1",
+        status: "failed_final",
+        entitlementRefId: "entitlement-1",
+      },
+      created: false,
+    });
+
+    const result = await requestDeferredPaidGeneration({
+      moduleConfig: aiTemperatureModule,
+      resultId: "result-1",
+      unlockIntentId: "unlock-1",
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      status: "failed",
+      paidResultId: undefined,
+      errorCategory: "paid_generation_failed",
+      reused: true,
+    });
+    expect(mockGeneratePaidResult).not.toHaveBeenCalled();
+    expect(mockCreatePaidResultRecord).not.toHaveBeenCalled();
+  });
+
+  it("does not fail direct paid generation when recovery Email auto-send fails", async () => {
+    process.env.ENABLE_PAID_GENERATION_JOBS = "true";
+    mockCreateOrReusePaidAnalysisJob.mockResolvedValue({
+      job: {
+        id: "job-1",
+        status: "queued",
+        entitlementRefId: "entitlement-1",
+      },
+      created: true,
     });
     mockSendRecoveryLinksForCompletedPaidResult.mockRejectedValueOnce(
       new Error("email_send_failed"),

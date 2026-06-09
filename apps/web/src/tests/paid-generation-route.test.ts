@@ -229,6 +229,41 @@ describe("paid result generation request route", () => {
     expect(JSON.stringify(data)).not.toContain(paidAccessToken);
   });
 
+  it("keeps repeated paid access status polling read-only and stable", async () => {
+    const paidAccessToken = `pa_${"b".repeat(43)}`;
+    mockResolvePaidAccessToken.mockResolvedValue({
+      ok: true,
+      state: "processing",
+    });
+
+    const responses = await Promise.all(
+      Array.from({ length: 5 }, () =>
+        statusPost(
+          new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ unlockToken: paidAccessToken }),
+          }),
+          { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+        ),
+      ),
+    );
+    const payloads = await Promise.all(responses.map((response) => response.json()));
+
+    expect(responses.map((response) => response.status)).toEqual([200, 200, 200, 200, 200]);
+    expect(payloads).toEqual([
+      { ok: true, status: "processing", retryable: true, errorCategory: null },
+      { ok: true, status: "processing", retryable: true, errorCategory: null },
+      { ok: true, status: "processing", retryable: true, errorCategory: null },
+      { ok: true, status: "processing", retryable: true, errorCategory: null },
+      { ok: true, status: "processing", retryable: true, errorCategory: null },
+    ]);
+    expect(mockResolvePaidAccessToken).toHaveBeenCalledTimes(5);
+    expect(mockGetUnlockIntentByTokenHash).not.toHaveBeenCalled();
+    expect(mockRequestDeferredPaidGeneration).not.toHaveBeenCalled();
+    expect(JSON.stringify(payloads)).not.toContain(paidAccessToken);
+  });
+
   it("does not fall back to legacy unlock lookup for invalid pa_ tokens", async () => {
     mockResolvePaidAccessToken.mockResolvedValue({
       ok: false,
@@ -257,6 +292,53 @@ describe("paid result generation request route", () => {
       rawToken: "pa_short",
     });
     expect(mockGetUnlockIntentByTokenHash).not.toHaveBeenCalled();
+  });
+
+  it("keeps repeated invalid paid access polling stable without side effects", async () => {
+    mockResolvePaidAccessToken.mockResolvedValue({
+      ok: false,
+      state: "not_found",
+      errorCategory: "invalid_token",
+    });
+
+    const responses = await Promise.all(
+      Array.from({ length: 3 }, () =>
+        statusPost(
+          new Request("http://localhost/api/modules/ambiguous-temperature/paid-result/status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ unlockToken: "pa_short" }),
+          }),
+          { params: Promise.resolve({ moduleSlug: "ambiguous-temperature" }) },
+        ),
+      ),
+    );
+    const payloads = await Promise.all(responses.map((response) => response.json()));
+
+    expect(responses.map((response) => response.status)).toEqual([200, 200, 200]);
+    expect(payloads).toEqual([
+      {
+        ok: true,
+        status: "expired",
+        retryable: false,
+        errorCategory: "invalid_paid_access",
+      },
+      {
+        ok: true,
+        status: "expired",
+        retryable: false,
+        errorCategory: "invalid_paid_access",
+      },
+      {
+        ok: true,
+        status: "expired",
+        retryable: false,
+        errorCategory: "invalid_paid_access",
+      },
+    ]);
+    expect(mockResolvePaidAccessToken).toHaveBeenCalledTimes(3);
+    expect(mockGetUnlockIntentByTokenHash).not.toHaveBeenCalled();
+    expect(mockRequestDeferredPaidGeneration).not.toHaveBeenCalled();
   });
 
   it("treats legacy completed paid rows as completed while current schema rolls forward", async () => {

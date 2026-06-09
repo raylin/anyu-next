@@ -340,6 +340,46 @@ describe("paid generation processor", () => {
     expect(mockGenerateDeferredPaidResultPayload).not.toHaveBeenCalled();
   });
 
+  it("keeps concurrent targeted processor calls to one effective job execution", async () => {
+    mockClaimDuePaidAnalysisJobById
+      .mockResolvedValueOnce(JOB)
+      .mockResolvedValueOnce(null);
+    mockGetGenerationJobById.mockResolvedValueOnce({
+      ...JOB,
+      status: "processing",
+    });
+
+    const [first, second] = await Promise.all([
+      processPaidAnalysisJobById({
+        generationJobId: "job-1",
+        lockedBy: "queue-worker-a",
+        now: NOW,
+      }),
+      processPaidAnalysisJobById({
+        generationJobId: "job-1",
+        lockedBy: "queue-worker-b",
+        now: NOW,
+      }),
+    ]);
+
+    expect([first, second]).toEqual([
+      {
+        ok: true,
+        category: "processed",
+        jobId: "job-1",
+        jobResult: "completed",
+      },
+      {
+        ok: false,
+        category: "already_processing",
+        jobId: "job-1",
+      },
+    ]);
+    expect(mockGenerateDeferredPaidResultPayload).toHaveBeenCalledTimes(1);
+    expect(mockCreatePaidResultRecord).toHaveBeenCalledTimes(1);
+    expect(mockMarkGenerationJobCompleted).toHaveBeenCalledTimes(1);
+  });
+
   it("classifies missing, invalid, and processing targeted jobs safely", async () => {
     mockClaimDuePaidAnalysisJobById.mockResolvedValue(null);
     mockGetGenerationJobById.mockResolvedValueOnce(null);
