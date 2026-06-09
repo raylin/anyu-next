@@ -12302,3 +12302,58 @@ Unresolved questions:
 - Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, DB mutation, or provider logic change.
 - `qa:module01:mock-flow` and `qa:result-checkout:no-card` skipped because Module 01 flow/payment/access-link behavior was not touched.
 - Recommended next task: owner visual review with screenshots, then targeted visual defect fixes across CoreShell and Module 01 flow.
+
+## 2026-06-09 Design System Reference Alignment v0
+
+### Completed Changes
+
+- treated the visual track as design-system alignment instead of isolated page patching.
+- compared current shared Core/Riso CSS primitives against archived reference files:
+  - `anyu-tokens-v2.css`
+  - `core-shell-screens.jsx`
+  - `ui-v2-atoms.jsx`
+  - `pay-shell-atoms.jsx`
+- added scoped CoreShell reference tokens:
+  - `--anyu-core-bg`
+  - `--anyu-core-card`
+  - `--anyu-core-surface`
+  - `--anyu-core-ink`
+  - `--anyu-core-dim`
+  - `--anyu-core-faint`
+  - `--anyu-core-hairline`
+  - `--anyu-core-paper-grain`
+- removed CoreShell static dependence on global Module 01 accent variables for paper texture, hairlines, and the homepage module preview.
+- neutralized the Core homepage product preview so module color appears as a small Core swatch/accent instead of Riso-like pink/purple gradients.
+- completed missing Module 01 Riso v2 token parity in runtime CSS:
+  - `--anyu-track-mono-lg`
+  - `--anyu-type-label-sm-size`
+  - `--anyu-type-num-sm-size`
+  - `--anyu-gutter`
+  - `--anyu-max-content`
+  - `--anyu-stack-card`
+  - `--anyu-stack-section`
+  - `--anyu-border-thin`
+  - `--anyu-border-cta`
+  - `--anyu-stripe-loading`
+- added design-system reference alignment tests protecting Core quiet-layer tokens, Riso token parity, and shared Riso flow primitive structure.
+- documented missing reference components/states to ask Claude Design for:
+  - CoreShell commercial module-entry/static storefront pattern
+  - Module 01 long paid-generation queued/delayed states
+  - full `/r` access-link expired/invalid/pending/completed state matrix
+
+### Validation
+
+- targeted design-system/CoreShell/legal/theme tests: pass, 5 files / 21 tests.
+- `cd apps/web && corepack pnpm lint`: pass.
+- `cd apps/web && corepack pnpm test`: pass, 106 files / 719 tests.
+- `cd apps/web && corepack pnpm build`: pass.
+- `cd apps/web && corepack pnpm run qa:module01:ui`: pass, 5 Playwright tests.
+- `cd apps/web && corepack pnpm run qa:module01:local`: pass, `gateStatus=pass`.
+- `cd apps/web && corepack pnpm run qa:module01:mock-flow`: pass.
+
+### Unresolved Questions
+
+- First failure category: none.
+- Production untouched: no runtime open, production payment, real Email/LINE send, Vercel env change, DB mutation, or provider logic change.
+- Visual acceptance remains owner review against the archived reference; tests only protect structure/behavior/shared-token alignment.
+- Recommended next task: owner visual review against the archived reference, then choose CoreShell storefront pattern, Module 01 ReturnURL/paid result/`/r` state matrix, or checkout/save refinement using owner screenshots.

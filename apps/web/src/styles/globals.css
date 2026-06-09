@@ -60,8 +60,19 @@ textarea {
 }
 
 .anyu-core-shell {
+  --anyu-core-bg: #faf6ee;
+  --anyu-core-card: #fffdf8;
+  --anyu-core-surface: #f5eee0;
+  --anyu-core-ink: #1a1626;
+  --anyu-core-dim: rgba(26, 22, 38, .72);
+  --anyu-core-faint: rgba(26, 22, 38, .45);
+  --anyu-core-hairline: rgba(26, 22, 38, .14);
+  --anyu-core-hairline-strong: rgba(26, 22, 38, .22);
+  --anyu-core-module-ai-temperature: #5b3aa3;
+  --anyu-core-paper-grain: radial-gradient(rgba(26, 22, 38, .30) 0.6px, transparent 0.6px) 0 0 / 3px 3px;
   isolation: isolate;
-  color: var(--anyu-ink);
+  background: var(--anyu-core-bg);
+  color: var(--anyu-core-ink);
 }
 
 .anyu-core-shell::before {
@@ -69,9 +80,9 @@ textarea {
   position: absolute;
   z-index: -2;
   inset: 0;
-  background-image: radial-gradient(color-mix(in srgb, var(--anyu-ink) 22%, transparent) 0.55px, transparent 0.7px);
-  background-size: 4px 4px;
-  opacity: 0.28;
+  background: var(--anyu-core-paper-grain);
+  mix-blend-mode: multiply;
+  opacity: 0.4;
   pointer-events: none;
 }
 
@@ -83,9 +94,9 @@ textarea {
   height: 0.18rem;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--anyu-ink) 24%, transparent),
-    color-mix(in srgb, var(--anyu-accent) 20%, transparent),
-    color-mix(in srgb, var(--anyu-ink) 10%, transparent)
+    var(--anyu-core-hairline-strong),
+    var(--anyu-core-hairline),
+    transparent
   );
 }
 
@@ -106,7 +117,7 @@ textarea {
   gap: var(--anyu-space-4);
   min-height: 3.4rem;
   padding-bottom: var(--anyu-space-4);
-  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
+  border-bottom: 1px solid var(--anyu-core-hairline);
 }
 
 .anyu-core-nav-cluster,
@@ -118,7 +129,7 @@ textarea {
 }
 
 .anyu-core-nav-link {
-  color: var(--anyu-dim);
+  color: var(--anyu-core-dim);
   font-family: var(--anyu-font-mono);
   font-size: var(--anyu-type-label-size);
   line-height: 1.4;
@@ -127,7 +138,7 @@ textarea {
 }
 
 .anyu-core-nav-link:hover {
-  color: var(--anyu-ink);
+  color: var(--anyu-core-ink);
 }
 
 .anyu-core-hero {
@@ -138,7 +149,7 @@ textarea {
     clamp(var(--anyu-space-8), 7vw, var(--anyu-space-18))
     0
     clamp(var(--anyu-space-6), 5vw, var(--anyu-space-10));
-  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
+  border-bottom: 1px solid var(--anyu-core-hairline);
 }
 
 .anyu-core-hero::after {
@@ -148,11 +159,11 @@ textarea {
   bottom: var(--anyu-space-4);
   width: clamp(5rem, 14vw, 10rem);
   height: clamp(5rem, 14vw, 10rem);
-  border: 1px solid color-mix(in srgb, var(--anyu-ink) 12%, transparent);
+  border: 1px solid var(--anyu-core-hairline);
   border-radius: 999px;
   background:
-    radial-gradient(circle, color-mix(in srgb, var(--anyu-accent) 10%, transparent) 0 34%, transparent 35%),
-    radial-gradient(circle, color-mix(in srgb, var(--anyu-ink) 7%, transparent) 0 1px, transparent 1.2px);
+    radial-gradient(circle, rgba(26, 22, 38, .06) 0 34%, transparent 35%),
+    radial-gradient(circle, rgba(26, 22, 38, .08) 0 1px, transparent 1.2px);
   background-size: auto, 6px 6px;
   opacity: 0.62;
   pointer-events: none;
@@ -188,9 +199,9 @@ textarea {
   gap: var(--anyu-space-4);
   align-content: space-between;
   padding: clamp(var(--anyu-space-5), 4vw, var(--anyu-space-8));
-  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 18%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 18%, transparent);
-  background: color-mix(in srgb, var(--anyu-card) 34%, transparent);
+  border-top: 1px solid var(--anyu-core-hairline-strong);
+  border-bottom: 1px solid var(--anyu-core-hairline-strong);
+  background: color-mix(in srgb, var(--anyu-core-card) 42%, transparent);
 }
 
 .anyu-core-section {
@@ -207,14 +218,14 @@ textarea {
 
 .anyu-core-section-head span:last-child {
   height: 1px;
-  background: color-mix(in srgb, var(--anyu-ink) 14%, transparent);
+  background: var(--anyu-core-hairline);
 }
 
 .anyu-core-info-card {
   display: grid;
   gap: var(--anyu-space-3);
   padding-block: var(--anyu-space-5);
-  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 13%, transparent);
+  border-top: 1px solid var(--anyu-core-hairline);
   background: transparent;
 }
 
@@ -225,8 +236,8 @@ textarea {
     var(--anyu-space-5)
     0
     var(--anyu-space-6);
-  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 18%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 18%, transparent);
+  border-top: 1px solid var(--anyu-core-hairline-strong);
+  border-bottom: 1px solid var(--anyu-core-hairline-strong);
   background: transparent;
 }
 
@@ -259,13 +270,13 @@ textarea {
   display: grid;
   gap: var(--anyu-space-3);
   padding-block: clamp(var(--anyu-space-6), 5vw, var(--anyu-space-10));
-  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 16%, transparent);
+  border-top: 1px solid var(--anyu-core-hairline);
   counter-increment: core-section;
 }
 
 .anyu-core-article-section::before {
   content: counter(core-section, decimal-leading-zero);
-  color: color-mix(in srgb, var(--anyu-ink) 48%, transparent);
+  color: var(--anyu-core-faint);
   font-family: var(--anyu-font-mono);
   font-size: var(--anyu-type-label-size);
   line-height: 1;
@@ -283,8 +294,8 @@ textarea {
 
 .anyu-core-legal-nav {
   padding-block: var(--anyu-space-4);
-  border-top: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--anyu-ink) 14%, transparent);
+  border-top: 1px solid var(--anyu-core-hairline);
+  border-bottom: 1px solid var(--anyu-core-hairline);
 }
 
 .anyu-storefront-shell {
@@ -359,15 +370,15 @@ textarea {
   overflow: hidden;
   min-height: 100%;
   background:
-    radial-gradient(circle at top right, var(--anyu-accent2-15), transparent 42%),
-    linear-gradient(180deg, var(--anyu-card), var(--anyu-surface));
+    linear-gradient(90deg, var(--anyu-core-module-ai-temperature) 0 0.22rem, transparent 0.22rem),
+    linear-gradient(180deg, var(--anyu-core-card), color-mix(in srgb, var(--anyu-core-surface) 72%, transparent));
 }
 
 .anyu-product-preview-card::before {
   content: "";
   position: absolute;
   inset: 0;
-  border: 1px solid color-mix(in srgb, var(--anyu-accent) 24%, transparent);
+  border: 1px solid var(--anyu-core-hairline);
   border-radius: inherit;
   pointer-events: none;
 }
@@ -378,9 +389,9 @@ textarea {
   justify-content: center;
   min-height: 2.35rem;
   padding: 0.45rem 0.8rem;
-  border: 1px solid var(--anyu-accent-45);
-  border-radius: var(--anyu-radius-pill);
-  color: var(--anyu-ink);
+  border: 1px solid var(--anyu-core-ink);
+  border-radius: 2px;
+  color: var(--anyu-core-ink);
   font-family: var(--anyu-font-mono);
   font-size: var(--anyu-type-label-size);
   letter-spacing: var(--anyu-track-mono);
@@ -390,8 +401,8 @@ textarea {
   position: relative;
   height: 0.75rem;
   overflow: hidden;
-  border-radius: var(--anyu-radius-pill);
-  background: color-mix(in srgb, var(--anyu-line) 72%, transparent);
+  border-radius: 2px;
+  background: var(--anyu-core-hairline);
 }
 
 .anyu-product-preview-meter span {
@@ -399,7 +410,7 @@ textarea {
   width: 68%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--anyu-accent), var(--anyu-accent2));
+  background: var(--anyu-core-module-ai-temperature);
 }
 
 .anyu-product-preview-label {
@@ -419,10 +430,10 @@ textarea {
 
 .anyu-product-preview-grid span {
   padding: 0.7rem 0.75rem;
-  border: 1px solid var(--anyu-line);
-  border-radius: var(--anyu-radius-xl);
-  background: color-mix(in srgb, var(--anyu-card) 76%, transparent);
-  color: var(--anyu-dim);
+  border: 1px solid var(--anyu-core-hairline);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--anyu-core-card) 76%, transparent);
+  color: var(--anyu-core-dim);
   font-size: var(--anyu-type-caption-size);
   line-height: var(--anyu-type-caption-lh);
 }
@@ -2244,6 +2255,7 @@ textarea {
   --anyu-track-tight: -0.4px;
   --anyu-track-wide: 0.3px;
   --anyu-track-mono: 1.6px;
+  --anyu-track-mono-lg: 1.8px;
   --anyu-track-wordmark: 2.5px;
   --anyu-type-display-size: 34px;
   --anyu-type-display-lh: 1.2;
@@ -2263,17 +2275,27 @@ textarea {
   --anyu-type-caption-lh: 1.65;
   --anyu-type-label-size: 11px;
   --anyu-type-label-lh: 1;
+  --anyu-type-label-sm-size: 9.5px;
+  --anyu-type-label-sm-lh: 1;
   --anyu-type-num-xl-size: 64px;
   --anyu-type-num-lg-size: 32px;
   --anyu-type-num-md-size: 24px;
+  --anyu-type-num-sm-size: 18px;
+  --anyu-type-num-sm-lh: 1;
+  --anyu-gutter: 24px;
+  --anyu-max-content: 440px;
+  --anyu-stack-card: 16px;
+  --anyu-stack-section: 28px;
   --anyu-radius-sm: 2px;
   --anyu-radius-md: 2px;
   --anyu-radius-lg: 2px;
   --anyu-radius-xl: 3px;
   --anyu-radius-2xl: 4px;
   --anyu-radius-3xl: 4px;
+  --anyu-border-thin: 1px;
   --anyu-border-base: 1.5px;
   --anyu-border-heavy: 2px;
+  --anyu-border-cta: 1.5px;
   --anyu-bg: #faf6ee;
   --anyu-surface: #f5eee0;
   --anyu-card: #ffffff;
@@ -2309,6 +2331,7 @@ textarea {
   --anyu-grain: radial-gradient(rgba(26, 22, 38, .35) 0.6px, transparent 0.6px) 0 0 / 3px 3px;
   --anyu-stripe-temp: repeating-linear-gradient(45deg, var(--anyu-accent) 0 4px, var(--anyu-accent2) 4px 8px);
   --anyu-stripe-signal: repeating-linear-gradient(90deg, var(--anyu-accent) 0 3px, var(--anyu-surface) 3px 6px);
+  --anyu-stripe-loading: repeating-linear-gradient(45deg, var(--anyu-accent) 0 6px, transparent 6px 12px);
   margin: calc(var(--anyu-space-6) * -1) calc(var(--anyu-space-6) * -1) calc(var(--anyu-space-14) * -1);
   padding: var(--anyu-space-5) var(--anyu-space-6) var(--anyu-space-14);
   background: var(--anyu-bg);
